@@ -7,6 +7,7 @@ import 'package:myapp/photo_loader.dart';
 import 'package:myapp/photo_provider.dart';
 import 'package:myapp/photo_sync_manager.dart';
 import 'package:myapp/ui/detail_page.dart';
+import 'package:myapp/ui/loading_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/ui/gallery_page.dart';
 
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyApp2 extends StatelessWidget {
-  final PhotoLoader photoLoader = PhotoLoader();
+  final PhotoLoader photoLoader = PhotoLoader.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -48,16 +49,18 @@ class MyApp2 extends StatelessWidget {
         builder: (context, snapshot) {
           Widget body;
           if (snapshot.hasData) {
-            body = GridView.builder(
-              itemBuilder: _buildItem,
-              itemCount: snapshot.data.length,
-              gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-            );
+            body = ChangeNotifierProvider<PhotoLoader>.value(
+                value: photoLoader,
+                child: GridView.builder(
+                  itemBuilder: _buildItem,
+                  itemCount: snapshot.data.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4),
+                ));
           } else if (snapshot.hasError) {
             body = Text("Error!");
           } else {
-            body = Text("Loading");
+            body = loadWidget;
           }
           return MaterialApp(
             title: title,
@@ -72,6 +75,7 @@ class MyApp2 extends StatelessWidget {
   }
 
   Widget _buildItem(BuildContext context, int index) {
+    logger.i("Building item");
     var file = File(photoLoader.getPhotos()[index].localPath);
     return GestureDetector(
       onTap: () async {

@@ -1,5 +1,6 @@
 import 'package:logger/logger.dart';
 import 'package:myapp/db/db_helper.dart';
+import 'package:myapp/photo_loader.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -10,7 +11,7 @@ import 'package:myapp/models/photo.dart';
 class PhotoSyncManager {
   final logger = Logger();
   final dio = Dio();
-  final endpoint = "http://192.168.0.106:8080";
+  final endpoint = "http://172.20.10.6:8080";
   final user = "umbu";
   static final lastSyncTimestampKey = "last_sync_timestamp_0";
 
@@ -39,15 +40,19 @@ class PhotoSyncManager {
     assets.sort((first, second) => second
         .modifiedDateTime.millisecondsSinceEpoch
         .compareTo(first.modifiedDateTime.millisecondsSinceEpoch));
+    var uploadedAssetCount = 0;
     for (AssetEntity asset in assets) {
-      DatabaseHelper.instance
-          .containsPath((await asset.originFile).path)
-          .then((containsPath) async {
-        if (!containsPath) {
-          var response = await _uploadFile(asset);
-          prefs.setInt(lastSyncTimestampKey, response.syncTimestamp);
-        }
-      });
+      // TODO: Fix me
+      if (uploadedAssetCount == 100) {
+        return;
+      }
+      var containsPath = await DatabaseHelper.instance
+          .containsPath((await asset.originFile).path);
+      if (!containsPath) {
+        var response = await _uploadFile(asset);
+        prefs.setInt(lastSyncTimestampKey, response.syncTimestamp);
+        uploadedAssetCount++;
+      }
     }
   }
 
@@ -56,7 +61,8 @@ class PhotoSyncManager {
       "user": user,
       "lastSyncTimestamp": lastSyncTimestamp
     });
-    var externalPath = (await getExternalStorageDirectory()).path;
+    logger.i(response.toString());
+    var externalPath = (await getApplicationDocumentsDirectory()).path;
     logger.i("External path: " + externalPath);
     var path = externalPath + "/photos/";
 
@@ -67,7 +73,7 @@ class PhotoSyncManager {
       await dio.download(endpoint + photo.url, path + basename(photo.url));
       photo.hash = _getHash(photo);
       photo.localPath = path + basename(photo.url);
-      DatabaseHelper.instance.insertPhoto(photo);
+      insertPhotoToDB(photo);
       prefs.setInt(lastSyncTimestampKey, photo.syncTimestamp);
       logger.i("Downloaded " + photo.url + " to " + path);
     }
@@ -85,12 +91,18 @@ class PhotoSyncManager {
     var photo = Photo.fromJson(response.data);
     photo.hash = _getHash(photo);
     photo.localPath = path;
-    DatabaseHelper.instance.insertPhoto(photo);
+    insertPhotoToDB(photo);
     return photo;
   }
 
   String _getHash(Photo photo) {
     // TODO: Compute hash
     return "hash";
+  }
+
+  Future<void> insertPhotoToDB(Photo photo) async {
+    logger.i("Inserting to DB");
+    await DatabaseHelper.instance.insertPhoto(photo);
+    PhotoLoader.instance.reloadPhotos();
   }
 }
