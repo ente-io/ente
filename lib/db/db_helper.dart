@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:myapp/models/photo.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -8,12 +9,13 @@ class DatabaseHelper {
   static final _databaseName = "orma.db";
   static final _databaseVersion = 1;
 
-  static final table = 'uploaded_photos';
+  static final table = 'photos';
 
   static final columnId = 'photo_id';
-  static final columnPath = 'path';
+  static final columnLocalPath = 'local_path';
+  static final columnUrl = 'url';
   static final columnHash = 'hash';
-  static final columnUploadTimestamp = 'upload_timestamp';
+  static final columnSyncTimestamp = 'sync_timestamp';
 
   // make this a singleton class
   DatabaseHelper._privateConstructor();
@@ -41,22 +43,33 @@ class DatabaseHelper {
     await db.execute('''
           CREATE TABLE $table (
             $columnId VARCHAR(255) PRIMARY KEY,
-            $columnPath TEXT NOT NULL,
+            $columnLocalPath TEXT NOT NULL,
+            $columnUrl TEXT NOT NULL,
             $columnHash TEXT NOT NULL,
-            $columnUploadTimestamp TEXT NOT NULL
+            $columnSyncTimestamp TEXT NOT NULL
           )
           ''');
   }
 
-  Future<int> insertPhoto(
-      String photoID, String path, String hash, int uploadTimestamp) async {
+  Future<int> insertPhoto(Photo photo) async {
     Database db = await instance.database;
     var row = new Map<String, dynamic>();
-    row[columnId] = photoID;
-    row[columnPath] = path;
-    row[columnHash] = hash;
-    row[columnUploadTimestamp] = uploadTimestamp;
+    row[columnId] = photo.photoID;
+    row[columnLocalPath] = photo.localPath;
+    row[columnUrl] = photo.url;
+    row[columnHash] = photo.hash;
+    row[columnSyncTimestamp] = photo.syncTimestamp;
     return await db.insert(table, row);
+  }
+
+  Future<List<Photo>> getAllPhotos() async {
+    Database db = await instance.database;
+    var results = await db.query(table);
+    var photos = List<Photo>();
+    for (var result in results) {
+      photos.add(Photo.fromRow(result));
+    }
+    return photos;
   }
 
   // Helper methods
@@ -93,7 +106,7 @@ class DatabaseHelper {
 
   Future<bool> containsPath(String path) async {
     Database db = await instance.database;
-    return (await db.query(table, where: '$columnPath =?', whereArgs: [path]))
+    return (await db.query(table, where: '$columnLocalPath =?', whereArgs: [path]))
             .length >
         0;
   }

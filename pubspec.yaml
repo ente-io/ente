@@ -30,6 +30,7 @@ dependencies:
   shared_preferences: ^0.5.6
   logger: ^0.8.3
   dio: ^3.0.9
+  local_image_provider: ^1.0.0
 
 dev_dependencies:
   flutter_test:

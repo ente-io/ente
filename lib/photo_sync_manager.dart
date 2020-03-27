@@ -5,17 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
-
-class RemotePhoto {
-  String photoID;
-  int syncTimestamp;
-  String url;
-
-  RemotePhoto.fromJson(Map<String, dynamic> json)
-      : photoID = json["photoID"],
-        syncTimestamp = json["syncTimestamp"],
-        url = json["url"];
-}
+import 'package:myapp/models/photo.dart';
 
 class PhotoSyncManager {
   final logger = Logger();
@@ -70,18 +60,20 @@ class PhotoSyncManager {
     logger.i("External path: " + externalPath);
     var path = externalPath + "/photos/";
 
-    List<RemotePhoto> photos = (response.data["diff"] as List)
-        .map((photo) => new RemotePhoto.fromJson(photo))
+    List<Photo> photos = (response.data["diff"] as List)
+        .map((photo) => new Photo.fromJson(photo))
         .toList();
-    for (RemotePhoto photo in photos) {
-      logger.i("Downloading " + endpoint + photo.url + " to " + path);
+    for (Photo photo in photos) {
       await dio.download(endpoint + photo.url, path + basename(photo.url));
+      photo.hash = _getHash(photo);
+      photo.localPath = path + basename(photo.url);
+      DatabaseHelper.instance.insertPhoto(photo);
       prefs.setInt(lastSyncTimestampKey, photo.syncTimestamp);
       logger.i("Downloaded " + photo.url + " to " + path);
     }
   }
 
-  Future<RemotePhoto> _uploadFile(AssetEntity entity) async {
+  Future<Photo> _uploadFile(AssetEntity entity) async {
     logger.i("Uploading: " + entity.id);
     var path = (await entity.originFile).path;
     var formData = FormData.fromMap({
@@ -90,10 +82,15 @@ class PhotoSyncManager {
     });
     var response = await dio.post(endpoint + "/upload", data: formData);
     logger.i(response.toString());
-    var remotePhoto = RemotePhoto.fromJson(response.data);
+    var photo = Photo.fromJson(response.data);
+    photo.hash = _getHash(photo);
+    photo.localPath = path;
+    DatabaseHelper.instance.insertPhoto(photo);
+    return photo;
+  }
+
+  String _getHash(Photo photo) {
     // TODO: Compute hash
-    DatabaseHelper.instance.insertPhoto(
-        remotePhoto.photoID, path, "hash", remotePhoto.syncTimestamp);
-    return remotePhoto;
+    return "hash";
   }
 }
