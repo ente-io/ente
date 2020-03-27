@@ -91,7 +91,6 @@ class _GalleryPageState extends State<GalleryPage> {
     final originFile = await entity.originFile;
     final page = DetailPage(
       file: originFile,
-      entity: entity,
     );
     Navigator.of(context).push(
       MaterialPageRoute(

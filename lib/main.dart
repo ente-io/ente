@@ -6,6 +6,7 @@ import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
 import 'package:myapp/photo_provider.dart';
 import 'package:myapp/photo_sync_manager.dart';
+import 'package:myapp/ui/detail_page.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/ui/gallery_page.dart';
 
@@ -71,6 +72,28 @@ class MyApp2 extends StatelessWidget {
   }
 
   Widget _buildItem(BuildContext context, int index) {
-    return Image.file(File(photoLoader.getPhotos()[index].localPath));
+    var file = File(photoLoader.getPhotos()[index].localPath);
+    return GestureDetector(
+      onTap: () async {
+        routeToDetailPage(file, context);
+      },
+      child: Hero(
+        child: Image.file(file),
+        tag: 'photo_' + file.path,
+      ),
+    );
+  }
+
+  void routeToDetailPage(File file, BuildContext context) async {
+    final page = DetailPage(
+      file: file,
+    );
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return page;
+        },
+      ),
+    );
   }
 }
