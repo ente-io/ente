@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:logger/logger.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/photo_loader.dart';
@@ -28,7 +26,11 @@ class PhotoSyncManager {
 
   Future<void> init() async {
     await _updateDatabase();
-    await _syncPhotos();
+    try {
+      _syncPhotos();
+    } catch (e) {
+      _logger.e(e);
+    }
   }
 
   Future<bool> _updateDatabase() async {
@@ -41,7 +43,6 @@ class PhotoSyncManager {
       if (asset.createDateTime.millisecondsSinceEpoch > lastDBUpdateTimestamp) {
         await DatabaseHelper.instance.insertPhoto(await Photo.fromAsset(asset));
       }
-      PhotoLoader.instance.addAsset((await asset.originFile).path, asset);
     }
     return await prefs.setInt(
         _lastDBUpdateTimestampKey, DateTime.now().millisecondsSinceEpoch);
@@ -55,10 +56,11 @@ class PhotoSyncManager {
     }
     _logger.i("Last sync timestamp: " + lastSyncTimestamp.toString());
 
-    List<Photo> diff = await _getDiff(lastSyncTimestamp);
-    await _downloadDiff(diff, prefs);
-
-    await _uploadDiff(prefs);
+    _getDiff(lastSyncTimestamp).then((diff) {
+      _downloadDiff(diff, prefs).then((_) {
+        _uploadDiff(prefs);
+      });
+    });
 
     // TODO:  Fix race conditions triggered due to concurrent syncs.
     //        Add device_id/last_sync_timestamp to the upload request?

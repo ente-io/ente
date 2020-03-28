@@ -51,21 +51,8 @@ class _ImageWidgetState extends State<ImageWidget> {
   }
 
   Future<Image> _buildImageWidget(String path, num size) async {
-    var thumbnail = await photoLoader.getThumbnail(path, size);
-    if (thumbnail != null) {
-      return Image.memory(
-        thumbnail,
-        width: size.toDouble(),
-        height: size.toDouble(),
-        fit: BoxFit.cover,
-      );
-    } else {
-      return Image.file(
-          File(path),
-          width: size.toDouble(),
-          height: size.toDouble(),
-          fit: BoxFit.cover);
-    }
+    return Image.file(File(path),
+        width: size.toDouble(), height: size.toDouble(), fit: BoxFit.cover);
   }
 
   @override
