@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:myapp/core/lru_map.dart';
 
 class DetailPage extends StatefulWidget {
   final File file;
@@ -30,10 +31,12 @@ class _DetailPageState extends State<DetailPage> {
       },
       child: Hero(
         tag: 'photo_' + widget.file.path,
-        child: Image.file(
-          widget.file,
-          filterQuality: FilterQuality.low,
-        ),
+        child: ImageLruCache.getData(widget.file.path) == null
+            ? Image.file(
+                widget.file,
+                filterQuality: FilterQuality.low,
+              )
+            : ImageLruCache.getData(widget.file.path),
       ),
     );
   }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/photo_provider.dart';
+import 'package:myapp/ui/image_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:myapp/ui/change_notifier_builder.dart';
 import 'package:myapp/ui/loading_widget.dart';
-import 'package:myapp/ui/image_item_widget.dart';
 import 'package:myapp/ui/detail_page.dart';
 import 'package:provider/provider.dart';
 
@@ -80,9 +80,9 @@ class _GalleryPageState extends State<GalleryPage> {
       onTap: () async {
         routeToDetailPage(entity);
       },
-      child: ImageItemWidget(
+      child: ImageWidget(
         key: ValueKey(entity),
-        entity: entity,
+        path: "",
       ),
     );
   }

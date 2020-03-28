@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:logger/logger.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/photo_loader.dart';
@@ -39,6 +41,7 @@ class PhotoSyncManager {
       if (asset.createDateTime.millisecondsSinceEpoch > lastDBUpdateTimestamp) {
         await DatabaseHelper.instance.insertPhoto(await Photo.fromAsset(asset));
       }
+      PhotoLoader.instance.addAsset((await asset.originFile).path, asset);
     }
     return await prefs.setInt(
         _lastDBUpdateTimestampKey, DateTime.now().millisecondsSinceEpoch);

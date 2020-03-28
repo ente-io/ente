@@ -1,7 +1,7 @@
 import 'dart:collection';
 import 'dart:typed_data';
 
-import 'package:photo_manager/photo_manager.dart';
+import 'package:flutter/material.dart';
 
 typedef EvictionHandler<K, V>(K key, V value);
 
@@ -38,31 +38,31 @@ class LRUMap<K, V> {
 }
 
 class ImageLruCache {
-  static LRUMap<_ImageCacheEntity, Uint8List> _map = LRUMap(500);
+  static LRUMap<_ImageCacheEntity, Image> _map = LRUMap(500);
 
-  static Uint8List getData(AssetEntity entity, [int size = 64]) {
-    return _map.get(_ImageCacheEntity(entity, size));
+  static Image getData(String path, [int size = 64]) {
+    return _map.get(_ImageCacheEntity(path, size));
   }
 
-  static void setData(AssetEntity entity, int size, Uint8List list) {
-    _map.put(_ImageCacheEntity(entity, size), list);
+  static void setData(String path, int size, Image image) {
+    _map.put(_ImageCacheEntity(path, size), image);
   }
 }
 
 class _ImageCacheEntity {
-  AssetEntity entity;
+  String path;
   int size;
 
-  _ImageCacheEntity(this.entity, this.size);
+  _ImageCacheEntity(this.path, this.size);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is _ImageCacheEntity &&
           runtimeType == other.runtimeType &&
-          entity == other.entity &&
+          path == other.path &&
           size == other.size;
 
   @override
-  int get hashCode => entity.hashCode ^ size.hashCode;
+  int get hashCode => path.hashCode ^ size.hashCode;
 }

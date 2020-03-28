@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -6,7 +5,7 @@ import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
 import 'package:myapp/photo_provider.dart';
 import 'package:myapp/photo_sync_manager.dart';
-import 'package:myapp/ui/detail_page.dart';
+import 'package:myapp/ui/gallery.dart';
 import 'package:myapp/ui/loading_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:myapp/ui/gallery_page.dart';
@@ -19,7 +18,7 @@ void main() async {
   await provider.refreshGalleryList();
   var assets = await provider.list[0].assetList;
   var photoSyncManager = PhotoSyncManager(assets);
-  await photoSyncManager.init();
+  photoSyncManager.init();
   runApp(MyApp2());
 }
 
@@ -50,55 +49,24 @@ class MyApp2 extends StatelessWidget {
         builder: (context, snapshot) {
           Widget body;
           if (snapshot.hasData) {
-            body = ChangeNotifierProvider<PhotoLoader>.value(
-                value: photoLoader,
-                child: GridView.builder(
-                  itemBuilder: _buildItem,
-                  itemCount: snapshot.data.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4),
-                ));
+            body = Gallery();
           } else if (snapshot.hasError) {
             body = Text("Error!");
           } else {
             body = loadWidget;
           }
-          return MaterialApp(
-            title: title,
-            theme: ThemeData.dark(),
-            home: Scaffold(
-                appBar: AppBar(
-                  title: Text(title),
-                ),
-                body: body),
+          return ChangeNotifierProvider<PhotoLoader>.value(
+            value: photoLoader,
+            child: MaterialApp(
+              title: title,
+              theme: ThemeData.dark(),
+              home: Scaffold(
+                  appBar: AppBar(
+                    title: Text(title),
+                  ),
+                  body: body),
+            ),
           );
         });
-  }
-
-  Widget _buildItem(BuildContext context, int index) {
-    logger.i("Building item");
-    var file = File(photoLoader.getPhotos()[index].localPath);
-    return GestureDetector(
-      onTap: () async {
-        routeToDetailPage(file, context);
-      },
-      child: Hero(
-        child: Image.file(file),
-        tag: 'photo_' + file.path,
-      ),
-    );
-  }
-
-  void routeToDetailPage(File file, BuildContext context) async {
-    final page = DetailPage(
-      file: file,
-    );
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return page;
-        },
-      ),
-    );
   }
 }
