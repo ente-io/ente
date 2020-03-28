@@ -11,7 +11,6 @@ class DatabaseHelper {
 
   static final table = 'photos';
 
-  static final columnId = 'photo_id';
   static final columnLocalPath = 'local_path';
   static final columnUrl = 'url';
   static final columnHash = 'hash';
@@ -42,11 +41,10 @@ class DatabaseHelper {
   Future _onCreate(Database db, int version) async {
     await db.execute('''
           CREATE TABLE $table (
-            $columnId VARCHAR(255) PRIMARY KEY,
             $columnLocalPath TEXT NOT NULL,
-            $columnUrl TEXT NOT NULL,
+            $columnUrl TEXT,
             $columnHash TEXT NOT NULL,
-            $columnSyncTimestamp TEXT NOT NULL
+            $columnSyncTimestamp TEXT
           )
           ''');
   }
@@ -54,7 +52,6 @@ class DatabaseHelper {
   Future<int> insertPhoto(Photo photo) async {
     Database db = await instance.database;
     var row = new Map<String, dynamic>();
-    row[columnId] = photo.photoID;
     row[columnLocalPath] = photo.localPath;
     row[columnUrl] = photo.url;
     row[columnHash] = photo.hash;
@@ -65,49 +62,47 @@ class DatabaseHelper {
   Future<List<Photo>> getAllPhotos() async {
     Database db = await instance.database;
     var results = await db.query(table);
+    return _convertToPhotos(results);
+  }
+
+  Future<List<Photo>> getPhotosToBeUploaded() async {
+    Database db = await instance.database;
+    var results = await db.query(table, where: '$columnUrl IS NULL');
+    return _convertToPhotos(results);
+  }
+
+  // We are assuming here that the hash column in the map is set. The other
+  // column values will be used to update the row.
+  Future<int> updateUrlAndTimestamp(
+      String hash, String url, String timestamp) async {
+    Database db = await instance.database;
+    var row = new Map<String, dynamic>();
+    row[columnUrl] = url;
+    row[columnSyncTimestamp] = timestamp;
+    return await db
+        .update(table, row, where: '$columnHash = ?', whereArgs: [hash]);
+  }
+
+  Future<bool> containsPath(String path) async {
+    Database db = await instance.database;
+    return (await db
+                .query(table, where: '$columnLocalPath =?', whereArgs: [path]))
+            .length >
+        0;
+  }
+
+  Future<bool> containsPhotoHash(String hash) async {
+    Database db = await instance.database;
+    return (await db.query(table, where: '$columnHash =?', whereArgs: [hash]))
+            .length >
+        0;
+  }
+
+  List<Photo> _convertToPhotos(List<Map<String, dynamic>> results) {
     var photos = List<Photo>();
     for (var result in results) {
       photos.add(Photo.fromRow(result));
     }
     return photos;
-  }
-
-  // Helper methods
-
-  // Inserts a row in the database where each key in the Map is a column name
-  // and the value is the column value. The return value is the id of the
-  // inserted row.
-  Future<int> insert(Map<String, dynamic> row) async {
-    Database db = await instance.database;
-    return await db.insert(table, row);
-  }
-
-  // All of the rows are returned as a list of maps, where each map is
-  // a key-value list of columns.
-  Future<List<Map<String, dynamic>>> queryAllRows() async {
-    Database db = await instance.database;
-    return await db.query(table);
-  }
-
-  // We are assuming here that the id column in the map is set. The other
-  // column values will be used to update the row.
-  Future<int> update(Map<String, dynamic> row) async {
-    Database db = await instance.database;
-    int id = row[columnId];
-    return await db.update(table, row, where: '$columnId = ?', whereArgs: [id]);
-  }
-
-  // Deletes the row specified by the id. The number of affected rows is
-  // returned. This should be 1 as long as the row exists.
-  Future<int> delete(int id) async {
-    Database db = await instance.database;
-    return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
-  }
-
-  Future<bool> containsPath(String path) async {
-    Database db = await instance.database;
-    return (await db.query(table, where: '$columnLocalPath =?', whereArgs: [path]))
-            .length >
-        0;
   }
 }

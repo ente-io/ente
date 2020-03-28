@@ -1,19 +1,38 @@
+import 'dart:io';
+
+import 'package:crypto/crypto.dart';
+import 'package:photo_manager/photo_manager.dart';
+
 class Photo {
-  String photoID;
   String url;
   String localPath;
   String hash;
   int syncTimestamp;
 
+  Photo();
+
   Photo.fromJson(Map<String, dynamic> json)
-      : photoID = json["photoID"],
-        url = json["url"],
+      : url = json["url"],
+        hash = json["hash"],
         syncTimestamp = json["syncTimestamp"];
 
   Photo.fromRow(Map<String, dynamic> row)
-      : photoID = row["photo_id"],
-        localPath = row["local_path"],
+      : localPath = row["local_path"],
         url = row["url"],
         hash = row["hash"],
-        syncTimestamp = int.parse(row["sync_timestamp"]);
+        syncTimestamp = row["sync_timestamp"] == null
+            ? -1
+            : int.parse(row["sync_timestamp"]);
+
+  static Future<Photo> fromAsset(AssetEntity asset) async {
+    Photo photo = Photo();
+    var file = (await asset.originFile);
+    photo.localPath = file.path;
+    photo.hash = getHash(file);
+    return photo;
+  }
+
+  static String getHash(File file) {
+    return sha256.convert(file.readAsBytesSync()).toString();
+  }
 }

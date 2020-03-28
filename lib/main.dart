@@ -18,7 +18,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await provider.refreshGalleryList();
   var assets = await provider.list[0].assetList;
-  PhotoSyncManager(assets);
+  var photoSyncManager = PhotoSyncManager(assets);
+  await photoSyncManager.init();
   runApp(MyApp2());
 }
 
