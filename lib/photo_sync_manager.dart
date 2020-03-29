@@ -41,7 +41,7 @@ class PhotoSyncManager {
     }
     for (AssetEntity asset in _assets) {
       if (asset.createDateTime.millisecondsSinceEpoch > lastDBUpdateTimestamp) {
-        await DatabaseHelper.instance.insertPhoto(await Photo.fromAsset(asset));
+        await insertPhotoToDB(await Photo.fromAsset(asset));
       }
     }
     return await prefs.setInt(
@@ -94,7 +94,9 @@ class PhotoSyncManager {
         continue;
       } else {
         var localPath = path + basename(photo.url);
-        await _dio.download(_endpoint + photo.url, localPath);
+        await _dio
+            .download(_endpoint + photo.url, localPath)
+            .catchError(_onError);
         photo.localPath = localPath;
         await insertPhotoToDB(photo);
       }
@@ -106,7 +108,7 @@ class PhotoSyncManager {
     Response response = await _dio.get(_endpoint + "/diff", queryParameters: {
       "user": _user,
       "lastSyncTimestamp": lastSyncTimestamp
-    });
+    }).catchError(_onError);
     _logger.i(response.toString());
     return (response.data["diff"] as List)
         .map((photo) => new Photo.fromJson(photo))
@@ -118,7 +120,9 @@ class PhotoSyncManager {
       "file": await MultipartFile.fromFile(path, filename: basename(path)),
       "user": _user,
     });
-    var response = await _dio.post(_endpoint + "/upload", data: formData);
+    var response = await _dio
+        .post(_endpoint + "/upload", data: formData)
+        .catchError(_onError);
     _logger.i(response.toString());
     var photo = Photo.fromJson(response.data);
     _logger.i("Locally computed hash for " + path + ": " + hash);
@@ -131,5 +135,9 @@ class PhotoSyncManager {
     _logger.i("Inserting to DB");
     await DatabaseHelper.instance.insertPhoto(photo);
     PhotoLoader.instance.reloadPhotos();
+  }
+
+  void _onError(error) {
+    _logger.e(error);
   }
 }
