@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:myapp/models/photo.dart';

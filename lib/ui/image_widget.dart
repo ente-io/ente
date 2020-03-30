@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:myapp/core/lru_map.dart';
 import 'package:myapp/photo_loader.dart';
 import 'package:myapp/ui/loading_widget.dart';
@@ -19,7 +18,6 @@ class ImageWidget extends StatefulWidget {
 }
 
 class _ImageWidgetState extends State<ImageWidget> {
-  var _logger = Logger();
   PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
 
   @override

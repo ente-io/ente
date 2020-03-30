@@ -116,8 +116,7 @@ class PhotoSyncManager {
             .download(_endpoint + photo.url, localPath)
             .catchError(_onError);
         photo.localPath = localPath;
-        // TODO: Fix me
-        photo.thumbnailPath = localPath;
+        Photo.setThumbnail(photo);
         await DatabaseHelper.instance.insertPhoto(photo);
         PhotoLoader.instance.reloadPhotos();
       }
