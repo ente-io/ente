@@ -34,14 +34,18 @@ class Photo {
     var file = (await asset.originFile);
     photo.localPath = file.path;
     photo.hash = getHash(file);
+    await setThumbnail(photo);
+    return photo;
+  }
+
+  static Future<void> setThumbnail(Photo photo) async {
     var externalPath = (await getApplicationDocumentsDirectory()).path;
     var thumbnailPath = externalPath + "/photos/thumbnails/" + photo.hash + ".thumbnail";
     var args = Map<String, String>();
-    args["assetPath"] = file.path;
+    args["assetPath"] = photo.localPath;
     args["thumbnailPath"] = thumbnailPath;
-    photo.thumbnailPath = thumbnailPath;
     await compute(getThumbnailPath, args);
-    return photo;
+    photo.thumbnailPath = thumbnailPath;
   }
 
   static String getHash(File file) {

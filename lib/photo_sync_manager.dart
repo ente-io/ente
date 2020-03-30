@@ -55,7 +55,8 @@ class PhotoSyncManager {
           photos.clear();
           PhotoLoader.instance.reloadPhotos();
           _logger.i("Inserted " + photos.length.toString() + " photos.");
-          await prefs.setInt(_lastDBUpdateTimestampKey, asset.createDateTime.millisecondsSinceEpoch);
+          await prefs.setInt(_lastDBUpdateTimestampKey,
+              asset.createDateTime.millisecondsSinceEpoch);
         }
       }
     }
@@ -130,9 +131,13 @@ class PhotoSyncManager {
       "lastSyncTimestamp": lastSyncTimestamp
     }).catchError(_onError);
     _logger.i(response.toString());
-    return (response.data["diff"] as List)
-        .map((photo) => new Photo.fromJson(photo))
-        .toList();
+    if (response != null) {
+      return (response.data["diff"] as List)
+          .map((photo) => new Photo.fromJson(photo))
+          .toList();
+    } else {
+      return List<Photo>();
+    }
   }
 
   Future<Photo> _uploadFile(String path, String hash) async {
@@ -145,9 +150,8 @@ class PhotoSyncManager {
         .catchError(_onError);
     _logger.i(response.toString());
     var photo = Photo.fromJson(response.data);
-    _logger.i("Locally computed hash for " + path + ": " + hash);
-    _logger.i("Server computed hash for " + path + ": " + photo.hash);
     photo.localPath = path;
+    Photo.setThumbnail(photo);
     return photo;
   }
 
