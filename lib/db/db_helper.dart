@@ -53,13 +53,22 @@ class DatabaseHelper {
 
   Future<int> insertPhoto(Photo photo) async {
     Database db = await instance.database;
-    var row = new Map<String, dynamic>();
-    row[columnLocalPath] = photo.localPath;
-    row[columnThumbnailPath] = photo.thumbnailPath;
-    row[columnUrl] = photo.url;
-    row[columnHash] = photo.hash;
-    row[columnSyncTimestamp] = photo.syncTimestamp;
-    return await db.insert(table, row);
+    return await db.insert(table, _getRowForPhoto(photo));
+  }
+
+  Future<List<dynamic>> insertPhotos(List<Photo> photos) async {
+    Database db = await instance.database;
+    var batch = db.batch();
+    int batchCounter = 0;
+    for (Photo photo in photos) {
+      if (batchCounter == 400) {
+        await batch.commit();
+        batch = db.batch();
+      }
+      batch.insert(table, _getRowForPhoto(photo));
+      batchCounter++;
+    }
+    return await batch.commit();
   }
 
   Future<List<Photo>> getAllPhotos() async {
@@ -107,5 +116,15 @@ class DatabaseHelper {
       photos.add(Photo.fromRow(result));
     }
     return photos;
+  }
+
+  Map<String, dynamic> _getRowForPhoto(Photo photo) {
+    var row = new Map<String, dynamic>();
+    row[columnLocalPath] = photo.localPath;
+    row[columnThumbnailPath] = photo.thumbnailPath;
+    row[columnUrl] = photo.url;
+    row[columnHash] = photo.hash;
+    row[columnSyncTimestamp] = photo.syncTimestamp;
+    return row;
   }
 }

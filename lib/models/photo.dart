@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image/image.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class Photo {
@@ -31,20 +33,27 @@ class Photo {
     Photo photo = Photo();
     var file = (await asset.originFile);
     photo.localPath = file.path;
-    photo.thumbnailPath = getThumbnailPath(file.path);
     photo.hash = getHash(file);
+    var externalPath = (await getApplicationDocumentsDirectory()).path;
+    var thumbnailPath = externalPath + "/photos/thumbnails/" + photo.hash + ".thumbnail";
+    var args = Map<String, String>();
+    args["assetPath"] = file.path;
+    args["thumbnailPath"] = thumbnailPath;
+    photo.thumbnailPath = thumbnailPath;
+    await compute(getThumbnailPath, args);
     return photo;
   }
 
   static String getHash(File file) {
     return sha256.convert(file.readAsBytesSync()).toString();
   }
+}
 
-  static String getThumbnailPath(String path) {
-    Image image = decodeImage(File(path).readAsBytesSync());
-    Image thumbnail = copyResize(image, width: 150);
-    String thumbnailPath = path + ".thumbnail";
-    File(thumbnailPath)..writeAsBytesSync(encodePng(thumbnail));
-    return thumbnailPath;
-  }
+Future<void> getThumbnailPath(Map<String, String> args) async {
+  return File(args["thumbnailPath"])..writeAsBytes(_getThumbnail(args["assetPath"]));
+}
+
+List<int> _getThumbnail(String path) {
+  Image image = decodeImage(File(path).readAsBytesSync());
+  return encodePng(copyResize(image, width: 250));
 }

@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:logger/logger.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/photo_loader.dart';
@@ -25,12 +28,9 @@ class PhotoSyncManager {
   }
 
   Future<void> init() async {
-    await _updateDatabase();
-    try {
+    _updateDatabase().then((_) {
       _syncPhotos();
-    } catch (e) {
-      _logger.e(e);
-    }
+    });
   }
 
   Future<bool> _updateDatabase() async {
@@ -38,17 +38,28 @@ class PhotoSyncManager {
     var lastDBUpdateTimestamp = prefs.getInt(_lastDBUpdateTimestampKey);
     if (lastDBUpdateTimestamp == null) {
       lastDBUpdateTimestamp = 0;
+      var externalPath = (await getApplicationDocumentsDirectory()).path;
+      new Directory(externalPath + "/photos/thumbnails")
+          .createSync(recursive: true);
     }
-    // for (AssetEntity asset in _assets) {
-    //   if (asset.createDateTime.millisecondsSinceEpoch > lastDBUpdateTimestamp) {
-    //     try {
-    //       var photo = await Photo.fromAsset(asset);
-    //       await DatabaseHelper.instance.insertPhoto(photo);
-    //     } catch (e) {
-    //       _logger.e(e);
-    //     }
-    //   }
-    // }
+    var photos = List<Photo>();
+    for (AssetEntity asset in _assets) {
+      if (asset.createDateTime.millisecondsSinceEpoch > lastDBUpdateTimestamp) {
+        try {
+          photos.add(await Photo.fromAsset(asset));
+        } catch (e) {
+          _logger.e((await asset.originFile).path, e);
+        }
+        if (photos.length > 10) {
+          await DatabaseHelper.instance.insertPhotos(photos);
+          photos.clear();
+          PhotoLoader.instance.reloadPhotos();
+          _logger.i("Inserted " + photos.length.toString() + " photos.");
+          await prefs.setInt(_lastDBUpdateTimestampKey, asset.createDateTime.millisecondsSinceEpoch);
+        }
+      }
+    }
+    await DatabaseHelper.instance.insertPhotos(photos);
     PhotoLoader.instance.reloadPhotos();
     return await prefs.setInt(
         _lastDBUpdateTimestampKey, DateTime.now().millisecondsSinceEpoch);
@@ -104,7 +115,8 @@ class PhotoSyncManager {
             .download(_endpoint + photo.url, localPath)
             .catchError(_onError);
         photo.localPath = localPath;
-        photo.thumbnailPath = Photo.getThumbnailPath(localPath);
+        // TODO: Fix me
+        photo.thumbnailPath = localPath;
         await DatabaseHelper.instance.insertPhoto(photo);
         PhotoLoader.instance.reloadPhotos();
       }

@@ -88,7 +88,7 @@ class PhotoProvider extends ChangeNotifier {
     if (!result) {
       print("Did not get permission");
     }
-    var galleryList = await PhotoManager.getAssetPathList();
+    var galleryList = await PhotoManager.getAssetPathList(type: RequestType.image);
 
     galleryList.sort((s1, s2) {
       return s2.assetCount.compareTo(s1.assetCount);
@@ -96,7 +96,6 @@ class PhotoProvider extends ChangeNotifier {
 
     this.list.clear();
     this.list.addAll(galleryList);
-    print("Final List: " + list.toString());
   }
 
   PathProvider getOrCreatePathProvider(AssetPathEntity pathEntity) {

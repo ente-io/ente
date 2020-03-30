@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
 import 'package:myapp/ui/image_widget.dart';
 import 'package:provider/provider.dart';
@@ -63,24 +63,21 @@ class _GalleryState extends State<Gallery> {
     var photo = photoLoader.getPhotos()[index];
     return GestureDetector(
       onTap: () async {
-        routeToDetailPage(photo.localPath, context);
+        routeToDetailPage(photo, context);
       },
       onLongPress: () {
-        Toast.show(photo.thumbnailPath, context);
+        Toast.show(photo.localPath, context);
       },
-      child: Hero(
-        child: Padding(
-          padding: const EdgeInsets.all(1.0),
-          child: ImageWidget(path: photo.thumbnailPath),
-        ),
-        tag: 'photo_' + photo.localPath,
+      child: Padding(
+        padding: const EdgeInsets.all(1.0),
+        child: ImageWidget(path: photo.thumbnailPath),
       ),
     );
   }
 
-  void routeToDetailPage(String path, BuildContext context) async {
+  void routeToDetailPage(Photo photo, BuildContext context) async {
     final page = DetailPage(
-      file: File(path),
+      photo: photo,
     );
     Navigator.of(context).push(
       MaterialPageRoute(
