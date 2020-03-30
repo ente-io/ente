@@ -31,7 +31,6 @@ class _ImageWidgetState extends State<ImageWidget> {
     Widget image;
 
     if (cachedImage != null) {
-      _logger.i("Cache hit for " + path);
       image = cachedImage;
     } else {
       image = FutureBuilder<Image>(

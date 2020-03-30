@@ -12,6 +12,7 @@ class DatabaseHelper {
   static final table = 'photos';
 
   static final columnLocalPath = 'local_path';
+  static final columnThumbnailPath = 'thumbnail_path';
   static final columnUrl = 'url';
   static final columnHash = 'hash';
   static final columnSyncTimestamp = 'sync_timestamp';
@@ -42,6 +43,7 @@ class DatabaseHelper {
     await db.execute('''
           CREATE TABLE $table (
             $columnLocalPath TEXT NOT NULL,
+            $columnThumbnailPath TEXT NOT NULL,
             $columnUrl TEXT,
             $columnHash TEXT NOT NULL,
             $columnSyncTimestamp TEXT
@@ -53,6 +55,7 @@ class DatabaseHelper {
     Database db = await instance.database;
     var row = new Map<String, dynamic>();
     row[columnLocalPath] = photo.localPath;
+    row[columnThumbnailPath] = photo.thumbnailPath;
     row[columnUrl] = photo.url;
     row[columnHash] = photo.hash;
     row[columnSyncTimestamp] = photo.syncTimestamp;

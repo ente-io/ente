@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:myapp/photo_loader.dart';
 import 'package:myapp/ui/image_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:toast/toast.dart';
 
 import 'change_notifier_builder.dart';
 import 'detail_page.dart';
@@ -18,44 +20,67 @@ class Gallery extends StatefulWidget {
 
 class _GalleryState extends State<Gallery> {
   Logger _logger = Logger();
-  
+
+  int _crossAxisCount = 4;
+
   PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
-  
+
   @override
   Widget build(BuildContext context) {
-    _logger.i("Build");
-    return ChangeNotifierBuilder(
-      value: photoLoader,
-      builder: (_, __) {
-        return GridView.builder(
-          itemBuilder: _buildItem,
-          itemCount: photoLoader.getPhotos().length,
-          gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-        );
-      },
-    );
-  }
-
-  Widget _buildItem(BuildContext context, int index) {
-    var file = File(photoLoader.getPhotos()[index].localPath);
+    _logger.i("Build with _crossAxisCount: " + _crossAxisCount.toString());
     return GestureDetector(
-      onTap: () async {
-        routeToDetailPage(file, context);
+      onScaleUpdate: (ScaleUpdateDetails details) {
+        _logger.i("Scale update: " + details.horizontalScale.toString());
+        setState(() {
+          if (details.horizontalScale < 1) {
+            _crossAxisCount = 8;
+          } else if (details.horizontalScale < 2) {
+            _crossAxisCount = 5;
+          } else if (details.horizontalScale < 4) {
+            _crossAxisCount = 4;
+          } else if (details.horizontalScale < 8) {
+            _crossAxisCount = 2;
+          } else {
+            _crossAxisCount = 1;
+          }
+        });
       },
-      child: Hero(
-        child: Padding(
-          padding: const EdgeInsets.all(1.0),
-          child: ImageWidget(path: file.path),
-        ),
-        tag: 'photo_' + file.path,
+      child: ChangeNotifierBuilder(
+        value: photoLoader,
+        builder: (_, __) {
+          return GridView.builder(
+              itemBuilder: _buildItem,
+              itemCount: photoLoader.getPhotos().length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: _crossAxisCount,
+              ));
+        },
       ),
     );
   }
 
-  void routeToDetailPage(File file, BuildContext context) async {
+  Widget _buildItem(BuildContext context, int index) {
+    var photo = photoLoader.getPhotos()[index];
+    return GestureDetector(
+      onTap: () async {
+        routeToDetailPage(photo.localPath, context);
+      },
+      onLongPress: () {
+        Toast.show(photo.thumbnailPath, context);
+      },
+      child: Hero(
+        child: Padding(
+          padding: const EdgeInsets.all(1.0),
+          child: ImageWidget(path: photo.thumbnailPath),
+        ),
+        tag: 'photo_' + photo.localPath,
+      ),
+    );
+  }
+
+  void routeToDetailPage(String path, BuildContext context) async {
     final page = DetailPage(
-      file: file,
+      file: File(path),
     );
     Navigator.of(context).push(
       MaterialPageRoute(

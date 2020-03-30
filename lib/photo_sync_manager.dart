@@ -39,11 +39,17 @@ class PhotoSyncManager {
     if (lastDBUpdateTimestamp == null) {
       lastDBUpdateTimestamp = 0;
     }
-    for (AssetEntity asset in _assets) {
-      if (asset.createDateTime.millisecondsSinceEpoch > lastDBUpdateTimestamp) {
-        await insertPhotoToDB(await Photo.fromAsset(asset));
-      }
-    }
+    // for (AssetEntity asset in _assets) {
+    //   if (asset.createDateTime.millisecondsSinceEpoch > lastDBUpdateTimestamp) {
+    //     try {
+    //       var photo = await Photo.fromAsset(asset);
+    //       await DatabaseHelper.instance.insertPhoto(photo);
+    //     } catch (e) {
+    //       _logger.e(e);
+    //     }
+    //   }
+    // }
+    PhotoLoader.instance.reloadPhotos();
     return await prefs.setInt(
         _lastDBUpdateTimestampKey, DateTime.now().millisecondsSinceEpoch);
   }
@@ -98,7 +104,9 @@ class PhotoSyncManager {
             .download(_endpoint + photo.url, localPath)
             .catchError(_onError);
         photo.localPath = localPath;
-        await insertPhotoToDB(photo);
+        photo.thumbnailPath = Photo.getThumbnailPath(localPath);
+        await DatabaseHelper.instance.insertPhoto(photo);
+        PhotoLoader.instance.reloadPhotos();
       }
       await prefs.setInt(_lastSyncTimestampKey, photo.syncTimestamp);
     }
@@ -129,12 +137,6 @@ class PhotoSyncManager {
     _logger.i("Server computed hash for " + path + ": " + photo.hash);
     photo.localPath = path;
     return photo;
-  }
-
-  Future<void> insertPhotoToDB(Photo photo) async {
-    _logger.i("Inserting to DB");
-    await DatabaseHelper.instance.insertPhoto(photo);
-    PhotoLoader.instance.reloadPhotos();
   }
 
   void _onError(error) {
