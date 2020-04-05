@@ -16,7 +16,7 @@ final logger = Logger();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp2());
+  runApp(MyApp());
   await provider.refreshGalleryList();
 
   provider.list[0].assetList.then((assets) {
@@ -30,7 +30,7 @@ Future<void> init(List<AssetEntity> assets) async {
   photoSyncManager.init();
 }
 
-class MyApp2 extends StatelessWidget {
+class MyApp extends StatelessWidget {
   final PhotoLoader photoLoader = PhotoLoader.instance;
 
   @override
@@ -41,8 +41,24 @@ class MyApp2 extends StatelessWidget {
         builder: (context, snapshot) {
           Widget body;
           if (snapshot.hasData) {
-            body = Gallery();
+            body = Container(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Search "Paris"',
+                      contentPadding: const EdgeInsets.all(12.0),
+                    ),
+                  ),
+                  Flexible(
+                    child: Gallery(),
+                  )
+                ],
+              ),
+            );
           } else if (snapshot.hasError) {
+            logger.e(snapshot.error);
             body = Text("Error!");
           } else {
             body = loadWidget;
