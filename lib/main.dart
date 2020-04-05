@@ -8,6 +8,7 @@ import 'package:myapp/photo_provider.dart';
 import 'package:myapp/photo_sync_manager.dart';
 import 'package:myapp/ui/gallery.dart';
 import 'package:myapp/ui/loading_widget.dart';
+import 'package:myapp/ui/search_page.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -41,22 +42,7 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           Widget body;
           if (snapshot.hasData) {
-            body = Container(
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Search "Paris"',
-                      contentPadding: const EdgeInsets.all(12.0),
-                    ),
-                  ),
-                  Flexible(
-                    child: Gallery(),
-                  )
-                ],
-              ),
-            );
+            body = HomeWidget();
           } else if (snapshot.hasError) {
             logger.e(snapshot.error);
             body = Text("Error!");
@@ -76,5 +62,44 @@ class MyApp extends StatelessWidget {
             ),
           );
         });
+  }
+}
+
+class HomeWidget extends StatelessWidget {
+  const HomeWidget({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Hero(
+              child: TextField(
+                readOnly: true,
+                onTap: () {
+                  logger.i("Tapped");
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return SearchPage();
+                      },
+                    ),
+                  );
+                },
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Search "Paris"',
+                  contentPadding: const EdgeInsets.all(12.0),
+                ),
+              ),
+              tag: "search"),
+          Flexible(
+            child: Gallery(),
+          )
+        ],
+      ),
+    );
   }
 }
