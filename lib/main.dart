@@ -20,10 +20,13 @@ void main() async {
   runApp(MyApp());
   await provider.refreshGalleryList();
 
-  provider.list[0].assetList.then((assets) {
-    var photoSyncManager = PhotoSyncManager(assets);
-    photoSyncManager.init();
-  });
+  if (provider.list.length > 0) {
+    provider.list[0].assetList.then((assets) {
+      init(assets);
+    });
+  } else {
+    init(List<AssetEntity>());
+  }
 }
 
 Future<void> init(List<AssetEntity> assets) async {

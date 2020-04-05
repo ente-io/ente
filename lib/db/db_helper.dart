@@ -95,12 +95,14 @@ class DatabaseHelper {
         .update(table, row, where: '$columnHash = ?', whereArgs: [hash]);
   }
 
-  Future<bool> containsPath(String path) async {
+  Future<Photo> getPhotoByUrl(String url) async {
     Database db = await instance.database;
-    return (await db
-                .query(table, where: '$columnLocalPath =?', whereArgs: [path]))
-            .length >
-        0;
+    var rows = await db.query(table, where: '$columnUrl =?', whereArgs: [url]);
+    if (rows.length > 0) {
+      return Photo.fromRow(rows[0]);
+    } else {
+      throw ("No cached photo");
+    }
   }
 
   Future<bool> containsPhotoHash(String hash) async {

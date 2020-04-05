@@ -5,17 +5,11 @@ import 'package:myapp/core/lru_map.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:share_extend/share_extend.dart';
 
-class DetailPage extends StatefulWidget {
+class DetailPage extends StatelessWidget {
   final Photo photo;
-  final String url;
 
-  const DetailPage({Key key, this.photo, this.url}) : super(key: key);
+  const DetailPage(this.photo, {Key key}) : super(key: key);
 
-  @override
-  _DetailPageState createState() => _DetailPageState();
-}
-
-class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +19,7 @@ class _DetailPageState extends State<DetailPage> {
           IconButton(
             icon: Icon(Icons.share),
             onPressed: () {
-              ShareExtend.share(widget.photo.localPath, "image");
+              ShareExtend.share(photo.localPath, "image");
             },
           )
         ],
@@ -43,12 +37,12 @@ class _DetailPageState extends State<DetailPage> {
       onVerticalDragUpdate: (details) {
         Navigator.pop(context);
       },
-      child: ImageLruCache.getData(widget.photo.localPath) == null
+      child: ImageLruCache.getData(photo.localPath) == null
           ? Image.file(
-              File(widget.photo.localPath),
+              File(photo.localPath),
               filterQuality: FilterQuality.low,
             )
-          : ImageLruCache.getData(widget.photo.localPath),
+          : ImageLruCache.getData(photo.localPath),
     );
   }
 }

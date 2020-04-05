@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/face_search_manager.dart';
 import 'package:myapp/models/face.dart';
+import 'package:myapp/models/photo.dart';
 import 'package:myapp/models/search_result.dart';
 import 'package:myapp/ui/circular_network_image_widget.dart';
 import 'package:myapp/core/constants.dart' as Constants;
+import 'package:myapp/ui/image_widget.dart';
 import 'package:myapp/ui/network_image_detail_page.dart';
 
 import 'detail_page.dart';
@@ -42,8 +44,8 @@ class FaceSearchResultsPage extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return GridView.builder(
-              itemBuilder: (_, index) => _buildItem(
-                  context, Constants.ENDPOINT + snapshot.data[index].url),
+              itemBuilder: (_, index) =>
+                  _buildItem(context, snapshot.data[index].url),
               itemCount: snapshot.data.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
@@ -57,18 +59,38 @@ class FaceSearchResultsPage extends StatelessWidget {
 
   Widget _buildItem(BuildContext context, String url) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         _routeToDetailPage(url, context);
       },
-      child: Container(
-        margin: EdgeInsets.all(2),
-        child: Image.network(url, height: 124, width: 124, fit: BoxFit.cover),
-      ),
+      child: _getImage(url),
     );
   }
 
-  void _routeToDetailPage(String url, BuildContext context) {
-    final page = NetworkImageDetailPage(url);
+  Widget _getImage(String url) {
+    return FutureBuilder<Photo>(
+      future: DatabaseHelper.instance.getPhotoByUrl(url),
+      builder: (_, snapshot) {
+        if (snapshot.hasData) {
+          return ImageWidget(path: snapshot.data.thumbnailPath);
+        } else if (snapshot.hasError) {
+          return Container(
+            margin: EdgeInsets.all(2),
+            child: Image.network(Constants.ENDPOINT + url,
+                height: 124, width: 124, fit: BoxFit.cover),
+          );
+        } else {
+          return Text("Loading...");
+        }
+      },
+    );
+  }
+
+  void _routeToDetailPage(String url, BuildContext context) async {
+    Widget page = NetworkImageDetailPage(url);
+    var photo = await DatabaseHelper.instance.getPhotoByUrl(url);
+    if (photo != null) {
+      page = DetailPage(photo);
+    }
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
