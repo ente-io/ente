@@ -7,8 +7,9 @@ import 'package:share_extend/share_extend.dart';
 
 class DetailPage extends StatefulWidget {
   final Photo photo;
+  final String url;
 
-  const DetailPage({Key key, this.photo}) : super(key: key);
+  const DetailPage({Key key, this.photo, this.url}) : super(key: key);
 
   @override
   _DetailPageState createState() => _DetailPageState();

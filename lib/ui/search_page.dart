@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:myapp/face_search_manager.dart';
 import 'package:myapp/models/face.dart';
 import 'package:myapp/core/constants.dart' as Constants;
+import 'package:myapp/ui/circular_network_image_widget.dart';
+import 'package:myapp/ui/face_search_results_page.dart';
 
 class SearchPage extends StatelessWidget {
-  final FaceSearchManager _faceSearchManager = FaceSearchManager();
+  final FaceSearchManager _faceSearchManager = FaceSearchManager.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,15 +65,28 @@ class SearchPage extends StatelessWidget {
   }
 
   Widget _buildItem(BuildContext context, Face face) {
-    return new Container(
-        width: 60.0,
-        height: 60.0,
-        margin: const EdgeInsets.only(right: 8),
-        decoration: new BoxDecoration(
-            shape: BoxShape.circle,
-            image: new DecorationImage(
-                fit: BoxFit.contain,
-                image:
-                    new NetworkImage(Constants.ENDPOINT + face.thumbnailURL))));
+    return GestureDetector(
+      onTap: () {
+        _routeToSearchResults(face, context);
+      },
+      child: Hero(
+        tag: "face_" + face.faceID.toString(),
+        child: CircularNetworkImageWidget(
+            Constants.ENDPOINT + face.thumbnailURL, 60),
+      ),
+    );
+  }
+
+  void _routeToSearchResults(Face face, BuildContext context) {
+    final page = FaceSearchResultsPage(
+      face: face,
+    );
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return page;
+        },
+      ),
+    );
   }
 }

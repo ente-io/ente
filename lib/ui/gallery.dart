@@ -60,7 +60,7 @@ class _GalleryState extends State<Gallery> {
   Widget _buildItem(BuildContext context, int index) {
     var photo = photoLoader.getPhotos()[index];
     return GestureDetector(
-      onTap: () async {
+      onTap: () {
         routeToDetailPage(photo, context);
       },
       onLongPress: () {
@@ -73,7 +73,7 @@ class _GalleryState extends State<Gallery> {
     );
   }
 
-  void routeToDetailPage(Photo photo, BuildContext context) async {
+  void routeToDetailPage(Photo photo, BuildContext context) {
     final page = DetailPage(
       photo: photo,
     );
