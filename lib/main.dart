@@ -79,7 +79,6 @@ class HomeWidget extends StatelessWidget {
               child: TextField(
                 readOnly: true,
                 onTap: () {
-                  logger.i("Tapped");
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (BuildContext context) {

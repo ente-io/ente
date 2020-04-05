@@ -10,12 +10,11 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:myapp/models/photo.dart';
+import 'package:myapp/core/constants.dart' as Constants;
 
 class PhotoSyncManager {
   final _logger = Logger();
   final _dio = Dio();
-  final _endpoint = "http://192.168.0.106:8080";
-  final _user = "umbu";
   final List<AssetEntity> _assets;
   static final _lastSyncTimestampKey = "last_sync_timestamp_0";
   static final _lastDBUpdateTimestampKey = "last_db_update_timestamp";
@@ -113,7 +112,7 @@ class PhotoSyncManager {
       } else {
         var localPath = path + basename(photo.url);
         await _dio
-            .download(_endpoint + photo.url, localPath)
+            .download(Constants.ENDPOINT + photo.url, localPath)
             .catchError(_onError);
         photo.localPath = localPath;
         Photo.setThumbnail(photo);
@@ -125,10 +124,11 @@ class PhotoSyncManager {
   }
 
   Future<List<Photo>> _getDiff(int lastSyncTimestamp) async {
-    Response response = await _dio.get(_endpoint + "/diff", queryParameters: {
-      "user": _user,
-      "lastSyncTimestamp": lastSyncTimestamp
-    }).catchError(_onError);
+    Response response = await _dio.get(Constants.ENDPOINT + "/diff",
+        queryParameters: {
+          "user": Constants.USER,
+          "lastSyncTimestamp": lastSyncTimestamp
+        }).catchError(_onError);
     _logger.i(response.toString());
     if (response != null) {
       return (response.data["diff"] as List)
@@ -142,10 +142,10 @@ class PhotoSyncManager {
   Future<Photo> _uploadFile(String path, String hash) async {
     var formData = FormData.fromMap({
       "file": await MultipartFile.fromFile(path, filename: basename(path)),
-      "user": _user,
+      "user": Constants.USER,
     });
     var response = await _dio
-        .post(_endpoint + "/upload", data: formData)
+        .post(Constants.ENDPOINT + "/upload", data: formData)
         .catchError(_onError);
     _logger.i(response.toString());
     var photo = Photo.fromJson(response.data);
