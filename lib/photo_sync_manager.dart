@@ -93,8 +93,8 @@ class PhotoSyncManager {
         return;
       }
       var uploadedPhoto = await _uploadFile(photo.localPath, photo.hash);
-      await DatabaseHelper.instance.updateUrlAndTimestamp(photo.hash,
-          uploadedPhoto.url, uploadedPhoto.syncTimestamp.toString());
+      await DatabaseHelper.instance.updatePathAndTimestamp(photo.hash,
+          uploadedPhoto.path, uploadedPhoto.syncTimestamp.toString());
       prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.syncTimestamp);
       uploadedCount++;
     }
@@ -106,13 +106,13 @@ class PhotoSyncManager {
     var path = externalPath + "/photos/";
     for (Photo photo in diff) {
       if (await DatabaseHelper.instance.containsPhotoHash(photo.hash)) {
-        await DatabaseHelper.instance.updateUrlAndTimestamp(
-            photo.hash, photo.url, photo.syncTimestamp.toString());
+        await DatabaseHelper.instance.updatePathAndTimestamp(
+            photo.hash, photo.path, photo.syncTimestamp.toString());
         continue;
       } else {
-        var localPath = path + basename(photo.url);
+        var localPath = path + basename(photo.path);
         await _dio
-            .download(Constants.ENDPOINT + photo.url, localPath)
+            .download(Constants.ENDPOINT + "/" + photo.path, localPath)
             .catchError(_onError);
         photo.localPath = localPath;
         await Photo.setThumbnail(photo);

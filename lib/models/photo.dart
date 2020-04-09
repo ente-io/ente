@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class Photo {
-  String url;
+  String path;
   String localPath;
   String thumbnailPath;
   String hash;
@@ -16,14 +16,14 @@ class Photo {
   Photo();
 
   Photo.fromJson(Map<String, dynamic> json)
-      : url = json["url"],
+      : path = json["path"],
         hash = json["hash"],
         syncTimestamp = json["syncTimestamp"];
 
   Photo.fromRow(Map<String, dynamic> row)
       : localPath = row["local_path"],
         thumbnailPath = row["thumbnail_path"],
-        url = row["url"],
+        path = row["path"],
         hash = row["hash"],
         syncTimestamp = row["sync_timestamp"] == null
             ? -1

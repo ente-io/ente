@@ -1,5 +1,5 @@
 class SearchResult {
-  final String url;
+  final String path;
 
-  SearchResult(this.url);
+  SearchResult(this.path);
 }

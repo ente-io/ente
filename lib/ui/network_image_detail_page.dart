@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/core/constants.dart' as Constants;
 
 class NetworkImageDetailPage extends StatelessWidget {
-  final String _url;
+  final String _path;
 
-  const NetworkImageDetailPage(this._url, {Key key}) : super(key: key);
+  const NetworkImageDetailPage(this._path, {Key key}) : super(key: key);
 
   @override
   Widget build(Object context) {
@@ -32,7 +33,7 @@ class NetworkImageDetailPage extends StatelessWidget {
       onVerticalDragUpdate: (details) {
         Navigator.pop(context);
       },
-      child: Image.network(_url),
+      child: Image.network(Constants.ENDPOINT + "/" + _path),
     );
   }
 }

@@ -1,8 +1,8 @@
 class Face {
   final int faceID;
-  final String thumbnailURL;
+  final String thumbnailPath;
 
   Face.fromJson(Map<String, dynamic> json)
       : faceID = json["faceID"],
-        thumbnailURL = json["thumbnailURL"];
+        thumbnailPath = json["thumbnailPath"];
 }

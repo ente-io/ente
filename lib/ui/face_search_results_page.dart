@@ -28,7 +28,7 @@ class FaceSearchResultsPage extends StatelessWidget {
           Hero(
             tag: "face_" + _face.faceID.toString(),
             child: CircularNetworkImageWidget(
-                Constants.ENDPOINT + _face.thumbnailURL, 20),
+                Constants.ENDPOINT + _face.thumbnailPath, 20),
           )
         ],
       ),
@@ -45,7 +45,7 @@ class FaceSearchResultsPage extends StatelessWidget {
         if (snapshot.hasData) {
           return GridView.builder(
               itemBuilder: (_, index) =>
-                  _buildItem(context, snapshot.data[index].url),
+                  _buildItem(context, snapshot.data[index].path),
               itemCount: snapshot.data.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
@@ -57,25 +57,25 @@ class FaceSearchResultsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildItem(BuildContext context, String url) {
+  Widget _buildItem(BuildContext context, String path) {
     return GestureDetector(
       onTap: () async {
-        _routeToDetailPage(url, context);
+        _routeToDetailPage(path, context);
       },
-      child: _getImage(url),
+      child: _getImage(path),
     );
   }
 
-  Widget _getImage(String url) {
+  Widget _getImage(String path) {
     return FutureBuilder<Photo>(
-      future: DatabaseHelper.instance.getPhotoByUrl(url),
+      future: DatabaseHelper.instance.getPhotoByPath(path),
       builder: (_, snapshot) {
         if (snapshot.hasData) {
           return ImageWidget(path: snapshot.data.thumbnailPath);
         } else if (snapshot.hasError) {
           return Container(
             margin: EdgeInsets.all(2),
-            child: Image.network(Constants.ENDPOINT + url,
+            child: Image.network(Constants.ENDPOINT + "/" + path,
                 height: 124, width: 124, fit: BoxFit.cover),
           );
         } else {
@@ -85,9 +85,9 @@ class FaceSearchResultsPage extends StatelessWidget {
     );
   }
 
-  void _routeToDetailPage(String url, BuildContext context) async {
-    Widget page = NetworkImageDetailPage(url);
-    var photo = await DatabaseHelper.instance.getPhotoByUrl(url);
+  void _routeToDetailPage(String path, BuildContext context) async {
+    Widget page = NetworkImageDetailPage(path);
+    var photo = await DatabaseHelper.instance.getPhotoByPath(path);
     if (photo != null) {
       page = DetailPage(photo);
     }

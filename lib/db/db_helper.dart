@@ -13,7 +13,7 @@ class DatabaseHelper {
 
   static final columnLocalPath = 'local_path';
   static final columnThumbnailPath = 'thumbnail_path';
-  static final columnUrl = 'url';
+  static final columnPath = 'path';
   static final columnHash = 'hash';
   static final columnSyncTimestamp = 'sync_timestamp';
 
@@ -44,7 +44,7 @@ class DatabaseHelper {
           CREATE TABLE $table (
             $columnLocalPath TEXT NOT NULL,
             $columnThumbnailPath TEXT NOT NULL,
-            $columnUrl TEXT,
+            $columnPath TEXT,
             $columnHash TEXT NOT NULL,
             $columnSyncTimestamp TEXT
           )
@@ -79,25 +79,26 @@ class DatabaseHelper {
 
   Future<List<Photo>> getPhotosToBeUploaded() async {
     Database db = await instance.database;
-    var results = await db.query(table, where: '$columnUrl IS NULL');
+    var results = await db.query(table, where: '$columnPath IS NULL');
     return _convertToPhotos(results);
   }
 
   // We are assuming here that the hash column in the map is set. The other
   // column values will be used to update the row.
-  Future<int> updateUrlAndTimestamp(
-      String hash, String url, String timestamp) async {
+  Future<int> updatePathAndTimestamp(
+      String hash, String path, String timestamp) async {
     Database db = await instance.database;
     var row = new Map<String, dynamic>();
-    row[columnUrl] = url;
+    row[columnPath] = path;
     row[columnSyncTimestamp] = timestamp;
     return await db
         .update(table, row, where: '$columnHash = ?', whereArgs: [hash]);
   }
 
-  Future<Photo> getPhotoByUrl(String url) async {
+  Future<Photo> getPhotoByPath(String path) async {
     Database db = await instance.database;
-    var rows = await db.query(table, where: '$columnUrl =?', whereArgs: [url]);
+    var rows =
+        await db.query(table, where: '$columnPath =?', whereArgs: [path]);
     if (rows.length > 0) {
       return Photo.fromRow(rows[0]);
     } else {
@@ -124,7 +125,7 @@ class DatabaseHelper {
     var row = new Map<String, dynamic>();
     row[columnLocalPath] = photo.localPath;
     row[columnThumbnailPath] = photo.thumbnailPath;
-    row[columnUrl] = photo.url;
+    row[columnPath] = photo.path;
     row[columnHash] = photo.hash;
     row[columnSyncTimestamp] = photo.syncTimestamp;
     return row;

@@ -72,7 +72,7 @@ class SearchPage extends StatelessWidget {
       child: Hero(
         tag: "face_" + face.faceID.toString(),
         child: CircularNetworkImageWidget(
-            Constants.ENDPOINT + face.thumbnailURL, 60),
+            Constants.ENDPOINT + "/" + face.thumbnailPath, 60),
       ),
     );
   }
