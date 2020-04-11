@@ -50,7 +50,7 @@ class PhotoSyncManager {
           await _insertPhotosToDB(
               photos, prefs, asset.createDateTime.millisecondsSinceEpoch);
           photos.clear();
-          bufferLimit = max(maxBufferLimit, bufferLimit * 2);
+          bufferLimit = min(maxBufferLimit, bufferLimit * 2);
         }
       }
     }
