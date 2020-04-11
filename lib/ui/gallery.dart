@@ -68,7 +68,7 @@ class _GalleryState extends State<Gallery> {
       },
       child: Padding(
         padding: const EdgeInsets.all(1.0),
-        child: ImageWidget(path: photo.thumbnailPath),
+        child: ImageWidget(photo),
       ),
     );
   }

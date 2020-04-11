@@ -11,6 +11,7 @@ class DatabaseHelper {
 
   static final table = 'photos';
 
+  static final columnLocalId = 'local_id';
   static final columnLocalPath = 'local_path';
   static final columnThumbnailPath = 'thumbnail_path';
   static final columnPath = 'path';
@@ -42,6 +43,7 @@ class DatabaseHelper {
   Future _onCreate(Database db, int version) async {
     await db.execute('''
           CREATE TABLE $table (
+            $columnLocalId TEXT,
             $columnLocalPath TEXT NOT NULL,
             $columnThumbnailPath TEXT NOT NULL,
             $columnPath TEXT,
@@ -123,6 +125,7 @@ class DatabaseHelper {
 
   Map<String, dynamic> _getRowForPhoto(Photo photo) {
     var row = new Map<String, dynamic>();
+    row[columnLocalId] = photo.localId;
     row[columnLocalPath] = photo.localPath;
     row[columnThumbnailPath] = photo.thumbnailPath;
     row[columnPath] = photo.path;

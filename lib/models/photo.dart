@@ -1,12 +1,10 @@
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
-import 'package:image/image.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class Photo {
+  String localId;
   String path;
   String localPath;
   String thumbnailPath;
@@ -22,7 +20,8 @@ class Photo {
         syncTimestamp = json["syncTimestamp"];
 
   Photo.fromRow(Map<String, dynamic> row)
-      : localPath = row["local_path"],
+      : localId = row["local_id"],
+        localPath = row["local_path"],
         thumbnailPath = row["thumbnail_path"],
         path = row["path"],
         hash = row["hash"],
@@ -33,34 +32,14 @@ class Photo {
   static Future<Photo> fromAsset(AssetEntity asset) async {
     Photo photo = Photo();
     var file = (await asset.originFile);
+    photo.localId = asset.id;
     photo.localPath = file.path;
     photo.hash = getHash(file);
     photo.thumbnailPath = file.path;
     return photo;
   }
 
-  static Future<Photo> setThumbnail(Photo photo) async {
-    var externalPath = (await getApplicationDocumentsDirectory()).path;
-    var thumbnailPath =
-        externalPath + "/photos/thumbnails/" + photo.hash + ".thumbnail";
-    var args = Map<String, String>();
-    args["assetPath"] = photo.localPath;
-    args["thumbnailPath"] = thumbnailPath;
-    photo.thumbnailPath = thumbnailPath;
-    return compute(getThumbnailPath, args).then((value) => photo);
-  }
-
   static String getHash(File file) {
     return sha256.convert(file.readAsBytesSync()).toString();
   }
-}
-
-Future<void> getThumbnailPath(Map<String, String> args) async {
-  return File(args["thumbnailPath"])
-    ..writeAsBytes(_getThumbnail(args["assetPath"]));
-}
-
-List<int> _getThumbnail(String path) {
-  Image image = decodeImage(File(path).readAsBytesSync());
-  return encodePng(copyResize(image, width: 250));
 }

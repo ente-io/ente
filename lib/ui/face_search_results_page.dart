@@ -71,7 +71,7 @@ class FaceSearchResultsPage extends StatelessWidget {
       future: DatabaseHelper.instance.getPhotoByPath(path),
       builder: (_, snapshot) {
         if (snapshot.hasData) {
-          return ImageWidget(path: snapshot.data.thumbnailPath);
+          return ImageWidget(snapshot.data);
         } else if (snapshot.hasError) {
           return Container(
             margin: EdgeInsets.all(2),

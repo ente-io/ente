@@ -1,17 +1,19 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:myapp/core/lru_map.dart';
+import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
 import 'package:myapp/ui/loading_widget.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 
 class ImageWidget extends StatefulWidget {
-  final String path;
+  final Photo photo;
 
-  const ImageWidget({
+  const ImageWidget(
+    this.photo, {
     Key key,
-    this.path,
   }) : super(key: key);
   @override
   _ImageWidgetState createState() => _ImageWidgetState();
@@ -22,7 +24,7 @@ class _ImageWidgetState extends State<ImageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final path = widget.path;
+    final path = widget.photo.localPath;
     final size = 124;
     final cachedImage = ImageLruCache.getData(path, size);
 
@@ -31,12 +33,15 @@ class _ImageWidgetState extends State<ImageWidget> {
     if (cachedImage != null) {
       image = cachedImage;
     } else {
-      image = FutureBuilder<Image>(
-        future: _buildImageWidget(path, size),
+      image = FutureBuilder<Uint8List>(
+        future:
+            AssetEntity(id: widget.photo.localId).thumbDataWithSize(size, size),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            ImageLruCache.setData(path, size, snapshot.data);
-            return snapshot.data;
+            Image image = Image.memory(snapshot.data,
+                width: 124, height: 124, fit: BoxFit.cover);
+            ImageLruCache.setData(path, size, image);
+            return image;
           } else {
             return loadWidget;
           }
@@ -47,15 +52,10 @@ class _ImageWidgetState extends State<ImageWidget> {
     return image;
   }
 
-  Future<Image> _buildImageWidget(String path, num size) async {
-    return Image.file(File(path),
-        width: size.toDouble(), height: size.toDouble(), fit: BoxFit.cover);
-  }
-
   @override
   void didUpdateWidget(ImageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.path != oldWidget.path) {
+    if (widget.photo.localPath != oldWidget.photo.localPath) {
       setState(() {});
     }
   }
