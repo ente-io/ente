@@ -33,36 +33,27 @@ class PhotoSyncManager {
   }
 
   Future<bool> _updateDatabase() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     var lastDBUpdateTimestamp = prefs.getInt(_lastDBUpdateTimestampKey);
     if (lastDBUpdateTimestamp == null) {
       lastDBUpdateTimestamp = 0;
-      var externalPath = (await getApplicationDocumentsDirectory()).path;
-      new Directory(externalPath + "/photos/thumbnails")
-          .createSync(recursive: true);
+      await _initializeDirectories();
     }
     var photos = List<Photo>();
+    var bufferLimit = 10;
     for (AssetEntity asset in _assets) {
       if (asset.createDateTime.millisecondsSinceEpoch > lastDBUpdateTimestamp) {
-        try {
-          photos.add(await Photo.fromAsset(asset));
-        } catch (e) {
-          _logger.e((await asset.originFile).path, e);
-        }
-        if (photos.length > 10) {
-          await DatabaseHelper.instance.insertPhotos(photos);
+        photos.add(await Photo.fromAsset(asset));
+        if (photos.length > bufferLimit) {
+          await _insertPhotosToDB(
+              photos, prefs, asset.createDateTime.millisecondsSinceEpoch);
           photos.clear();
-          PhotoLoader.instance.reloadPhotos();
-          _logger.i("Inserted " + photos.length.toString() + " photos.");
-          await prefs.setInt(_lastDBUpdateTimestampKey,
-              asset.createDateTime.millisecondsSinceEpoch);
+          bufferLimit *= 2;
         }
       }
     }
-    await DatabaseHelper.instance.insertPhotos(photos);
-    PhotoLoader.instance.reloadPhotos();
-    return await prefs.setInt(
-        _lastDBUpdateTimestampKey, DateTime.now().millisecondsSinceEpoch);
+    return await _insertPhotosToDB(
+        photos, prefs, DateTime.now().millisecondsSinceEpoch);
   }
 
   _syncPhotos() async {
@@ -84,19 +75,13 @@ class PhotoSyncManager {
   }
 
   Future _uploadDiff(SharedPreferences prefs) async {
-    var uploadedCount = 0;
     List<Photo> photosToBeUploaded =
         await DatabaseHelper.instance.getPhotosToBeUploaded();
     for (Photo photo in photosToBeUploaded) {
-      // TODO: Fix me
-      if (uploadedCount == 100) {
-        return;
-      }
       var uploadedPhoto = await _uploadFile(photo.localPath, photo.hash);
       await DatabaseHelper.instance.updatePathAndTimestamp(photo.hash,
           uploadedPhoto.path, uploadedPhoto.syncTimestamp.toString());
       prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.syncTimestamp);
-      uploadedCount++;
     }
   }
 
@@ -155,5 +140,19 @@ class PhotoSyncManager {
 
   void _onError(error) {
     _logger.e(error);
+  }
+
+  Future _initializeDirectories() async {
+    var externalPath = (await getApplicationDocumentsDirectory()).path;
+    new Directory(externalPath + "/photos/thumbnails")
+        .createSync(recursive: true);
+  }
+
+  Future<bool> _insertPhotosToDB(
+      List<Photo> photos, SharedPreferences prefs, int timestamp) async {
+    await DatabaseHelper.instance.insertPhotos(photos);
+    _logger.i("Inserted " + photos.length.toString() + " photos.");
+    PhotoLoader.instance.reloadPhotos();
+    return await prefs.setInt(_lastDBUpdateTimestampKey, timestamp);
   }
 }
