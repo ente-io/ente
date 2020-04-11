@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:logger/logger.dart';
 import 'package:myapp/db/db_helper.dart';
@@ -41,6 +42,7 @@ class PhotoSyncManager {
     }
     var photos = List<Photo>();
     var bufferLimit = 10;
+    final maxBufferLimit = 1000;
     for (AssetEntity asset in _assets) {
       if (asset.createDateTime.millisecondsSinceEpoch > lastDBUpdateTimestamp) {
         photos.add(await Photo.fromAsset(asset));
@@ -48,7 +50,7 @@ class PhotoSyncManager {
           await _insertPhotosToDB(
               photos, prefs, asset.createDateTime.millisecondsSinceEpoch);
           photos.clear();
-          bufferLimit *= 2;
+          bufferLimit = max(maxBufferLimit, bufferLimit * 2);
         }
       }
     }
