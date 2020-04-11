@@ -115,7 +115,7 @@ class PhotoSyncManager {
             .download(Constants.ENDPOINT + "/" + photo.path, localPath)
             .catchError(_onError);
         photo.localPath = localPath;
-        await Photo.setThumbnail(photo);
+        photo.thumbnailPath = localPath;
         await DatabaseHelper.instance.insertPhoto(photo);
         PhotoLoader.instance.reloadPhotos();
       }
@@ -150,7 +150,6 @@ class PhotoSyncManager {
     _logger.i(response.toString());
     var photo = Photo.fromJson(response.data);
     photo.localPath = path;
-    Photo.setThumbnail(photo);
     return photo;
   }
 

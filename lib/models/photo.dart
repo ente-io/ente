@@ -18,6 +18,7 @@ class Photo {
   Photo.fromJson(Map<String, dynamic> json)
       : path = json["path"],
         hash = json["hash"],
+        thumbnailPath = json["thumbnailPath"],
         syncTimestamp = json["syncTimestamp"];
 
   Photo.fromRow(Map<String, dynamic> row)
@@ -34,7 +35,8 @@ class Photo {
     var file = (await asset.originFile);
     photo.localPath = file.path;
     photo.hash = getHash(file);
-    return setThumbnail(photo);
+    photo.thumbnailPath = file.path;
+    return photo;
   }
 
   static Future<Photo> setThumbnail(Photo photo) async {

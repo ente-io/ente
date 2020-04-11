@@ -28,7 +28,7 @@ class FaceSearchResultsPage extends StatelessWidget {
           Hero(
             tag: "face_" + _face.faceID.toString(),
             child: CircularNetworkImageWidget(
-                Constants.ENDPOINT + _face.thumbnailPath, 20),
+                Constants.ENDPOINT + "/" + _face.thumbnailPath, 20),
           )
         ],
       ),
