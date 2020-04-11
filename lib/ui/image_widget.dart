@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -33,22 +34,27 @@ class _ImageWidgetState extends State<ImageWidget> {
     if (cachedImage != null) {
       image = cachedImage;
     } else {
-      image = FutureBuilder<Uint8List>(
-        future:
-            AssetEntity(id: widget.photo.localId).thumbDataWithSize(size, size),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            Image image = Image.memory(snapshot.data,
-                width: size.toDouble(),
-                height: size.toDouble(),
-                fit: BoxFit.cover);
-            ImageLruCache.setData(path, size, image);
-            return image;
-          } else {
-            return loadWidget;
-          }
-        },
-      );
+      if (widget.photo.localId.isNotEmpty) {
+        image = FutureBuilder<Uint8List>(
+          future: AssetEntity(id: widget.photo.localId)
+              .thumbDataWithSize(size, size),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              Image image = Image.memory(snapshot.data,
+                  width: size.toDouble(),
+                  height: size.toDouble(),
+                  fit: BoxFit.cover);
+              ImageLruCache.setData(path, size, image);
+              return image;
+            } else {
+              return loadWidget;
+            }
+          },
+        );
+      } else {
+        image = Image.file(File(widget.photo.localPath),
+            width: size.toDouble(), height: size.toDouble(), fit: BoxFit.cover);
+      }
     }
 
     return image;
