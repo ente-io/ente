@@ -67,7 +67,7 @@ class _GalleryState extends State<Gallery> {
         Toast.show(photo.localPath, context);
       },
       child: Padding(
-        padding: const EdgeInsets.all(1.0),
+        padding: const EdgeInsets.all(2.0),
         child: ImageWidget(photo),
       ),
     );

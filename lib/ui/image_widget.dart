@@ -39,7 +39,9 @@ class _ImageWidgetState extends State<ImageWidget> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             Image image = Image.memory(snapshot.data,
-                width: 124, height: 124, fit: BoxFit.cover);
+                width: size.toDouble(),
+                height: size.toDouble(),
+                fit: BoxFit.cover);
             ImageLruCache.setData(path, size, image);
             return image;
           } else {
