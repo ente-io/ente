@@ -1,9 +1,16 @@
+import 'dart:io';
+
+import 'package:draggable_scrollbar/draggable_scrollbar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
+import 'package:myapp/photo_sync_manager.dart';
 import 'package:myapp/ui/image_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:share_extend/share_extend.dart';
 import 'package:toast/toast.dart';
 
 import 'change_notifier_builder.dart';
@@ -17,43 +24,27 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
-  Logger _logger = Logger();
-
-  int _crossAxisCount = 4;
-
   PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
-    _logger.i("Build with _crossAxisCount: " + _crossAxisCount.toString());
-    return GestureDetector(
-      onScaleUpdate: (ScaleUpdateDetails details) {
-        _logger.i("Scale update: " + details.horizontalScale.toString());
-        setState(() {
-          if (details.horizontalScale < 1) {
-            _crossAxisCount = 8;
-          } else if (details.horizontalScale < 2) {
-            _crossAxisCount = 5;
-          } else if (details.horizontalScale < 4) {
-            _crossAxisCount = 4;
-          } else if (details.horizontalScale < 8) {
-            _crossAxisCount = 2;
-          } else {
-            _crossAxisCount = 1;
-          }
-        });
-      },
-      child: ChangeNotifierBuilder(
-        value: photoLoader,
-        builder: (_, __) {
-          return GridView.builder(
+    return ChangeNotifierBuilder(
+      value: photoLoader,
+      builder: (_, __) {
+        return DraggableScrollbar.semicircle(
+          labelTextBuilder: (double offset) => Text("Hello!"),
+          labelConstraints: BoxConstraints.tightFor(width: 80.0, height: 30.0),
+          controller: _scrollController,
+          child: GridView.builder(
               itemBuilder: _buildItem,
               itemCount: photoLoader.getPhotos().length,
+              controller: _scrollController,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: _crossAxisCount,
-              ));
-        },
-      ),
+                crossAxisCount: 4,
+              )),
+        );
+      },
     );
   }
 
@@ -64,13 +55,83 @@ class _GalleryState extends State<Gallery> {
         routeToDetailPage(photo, context);
       },
       onLongPress: () {
-        Toast.show(photo.localPath, context);
+        _showPopup(photo, context);
       },
       child: Padding(
         padding: const EdgeInsets.all(2.0),
         child: ImageWidget(photo),
       ),
     );
+  }
+
+  void _showPopup(Photo photo, BuildContext context) {
+    final action = CupertinoActionSheet(
+      actions: <Widget>[
+        CupertinoActionSheetAction(
+          child: Text("Share"),
+          isDefaultAction: true,
+          onPressed: () {
+            ShareExtend.share(photo.localPath, "image");
+            Navigator.pop(context);
+          },
+        ),
+        CupertinoActionSheetAction(
+          child: Text("Delete"),
+          isDestructiveAction: true,
+          onPressed: () {
+            Navigator.pop(context);
+            _showDeletePopup(photo, context);
+          },
+        )
+      ],
+      cancelButton: CupertinoActionSheetAction(
+        child: Text("Cancel"),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+    );
+    showCupertinoModalPopup(context: context, builder: (_) => action);
+  }
+
+  void _showDeletePopup(Photo photo, BuildContext context) {
+    final action = CupertinoActionSheet(
+      actions: <Widget>[
+        CupertinoActionSheetAction(
+          child: Text("Delete on device"),
+          isDestructiveAction: true,
+          onPressed: () {
+            DatabaseHelper.instance.deletePhoto(photo).then((_) {
+              File file = File(photo.localPath);
+              file.delete().then((_) {
+                photoLoader.reloadPhotos();
+                Navigator.pop(context);
+              });
+            });
+          },
+        ),
+        CupertinoActionSheetAction(
+          child: Text("Delete everywhere [WiP]"),
+          isDestructiveAction: true,
+          onPressed: () {
+            DatabaseHelper.instance.markPhotoAsDeleted(photo).then((_) {
+              File file = File(photo.localPath);
+              file.delete().then((_) {
+                photoLoader.reloadPhotos();
+                Navigator.pop(context);
+              });
+            });
+          },
+        )
+      ],
+      cancelButton: CupertinoActionSheetAction(
+        child: Text("Cancel"),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+    );
+    showCupertinoModalPopup(context: context, builder: (_) => action);
   }
 
   void routeToDetailPage(Photo photo, BuildContext context) {

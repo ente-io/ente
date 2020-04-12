@@ -29,7 +29,9 @@ class PhotoSyncManager {
 
   Future<void> init() async {
     _updateDatabase().then((_) {
-      _syncPhotos();
+      _syncPhotos().then((_) {
+        _deletePhotos();
+      });
     });
   }
 
@@ -80,9 +82,8 @@ class PhotoSyncManager {
     List<Photo> photosToBeUploaded =
         await DatabaseHelper.instance.getPhotosToBeUploaded();
     for (Photo photo in photosToBeUploaded) {
-      var uploadedPhoto = await _uploadFile(photo.localPath, photo.hash);
-      await DatabaseHelper.instance.updatePathAndTimestamp(photo.hash,
-          uploadedPhoto.path, uploadedPhoto.syncTimestamp.toString());
+      var uploadedPhoto = await _uploadFile(photo);
+      await DatabaseHelper.instance.updatePhoto(uploadedPhoto);
       prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.syncTimestamp);
     }
   }
@@ -93,10 +94,6 @@ class PhotoSyncManager {
     var path = externalPath + "/photos/";
     for (Photo photo in diff) {
       if (await DatabaseHelper.instance.containsPhotoHash(photo.hash)) {
-        await DatabaseHelper.instance.updatePathAndTimestamp(
-            photo.hash, photo.path, photo.syncTimestamp.toString());
-        continue;
-      } else {
         var localPath = path + basename(photo.path);
         await _dio
             .download(Constants.ENDPOINT + "/" + photo.path, localPath)
@@ -126,18 +123,40 @@ class PhotoSyncManager {
     }
   }
 
-  Future<Photo> _uploadFile(String path, String hash) async {
+  Future<Photo> _uploadFile(Photo localPhoto) async {
     var formData = FormData.fromMap({
-      "file": await MultipartFile.fromFile(path, filename: basename(path)),
+      "file": await MultipartFile.fromFile(localPhoto.localPath,
+          filename: basename(localPhoto.localPath)),
       "user": Constants.USER,
     });
     var response = await _dio
         .post(Constants.ENDPOINT + "/upload", data: formData)
         .catchError(_onError);
-    _logger.i(response.toString());
-    var photo = Photo.fromJson(response.data);
-    photo.localPath = path;
-    return photo;
+    if (response != null) {
+      _logger.i(response.toString());
+      var photo = Photo.fromJson(response.data);
+      photo.localPath = localPhoto.localPath;
+      photo.localId = localPhoto.localId;
+      return photo;
+    } else {
+      return null;
+    }
+  }
+
+  Future<void> _deletePhotos() async {
+    DatabaseHelper.instance.getAllDeletedPhotos().then((deletedPhotos) {
+      for (Photo deletedPhoto in deletedPhotos) {
+        _deletePhotoOnServer(deletedPhoto)
+            .then((value) => DatabaseHelper.instance.deletePhoto(deletedPhoto));
+      }
+    });
+  }
+
+  Future<void> _deletePhotoOnServer(Photo photo) async {
+    return _dio.post(Constants.ENDPOINT + "/delete", queryParameters: {
+      "user": Constants.USER,
+      "fileID": photo.uploadedFileId
+    }).catchError((e) => _onError(e));
   }
 
   void _onError(error) {

@@ -11,11 +11,13 @@ class DatabaseHelper {
 
   static final table = 'photos';
 
+  static final columnUploadedFileId = 'uploaded_file_id';
   static final columnLocalId = 'local_id';
   static final columnLocalPath = 'local_path';
   static final columnThumbnailPath = 'thumbnail_path';
   static final columnPath = 'path';
   static final columnHash = 'hash';
+  static final columnIsDeleted = 'is_deleted';
   static final columnSyncTimestamp = 'sync_timestamp';
 
   // make this a singleton class
@@ -44,10 +46,12 @@ class DatabaseHelper {
     await db.execute('''
           CREATE TABLE $table (
             $columnLocalId TEXT,
+            $columnUploadedFileId INTEGER NOT NULL,
             $columnLocalPath TEXT NOT NULL,
             $columnThumbnailPath TEXT NOT NULL,
             $columnPath TEXT,
             $columnHash TEXT NOT NULL,
+            $columnIsDeleted INTEGER DEFAULT 0,
             $columnSyncTimestamp TEXT
           )
           ''');
@@ -75,26 +79,27 @@ class DatabaseHelper {
 
   Future<List<Photo>> getAllPhotos() async {
     Database db = await instance.database;
-    var results = await db.query(table);
+    var results = await db.query(table, where: '$columnIsDeleted = 0');
+    return _convertToPhotos(results);
+  }
+
+  Future<List<Photo>> getAllDeletedPhotos() async {
+    Database db = await instance.database;
+    var results = await db.query(table, where: '$columnIsDeleted = 1');
     return _convertToPhotos(results);
   }
 
   Future<List<Photo>> getPhotosToBeUploaded() async {
     Database db = await instance.database;
-    var results = await db.query(table, where: '$columnPath IS NULL');
+    var results = await db.query(table, where: '$columnUploadedFileId = -1');
     return _convertToPhotos(results);
   }
 
-  // We are assuming here that the hash column in the map is set. The other
-  // column values will be used to update the row.
-  Future<int> updatePathAndTimestamp(
-      String hash, String path, String timestamp) async {
+  Future<int> updatePhoto(Photo photo) async {
     Database db = await instance.database;
-    var row = new Map<String, dynamic>();
-    row[columnPath] = path;
-    row[columnSyncTimestamp] = timestamp;
-    return await db
-        .update(table, row, where: '$columnHash = ?', whereArgs: [hash]);
+    return await db.update(table, _getRowForPhoto(photo),
+        where: '$columnHash = ? AND $columnPath = ?',
+        whereArgs: [photo.hash, photo.localPath]);
   }
 
   Future<Photo> getPhotoByPath(String path) async {
@@ -102,7 +107,7 @@ class DatabaseHelper {
     var rows =
         await db.query(table, where: '$columnPath =?', whereArgs: [path]);
     if (rows.length > 0) {
-      return Photo.fromRow(rows[0]);
+      return _getPhotofromRow(rows[0]);
     } else {
       throw ("No cached photo");
     }
@@ -115,10 +120,26 @@ class DatabaseHelper {
         0;
   }
 
+  Future<int> markPhotoAsDeleted(Photo photo) async {
+    Database db = await instance.database;
+    var values = new Map<String, dynamic>();
+    values[columnIsDeleted] = 1;
+    return db.update(table, values,
+        where: '$columnHash =? AND $columnLocalPath =?',
+        whereArgs: [photo.hash, photo.localPath]);
+  }
+
+  Future<int> deletePhoto(Photo photo) async {
+    Database db = await instance.database;
+    return db.delete(table,
+        where: '$columnHash =? AND $columnLocalPath =?',
+        whereArgs: [photo.hash, photo.localPath]);
+  }
+
   List<Photo> _convertToPhotos(List<Map<String, dynamic>> results) {
     var photos = List<Photo>();
     for (var result in results) {
-      photos.add(Photo.fromRow(result));
+      photos.add(_getPhotofromRow(result));
     }
     return photos;
   }
@@ -126,11 +147,27 @@ class DatabaseHelper {
   Map<String, dynamic> _getRowForPhoto(Photo photo) {
     var row = new Map<String, dynamic>();
     row[columnLocalId] = photo.localId;
+    row[columnUploadedFileId] =
+        photo.uploadedFileId == null ? -1 : photo.uploadedFileId;
     row[columnLocalPath] = photo.localPath;
     row[columnThumbnailPath] = photo.thumbnailPath;
     row[columnPath] = photo.path;
     row[columnHash] = photo.hash;
     row[columnSyncTimestamp] = photo.syncTimestamp;
     return row;
+  }
+
+  Photo _getPhotofromRow(Map<String, dynamic> row) {
+    Photo photo = Photo();
+    photo.localId = row[columnLocalId];
+    photo.uploadedFileId = row[columnUploadedFileId];
+    photo.localPath = row[columnLocalPath];
+    photo.thumbnailPath = row[columnThumbnailPath];
+    photo.path = row[columnPath];
+    photo.hash = row[columnHash];
+    photo.syncTimestamp = row[columnSyncTimestamp] == null
+        ? -1
+        : int.parse(row[columnSyncTimestamp]);
+    return photo;
   }
 }

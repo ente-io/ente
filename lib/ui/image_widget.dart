@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:myapp/core/lru_map.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
-import 'package:myapp/ui/loading_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -34,7 +33,7 @@ class _ImageWidgetState extends State<ImageWidget> {
     if (cachedImage != null) {
       image = cachedImage;
     } else {
-      if (widget.photo.localId.isNotEmpty) {
+      if (widget.photo.localId != null) {
         image = FutureBuilder<Uint8List>(
           future: AssetEntity(id: widget.photo.localId)
               .thumbDataWithSize(size, size),
@@ -47,7 +46,10 @@ class _ImageWidgetState extends State<ImageWidget> {
               ImageLruCache.setData(path, size, image);
               return image;
             } else {
-              return loadWidget;
+              return Container(
+                alignment: Alignment.center,
+                color: Colors.grey[500],
+              );
             }
           },
         );

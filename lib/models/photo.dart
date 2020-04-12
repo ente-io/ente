@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class Photo {
+  int uploadedFileId;
   String localId;
   String path;
   String localPath;
@@ -14,24 +15,16 @@ class Photo {
   Photo();
 
   Photo.fromJson(Map<String, dynamic> json)
-      : path = json["path"],
+      : uploadedFileId = json["fileId"],
+        path = json["path"],
         hash = json["hash"],
         thumbnailPath = json["thumbnailPath"],
         syncTimestamp = json["syncTimestamp"];
 
-  Photo.fromRow(Map<String, dynamic> row)
-      : localId = row["local_id"],
-        localPath = row["local_path"],
-        thumbnailPath = row["thumbnail_path"],
-        path = row["path"],
-        hash = row["hash"],
-        syncTimestamp = row["sync_timestamp"] == null
-            ? -1
-            : int.parse(row["sync_timestamp"]);
-
   static Future<Photo> fromAsset(AssetEntity asset) async {
     Photo photo = Photo();
     var file = (await asset.originFile);
+    photo.uploadedFileId = -1;
     photo.localId = asset.id;
     photo.localPath = file.path;
     photo.hash = getHash(file);

@@ -35,6 +35,7 @@ dependencies:
   toast: ^0.1.5
   image: ^2.1.4
   share_extend: "^1.1.2"
+  draggable_scrollbar: ^0.0.4
 
 dev_dependencies:
   flutter_test:
