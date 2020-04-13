@@ -82,14 +82,14 @@ class DatabaseHelper {
   Future<List<Photo>> getAllPhotos() async {
     Database db = await instance.database;
     var results = await db.query(table,
-        where: '$columnIsDeleted = 0', orderBy: columnCreateTimestamp);
+        where: '$columnIsDeleted = 0', orderBy: '$columnCreateTimestamp DESC');
     return _convertToPhotos(results);
   }
 
   Future<List<Photo>> getAllDeletedPhotos() async {
     Database db = await instance.database;
     var results = await db.query(table,
-        where: '$columnIsDeleted = 1', orderBy: columnCreateTimestamp);
+        where: '$columnIsDeleted = 1', orderBy: '$columnCreateTimestamp DESC');
     return _convertToPhotos(results);
   }
 

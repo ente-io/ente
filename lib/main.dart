@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = 'Orma';
-    return FutureBuilder<List<Photo>>(
+    return FutureBuilder<bool>(
         future: photoLoader.loadPhotos(),
         builder: (context, snapshot) {
           Widget body;

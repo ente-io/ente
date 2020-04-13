@@ -83,6 +83,9 @@ class PhotoSyncManager {
         await DatabaseHelper.instance.getPhotosToBeUploaded();
     for (Photo photo in photosToBeUploaded) {
       var uploadedPhoto = await _uploadFile(photo);
+      if (uploadedPhoto == null) {
+        return;
+      }
       await DatabaseHelper.instance.updatePhoto(uploadedPhoto);
       prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.syncTimestamp);
     }
@@ -127,18 +130,15 @@ class PhotoSyncManager {
           filename: basename(localPhoto.localPath)),
       "user": Constants.USER,
     });
-    var response = await _dio
+    return _dio
         .post(Constants.ENDPOINT + "/upload", data: formData)
-        .catchError(_onError);
-    if (response != null) {
+        .then((response) {
       _logger.i(response.toString());
       var photo = Photo.fromJson(response.data);
       photo.localPath = localPhoto.localPath;
       photo.localId = localPhoto.localId;
       return photo;
-    } else {
-      return null;
-    }
+    }).catchError(_onError);
   }
 
   Future<void> _deletePhotos() async {

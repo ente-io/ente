@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
@@ -37,6 +38,16 @@ class _GalleryState extends State<Gallery> {
     12: "December",
   };
 
+  Map<int, String> _days = {
+    1: "Monday",
+    2: "Tuesday",
+    3: "Wednesday",
+    4: "Thursday",
+    5: "Friday",
+    6: "Saturday",
+    7: "Sunday",
+  };
+
   PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
   final ScrollController _scrollController = ScrollController();
 
@@ -50,13 +61,13 @@ class _GalleryState extends State<Gallery> {
             int itemIndex = _scrollController.hasClients
                 ? (_scrollController.offset /
                         _scrollController.position.maxScrollExtent *
-                        photoLoader.getPhotos().length)
+                        photoLoader.collatedPhotos.length)
                     .floor()
                 : 0;
-            itemIndex = min(itemIndex, photoLoader.getPhotos().length);
-            Photo photo = photoLoader.getPhotos()[itemIndex];
+            itemIndex = min(itemIndex, photoLoader.collatedPhotos.length);
+            var photos = photoLoader.collatedPhotos[itemIndex];
             var date =
-                DateTime.fromMicrosecondsSinceEpoch(photo.createTimestamp);
+                DateTime.fromMicrosecondsSinceEpoch(photos[0].createTimestamp);
             return Text(
               _months[date.month],
               style: TextStyle(color: Colors.black),
@@ -64,20 +75,52 @@ class _GalleryState extends State<Gallery> {
           },
           labelConstraints: BoxConstraints.tightFor(width: 80.0, height: 30.0),
           controller: _scrollController,
-          child: GridView.builder(
-              itemBuilder: _buildItem,
-              itemCount: photoLoader.getPhotos().length,
-              controller: _scrollController,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-              )),
+          child: ListView.builder(
+            itemCount: photoLoader.collatedPhotos.length,
+            itemBuilder: _buildListItem,
+            controller: _scrollController,
+          ),
         );
       },
     );
   }
 
-  Widget _buildItem(BuildContext context, int index) {
-    var photo = photoLoader.getPhotos()[index];
+  Widget _buildListItem(BuildContext context, int index) {
+    var photos = photoLoader.collatedPhotos[index];
+    return Column(
+      children: <Widget>[_getDay(photos), _getGallery(photos)],
+    );
+  }
+
+  Widget _getDay(List<Photo> photos) {
+    var date = DateTime.fromMicrosecondsSinceEpoch(photos[0].createTimestamp);
+    return Container(
+      padding: const EdgeInsets.all(4.0),
+      alignment: Alignment.centerLeft,
+      child: Text(_days[date.weekday] +
+          ", " +
+          _months[date.month] +
+          " " +
+          date.day.toString()),
+    );
+  }
+
+  Widget _getGallery(List<Photo> photos) {
+    return GridView.builder(
+      shrinkWrap: true,
+      padding: EdgeInsets.only(bottom: 12),
+      physics: ScrollPhysics(), // to disable GridView's scrolling
+      itemBuilder: (context, index) {
+        return _buildPhoto(context, photos[index]);
+      },
+      itemCount: photos.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+      ),
+    );
+  }
+
+  Widget _buildPhoto(BuildContext context, Photo photo) {
     return GestureDetector(
       onTap: () {
         routeToDetailPage(photo, context);

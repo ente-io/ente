@@ -4,9 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:myapp/core/lru_map.dart';
 import 'package:myapp/models/photo.dart';
-import 'package:myapp/photo_loader.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:provider/provider.dart';
 
 class ImageWidget extends StatefulWidget {
   final Photo photo;
@@ -20,8 +18,6 @@ class ImageWidget extends StatefulWidget {
 }
 
 class _ImageWidgetState extends State<ImageWidget> {
-  PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
-
   @override
   Widget build(BuildContext context) {
     final path = widget.photo.localPath;
