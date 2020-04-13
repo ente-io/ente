@@ -18,6 +18,7 @@ class DatabaseHelper {
   static final columnPath = 'path';
   static final columnHash = 'hash';
   static final columnIsDeleted = 'is_deleted';
+  static final columnCreateTimestamp = 'create_timestamp';
   static final columnSyncTimestamp = 'sync_timestamp';
 
   // make this a singleton class
@@ -52,6 +53,7 @@ class DatabaseHelper {
             $columnPath TEXT,
             $columnHash TEXT NOT NULL,
             $columnIsDeleted INTEGER DEFAULT 0,
+            $columnCreateTimestamp TEXT NOT NULL,
             $columnSyncTimestamp TEXT
           )
           ''');
@@ -79,13 +81,15 @@ class DatabaseHelper {
 
   Future<List<Photo>> getAllPhotos() async {
     Database db = await instance.database;
-    var results = await db.query(table, where: '$columnIsDeleted = 0');
+    var results = await db.query(table,
+        where: '$columnIsDeleted = 0', orderBy: columnCreateTimestamp);
     return _convertToPhotos(results);
   }
 
   Future<List<Photo>> getAllDeletedPhotos() async {
     Database db = await instance.database;
-    var results = await db.query(table, where: '$columnIsDeleted = 1');
+    var results = await db.query(table,
+        where: '$columnIsDeleted = 1', orderBy: columnCreateTimestamp);
     return _convertToPhotos(results);
   }
 
@@ -153,6 +157,7 @@ class DatabaseHelper {
     row[columnThumbnailPath] = photo.thumbnailPath;
     row[columnPath] = photo.path;
     row[columnHash] = photo.hash;
+    row[columnCreateTimestamp] = photo.createTimestamp;
     row[columnSyncTimestamp] = photo.syncTimestamp;
     return row;
   }
@@ -165,6 +170,7 @@ class DatabaseHelper {
     photo.thumbnailPath = row[columnThumbnailPath];
     photo.path = row[columnPath];
     photo.hash = row[columnHash];
+    photo.createTimestamp = int.parse(row[columnCreateTimestamp]);
     photo.syncTimestamp = row[columnSyncTimestamp] == null
         ? -1
         : int.parse(row[columnSyncTimestamp]);

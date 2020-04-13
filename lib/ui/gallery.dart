@@ -1,17 +1,15 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
-import 'package:myapp/photo_sync_manager.dart';
 import 'package:myapp/ui/image_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:share_extend/share_extend.dart';
-import 'package:toast/toast.dart';
 
 import 'change_notifier_builder.dart';
 import 'detail_page.dart';
@@ -24,6 +22,21 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
+  Map<int, String> _months = {
+    1: "January",
+    2: "February",
+    3: "March",
+    4: "April",
+    5: "May",
+    6: "June",
+    7: "July",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December",
+  };
+
   PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
   final ScrollController _scrollController = ScrollController();
 
@@ -33,7 +46,22 @@ class _GalleryState extends State<Gallery> {
       value: photoLoader,
       builder: (_, __) {
         return DraggableScrollbar.semicircle(
-          labelTextBuilder: (double offset) => Text("Hello!"),
+          labelTextBuilder: (double offset) {
+            int itemIndex = _scrollController.hasClients
+                ? (_scrollController.offset /
+                        _scrollController.position.maxScrollExtent *
+                        photoLoader.getPhotos().length)
+                    .floor()
+                : 0;
+            itemIndex = min(itemIndex, photoLoader.getPhotos().length);
+            Photo photo = photoLoader.getPhotos()[itemIndex];
+            var date =
+                DateTime.fromMicrosecondsSinceEpoch(photo.createTimestamp);
+            return Text(
+              _months[date.month],
+              style: TextStyle(color: Colors.black),
+            );
+          },
           labelConstraints: BoxConstraints.tightFor(width: 80.0, height: 30.0),
           controller: _scrollController,
           child: GridView.builder(

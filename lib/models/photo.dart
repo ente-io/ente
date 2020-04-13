@@ -10,6 +10,7 @@ class Photo {
   String localPath;
   String thumbnailPath;
   String hash;
+  int createTimestamp;
   int syncTimestamp;
 
   Photo();
@@ -19,6 +20,7 @@ class Photo {
         path = json["path"],
         hash = json["hash"],
         thumbnailPath = json["thumbnailPath"],
+        createTimestamp = json["createTimestamp"],
         syncTimestamp = json["syncTimestamp"];
 
   static Future<Photo> fromAsset(AssetEntity asset) async {
@@ -29,6 +31,7 @@ class Photo {
     photo.localPath = file.path;
     photo.hash = getHash(file);
     photo.thumbnailPath = file.path;
+    photo.createTimestamp = asset.createDateTime.microsecondsSinceEpoch;
     return photo;
   }
 

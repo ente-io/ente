@@ -23,8 +23,8 @@ class PhotoSyncManager {
   PhotoSyncManager(this._assets) {
     _logger.i("PhotoSyncManager init");
     _assets.sort((first, second) => second
-        .modifiedDateTime.millisecondsSinceEpoch
-        .compareTo(first.modifiedDateTime.millisecondsSinceEpoch));
+        .modifiedDateTime.microsecondsSinceEpoch
+        .compareTo(first.modifiedDateTime.microsecondsSinceEpoch));
   }
 
   Future<void> init() async {
@@ -46,18 +46,18 @@ class PhotoSyncManager {
     var bufferLimit = 10;
     final maxBufferLimit = 1000;
     for (AssetEntity asset in _assets) {
-      if (asset.createDateTime.millisecondsSinceEpoch > lastDBUpdateTimestamp) {
+      if (asset.createDateTime.microsecondsSinceEpoch > lastDBUpdateTimestamp) {
         photos.add(await Photo.fromAsset(asset));
         if (photos.length > bufferLimit) {
           await _insertPhotosToDB(
-              photos, prefs, asset.createDateTime.millisecondsSinceEpoch);
+              photos, prefs, asset.createDateTime.microsecondsSinceEpoch);
           photos.clear();
           bufferLimit = min(maxBufferLimit, bufferLimit * 2);
         }
       }
     }
     return await _insertPhotosToDB(
-        photos, prefs, DateTime.now().millisecondsSinceEpoch);
+        photos, prefs, DateTime.now().microsecondsSinceEpoch);
   }
 
   _syncPhotos() async {
@@ -93,16 +93,14 @@ class PhotoSyncManager {
     _logger.i("External path: " + externalPath);
     var path = externalPath + "/photos/";
     for (Photo photo in diff) {
-      if (await DatabaseHelper.instance.containsPhotoHash(photo.hash)) {
-        var localPath = path + basename(photo.path);
-        await _dio
-            .download(Constants.ENDPOINT + "/" + photo.path, localPath)
-            .catchError(_onError);
-        photo.localPath = localPath;
-        photo.thumbnailPath = localPath;
-        await DatabaseHelper.instance.insertPhoto(photo);
-        PhotoLoader.instance.reloadPhotos();
-      }
+      var localPath = path + basename(photo.path);
+      await _dio
+          .download(Constants.ENDPOINT + "/" + photo.path, localPath)
+          .catchError(_onError);
+      photo.localPath = localPath;
+      photo.thumbnailPath = localPath;
+      await DatabaseHelper.instance.insertPhoto(photo);
+      PhotoLoader.instance.reloadPhotos();
       await prefs.setInt(_lastSyncTimestampKey, photo.syncTimestamp);
     }
   }
