@@ -18,6 +18,10 @@ class ImageWidget extends StatefulWidget {
 }
 
 class _ImageWidgetState extends State<ImageWidget> {
+  static final Widget loadingWidget = Container(
+    alignment: Alignment.center,
+    color: Colors.grey[500],
+  );
   @override
   Widget build(BuildContext context) {
     final path = widget.photo.localPath;
@@ -42,10 +46,7 @@ class _ImageWidgetState extends State<ImageWidget> {
               ImageLruCache.setData(path, size, image);
               return image;
             } else {
-              return Container(
-                alignment: Alignment.center,
-                color: Colors.grey[500],
-              );
+              return loadingWidget;
             }
           },
         );

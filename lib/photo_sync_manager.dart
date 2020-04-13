@@ -47,7 +47,11 @@ class PhotoSyncManager {
     final maxBufferLimit = 1000;
     for (AssetEntity asset in _assets) {
       if (asset.createDateTime.microsecondsSinceEpoch > lastDBUpdateTimestamp) {
-        photos.add(await Photo.fromAsset(asset));
+        try {
+          photos.add(await Photo.fromAsset(asset));
+        } catch (e) {
+          _logger.e(e);
+        }
         if (photos.length > bufferLimit) {
           await _insertPhotosToDB(
               photos, prefs, asset.createDateTime.microsecondsSinceEpoch);
