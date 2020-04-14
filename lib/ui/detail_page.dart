@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:myapp/core/lru_map.dart';
 import 'package:myapp/models/photo.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:share_extend/share_extend.dart';
 
 class DetailPage extends StatelessWidget {
@@ -35,16 +36,18 @@ class DetailPage extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
+    var image = ImageLruCache.getData(photo.localPath) == null
+        ? Image.file(
+            File(photo.localPath),
+            filterQuality: FilterQuality.low,
+          )
+        : ImageLruCache.getData(photo.localPath);
     return GestureDetector(
-      onVerticalDragUpdate: (details) {
-        Navigator.pop(context);
-      },
-      child: ImageLruCache.getData(photo.localPath) == null
-          ? Image.file(
-              File(photo.localPath),
-              filterQuality: FilterQuality.low,
-            )
-          : ImageLruCache.getData(photo.localPath),
-    );
+        onVerticalDragUpdate: (details) {
+          Navigator.pop(context);
+        },
+        child: PhotoView(
+          imageProvider: image.image,
+        ));
   }
 }
