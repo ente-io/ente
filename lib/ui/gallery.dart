@@ -10,10 +10,13 @@ import 'package:myapp/utils/date_time_util.dart';
 import 'package:provider/provider.dart';
 import 'package:share_extend/share_extend.dart';
 
-import 'change_notifier_builder.dart';
 import 'detail_page.dart';
 
 class Gallery extends StatefulWidget {
+  final List<List<Photo>> collatedPhotos;
+
+  const Gallery(this.collatedPhotos, {Key key}) : super(key: key);
+
   @override
   _GalleryState createState() {
     return _GalleryState();
@@ -26,19 +29,15 @@ class _GalleryState extends State<Gallery> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierBuilder(
-        value: photoLoader,
-        builder: (_, __) {
-          return ListView.builder(
-            itemCount: photoLoader.collatedPhotos.length,
-            itemBuilder: _buildListItem,
-            controller: _scrollController,
-          );
-        });
+    return ListView.builder(
+      itemCount: widget.collatedPhotos.length,
+      itemBuilder: _buildListItem,
+      controller: _scrollController,
+    );
   }
 
   Widget _buildListItem(BuildContext context, int index) {
-    var photos = photoLoader.collatedPhotos[index];
+    var photos = widget.collatedPhotos[index];
     return Column(
       children: <Widget>[
         _getDay(photos[0].createTimestamp),
