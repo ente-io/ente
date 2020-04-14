@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/models/photo.dart';
+import 'package:path/path.dart' as path;
 import 'package:myapp/photo_loader.dart';
 import 'package:myapp/ui/image_widget.dart';
 import 'package:myapp/utils/date_time_util.dart';
@@ -89,6 +90,7 @@ class _GalleryState extends State<Gallery> {
 
   void _showPopup(Photo photo, BuildContext context) {
     final action = CupertinoActionSheet(
+      title: Text(path.basename(photo.localPath)),
       actions: <Widget>[
         CupertinoActionSheetAction(
           child: Text("Share"),
