@@ -1,34 +1,36 @@
-import 'dart:io';
+import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/models/photo.dart';
-import 'package:path/path.dart' as path;
 import 'package:myapp/photo_loader.dart';
 import 'package:myapp/ui/image_widget.dart';
 import 'package:myapp/utils/date_time_util.dart';
 import 'package:provider/provider.dart';
-import 'package:share_extend/share_extend.dart';
 
 import 'detail_page.dart';
 
 class Gallery extends StatefulWidget {
   final List<Photo> photos;
+  _GalleryState _state;
+  Function(Set<Photo>) photoSelectionChangeCallback;
 
-  Gallery(this.photos);
+  Gallery(this.photos, {this.photoSelectionChangeCallback});
 
   @override
   _GalleryState createState() {
-    return _GalleryState();
+    _state = _GalleryState();
+    return _state;
   }
 }
 
 class _GalleryState extends State<Gallery> {
-  PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
   final ScrollController _scrollController = ScrollController();
   final List<List<Photo>> _collatedPhotos = List<List<Photo>>();
+  final Set<Photo> _selectedPhotos = HashSet<Photo>();
+  PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
+  bool _shouldSelectOnTap = false;
 
   @override
   Widget build(BuildContext context) {
@@ -80,87 +82,41 @@ class _GalleryState extends State<Gallery> {
   Widget _buildPhoto(BuildContext context, Photo photo) {
     return GestureDetector(
       onTap: () {
-        routeToDetailPage(photo, context);
+        if (_shouldSelectOnTap) {
+          _selectPhoto(photo);
+        } else {
+          routeToDetailPage(photo, context);
+        }
       },
       onLongPress: () {
-        _showPopup(photo, context);
+        _selectPhoto(photo);
       },
-      child: Padding(
-        padding: const EdgeInsets.all(2.0),
+      child: Container(
+        margin: const EdgeInsets.all(2.0),
+        decoration: BoxDecoration(
+          border: _selectedPhotos.contains(photo)
+              ? Border.all(width: 4.0, color: Colors.blue)
+              : null,
+        ),
         child: ImageWidget(photo),
       ),
     );
   }
 
-  void _showPopup(Photo photo, BuildContext context) {
-    final action = CupertinoActionSheet(
-      title: Text(path.basename(photo.localPath)),
-      actions: <Widget>[
-        CupertinoActionSheetAction(
-          child: Text("Share"),
-          isDefaultAction: true,
-          onPressed: () {
-            ShareExtend.share(photo.localPath, "image");
-            Navigator.pop(context);
-          },
-        ),
-        CupertinoActionSheetAction(
-          child: Text("Delete"),
-          isDestructiveAction: true,
-          onPressed: () {
-            Navigator.pop(context);
-            _showDeletePopup(photo, context);
-          },
-        )
-      ],
-      cancelButton: CupertinoActionSheetAction(
-        child: Text("Cancel"),
-        onPressed: () {
-          Navigator.pop(context);
-        },
-      ),
-    );
-    showCupertinoModalPopup(context: context, builder: (_) => action);
-  }
-
-  void _showDeletePopup(Photo photo, BuildContext context) {
-    final action = CupertinoActionSheet(
-      actions: <Widget>[
-        CupertinoActionSheetAction(
-          child: Text("Delete on device"),
-          isDestructiveAction: true,
-          onPressed: () {
-            DatabaseHelper.instance.deletePhoto(photo).then((_) {
-              File file = File(photo.localPath);
-              file.delete().then((_) {
-                photoLoader.reloadPhotos();
-                Navigator.pop(context);
-              });
-            });
-          },
-        ),
-        CupertinoActionSheetAction(
-          child: Text("Delete everywhere [WiP]"),
-          isDestructiveAction: true,
-          onPressed: () {
-            DatabaseHelper.instance.markPhotoAsDeleted(photo).then((_) {
-              File file = File(photo.localPath);
-              file.delete().then((_) {
-                photoLoader.reloadPhotos();
-                Navigator.pop(context);
-              });
-            });
-          },
-        )
-      ],
-      cancelButton: CupertinoActionSheetAction(
-        child: Text("Cancel"),
-        onPressed: () {
-          Navigator.pop(context);
-        },
-      ),
-    );
-    showCupertinoModalPopup(context: context, builder: (_) => action);
+  void _selectPhoto(Photo photo) {
+    setState(() {
+      if (_selectedPhotos.contains(photo)) {
+        _selectedPhotos.remove(photo);
+      } else {
+        _selectedPhotos.add(photo);
+      }
+      if (_selectedPhotos.isNotEmpty) {
+        _shouldSelectOnTap = true;
+      } else {
+        _shouldSelectOnTap = false;
+      }
+      widget.photoSelectionChangeCallback(_selectedPhotos);
+    });
   }
 
   void routeToDetailPage(Photo photo, BuildContext context) {
