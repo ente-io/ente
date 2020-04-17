@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:logger/logger.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -11,6 +12,7 @@ class DatabaseHelper {
 
   static final table = 'photos';
 
+  static final columnGeneratedId = '_id';
   static final columnUploadedFileId = 'uploaded_file_id';
   static final columnLocalId = 'local_id';
   static final columnLocalPath = 'local_path';
@@ -46,6 +48,7 @@ class DatabaseHelper {
   Future _onCreate(Database db, int version) async {
     await db.execute('''
           CREATE TABLE $table (
+            $columnGeneratedId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             $columnLocalId TEXT,
             $columnUploadedFileId INTEGER NOT NULL,
             $columnLocalPath TEXT NOT NULL,
@@ -102,8 +105,7 @@ class DatabaseHelper {
   Future<int> updatePhoto(Photo photo) async {
     Database db = await instance.database;
     return await db.update(table, _getRowForPhoto(photo),
-        where: '$columnHash = ? AND $columnPath = ?',
-        whereArgs: [photo.hash, photo.localPath]);
+        where: '$columnGeneratedId = ?', whereArgs: [photo.generatedId]);
   }
 
   Future<Photo> getPhotoByPath(String path) async {
@@ -117,27 +119,18 @@ class DatabaseHelper {
     }
   }
 
-  Future<bool> containsPhotoHash(String hash) async {
-    Database db = await instance.database;
-    return (await db.query(table, where: '$columnHash =?', whereArgs: [hash]))
-            .length >
-        0;
-  }
-
   Future<int> markPhotoAsDeleted(Photo photo) async {
     Database db = await instance.database;
     var values = new Map<String, dynamic>();
     values[columnIsDeleted] = 1;
     return db.update(table, values,
-        where: '$columnHash =? AND $columnLocalPath =?',
-        whereArgs: [photo.hash, photo.localPath]);
+        where: '$columnGeneratedId =?', whereArgs: [photo.generatedId]);
   }
 
   Future<int> deletePhoto(Photo photo) async {
     Database db = await instance.database;
     return db.delete(table,
-        where: '$columnHash =? AND $columnLocalPath =?',
-        whereArgs: [photo.hash, photo.localPath]);
+        where: '$columnGeneratedId =?', whereArgs: [photo.generatedId]);
   }
 
   List<Photo> _convertToPhotos(List<Map<String, dynamic>> results) {
@@ -164,6 +157,7 @@ class DatabaseHelper {
 
   Photo _getPhotofromRow(Map<String, dynamic> row) {
     Photo photo = Photo();
+    photo.generatedId = row[columnGeneratedId];
     photo.localId = row[columnLocalId];
     photo.uploadedFileId = row[columnUploadedFileId];
     photo.localPath = row[columnLocalPath];
