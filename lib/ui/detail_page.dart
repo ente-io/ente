@@ -79,6 +79,7 @@ class _DetailPageState extends State<DetailPage> {
     return PhotoView(
       imageProvider: image.image,
       scaleStateChangedCallback: scaleStateChangedCallback,
+      minScale: PhotoViewComputedScale.contained,
     );
   }
 }
