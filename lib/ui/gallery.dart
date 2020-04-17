@@ -14,9 +14,11 @@ import 'package:share_extend/share_extend.dart';
 import 'detail_page.dart';
 
 class Gallery extends StatefulWidget {
-  final List<List<Photo>> collatedPhotos;
+  final List<Photo> photos = List<Photo>();
 
-  const Gallery(this.collatedPhotos, {Key key}) : super(key: key);
+  Gallery(List<Photo> photoList) {
+    this.photos.addAll(photoList);
+  }
 
   @override
   _GalleryState createState() {
@@ -27,18 +29,21 @@ class Gallery extends StatefulWidget {
 class _GalleryState extends State<Gallery> {
   PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
   final ScrollController _scrollController = ScrollController();
+  final List<List<Photo>> _collatedPhotos = List<List<Photo>>();
 
   @override
   Widget build(BuildContext context) {
+    _collatePhotos();
+
     return ListView.builder(
-      itemCount: widget.collatedPhotos.length,
+      itemCount: _collatedPhotos.length,
       itemBuilder: _buildListItem,
       controller: _scrollController,
     );
   }
 
   Widget _buildListItem(BuildContext context, int index) {
-    var photos = widget.collatedPhotos[index];
+    var photos = _collatedPhotos[index];
     return Column(
       children: <Widget>[
         _getDay(photos[0].createTimestamp),
@@ -160,7 +165,7 @@ class _GalleryState extends State<Gallery> {
   }
 
   void routeToDetailPage(Photo photo, BuildContext context) {
-    final page = DetailPage(photoLoader.photos, photoLoader.photos.indexOf(photo));
+    final page = DetailPage(widget.photos, widget.photos.indexOf(photo));
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
@@ -168,5 +173,36 @@ class _GalleryState extends State<Gallery> {
         },
       ),
     );
+  }
+
+  void _collatePhotos() {
+    final dailyPhotos = List<Photo>();
+    final collatedPhotos = List<List<Photo>>();
+    for (int index = 0; index < widget.photos.length; index++) {
+      if (index > 0 &&
+          !_arePhotosFromSameDay(
+              widget.photos[index], widget.photos[index - 1])) {
+        var collatedDailyPhotos = List<Photo>();
+        collatedDailyPhotos.addAll(dailyPhotos);
+        collatedPhotos.add(collatedDailyPhotos);
+        dailyPhotos.clear();
+      }
+      dailyPhotos.add(widget.photos[index]);
+    }
+    if (dailyPhotos.isNotEmpty) {
+      collatedPhotos.add(dailyPhotos);
+    }
+    _collatedPhotos.clear();
+    _collatedPhotos.addAll(collatedPhotos);
+  }
+
+  bool _arePhotosFromSameDay(Photo firstPhoto, Photo secondPhoto) {
+    var firstDate =
+        DateTime.fromMicrosecondsSinceEpoch(firstPhoto.createTimestamp);
+    var secondDate =
+        DateTime.fromMicrosecondsSinceEpoch(secondPhoto.createTimestamp);
+    return firstDate.year == secondDate.year &&
+        firstDate.month == secondDate.month &&
+        firstDate.day == secondDate.day;
   }
 }

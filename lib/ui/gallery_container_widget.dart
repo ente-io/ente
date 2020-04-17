@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logger/logger.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/ui/change_notifier_builder.dart';
 import 'package:myapp/ui/search_page.dart';
-import 'package:myapp/utils/camera_items_filter.dart';
+import 'package:myapp/utils/important_items_filter.dart';
 import 'package:myapp/utils/gallery_items_filter.dart';
 import 'package:provider/provider.dart';
 
@@ -14,7 +15,7 @@ import 'loading_widget.dart';
 class GalleryContainer extends StatelessWidget {
   final GalleryType type;
 
-  static final importantItemsFilter = CameraItemsFilter();
+  static final importantItemsFilter = ImportantItemsFilter();
   static final galleryItemsFilter = GalleryItemsFilter();
 
   const GalleryContainer(
@@ -55,8 +56,7 @@ class GalleryContainer extends StatelessWidget {
                 child: ChangeNotifierBuilder(
                     value: photoLoader,
                     builder: (_, __) {
-                      var collatedPhotos = photoLoader.collatedPhotos;
-                      return Flexible(child: _getGallery(collatedPhotos));
+                      return Flexible(child: _getGallery(photoLoader.photos));
                     }),
               );
             } else if (snapshot.hasError) {
@@ -70,27 +70,21 @@ class GalleryContainer extends StatelessWidget {
     );
   }
 
-  Gallery _getGallery(List<List<Photo>> collatedPhotos) {
+  Gallery _getGallery(List<Photo> photos) {
     return type == GalleryType.important_photos
-        ? Gallery(getCollatedPhotos(collatedPhotos, importantItemsFilter))
-        : Gallery(getCollatedPhotos(collatedPhotos, galleryItemsFilter));
+        ? Gallery(getFilteredPhotos(photos, importantItemsFilter))
+        : Gallery(getFilteredPhotos(photos, galleryItemsFilter));
   }
 
-  List<List<Photo>> getCollatedPhotos(
-      List<List<Photo>> source, GalleryItemsFilter filter) {
-    final List<List<Photo>> collatedList = List<List<Photo>>();
-    for (List<Photo> unfilteredPhotos in source) {
-      final List<Photo> filteredPhotos = List<Photo>();
-      for (Photo photo in unfilteredPhotos) {
-        if (filter.shouldInclude(photo)) {
-          filteredPhotos.add(photo);
-        }
-      }
-      if (filteredPhotos.isNotEmpty) {
-        collatedList.add(filteredPhotos);
+  List<Photo> getFilteredPhotos(
+      List<Photo> unfilteredPhotos, GalleryItemsFilter filter) {
+    final List<Photo> filteredPhotos = List<Photo>();
+    for (Photo photo in unfilteredPhotos) {
+      if (filter.shouldInclude(photo)) {
+        filteredPhotos.add(photo);
       }
     }
-    return collatedList;
+    return filteredPhotos;
   }
 }
 
