@@ -160,7 +160,7 @@ class _GalleryState extends State<Gallery> {
   }
 
   void routeToDetailPage(Photo photo, BuildContext context) {
-    final page = DetailPage(photo);
+    final page = DetailPage(photoLoader.photos, photoLoader.photos.indexOf(photo));
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
