@@ -22,6 +22,8 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    var pageController = PageController(initialPage: widget.selectedIndex);
+
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
@@ -47,6 +49,7 @@ class _DetailPageState extends State<DetailPage> {
             physics: _shouldDisableScroll
                 ? NeverScrollableScrollPhysics()
                 : PageScrollPhysics(),
+            controller: pageController,
           ),
         ),
       ),

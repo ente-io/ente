@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:path/path.dart' as path;
@@ -14,11 +15,9 @@ import 'package:share_extend/share_extend.dart';
 import 'detail_page.dart';
 
 class Gallery extends StatefulWidget {
-  final List<Photo> photos = List<Photo>();
+  final List<Photo> photos;
 
-  Gallery(List<Photo> photoList) {
-    this.photos.addAll(photoList);
-  }
+  Gallery(this.photos);
 
   @override
   _GalleryState createState() {
@@ -165,6 +164,7 @@ class _GalleryState extends State<Gallery> {
   }
 
   void routeToDetailPage(Photo photo, BuildContext context) {
+    Logger().i("Photo index: " + widget.photos.indexOf(photo).toString());
     final page = DetailPage(widget.photos, widget.photos.indexOf(photo));
     Navigator.of(context).push(
       MaterialPageRoute(
