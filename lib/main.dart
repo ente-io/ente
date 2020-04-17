@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:myapp/photo_loader.dart';
 import 'package:myapp/photo_provider.dart';
 import 'package:myapp/photo_sync_manager.dart';
 import 'package:myapp/ui/home_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:provider/provider.dart';
 
 final provider = PhotoProvider();
 final logger = Logger();
@@ -36,7 +38,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: _title,
       theme: ThemeData.dark(),
-      home: HomeWidget(_title),
+      home: ChangeNotifierProvider<PhotoLoader>.value(
+        value: PhotoLoader.instance,
+        child: HomeWidget(_title),
+      ),
     );
   }
 }
