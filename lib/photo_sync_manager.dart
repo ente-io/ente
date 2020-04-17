@@ -22,9 +22,8 @@ class PhotoSyncManager {
 
   PhotoSyncManager(this._assets) {
     _logger.i("PhotoSyncManager init");
-    _assets.sort((first, second) => second
-        .modifiedDateTime.microsecondsSinceEpoch
-        .compareTo(first.modifiedDateTime.microsecondsSinceEpoch));
+    _assets.sort((first, second) => first.createDateTime.microsecondsSinceEpoch
+        .compareTo(second.createDateTime.microsecondsSinceEpoch));
   }
 
   Future<void> init() async {
