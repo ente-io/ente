@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:logger/logger.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class Photo {
+  int generatedId;
   int uploadedFileId;
   String localId;
   String path;
@@ -24,6 +26,7 @@ class Photo {
         syncTimestamp = json["syncTimestamp"];
 
   static Future<Photo> fromAsset(AssetEntity asset) async {
+    Logger().i("From asset: " + asset.toString());
     Photo photo = Photo();
     var file = (await asset.originFile);
     photo.uploadedFileId = -1;
@@ -37,5 +40,12 @@ class Photo {
 
   static String getHash(File file) {
     return sha256.convert(file.readAsBytesSync()).toString();
+  }
+
+  int get hashCode => generatedId;
+
+  @override
+  bool operator ==(other) {
+    return generatedId == other.generatedId;
   }
 }
