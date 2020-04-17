@@ -21,8 +21,6 @@ class PhotoLoader extends ChangeNotifier {
     _photos.clear();
     _photos.addAll(photos);
 
-    logger.i("Imported photo size: " + _photos.length.toString());
-
     return true;
   }
 
