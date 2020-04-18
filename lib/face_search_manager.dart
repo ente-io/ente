@@ -5,7 +5,6 @@ import 'package:myapp/db/db_helper.dart';
 
 import 'models/face.dart';
 import 'models/photo.dart';
-import 'models/search_result.dart';
 
 class FaceSearchManager {
   final _logger = Logger();

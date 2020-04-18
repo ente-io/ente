@@ -8,10 +8,12 @@ import 'package:photo_manager/photo_manager.dart';
 
 class ImageWidget extends StatefulWidget {
   final Photo photo;
+  final int size;
 
   const ImageWidget(
     this.photo, {
     Key key,
+    this.size,
   }) : super(key: key);
   @override
   _ImageWidgetState createState() => _ImageWidgetState();
@@ -25,7 +27,7 @@ class _ImageWidgetState extends State<ImageWidget> {
   @override
   Widget build(BuildContext context) {
     final path = widget.photo.localPath;
-    final size = 124;
+    final size = widget.size == null ? 124 : widget.size;
     final cachedImage = ImageLruCache.getData(path, size);
 
     Widget image;

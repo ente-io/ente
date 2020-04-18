@@ -2,26 +2,23 @@ import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
+import 'package:flutter/services.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
+import 'package:myapp/ui/detail_page.dart';
 import 'package:myapp/ui/image_widget.dart';
 import 'package:myapp/utils/date_time_util.dart';
 import 'package:provider/provider.dart';
 
-import 'detail_page.dart';
-
 class Gallery extends StatefulWidget {
   final List<Photo> photos;
-  _GalleryState _state;
-  Function(Set<Photo>) photoSelectionChangeCallback;
+  final Function(Set<Photo>) photoSelectionChangeCallback;
 
   Gallery(this.photos, {this.photoSelectionChangeCallback});
 
   @override
   _GalleryState createState() {
-    _state = _GalleryState();
-    return _state;
+    return _GalleryState();
   }
 }
 
@@ -89,6 +86,7 @@ class _GalleryState extends State<Gallery> {
         }
       },
       onLongPress: () {
+        HapticFeedback.lightImpact();
         _selectPhoto(photo);
       },
       child: Container(
@@ -120,7 +118,6 @@ class _GalleryState extends State<Gallery> {
   }
 
   void routeToDetailPage(Photo photo, BuildContext context) {
-    Logger().i("Photo index: " + widget.photos.indexOf(photo).toString());
     final page = DetailPage(widget.photos, widget.photos.indexOf(photo));
     Navigator.of(context).push(
       MaterialPageRoute(

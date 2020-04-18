@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:logger/logger.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -119,7 +118,7 @@ class DatabaseHelper {
     }
   }
 
-  Future<int> markPhotoAsDeleted(Photo photo) async {
+  Future<int> markPhotoForDeletion(Photo photo) async {
     Database db = await instance.database;
     var values = new Map<String, dynamic>();
     values[columnIsDeleted] = 1;

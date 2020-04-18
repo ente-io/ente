@@ -25,11 +25,9 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     _selectedIndex = widget.selectedIndex;
     var pageController = PageController(initialPage: _selectedIndex);
-
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
-          // action button
           IconButton(
             icon: Icon(Icons.share),
             onPressed: () {
