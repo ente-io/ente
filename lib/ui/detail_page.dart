@@ -9,7 +9,7 @@ import 'extents_page_view.dart';
 
 class DetailPage extends StatefulWidget {
   final List<Photo> photos;
-  int selectedIndex;
+  final int selectedIndex;
 
   DetailPage(this.photos, this.selectedIndex, {Key key}) : super(key: key);
 
@@ -19,10 +19,12 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   bool _shouldDisableScroll = false;
+  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    var pageController = PageController(initialPage: widget.selectedIndex);
+    _selectedIndex = widget.selectedIndex;
+    var pageController = PageController(initialPage: _selectedIndex);
 
     return Scaffold(
       appBar: AppBar(
@@ -32,7 +34,7 @@ class _DetailPageState extends State<DetailPage> {
             icon: Icon(Icons.share),
             onPressed: () {
               ShareExtend.share(
-                  widget.photos[widget.selectedIndex].localPath, "image");
+                  widget.photos[_selectedIndex].localPath, "image");
             },
           )
         ],
@@ -44,12 +46,13 @@ class _DetailPageState extends State<DetailPage> {
               return _buildItem(context, widget.photos[index]);
             },
             onPageChanged: (int index) {
-              widget.selectedIndex = index;
+              _selectedIndex = index;
             },
             physics: _shouldDisableScroll
                 ? NeverScrollableScrollPhysics()
                 : PageScrollPhysics(),
             controller: pageController,
+            itemCount: widget.photos.length,
           ),
         ),
       ),
