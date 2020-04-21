@@ -88,7 +88,8 @@ class PhotoProvider extends ChangeNotifier {
     if (!result) {
       print("Did not get permission");
     }
-    var galleryList = await PhotoManager.getAssetPathList(type: RequestType.image);
+    var galleryList =
+        await PhotoManager.getAssetPathList(type: RequestType.image);
 
     galleryList.sort((s1, s2) {
       return s2.assetCount.compareTo(s1.assetCount);
@@ -96,6 +97,13 @@ class PhotoProvider extends ChangeNotifier {
 
     this.list.clear();
     this.list.addAll(galleryList);
+  }
+
+  Future<void> refreshAllGalleryProperties() async {
+    for (var gallery in list) {
+      await gallery.refreshPathProperties();
+    }
+    notifyListeners();
   }
 
   PathProvider getOrCreatePathProvider(AssetPathEntity pathEntity) {
@@ -149,13 +157,13 @@ class PathProvider extends ChangeNotifier {
   void delete(AssetEntity entity) async {
     final result = await PhotoManager.editor.deleteWithIds([entity.id]);
     if (result.isNotEmpty) {
-      await path.refreshPathProperties(dt: path.fetchDatetime);
+      await Future.delayed(Duration(seconds: 3));
+      await provider.refreshAllGalleryProperties();
       final list =
-          await path.getAssetListRange(start: 0, end: provider.list.length);
+          await path.getAssetListRange(start: 0, end: this.list.length);
       printListLength("deleted");
       this.list.clear();
       this.list.addAll(list);
-      notifyListeners();
     }
   }
 

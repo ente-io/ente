@@ -96,7 +96,6 @@ class PhotoSyncManager {
 
   Future _downloadDiff(List<Photo> diff, SharedPreferences prefs) async {
     var externalPath = (await getApplicationDocumentsDirectory()).path;
-    _logger.i("External path: " + externalPath);
     var path = externalPath + "/photos/";
     for (Photo photo in diff) {
       var localPath = path + basename(photo.path);

@@ -15,6 +15,7 @@ class DatabaseHelper {
   static final columnUploadedFileId = 'uploaded_file_id';
   static final columnLocalId = 'local_id';
   static final columnLocalPath = 'local_path';
+  static final columnRelativePath = 'relative_path';
   static final columnThumbnailPath = 'thumbnail_path';
   static final columnPath = 'path';
   static final columnHash = 'hash';
@@ -51,6 +52,7 @@ class DatabaseHelper {
             $columnLocalId TEXT,
             $columnUploadedFileId INTEGER NOT NULL,
             $columnLocalPath TEXT NOT NULL,
+            $columnRelativePath TEXT NOT NULL,
             $columnThumbnailPath TEXT NOT NULL,
             $columnPath TEXT,
             $columnHash TEXT NOT NULL,
@@ -146,6 +148,7 @@ class DatabaseHelper {
     row[columnUploadedFileId] =
         photo.uploadedFileId == null ? -1 : photo.uploadedFileId;
     row[columnLocalPath] = photo.localPath;
+    row[columnRelativePath] = photo.relativePath;
     row[columnThumbnailPath] = photo.thumbnailPath;
     row[columnPath] = photo.path;
     row[columnHash] = photo.hash;
@@ -160,6 +163,7 @@ class DatabaseHelper {
     photo.localId = row[columnLocalId];
     photo.uploadedFileId = row[columnUploadedFileId];
     photo.localPath = row[columnLocalPath];
+    photo.relativePath = row[columnRelativePath];
     photo.thumbnailPath = row[columnThumbnailPath];
     photo.path = row[columnPath];
     photo.hash = row[columnHash];

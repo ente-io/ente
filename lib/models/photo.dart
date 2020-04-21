@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:logger/logger.dart';
+import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class Photo {
@@ -9,6 +11,7 @@ class Photo {
   String localId;
   String path;
   String localPath;
+  String relativePath;
   String thumbnailPath;
   String hash;
   int createTimestamp;
@@ -26,12 +29,20 @@ class Photo {
 
   static Future<Photo> fromAsset(AssetEntity asset) async {
     Photo photo = Photo();
-    var file = (await asset.originFile);
     photo.uploadedFileId = -1;
     photo.localId = asset.id;
+    var file = await asset.originFile;
     photo.localPath = file.path;
+    if (Platform.isAndroid) {
+      photo.relativePath = dirname((asset.relativePath.endsWith("/")
+              ? asset.relativePath
+              : asset.relativePath + "/") +
+          asset.title);
+    } else {
+      photo.relativePath = dirname(photo.localPath);
+    }
     photo.hash = getHash(file);
-    photo.thumbnailPath = file.path;
+    photo.thumbnailPath = photo.localPath;
     photo.createTimestamp = asset.createDateTime.microsecondsSinceEpoch;
     return photo;
   }

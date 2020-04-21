@@ -6,6 +6,7 @@ import 'package:myapp/models/album.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/ui/album_widget.dart';
 import 'package:myapp/ui/image_widget.dart';
+import 'package:path/path.dart' as path;
 
 class AlbumListWidget extends StatefulWidget {
   final List<Photo> photos;
@@ -41,8 +42,7 @@ class _AlbumListWidgetState extends State<AlbumListWidget> {
   List<Album> _getAlbums(List<Photo> photos) {
     final albumMap = new LinkedHashMap<String, List<Photo>>();
     for (Photo photo in photos) {
-      final splitPath = photo.localPath.split("/");
-      final folder = splitPath[splitPath.length - 2];
+      final folder = path.basename(photo.relativePath);
       if (!albumMap.containsKey(folder)) {
         albumMap[folder] = new List<Photo>();
       }
