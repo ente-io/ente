@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
@@ -47,14 +48,16 @@ class Photo {
     return photo;
   }
 
+  AssetEntity getAsset() {
+    return AssetEntity(id: localId);
+  }
+
   static String getHash(File file) {
     return sha256.convert(file.readAsBytesSync()).toString();
   }
 
-  int get hashCode => generatedId;
-
   @override
-  bool operator ==(other) {
-    return generatedId == other.generatedId;
+  String toString() {
+    return 'Photo(generatedId: $generatedId, uploadedFileId: $uploadedFileId, localId: $localId, path: $path, localPath: $localPath, relativePath: $relativePath, thumbnailPath: $thumbnailPath, hash: $hash, createTimestamp: $createTimestamp, syncTimestamp: $syncTimestamp)';
   }
 }

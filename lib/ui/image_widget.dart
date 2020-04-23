@@ -26,14 +26,14 @@ class _ImageWidgetState extends State<ImageWidget> {
   );
   @override
   Widget build(BuildContext context) {
-    final path = widget.photo.localPath;
     final size = widget.size == null ? 124 : widget.size;
-    final cachedImage = ImageLruCache.getData(path, size);
+    final cachedImageData =
+        ImageLruCache.getData(widget.photo.generatedId, size);
 
     Widget image;
 
-    if (cachedImage != null) {
-      image = cachedImage;
+    if (cachedImageData != null) {
+      image = Image.memory(cachedImageData);
     } else {
       if (widget.photo.localId != null) {
         image = FutureBuilder<Uint8List>(
@@ -41,11 +41,12 @@ class _ImageWidgetState extends State<ImageWidget> {
               .thumbDataWithSize(size, size),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
+              ImageLruCache.setData(
+                  widget.photo.generatedId, size, snapshot.data);
               Image image = Image.memory(snapshot.data,
                   width: size.toDouble(),
                   height: size.toDouble(),
                   fit: BoxFit.cover);
-              ImageLruCache.setData(path, size, image);
               return image;
             } else {
               return loadingWidget;
@@ -64,7 +65,7 @@ class _ImageWidgetState extends State<ImageWidget> {
   @override
   void didUpdateWidget(ImageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.photo.localPath != oldWidget.photo.localPath) {
+    if (widget.photo.generatedId != oldWidget.photo.generatedId) {
       setState(() {});
     }
   }
