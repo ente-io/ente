@@ -1,5 +1,8 @@
+import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:logger/logger.dart';
+import 'package:myapp/core/image_cache.dart';
+import 'package:myapp/core/image_cache.dart';
 import 'package:myapp/core/lru_map.dart';
 import 'package:myapp/core/thumbnail_cache.dart';
 import 'package:myapp/models/photo.dart';
@@ -59,21 +62,19 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
 
     if (!_loadedFinalImage) {
-      widget.photo.getBytes().then((bytes) {
-        if (mounted) {
-          setState(() {
-            final imageProvider = Image.memory(bytes).image;
-            precacheImage(imageProvider, context).then((value) {
-              if (mounted) {
-                setState(() {
-                  _imageProvider = imageProvider;
-                  _loadedFinalImage = true;
-                });
-              }
+      if (ImageLruCache.get(widget.photo) != null) {
+        final bytes = ImageLruCache.get(widget.photo);
+        _onFinalImageLoaded(bytes, context);
+      } else {
+        widget.photo.getBytes().then((bytes) {
+          if (mounted) {
+            setState(() {
+              ImageLruCache.put(widget.photo, bytes);
+              _onFinalImageLoaded(bytes, context);
             });
-          });
-        }
-      });
+          }
+        });
+      }
     }
 
     if (_imageProvider != null) {
@@ -87,5 +88,17 @@ class _ZoomableImageState extends State<ZoomableImage> {
     } else {
       return loadWidget;
     }
+  }
+
+  void _onFinalImageLoaded(Uint8List bytes, BuildContext context) {
+    final imageProvider = Image.memory(bytes).image;
+    precacheImage(imageProvider, context).then((value) {
+      if (mounted) {
+        setState(() {
+          _imageProvider = imageProvider;
+          _loadedFinalImage = true;
+        });
+      }
+    });
   }
 }
