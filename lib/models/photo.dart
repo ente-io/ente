@@ -32,11 +32,11 @@ class Photo {
     return photo;
   }
 
-  Future<Uint8List> getBytes() {
+  Future<Uint8List> getBytes({int quality = 100}) {
     final asset = AssetEntity(id: localId);
-    if (extension(title) == ".HEIC") {
+    if (extension(title) == ".HEIC" || quality != 100) {
       return asset.originBytes.then((bytes) =>
-          FlutterImageCompress.compressWithList(bytes)
+          FlutterImageCompress.compressWithList(bytes, quality: quality)
               .then((result) => Uint8List.fromList(result)));
     } else {
       return asset.originBytes;
