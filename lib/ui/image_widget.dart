@@ -25,7 +25,7 @@ class _ImageWidgetState extends State<ImageWidget> {
   );
   @override
   Widget build(BuildContext context) {
-    final size = widget.size == null ? 128 : widget.size;
+    final size = widget.size == null ? 512 : widget.size;
     final cachedImageData = ThumbnailLruCache.get(widget.photo);
 
     Widget image;
