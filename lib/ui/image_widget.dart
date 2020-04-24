@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -33,7 +32,7 @@ class _ImageWidgetState extends State<ImageWidget> {
     Widget image;
 
     if (cachedImageData != null) {
-      image = Image.memory(cachedImageData);
+      image = _buildImage(cachedImageData, size);
     } else {
       if (widget.photo.localId != null) {
         image = FutureBuilder<Uint8List>(
@@ -43,10 +42,7 @@ class _ImageWidgetState extends State<ImageWidget> {
             if (snapshot.hasData) {
               ImageLruCache.setData(
                   widget.photo.generatedId, size, snapshot.data);
-              Image image = Image.memory(snapshot.data,
-                  width: size.toDouble(),
-                  height: size.toDouble(),
-                  fit: BoxFit.cover);
+              Image image = _buildImage(snapshot.data, size);
               return image;
             } else {
               return loadingWidget;
@@ -54,19 +50,16 @@ class _ImageWidgetState extends State<ImageWidget> {
           },
         );
       } else {
-        image = Image.file(File(widget.photo.localPath),
-            width: size.toDouble(), height: size.toDouble(), fit: BoxFit.cover);
+        // TODO
+        return Text("Not Implemented");
       }
     }
 
     return image;
   }
 
-  @override
-  void didUpdateWidget(ImageWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.photo.generatedId != oldWidget.photo.generatedId) {
-      setState(() {});
-    }
+  Image _buildImage(Uint8List data, int size) {
+    return Image.memory(data,
+        width: size.toDouble(), height: size.toDouble(), fit: BoxFit.cover);
   }
 }

@@ -1,12 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:share_extend/share_extend.dart';
+import 'package:myapp/utils/share_util.dart';
 
 class GalleryAppBarWidget extends StatefulWidget
     implements PreferredSizeWidget {
@@ -65,11 +64,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _shareSelectedPhotos(BuildContext context) {
-    var photoPaths = List<String>();
-    for (Photo photo in widget.selectedPhotos) {
-      photoPaths.add(photo.localPath);
-    }
-    ShareExtend.shareMultiple(photoPaths, "image");
+    shareMultiple(widget.selectedPhotos.toList());
   }
 
   void _showDeletePhotosSheet(BuildContext context) {
@@ -102,14 +97,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future _deleteSelectedPhotos(
       BuildContext context, bool deleteEverywhere) async {
+    await PhotoManager.editor
+        .deleteWithIds(widget.selectedPhotos.map((p) => p.localId).toList());
+
     for (Photo photo in widget.selectedPhotos) {
       deleteEverywhere
           ? await DatabaseHelper.instance.markPhotoForDeletion(photo)
           : await DatabaseHelper.instance.deletePhoto(photo);
-      File file = File(photo.localPath);
-      await file.delete();
     }
-
     Navigator.of(context, rootNavigator: true).pop();
     photoLoader.reloadPhotos();
     if (widget.onPhotosDeleted != null) {

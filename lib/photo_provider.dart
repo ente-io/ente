@@ -88,8 +88,10 @@ class PhotoProvider extends ChangeNotifier {
     if (!result) {
       print("Did not get permission");
     }
-    var galleryList =
-        await PhotoManager.getAssetPathList(type: RequestType.image);
+    final filterOptionGroup = FilterOptionGroup();
+    filterOptionGroup.setOption(AssetType.image, FilterOption(needTitle: true));
+    var galleryList = await PhotoManager.getAssetPathList(
+        type: RequestType.image, filterOption: filterOptionGroup);
 
     galleryList.sort((s1, s2) {
       return s2.assetCount.compareTo(s1.assetCount);

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:logger/logger.dart';
 import 'package:myapp/db/db_helper.dart';
@@ -16,51 +15,58 @@ import 'package:myapp/core/constants.dart' as Constants;
 class PhotoSyncManager {
   final _logger = Logger();
   final _dio = Dio();
-  final List<AssetEntity> _assets;
   static final _lastSyncTimestampKey = "last_sync_timestamp_0";
   static final _lastDBUpdateTimestampKey = "last_db_update_timestamp";
 
-  PhotoSyncManager(this._assets) {
-    _logger.i("PhotoSyncManager init");
-    _assets.sort((first, second) => first.createDateTime.microsecondsSinceEpoch
-        .compareTo(second.createDateTime.microsecondsSinceEpoch));
+  PhotoSyncManager(List<AssetPathEntity> pathEntities) {
+    init(pathEntities);
   }
 
-  Future<void> init() async {
-    _updateDatabase().then((_) {
-      _syncPhotos().then((_) {
-        _deletePhotos();
-      });
-    });
-  }
-
-  Future<bool> _updateDatabase() async {
+  Future<void> init(List<AssetPathEntity> pathEntities) async {
     final prefs = await SharedPreferences.getInstance();
     var lastDBUpdateTimestamp = prefs.getInt(_lastDBUpdateTimestampKey);
     if (lastDBUpdateTimestamp == null) {
       lastDBUpdateTimestamp = 0;
       await _initializeDirectories();
     }
-    var photos = List<Photo>();
-    var bufferLimit = 10;
-    final maxBufferLimit = 1000;
-    for (AssetEntity asset in _assets) {
-      if (asset.createDateTime.microsecondsSinceEpoch > lastDBUpdateTimestamp) {
-        try {
-          photos.add(await Photo.fromAsset(asset));
-        } catch (e) {
-          _logger.e(e);
-        }
-        if (photos.length > bufferLimit) {
-          await _insertPhotosToDB(
-              photos, prefs, asset.createDateTime.microsecondsSinceEpoch);
-          photos.clear();
-          bufferLimit = min(maxBufferLimit, bufferLimit * 2);
+
+    final photos = List<Photo>();
+    for (AssetPathEntity pathEntity in pathEntities) {
+      if (Platform.isIOS || pathEntity.name != "Recent") {
+        // "Recents" contain duplicate information on Android
+        var assetList = await pathEntity.assetList;
+        for (AssetEntity entity in assetList) {
+          if (entity.createDateTime.microsecondsSinceEpoch >
+              lastDBUpdateTimestamp) {
+            try {
+              photos.add(await Photo.fromAsset(pathEntity, entity));
+            } catch (e) {
+              _logger.e(e);
+            }
+          }
         }
       }
     }
+    photos.sort((first, second) =>
+        first.createTimestamp.compareTo(second.createTimestamp));
+
+    _updateDatabase(photos, prefs, lastDBUpdateTimestamp).then((_) {
+      _syncPhotos().then((_) {
+        _deletePhotos();
+      });
+    });
+  }
+
+  Future<bool> _updateDatabase(final List<Photo> photos,
+      SharedPreferences prefs, int lastDBUpdateTimestamp) async {
+    var photosToBeAdded = List<Photo>();
+    for (Photo photo in photos) {
+      if (photo.createTimestamp > lastDBUpdateTimestamp) {
+        photosToBeAdded.add(photo);
+      }
+    }
     return await _insertPhotosToDB(
-        photos, prefs, DateTime.now().microsecondsSinceEpoch);
+        photosToBeAdded, prefs, DateTime.now().microsecondsSinceEpoch);
   }
 
   _syncPhotos() async {
@@ -89,7 +95,8 @@ class PhotoSyncManager {
       if (uploadedPhoto == null) {
         return;
       }
-      await DatabaseHelper.instance.updatePhoto(uploadedPhoto);
+      await DatabaseHelper.instance.updatePhoto(photo.generatedId,
+          uploadedPhoto.remotePath, uploadedPhoto.syncTimestamp);
       prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.syncTimestamp);
     }
   }
@@ -98,12 +105,12 @@ class PhotoSyncManager {
     var externalPath = (await getApplicationDocumentsDirectory()).path;
     var path = externalPath + "/photos/";
     for (Photo photo in diff) {
-      var localPath = path + basename(photo.path);
+      var localPath = path + basename(photo.remotePath);
       await _dio
-          .download(Constants.ENDPOINT + "/" + photo.path, localPath)
+          .download(Constants.ENDPOINT + "/" + photo.remotePath, localPath)
           .catchError(_onError);
-      photo.localPath = localPath;
-      photo.thumbnailPath = localPath;
+      // TODO: Save path
+      photo.pathName = localPath;
       await DatabaseHelper.instance.insertPhoto(photo);
       PhotoLoader.instance.reloadPhotos();
       await prefs.setInt(_lastSyncTimestampKey, photo.syncTimestamp);
@@ -128,8 +135,8 @@ class PhotoSyncManager {
 
   Future<Photo> _uploadFile(Photo localPhoto) async {
     var formData = FormData.fromMap({
-      "file": await MultipartFile.fromFile(localPhoto.localPath,
-          filename: basename(localPhoto.localPath)),
+      "file": MultipartFile.fromBytes(await localPhoto.getOriginalBytes()),
+      "filename": localPhoto.title,
       "user": Constants.USER,
     });
     return _dio
@@ -137,8 +144,6 @@ class PhotoSyncManager {
         .then((response) {
       _logger.i(response.toString());
       var photo = Photo.fromJson(response.data);
-      photo.localPath = localPhoto.localPath;
-      photo.localId = localPhoto.localId;
       return photo;
     }).catchError(_onError);
   }

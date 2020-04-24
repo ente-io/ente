@@ -4,13 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:myapp/core/lru_map.dart';
 import 'package:myapp/models/photo.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:share_extend/share_extend.dart';
 import 'extents_page_view.dart';
 import 'loading_widget.dart';
-import 'package:path/path.dart' as path;
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:myapp/utils/share_util.dart';
 
 class DetailPage extends StatefulWidget {
   final List<Photo> photos;
@@ -26,11 +23,6 @@ class _DetailPageState extends State<DetailPage> {
   bool _shouldDisableScroll = false;
   int _selectedIndex = 0;
   final _cachedImages = LRUMap<int, ZoomableImage>(5);
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +69,8 @@ class _DetailPageState extends State<DetailPage> {
       actions: <Widget>[
         IconButton(
           icon: Icon(Icons.share),
-          onPressed: () {
-            ShareExtend.share(widget.photos[_selectedIndex].localPath, "image");
+          onPressed: () async {
+            share(widget.photos[_selectedIndex]);
           },
         )
       ],
@@ -99,26 +91,17 @@ class ZoomableImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Logger().i("Building " + photo.generatedId.toString());
+    Logger().i("Building " + photo.toString());
     if (ImageLruCache.getData(photo.generatedId) != null) {
       return _buildPhotoView(ImageLruCache.getData(photo.generatedId));
     }
-    var future;
-    if (path.extension(photo.localPath) == '.HEIC') {
-      Logger().i("Decoding HEIC");
-      future = photo.getAsset().originBytes.then((bytes) =>
-          FlutterImageCompress.compressWithList(bytes)
-              .then((result) => Uint8List.fromList(result)));
-    } else {
-      future = AssetEntity(id: photo.localId).originBytes;
-    }
     return FutureBuilder<Uint8List>(
-      future: future,
+      future: photo.getBytes(),
       builder: (_, snapshot) {
         if (snapshot.hasData) {
           return _buildPhotoView(snapshot.data);
         } else if (snapshot.hasError) {
-          return Text(snapshot.error);
+          return Text(snapshot.error.toString());
         } else {
           return loadWidget;
         }

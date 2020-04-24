@@ -42,7 +42,7 @@ class _AlbumListWidgetState extends State<AlbumListWidget> {
   List<Album> _getAlbums(List<Photo> photos) {
     final albumMap = new LinkedHashMap<String, List<Photo>>();
     for (Photo photo in photos) {
-      final folder = path.basename(photo.relativePath);
+      final folder = path.basename(photo.pathName);
       if (!albumMap.containsKey(folder)) {
         albumMap[folder] = new List<Photo>();
       }
@@ -59,7 +59,7 @@ class _AlbumListWidgetState extends State<AlbumListWidget> {
     return GestureDetector(
       child: Column(
         children: <Widget>[
-          ImageWidget(album.photos[0], size: 160),
+          ImageWidget(album.photos[0], size: 140),
           Padding(padding: EdgeInsets.all(2)),
           Expanded(
             child: Text(

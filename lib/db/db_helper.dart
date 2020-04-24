@@ -14,11 +14,9 @@ class DatabaseHelper {
   static final columnGeneratedId = '_id';
   static final columnUploadedFileId = 'uploaded_file_id';
   static final columnLocalId = 'local_id';
-  static final columnLocalPath = 'local_path';
-  static final columnRelativePath = 'relative_path';
-  static final columnThumbnailPath = 'thumbnail_path';
-  static final columnPath = 'path';
-  static final columnHash = 'hash';
+  static final columnTitle = 'title';
+  static final columnPathName = 'path_name';
+  static final columnRemotePath = 'remote_path';
   static final columnIsDeleted = 'is_deleted';
   static final columnCreateTimestamp = 'create_timestamp';
   static final columnSyncTimestamp = 'sync_timestamp';
@@ -51,11 +49,9 @@ class DatabaseHelper {
             $columnGeneratedId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             $columnLocalId TEXT,
             $columnUploadedFileId INTEGER NOT NULL,
-            $columnLocalPath TEXT NOT NULL,
-            $columnRelativePath TEXT NOT NULL,
-            $columnThumbnailPath TEXT NOT NULL,
-            $columnPath TEXT,
-            $columnHash TEXT NOT NULL,
+            $columnTitle TEXT NOT NULL,
+            $columnPathName TEXT NOT NULL,
+            $columnRemotePath TEXT,
             $columnIsDeleted INTEGER DEFAULT 0,
             $columnCreateTimestamp TEXT NOT NULL,
             $columnSyncTimestamp TEXT
@@ -103,16 +99,20 @@ class DatabaseHelper {
     return _convertToPhotos(results);
   }
 
-  Future<int> updatePhoto(Photo photo) async {
+  Future<int> updatePhoto(
+      int generatedId, String remotePath, int syncTimestamp) async {
     Database db = await instance.database;
-    return await db.update(table, _getRowForPhoto(photo),
-        where: '$columnGeneratedId = ?', whereArgs: [photo.generatedId]);
+    var values = new Map<String, dynamic>();
+    values[columnRemotePath] = remotePath;
+    values[columnSyncTimestamp] = syncTimestamp;
+    return await db.update(table, values,
+        where: '$columnGeneratedId = ?', whereArgs: [generatedId]);
   }
 
   Future<Photo> getPhotoByPath(String path) async {
     Database db = await instance.database;
     var rows =
-        await db.query(table, where: '$columnPath =?', whereArgs: [path]);
+        await db.query(table, where: '$columnRemotePath =?', whereArgs: [path]);
     if (rows.length > 0) {
       return _getPhotofromRow(rows[0]);
     } else {
@@ -147,11 +147,9 @@ class DatabaseHelper {
     row[columnLocalId] = photo.localId;
     row[columnUploadedFileId] =
         photo.uploadedFileId == null ? -1 : photo.uploadedFileId;
-    row[columnLocalPath] = photo.localPath;
-    row[columnRelativePath] = photo.relativePath;
-    row[columnThumbnailPath] = photo.thumbnailPath;
-    row[columnPath] = photo.path;
-    row[columnHash] = photo.hash;
+    row[columnTitle] = photo.title;
+    row[columnPathName] = photo.pathName;
+    row[columnRemotePath] = photo.remotePath;
     row[columnCreateTimestamp] = photo.createTimestamp;
     row[columnSyncTimestamp] = photo.syncTimestamp;
     return row;
@@ -162,11 +160,9 @@ class DatabaseHelper {
     photo.generatedId = row[columnGeneratedId];
     photo.localId = row[columnLocalId];
     photo.uploadedFileId = row[columnUploadedFileId];
-    photo.localPath = row[columnLocalPath];
-    photo.relativePath = row[columnRelativePath];
-    photo.thumbnailPath = row[columnThumbnailPath];
-    photo.path = row[columnPath];
-    photo.hash = row[columnHash];
+    photo.title = row[columnTitle];
+    photo.pathName = row[columnPathName];
+    photo.remotePath = row[columnRemotePath];
     photo.createTimestamp = int.parse(row[columnCreateTimestamp]);
     photo.syncTimestamp = row[columnSyncTimestamp] == null
         ? -1
