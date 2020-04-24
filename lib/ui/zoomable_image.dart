@@ -78,13 +78,12 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
 
     if (_imageProvider != null) {
-      final view = PhotoView(
+      return PhotoView(
         imageProvider: _imageProvider,
         scaleStateChangedCallback: _scaleStateChangedCallback,
         minScale: PhotoViewComputedScale.contained,
         gaplessPlayback: true,
       );
-      return view;
     } else {
       return loadWidget;
     }
