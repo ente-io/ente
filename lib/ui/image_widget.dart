@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:myapp/core/lru_map.dart';
+import 'package:myapp/core/thumbnail_cache.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -25,9 +25,8 @@ class _ImageWidgetState extends State<ImageWidget> {
   );
   @override
   Widget build(BuildContext context) {
-    final size = widget.size == null ? 124 : widget.size;
-    final cachedImageData =
-        ImageLruCache.getData(widget.photo.generatedId, size);
+    final size = widget.size == null ? 128 : widget.size;
+    final cachedImageData = ThumbnailLruCache.get(widget.photo);
 
     Widget image;
 
@@ -40,8 +39,7 @@ class _ImageWidgetState extends State<ImageWidget> {
               .thumbDataWithSize(size, size),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              ImageLruCache.setData(
-                  widget.photo.generatedId, size, snapshot.data);
+              ThumbnailLruCache.put(widget.photo, snapshot.data);
               Image image = _buildImage(snapshot.data, size);
               return image;
             } else {

@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:typed_data';
 
 typedef EvictionHandler<K, V>(K key, V value);
 
@@ -33,34 +32,4 @@ class LRUMap<K, V> {
   void remove(K key) {
     _map.remove(key);
   }
-}
-
-class ImageLruCache {
-  static LRUMap<_ImageCacheEntity, Uint8List> _map = LRUMap(500);
-
-  static Uint8List getData(int id, [int size = 64]) {
-    return _map.get(_ImageCacheEntity(id, size));
-  }
-
-  static void setData(int id, int size, Uint8List imageData) {
-    _map.put(_ImageCacheEntity(id, size), imageData);
-  }
-}
-
-class _ImageCacheEntity {
-  int id;
-  int size;
-
-  _ImageCacheEntity(this.id, this.size);
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is _ImageCacheEntity &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          size == other.size;
-
-  @override
-  int get hashCode => id.hashCode ^ size.hashCode;
 }
