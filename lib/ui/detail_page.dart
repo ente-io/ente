@@ -1,12 +1,9 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:myapp/core/lru_map.dart';
 import 'package:myapp/models/photo.dart';
-import 'package:photo_view/photo_view.dart';
+import 'package:myapp/ui/zoomable_image.dart';
 import 'extents_page_view.dart';
-import 'loading_widget.dart';
 import 'package:myapp/utils/share_util.dart';
 
 class DetailPage extends StatefulWidget {
@@ -40,7 +37,7 @@ class _DetailPageState extends State<DetailPage> {
                 return _cachedImages.get(index);
               }
               final image = ZoomableImage(
-                photo: widget.photos[index],
+                widget.photos[index],
                 shouldDisableScroll: (value) {
                   setState(() {
                     _shouldDisableScroll = value;
@@ -74,51 +71,6 @@ class _DetailPageState extends State<DetailPage> {
           },
         )
       ],
-    );
-  }
-}
-
-class ZoomableImage extends StatelessWidget {
-  final Function(bool) shouldDisableScroll;
-
-  const ZoomableImage({
-    Key key,
-    @required this.photo,
-    this.shouldDisableScroll,
-  }) : super(key: key);
-
-  final Photo photo;
-
-  @override
-  Widget build(BuildContext context) {
-    Logger().i("Building " + photo.toString());
-    if (ImageLruCache.getData(photo.generatedId) != null) {
-      return _buildPhotoView(ImageLruCache.getData(photo.generatedId));
-    }
-    return FutureBuilder<Uint8List>(
-      future: photo.getBytes(),
-      builder: (_, snapshot) {
-        if (snapshot.hasData) {
-          return _buildPhotoView(snapshot.data);
-        } else if (snapshot.hasError) {
-          return Text(snapshot.error.toString());
-        } else {
-          return loadWidget;
-        }
-      },
-    );
-  }
-
-  Widget _buildPhotoView(Uint8List imageData) {
-    ValueChanged<PhotoViewScaleState> scaleStateChangedCallback = (value) {
-      if (shouldDisableScroll != null) {
-        shouldDisableScroll(value != PhotoViewScaleState.initial);
-      }
-    };
-    return PhotoView(
-      imageProvider: Image.memory(imageData).image,
-      scaleStateChangedCallback: scaleStateChangedCallback,
-      minScale: PhotoViewComputedScale.contained,
     );
   }
 }
