@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:myapp/models/album.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/ui/album_widget.dart';
-import 'package:myapp/ui/image_widget.dart';
+import 'package:myapp/ui/thumbnail_widget.dart';
 import 'package:path/path.dart' as path;
 
 class AlbumListWidget extends StatefulWidget {
@@ -59,7 +59,7 @@ class _AlbumListWidgetState extends State<AlbumListWidget> {
     return GestureDetector(
       child: Column(
         children: <Widget>[
-          ImageWidget(album.photos[0], size: 140),
+          ThumbnailWidget(album.photos[0], size: 140),
           Padding(padding: EdgeInsets.all(2)),
           Expanded(
             child: Text(

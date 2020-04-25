@@ -4,7 +4,7 @@ import 'package:myapp/models/face.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/ui/circular_network_image_widget.dart';
 import 'package:myapp/core/constants.dart' as Constants;
-import 'package:myapp/ui/image_widget.dart';
+import 'package:myapp/ui/thumbnail_widget.dart';
 
 import 'detail_page.dart';
 
@@ -59,7 +59,7 @@ class FaceSearchResultsPage extends StatelessWidget {
       onTap: () async {
         _routeToDetailPage(photos, index, context);
       },
-      child: ImageWidget(photos[index]),
+      child: ThumbnailWidget(photos[index]),
     );
   }
 

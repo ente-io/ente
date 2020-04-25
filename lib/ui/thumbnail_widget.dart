@@ -5,24 +5,25 @@ import 'package:myapp/core/thumbnail_cache.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-class ImageWidget extends StatefulWidget {
+class ThumbnailWidget extends StatefulWidget {
   final Photo photo;
   final int size;
 
-  const ImageWidget(
+  const ThumbnailWidget(
     this.photo, {
     Key key,
     this.size,
   }) : super(key: key);
   @override
-  _ImageWidgetState createState() => _ImageWidgetState();
+  _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
 }
 
-class _ImageWidgetState extends State<ImageWidget> {
+class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   static final Widget loadingWidget = Container(
     alignment: Alignment.center,
     color: Colors.grey[500],
   );
+
   @override
   Widget build(BuildContext context) {
     final size = widget.size == null ? 512 : widget.size;

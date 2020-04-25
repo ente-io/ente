@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
 import 'package:myapp/ui/detail_page.dart';
-import 'package:myapp/ui/image_widget.dart';
+import 'package:myapp/ui/thumbnail_widget.dart';
 import 'package:myapp/utils/date_time_util.dart';
 import 'package:provider/provider.dart';
 
@@ -96,7 +96,7 @@ class _GalleryState extends State<Gallery> {
               ? Border.all(width: 4.0, color: Colors.blue)
               : null,
         ),
-        child: ImageWidget(photo),
+        child: ThumbnailWidget(photo),
       ),
     );
   }
