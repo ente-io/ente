@@ -1,18 +1,15 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:myapp/core/thumbnail_cache.dart';
 import 'package:myapp/models/photo.dart';
-import 'package:photo_manager/photo_manager.dart';
+import 'package:myapp/core/constants.dart';
 
 class ThumbnailWidget extends StatefulWidget {
   final Photo photo;
-  final int size;
 
   const ThumbnailWidget(
     this.photo, {
     Key key,
-    this.size,
   }) : super(key: key);
   @override
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
@@ -24,41 +21,54 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     color: Colors.grey[500],
   );
 
+  bool _loadedSmallThumbnail = false;
+  bool _loadedLargeThumbnail = false;
+  ImageProvider _imageProvider;
+
   @override
   Widget build(BuildContext context) {
-    final size = widget.size == null ? 512 : widget.size;
-    final cachedImageData = ThumbnailLruCache.get(widget.photo);
-
-    Widget image;
-
-    if (cachedImageData != null) {
-      image = _buildImage(cachedImageData, size);
-    } else {
-      if (widget.photo.localId != null) {
-        image = FutureBuilder<Uint8List>(
-          future: AssetEntity(id: widget.photo.localId)
-              .thumbDataWithSize(size, size),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              ThumbnailLruCache.put(widget.photo, snapshot.data);
-              Image image = _buildImage(snapshot.data, size);
-              return image;
-            } else {
-              return loadingWidget;
-            }
-          },
-        );
+    if (!_loadedSmallThumbnail && !_loadedLargeThumbnail) {
+      final cachedSmallThumbnail =
+          ThumbnailLruCache.get(widget.photo, THUMBNAIL_SMALL_SIZE);
+      if (cachedSmallThumbnail != null) {
+        _imageProvider = Image.memory(cachedSmallThumbnail).image;
+        _loadedSmallThumbnail = true;
       } else {
-        // TODO
-        return Text("Not Implemented");
+        if (mounted) {
+          widget.photo
+              .getAsset()
+              .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
+              .then((data) {
+            if (mounted) {
+              setState(() {
+                if (data != null) {
+                  _imageProvider = Image.memory(data).image;
+                }
+                _loadedSmallThumbnail = true;
+              });
+            }
+            ThumbnailLruCache.put(widget.photo, THUMBNAIL_SMALL_SIZE, data);
+          });
+        }
       }
     }
 
-    return image;
-  }
+    if (!_loadedLargeThumbnail) {
+      if (ThumbnailLruCache.get(widget.photo, THUMBNAIL_LARGE_SIZE) == null) {
+        widget.photo
+            .getAsset()
+            .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE)
+            .then((data) {
+          ThumbnailLruCache.put(widget.photo, THUMBNAIL_LARGE_SIZE, data);
+        });
+      }
+    }
 
-  Image _buildImage(Uint8List data, int size) {
-    return Image.memory(data,
-        width: size.toDouble(), height: size.toDouble(), fit: BoxFit.cover);
+    if (_imageProvider != null) {
+      return Image(
+          image: _imageProvider, gaplessPlayback: true, fit: BoxFit.cover);
+    } else {
+      return loadingWidget;
+    }
   }
 }

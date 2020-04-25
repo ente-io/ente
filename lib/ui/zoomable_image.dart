@@ -2,11 +2,11 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:logger/logger.dart';
 import 'package:myapp/core/image_cache.dart';
-import 'package:myapp/core/lru_map.dart';
 import 'package:myapp/core/thumbnail_cache.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:myapp/core/constants.dart';
 
 class ZoomableImage extends StatefulWidget {
   final Photo photo;
@@ -41,10 +41,13 @@ class _ZoomableImageState extends State<ZoomableImage> {
   @override
   Widget build(BuildContext context) {
     if (!_loadedThumbnail && !_loadedFinalImage) {
-      final cachedThumbnail = ThumbnailLruCache.get(widget.photo);
+      final cachedThumbnail =
+          ThumbnailLruCache.get(widget.photo, THUMBNAIL_LARGE_SIZE);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedThumbnail = true;
+      } else {
+        Logger().i("Thumbnail missing for " + widget.photo.toString());
       }
     }
 

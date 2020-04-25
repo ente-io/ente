@@ -59,7 +59,7 @@ class _AlbumListWidgetState extends State<AlbumListWidget> {
     return GestureDetector(
       child: Column(
         children: <Widget>[
-          ThumbnailWidget(album.photos[0], size: 140),
+          ThumbnailWidget(album.photos[0]),
           Padding(padding: EdgeInsets.all(2)),
           Expanded(
             child: Text(
