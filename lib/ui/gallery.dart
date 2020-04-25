@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logger/logger.dart';
 import 'package:myapp/core/thumbnail_cache.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
@@ -31,6 +32,13 @@ class _GalleryState extends State<Gallery> {
   final Set<Photo> _selectedPhotos = HashSet<Photo>();
   PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
   bool _shouldSelectOnTap = false;
+  List<Photo> _photos;
+
+  @override
+  void initState() {
+    _photos = widget.photos;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +130,16 @@ class _GalleryState extends State<Gallery> {
   }
 
   void routeToDetailPage(Photo photo, BuildContext context) {
-    final page = DetailPage(widget.photos, widget.photos.indexOf(photo));
+    final page = DetailPage(
+      _photos,
+      _photos.indexOf(photo),
+      onPhotoDeleted: (photo) {
+        setState(() {
+          Logger().i("Photo deleted! ");
+          _photos.remove(photo);
+        });
+      },
+    );
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
@@ -135,16 +152,15 @@ class _GalleryState extends State<Gallery> {
   void _collatePhotos() {
     final dailyPhotos = List<Photo>();
     final collatedPhotos = List<List<Photo>>();
-    for (int index = 0; index < widget.photos.length; index++) {
+    for (int index = 0; index < _photos.length; index++) {
       if (index > 0 &&
-          !_arePhotosFromSameDay(
-              widget.photos[index], widget.photos[index - 1])) {
+          !_arePhotosFromSameDay(_photos[index], _photos[index - 1])) {
         var collatedDailyPhotos = List<Photo>();
         collatedDailyPhotos.addAll(dailyPhotos);
         collatedPhotos.add(collatedDailyPhotos);
         dailyPhotos.clear();
       }
-      dailyPhotos.add(widget.photos[index]);
+      dailyPhotos.add(_photos[index]);
     }
     if (dailyPhotos.isNotEmpty) {
       collatedPhotos.add(dailyPhotos);

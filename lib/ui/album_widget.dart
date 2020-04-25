@@ -19,7 +19,6 @@ class _AlbumPageState extends State<AlbumPage> {
 
   @override
   Widget build(Object context) {
-    Logger().i("Building with " + widget.album.photos.length.toString());
     return Scaffold(
       appBar: GalleryAppBarWidget(
         widget.album.name,

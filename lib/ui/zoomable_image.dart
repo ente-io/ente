@@ -46,8 +46,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedThumbnail = true;
-      } else {
-        Logger().i("Thumbnail missing for " + widget.photo.toString());
       }
     }
 
