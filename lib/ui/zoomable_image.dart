@@ -2,24 +2,11 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:logger/logger.dart';
 import 'package:myapp/core/image_cache.dart';
-import 'package:myapp/core/image_cache.dart';
 import 'package:myapp/core/lru_map.dart';
 import 'package:myapp/core/thumbnail_cache.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';
-
-class ExpandedImageLruCache {
-  static LRUMap<int, Widget> _map = LRUMap(500);
-
-  static Widget getData(Photo photo) {
-    return _map.get(photo.generatedId);
-  }
-
-  static void setData(Photo photo, Widget image) {
-    _map.put(photo.generatedId, image);
-  }
-}
 
 class ZoomableImage extends StatefulWidget {
   final Photo photo;
