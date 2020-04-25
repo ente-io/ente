@@ -66,7 +66,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
     if (_imageProvider != null) {
       return Image(
-          image: _imageProvider, gaplessPlayback: true, fit: BoxFit.cover);
+        image: _imageProvider,
+        gaplessPlayback: true,
+        fit: BoxFit.cover,
+      );
     } else {
       return loadingWidget;
     }
