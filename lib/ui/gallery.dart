@@ -37,6 +37,7 @@ class _GalleryState extends State<Gallery> {
       itemCount: _collatedPhotos.length,
       itemBuilder: _buildListItem,
       controller: _scrollController,
+      cacheExtent: 2000,
     );
   }
 
