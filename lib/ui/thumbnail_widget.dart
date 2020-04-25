@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:myapp/core/thumbnail_cache.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/core/constants.dart';
@@ -34,32 +33,19 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _loadedSmallThumbnail = true;
       } else {
-        if (mounted) {
-          widget.photo
-              .getAsset()
-              .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
-              .then((data) {
-            if (mounted) {
-              setState(() {
-                if (data != null) {
-                  _imageProvider = Image.memory(data).image;
-                }
-                _loadedSmallThumbnail = true;
-              });
-            }
-            ThumbnailLruCache.put(widget.photo, THUMBNAIL_SMALL_SIZE, data);
-          });
-        }
-      }
-    }
-
-    if (!_loadedLargeThumbnail) {
-      if (ThumbnailLruCache.get(widget.photo, THUMBNAIL_LARGE_SIZE) == null) {
         widget.photo
             .getAsset()
-            .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE)
+            .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
             .then((data) {
-          ThumbnailLruCache.put(widget.photo, THUMBNAIL_LARGE_SIZE, data);
+          if (mounted) {
+            setState(() {
+              if (data != null) {
+                _imageProvider = Image.memory(data).image;
+              }
+              _loadedSmallThumbnail = true;
+            });
+          }
+          ThumbnailLruCache.put(widget.photo, THUMBNAIL_SMALL_SIZE, data);
         });
       }
     }

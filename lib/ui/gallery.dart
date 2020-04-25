@@ -3,12 +3,15 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:myapp/core/thumbnail_cache.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
 import 'package:myapp/ui/detail_page.dart';
 import 'package:myapp/ui/thumbnail_widget.dart';
 import 'package:myapp/utils/date_time_util.dart';
 import 'package:provider/provider.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+import 'package:myapp/core/constants.dart';
 
 class Gallery extends StatefulWidget {
   final List<Photo> photos;
@@ -97,7 +100,7 @@ class _GalleryState extends State<Gallery> {
               ? Border.all(width: 4.0, color: Colors.blue)
               : null,
         ),
-        child: ThumbnailWidget(photo),
+        child: GalleryItemWidget(photo),
       ),
     );
   }
@@ -158,5 +161,54 @@ class _GalleryState extends State<Gallery> {
     return firstDate.year == secondDate.year &&
         firstDate.month == secondDate.month &&
         firstDate.day == secondDate.day;
+  }
+}
+
+class GalleryItemWidget extends StatefulWidget {
+  final Photo photo;
+
+  const GalleryItemWidget(
+    this.photo, {
+    Key key,
+  }) : super(key: key);
+
+  @override
+  _GalleryItemWidgetState createState() => _GalleryItemWidgetState();
+}
+
+class _GalleryItemWidgetState extends State<GalleryItemWidget> {
+  bool _isVisible = false;
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: Key(widget.photo.generatedId.toString()),
+      child: ThumbnailWidget(widget.photo),
+      onVisibilityChanged: (info) {
+        _isVisible = info.visibleFraction == 1;
+        if (_isVisible && !_isLoading) {
+          _isLoading = true;
+          _scheduleCaching();
+        }
+      },
+    );
+  }
+
+  void _scheduleCaching() {
+    Future.delayed(Duration(milliseconds: 500), () {
+      if (!_isVisible) {
+        _isLoading = false;
+        return;
+      }
+      if (ThumbnailLruCache.get(widget.photo, THUMBNAIL_LARGE_SIZE) == null) {
+        widget.photo
+            .getAsset()
+            .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE)
+            .then((data) {
+          ThumbnailLruCache.put(widget.photo, THUMBNAIL_LARGE_SIZE, data);
+        });
+      }
+    });
   }
 }

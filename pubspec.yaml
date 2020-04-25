@@ -38,6 +38,7 @@ dependencies:
   draggable_scrollbar: ^0.0.4
   photo_view: ^0.9.2
   flutter_image_compress: ^0.6.5+1
+  visibility_detector: ^0.1.4
 
 dev_dependencies:
   flutter_test:
