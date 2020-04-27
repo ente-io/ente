@@ -25,38 +25,34 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: widget.title,
-      theme: ThemeData.dark(),
-      home: Scaffold(
-        appBar: GalleryAppBarWidget(
-          widget.title,
-          _selectedPhotos,
-          onSelectionClear: () {
-            setState(() {
-              _selectedPhotos.clear();
-            });
-          },
-        ),
-        bottomNavigationBar: _buildBottomNavigationBar(),
-        body: IndexedStack(
-          children: <Widget>[
-            GalleryContainer(
-              photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
-                setState(() {
-                  _selectedPhotos = selectedPhotos;
-                });
-              },
-            ),
-            ChangeNotifierBuilder(
-              value: photoLoader,
-              builder: (_, __) {
-                return AlbumListWidget(photoLoader.photos);
-              },
-            )
-          ],
-          index: _selectedNavBarItem,
-        ),
+    return Scaffold(
+      appBar: GalleryAppBarWidget(
+        widget.title,
+        _selectedPhotos,
+        onSelectionClear: () {
+          setState(() {
+            _selectedPhotos.clear();
+          });
+        },
+      ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+      body: IndexedStack(
+        children: <Widget>[
+          GalleryContainer(
+            photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
+              setState(() {
+                _selectedPhotos = selectedPhotos;
+              });
+            },
+          ),
+          ChangeNotifierBuilder(
+            value: photoLoader,
+            builder: (_, __) {
+              return AlbumListWidget(photoLoader.photos);
+            },
+          )
+        ],
+        index: _selectedNavBarItem,
       ),
     );
   }
