@@ -35,8 +35,8 @@ class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
     Logger().i("Opening " +
-        _photos[_selectedIndex].title +
-        ", " +
+        _photos[_selectedIndex].toString() +
+        ". " +
         _selectedIndex.toString() +
         " / " +
         _photos.length.toString() +
