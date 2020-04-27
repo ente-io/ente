@@ -4,7 +4,6 @@ import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:provider/provider.dart';
 import 'package:myapp/utils/share_util.dart';
 
 class GalleryAppBarWidget extends StatefulWidget

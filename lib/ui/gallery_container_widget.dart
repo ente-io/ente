@@ -11,11 +11,13 @@ import 'package:provider/provider.dart';
 
 // TODO: Remove redundant layer
 class GalleryContainer extends StatefulWidget {
+  final Set<Photo> selectedPhotos;
   final Function(Set<Photo>) photoSelectionChangeCallback;
 
-  const GalleryContainer({
+  const GalleryContainer(
+    this.selectedPhotos,
+    this.photoSelectionChangeCallback, {
     Key key,
-    this.photoSelectionChangeCallback,
   }) : super(key: key);
 
   @override
@@ -44,6 +46,7 @@ class _GalleryContainerState extends State<GalleryContainer> {
                   builder: (_, __) {
                     return Gallery(
                       getFilteredPhotos(photoLoader.photos),
+                      widget.selectedPhotos,
                       photoSelectionChangeCallback:
                           widget.photoSelectionChangeCallback,
                     );

@@ -16,9 +16,11 @@ import 'package:myapp/core/constants.dart';
 
 class Gallery extends StatefulWidget {
   final List<Photo> photos;
+  final Set<Photo> selectedPhotos;
   final Function(Set<Photo>) photoSelectionChangeCallback;
 
-  Gallery(this.photos, {this.photoSelectionChangeCallback});
+  Gallery(this.photos, this.selectedPhotos,
+      {this.photoSelectionChangeCallback});
 
   @override
   _GalleryState createState() {
@@ -29,15 +31,14 @@ class Gallery extends StatefulWidget {
 class _GalleryState extends State<Gallery> {
   final ScrollController _scrollController = ScrollController();
   final List<List<Photo>> _collatedPhotos = List<List<Photo>>();
-  final Set<Photo> _selectedPhotos = HashSet<Photo>();
+  Set<Photo> _selectedPhotos = HashSet<Photo>();
   PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
-  bool _shouldSelectOnTap = false;
   List<Photo> _photos;
 
   @override
   Widget build(BuildContext context) {
     _photos = widget.photos;
-    Logger().i("Building with " + _photos.length.toString());
+    _selectedPhotos = widget.selectedPhotos;
     _collatePhotos();
 
     return ListView.builder(
@@ -87,7 +88,7 @@ class _GalleryState extends State<Gallery> {
   Widget _buildPhoto(BuildContext context, Photo photo) {
     return GestureDetector(
       onTap: () {
-        if (_shouldSelectOnTap) {
+        if (_selectedPhotos.isNotEmpty) {
           _selectPhoto(photo);
         } else {
           routeToDetailPage(photo, context);
@@ -115,11 +116,6 @@ class _GalleryState extends State<Gallery> {
         _selectedPhotos.remove(photo);
       } else {
         _selectedPhotos.add(photo);
-      }
-      if (_selectedPhotos.isNotEmpty) {
-        _shouldSelectOnTap = true;
-      } else {
-        _shouldSelectOnTap = false;
       }
       widget.photoSelectionChangeCallback(_selectedPhotos);
     });

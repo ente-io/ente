@@ -35,11 +35,13 @@ class _AlbumPageState extends State<AlbumPage> {
               Logger().i("Deleting " + index.toString());
               widget.album.photos.removeAt(index);
             }
+            _selectedPhotos.clear();
           });
         },
       ),
       body: Gallery(
         widget.album.photos,
+        _selectedPhotos,
         photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
           setState(() {
             _selectedPhotos = selectedPhotos;

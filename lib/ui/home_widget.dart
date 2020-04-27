@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -21,7 +23,7 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
   int _selectedNavBarItem = 0;
-  Set<Photo> _selectedPhotos = Set<Photo>();
+  Set<Photo> _selectedPhotos = HashSet<Photo>();
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +36,18 @@ class _HomeWidgetState extends State<HomeWidget> {
             _selectedPhotos.clear();
           });
         },
+        onPhotosDeleted: (_) {
+          setState(() {
+            _selectedPhotos.clear();
+          });
+        },
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
       body: IndexedStack(
         children: <Widget>[
           GalleryContainer(
-            photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
+            _selectedPhotos,
+            (Set<Photo> selectedPhotos) {
               setState(() {
                 _selectedPhotos = selectedPhotos;
               });
