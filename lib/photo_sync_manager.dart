@@ -15,14 +15,22 @@ import 'package:myapp/core/constants.dart' as Constants;
 class PhotoSyncManager {
   final _logger = Logger();
   final _dio = Dio();
+  bool _isLoadInProgress = false;
+
   static final _lastSyncTimestampKey = "last_sync_timestamp_0";
   static final _lastDBUpdateTimestampKey = "last_db_update_timestamp";
 
-  PhotoSyncManager(List<AssetPathEntity> pathEntities) {
-    init(pathEntities);
-  }
+  PhotoSyncManager._privateConstructor();
+  static final PhotoSyncManager instance =
+      PhotoSyncManager._privateConstructor();
 
-  Future<void> init(List<AssetPathEntity> pathEntities) async {
+  Future<void> load(List<AssetPathEntity> pathEntities) async {
+    if (_isLoadInProgress) {
+      _logger.w("Load already in progress, skipping.");
+      return;
+    }
+    _isLoadInProgress = true;
+    _logger.i("Loading...");
     final prefs = await SharedPreferences.getInstance();
     var lastDBUpdateTimestamp = prefs.getInt(_lastDBUpdateTimestampKey);
     if (lastDBUpdateTimestamp == null) {
@@ -47,14 +55,19 @@ class PhotoSyncManager {
         }
       }
     }
-    photos.sort((first, second) =>
-        first.createTimestamp.compareTo(second.createTimestamp));
-
-    _updateDatabase(photos, prefs, lastDBUpdateTimestamp).then((_) {
-      _syncPhotos().then((_) {
-        _deletePhotos();
+    if (photos.isEmpty) {
+      _isLoadInProgress = false;
+      return;
+    } else {
+      photos.sort((first, second) =>
+          first.createTimestamp.compareTo(second.createTimestamp));
+      _updateDatabase(photos, prefs, lastDBUpdateTimestamp).then((_) {
+        _isLoadInProgress = false;
+        _syncPhotos().then((_) {
+          _deletePhotos();
+        });
       });
-    });
+    }
   }
 
   Future<bool> _updateDatabase(final List<Photo> photos,

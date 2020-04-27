@@ -60,4 +60,16 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       return loadingWidget;
     }
   }
+
+  @override
+  void didUpdateWidget(ThumbnailWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.photo.generatedId != oldWidget.photo.generatedId) {
+      setState(() {
+        _loadedSmallThumbnail = false;
+        _loadedLargeThumbnail = false;
+        _imageProvider = null;
+      });
+    }
+  }
 }

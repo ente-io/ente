@@ -35,13 +35,9 @@ class _GalleryState extends State<Gallery> {
   List<Photo> _photos;
 
   @override
-  void initState() {
-    _photos = widget.photos;
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    _photos = widget.photos;
+    Logger().i("Building with " + _photos.length.toString());
     _collatePhotos();
 
     return ListView.builder(

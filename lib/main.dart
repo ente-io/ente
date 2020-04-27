@@ -6,19 +6,20 @@ import 'package:myapp/photo_sync_manager.dart';
 import 'package:myapp/ui/home_widget.dart';
 import 'package:provider/provider.dart';
 
-final provider = PhotoProvider();
-final logger = Logger();
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
-  provider.refreshGalleryList().then((_) => PhotoSyncManager(provider.list));
+  PhotoProvider.instance
+      .refreshGalleryList()
+      .then((_) => PhotoSyncManager.instance.load(PhotoProvider.instance.list));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatelessWidget with WidgetsBindingObserver {
   final _title = 'Orma';
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addObserver(this);
+
     return MaterialApp(
       title: _title,
       theme: ThemeData.dark(),
@@ -27,5 +28,14 @@ class MyApp extends StatelessWidget {
         child: HomeWidget(_title),
       ),
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      PhotoProvider.instance.refreshGalleryList().then((_) {
+        return PhotoSyncManager.instance.load(PhotoProvider.instance.list);
+      });
+    }
   }
 }

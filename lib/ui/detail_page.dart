@@ -26,7 +26,6 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void initState() {
-    Logger().i("initState");
     _photos = widget.photos;
     _selectedIndex = widget.selectedIndex;
     _cachedImages = LRUMap<int, ZoomableImage>(5);
@@ -36,10 +35,12 @@ class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
     Logger().i("Opening " +
+        _photos[_selectedIndex].title +
+        ", " +
         _selectedIndex.toString() +
         " / " +
         _photos.length.toString() +
-        "photos .");
+        " photos .");
     return Scaffold(
       appBar: _buildAppBar(),
       body: Center(
