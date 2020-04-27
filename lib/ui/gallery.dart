@@ -37,6 +37,7 @@ class _GalleryState extends State<Gallery> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Investigate reason for multiple rebuilds on selection change
     _photos = widget.photos;
     _selectedPhotos = widget.selectedPhotos;
     _collatePhotos();
