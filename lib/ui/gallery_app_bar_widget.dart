@@ -25,7 +25,6 @@ class GalleryAppBarWidget extends StatefulWidget
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
-  PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
   @override
   Widget build(BuildContext context) {
     if (widget.selectedPhotos.isEmpty) {
@@ -106,7 +105,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           : await DatabaseHelper.instance.deletePhoto(photo);
     }
     Navigator.of(context, rootNavigator: true).pop();
-    photoLoader.reloadPhotos();
+    PhotoLoader.instance.reloadPhotos();
     if (widget.onPhotosDeleted != null) {
       widget.onPhotosDeleted(widget.selectedPhotos.toList());
     }

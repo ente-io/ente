@@ -133,12 +133,6 @@ class _GalleryState extends State<Gallery> {
     final page = DetailPage(
       _photos,
       _photos.indexOf(photo),
-      onPhotoDeleted: (photo) {
-        setState(() {
-          Logger().i("Photo deleted! ");
-          _photos.remove(photo);
-        });
-      },
     );
     Navigator.of(context).push(
       MaterialPageRoute(
