@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:logger/logger.dart';
-import 'package:http_parser/http_parser.dart';
 import 'package:myapp/core/event_bus.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/events/user_authenticated_event.dart';
@@ -79,6 +78,9 @@ class PhotoSyncManager {
           first.createTimestamp.compareTo(second.createTimestamp));
       _updateDatabase(photos, prefs, lastDBUpdateTimestamp).then((_) {
         _isSyncInProgress = false;
+        _syncPhotos().then((_) {
+          _deletePhotos();
+        });
       });
     }
   }
@@ -168,9 +170,10 @@ class PhotoSyncManager {
 
   Future<Photo> _uploadFile(Photo localPhoto) async {
     var formData = FormData.fromMap({
-      "file":
-          MultipartFile.fromFile((await localPhoto.getAsset().originFile).path),
-      "filename": localPhoto.title,
+      "file": MultipartFile.fromBytes((await localPhoto.getOriginalBytes()),
+          filename: localPhoto.title),
+      "title": localPhoto.title,
+      "createTimestamp": localPhoto.createTimestamp,
       "user": Configuration.instance.getUsername(),
       "token": Configuration.instance.getToken(),
     });

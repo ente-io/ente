@@ -20,6 +20,9 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
+    if (getEndpoint() == null) {
+      return "";
+    }
     return "http://" + getEndpoint() + ":8080";
   }
 

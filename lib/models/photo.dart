@@ -18,6 +18,7 @@ class Photo {
   Photo.fromJson(Map<String, dynamic> json)
       : uploadedFileId = json["fileId"],
         remotePath = json["path"],
+        title = json["title"],
         createTimestamp = json["createTimestamp"],
         syncTimestamp = json["syncTimestamp"];
 
