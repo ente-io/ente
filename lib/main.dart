@@ -14,7 +14,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget with WidgetsBindingObserver {
-  final _title = 'Orma';
+  final _title = 'ente photos';
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addObserver(this);

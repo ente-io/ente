@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:logger/logger.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:myapp/core/event_bus.dart';
 import 'package:myapp/db/db_helper.dart';
 import 'package:myapp/events/user_authenticated_event.dart';
@@ -167,7 +168,8 @@ class PhotoSyncManager {
 
   Future<Photo> _uploadFile(Photo localPhoto) async {
     var formData = FormData.fromMap({
-      "file": MultipartFile.fromBytes(await localPhoto.getOriginalBytes()),
+      "file":
+          MultipartFile.fromFile((await localPhoto.getAsset().originFile).path),
       "filename": localPhoto.title,
       "user": Configuration.instance.getUsername(),
       "token": Configuration.instance.getToken(),

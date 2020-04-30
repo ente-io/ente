@@ -48,7 +48,7 @@ class Photo {
   }
 
   Future<Uint8List> getOriginalBytes() {
-    return AssetEntity(id: localId).originBytes;
+    return getAsset().originBytes;
   }
 
   @override

@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
-  static final _databaseName = "orma.db";
+  static final _databaseName = "ente.db";
   static final _databaseVersion = 1;
 
   static final table = 'photos';
