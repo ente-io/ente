@@ -13,14 +13,13 @@ class SetupPage extends StatefulWidget {
 }
 
 class _SetupPageState extends State<SetupPage> {
-  bool _hasFoundEndpoint = Configuration.instance.getEndpoint() != null;
   bool _errorFindingEndpoint = false;
   String _enteredEndpoint = "";
 
   @override
   Widget build(BuildContext context) {
-    _hasFoundEndpoint = Configuration.instance.getEndpoint() != null;
-    if (!_hasFoundEndpoint && !_errorFindingEndpoint) {
+    if (Configuration.instance.getEndpoint() == null &&
+        !_errorFindingEndpoint) {
       EndpointFinder.instance.findEndpoint().then((endpoint) {
         setState(() {
           Configuration.instance.setEndpoint(endpoint);
@@ -41,9 +40,11 @@ class _SetupPageState extends State<SetupPage> {
   }
 
   Widget _getBody() {
-    if (!_hasFoundEndpoint && !_errorFindingEndpoint) {
+    if (Configuration.instance.getEndpoint() == null &&
+        !_errorFindingEndpoint) {
       return _getSearchScreen();
-    } else if (!_hasFoundEndpoint && _errorFindingEndpoint) {
+    } else if (Configuration.instance.getEndpoint() == null &&
+        _errorFindingEndpoint) {
       return _getManualEndpointEntryScreen();
     } else {
       return SignInWidget(() {

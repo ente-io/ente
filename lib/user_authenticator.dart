@@ -35,4 +35,30 @@ class UserAuthenticator {
       return false;
     });
   }
+
+  Future<bool> create(String username, String password) {
+    return _dio.post(
+        "http://" + Configuration.instance.getEndpoint() + ":8080/users/create",
+        queryParameters: {
+          "username": username,
+          "password": password
+        }).then((response) {
+      if (response.statusCode == 200 && response.data != null) {
+        Configuration.instance.setUsername(username);
+        Configuration.instance.setPassword(password);
+        Configuration.instance.setToken(response.data["token"]);
+        Bus.instance.fire(UserAuthenticatedEvent());
+        return true;
+      } else {
+        if (response.data != null && response.data["message"] != null) {
+          throw Exception(response.data["message"]);
+        } else {
+          throw Exception("Something went wrong");
+        }
+      }
+    }).catchError((e) {
+      _logger.e(e.toString());
+      throw e;
+    });
+  }
 }
