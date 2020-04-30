@@ -13,8 +13,8 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:myapp/models/photo.dart';
-import 'package:myapp/core/constants.dart' as Constants;
 
+import 'core/configuration.dart';
 import 'events/remote_sync_event.dart';
 
 class PhotoSyncManager {
@@ -134,7 +134,9 @@ class PhotoSyncManager {
     for (Photo photo in diff) {
       var localPath = path + basename(photo.remotePath);
       await _dio
-          .download(Constants.ENDPOINT + "/" + photo.remotePath, localPath)
+          .download(
+              Configuration.instance.getHttpEndpoint() + "/" + photo.remotePath,
+              localPath)
           .catchError((e) => _logger.e(e));
       // TODO: Save path
       photo.pathName = localPath;
@@ -145,9 +147,11 @@ class PhotoSyncManager {
   }
 
   Future<List<Photo>> _getDiff(int lastSyncTimestamp) async {
-    Response response = await _dio.get(Constants.ENDPOINT + "/diff",
+    Response response = await _dio.get(
+        Configuration.instance.getHttpEndpoint() + "/diff",
         queryParameters: {
-          "user": Constants.USER,
+          "user": Configuration.instance.getUsername(),
+          "token": Configuration.instance.getToken(),
           "lastSyncTimestamp": lastSyncTimestamp
         }).catchError((e) => _logger.e(e));
     if (response != null) {
@@ -165,10 +169,12 @@ class PhotoSyncManager {
     var formData = FormData.fromMap({
       "file": MultipartFile.fromBytes(await localPhoto.getOriginalBytes()),
       "filename": localPhoto.title,
-      "user": Constants.USER,
+      "user": Configuration.instance.getUsername(),
+      "token": Configuration.instance.getToken(),
     });
     return _dio
-        .post(Constants.ENDPOINT + "/upload", data: formData)
+        .post(Configuration.instance.getHttpEndpoint() + "/upload",
+            data: formData)
         .then((response) {
       _logger.i(response.toString());
       var photo = Photo.fromJson(response.data);
@@ -186,10 +192,12 @@ class PhotoSyncManager {
   }
 
   Future<void> _deletePhotoOnServer(Photo photo) async {
-    return _dio.post(Constants.ENDPOINT + "/delete", queryParameters: {
-      "user": Constants.USER,
-      "fileID": photo.uploadedFileId
-    }).catchError((e) => _logger.e(e));
+    return _dio.post(Configuration.instance.getHttpEndpoint() + "/delete",
+        queryParameters: {
+          "user": Configuration.instance.getUsername(),
+          "token": Configuration.instance.getToken(),
+          "fileID": photo.uploadedFileId
+        }).catchError((e) => _logger.e(e));
   }
 
   Future _initializeDirectories() async {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/core/configuration.dart';
 import 'package:myapp/face_search_manager.dart';
 import 'package:myapp/models/face.dart';
 import 'package:myapp/core/constants.dart' as Constants;
@@ -72,7 +73,8 @@ class SearchPage extends StatelessWidget {
       child: Hero(
         tag: "face_" + face.faceID.toString(),
         child: CircularNetworkImageWidget(
-            Constants.ENDPOINT + "/" + face.thumbnailPath, 60),
+            Configuration.instance.getHttpEndpoint() + "/" + face.thumbnailPath,
+            60),
       ),
     );
   }

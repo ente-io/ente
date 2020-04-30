@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/core/configuration.dart';
 import 'package:myapp/face_search_manager.dart';
 import 'package:myapp/models/face.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/ui/circular_network_image_widget.dart';
-import 'package:myapp/core/constants.dart' as Constants;
 import 'package:myapp/ui/thumbnail_widget.dart';
 
 import 'detail_page.dart';
@@ -25,7 +25,10 @@ class FaceSearchResultsPage extends StatelessWidget {
           Hero(
             tag: "face_" + _face.faceID.toString(),
             child: CircularNetworkImageWidget(
-                Constants.ENDPOINT + "/" + _face.thumbnailPath, 20),
+                Configuration.instance.getHttpEndpoint() +
+                    "/" +
+                    _face.thumbnailPath,
+                20),
           )
         ],
       ),

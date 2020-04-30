@@ -19,6 +19,10 @@ class Configuration {
     return preferences.getString(endpointKey);
   }
 
+  String getHttpEndpoint() {
+    return "http://" + getEndpoint() + ":8080";
+  }
+
   void setEndpoint(String endpoint) async {
     await preferences.setString(endpointKey, endpoint);
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/core/configuration.dart';
 import 'package:myapp/core/constants.dart' as Constants;
 
 class NetworkImageDetailPage extends StatelessWidget {
@@ -33,7 +34,8 @@ class NetworkImageDetailPage extends StatelessWidget {
       onVerticalDragUpdate: (details) {
         Navigator.pop(context);
       },
-      child: Image.network(Constants.ENDPOINT + "/" + _path),
+      child:
+          Image.network(Configuration.instance.getHttpEndpoint() + "/" + _path),
     );
   }
 }

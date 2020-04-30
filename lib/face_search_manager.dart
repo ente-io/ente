@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
-import 'package:myapp/core/constants.dart' as Constants;
+import 'package:myapp/core/configuration.dart';
 import 'package:myapp/db/db_helper.dart';
 
 import 'models/face.dart';
@@ -16,8 +16,11 @@ class FaceSearchManager {
 
   Future<List<Face>> getFaces() {
     return _dio
-        .get(Constants.ENDPOINT + "/faces",
-            queryParameters: {"user": Constants.USER})
+        .get(Configuration.instance.getHttpEndpoint() + "/faces",
+            queryParameters: {
+              "user": Configuration.instance.getUsername(),
+              "token": Configuration.instance.getToken()
+            })
         .then((response) => (response.data["faces"] as List)
             .map((face) => new Face.fromJson(face))
             .toList())
@@ -26,9 +29,13 @@ class FaceSearchManager {
 
   Future<List<Photo>> getFaceSearchResults(Face face) async {
     var futures = _dio.get(
-        Constants.ENDPOINT + "/search/face/" + face.faceID.toString(),
-        queryParameters: {"user": Constants.USER}).then((response) => (response
-            .data["results"] as List)
+        Configuration.instance.getHttpEndpoint() +
+            "/search/face/" +
+            face.faceID.toString(),
+        queryParameters: {
+          "user": Configuration.instance.getUsername(),
+          "token": Configuration.instance.getToken(),
+        }).then((response) => (response.data["results"] as List)
         .map((result) => (DatabaseHelper.instance.getPhotoByPath(result))));
     return Future.wait(await futures);
   }
