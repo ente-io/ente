@@ -2,8 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:logger/logger.dart';
+import 'package:myapp/core/event_bus.dart';
 import 'package:myapp/db/db_helper.dart';
+import 'package:myapp/events/user_authenticated_event.dart';
 import 'package:myapp/photo_loader.dart';
+import 'package:myapp/photo_provider.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -12,25 +15,33 @@ import 'package:dio/dio.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/core/constants.dart' as Constants;
 
+import 'events/remote_sync_event.dart';
+
 class PhotoSyncManager {
   final _logger = Logger();
   final _dio = Dio();
-  bool _isLoadInProgress = false;
+  bool _isSyncInProgress = false;
 
   static final _lastSyncTimestampKey = "last_sync_timestamp_0";
   static final _lastDBUpdateTimestampKey = "last_db_update_timestamp";
 
-  PhotoSyncManager._privateConstructor();
+  PhotoSyncManager._privateConstructor() {
+    Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
+      sync();
+    });
+  }
+
   static final PhotoSyncManager instance =
       PhotoSyncManager._privateConstructor();
 
-  Future<void> load(List<AssetPathEntity> pathEntities) async {
-    if (_isLoadInProgress) {
-      _logger.w("Load already in progress, skipping.");
+  Future<void> sync() async {
+    if (_isSyncInProgress) {
+      _logger.w("Sync already in progress, skipping.");
       return;
     }
-    _isLoadInProgress = true;
-    _logger.i("Loading...");
+    _isSyncInProgress = true;
+    _logger.i("Syncing...");
+
     final prefs = await SharedPreferences.getInstance();
     var lastDBUpdateTimestamp = prefs.getInt(_lastDBUpdateTimestampKey);
     if (lastDBUpdateTimestamp == null) {
@@ -38,6 +49,8 @@ class PhotoSyncManager {
       await _initializeDirectories();
     }
 
+    await PhotoProvider.instance.refreshGalleryList();
+    final pathEntities = PhotoProvider.instance.list;
     final photos = List<Photo>();
     for (AssetPathEntity pathEntity in pathEntities) {
       if (Platform.isIOS || pathEntity.name != "Recent") {
@@ -56,16 +69,15 @@ class PhotoSyncManager {
       }
     }
     if (photos.isEmpty) {
-      _isLoadInProgress = false;
-      return;
+      _isSyncInProgress = false;
+      _syncPhotos().then((_) {
+        _deletePhotos();
+      });
     } else {
       photos.sort((first, second) =>
           first.createTimestamp.compareTo(second.createTimestamp));
       _updateDatabase(photos, prefs, lastDBUpdateTimestamp).then((_) {
-        _isLoadInProgress = false;
-        _syncPhotos().then((_) {
-          _deletePhotos();
-        });
+        _isSyncInProgress = false;
       });
     }
   }
@@ -91,9 +103,11 @@ class PhotoSyncManager {
     _logger.i("Last sync timestamp: " + lastSyncTimestamp.toString());
 
     _getDiff(lastSyncTimestamp).then((diff) {
-      _downloadDiff(diff, prefs).then((_) {
-        _uploadDiff(prefs);
-      });
+      if (diff != null) {
+        _downloadDiff(diff, prefs).then((_) {
+          _uploadDiff(prefs);
+        });
+      }
     });
 
     // TODO:  Fix race conditions triggered due to concurrent syncs.
@@ -121,7 +135,7 @@ class PhotoSyncManager {
       var localPath = path + basename(photo.remotePath);
       await _dio
           .download(Constants.ENDPOINT + "/" + photo.remotePath, localPath)
-          .catchError(_onError);
+          .catchError((e) => _logger.e(e));
       // TODO: Save path
       photo.pathName = localPath;
       await DatabaseHelper.instance.insertPhoto(photo);
@@ -135,14 +149,15 @@ class PhotoSyncManager {
         queryParameters: {
           "user": Constants.USER,
           "lastSyncTimestamp": lastSyncTimestamp
-        }).catchError(_onError);
-    _logger.i(response.toString());
+        }).catchError((e) => _logger.e(e));
     if (response != null) {
+      Bus.instance.fire(RemoteSyncEvent(true));
       return (response.data["diff"] as List)
           .map((photo) => new Photo.fromJson(photo))
           .toList();
     } else {
-      return List<Photo>();
+      Bus.instance.fire(RemoteSyncEvent(false));
+      return null;
     }
   }
 
@@ -158,7 +173,7 @@ class PhotoSyncManager {
       _logger.i(response.toString());
       var photo = Photo.fromJson(response.data);
       return photo;
-    }).catchError(_onError);
+    }).catchError((e) => _logger.e(e));
   }
 
   Future<void> _deletePhotos() async {
@@ -174,11 +189,7 @@ class PhotoSyncManager {
     return _dio.post(Constants.ENDPOINT + "/delete", queryParameters: {
       "user": Constants.USER,
       "fileID": photo.uploadedFileId
-    }).catchError((e) => _onError(e));
-  }
-
-  void _onError(error) {
-    _logger.e(error);
+    }).catchError((e) => _logger.e(e));
   }
 
   Future _initializeDirectories() async {

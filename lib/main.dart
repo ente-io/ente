@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:myapp/core/configuration.dart';
 import 'package:myapp/photo_loader.dart';
-import 'package:myapp/photo_provider.dart';
 import 'package:myapp/photo_sync_manager.dart';
 import 'package:myapp/ui/home_widget.dart';
 import 'package:provider/provider.dart';
@@ -9,9 +9,8 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
-  PhotoProvider.instance
-      .refreshGalleryList()
-      .then((_) => PhotoSyncManager.instance.load(PhotoProvider.instance.list));
+  Configuration.instance.init();
+  PhotoSyncManager.instance.sync();
 }
 
 class MyApp extends StatelessWidget with WidgetsBindingObserver {
@@ -33,9 +32,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      PhotoProvider.instance.refreshGalleryList().then((_) {
-        return PhotoSyncManager.instance.load(PhotoProvider.instance.list);
-      });
+      PhotoSyncManager.instance.sync();
     }
   }
 }

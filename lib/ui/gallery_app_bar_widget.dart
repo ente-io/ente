@@ -1,8 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:myapp/core/event_bus.dart';
 import 'package:myapp/db/db_helper.dart';
+import 'package:myapp/events/remote_sync_event.dart';
 import 'package:myapp/models/photo.dart';
 import 'package:myapp/photo_loader.dart';
+import 'package:myapp/ui/setup_page.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:myapp/utils/share_util.dart';
 
@@ -24,10 +28,25 @@ class GalleryAppBarWidget extends StatefulWidget
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
+  bool _hasSyncErrors = false;
+
+  @override
+  void initState() {
+    Bus.instance.on<RemoteSyncEvent>().listen((event) {
+      setState(() {
+        _hasSyncErrors = !event.success;
+      });
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.selectedPhotos.isEmpty) {
-      return AppBar(title: Text(widget.title));
+      return AppBar(
+        title: Text(widget.title),
+        actions: _getDefaultActions(context),
+      );
     }
 
     return AppBar(
@@ -38,11 +57,24 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
       ),
       title: Text(widget.selectedPhotos.length.toString()),
-      actions: _getActions(context),
+      actions: _getPhotoActions(context),
     );
   }
 
-  List<Widget> _getActions(BuildContext context) {
+  List<Widget> _getDefaultActions(BuildContext context) {
+    List<Widget> actions = List<Widget>();
+    if (_hasSyncErrors) {
+      actions.add(IconButton(
+        icon: Icon(Icons.sync_problem),
+        onPressed: () {
+          _openSyncConfiguration(context);
+        },
+      ));
+    }
+    return actions;
+  }
+
+  List<Widget> _getPhotoActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
     if (widget.selectedPhotos.isNotEmpty) {
       actions.add(IconButton(
@@ -118,5 +150,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (widget.onSelectionClear != null) {
       widget.onSelectionClear();
     }
+  }
+
+  void _openSyncConfiguration(BuildContext context) {
+    final page = SetupPage();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: RouteSettings(name: "/setup"),
+        builder: (BuildContext context) {
+          return page;
+        },
+      ),
+    );
   }
 }
