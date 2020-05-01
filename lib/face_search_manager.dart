@@ -17,10 +17,7 @@ class FaceSearchManager {
   Future<List<Face>> getFaces() {
     return _dio
         .get(Configuration.instance.getHttpEndpoint() + "/faces",
-            queryParameters: {
-              "user": Configuration.instance.getUsername(),
-              "token": Configuration.instance.getToken()
-            })
+            queryParameters: {"token": Configuration.instance.getToken()})
         .then((response) => (response.data["faces"] as List)
             .map((face) => new Face.fromJson(face))
             .toList())
@@ -33,7 +30,6 @@ class FaceSearchManager {
             "/search/face/" +
             face.faceID.toString(),
         queryParameters: {
-          "user": Configuration.instance.getUsername(),
           "token": Configuration.instance.getToken(),
         }).then((response) => (response.data["results"] as List)
         .map((result) => (DatabaseHelper.instance.getPhotoByPath(result))));

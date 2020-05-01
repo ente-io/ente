@@ -153,7 +153,6 @@ class PhotoSyncManager {
     Response response = await _dio.get(
         Configuration.instance.getHttpEndpoint() + "/diff",
         queryParameters: {
-          "user": Configuration.instance.getUsername(),
           "token": Configuration.instance.getToken(),
           "lastSyncTimestamp": lastSyncTimestamp
         }).catchError((e) => _logger.e(e));
@@ -174,7 +173,6 @@ class PhotoSyncManager {
           filename: localPhoto.title),
       "title": localPhoto.title,
       "createTimestamp": localPhoto.createTimestamp,
-      "user": Configuration.instance.getUsername(),
       "token": Configuration.instance.getToken(),
     });
     return _dio
@@ -199,7 +197,6 @@ class PhotoSyncManager {
   Future<void> _deletePhotoOnServer(Photo photo) async {
     return _dio.post(Configuration.instance.getHttpEndpoint() + "/delete",
         queryParameters: {
-          "user": Configuration.instance.getUsername(),
           "token": Configuration.instance.getToken(),
           "fileID": photo.uploadedFileId
         }).catchError((e) => _logger.e(e));
