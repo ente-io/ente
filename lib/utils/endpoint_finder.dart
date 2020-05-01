@@ -25,12 +25,8 @@ class EndpointFinder {
       }
       Logger().i(prefix);
 
-      for (int i = 1; i <= 10; i++) {
+      for (int i = 1; i <= 255; i++) {
         var endpoint = prefix + i.toString();
-        if (i == 300) {
-          endpoint = "192.168.0.101";
-        }
-        Logger().i("Trying " + endpoint);
         try {
           final success = await ping(endpoint);
           if (success) {
