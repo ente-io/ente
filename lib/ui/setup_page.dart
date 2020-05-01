@@ -156,9 +156,9 @@ class _AnimatedSearchIconWidgetState extends State<AnimatedSearchIconWidget>
         AnimationController(duration: const Duration(seconds: 1), vsync: this);
     _animation = Tween<double>(begin: 100, end: 200).animate(_controller)
       ..addListener(() {
-        setState(() {
-          // The state that has changed here is the animation object’s value.
-        });
+        if (mounted) {
+          setState(() {});
+        }
       })
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
