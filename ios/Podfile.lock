@@ -4,8 +4,47 @@ PODS:
     - Reachability
   - connectivity_macos (0.0.1):
     - Flutter
+  - Crashlytics (3.14.0):
+    - Fabric (~> 1.10.2)
   - esys_flutter_share (0.0.1):
     - Flutter
+  - Fabric (1.10.2)
+  - Firebase/Core (6.23.0):
+    - Firebase/CoreOnly
+    - FirebaseAnalytics (= 6.4.2)
+  - Firebase/CoreOnly (6.23.0):
+    - FirebaseCore (= 6.6.7)
+  - firebase_crashlytics (0.0.1):
+    - Crashlytics
+    - Fabric
+    - Firebase/Core
+    - Flutter
+  - FirebaseAnalytics (6.4.2):
+    - FirebaseCore (~> 6.6)
+    - FirebaseInstallations (~> 1.2)
+    - GoogleAppMeasurement (= 6.4.2)
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
+    - GoogleUtilities/MethodSwizzler (~> 6.0)
+    - GoogleUtilities/Network (~> 6.0)
+    - "GoogleUtilities/NSData+zlib (~> 6.0)"
+    - nanopb (= 0.3.9011)
+  - FirebaseCore (6.6.7):
+    - FirebaseCoreDiagnostics (~> 1.2)
+    - FirebaseCoreDiagnosticsInterop (~> 1.2)
+    - GoogleUtilities/Environment (~> 6.5)
+    - GoogleUtilities/Logger (~> 6.5)
+  - FirebaseCoreDiagnostics (1.2.4):
+    - FirebaseCoreDiagnosticsInterop (~> 1.2)
+    - GoogleDataTransportCCTSupport (~> 3.0)
+    - GoogleUtilities/Environment (~> 6.5)
+    - GoogleUtilities/Logger (~> 6.5)
+    - nanopb (~> 0.3.901)
+  - FirebaseCoreDiagnosticsInterop (1.2.0)
+  - FirebaseInstallations (1.2.0):
+    - FirebaseCore (~> 6.6)
+    - GoogleUtilities/Environment (~> 6.6)
+    - GoogleUtilities/UserDefaults (~> 6.6)
+    - PromisesObjC (~> 1.2)
   - Flutter (1.0.0)
   - flutter_image_compress (0.0.1):
     - Flutter
@@ -14,6 +53,35 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
+  - GoogleAppMeasurement (6.4.2):
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
+    - GoogleUtilities/MethodSwizzler (~> 6.0)
+    - GoogleUtilities/Network (~> 6.0)
+    - "GoogleUtilities/NSData+zlib (~> 6.0)"
+    - nanopb (= 0.3.9011)
+  - GoogleDataTransport (6.0.0)
+  - GoogleDataTransportCCTSupport (3.0.0):
+    - GoogleDataTransport (~> 6.0)
+    - nanopb (~> 0.3.901)
+  - GoogleUtilities/AppDelegateSwizzler (6.6.0):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+  - GoogleUtilities/Environment (6.6.0):
+    - PromisesObjC (~> 1.2)
+  - GoogleUtilities/Logger (6.6.0):
+    - GoogleUtilities/Environment
+  - GoogleUtilities/MethodSwizzler (6.6.0):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/Network (6.6.0):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (6.6.0)"
+  - GoogleUtilities/Reachability (6.6.0):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/UserDefaults (6.6.0):
+    - GoogleUtilities/Logger
   - libwebp (1.1.0):
     - libwebp/demux (= 1.1.0)
     - libwebp/mux (= 1.1.0)
@@ -28,12 +96,18 @@ PODS:
   - Mantle (2.1.1):
     - Mantle/extobjc (= 2.1.1)
   - Mantle/extobjc (2.1.1)
+  - nanopb (0.3.9011):
+    - nanopb/decode (= 0.3.9011)
+    - nanopb/encode (= 0.3.9011)
+  - nanopb/decode (0.3.9011)
+  - nanopb/encode (0.3.9011)
   - path_provider (0.0.1):
     - Flutter
   - path_provider_macos (0.0.1):
     - Flutter
   - photo_manager (0.0.1):
     - Flutter
+  - PromisesObjC (1.2.8)
   - Reachability (3.2)
   - SDWebImage/Core (5.7.3)
   - SDWebImageWebPCoder (0.6.1):
@@ -53,6 +127,7 @@ DEPENDENCIES:
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
   - connectivity_macos (from `.symlinks/plugins/connectivity_macos/ios`)
   - esys_flutter_share (from `.symlinks/plugins/esys_flutter_share/ios`)
+  - firebase_crashlytics (from `.symlinks/plugins/firebase_crashlytics/ios`)
   - Flutter (from `Flutter`)
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
   - local_image_provider (from `.symlinks/plugins/local_image_provider/ios`)
@@ -66,9 +141,23 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - Crashlytics
+    - Fabric
+    - Firebase
+    - FirebaseAnalytics
+    - FirebaseCore
+    - FirebaseCoreDiagnostics
+    - FirebaseCoreDiagnosticsInterop
+    - FirebaseInstallations
     - FMDB
+    - GoogleAppMeasurement
+    - GoogleDataTransport
+    - GoogleDataTransportCCTSupport
+    - GoogleUtilities
     - libwebp
     - Mantle
+    - nanopb
+    - PromisesObjC
     - Reachability
     - SDWebImage
     - SDWebImageWebPCoder
@@ -80,6 +169,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/connectivity_macos/ios"
   esys_flutter_share:
     :path: ".symlinks/plugins/esys_flutter_share/ios"
+  firebase_crashlytics:
+    :path: ".symlinks/plugins/firebase_crashlytics/ios"
   Flutter:
     :path: Flutter
   flutter_image_compress:
@@ -104,16 +195,31 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   connectivity: 6e94255659cc86dcbef1d452ad3e0491bb1b3e75
   connectivity_macos: e2e9731b6b22dda39eb1b128f6969d574460e191
+  Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
   esys_flutter_share: 403498dab005b36ce1f8d7aff377e81f0621b0b4
+  Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
+  Firebase: 585ae467b3edda6a5444e788fda6888f024d8d6f
+  firebase_crashlytics: bd8c58df07f107cb7e1a20cb190b9a468e0a69fd
+  FirebaseAnalytics: 558f7a03d19de451093032c806f39d5f9dff096e
+  FirebaseCore: a2788a0d5f6c1dff17b8f79b4a73654a8d4bfdbd
+  FirebaseCoreDiagnostics: b59c024493a409f8aecba02c99928d0d8431d159
+  FirebaseCoreDiagnosticsInterop: 296e2c5f5314500a850ad0b83e9e7c10b011a850
+  FirebaseInstallations: 2119fb3e46b0a88bfdbf12562f855ee3252462fa
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_image_compress: 082f8daaf6c1b0c9fe798251c750ef0ecd98d7ae
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  GoogleAppMeasurement: 2253e99c1f22638cf234c059144660c338ad76c3
+  GoogleDataTransport: 061fe7d9b476710e3cd8ea51e8e07d8b67c2b420
+  GoogleDataTransportCCTSupport: 0f39025e8cf51f168711bd3fb773938d7e62ddb5
+  GoogleUtilities: 39530bc0ad980530298e9c4af8549e991fd033b1
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
   local_image_provider: cf979b81bc1cacc81867d3511a1b6b7216411e93
   Mantle: 35238ae6f2e2b2d474fa7b67fee82a59fea71915
+  nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
   path_provider_macos: f760a3c5b04357c380e2fddb6f9db6f3015897e0
   photo_manager: f7c619c2cc8c2adb8d85c63363babac477de9c67
+  PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   SDWebImage: 97351f6582ceca541ea294ba66a1fcb342a331c2
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21

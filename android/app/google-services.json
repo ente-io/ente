@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "115334189746",
+    "firebase_url": "https://ente-photos-d18bb.firebaseio.com",
+    "project_id": "ente-photos-d18bb",
+    "storage_bucket": "ente-photos-d18bb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115334189746:android:58d17810efc8f7610b6fab",
+        "android_client_info": {
+          "package_name": "io.ente.photos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "115334189746-aa3bsingrkb3jp8e3lh48lupeabbkbpj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiWlE9VAVD2RptqWrmCcbF_i5ZowUoOko"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "115334189746-aa3bsingrkb3jp8e3lh48lupeabbkbpj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
