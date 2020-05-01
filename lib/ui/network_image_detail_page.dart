@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/core/configuration.dart';
-import 'package:myapp/core/constants.dart' as Constants;
+import 'package:photos/core/configuration.dart';
 
 class NetworkImageDetailPage extends StatelessWidget {
   final String _path;

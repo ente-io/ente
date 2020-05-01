@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:myapp/core/lru_map.dart';
-import 'package:myapp/models/photo.dart';
+import 'lru_map.dart';
+import 'package:photos/models/photo.dart';
 
 class ImageLruCache {
   static LRUMap<int, Uint8List> _map = LRUMap(500);

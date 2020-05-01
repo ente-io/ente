@@ -1,4 +1,4 @@
-import 'package:myapp/models/photo.dart';
+import 'photo.dart';
 
 class Album {
   final String name;

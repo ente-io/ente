@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:myapp/core/configuration.dart';
-import 'package:myapp/photo_loader.dart';
-import 'package:myapp/photo_sync_manager.dart';
-import 'package:myapp/ui/home_widget.dart';
+import 'core/configuration.dart';
+import 'photo_loader.dart';
+import 'photo_sync_manager.dart';
+import 'ui/home_widget.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -14,7 +14,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget with WidgetsBindingObserver {
-  final _title = 'ente photos';
+  final _title = 'Photos';
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addObserver(this);

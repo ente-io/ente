@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
-import 'package:myapp/core/configuration.dart';
-import 'package:myapp/core/event_bus.dart';
+import 'core/configuration.dart';
+import 'core/event_bus.dart';
 
 import 'events/user_authenticated_event.dart';
 

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/core/configuration.dart';
-import 'package:myapp/face_search_manager.dart';
-import 'package:myapp/models/face.dart';
-import 'package:myapp/core/constants.dart' as Constants;
-import 'package:myapp/ui/circular_network_image_widget.dart';
-import 'package:myapp/ui/face_search_results_page.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/face_search_manager.dart';
+import 'package:photos/models/face.dart';
+import 'package:photos/ui/circular_network_image_widget.dart';
+import 'package:photos/ui/face_search_results_page.dart';
 
 class SearchPage extends StatelessWidget {
   final FaceSearchManager _faceSearchManager = FaceSearchManager.instance;

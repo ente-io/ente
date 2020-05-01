@@ -2,17 +2,17 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:logger/logger.dart';
-import 'package:myapp/core/event_bus.dart';
-import 'package:myapp/db/db_helper.dart';
-import 'package:myapp/events/user_authenticated_event.dart';
-import 'package:myapp/photo_loader.dart';
-import 'package:myapp/photo_provider.dart';
+import 'core/event_bus.dart';
+import 'db/db_helper.dart';
+import 'events/user_authenticated_event.dart';
+import 'photo_loader.dart';
+import 'photo_provider.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
-import 'package:myapp/models/photo.dart';
+import 'models/photo.dart';
 
 import 'core/configuration.dart';
 import 'events/remote_sync_event.dart';

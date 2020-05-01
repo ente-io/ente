@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:myapp/models/photo.dart';
-import 'package:myapp/utils/gallery_items_filter.dart';
+import 'package:photos/models/photo.dart';
+import 'package:photos/utils/gallery_items_filter.dart';
 import 'package:path/path.dart';
 
 class ImportantItemsFilter implements GalleryItemsFilter {

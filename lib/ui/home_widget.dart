@@ -3,12 +3,12 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:myapp/models/photo.dart';
-import 'package:myapp/photo_loader.dart';
-import 'package:myapp/ui/album_list_widget.dart';
-import 'package:myapp/ui/change_notifier_builder.dart';
-import 'package:myapp/ui/gallery_app_bar_widget.dart';
-import 'package:myapp/ui/gallery_container_widget.dart';
+import 'package:photos/models/photo.dart';
+import 'package:photos/photo_loader.dart';
+import 'package:photos/ui/album_list_widget.dart';
+import 'package:photos/ui/change_notifier_builder.dart';
+import 'package:photos/ui/gallery_app_bar_widget.dart';
+import 'package:photos/ui/gallery_container_widget.dart';
 import 'package:provider/provider.dart';
 
 class HomeWidget extends StatefulWidget {

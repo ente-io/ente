@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/core/thumbnail_cache.dart';
-import 'package:myapp/models/photo.dart';
-import 'package:myapp/core/constants.dart';
+import 'package:photos/core/thumbnail_cache.dart';
+import 'package:photos/models/photo.dart';
+import 'package:photos/core/constants.dart';
 
 class ThumbnailWidget extends StatefulWidget {
   final Photo photo;

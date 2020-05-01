@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:myapp/core/configuration.dart';
-import 'package:myapp/user_authenticator.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/user_authenticator.dart';
 
 class SignInWidget extends StatefulWidget {
   final Function() onReconfigurationRequested;

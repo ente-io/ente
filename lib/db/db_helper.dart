@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:myapp/models/photo.dart';
+import 'package:photos/models/photo.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';

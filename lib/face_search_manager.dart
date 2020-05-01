@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
-import 'package:myapp/core/configuration.dart';
-import 'package:myapp/db/db_helper.dart';
+import 'core/configuration.dart';
+import 'db/db_helper.dart';
 
 import 'models/face.dart';
 import 'models/photo.dart';

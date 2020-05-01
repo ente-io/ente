@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/core/configuration.dart';
-import 'package:myapp/face_search_manager.dart';
-import 'package:myapp/models/face.dart';
-import 'package:myapp/models/photo.dart';
-import 'package:myapp/ui/circular_network_image_widget.dart';
-import 'package:myapp/ui/thumbnail_widget.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/face_search_manager.dart';
+import 'package:photos/models/face.dart';
+import 'package:photos/models/photo.dart';
+import 'package:photos/ui/circular_network_image_widget.dart';
+import 'package:photos/ui/thumbnail_widget.dart';
 
 import 'detail_page.dart';
 

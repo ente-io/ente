@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:myapp/models/album.dart';
-import 'package:myapp/models/photo.dart';
-import 'package:myapp/ui/gallery.dart';
-import 'package:myapp/ui/gallery_app_bar_widget.dart';
+import 'package:photos/models/album.dart';
+import 'package:photos/models/photo.dart';
+import 'package:photos/ui/gallery.dart';
+import 'package:photos/ui/gallery_app_bar_widget.dart';
 
 class AlbumPage extends StatefulWidget {
   final Album album;

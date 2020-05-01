@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
-import 'package:myapp/core/configuration.dart';
-import 'package:myapp/ui/sign_in_widget.dart';
-import 'package:myapp/utils/endpoint_finder.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/ui/sign_in_widget.dart';
+import 'package:photos/utils/endpoint_finder.dart';
 
 class SetupPage extends StatefulWidget {
   SetupPage({key}) : super(key: key);

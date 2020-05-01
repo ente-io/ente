@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:myapp/db/db_helper.dart';
-import 'package:myapp/models/photo.dart';
+import 'db/db_helper.dart';
+import 'models/photo.dart';
 
 class PhotoLoader extends ChangeNotifier {
   final logger = Logger();

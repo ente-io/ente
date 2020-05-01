@@ -4,15 +4,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
-import 'package:myapp/core/thumbnail_cache.dart';
-import 'package:myapp/models/photo.dart';
-import 'package:myapp/photo_loader.dart';
-import 'package:myapp/ui/detail_page.dart';
-import 'package:myapp/ui/thumbnail_widget.dart';
-import 'package:myapp/utils/date_time_util.dart';
+import 'package:photos/core/thumbnail_cache.dart';
+import 'package:photos/models/photo.dart';
+import 'package:photos/photo_loader.dart';
+import 'package:photos/ui/detail_page.dart';
+import 'package:photos/ui/thumbnail_widget.dart';
+import 'package:photos/utils/date_time_util.dart';
 import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import 'package:myapp/core/constants.dart';
+import 'package:photos/core/constants.dart';
 
 class Gallery extends StatefulWidget {
   final List<Photo> photos;

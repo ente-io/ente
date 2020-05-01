@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:esys_flutter_share/esys_flutter_share.dart';
-import 'package:myapp/models/photo.dart';
+import 'package:photos/models/photo.dart';
 import 'package:path/path.dart';
 
 Future<void> share(Photo photo) async {

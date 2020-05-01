@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:myapp/core/event_bus.dart';
-import 'package:myapp/db/db_helper.dart';
-import 'package:myapp/events/remote_sync_event.dart';
-import 'package:myapp/models/photo.dart';
-import 'package:myapp/photo_loader.dart';
-import 'package:myapp/ui/setup_page.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/db_helper.dart';
+import 'package:photos/events/remote_sync_event.dart';
+import 'package:photos/models/photo.dart';
+import 'package:photos/photo_loader.dart';
+import 'package:photos/ui/setup_page.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:myapp/utils/share_util.dart';
+import 'package:photos/utils/share_util.dart';
 
 class GalleryAppBarWidget extends StatefulWidget
     implements PreferredSizeWidget {

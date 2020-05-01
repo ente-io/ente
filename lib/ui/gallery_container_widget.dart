@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:myapp/models/photo.dart';
-import 'package:myapp/photo_loader.dart';
-import 'package:myapp/ui/change_notifier_builder.dart';
-import 'package:myapp/ui/gallery.dart';
-import 'package:myapp/ui/loading_widget.dart';
-import 'package:myapp/ui/search_page.dart';
-import 'package:myapp/utils/important_items_filter.dart';
+import 'package:photos/models/photo.dart';
+import 'package:photos/photo_loader.dart';
+import 'package:photos/ui/change_notifier_builder.dart';
+import 'package:photos/ui/gallery.dart';
+import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/search_page.dart';
+import 'package:photos/utils/important_items_filter.dart';
 import 'package:provider/provider.dart';
 
 // TODO: Remove redundant layer
