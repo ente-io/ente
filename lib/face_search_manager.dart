@@ -1,13 +1,13 @@
 import 'package:dio/dio.dart';
-import 'package:logger/logger.dart';
 import 'core/configuration.dart';
 import 'db/db_helper.dart';
+import 'package:logging/logging.dart';
 
 import 'models/face.dart';
 import 'models/photo.dart';
 
 class FaceSearchManager {
-  final _logger = Logger();
+  final logger = Logger("FaceSearchManager");
   final _dio = Dio();
 
   FaceSearchManager._privateConstructor();
@@ -37,6 +37,6 @@ class FaceSearchManager {
   }
 
   void _onError(error) {
-    _logger.e(error);
+    logger.severe(error);
   }
 }

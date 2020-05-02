@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
-import 'package:logger/logger.dart';
+import 'package:logging/logging.dart';
 
 class EndpointFinder {
   final _dio = Dio();
+  final logger = Logger("EndpointFinder");
 
   EndpointFinder._privateConstructor() {
     _dio.options = BaseOptions(connectTimeout: 200);
@@ -15,7 +16,7 @@ class EndpointFinder {
 
   Future<String> findEndpoint() {
     return (Connectivity().getWifiIP()).then((ip) async {
-      Logger().i(ip);
+      logger.info(ip);
       final ipSplit = ip.split(".");
       var prefix = "";
       for (int index = 0; index < ipSplit.length; index++) {
@@ -23,7 +24,7 @@ class EndpointFinder {
           prefix += ipSplit[index] + ".";
         }
       }
-      Logger().i(prefix);
+      logger.info(prefix);
 
       for (int i = 1; i <= 255; i++) {
         var endpoint = prefix + i.toString();
@@ -43,7 +44,7 @@ class EndpointFinder {
   Future<bool> ping(String endpoint) async {
     return _dio.get("http://" + endpoint + ":8080/ping").then((response) {
       if (response.data["message"] == "pong") {
-        Logger().i("Found " + endpoint);
+        logger.info("Found " + endpoint);
         return true;
       } else {
         return false;

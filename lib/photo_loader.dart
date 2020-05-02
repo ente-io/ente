@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
+import 'package:logging/logging.dart';
 import 'db/db_helper.dart';
 import 'models/photo.dart';
 
 class PhotoLoader extends ChangeNotifier {
-  final logger = Logger();
+  final logger = Logger("PhotoLoader");
   final _photos = List<Photo>();
 
   PhotoLoader._privateConstructor();
@@ -26,7 +26,7 @@ class PhotoLoader extends ChangeNotifier {
 
   void reloadPhotos() async {
     await loadPhotos();
-    logger.i("Reloading...");
+    logger.info("Reloading...");
     notifyListeners();
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/db_helper.dart';
 import 'package:photos/events/remote_sync_event.dart';
@@ -67,6 +66,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       actions.add(IconButton(
         icon: Icon(Icons.sync_problem),
         onPressed: () {
+          final list = new List<int>();
+          print(list[0]);
           _openSyncConfiguration(context);
         },
       ));

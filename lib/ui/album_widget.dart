@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:photos/models/album.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
+import 'package:logging/logging.dart';
 
 class AlbumPage extends StatefulWidget {
   final Album album;
@@ -15,6 +15,7 @@ class AlbumPage extends StatefulWidget {
 }
 
 class _AlbumPageState extends State<AlbumPage> {
+  final logger = Logger("AlbumPageState");
   Set<Photo> _selectedPhotos = Set<Photo>();
 
   @override
@@ -32,7 +33,7 @@ class _AlbumPageState extends State<AlbumPage> {
           setState(() {
             for (Photo deletedPhoto in deletedPhotos) {
               var index = widget.album.photos.indexOf(deletedPhoto);
-              Logger().i("Deleting " + index.toString());
+              logger.info("Deleting " + index.toString());
               widget.album.photos.removeAt(index);
             }
             _selectedPhotos.clear();

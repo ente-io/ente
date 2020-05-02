@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:logger/logger.dart';
+import 'package:logging/logging.dart';
 import 'core/event_bus.dart';
 import 'db/db_helper.dart';
 import 'events/user_authenticated_event.dart';
@@ -18,7 +18,7 @@ import 'core/configuration.dart';
 import 'events/remote_sync_event.dart';
 
 class PhotoSyncManager {
-  final _logger = Logger();
+  final _logger = Logger("PhotoSyncManager");
   final _dio = Dio();
   bool _isSyncInProgress = false;
 
@@ -36,11 +36,11 @@ class PhotoSyncManager {
 
   Future<void> sync() async {
     if (_isSyncInProgress) {
-      _logger.w("Sync already in progress, skipping.");
+      _logger.warning("Sync already in progress, skipping.");
       return;
     }
     _isSyncInProgress = true;
-    _logger.i("Syncing...");
+    _logger.info("Syncing...");
 
     final prefs = await SharedPreferences.getInstance();
     var lastDBUpdateTimestamp = prefs.getInt(_lastDBUpdateTimestampKey);
@@ -62,7 +62,7 @@ class PhotoSyncManager {
             try {
               photos.add(await Photo.fromAsset(pathEntity, entity));
             } catch (e) {
-              _logger.e(e);
+              _logger.severe(e);
             }
           }
         }
@@ -103,7 +103,7 @@ class PhotoSyncManager {
     if (lastSyncTimestamp == null) {
       lastSyncTimestamp = 0;
     }
-    _logger.i("Last sync timestamp: " + lastSyncTimestamp.toString());
+    _logger.info("Last sync timestamp: " + lastSyncTimestamp.toString());
 
     _getDiff(lastSyncTimestamp).then((diff) {
       if (diff != null) {
@@ -140,7 +140,7 @@ class PhotoSyncManager {
           .download(
               Configuration.instance.getHttpEndpoint() + "/" + photo.remotePath,
               localPath)
-          .catchError((e) => _logger.e(e));
+          .catchError((e) => _logger.severe(e));
       // TODO: Save path
       photo.pathName = localPath;
       await DatabaseHelper.instance.insertPhoto(photo);
@@ -155,7 +155,7 @@ class PhotoSyncManager {
         queryParameters: {
           "token": Configuration.instance.getToken(),
           "lastSyncTimestamp": lastSyncTimestamp
-        }).catchError((e) => _logger.e(e));
+        }).catchError((e) => _logger.severe(e));
     if (response != null) {
       Bus.instance.fire(RemoteSyncEvent(true));
       return (response.data["diff"] as List)
@@ -179,10 +179,10 @@ class PhotoSyncManager {
         .post(Configuration.instance.getHttpEndpoint() + "/upload",
             data: formData)
         .then((response) {
-      _logger.i(response.toString());
+      _logger.info(response.toString());
       var photo = Photo.fromJson(response.data);
       return photo;
-    }).catchError((e) => _logger.e(e));
+    }).catchError((e) => _logger.severe(e));
   }
 
   Future<void> _deletePhotos() async {
@@ -199,7 +199,7 @@ class PhotoSyncManager {
         queryParameters: {
           "token": Configuration.instance.getToken(),
           "fileID": photo.uploadedFileId
-        }).catchError((e) => _logger.e(e));
+        }).catchError((e) => _logger.severe(e));
   }
 
   Future _initializeDirectories() async {
@@ -211,7 +211,7 @@ class PhotoSyncManager {
   Future<bool> _insertPhotosToDB(
       List<Photo> photos, SharedPreferences prefs, int timestamp) async {
     await DatabaseHelper.instance.insertPhotos(photos);
-    _logger.i("Inserted " + photos.length.toString() + " photos.");
+    _logger.info("Inserted " + photos.length.toString() + " photos.");
     PhotoLoader.instance.reloadPhotos();
     return await prefs.setInt(_lastDBUpdateTimestampKey, timestamp);
   }

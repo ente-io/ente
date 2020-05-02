@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:photos/core/lru_map.dart';
 import 'package:photos/models/photo.dart';
 import 'extents_page_view.dart';
 import 'zoomable_image.dart';
 import 'package:photos/utils/share_util.dart';
+import 'package:logging/logging.dart';
 
 class DetailPage extends StatefulWidget {
   final List<Photo> photos;
@@ -18,6 +18,7 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
+  final logger = Logger("DetailPageState");
   bool _shouldDisableScroll = false;
   List<Photo> _photos;
   int _selectedIndex = 0;
@@ -34,7 +35,7 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    Logger().i("Opening " +
+    logger.info("Opening " +
         _photos[_selectedIndex].toString() +
         ". " +
         _selectedIndex.toString() +
@@ -72,7 +73,7 @@ class _DetailPageState extends State<DetailPage> {
       },
       extents: 1,
       onPageChanged: (int index) {
-        Logger().i("onPageChanged to " + index.toString());
+        logger.info("onPageChanged to " + index.toString());
         _selectedIndex = index;
       },
       physics: _shouldDisableScroll

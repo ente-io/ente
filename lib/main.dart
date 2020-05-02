@@ -1,24 +1,38 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:photos/core/constants.dart';
 import 'core/configuration.dart';
 import 'photo_loader.dart';
 import 'photo_sync_manager.dart';
 import 'ui/home_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry/sentry.dart';
+import 'package:super_logging/super_logging.dart';
+import 'package:logging/logging.dart';
+
+final logger = Logger("main");
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SuperLogging.main(LogConfig(
+    body: _main,
+    sentryDsn: SENTRY_DSN,
+    logDirPath: (await getTemporaryDirectory()).path + "/logs",
+    enableInDebugMode: true,
+  ));
+}
+
+void _main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   Configuration.instance.init();
   PhotoSyncManager.instance.sync();
 
-  final SentryClient sentry = new SentryClient(
-      dsn: "http://96780dc0b00f4c69a16c02e90d379996@sentry.ente.io/2");
+  final SentryClient sentry = new SentryClient(dsn: SENTRY_DSN);
 
   FlutterError.onError = (FlutterErrorDetails details) async {
-    print('Flutter error caught by Sentry');
     FlutterError.dumpErrorToConsole(details, forceReport: true);
     _sendErrorToSentry(sentry, details.exception, details.stack);
   };
@@ -30,12 +44,12 @@ void main() async {
   );
 }
 
-void _sendErrorToSentry(
-    SentryClient sentry, Object error, StackTrace stackTrace) {
+void _sendErrorToSentry(SentryClient sentry, Object error, StackTrace stack) {
+  logger.shout("Uncaught error", error, stack);
   try {
     sentry.captureException(
       exception: error,
-      stackTrace: stackTrace,
+      stackTrace: stack,
     );
     print('Error sent to sentry.io: $error');
   } catch (e) {

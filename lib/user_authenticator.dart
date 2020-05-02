@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:logger/logger.dart';
+import 'package:logging/logging.dart';
 import 'core/configuration.dart';
 import 'core/event_bus.dart';
 
@@ -7,7 +7,7 @@ import 'events/user_authenticated_event.dart';
 
 class UserAuthenticator {
   final _dio = Dio();
-  final _logger = Logger();
+  final _logger = Logger("UserAuthenticator");
 
   UserAuthenticator._privateConstructor();
 
@@ -31,7 +31,7 @@ class UserAuthenticator {
         return false;
       }
     }).catchError((e) {
-      _logger.e(e.toString());
+      _logger.severe(e.toString());
       return false;
     });
   }
@@ -57,7 +57,7 @@ class UserAuthenticator {
         }
       }
     }).catchError((e) {
-      _logger.e(e.toString());
+      _logger.severe(e.toString());
       throw e;
     });
   }
