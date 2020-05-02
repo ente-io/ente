@@ -42,6 +42,9 @@ dependencies:
   event_bus: ^1.1.1
   sentry: ">=3.0.0 <4.0.0"
   super_logging: ^1.0.0
+  shake: ^0.1.0
+  archive: ^2.0.11
+  flutter_email_sender: ^3.0.1
 
 dev_dependencies:
   flutter_test:

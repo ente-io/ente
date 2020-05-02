@@ -66,8 +66,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       actions.add(IconButton(
         icon: Icon(Icons.sync_problem),
         onPressed: () {
-          final list = new List<int>();
-          print(list[0]);
           _openSyncConfiguration(context);
         },
       ));

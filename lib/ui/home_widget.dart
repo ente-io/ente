@@ -9,7 +9,10 @@ import 'package:photos/ui/album_list_widget.dart';
 import 'package:photos/ui/change_notifier_builder.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/gallery_container_widget.dart';
+import 'package:photos/utils/logging_util.dart';
 import 'package:provider/provider.dart';
+import 'package:shake/shake.dart';
+import 'package:logging/logging.dart';
 
 class HomeWidget extends StatefulWidget {
   final String title;
@@ -21,12 +24,24 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
+  final logger = Logger("HomeWidgetState");
+  ShakeDetector detector;
   PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
   int _selectedNavBarItem = 0;
   Set<Photo> _selectedPhotos = HashSet<Photo>();
 
   @override
+  void initState() {
+    super.initState();
+    detector = ShakeDetector.waitForStart(onPhoneShake: () {
+      logger.info("Emailing logs");
+      emailLogs();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    detector.startListening();
     return Scaffold(
       appBar: GalleryAppBarWidget(
         widget.title,
@@ -85,5 +100,11 @@ class _HomeWidgetState extends State<HomeWidget> {
         });
       },
     );
+  }
+
+  @override
+  void dispose() {
+    detector.stopListening();
+    super.dispose();
   }
 }
