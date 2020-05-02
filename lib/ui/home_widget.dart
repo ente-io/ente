@@ -33,10 +33,12 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void initState() {
     super.initState();
-    detector = ShakeDetector.waitForStart(onPhoneShake: () {
-      logger.info("Emailing logs");
-      emailLogs();
-    });
+    detector = ShakeDetector.waitForStart(
+        shakeThresholdGravity: 2,
+        onPhoneShake: () {
+          logger.info("Emailing logs");
+          LoggingUtil.instance.emailLogs();
+        });
   }
 
   @override
