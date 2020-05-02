@@ -41,6 +41,7 @@ dependencies:
   visibility_detector: ^0.1.4
   connectivity: ^0.4.8+2
   event_bus: ^1.1.1
+  sentry: ">=3.0.0 <4.0.0"
 
 dev_dependencies:
   flutter_test:
