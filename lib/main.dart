@@ -15,7 +15,7 @@ void main() async {
   PhotoSyncManager.instance.sync();
 
   final SentryClient sentry = new SentryClient(
-      dsn: "http://96780dc0b00f4c69a16c02e90d379996@3.211.17.56/2");
+      dsn: "http://96780dc0b00f4c69a16c02e90d379996@sentry.ente.io/2");
 
   FlutterError.onError = (FlutterErrorDetails details) async {
     print('Flutter error caught by Sentry');
