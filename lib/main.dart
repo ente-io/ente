@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/utils/super_logging.dart';
 import 'core/configuration.dart';
 import 'photo_loader.dart';
 import 'photo_sync_manager.dart';
 import 'ui/home_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry/sentry.dart';
+import 'package:super_logging/super_logging.dart';
 import 'package:logging/logging.dart';
 
 final logger = Logger("main");
