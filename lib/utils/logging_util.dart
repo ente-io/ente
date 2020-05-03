@@ -14,7 +14,7 @@ class LoggingUtil {
     if (_isInProgress) {
       return;
     }
-    _isInProgress = true;
+    // _isInProgress = true;
     final tempPath = (await getTemporaryDirectory()).path;
     final zipFilePath = tempPath + "/logs.zip";
     Directory logsDirectory = Directory(tempPath + "/logs");
