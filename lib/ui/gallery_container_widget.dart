@@ -6,7 +6,6 @@ import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/search_page.dart';
 import 'package:photos/utils/important_items_filter.dart';
-import 'package:provider/provider.dart';
 
 // TODO: Remove redundant layer
 class GalleryContainer extends StatefulWidget {

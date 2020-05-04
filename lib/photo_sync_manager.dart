@@ -2,20 +2,20 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
-import 'core/event_bus.dart';
-import 'db/db_helper.dart';
-import 'events/user_authenticated_event.dart';
-import 'photo_loader.dart';
-import 'photo_provider.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/db_helper.dart';
+import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/photo_loader.dart';
+import 'package:photos/photo_provider.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
-import 'models/photo.dart';
+import 'package:photos/models/photo.dart';
 
-import 'core/configuration.dart';
-import 'events/remote_sync_event.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/events/remote_sync_event.dart';
 
 class PhotoSyncManager {
   final _logger = Logger("PhotoSyncManager");

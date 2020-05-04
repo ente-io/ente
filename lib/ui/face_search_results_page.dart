@@ -5,8 +5,7 @@ import 'package:photos/models/face.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
-
-import 'detail_page.dart';
+import 'package:photos/ui/detail_page.dart';
 
 class FaceSearchResultsPage extends StatelessWidget {
   final FaceSearchManager _faceSearchManager = FaceSearchManager.instance;

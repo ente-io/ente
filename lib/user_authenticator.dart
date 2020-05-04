@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import 'core/configuration.dart';
-import 'core/event_bus.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 
-import 'events/user_authenticated_event.dart';
+import 'package:photos/events/user_authenticated_event.dart';
 
 class UserAuthenticator {
   final _dio = Dio();

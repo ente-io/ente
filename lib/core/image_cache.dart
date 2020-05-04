@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'lru_map.dart';
+import 'package:photos/core/lru_map.dart';
 import 'package:photos/models/photo.dart';
 
 class ImageLruCache {

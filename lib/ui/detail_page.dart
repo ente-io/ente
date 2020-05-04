@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/lru_map.dart';
 import 'package:photos/models/photo.dart';
-import 'extents_page_view.dart';
-import 'zoomable_image.dart';
+import 'package:photos/ui/extents_page_view.dart';
+import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:logging/logging.dart';
 

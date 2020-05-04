@@ -1,8 +1,8 @@
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
-import 'db/db_helper.dart';
-import 'events/local_photos_updated_event.dart';
-import 'models/photo.dart';
+import 'package:photos/db/db_helper.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/models/photo.dart';
 
 class PhotoLoader {
   final logger = Logger("PhotoLoader");

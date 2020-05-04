@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'core/configuration.dart';
-import 'db/db_helper.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/db/db_helper.dart';
 import 'package:logging/logging.dart';
 
-import 'models/face.dart';
-import 'models/photo.dart';
+import 'package:photos/models/face.dart';
+import 'package:photos/models/photo.dart';
 
 class FaceSearchManager {
   final logger = Logger("FaceSearchManager");
