@@ -24,8 +24,8 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
-  final logger = Logger("HomeWidgetState");
-  ShakeDetector detector;
+  final _logger = Logger("HomeWidgetState");
+  ShakeDetector _detector;
   int _selectedNavBarItem = 0;
   Set<Photo> _selectedPhotos = HashSet<Photo>();
 
@@ -34,10 +34,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       setState(() {});
     });
-    detector = ShakeDetector.waitForStart(
+    _detector = ShakeDetector.waitForStart(
         shakeThresholdGravity: 3,
         onPhoneShake: () {
-          logger.info("Emailing logs");
+          _logger.info("Emailing logs");
           LoggingUtil.instance.emailLogs();
         });
     super.initState();
@@ -45,7 +45,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    detector.startListening();
+    _detector.startListening();
     return Scaffold(
       appBar: GalleryAppBarWidget(
         widget.title,
@@ -103,7 +103,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   void dispose() {
-    detector.stopListening();
+    _detector.stopListening();
     super.dispose();
   }
 }
