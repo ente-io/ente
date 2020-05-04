@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
-import 'package:photos/core/image_cache.dart';
-import 'package:photos/core/thumbnail_cache.dart';
+import 'package:photos/core/cache/image_cache.dart';
+import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';

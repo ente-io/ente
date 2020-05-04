@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/core/lru_map.dart';
+import 'package:photos/core/cache/lru_map.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/zoomable_image.dart';

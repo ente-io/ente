@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/photo.dart';
-import 'package:photos/photo_loader.dart';
+import 'package:photos/photo_repository.dart';
 import 'package:photos/ui/album_list_widget.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/gallery_container_widget.dart';
@@ -72,7 +72,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               });
             },
           ),
-          AlbumListWidget(PhotoLoader.instance.photos)
+          AlbumListWidget(PhotoRepository.instance.photos)
         ],
         index: _selectedNavBarItem,
       ),

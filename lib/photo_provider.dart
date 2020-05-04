@@ -1,7 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-class PhotoProvider extends ChangeNotifier {
+class PhotoProvider {
   PhotoProvider._privateConstructor();
   static final PhotoProvider instance = PhotoProvider._privateConstructor();
 

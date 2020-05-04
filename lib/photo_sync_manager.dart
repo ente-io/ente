@@ -5,7 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/db_helper.dart';
 import 'package:photos/events/user_authenticated_event.dart';
-import 'package:photos/photo_loader.dart';
+import 'package:photos/photo_repository.dart';
 import 'package:photos/photo_provider.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -144,7 +144,7 @@ class PhotoSyncManager {
       // TODO: Save path
       photo.pathName = localPath;
       await DatabaseHelper.instance.insertPhoto(photo);
-      PhotoLoader.instance.reloadPhotos();
+      PhotoRepository.instance.reloadPhotos();
       await prefs.setInt(_lastSyncTimestampKey, photo.syncTimestamp);
     }
   }
@@ -212,7 +212,7 @@ class PhotoSyncManager {
       List<Photo> photos, SharedPreferences prefs, int timestamp) async {
     await DatabaseHelper.instance.insertPhotos(photos);
     _logger.info("Inserted " + photos.length.toString() + " photos.");
-    PhotoLoader.instance.reloadPhotos();
+    PhotoRepository.instance.reloadPhotos();
     return await prefs.setInt(_lastDBUpdateTimestampKey, timestamp);
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/photo.dart';
-import 'package:photos/photo_loader.dart';
+import 'package:photos/photo_repository.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/search_page.dart';
@@ -34,12 +34,12 @@ class _GalleryContainerState extends State<GalleryContainer> {
 
   FutureBuilder<bool> _buildGallery() {
     return FutureBuilder<bool>(
-      future: PhotoLoader.instance.loadPhotos(),
+      future: PhotoRepository.instance.loadPhotos(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Flexible(
             child: Gallery(
-              getFilteredPhotos(PhotoLoader.instance.photos),
+              getFilteredPhotos(PhotoRepository.instance.photos),
               widget.selectedPhotos,
               photoSelectionChangeCallback: widget.photoSelectionChangeCallback,
             ),

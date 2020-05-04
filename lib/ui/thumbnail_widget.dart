@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/core/thumbnail_cache.dart';
+import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/core/constants.dart';
 

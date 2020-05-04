@@ -4,12 +4,12 @@ import 'package:photos/db/db_helper.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/photo.dart';
 
-class PhotoLoader {
+class PhotoRepository {
   final logger = Logger("PhotoLoader");
   final _photos = List<Photo>();
 
-  PhotoLoader._privateConstructor();
-  static final PhotoLoader instance = PhotoLoader._privateConstructor();
+  PhotoRepository._privateConstructor();
+  static final PhotoRepository instance = PhotoRepository._privateConstructor();
 
   List<Photo> get photos {
     return _photos;

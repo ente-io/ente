@@ -4,7 +4,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/db_helper.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/photo.dart';
-import 'package:photos/photo_loader.dart';
+import 'package:photos/photo_repository.dart';
 import 'package:photos/ui/setup_page.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/utils/share_util.dart';
@@ -135,7 +135,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           : await DatabaseHelper.instance.deletePhoto(photo);
     }
     Navigator.of(context, rootNavigator: true).pop();
-    PhotoLoader.instance.reloadPhotos();
+    PhotoRepository.instance.reloadPhotos();
     if (widget.onPhotosDeleted != null) {
       widget.onPhotosDeleted(widget.selectedPhotos.toList());
     }
