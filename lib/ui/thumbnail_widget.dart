@@ -20,32 +20,49 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     color: Colors.grey[500],
   );
 
-  bool _loadedSmallThumbnail = false;
-  bool _loadedLargeThumbnail = false;
+  bool _hasLoadedThumbnail = false;
   ImageProvider _imageProvider;
 
   @override
   Widget build(BuildContext context) {
-    if (!_loadedSmallThumbnail && !_loadedLargeThumbnail) {
+    if (!_hasLoadedThumbnail) {
       final cachedSmallThumbnail =
           ThumbnailLruCache.get(widget.photo, THUMBNAIL_SMALL_SIZE);
       if (cachedSmallThumbnail != null) {
-        _imageProvider = Image.memory(cachedSmallThumbnail).image;
-        _loadedSmallThumbnail = true;
-      } else {
-        widget.photo
-            .getAsset()
-            .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
-            .then((data) {
+        final imageProvider = Image.memory(cachedSmallThumbnail).image;
+        precacheImage(imageProvider, context).then((value) {
           if (mounted) {
             setState(() {
-              if (data != null) {
-                _imageProvider = Image.memory(data).image;
-              }
-              _loadedSmallThumbnail = true;
+              _imageProvider = imageProvider;
+              _hasLoadedThumbnail = true;
             });
           }
-          ThumbnailLruCache.put(widget.photo, THUMBNAIL_SMALL_SIZE, data);
+        });
+      } else {
+        Future.delayed(Duration(milliseconds: 1000), () {
+          if (mounted) {
+            widget.photo
+                .getAsset()
+                .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
+                .then((data) {
+              if (mounted) {
+                setState(() {
+                  if (data != null) {
+                    final imageProvider = Image.memory(data).image;
+                    precacheImage(imageProvider, context).then((value) {
+                      if (mounted) {
+                        setState(() {
+                          _imageProvider = imageProvider;
+                          _hasLoadedThumbnail = true;
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+              ThumbnailLruCache.put(widget.photo, THUMBNAIL_SMALL_SIZE, data);
+            });
+          }
         });
       }
     }
@@ -53,7 +70,6 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     if (_imageProvider != null) {
       return Image(
         image: _imageProvider,
-        gaplessPlayback: true,
         fit: BoxFit.cover,
       );
     } else {
@@ -66,8 +82,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     super.didUpdateWidget(oldWidget);
     if (widget.photo.generatedId != oldWidget.photo.generatedId) {
       setState(() {
-        _loadedSmallThumbnail = false;
-        _loadedLargeThumbnail = false;
+        _hasLoadedThumbnail = false;
         _imageProvider = null;
       });
     }
