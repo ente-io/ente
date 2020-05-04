@@ -34,7 +34,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     super.initState();
     detector = ShakeDetector.waitForStart(
-        shakeThresholdGravity: 2,
+        shakeThresholdGravity: 3,
         onPhoneShake: () {
           logger.info("Emailing logs");
           LoggingUtil.instance.emailLogs();
