@@ -3,12 +3,12 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/photo.dart';
-import 'package:photos/photo_loader.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
-import 'package:provider/provider.dart';
 
 class Gallery extends StatefulWidget {
   final List<Photo> photos;
@@ -28,8 +28,15 @@ class _GalleryState extends State<Gallery> {
   final ScrollController _scrollController = ScrollController();
   final List<List<Photo>> _collatedPhotos = List<List<Photo>>();
   Set<Photo> _selectedPhotos = HashSet<Photo>();
-  PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
   List<Photo> _photos;
+
+  @override
+  void initState() {
+    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      setState(() {});
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

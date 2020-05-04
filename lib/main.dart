@@ -4,10 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'core/configuration.dart';
-import 'photo_loader.dart';
 import 'photo_sync_manager.dart';
 import 'ui/home_widget.dart';
-import 'package:provider/provider.dart';
 import 'package:sentry/sentry.dart';
 import 'package:super_logging/super_logging.dart';
 import 'package:logging/logging.dart';
@@ -67,10 +65,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
     return MaterialApp(
       title: _title,
       theme: ThemeData.dark(),
-      home: ChangeNotifierProvider<PhotoLoader>.value(
-        value: PhotoLoader.instance,
-        child: HomeWidget(_title),
-      ),
+      home: HomeWidget(_title),
     );
   }
 

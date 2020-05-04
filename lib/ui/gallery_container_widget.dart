@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/photo_loader.dart';
-import 'package:photos/ui/change_notifier_builder.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/search_page.dart';
@@ -26,7 +25,6 @@ class GalleryContainer extends StatefulWidget {
 
 class _GalleryContainerState extends State<GalleryContainer> {
   static final importantItemsFilter = ImportantItemsFilter();
-  PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
 
   @override
   Widget build(BuildContext context) {
@@ -37,20 +35,16 @@ class _GalleryContainerState extends State<GalleryContainer> {
 
   FutureBuilder<bool> _buildGallery() {
     return FutureBuilder<bool>(
-      future: photoLoader.loadPhotos(),
+      future: PhotoLoader.instance.loadPhotos(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Flexible(
-              child: ChangeNotifierBuilder(
-                  value: photoLoader,
-                  builder: (_, __) {
-                    return Gallery(
-                      getFilteredPhotos(photoLoader.photos),
-                      widget.selectedPhotos,
-                      photoSelectionChangeCallback:
-                          widget.photoSelectionChangeCallback,
-                    );
-                  }));
+            child: Gallery(
+              getFilteredPhotos(PhotoLoader.instance.photos),
+              widget.selectedPhotos,
+              photoSelectionChangeCallback: widget.photoSelectionChangeCallback,
+            ),
+          );
         } else if (snapshot.hasError) {
           return Text("Error!");
         } else {

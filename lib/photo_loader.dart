@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/event_bus.dart';
 import 'db/db_helper.dart';
+import 'events/local_photos_updated_event.dart';
 import 'models/photo.dart';
 
-class PhotoLoader extends ChangeNotifier {
+class PhotoLoader {
   final logger = Logger("PhotoLoader");
   final _photos = List<Photo>();
 
@@ -25,8 +26,8 @@ class PhotoLoader extends ChangeNotifier {
   }
 
   void reloadPhotos() async {
-    await loadPhotos();
     logger.info("Reloading...");
-    notifyListeners();
+    await loadPhotos();
+    Bus.instance.fire(LocalPhotosUpdatedEvent());
   }
 }

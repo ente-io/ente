@@ -3,14 +3,14 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/photo_loader.dart';
 import 'package:photos/ui/album_list_widget.dart';
-import 'package:photos/ui/change_notifier_builder.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/gallery_container_widget.dart';
 import 'package:photos/utils/logging_util.dart';
-import 'package:provider/provider.dart';
 import 'package:shake/shake.dart';
 import 'package:logging/logging.dart';
 
@@ -26,19 +26,21 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   final logger = Logger("HomeWidgetState");
   ShakeDetector detector;
-  PhotoLoader get photoLoader => Provider.of<PhotoLoader>(context);
   int _selectedNavBarItem = 0;
   Set<Photo> _selectedPhotos = HashSet<Photo>();
 
   @override
   void initState() {
-    super.initState();
+    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      setState(() {});
+    });
     detector = ShakeDetector.waitForStart(
         shakeThresholdGravity: 3,
         onPhoneShake: () {
           logger.info("Emailing logs");
           LoggingUtil.instance.emailLogs();
         });
+    super.initState();
   }
 
   @override
@@ -70,12 +72,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               });
             },
           ),
-          ChangeNotifierBuilder(
-            value: photoLoader,
-            builder: (_, __) {
-              return AlbumListWidget(photoLoader.photos);
-            },
-          )
+          AlbumListWidget(PhotoLoader.instance.photos)
         ],
         index: _selectedNavBarItem,
       ),
