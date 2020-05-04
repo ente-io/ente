@@ -23,7 +23,8 @@ class ZoomableImage extends StatefulWidget {
 
 class _ZoomableImageState extends State<ZoomableImage> {
   ImageProvider _imageProvider;
-  bool _loadedThumbnail = false;
+  bool _loadedSmallThumbnail = false;
+  bool _loadedLargeThumbnail = false;
   bool _loadedFinalImage = false;
   ValueChanged<PhotoViewScaleState> _scaleStateChangedCallback;
 
@@ -39,25 +40,43 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_loadedThumbnail && !_loadedFinalImage) {
+    if (!_loadedSmallThumbnail &&
+        !_loadedLargeThumbnail &&
+        !_loadedFinalImage) {
+      final cachedThumbnail =
+          ThumbnailLruCache.get(widget.photo, THUMBNAIL_SMALL_SIZE);
+      if (cachedThumbnail != null) {
+        _imageProvider = Image.memory(cachedThumbnail).image;
+        _loadedSmallThumbnail = true;
+      }
+    }
+
+    if (!_loadedLargeThumbnail && !_loadedFinalImage) {
       final cachedThumbnail =
           ThumbnailLruCache.get(widget.photo, THUMBNAIL_LARGE_SIZE);
       if (cachedThumbnail != null) {
-        _imageProvider = Image.memory(cachedThumbnail).image;
-        _loadedThumbnail = true;
+        _onLargeThumbnailLoaded(Image.memory(cachedThumbnail).image, context);
+      } else {
+        widget.photo
+            .getAsset()
+            .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE)
+            .then((data) {
+          _onLargeThumbnailLoaded(Image.memory(data).image, context);
+          ThumbnailLruCache.put(widget.photo, THUMBNAIL_LARGE_SIZE, data);
+        });
       }
     }
 
     if (!_loadedFinalImage) {
-      if (ImageLruCache.get(widget.photo) != null) {
-        final bytes = ImageLruCache.get(widget.photo);
-        _onFinalImageLoaded(bytes, context);
+      final cachedImage = ImageLruCache.get(widget.photo);
+      if (cachedImage != null) {
+        _onFinalImageLoaded(cachedImage, context);
       } else {
         widget.photo.getBytes().then((bytes) {
           if (mounted) {
             setState(() {
-              ImageLruCache.put(widget.photo, bytes);
               _onFinalImageLoaded(bytes, context);
+              ImageLruCache.put(widget.photo, bytes);
             });
           }
         });
@@ -74,6 +93,19 @@ class _ZoomableImageState extends State<ZoomableImage> {
     } else {
       return loadWidget;
     }
+  }
+
+  void _onLargeThumbnailLoaded(
+      ImageProvider imageProvider, BuildContext context) {
+    precacheImage(imageProvider, context).then((value) {
+      if (mounted) {
+        setState(() {
+          _imageProvider = imageProvider;
+          _loadedLargeThumbnail = true;
+        });
+      }
+    });
+    _loadedLargeThumbnail = true;
   }
 
   void _onFinalImageLoaded(Uint8List bytes, BuildContext context) {

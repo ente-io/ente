@@ -3,15 +3,12 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:photos/core/thumbnail_cache.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/photo_loader.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:provider/provider.dart';
-import 'package:visibility_detector/visibility_detector.dart';
-import 'package:photos/core/constants.dart';
 
 class Gallery extends StatefulWidget {
   final List<Photo> photos;
@@ -106,7 +103,7 @@ class _GalleryState extends State<Gallery> {
               ? Border.all(width: 4.0, color: Colors.blue)
               : null,
         ),
-        child: GalleryItemWidget(photo),
+        child: ThumbnailWidget(photo),
       ),
     );
   }
@@ -174,54 +171,5 @@ class _GalleryState extends State<Gallery> {
     return firstDate.year == secondDate.year &&
         firstDate.month == secondDate.month &&
         firstDate.day == secondDate.day;
-  }
-}
-
-class GalleryItemWidget extends StatefulWidget {
-  final Photo photo;
-
-  const GalleryItemWidget(
-    this.photo, {
-    Key key,
-  }) : super(key: key);
-
-  @override
-  _GalleryItemWidgetState createState() => _GalleryItemWidgetState();
-}
-
-class _GalleryItemWidgetState extends State<GalleryItemWidget> {
-  bool _isVisible = false;
-  bool _isLoading = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return VisibilityDetector(
-      key: Key(widget.photo.generatedId.toString()),
-      child: ThumbnailWidget(widget.photo),
-      onVisibilityChanged: (info) {
-        _isVisible = info.visibleFraction == 1;
-        if (_isVisible && !_isLoading) {
-          _isLoading = true;
-          _scheduleCaching();
-        }
-      },
-    );
-  }
-
-  void _scheduleCaching() {
-    Future.delayed(Duration(milliseconds: 500), () {
-      if (!_isVisible) {
-        _isLoading = false;
-        return;
-      }
-      if (ThumbnailLruCache.get(widget.photo, THUMBNAIL_LARGE_SIZE) == null) {
-        widget.photo
-            .getAsset()
-            .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE)
-            .then((data) {
-          ThumbnailLruCache.put(widget.photo, THUMBNAIL_LARGE_SIZE, data);
-        });
-      }
-    });
   }
 }
