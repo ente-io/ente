@@ -1,11 +1,8 @@
-import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -30,15 +27,6 @@ class _GalleryState extends State<Gallery> {
   final List<List<Photo>> _collatedPhotos = List<List<Photo>>();
   Set<Photo> _selectedPhotos = HashSet<Photo>();
   List<Photo> _photos;
-  StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
-
-  @override
-  void initState() {
-    _subscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      setState(() {});
-    });
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,10 +168,5 @@ class _GalleryState extends State<Gallery> {
     return firstDate.year == secondDate.year &&
         firstDate.month == secondDate.month &&
         firstDate.day == secondDate.day;
-  }
-
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
   }
 }
