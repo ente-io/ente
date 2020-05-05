@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
@@ -72,11 +72,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
       if (cachedImage != null) {
         _onFinalImageLoaded(cachedImage, context);
       } else {
-        widget.photo.getBytes().then((bytes) {
+        widget.photo.getAsset().file.then((file) {
           if (mounted) {
             setState(() {
-              _onFinalImageLoaded(bytes, context);
-              ImageLruCache.put(widget.photo, bytes);
+              _onFinalImageLoaded(file, context);
+              ImageLruCache.put(widget.photo, file);
             });
           }
         });
@@ -108,8 +108,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
     _loadedLargeThumbnail = true;
   }
 
-  void _onFinalImageLoaded(Uint8List bytes, BuildContext context) {
-    final imageProvider = Image.memory(bytes).image;
+  void _onFinalImageLoaded(File file, BuildContext context) {
+    final imageProvider = Image.file(file).image;
     precacheImage(imageProvider, context).then((value) {
       if (mounted) {
         setState(() {
