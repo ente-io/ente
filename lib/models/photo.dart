@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
+import 'package:logging/logging.dart';
 
 class Photo {
   int generatedId;
@@ -29,9 +30,19 @@ class Photo {
     photo.localId = asset.id;
     photo.title = asset.title;
     photo.pathName = pathEntity.name;
-    photo.createTimestamp = asset.createDateTime.microsecondsSinceEpoch == 0
-        ? asset.modifiedDateTime.microsecondsSinceEpoch
-        : asset.createDateTime.microsecondsSinceEpoch;
+    photo.createTimestamp = asset.createDateTime.microsecondsSinceEpoch;
+    if (photo.createTimestamp == 0) {
+      try {
+        final parsedDateTime = DateTime.parse(
+            basenameWithoutExtension(photo.title)
+                .replaceAll("IMG_", "")
+                .replaceAll("DCIM_", "")
+                .replaceAll("_", " "));
+        photo.createTimestamp = parsedDateTime.microsecondsSinceEpoch;
+      } catch (e) {
+        photo.createTimestamp = asset.modifiedDateTime.microsecondsSinceEpoch;
+      }
+    }
     return photo;
   }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
@@ -57,7 +58,8 @@ class PhotoSyncManager {
         // "Recents" contain duplicate information on Android
         var assetList = await pathEntity.assetList;
         for (AssetEntity entity in assetList) {
-          if (entity.modifiedDateTime.microsecondsSinceEpoch >
+          if (max(entity.createDateTime.microsecondsSinceEpoch,
+                  entity.modifiedDateTime.microsecondsSinceEpoch) >
               lastDBUpdateTimestamp) {
             try {
               photos.add(await Photo.fromAsset(pathEntity, entity));
