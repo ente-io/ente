@@ -9,8 +9,10 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/photo_repository.dart';
 import 'package:photos/ui/album_list_widget.dart';
+import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
-import 'package:photos/ui/gallery_container_widget.dart';
+import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/utils/important_items_filter.dart';
 import 'package:photos/utils/logging_util.dart';
 import 'package:shake/shake.dart';
 import 'package:logging/logging.dart';
@@ -25,6 +27,7 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
+  static final importantItemsFilter = ImportantItemsFilter();
   final _logger = Logger("HomeWidgetState");
   ShakeDetector _detector;
   int _selectedNavBarItem = 0;
@@ -51,31 +54,37 @@ class _HomeWidgetState extends State<HomeWidget> {
       appBar: GalleryAppBarWidget(
         widget.title,
         _selectedPhotos,
-        onSelectionClear: () {
-          setState(() {
-            _selectedPhotos.clear();
-          });
-        },
+        onSelectionClear: _clearSelectedPhotos,
         onPhotosDeleted: (_) {
-          setState(() {
-            _selectedPhotos.clear();
-          });
+          _clearSelectedPhotos();
         },
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
-      body: IndexedStack(
-        children: <Widget>[
-          GalleryContainer(
-            _selectedPhotos,
-            (Set<Photo> selectedPhotos) {
-              setState(() {
-                _selectedPhotos = selectedPhotos;
-              });
-            },
-          ),
-          AlbumListWidget(PhotoRepository.instance.photos)
-        ],
-        index: _selectedNavBarItem,
+      body: FutureBuilder<bool>(
+        future: PhotoRepository.instance.loadPhotos(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return IndexedStack(
+              children: <Widget>[
+                Gallery(
+                  _getFilteredPhotos(PhotoRepository.instance.photos),
+                  _selectedPhotos,
+                  photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
+                    setState(() {
+                      _selectedPhotos = selectedPhotos;
+                    });
+                  },
+                ),
+                AlbumListWidget(PhotoRepository.instance.photos)
+              ],
+              index: _selectedNavBarItem,
+            );
+          } else if (snapshot.hasError) {
+            return Text("Error!");
+          } else {
+            return loadWidget;
+          }
+        },
       ),
     );
   }
@@ -100,6 +109,22 @@ class _HomeWidgetState extends State<HomeWidget> {
         });
       },
     );
+  }
+
+  List<Photo> _getFilteredPhotos(List<Photo> unfilteredPhotos) {
+    final List<Photo> filteredPhotos = List<Photo>();
+    for (Photo photo in unfilteredPhotos) {
+      if (importantItemsFilter.shouldInclude(photo)) {
+        filteredPhotos.add(photo);
+      }
+    }
+    return filteredPhotos;
+  }
+
+  void _clearSelectedPhotos() {
+    setState(() {
+      _selectedPhotos.clear();
+    });
   }
 
   @override
