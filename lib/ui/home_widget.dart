@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
@@ -28,13 +29,14 @@ class _HomeWidgetState extends State<HomeWidget> {
   ShakeDetector _detector;
   int _selectedNavBarItem = 0;
   Set<Photo> _selectedPhotos = HashSet<Photo>();
+  StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
 
   @override
   void initState() {
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _subscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       setState(() {});
     });
-    _detector = ShakeDetector.waitForStart(
+    _detector = ShakeDetector.autoStart(
         shakeThresholdGravity: 3,
         onPhoneShake: () {
           _logger.info("Emailing logs");
@@ -45,7 +47,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    _detector.startListening();
     return Scaffold(
       appBar: GalleryAppBarWidget(
         widget.title,
@@ -104,6 +105,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void dispose() {
     _detector.stopListening();
+    _subscription.cancel();
     super.dispose();
   }
 }

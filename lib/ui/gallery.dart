@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
@@ -29,10 +30,11 @@ class _GalleryState extends State<Gallery> {
   final List<List<Photo>> _collatedPhotos = List<List<Photo>>();
   Set<Photo> _selectedPhotos = HashSet<Photo>();
   List<Photo> _photos;
+  StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
 
   @override
   void initState() {
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _subscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       setState(() {});
     });
     super.initState();
@@ -178,5 +180,10 @@ class _GalleryState extends State<Gallery> {
     return firstDate.year == secondDate.year &&
         firstDate.month == secondDate.month &&
         firstDate.day == secondDate.day;
+  }
+
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
   }
 }

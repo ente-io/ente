@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
@@ -28,10 +30,11 @@ class GalleryAppBarWidget extends StatefulWidget
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   bool _hasSyncErrors = false;
+  StreamSubscription<RemoteSyncEvent> _subscription;
 
   @override
   void initState() {
-    Bus.instance.on<RemoteSyncEvent>().listen((event) {
+    _subscription = Bus.instance.on<RemoteSyncEvent>().listen((event) {
       setState(() {
         _hasSyncErrors = !event.success;
       });
@@ -161,5 +164,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
       ),
     );
+  }
+
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
   }
 }
