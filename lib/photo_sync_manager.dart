@@ -57,7 +57,7 @@ class PhotoSyncManager {
         // "Recents" contain duplicate information on Android
         var assetList = await pathEntity.assetList;
         for (AssetEntity entity in assetList) {
-          if (entity.createDateTime.microsecondsSinceEpoch >
+          if (entity.modifiedDateTime.microsecondsSinceEpoch >
               lastDBUpdateTimestamp) {
             try {
               photos.add(await Photo.fromAsset(pathEntity, entity));

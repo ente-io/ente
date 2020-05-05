@@ -29,7 +29,9 @@ class Photo {
     photo.localId = asset.id;
     photo.title = asset.title;
     photo.pathName = pathEntity.name;
-    photo.createTimestamp = asset.createDateTime.microsecondsSinceEpoch;
+    photo.createTimestamp = asset.createDateTime.microsecondsSinceEpoch == 0
+        ? asset.modifiedDateTime.microsecondsSinceEpoch
+        : asset.createDateTime.microsecondsSinceEpoch;
     return photo;
   }
 
