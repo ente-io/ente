@@ -71,7 +71,7 @@ class _DetailPageState extends State<DetailPage> {
         _cachedImages.put(photo.generatedId, image);
         return image;
       },
-      extents: 2,
+      extents: 1,
       onPageChanged: (int index) {
         logger.info("onPageChanged to " + index.toString());
         _selectedIndex = index;
