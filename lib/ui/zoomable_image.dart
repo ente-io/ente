@@ -68,9 +68,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
 
     if (!_loadedFinalImage) {
-      final cachedImage = ImageLruCache.get(widget.photo);
-      if (cachedImage != null) {
-        _onFinalImageLoaded(cachedImage, context);
+      final cachedFile = ImageLruCache.get(widget.photo);
+      if (cachedFile != null) {
+        _onFinalImageLoaded(cachedFile, context);
       } else {
         widget.photo.getAsset().file.then((file) {
           if (mounted) {
@@ -105,7 +105,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
         });
       }
     });
-    _loadedLargeThumbnail = true;
   }
 
   void _onFinalImageLoaded(File file, BuildContext context) {
