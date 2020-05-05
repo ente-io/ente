@@ -55,9 +55,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         widget.title,
         _selectedPhotos,
         onSelectionClear: _clearSelectedPhotos,
-        onPhotosDeleted: (_) {
-          _clearSelectedPhotos();
-        },
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
       body: FutureBuilder<bool>(

@@ -36,7 +36,6 @@ class _AlbumPageState extends State<AlbumPage> {
               logger.info("Deleting " + index.toString());
               widget.album.photos.removeAt(index);
             }
-            _selectedPhotos.clear();
           });
         },
       ),
