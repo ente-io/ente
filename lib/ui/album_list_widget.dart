@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photos/favorite_photos_repository.dart';
 import 'package:photos/models/album.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/album_widget.dart';
@@ -41,14 +42,22 @@ class _AlbumListWidgetState extends State<AlbumListWidget> {
 
   List<Album> _getAlbums(List<Photo> photos) {
     final albumMap = new LinkedHashMap<String, List<Photo>>();
+    final favorites = Album("Favorites", List<Photo>());
     for (Photo photo in photos) {
       final folder = path.basename(photo.pathName);
       if (!albumMap.containsKey(folder)) {
         albumMap[folder] = new List<Photo>();
       }
       albumMap[folder].add(photo);
+
+      if (FavoritePhotosRepository.instance.isLiked(photo)) {
+        favorites.photos.add(photo);
+      }
     }
     List<Album> albums = new List<Album>();
+    if (favorites.photos.isNotEmpty) {
+      albums.add(favorites);
+    }
     for (String albumName in albumMap.keys) {
       albums.add(Album(albumName, albumMap[albumName]));
     }

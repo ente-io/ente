@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:like_button/like_button.dart';
 import 'package:photos/core/cache/lru_map.dart';
+import 'package:photos/favorite_photos_repository.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/zoomable_image.dart';
@@ -18,7 +20,7 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  final logger = Logger("DetailPageState");
+  final _logger = Logger("DetailPageState");
   bool _shouldDisableScroll = false;
   List<Photo> _photos;
   int _selectedIndex = 0;
@@ -35,7 +37,7 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    logger.info("Opening " +
+    _logger.info("Opening " +
         _photos[_selectedIndex].toString() +
         ". " +
         _selectedIndex.toString() +
@@ -73,8 +75,9 @@ class _DetailPageState extends State<DetailPage> {
       },
       extents: 1,
       onPageChanged: (int index) {
-        logger.info("onPageChanged to " + index.toString());
-        _selectedIndex = index;
+        setState(() {
+          _selectedIndex = index;
+        });
       },
       physics: _shouldDisableScroll
           ? NeverScrollableScrollPhysics()
@@ -87,6 +90,7 @@ class _DetailPageState extends State<DetailPage> {
   AppBar _buildAppBar() {
     return AppBar(
       actions: <Widget>[
+        _getFavoriteButton(),
         IconButton(
           icon: Icon(Icons.share),
           onPressed: () async {
@@ -94,6 +98,16 @@ class _DetailPageState extends State<DetailPage> {
           },
         )
       ],
+    );
+  }
+
+  Widget _getFavoriteButton() {
+    final photo = _photos[_selectedIndex];
+    return LikeButton(
+      isLiked: FavoritePhotosRepository.instance.isLiked(photo),
+      onTap: (oldValue) {
+        return FavoritePhotosRepository.instance.setLiked(photo, !oldValue);
+      },
     );
   }
 }
