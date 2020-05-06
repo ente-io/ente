@@ -16,10 +16,8 @@ class GalleryAppBarWidget extends StatefulWidget
   final String title;
   final Set<Photo> selectedPhotos;
   final Function() onSelectionClear;
-  final Function(List<Photo>) onPhotosDeleted;
 
-  GalleryAppBarWidget(this.title, this.selectedPhotos,
-      {this.onSelectionClear, this.onPhotosDeleted});
+  GalleryAppBarWidget(this.title, this.selectedPhotos, {this.onSelectionClear});
 
   @override
   _GalleryAppBarWidgetState createState() => _GalleryAppBarWidgetState();
@@ -139,9 +137,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
     Navigator.of(context, rootNavigator: true).pop();
     PhotoRepository.instance.reloadPhotos();
-    if (widget.onPhotosDeleted != null) {
-      widget.onPhotosDeleted(widget.selectedPhotos.toList());
-    }
     _clearSelectedPhotos();
   }
 

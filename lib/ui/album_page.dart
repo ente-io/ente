@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/album.dart';
 import 'package:photos/models/photo.dart';
+import 'package:photos/photo_repository.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:logging/logging.dart';
@@ -17,6 +22,15 @@ class AlbumPage extends StatefulWidget {
 class _AlbumPageState extends State<AlbumPage> {
   final logger = Logger("AlbumPageState");
   Set<Photo> _selectedPhotos = Set<Photo>();
+  StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
+
+  @override
+  void initState() {
+    _subscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      setState(() {});
+    });
+    super.initState();
+  }
 
   @override
   Widget build(Object context) {
@@ -29,18 +43,9 @@ class _AlbumPageState extends State<AlbumPage> {
             _selectedPhotos.clear();
           });
         },
-        onPhotosDeleted: (deletedPhotos) {
-          setState(() {
-            for (Photo deletedPhoto in deletedPhotos) {
-              var index = widget.album.photos.indexOf(deletedPhoto);
-              logger.info("Deleting " + index.toString());
-              widget.album.photos.removeAt(index);
-            }
-          });
-        },
       ),
       body: Gallery(
-        widget.album.photos,
+        _getFilteredPhotos(PhotoRepository.instance.photos),
         _selectedPhotos,
         photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
           setState(() {
@@ -49,5 +54,21 @@ class _AlbumPageState extends State<AlbumPage> {
         },
       ),
     );
+  }
+
+  List<Photo> _getFilteredPhotos(List<Photo> unfilteredPhotos) {
+    final List<Photo> filteredPhotos = List<Photo>();
+    for (Photo photo in unfilteredPhotos) {
+      if (widget.album.filter.shouldInclude(photo)) {
+        filteredPhotos.add(photo);
+      }
+    }
+    return filteredPhotos;
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
   }
 }

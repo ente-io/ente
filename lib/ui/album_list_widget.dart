@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/favorite_photos_repository.dart';
 import 'package:photos/models/album.dart';
+import 'package:photos/models/filters/favorite_items_filter.dart';
+import 'package:photos/models/filters/folder_name_filter.dart';
 import 'package:photos/models/photo.dart';
-import 'package:photos/ui/album_widget.dart';
+import 'package:photos/ui/album_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:path/path.dart' as path;
 
@@ -42,7 +44,7 @@ class _AlbumListWidgetState extends State<AlbumListWidget> {
 
   List<Album> _getAlbums(List<Photo> photos) {
     final albumMap = new LinkedHashMap<String, List<Photo>>();
-    final favorites = Album("Favorites", List<Photo>());
+    final favorites = Album("Favorites", List<Photo>(), FavoriteItemsFilter());
     for (Photo photo in photos) {
       final folder = path.basename(photo.pathName);
       if (!albumMap.containsKey(folder)) {
@@ -59,7 +61,8 @@ class _AlbumListWidgetState extends State<AlbumListWidget> {
       albums.add(favorites);
     }
     for (String albumName in albumMap.keys) {
-      albums.add(Album(albumName, albumMap[albumName]));
+      albums.add(
+          Album(albumName, albumMap[albumName], FolderNameFilter(albumName)));
     }
     return albums;
   }
