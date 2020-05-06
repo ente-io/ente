@@ -4,19 +4,19 @@ class Configuration {
   Configuration._privateConstructor();
   static final Configuration instance = Configuration._privateConstructor();
 
-  static const endpointKey = "endpoint_7";
-  static const tokenKey = "token";
-  static const usernameKey = "username";
-  static const passwordKey = "password";
+  static const _endpointKey = "endpoint_7";
+  static const _tokenKey = "token";
+  static const _usernameKey = "username";
+  static const _passwordKey = "password";
 
-  SharedPreferences preferences;
+  SharedPreferences _preferences;
 
   Future<void> init() async {
-    preferences = await SharedPreferences.getInstance();
+    _preferences = await SharedPreferences.getInstance();
   }
 
   String getEndpoint() {
-    return preferences.getString(endpointKey);
+    return _preferences.getString(_endpointKey);
   }
 
   String getHttpEndpoint() {
@@ -27,30 +27,30 @@ class Configuration {
   }
 
   void setEndpoint(String endpoint) async {
-    await preferences.setString(endpointKey, endpoint);
+    await _preferences.setString(_endpointKey, endpoint);
   }
 
   String getToken() {
-    return preferences.getString(tokenKey);
+    return _preferences.getString(_tokenKey);
   }
 
   void setToken(String token) async {
-    await preferences.setString(tokenKey, token);
+    await _preferences.setString(_tokenKey, token);
   }
 
   String getUsername() {
-    return preferences.getString(usernameKey);
+    return _preferences.getString(_usernameKey);
   }
 
   void setUsername(String username) async {
-    await preferences.setString(usernameKey, username);
+    await _preferences.setString(_usernameKey, username);
   }
 
   String getPassword() {
-    return preferences.getString(passwordKey);
+    return _preferences.getString(_passwordKey);
   }
 
   void setPassword(String password) async {
-    await preferences.setString(passwordKey, password);
+    await _preferences.setString(_passwordKey, password);
   }
 }
