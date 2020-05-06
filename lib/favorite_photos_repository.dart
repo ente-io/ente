@@ -14,11 +14,15 @@ class FavoritePhotosRepository {
   }
 
   bool isLiked(Photo photo) {
-    return _getLiked().contains(photo.generatedId.toString());
+    return getLiked().contains(photo.generatedId.toString());
+  }
+
+  bool hasFavorites() {
+    return getLiked().isNotEmpty;
   }
 
   Future<bool> setLiked(Photo photo, bool isLiked) {
-    final liked = _getLiked();
+    final liked = getLiked();
     if (isLiked) {
       liked.add(photo.generatedId.toString());
     } else {
@@ -29,7 +33,7 @@ class FavoritePhotosRepository {
         .then((_) => isLiked);
   }
 
-  Set<String> _getLiked() {
+  Set<String> getLiked() {
     final value = _preferences.getStringList(_favoritePhotoIdsKey);
     if (value == null) {
       return Set<String>();

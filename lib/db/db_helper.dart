@@ -60,12 +60,12 @@ class DatabaseHelper {
   }
 
   Future<int> insertPhoto(Photo photo) async {
-    Database db = await instance.database;
+    final db = await instance.database;
     return await db.insert(table, _getRowForPhoto(photo));
   }
 
   Future<List<dynamic>> insertPhotos(List<Photo> photos) async {
-    Database db = await instance.database;
+    final db = await instance.database;
     var batch = db.batch();
     int batchCounter = 0;
     for (Photo photo in photos) {
@@ -80,40 +80,56 @@ class DatabaseHelper {
   }
 
   Future<List<Photo>> getAllPhotos() async {
-    Database db = await instance.database;
-    var results = await db.query(table,
-        where: '$columnIsDeleted = 0', orderBy: '$columnCreateTimestamp DESC');
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnIsDeleted = 0',
+      orderBy: '$columnCreateTimestamp DESC',
+    );
     return _convertToPhotos(results);
   }
 
   Future<List<Photo>> getAllDeletedPhotos() async {
-    Database db = await instance.database;
-    var results = await db.query(table,
-        where: '$columnIsDeleted = 1', orderBy: '$columnCreateTimestamp DESC');
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnIsDeleted = 1',
+      orderBy: '$columnCreateTimestamp DESC',
+    );
     return _convertToPhotos(results);
   }
 
   Future<List<Photo>> getPhotosToBeUploaded() async {
-    Database db = await instance.database;
-    var results = await db.query(table, where: '$columnUploadedFileId = -1');
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnUploadedFileId = -1',
+    );
     return _convertToPhotos(results);
   }
 
   Future<int> updatePhoto(
       int generatedId, String remotePath, int syncTimestamp) async {
-    Database db = await instance.database;
-    var values = new Map<String, dynamic>();
+    final db = await instance.database;
+    final values = new Map<String, dynamic>();
     values[columnRemotePath] = remotePath;
     values[columnSyncTimestamp] = syncTimestamp;
-    return await db.update(table, values,
-        where: '$columnGeneratedId = ?', whereArgs: [generatedId]);
+    return await db.update(
+      table,
+      values,
+      where: '$columnGeneratedId = ?',
+      whereArgs: [generatedId],
+    );
   }
 
   Future<Photo> getPhotoByPath(String path) async {
-    Database db = await instance.database;
-    var rows =
-        await db.query(table, where: '$columnRemotePath =?', whereArgs: [path]);
-    if (rows.length > 0) {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      where: '$columnRemotePath =?',
+      whereArgs: [path],
+    );
+    if (rows.isNotEmpty) {
       return _getPhotofromRow(rows[0]);
     } else {
       throw ("No cached photo");
@@ -121,17 +137,70 @@ class DatabaseHelper {
   }
 
   Future<int> markPhotoForDeletion(Photo photo) async {
-    Database db = await instance.database;
+    final db = await instance.database;
     var values = new Map<String, dynamic>();
     values[columnIsDeleted] = 1;
-    return db.update(table, values,
-        where: '$columnGeneratedId =?', whereArgs: [photo.generatedId]);
+    return db.update(
+      table,
+      values,
+      where: '$columnGeneratedId =?',
+      whereArgs: [photo.generatedId],
+    );
   }
 
   Future<int> deletePhoto(Photo photo) async {
-    Database db = await instance.database;
-    return db.delete(table,
-        where: '$columnGeneratedId =?', whereArgs: [photo.generatedId]);
+    final db = await instance.database;
+    return db.delete(
+      table,
+      where: '$columnGeneratedId =?',
+      whereArgs: [photo.generatedId],
+    );
+  }
+
+  Future<List<String>> getDistinctPaths() async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      columns: [columnPathName],
+      distinct: true,
+    );
+    List<String> result = List<String>();
+    for (final row in rows) {
+      result.add(row[columnPathName]);
+    }
+    return result;
+  }
+
+  Future<Photo> getLatestPhotoInPath(String path) async {
+    final db = await instance.database;
+    var rows = await db.query(
+      table,
+      where: '$columnPathName =?',
+      whereArgs: [path],
+      orderBy: '$columnCreateTimestamp DESC',
+      limit: 1,
+    );
+    if (rows.isNotEmpty) {
+      return _getPhotofromRow(rows[0]);
+    } else {
+      throw ("No photo found in path");
+    }
+  }
+
+  Future<Photo> getLatestPhotoAmongGeneratedIds(
+      List<String> generatedIds) async {
+    final db = await instance.database;
+    var rows = await db.query(
+      table,
+      where: '$columnGeneratedId IN (${generatedIds.join(",")})',
+      orderBy: '$columnCreateTimestamp DESC',
+      limit: 1,
+    );
+    if (rows.isNotEmpty) {
+      return _getPhotofromRow(rows[0]);
+    } else {
+      throw ("No photo found with ids " + generatedIds.join(", ").toString());
+    }
   }
 
   List<Photo> _convertToPhotos(List<Map<String, dynamic>> results) {

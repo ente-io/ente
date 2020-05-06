@@ -2,14 +2,16 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photos/db/db_helper.dart';
 import 'package:photos/favorite_photos_repository.dart';
 import 'package:photos/models/album.dart';
 import 'package:photos/models/filters/favorite_items_filter.dart';
 import 'package:photos/models/filters/folder_name_filter.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/album_page.dart';
+import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as p;
 
 class AlbumListWidget extends StatefulWidget {
   final List<Photo> photos;
@@ -23,8 +25,21 @@ class AlbumListWidget extends StatefulWidget {
 class _AlbumListWidgetState extends State<AlbumListWidget> {
   @override
   Widget build(BuildContext context) {
-    List<Album> albums = _getAlbums(widget.photos);
+    return FutureBuilder(
+      future: _getAlbums(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return _getAlbumListWidget(snapshot.data);
+        } else if (snapshot.hasError) {
+          return Text(snapshot.error.toString());
+        } else {
+          return loadWidget;
+        }
+      },
+    );
+  }
 
+  Widget _getAlbumListWidget(List<Album> albums) {
     return Container(
       margin: EdgeInsets.only(top: 24),
       child: GridView.builder(
@@ -42,27 +57,23 @@ class _AlbumListWidgetState extends State<AlbumListWidget> {
     );
   }
 
-  List<Album> _getAlbums(List<Photo> photos) {
-    final albumMap = new LinkedHashMap<String, List<Photo>>();
-    final favorites = Album("Favorites", List<Photo>(), FavoriteItemsFilter());
-    for (Photo photo in photos) {
-      final folder = path.basename(photo.pathName);
-      if (!albumMap.containsKey(folder)) {
-        albumMap[folder] = new List<Photo>();
-      }
-      albumMap[folder].add(photo);
-
-      if (FavoritePhotosRepository.instance.isLiked(photo)) {
-        favorites.photos.add(photo);
-      }
+  Future<List<Album>> _getAlbums() async {
+    final paths = await DatabaseHelper.instance.getDistinctPaths();
+    final albums = List<Album>();
+    for (final path in paths) {
+      final photo = await DatabaseHelper.instance.getLatestPhotoInPath(path);
+      final albumName = p.basename(path);
+      albums.add(Album(albumName, photo, FolderNameFilter(albumName)));
     }
-    List<Album> albums = new List<Album>();
-    if (favorites.photos.isNotEmpty) {
-      albums.add(favorites);
-    }
-    for (String albumName in albumMap.keys) {
-      albums.add(
-          Album(albumName, albumMap[albumName], FolderNameFilter(albumName)));
+    albums.sort((firstAlbum, secondAlbum) {
+      return secondAlbum.thumbnailPhoto.createTimestamp
+          .compareTo(firstAlbum.thumbnailPhoto.createTimestamp);
+    });
+    if (FavoritePhotosRepository.instance.hasFavorites()) {
+      final photo = await DatabaseHelper.instance
+          .getLatestPhotoAmongGeneratedIds(
+              FavoritePhotosRepository.instance.getLiked().toList());
+      albums.insert(0, Album("Favorites", photo, FavoriteItemsFilter()));
     }
     return albums;
   }
@@ -72,7 +83,7 @@ class _AlbumListWidgetState extends State<AlbumListWidget> {
       child: Column(
         children: <Widget>[
           Container(
-            child: ThumbnailWidget(album.photos[0]),
+            child: ThumbnailWidget(album.thumbnailPhoto),
             height: 150,
             width: 150,
           ),
