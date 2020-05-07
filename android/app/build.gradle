@@ -43,7 +43,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "io.ente.photos"
         minSdkVersion 16
         targetSdkVersion 28
@@ -64,6 +63,15 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
+        }
+        debug {
+          applicationIdSuffix '.debug'
+          versionNameSuffix "-debug"
+          externalNativeBuild {
+            cmake {
+              arguments "-DANDROID_PACKAGE_NAME=${android.defaultConfig.applicationId}${applicationIdSuffix}"
+            }
+          }
         }
     }
 }
