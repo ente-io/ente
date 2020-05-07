@@ -20,13 +20,17 @@ class _SetupPageState extends State<SetupPage> {
     if (Configuration.instance.getEndpoint() == null &&
         !_errorFindingEndpoint) {
       EndpointFinder.instance.findEndpoint().then((endpoint) {
-        setState(() {
-          Configuration.instance.setEndpoint(endpoint);
-        });
+        if (mounted) {
+          setState(() {
+            Configuration.instance.setEndpoint(endpoint);
+          });
+        }
       }).catchError((e) {
-        setState(() {
-          _errorFindingEndpoint = true;
-        });
+        if (mounted) {
+          setState(() {
+            _errorFindingEndpoint = true;
+          });
+        }
       });
     }
 
