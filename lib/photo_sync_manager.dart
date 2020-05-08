@@ -153,7 +153,7 @@ class PhotoSyncManager {
 
   Future<List<Photo>> _getDiff(int lastSyncTimestamp) async {
     Response response = await _dio.get(
-        Configuration.instance.getHttpEndpoint() + "/diff",
+        Configuration.instance.getHttpEndpoint() + "/files/diff",
         queryParameters: {
           "token": Configuration.instance.getToken(),
           "lastSyncTimestamp": lastSyncTimestamp
@@ -178,7 +178,7 @@ class PhotoSyncManager {
       "token": Configuration.instance.getToken(),
     });
     return _dio
-        .post(Configuration.instance.getHttpEndpoint() + "/upload",
+        .post(Configuration.instance.getHttpEndpoint() + "/files/upload",
             data: formData)
         .then((response) {
       _logger.info(response.toString());
@@ -197,7 +197,7 @@ class PhotoSyncManager {
   }
 
   Future<void> _deletePhotoOnServer(Photo photo) async {
-    return _dio.post(Configuration.instance.getHttpEndpoint() + "/delete",
+    return _dio.post(Configuration.instance.getHttpEndpoint() + "/files/delete",
         queryParameters: {
           "token": Configuration.instance.getToken(),
           "fileID": photo.uploadedFileId

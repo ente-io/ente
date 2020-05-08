@@ -16,7 +16,7 @@ class FaceSearchManager {
 
   Future<List<Face>> getFaces() {
     return _dio
-        .get(Configuration.instance.getHttpEndpoint() + "/faces",
+        .get(Configuration.instance.getHttpEndpoint() + "/photos/faces",
             queryParameters: {"token": Configuration.instance.getToken()})
         .then((response) => (response.data["faces"] as List)
             .map((face) => new Face.fromJson(face))
@@ -27,7 +27,7 @@ class FaceSearchManager {
   Future<List<Photo>> getFaceSearchResults(Face face) async {
     var futures = _dio.get(
         Configuration.instance.getHttpEndpoint() +
-            "/search/face/" +
+            "/photos/search/face/" +
             face.faceID.toString(),
         queryParameters: {
           "token": Configuration.instance.getToken(),
