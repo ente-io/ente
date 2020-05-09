@@ -178,7 +178,7 @@ class PhotoSyncManager {
       "token": Configuration.instance.getToken(),
     });
     return _dio
-        .post(Configuration.instance.getHttpEndpoint() + "/files/upload",
+        .post(Configuration.instance.getHttpEndpoint() + "/files",
             data: formData)
         .then((response) {
       _logger.info(response.toString());
