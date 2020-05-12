@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/models/photo.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -15,17 +16,19 @@ class ThumbnailWidget extends StatefulWidget {
 }
 
 class _ThumbnailWidgetState extends State<ThumbnailWidget> {
+  static final _logger = Logger("ThumbnailWidget");
   static final Widget loadingWidget = Container(
     alignment: Alignment.center,
     color: Colors.grey[500],
   );
 
   bool _hasLoadedThumbnail = false;
+  bool _encounteredErrorLoadingThumbnail = false;
   ImageProvider _imageProvider;
 
   @override
   Widget build(BuildContext context) {
-    if (!_hasLoadedThumbnail) {
+    if (!_hasLoadedThumbnail && !_encounteredErrorLoadingThumbnail) {
       final cachedSmallThumbnail =
           ThumbnailLruCache.get(widget.photo, THUMBNAIL_SMALL_SIZE);
       if (cachedSmallThumbnail != null) {
@@ -42,7 +45,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         widget.photo
             .getAsset()
             .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
-            .then((data) {
+            .catchError((e) {
+          _logger.warning("Could not load image: ", e);
+          _encounteredErrorLoadingThumbnail = true;
+        }).then((data) {
           if (mounted) {
             setState(() {
               if (data != null) {
