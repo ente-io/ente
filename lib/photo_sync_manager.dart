@@ -20,6 +20,7 @@ import 'package:photos/events/remote_sync_event.dart';
 class PhotoSyncManager {
   final _logger = Logger("PhotoSyncManager");
   final _dio = Dio();
+  final _db = DatabaseHelper.instance;
   bool _isSyncInProgress = false;
 
   static final _lastSyncTimestampKey = "last_sync_timestamp_0";
@@ -72,16 +73,16 @@ class PhotoSyncManager {
     }
     if (photos.isEmpty) {
       _isSyncInProgress = false;
-      _syncPhotos().then((_) {
-        _deletePhotos();
+      _syncPhotosWithServer().then((_) {
+        _deletePhotosOnServer();
       });
     } else {
       photos.sort((first, second) =>
           first.createTimestamp.compareTo(second.createTimestamp));
       _updateDatabase(photos, prefs, lastDBUpdateTimestamp).then((_) {
         _isSyncInProgress = false;
-        _syncPhotos().then((_) {
-          _deletePhotos();
+        _syncPhotosWithServer().then((_) {
+          _deletePhotosOnServer();
         });
       });
     }
@@ -99,37 +100,44 @@ class PhotoSyncManager {
         photosToBeAdded, prefs, DateTime.now().microsecondsSinceEpoch);
   }
 
-  _syncPhotos() async {
+  _syncPhotosWithServer() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var lastSyncTimestamp = prefs.getInt(_lastSyncTimestampKey);
-    if (lastSyncTimestamp == null) {
-      lastSyncTimestamp = 0;
-    }
-    _logger.info("Last sync timestamp: " + lastSyncTimestamp.toString());
 
-    await _getDiff(lastSyncTimestamp, _diffLimit).then((diff) async {
-      if (diff != null) {
-        await _storeDiff(diff, prefs).then((_) {
-          // TODO: Recursively store diff
-          _uploadDiff(prefs);
-        });
+    var shouldFetchDiff = true;
+    while (shouldFetchDiff) {
+      int lastSyncTimestamp = _getLastSyncTimestamp(prefs);
+      var diff = await _getDiff(lastSyncTimestamp, _diffLimit);
+      if (diff != null && diff.isNotEmpty) {
+        await _storeDiff(diff, prefs);
+        PhotoRepository.instance.reloadPhotos();
       }
-    });
+      if (diff.length < _diffLimit) {
+        shouldFetchDiff = false;
+      }
+    }
+    _uploadDiff(prefs);
 
     // TODO:  Fix race conditions triggered due to concurrent syncs.
     //        Add device_id/last_sync_timestamp to the upload request?
   }
 
+  int _getLastSyncTimestamp(SharedPreferences prefs) {
+    var lastSyncTimestamp = prefs.getInt(_lastSyncTimestampKey);
+    if (lastSyncTimestamp == null) {
+      lastSyncTimestamp = 0;
+    }
+    return lastSyncTimestamp;
+  }
+
   Future _uploadDiff(SharedPreferences prefs) async {
-    List<Photo> photosToBeUploaded =
-        await DatabaseHelper.instance.getPhotosToBeUploaded();
+    List<Photo> photosToBeUploaded = await _db.getPhotosToBeUploaded();
     for (Photo photo in photosToBeUploaded) {
       try {
         var uploadedPhoto = await _uploadFile(photo);
         if (uploadedPhoto == null) {
           return;
         }
-        await DatabaseHelper.instance.updatePhoto(photo.generatedId,
+        await _db.updatePhoto(photo.generatedId, uploadedPhoto.uploadedFileId,
             uploadedPhoto.remotePath, uploadedPhoto.syncTimestamp);
         prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.syncTimestamp);
       } catch (e) {
@@ -140,10 +148,16 @@ class PhotoSyncManager {
 
   Future _storeDiff(List<Photo> diff, SharedPreferences prefs) async {
     for (Photo photo in diff) {
-      await DatabaseHelper.instance.insertPhoto(photo);
+      try {
+        var existingPhoto = await _db.getMatchingPhoto(photo.localId,
+            photo.title, photo.deviceFolder, photo.createTimestamp);
+        await _db.updatePhoto(existingPhoto.generatedId, photo.uploadedFileId,
+            photo.remotePath, photo.syncTimestamp);
+      } catch (e) {
+        await _db.insertPhoto(photo);
+      }
       await prefs.setInt(_lastSyncTimestampKey, photo.syncTimestamp);
     }
-    PhotoRepository.instance.reloadPhotos();
   }
 
   Future<List<Photo>> _getDiff(int lastSyncTimestamp, int limit) async {
@@ -190,11 +204,11 @@ class PhotoSyncManager {
     });
   }
 
-  Future<void> _deletePhotos() async {
-    DatabaseHelper.instance.getAllDeletedPhotos().then((deletedPhotos) {
+  Future<void> _deletePhotosOnServer() async {
+    _db.getAllDeletedPhotos().then((deletedPhotos) {
       for (Photo deletedPhoto in deletedPhotos) {
         _deletePhotoOnServer(deletedPhoto)
-            .then((value) => DatabaseHelper.instance.deletePhoto(deletedPhoto));
+            .then((value) => _db.deletePhoto(deletedPhoto));
       }
     });
   }
@@ -219,7 +233,7 @@ class PhotoSyncManager {
 
   Future<bool> _insertPhotosToDB(
       List<Photo> photos, SharedPreferences prefs, int timestamp) async {
-    await DatabaseHelper.instance.insertPhotos(photos);
+    await _db.insertPhotos(photos);
     _logger.info("Inserted " + photos.length.toString() + " photos.");
     PhotoRepository.instance.reloadPhotos();
     return await prefs.setInt(_lastDBUpdateTimestampKey, timestamp);

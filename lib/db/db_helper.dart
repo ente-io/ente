@@ -108,10 +108,27 @@ class DatabaseHelper {
     return _convertToPhotos(results);
   }
 
-  Future<int> updatePhoto(
-      int generatedId, String remotePath, int syncTimestamp) async {
+  Future<Photo> getMatchingPhoto(String localId, String title,
+      String deviceFolder, int createTimestamp) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      where:
+          '$columnLocalId=? AND $columnTitle=? AND $columnDeviceFolder=? AND $columnCreateTimestamp=?',
+      whereArgs: [localId, title, deviceFolder, createTimestamp],
+    );
+    if (rows.isNotEmpty) {
+      return _getPhotoFromRow(rows[0]);
+    } else {
+      throw ("No matching photo found");
+    }
+  }
+
+  Future<int> updatePhoto(int generatedId, int uploadedId, String remotePath,
+      int syncTimestamp) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
+    values[columnUploadedFileId] = uploadedId;
     values[columnRemotePath] = remotePath;
     values[columnSyncTimestamp] = syncTimestamp;
     return await db.update(
@@ -130,12 +147,13 @@ class DatabaseHelper {
       whereArgs: [path],
     );
     if (rows.isNotEmpty) {
-      return _getPhotofromRow(rows[0]);
+      return _getPhotoFromRow(rows[0]);
     } else {
       throw ("No cached photo");
     }
   }
 
+  // TODO: Remove deleted photos on remote
   Future<int> markPhotoForDeletion(Photo photo) async {
     final db = await instance.database;
     var values = new Map<String, dynamic>();
@@ -181,7 +199,7 @@ class DatabaseHelper {
       limit: 1,
     );
     if (rows.isNotEmpty) {
-      return _getPhotofromRow(rows[0]);
+      return _getPhotoFromRow(rows[0]);
     } else {
       throw ("No photo found in path");
     }
@@ -197,7 +215,7 @@ class DatabaseHelper {
       limit: 1,
     );
     if (rows.isNotEmpty) {
-      return _getPhotofromRow(rows[0]);
+      return _getPhotoFromRow(rows[0]);
     } else {
       throw ("No photo found with ids " + generatedIds.join(", ").toString());
     }
@@ -206,7 +224,7 @@ class DatabaseHelper {
   List<Photo> _convertToPhotos(List<Map<String, dynamic>> results) {
     var photos = List<Photo>();
     for (var result in results) {
-      photos.add(_getPhotofromRow(result));
+      photos.add(_getPhotoFromRow(result));
     }
     return photos;
   }
@@ -224,7 +242,7 @@ class DatabaseHelper {
     return row;
   }
 
-  Photo _getPhotofromRow(Map<String, dynamic> row) {
+  Photo _getPhotoFromRow(Map<String, dynamic> row) {
     Photo photo = Photo();
     photo.generatedId = row[columnGeneratedId];
     photo.localId = row[columnLocalId];

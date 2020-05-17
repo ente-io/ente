@@ -17,9 +17,10 @@ class Photo {
 
   Photo();
   Photo.fromJson(Map<String, dynamic> json)
-      : uploadedFileId = json["fileId"],
-        title = json["title"],
+      : uploadedFileId = json["fileID"],
+        localId = json["deviceFileID"],
         deviceFolder = json["deviceFolder"],
+        title = json["title"],
         remotePath = json["path"],
         createTimestamp = json["createTimestamp"],
         syncTimestamp = json["syncTimestamp"];
