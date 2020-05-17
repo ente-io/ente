@@ -12,15 +12,15 @@ class SetupPage extends StatefulWidget {
 }
 
 class _SetupPageState extends State<SetupPage> {
-  bool _errorFindingEndpoint = false;
+  bool _shouldSearchForEndpoint = true;
   String _enteredEndpoint = "";
 
   @override
   Widget build(BuildContext context) {
     if (Configuration.instance.getEndpoint() == null &&
-        !_errorFindingEndpoint) {
+        _shouldSearchForEndpoint) {
       EndpointFinder.instance.findEndpoint().then((endpoint) {
-        if (mounted) {
+        if (mounted && endpoint != null) {
           setState(() {
             Configuration.instance.setEndpoint(endpoint);
           });
@@ -28,7 +28,7 @@ class _SetupPageState extends State<SetupPage> {
       }).catchError((e) {
         if (mounted) {
           setState(() {
-            _errorFindingEndpoint = true;
+            _shouldSearchForEndpoint = false;
           });
         }
       });
@@ -44,10 +44,10 @@ class _SetupPageState extends State<SetupPage> {
 
   Widget _getBody() {
     if (Configuration.instance.getEndpoint() == null &&
-        !_errorFindingEndpoint) {
+        _shouldSearchForEndpoint) {
       return _getSearchScreen();
     } else if (Configuration.instance.getEndpoint() == null &&
-        _errorFindingEndpoint) {
+        !_shouldSearchForEndpoint) {
       return _getManualEndpointEntryScreen();
     } else {
       return SignInWidget(() {
@@ -83,7 +83,7 @@ class _SetupPageState extends State<SetupPage> {
                     await EndpointFinder.instance.ping(_enteredEndpoint);
                 if (success) {
                   setState(() {
-                    _errorFindingEndpoint = false;
+                    _shouldSearchForEndpoint = false;
                     Configuration.instance.setEndpoint(_enteredEndpoint);
                   });
                 } else {
@@ -102,11 +102,23 @@ class _SetupPageState extends State<SetupPage> {
   Center _getSearchScreen() {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           AnimatedSearchIconWidget(),
           Text("Searching for ente server..."),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: CupertinoButton(
+              child: Text("Enter manually instead"),
+              onPressed: () async {
+                EndpointFinder.instance.cancelSearch();
+                setState(() {
+                  _shouldSearchForEndpoint = false;
+                });
+              },
+            ),
+          ),
         ],
       ),
     );

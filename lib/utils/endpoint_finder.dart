@@ -14,7 +14,10 @@ class EndpointFinder {
 
   static final EndpointFinder instance = EndpointFinder._privateConstructor();
 
+  bool _shouldContinueSearch;
+
   Future<String> findEndpoint() {
+    _shouldContinueSearch = true;
     return (Connectivity().getWifiIP()).then((ip) async {
       logger.info(ip);
       final ipSplit = ip.split(".");
@@ -26,7 +29,7 @@ class EndpointFinder {
       }
       logger.info(prefix);
 
-      for (int i = 1; i <= 255; i++) {
+      for (int i = 1; i <= 255 && _shouldContinueSearch; i++) {
         var endpoint = prefix + i.toString();
         try {
           final success = await ping(endpoint);
@@ -37,8 +40,17 @@ class EndpointFinder {
           // Do nothing
         }
       }
-      throw TimeoutException("Could not find a valid endpoint");
+      if (_shouldContinueSearch) {
+        throw TimeoutException("Could not find a valid endpoint");
+      } else {
+        // Exit gracefully
+        return Future.value(null);
+      }
     });
+  }
+
+  void cancelSearch() {
+    _shouldContinueSearch = false;
   }
 
   Future<bool> ping(String endpoint) async {
