@@ -107,17 +107,14 @@ class _SetupPageState extends State<SetupPage> {
         children: <Widget>[
           AnimatedSearchIconWidget(),
           Text("Searching for ente server..."),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: CupertinoButton(
-              child: Text("Enter manually instead"),
-              onPressed: () async {
-                EndpointFinder.instance.cancelSearch();
-                setState(() {
-                  _shouldSearchForEndpoint = false;
-                });
-              },
-            ),
+          CupertinoButton(
+            child: Text("Enter manually instead"),
+            onPressed: () async {
+              EndpointFinder.instance.cancelSearch();
+              setState(() {
+                _shouldSearchForEndpoint = false;
+              });
+            },
           ),
         ],
       ),
