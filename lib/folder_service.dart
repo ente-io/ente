@@ -21,7 +21,7 @@ class FolderSharingService {
       return _dio
           .get(
         Configuration.instance.getHttpEndpoint() +
-            "/folders/" +
+            "/folders/folder/" +
             folderID.toString(),
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
