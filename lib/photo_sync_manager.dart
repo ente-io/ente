@@ -171,6 +171,7 @@ class PhotoSyncManager {
     var formData = FormData.fromMap({
       "file": MultipartFile.fromBytes((await localPhoto.getOriginalBytes()),
           filename: localPhoto.title),
+      "deviceFileID": localPhoto.localId,
       "deviceFolder": localPhoto.deviceFolder,
       "title": localPhoto.title,
       "createTimestamp": localPhoto.createTimestamp,
