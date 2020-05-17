@@ -16,17 +16,17 @@ class SignInWidget extends StatefulWidget {
   _SignInWidgetState createState() => _SignInWidgetState();
 }
 
+enum Mode { sign_up, sign_in, unknown }
+
 class _SignInWidgetState extends State<SignInWidget> {
-  String _username, _password, _repeatedPassword;
-  @override
-  void initState() {
-    super.initState();
-  }
+  Mode mode = Mode.unknown;
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _repeatPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    if (Configuration.instance.getToken() == null) {
-      // Has probably not signed up
+    if (mode == Mode.sign_up) {
       return _getSignUpWidget(context);
     } else {
       return _getSignInWidget(context);
@@ -35,120 +35,121 @@ class _SignInWidgetState extends State<SignInWidget> {
 
   Widget _getSignUpWidget(BuildContext context) {
     return Container(
-        child: Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
-          child: Text("Create an account to get started"),
-        ),
-        TextFormField(
-          decoration: InputDecoration(
-            hintText: 'username',
-            contentPadding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+            child: Text("Create an account to get started"),
           ),
-          autofocus: true,
-          autocorrect: false,
-          onChanged: (value) {
-            setState(() {
-              _username = value;
-            });
-          },
-        ),
-        TextFormField(
-          decoration: InputDecoration(
-            hintText: 'password',
-            contentPadding: EdgeInsets.all(20),
+          TextFormField(
+            decoration: InputDecoration(
+              hintText: 'username',
+              contentPadding: EdgeInsets.all(20),
+            ),
+            controller: _usernameController,
+            autofocus: true,
+            autocorrect: false,
           ),
-          autocorrect: false,
-          obscureText: true,
-          onChanged: (value) {
-            setState(() {
-              _password = value;
-            });
-          },
-        ),
-        TextFormField(
-          decoration: InputDecoration(
-            hintText: 'repeat password',
-            contentPadding: EdgeInsets.all(20),
+          TextFormField(
+            decoration: InputDecoration(
+              hintText: 'password',
+              contentPadding: EdgeInsets.all(20),
+            ),
+            autocorrect: false,
+            obscureText: true,
+            controller: _passwordController,
           ),
-          autocorrect: false,
-          obscureText: true,
-          onChanged: (value) {
-            setState(() {
-              _repeatedPassword = value;
-            });
-          },
-        ),
-        CupertinoButton(
-          child: Text("Sign Up"),
-          onPressed: () async {
-            if (_password != _repeatedPassword) {
-              _showPasswordMismatchDialog();
-            } else {
-              try {
-                final userCreated = await UserAuthenticator.instance
-                    .create(_username, _password);
-                if (userCreated) {
-                  Navigator.of(context).pop();
-                } else {
-                  _showGenericErrorDialog();
+          TextFormField(
+            decoration: InputDecoration(
+              hintText: 'repeat password',
+              contentPadding: EdgeInsets.all(20),
+            ),
+            autocorrect: false,
+            obscureText: true,
+            controller: _repeatPasswordController,
+          ),
+          CupertinoButton(
+            child: Text("Sign Up"),
+            onPressed: () async {
+              if (_passwordController.text != _repeatPasswordController.text) {
+                _showPasswordMismatchDialog();
+              } else {
+                try {
+                  final userCreated = await UserAuthenticator.instance.create(
+                      _usernameController.text, _passwordController.text);
+                  if (userCreated) {
+                    Navigator.of(context).pop();
+                  } else {
+                    _showGenericErrorDialog();
+                  }
+                } catch (e) {
+                  _showGenericErrorDialog(error: e);
                 }
-              } catch (e) {
-                _showGenericErrorDialog(error: e);
               }
-            }
-          },
-        ),
-      ],
+            },
+          ),
+          CupertinoButton(
+            child: Text("Have an account?"),
+            onPressed: () {
+              setState(() {
+                mode = Mode.sign_in;
+              });
+            },
+          ),
+        ],
+      ),
     ));
   }
 
   Widget _getSignInWidget(BuildContext context) {
     return Container(
-        child: Column(
-      children: <Widget>[
-        TextFormField(
-          initialValue: Configuration.instance.getUsername(),
-          decoration: InputDecoration(
-            hintText: 'username',
-            contentPadding: EdgeInsets.all(20),
+        child: SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          TextFormField(
+            // initialValue: Configuration.instance.getUsername(),
+            decoration: InputDecoration(
+              hintText: 'username',
+              contentPadding: EdgeInsets.all(20),
+            ),
+            autofocus: true,
+            autocorrect: false,
+            controller: _usernameController,
           ),
-          autofocus: true,
-          autocorrect: false,
-          onChanged: (value) {
-            setState(() {
-              _username = value;
-            });
-          },
-        ),
-        TextFormField(
-          initialValue: Configuration.instance.getPassword(),
-          decoration: InputDecoration(
-            hintText: 'password',
-            contentPadding: EdgeInsets.all(20),
+          TextFormField(
+            // initialValue: Configuration.instance.getPassword(),
+            decoration: InputDecoration(
+              hintText: 'password',
+              contentPadding: EdgeInsets.all(20),
+            ),
+            autocorrect: false,
+            obscureText: true,
+            controller: _passwordController,
           ),
-          autocorrect: false,
-          obscureText: true,
-          onChanged: (value) {
-            setState(() {
-              _password = value;
-            });
-          },
-        ),
-        CupertinoButton(
-          child: Text("Sign In"),
-          onPressed: () async {
-            final loggedIn =
-                await UserAuthenticator.instance.login(_username, _password);
-            if (loggedIn) {
-              Navigator.of(context).pop();
-            } else {
-              _showAuthenticationFailedErrorDialog();
-            }
-          },
-        ),
-      ],
+          CupertinoButton(
+            child: Text("Sign In"),
+            onPressed: () async {
+              final loggedIn = await UserAuthenticator.instance
+                  .login(_usernameController.text, _passwordController.text);
+              if (loggedIn) {
+                Navigator.of(context).pop();
+              } else {
+                _showAuthenticationFailedErrorDialog();
+              }
+            },
+          ),
+          CupertinoButton(
+            child: Text("Don't have an account?"),
+            onPressed: () {
+              setState(() {
+                mode = Mode.sign_up;
+              });
+            },
+          ),
+        ],
+      ),
     ));
   }
 

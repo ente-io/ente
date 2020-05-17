@@ -8,7 +8,7 @@ class ImportantItemsFilter implements GalleryItemsFilter {
   @override
   bool shouldInclude(Photo photo) {
     if (Platform.isAndroid) {
-      final String folder = basename(photo.pathName);
+      final String folder = basename(photo.deviceFolder);
       return folder == "Camera" ||
           folder == "DCIM" ||
           folder == "Download" ||

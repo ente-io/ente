@@ -16,10 +16,11 @@ class UserAuthenticator {
 
   Future<bool> login(String username, String password) {
     return _dio.post(
-        "http://" +
-            Configuration.instance.getEndpoint() +
-            ":8080/users/authenticate",
-        data: {"username": username, "password": password}).then((response) {
+        Configuration.instance.getHttpEndpoint() + "/users/authenticate",
+        data: {
+          "username": username,
+          "password": password,
+        }).then((response) {
       if (response.statusCode == 200 && response.data != null) {
         Configuration.instance.setUsername(username);
         Configuration.instance.setPassword(password);
@@ -36,9 +37,11 @@ class UserAuthenticator {
   }
 
   Future<bool> create(String username, String password) {
-    return _dio.post(
-        "http://" + Configuration.instance.getEndpoint() + ":8080/users",
-        data: {"username": username, "password": password}).then((response) {
+    return _dio
+        .post(Configuration.instance.getHttpEndpoint() + "/users", data: {
+      "username": username,
+      "password": password,
+    }).then((response) {
       if (response.statusCode == 200 && response.data != null) {
         Configuration.instance.setUsername(username);
         Configuration.instance.setPassword(password);

@@ -8,7 +8,6 @@ import 'package:photos/db/db_helper.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/photo_repository.dart';
 import 'package:photos/photo_provider.dart';
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -110,15 +109,13 @@ class PhotoSyncManager {
 
     await _getDiff(lastSyncTimestamp, _diffLimit).then((diff) async {
       if (diff != null) {
-        await _downloadDiff(diff, prefs).then((_) {
-          if (diff.length > 0) {
-            _syncPhotos();
-          }
+        await _storeDiff(diff, prefs).then((_) {
+          // TODO: Recursively store diff
+          _uploadDiff(prefs);
         });
       }
     });
 
-    _uploadDiff(prefs);
     // TODO:  Fix race conditions triggered due to concurrent syncs.
     //        Add device_id/last_sync_timestamp to the upload request?
   }
@@ -127,32 +124,26 @@ class PhotoSyncManager {
     List<Photo> photosToBeUploaded =
         await DatabaseHelper.instance.getPhotosToBeUploaded();
     for (Photo photo in photosToBeUploaded) {
-      var uploadedPhoto = await _uploadFile(photo);
-      if (uploadedPhoto == null) {
-        return;
+      try {
+        var uploadedPhoto = await _uploadFile(photo);
+        if (uploadedPhoto == null) {
+          return;
+        }
+        await DatabaseHelper.instance.updatePhoto(photo.generatedId,
+            uploadedPhoto.remotePath, uploadedPhoto.syncTimestamp);
+        prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.syncTimestamp);
+      } catch (e) {
+        _logger.severe(e);
       }
-      await DatabaseHelper.instance.updatePhoto(photo.generatedId,
-          uploadedPhoto.remotePath, uploadedPhoto.syncTimestamp);
-      prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.syncTimestamp);
     }
   }
 
-  Future _downloadDiff(List<Photo> diff, SharedPreferences prefs) async {
-    var externalPath = (await getApplicationDocumentsDirectory()).path;
-    var path = externalPath + "/photos/";
+  Future _storeDiff(List<Photo> diff, SharedPreferences prefs) async {
     for (Photo photo in diff) {
-      var localPath = path + basename(photo.remotePath);
-      await _dio
-          .download(
-              Configuration.instance.getHttpEndpoint() + "/" + photo.remotePath,
-              localPath)
-          .catchError((e) => _logger.severe(e));
-      // TODO: Save path
-      photo.pathName = localPath;
       await DatabaseHelper.instance.insertPhoto(photo);
-      PhotoRepository.instance.reloadPhotos();
       await prefs.setInt(_lastSyncTimestampKey, photo.syncTimestamp);
     }
+    PhotoRepository.instance.reloadPhotos();
   }
 
   Future<List<Photo>> _getDiff(int lastSyncTimestamp, int limit) async {
@@ -180,19 +171,22 @@ class PhotoSyncManager {
     var formData = FormData.fromMap({
       "file": MultipartFile.fromBytes((await localPhoto.getOriginalBytes()),
           filename: localPhoto.title),
+      "deviceFolder": localPhoto.deviceFolder,
       "title": localPhoto.title,
       "createTimestamp": localPhoto.createTimestamp,
-      "token": Configuration.instance.getToken(),
     });
     return _dio
         .post(
-          Configuration.instance.getHttpEndpoint() + "/files",
-          options: Options(
-              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-          data: formData,
-        )
-        .then((response) => Photo.fromJson(response.data))
-        .catchError((e) => _logger.severe(e));
+      Configuration.instance.getHttpEndpoint() + "/files",
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      data: formData,
+    )
+        .then((response) {
+      return Photo.fromJson(response.data);
+    }).catchError((e) {
+      _logger.severe("Error in uploading ", e);
+    });
   }
 
   Future<void> _deletePhotos() async {

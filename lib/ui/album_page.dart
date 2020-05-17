@@ -37,6 +37,7 @@ class _AlbumPageState extends State<AlbumPage> {
     return Scaffold(
       appBar: GalleryAppBarWidget(
         widget.album.name,
+        widget.album.thumbnailPhoto.deviceFolder,
         _selectedPhotos,
         onSelectionClear: () {
           setState(() {

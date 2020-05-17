@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
@@ -9,15 +8,18 @@ import 'package:photos/models/photo.dart';
 import 'package:photos/photo_repository.dart';
 import 'package:photos/ui/setup_page.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/ui/share_album_widget.dart';
 import 'package:photos/utils/share_util.dart';
 
 class GalleryAppBarWidget extends StatefulWidget
     implements PreferredSizeWidget {
   final String title;
+  final String path;
   final Set<Photo> selectedPhotos;
   final Function() onSelectionClear;
 
-  GalleryAppBarWidget(this.title, this.selectedPhotos, {this.onSelectionClear});
+  GalleryAppBarWidget(this.title, this.path, this.selectedPhotos,
+      {this.onSelectionClear});
 
   @override
   _GalleryAppBarWidgetState createState() => _GalleryAppBarWidgetState();
@@ -70,8 +72,24 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           _openSyncConfiguration(context);
         },
       ));
+    } else {
+      actions.add(IconButton(
+        icon: Icon(Icons.person_add),
+        onPressed: () {
+          _showShareAlbumDialog();
+        },
+      ));
     }
     return actions;
+  }
+
+  Future<void> _showShareAlbumDialog() async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return ShareAlbumWidget(widget.title, widget.path);
+      },
+    );
   }
 
   List<Widget> _getPhotoActions(BuildContext context) {

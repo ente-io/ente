@@ -15,7 +15,7 @@ class DatabaseHelper {
   static final columnUploadedFileId = 'uploaded_file_id';
   static final columnLocalId = 'local_id';
   static final columnTitle = 'title';
-  static final columnPathName = 'path_name';
+  static final columnDeviceFolder = 'device_folder';
   static final columnRemotePath = 'remote_path';
   static final columnIsDeleted = 'is_deleted';
   static final columnCreateTimestamp = 'create_timestamp';
@@ -50,7 +50,7 @@ class DatabaseHelper {
             $columnLocalId TEXT,
             $columnUploadedFileId INTEGER NOT NULL,
             $columnTitle TEXT NOT NULL,
-            $columnPathName TEXT NOT NULL,
+            $columnDeviceFolder TEXT NOT NULL,
             $columnRemotePath TEXT,
             $columnIsDeleted INTEGER DEFAULT 0,
             $columnCreateTimestamp TEXT NOT NULL,
@@ -161,12 +161,12 @@ class DatabaseHelper {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      columns: [columnPathName],
+      columns: [columnDeviceFolder],
       distinct: true,
     );
     List<String> result = List<String>();
     for (final row in rows) {
-      result.add(row[columnPathName]);
+      result.add(row[columnDeviceFolder]);
     }
     return result;
   }
@@ -175,7 +175,7 @@ class DatabaseHelper {
     final db = await instance.database;
     var rows = await db.query(
       table,
-      where: '$columnPathName =?',
+      where: '$columnDeviceFolder =?',
       whereArgs: [path],
       orderBy: '$columnCreateTimestamp DESC',
       limit: 1,
@@ -217,7 +217,7 @@ class DatabaseHelper {
     row[columnUploadedFileId] =
         photo.uploadedFileId == null ? -1 : photo.uploadedFileId;
     row[columnTitle] = photo.title;
-    row[columnPathName] = photo.pathName;
+    row[columnDeviceFolder] = photo.deviceFolder;
     row[columnRemotePath] = photo.remotePath;
     row[columnCreateTimestamp] = photo.createTimestamp;
     row[columnSyncTimestamp] = photo.syncTimestamp;
@@ -230,7 +230,7 @@ class DatabaseHelper {
     photo.localId = row[columnLocalId];
     photo.uploadedFileId = row[columnUploadedFileId];
     photo.title = row[columnTitle];
-    photo.pathName = row[columnPathName];
+    photo.deviceFolder = row[columnDeviceFolder];
     photo.remotePath = row[columnRemotePath];
     photo.createTimestamp = int.parse(row[columnCreateTimestamp]);
     photo.syncTimestamp = row[columnSyncTimestamp] == null

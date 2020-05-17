@@ -53,6 +53,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     return Scaffold(
       appBar: GalleryAppBarWidget(
         widget.title,
+        "/",
         _selectedPhotos,
         onSelectionClear: _clearSelectedPhotos,
       ),

@@ -10,7 +10,7 @@ class Photo {
   int uploadedFileId;
   String localId;
   String title;
-  String pathName;
+  String deviceFolder;
   String remotePath;
   int createTimestamp;
   int syncTimestamp;
@@ -18,8 +18,9 @@ class Photo {
   Photo();
   Photo.fromJson(Map<String, dynamic> json)
       : uploadedFileId = json["fileId"],
-        remotePath = json["path"],
         title = json["title"],
+        deviceFolder = json["deviceFolder"],
+        remotePath = json["path"],
         createTimestamp = json["createTimestamp"],
         syncTimestamp = json["syncTimestamp"];
 
@@ -29,7 +30,7 @@ class Photo {
     photo.uploadedFileId = -1;
     photo.localId = asset.id;
     photo.title = asset.title;
-    photo.pathName = pathEntity.name;
+    photo.deviceFolder = pathEntity.name;
     photo.createTimestamp = asset.createDateTime.microsecondsSinceEpoch;
     if (photo.createTimestamp == 0) {
       try {
@@ -67,7 +68,7 @@ class Photo {
 
   @override
   String toString() {
-    return 'Photo(generatedId: $generatedId, uploadedFileId: $uploadedFileId, localId: $localId, title: $title, pathName: $pathName, remotePath: $remotePath, createTimestamp: $createTimestamp, syncTimestamp: $syncTimestamp)';
+    return 'Photo(generatedId: $generatedId, uploadedFileId: $uploadedFileId, localId: $localId, title: $title, deviceFolder: $deviceFolder, remotePath: $remotePath, createTimestamp: $createTimestamp, syncTimestamp: $syncTimestamp)';
   }
 
   @override
@@ -79,7 +80,7 @@ class Photo {
         o.uploadedFileId == uploadedFileId &&
         o.localId == localId &&
         o.title == title &&
-        o.pathName == pathName &&
+        o.deviceFolder == deviceFolder &&
         o.remotePath == remotePath &&
         o.createTimestamp == createTimestamp &&
         o.syncTimestamp == syncTimestamp;
@@ -91,7 +92,7 @@ class Photo {
         uploadedFileId.hashCode ^
         localId.hashCode ^
         title.hashCode ^
-        pathName.hashCode ^
+        deviceFolder.hashCode ^
         remotePath.hashCode ^
         createTimestamp.hashCode ^
         syncTimestamp.hashCode;
