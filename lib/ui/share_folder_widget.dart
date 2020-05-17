@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:photos/album_sharing_service.dart';
+import 'package:photos/folder_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 
-class ShareAlbumWidget extends StatefulWidget {
+class ShareFolderWidget extends StatefulWidget {
   final String title;
   final String path;
 
-  const ShareAlbumWidget(
+  const ShareFolderWidget(
     this.title,
     this.path, {
     Key key,
   }) : super(key: key);
 
   @override
-  _ShareAlbumWidgetState createState() => _ShareAlbumWidgetState();
+  _ShareFolderWidgetState createState() => _ShareFolderWidgetState();
 }
 
-class _ShareAlbumWidgetState extends State<ShareAlbumWidget> {
+class _ShareFolderWidgetState extends State<ShareFolderWidget> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, bool>>(
-      future: AlbumSharingService.instance.getSharingStatus(widget.path),
+      future: FolderSharingService.instance.getSharingStatus(widget.path),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _getSharingDialog(snapshot.data);
@@ -48,7 +48,7 @@ class _ShareAlbumWidgetState extends State<ShareAlbumWidget> {
         FlatButton(
           child: Text("Share"),
           onPressed: () {
-            // TODO: AlbumSharingService.instance.shareAlbum();
+            // TODO: FolderSharingService.instance.shareFolder();
             Navigator.of(context).pop();
           },
         ),

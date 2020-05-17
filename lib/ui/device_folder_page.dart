@@ -3,24 +3,24 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/models/album.dart';
+import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/photo_repository.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:logging/logging.dart';
 
-class AlbumPage extends StatefulWidget {
-  final Album album;
+class DeviceFolderPage extends StatefulWidget {
+  final DeviceFolder folder;
 
-  const AlbumPage(this.album, {Key key}) : super(key: key);
+  const DeviceFolderPage(this.folder, {Key key}) : super(key: key);
 
   @override
-  _AlbumPageState createState() => _AlbumPageState();
+  _DeviceFolderPageState createState() => _DeviceFolderPageState();
 }
 
-class _AlbumPageState extends State<AlbumPage> {
-  final logger = Logger("AlbumPageState");
+class _DeviceFolderPageState extends State<DeviceFolderPage> {
+  final logger = Logger("DeviceFolderPageState");
   Set<Photo> _selectedPhotos = Set<Photo>();
   StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
 
@@ -37,8 +37,8 @@ class _AlbumPageState extends State<AlbumPage> {
     return Scaffold(
       appBar: GalleryAppBarWidget(
         GalleryAppBarType.folder,
-        widget.album.name,
-        widget.album.thumbnailPhoto.deviceFolder,
+        widget.folder.name,
+        widget.folder.thumbnailPhoto.deviceFolder,
         _selectedPhotos,
         onSelectionClear: () {
           setState(() {
@@ -61,7 +61,7 @@ class _AlbumPageState extends State<AlbumPage> {
   List<Photo> _getFilteredPhotos(List<Photo> unfilteredPhotos) {
     final List<Photo> filteredPhotos = List<Photo>();
     for (Photo photo in unfilteredPhotos) {
-      if (widget.album.filter.shouldInclude(photo)) {
+      if (widget.folder.filter.shouldInclude(photo)) {
         filteredPhotos.add(photo);
       }
     }

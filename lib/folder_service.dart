@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:photos/core/configuration.dart';
 
-class AlbumSharingService {
+class FolderSharingService {
   final _dio = Dio();
 
-  AlbumSharingService._privateConstructor();
-  static final AlbumSharingService instance =
-      AlbumSharingService._privateConstructor();
+  FolderSharingService._privateConstructor();
+  static final FolderSharingService instance =
+      FolderSharingService._privateConstructor();
 
   Future<Map<String, bool>> getSharingStatus(String path) async {
     // TODO fetch folderID from path
@@ -40,7 +40,7 @@ class AlbumSharingService {
     });
   }
 
-  void shareAlbum(
+  void shareFolder(
     String path,
   ) {}
 }

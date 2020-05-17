@@ -8,7 +8,7 @@ import 'package:photos/models/photo.dart';
 import 'package:photos/photo_repository.dart';
 import 'package:photos/ui/setup_page.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/ui/share_album_widget.dart';
+import 'package:photos/ui/share_folder_widget.dart';
 import 'package:photos/utils/share_util.dart';
 
 enum GalleryAppBarType { homepage, folder }
@@ -90,7 +90,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return ShareAlbumWidget(widget.title, widget.path);
+        return ShareFolderWidget(widget.title, widget.path);
       },
     );
   }
