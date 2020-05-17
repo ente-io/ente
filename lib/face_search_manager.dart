@@ -16,8 +16,11 @@ class FaceSearchManager {
 
   Future<List<Face>> getFaces() {
     return _dio
-        .get(Configuration.instance.getHttpEndpoint() + "/photos/faces",
-            queryParameters: {"token": Configuration.instance.getToken()})
+        .get(
+          Configuration.instance.getHttpEndpoint() + "/photos/faces",
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        )
         .then((response) => (response.data["faces"] as List)
             .map((face) => new Face.fromJson(face))
             .toList())
@@ -25,14 +28,16 @@ class FaceSearchManager {
   }
 
   Future<List<Photo>> getFaceSearchResults(Face face) async {
-    var futures = _dio.get(
-        Configuration.instance.getHttpEndpoint() +
-            "/photos/search/face/" +
-            face.faceID.toString(),
-        queryParameters: {
-          "token": Configuration.instance.getToken(),
-        }).then((response) => (response.data["results"] as List)
-        .map((result) => (DatabaseHelper.instance.getPhotoByPath(result))));
+    var futures = _dio
+        .get(
+          Configuration.instance.getHttpEndpoint() +
+              "/photos/search/face/" +
+              face.faceID.toString(),
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        )
+        .then((response) => (response.data["results"] as List)
+            .map((result) => (DatabaseHelper.instance.getPhotoByPath(result))));
     return Future.wait(await futures);
   }
 

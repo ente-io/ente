@@ -25,6 +25,7 @@ class PhotoSyncManager {
 
   static final _lastSyncTimestampKey = "last_sync_timestamp_0";
   static final _lastDBUpdateTimestampKey = "last_db_update_timestamp";
+  static final _diffLimit = 100;
 
   PhotoSyncManager._privateConstructor() {
     Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
@@ -107,14 +108,17 @@ class PhotoSyncManager {
     }
     _logger.info("Last sync timestamp: " + lastSyncTimestamp.toString());
 
-    _getDiff(lastSyncTimestamp).then((diff) {
+    await _getDiff(lastSyncTimestamp, _diffLimit).then((diff) async {
       if (diff != null) {
-        _downloadDiff(diff, prefs).then((_) {
-          _uploadDiff(prefs);
+        await _downloadDiff(diff, prefs).then((_) {
+          if (diff.length > 0) {
+            _syncPhotos();
+          }
         });
       }
     });
 
+    _uploadDiff(prefs);
     // TODO:  Fix race conditions triggered due to concurrent syncs.
     //        Add device_id/last_sync_timestamp to the upload request?
   }
@@ -151,13 +155,16 @@ class PhotoSyncManager {
     }
   }
 
-  Future<List<Photo>> _getDiff(int lastSyncTimestamp) async {
+  Future<List<Photo>> _getDiff(int lastSyncTimestamp, int limit) async {
     Response response = await _dio.get(
-        Configuration.instance.getHttpEndpoint() + "/files/diff",
-        queryParameters: {
-          "token": Configuration.instance.getToken(),
-          "lastSyncTimestamp": lastSyncTimestamp
-        }).catchError((e) => _logger.severe(e));
+      Configuration.instance.getHttpEndpoint() + "/files/diff",
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      queryParameters: {
+        "sinceTimestamp": lastSyncTimestamp,
+        "limit": limit,
+      },
+    ).catchError((e) => _logger.severe(e));
     if (response != null) {
       Bus.instance.fire(RemoteSyncEvent(true));
       return (response.data["diff"] as List)
@@ -178,13 +185,14 @@ class PhotoSyncManager {
       "token": Configuration.instance.getToken(),
     });
     return _dio
-        .post(Configuration.instance.getHttpEndpoint() + "/files",
-            data: formData)
-        .then((response) {
-      _logger.info(response.toString());
-      var photo = Photo.fromJson(response.data);
-      return photo;
-    }).catchError((e) => _logger.severe(e));
+        .post(
+          Configuration.instance.getHttpEndpoint() + "/files",
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+          data: formData,
+        )
+        .then((response) => Photo.fromJson(response.data))
+        .catchError((e) => _logger.severe(e));
   }
 
   Future<void> _deletePhotos() async {
@@ -197,11 +205,15 @@ class PhotoSyncManager {
   }
 
   Future<void> _deletePhotoOnServer(Photo photo) async {
-    return _dio.post(Configuration.instance.getHttpEndpoint() + "/files/delete",
-        queryParameters: {
-          "token": Configuration.instance.getToken(),
-          "fileID": photo.uploadedFileId
-        }).catchError((e) => _logger.severe(e));
+    return _dio
+        .delete(
+          Configuration.instance.getHttpEndpoint() +
+              "/files/" +
+              photo.uploadedFileId.toString(),
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        )
+        .catchError((e) => _logger.severe(e));
   }
 
   Future _initializeDirectories() async {
