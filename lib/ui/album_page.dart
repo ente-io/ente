@@ -36,6 +36,7 @@ class _AlbumPageState extends State<AlbumPage> {
   Widget build(Object context) {
     return Scaffold(
       appBar: GalleryAppBarWidget(
+        GalleryAppBarType.folder,
         widget.album.name,
         widget.album.thumbnailPhoto.deviceFolder,
         _selectedPhotos,

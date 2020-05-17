@@ -11,14 +11,17 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/ui/share_album_widget.dart';
 import 'package:photos/utils/share_util.dart';
 
+enum GalleryAppBarType { homepage, folder }
+
 class GalleryAppBarWidget extends StatefulWidget
     implements PreferredSizeWidget {
+  final GalleryAppBarType type;
   final String title;
   final String path;
   final Set<Photo> selectedPhotos;
   final Function() onSelectionClear;
 
-  GalleryAppBarWidget(this.title, this.path, this.selectedPhotos,
+  GalleryAppBarWidget(this.type, this.title, this.path, this.selectedPhotos,
       {this.onSelectionClear});
 
   @override
@@ -72,18 +75,18 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           _openSyncConfiguration(context);
         },
       ));
-    } else {
+    } else if (widget.type == GalleryAppBarType.folder) {
       actions.add(IconButton(
         icon: Icon(Icons.person_add),
         onPressed: () {
-          _showShareAlbumDialog();
+          _showShareCollectionDialog();
         },
       ));
     }
     return actions;
   }
 
-  Future<void> _showShareAlbumDialog() async {
+  Future<void> _showShareCollectionDialog() async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {

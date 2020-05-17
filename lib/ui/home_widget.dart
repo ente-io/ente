@@ -52,6 +52,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GalleryAppBarWidget(
+        GalleryAppBarType.homepage,
         widget.title,
         "/",
         _selectedPhotos,
