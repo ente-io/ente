@@ -26,9 +26,11 @@ class FolderSharingService {
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       )
           .then((foldersResponse) {
+        log(foldersResponse.toString());
         var folders = (foldersResponse.data as List)
             .map((f) => Folder.fromMap(f))
             .toList();
+        log(folders.toString());
         Folder sharedFolder;
         for (var folder in folders) {
           if (folder.owner == Configuration.instance.getUsername() &&
@@ -52,5 +54,14 @@ class FolderSharingService {
     });
   }
 
-  void shareFolder(String path) {}
+  Future<void> shareFolder(String name, String path, Set<String> users) {
+    var folder = Folder(0, name, Configuration.instance.getUsername(), path,
+        users.toList(), -1);
+    return _dio
+        .put(Configuration.instance.getHttpEndpoint() + "/folders/",
+            options: Options(
+                headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            data: folder.toMap())
+        .then((response) => log(response.toString()));
+  }
 }

@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
 class Folder {
-  final int folderID;
+  final int id;
   final String name;
   final String owner;
   final String deviceFolder;
@@ -7,7 +11,7 @@ class Folder {
   final int updateTimestamp;
 
   Folder(
-    this.folderID,
+    this.id,
     this.name,
     this.owner,
     this.deviceFolder,
@@ -19,7 +23,7 @@ class Folder {
     if (map == null) return null;
 
     return Folder(
-      map['folderID'],
+      map['id'],
       map['name'],
       map['owner'],
       map['deviceFolder'],
@@ -30,6 +34,44 @@ class Folder {
 
   @override
   String toString() {
-    return 'Folder(folderID: $folderID, name: $name, owner: $owner, deviceFolder: $deviceFolder, sharedWith: $sharedWith, updateTimestamp: $updateTimestamp)';
+    return 'Folder(id: $id, name: $name, owner: $owner, deviceFolder: $deviceFolder, sharedWith: $sharedWith, updateTimestamp: $updateTimestamp)';
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'owner': owner,
+      'deviceFolder': deviceFolder,
+      'sharedWith': sharedWith,
+      'updateTimestamp': updateTimestamp,
+    };
+  }
+
+  String toJson() => json.encode(toMap());
+
+  static Folder fromJson(String source) => fromMap(json.decode(source));
+
+  @override
+  bool operator ==(Object o) {
+    if (identical(this, o)) return true;
+
+    return o is Folder &&
+        o.id == id &&
+        o.name == name &&
+        o.owner == owner &&
+        o.deviceFolder == deviceFolder &&
+        listEquals(o.sharedWith, sharedWith) &&
+        o.updateTimestamp == updateTimestamp;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        name.hashCode ^
+        owner.hashCode ^
+        deviceFolder.hashCode ^
+        sharedWith.hashCode ^
+        updateTimestamp.hashCode;
   }
 }

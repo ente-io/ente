@@ -18,12 +18,15 @@ class ShareFolderWidget extends StatefulWidget {
 }
 
 class _ShareFolderWidgetState extends State<ShareFolderWidget> {
+  Map<String, bool> _sharingStatus;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, bool>>(
       future: FolderSharingService.instance.getSharingStatus(widget.path),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          _sharingStatus = snapshot.data;
           return _getSharingDialog(snapshot.data);
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
@@ -47,8 +50,18 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
       actions: <Widget>[
         FlatButton(
           child: Text("Share"),
-          onPressed: () {
-            // TODO: FolderSharingService.instance.shareFolder();
+          onPressed: () async {
+            var sharedWith = Set<String>();
+            for (var user in _sharingStatus.keys) {
+              if (_sharingStatus[user]) {
+                sharedWith.add(user);
+              }
+            }
+            await FolderSharingService.instance.shareFolder(
+              "namewa",
+              widget.path,
+              sharedWith,
+            );
             Navigator.of(context).pop();
           },
         ),
