@@ -26,11 +26,9 @@ class FolderSharingService {
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       )
           .then((foldersResponse) {
-        log(foldersResponse.toString());
         var folders = (foldersResponse.data as List)
             .map((f) => Folder.fromMap(f))
             .toList();
-        log(folders.toString());
         Folder sharedFolder;
         for (var folder in folders) {
           if (folder.owner == Configuration.instance.getUsername() &&
