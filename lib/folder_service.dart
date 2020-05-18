@@ -11,6 +11,24 @@ class FolderSharingService {
   static final FolderSharingService instance =
       FolderSharingService._privateConstructor();
 
+  void sync() {
+    // TODO
+  }
+
+  Future<List<Folder>> getFolders() async {
+    return _dio
+        .get(
+      Configuration.instance.getHttpEndpoint() + "/folders/",
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    )
+        .then((foldersResponse) {
+      return (foldersResponse.data as List)
+          .map((f) => Folder.fromMap(f))
+          .toList();
+    });
+  }
+
   Future<Map<String, bool>> getSharingStatus(String path) async {
     return _dio
         .get(
@@ -19,16 +37,7 @@ class FolderSharingService {
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     )
         .then((usersResponse) {
-      return _dio
-          .get(
-        Configuration.instance.getHttpEndpoint() + "/folders/",
-        options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      )
-          .then((foldersResponse) {
-        var folders = (foldersResponse.data as List)
-            .map((f) => Folder.fromMap(f))
-            .toList();
+      return getFolders().then((folders) {
         Folder sharedFolder;
         for (var folder in folders) {
           if (folder.owner == Configuration.instance.getUsername() &&
