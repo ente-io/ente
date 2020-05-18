@@ -5,7 +5,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
-class DatabaseHelper {
+class PhotoDB {
   static final _databaseName = "ente.db";
   static final _databaseVersion = 1;
 
@@ -22,8 +22,8 @@ class DatabaseHelper {
   static final columnSyncTimestamp = 'sync_timestamp';
 
   // make this a singleton class
-  DatabaseHelper._privateConstructor();
-  static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
+  PhotoDB._privateConstructor();
+  static final PhotoDB instance = PhotoDB._privateConstructor();
 
   // only have a single app-wide reference to the database
   static Database _database;

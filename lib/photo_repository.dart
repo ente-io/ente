@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/db_helper.dart';
+import 'package:photos/db/photo_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/photo.dart';
 
@@ -16,7 +16,7 @@ class PhotoRepository {
   }
 
   Future<bool> loadPhotos() async {
-    DatabaseHelper db = DatabaseHelper.instance;
+    PhotoDB db = PhotoDB.instance;
     var photos = await db.getAllPhotos();
 
     _photos.clear();

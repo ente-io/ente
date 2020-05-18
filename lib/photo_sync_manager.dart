@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/db_helper.dart';
+import 'package:photos/db/photo_db.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/photo_repository.dart';
 import 'package:photos/photo_provider.dart';
@@ -20,7 +20,7 @@ import 'package:photos/events/remote_sync_event.dart';
 class PhotoSyncManager {
   final _logger = Logger("PhotoSyncManager");
   final _dio = Dio();
-  final _db = DatabaseHelper.instance;
+  final _db = PhotoDB.instance;
   bool _isSyncInProgress = false;
 
   static final _lastSyncTimestampKey = "last_sync_timestamp_0";

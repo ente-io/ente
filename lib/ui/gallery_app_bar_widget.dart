@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/db_helper.dart';
+import 'package:photos/db/photo_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/photo_repository.dart';
@@ -153,8 +153,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     for (Photo photo in widget.selectedPhotos) {
       deleteEverywhere
-          ? await DatabaseHelper.instance.markPhotoForDeletion(photo)
-          : await DatabaseHelper.instance.deletePhoto(photo);
+          ? await PhotoDB.instance.markPhotoForDeletion(photo)
+          : await PhotoDB.instance.deletePhoto(photo);
     }
     Navigator.of(context, rootNavigator: true).pop();
     PhotoRepository.instance.reloadPhotos();

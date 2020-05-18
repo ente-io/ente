@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/db/db_helper.dart';
+import 'package:photos/db/photo_db.dart';
 import 'package:logging/logging.dart';
 
 import 'package:photos/models/face.dart';
@@ -37,7 +37,7 @@ class FaceSearchManager {
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         )
         .then((response) => (response.data["results"] as List)
-            .map((result) => (DatabaseHelper.instance.getPhotoByPath(result))));
+            .map((result) => (PhotoDB.instance.getPhotoByPath(result))));
     return Future.wait(await futures);
   }
 

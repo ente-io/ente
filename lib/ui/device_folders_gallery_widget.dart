@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:photos/db/db_helper.dart';
+import 'package:photos/db/photo_db.dart';
 import 'package:photos/favorite_photos_repository.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/filters/favorite_items_filter.dart';
@@ -57,10 +57,10 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
   }
 
   Future<List<DeviceFolder>> _getDeviceFolders() async {
-    final paths = await DatabaseHelper.instance.getDistinctPaths();
+    final paths = await PhotoDB.instance.getDistinctPaths();
     final folders = List<DeviceFolder>();
     for (final path in paths) {
-      final photo = await DatabaseHelper.instance.getLatestPhotoInPath(path);
+      final photo = await PhotoDB.instance.getLatestPhotoInPath(path);
       final folderName = p.basename(path);
       folders
           .add(DeviceFolder(folderName, photo, FolderNameFilter(folderName)));
@@ -70,9 +70,8 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
           .compareTo(first.thumbnailPhoto.createTimestamp);
     });
     if (FavoritePhotosRepository.instance.hasFavorites()) {
-      final photo = await DatabaseHelper.instance
-          .getLatestPhotoAmongGeneratedIds(
-              FavoritePhotosRepository.instance.getLiked().toList());
+      final photo = await PhotoDB.instance.getLatestPhotoAmongGeneratedIds(
+          FavoritePhotosRepository.instance.getLiked().toList());
       folders.insert(
           0, DeviceFolder("Favorites", photo, FavoriteItemsFilter()));
     }
