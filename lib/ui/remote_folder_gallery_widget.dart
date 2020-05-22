@@ -10,15 +10,15 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:path/path.dart' as p;
 
-class DeviceFolderGalleryWidget extends StatefulWidget {
-  const DeviceFolderGalleryWidget({Key key}) : super(key: key);
+class RemoteFolderGalleryWidget extends StatefulWidget {
+  const RemoteFolderGalleryWidget({Key key}) : super(key: key);
 
   @override
-  _DeviceFolderGalleryWidgetState createState() =>
-      _DeviceFolderGalleryWidgetState();
+  _RemoteFolderGalleryWidgetState createState() =>
+      _RemoteFolderGalleryWidgetState();
 }
 
-class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
+class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(

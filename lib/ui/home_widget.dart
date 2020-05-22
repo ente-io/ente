@@ -13,6 +13,7 @@ import 'package:photos/ui/device_folders_gallery_widget.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/remote_folder_gallery_widget.dart';
 import 'package:photos/utils/logging_util.dart';
 import 'package:shake/shake.dart';
 import 'package:logging/logging.dart';
@@ -74,7 +75,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                     });
                   },
                 ),
-                DeviceFolderGalleryWidget(PhotoRepository.instance.photos)
+                DeviceFolderGalleryWidget(),
+                RemoteFolderGalleryWidget(),
               ],
               index: _selectedNavBarItem,
             );
@@ -98,6 +100,10 @@ class _HomeWidgetState extends State<HomeWidget> {
         BottomNavigationBarItem(
           icon: Icon(Icons.photo_library),
           title: Text('Gallery'),
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.folder_shared),
+          title: Text('Shared'),
         ),
       ],
       currentIndex: _selectedNavBarItem,
