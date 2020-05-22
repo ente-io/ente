@@ -11,6 +11,7 @@ class Photo {
   String localId;
   String title;
   String deviceFolder;
+  int remoteFolderId;
   String remotePath;
   int createTimestamp;
   int syncTimestamp;

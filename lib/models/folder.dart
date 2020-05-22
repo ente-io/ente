@@ -7,7 +7,7 @@ class Folder {
   final String name;
   final String owner;
   final String deviceFolder;
-  final List<String> sharedWith;
+  final Set<String> sharedWith;
   final int updateTimestamp;
 
   Folder(
@@ -27,7 +27,7 @@ class Folder {
       map['name'],
       map['owner'],
       map['deviceFolder'],
-      List<String>.from(map['sharedWith']),
+      Set<String>.from(map['sharedWith']),
       map['updateTimestamp'],
     );
   }
@@ -43,7 +43,7 @@ class Folder {
       'name': name,
       'owner': owner,
       'deviceFolder': deviceFolder,
-      'sharedWith': sharedWith,
+      'sharedWith': sharedWith.toList(),
       'updateTimestamp': updateTimestamp,
     };
   }
@@ -61,7 +61,7 @@ class Folder {
         o.name == name &&
         o.owner == owner &&
         o.deviceFolder == deviceFolder &&
-        listEquals(o.sharedWith, sharedWith) &&
+        setEquals(o.sharedWith, sharedWith) &&
         o.updateTimestamp == updateTimestamp;
   }
 

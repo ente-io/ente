@@ -16,6 +16,7 @@ class PhotoDB {
   static final columnLocalId = 'local_id';
   static final columnTitle = 'title';
   static final columnDeviceFolder = 'device_folder';
+  static final columnRemoteFolderId = 'remote_folder_id';
   static final columnRemotePath = 'remote_path';
   static final columnIsDeleted = 'is_deleted';
   static final columnCreateTimestamp = 'create_timestamp';
@@ -51,6 +52,7 @@ class PhotoDB {
             $columnUploadedFileId INTEGER NOT NULL,
             $columnTitle TEXT NOT NULL,
             $columnDeviceFolder TEXT NOT NULL,
+            $columnRemoteFolderId INTEGER DEFAULT -1,
             $columnRemotePath TEXT,
             $columnIsDeleted INTEGER DEFAULT 0,
             $columnCreateTimestamp TEXT NOT NULL,
@@ -175,6 +177,15 @@ class PhotoDB {
     );
   }
 
+  Future<int> deletePhotosInRemoteFolder(int folderId) async {
+    final db = await instance.database;
+    return db.delete(
+      table,
+      where: '$columnRemoteFolderId =?',
+      whereArgs: [folderId],
+    );
+  }
+
   Future<List<String>> getDistinctPaths() async {
     final db = await instance.database;
     final rows = await db.query(
@@ -195,6 +206,22 @@ class PhotoDB {
       table,
       where: '$columnDeviceFolder =?',
       whereArgs: [path],
+      orderBy: '$columnCreateTimestamp DESC',
+      limit: 1,
+    );
+    if (rows.isNotEmpty) {
+      return _getPhotoFromRow(rows[0]);
+    } else {
+      throw ("No photo found in path");
+    }
+  }
+
+  Future<Photo> getLatestPhotoInRemoteFolder(int folderId) async {
+    final db = await instance.database;
+    var rows = await db.query(
+      table,
+      where: '$columnRemoteFolderId =?',
+      whereArgs: [folderId],
       orderBy: '$columnCreateTimestamp DESC',
       limit: 1,
     );
@@ -236,6 +263,7 @@ class PhotoDB {
         photo.uploadedFileId == null ? -1 : photo.uploadedFileId;
     row[columnTitle] = photo.title;
     row[columnDeviceFolder] = photo.deviceFolder;
+    row[columnRemoteFolderId] = photo.remoteFolderId;
     row[columnRemotePath] = photo.remotePath;
     row[columnCreateTimestamp] = photo.createTimestamp;
     row[columnSyncTimestamp] = photo.syncTimestamp;
@@ -249,6 +277,7 @@ class PhotoDB {
     photo.uploadedFileId = row[columnUploadedFileId];
     photo.title = row[columnTitle];
     photo.deviceFolder = row[columnDeviceFolder];
+    photo.remoteFolderId = row[columnRemoteFolderId];
     photo.remotePath = row[columnRemotePath];
     photo.createTimestamp = int.parse(row[columnCreateTimestamp]);
     photo.syncTimestamp = row[columnSyncTimestamp] == null

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/folder_service.dart';
+import 'package:photos/models/folder.dart';
 import 'package:photos/ui/loading_widget.dart';
 
 class ShareFolderWidget extends StatefulWidget {
@@ -18,15 +19,18 @@ class ShareFolderWidget extends StatefulWidget {
 }
 
 class _ShareFolderWidgetState extends State<ShareFolderWidget> {
-  Map<String, bool> _sharingStatus;
+  Folder _folder;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, bool>>(
-      future: FolderSharingService.instance.getSharingStatus(widget.path),
+      future:
+          FolderSharingService.instance.getFolder(widget.path).then((folder) {
+        _folder = folder;
+        return FolderSharingService.instance.getSharingStatus(folder);
+      }),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          _sharingStatus = snapshot.data;
           return _getSharingDialog(snapshot.data);
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
@@ -52,16 +56,14 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
           child: Text("Share"),
           onPressed: () async {
             var sharedWith = Set<String>();
-            for (var user in _sharingStatus.keys) {
-              if (_sharingStatus[user]) {
+            for (var user in sharingStatus.keys) {
+              if (sharingStatus[user]) {
                 sharedWith.add(user);
               }
             }
-            await FolderSharingService.instance.shareFolder(
-              "namewa",
-              widget.path,
-              sharedWith,
-            );
+            _folder.sharedWith.clear();
+            _folder.sharedWith.addAll(sharedWith);
+            await FolderSharingService.instance.updateFolder(_folder);
             Navigator.of(context).pop();
           },
         ),
