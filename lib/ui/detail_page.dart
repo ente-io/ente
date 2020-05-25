@@ -88,16 +88,18 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   AppBar _buildAppBar() {
+    final actions = List<Widget>();
+    if (widget.photos[_selectedIndex].localId != null) {
+      actions.add(_getFavoriteButton());
+    }
+    actions.add(IconButton(
+      icon: Icon(Icons.share),
+      onPressed: () async {
+        share(_photos[_selectedIndex]);
+      },
+    ));
     return AppBar(
-      actions: <Widget>[
-        _getFavoriteButton(),
-        IconButton(
-          icon: Icon(Icons.share),
-          onPressed: () async {
-            share(_photos[_selectedIndex]);
-          },
-        )
-      ],
+      actions: actions,
     );
   }
 
