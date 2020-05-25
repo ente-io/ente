@@ -23,8 +23,8 @@ class FolderSharingService {
       var currentFolders = await FolderDB.instance.getFolders();
       for (final currentFolder in currentFolders) {
         if (!folders.contains(currentFolder)) {
-          await FolderDB.instance.deleteFolder(currentFolder);
           await PhotoDB.instance.deletePhotosInRemoteFolder(currentFolder.id);
+          await FolderDB.instance.deleteFolder(currentFolder);
         }
       }
       for (final folder in folders) {
@@ -54,7 +54,7 @@ class FolderSharingService {
       int folderId, int sinceTimestamp, int limit) async {
     Response response = await _dio.get(
       Configuration.instance.getHttpEndpoint() +
-          "/folders/diff" +
+          "/folders/diff/" +
           folderId.toString(),
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
@@ -66,6 +66,7 @@ class FolderSharingService {
     if (response != null) {
       return (response.data["diff"] as List).map((p) {
         Photo photo = new Photo.fromJson(p);
+        photo.localId = null;
         photo.remoteFolderId = folderId;
         return photo;
       }).toList();
