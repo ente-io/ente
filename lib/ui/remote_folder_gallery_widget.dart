@@ -5,6 +5,7 @@ import 'package:photos/db/folder_db.dart';
 import 'package:photos/db/photo_db.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/remote_folder_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
 class RemoteFolderGalleryWidget extends StatefulWidget {
@@ -87,14 +88,14 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
         ],
       ),
       onTap: () {
-        // final page = DeviceFolderPage(folder);
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder: (BuildContext context) {
-        //       return page;
-        //     },
-        //   ),
-        // );
+        final page = RemoteFolderPage(folder);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page;
+            },
+          ),
+        );
       },
     );
   }

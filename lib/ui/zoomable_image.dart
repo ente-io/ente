@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';
@@ -40,6 +41,32 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.photo.localId == null) {
+      _loadNetworkImage();
+    } else {
+      _loadLocalImage(context);
+    }
+
+    if (_imageProvider != null) {
+      return PhotoView(
+        imageProvider: _imageProvider,
+        scaleStateChangedCallback: _scaleStateChangedCallback,
+        minScale: PhotoViewComputedScale.contained,
+        gaplessPlayback: true,
+      );
+    } else {
+      return loadWidget;
+    }
+  }
+
+  void _loadNetworkImage() {
+    _imageProvider = Image.network(Configuration.instance.getHttpEndpoint() +
+            "/" +
+            widget.photo.remotePath)
+        .image;
+  }
+
+  void _loadLocalImage(BuildContext context) {
     if (!_loadedSmallThumbnail &&
         !_loadedLargeThumbnail &&
         !_loadedFinalImage) {
@@ -81,17 +108,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
           }
         });
       }
-    }
-
-    if (_imageProvider != null) {
-      return PhotoView(
-        imageProvider: _imageProvider,
-        scaleStateChangedCallback: _scaleStateChangedCallback,
-        minScale: PhotoViewComputedScale.contained,
-        gaplessPlayback: true,
-      );
-    } else {
-      return loadWidget;
     }
   }
 

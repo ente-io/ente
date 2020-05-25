@@ -92,6 +92,17 @@ class PhotoDB {
     return _convertToPhotos(results);
   }
 
+  Future<List<Photo>> getAllPhotosInFolder(int folderId) async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnRemoteFolderId = ? AND $columnIsDeleted = 0',
+      whereArgs: [folderId],
+      orderBy: '$columnCreateTimestamp DESC',
+    );
+    return _convertToPhotos(results);
+  }
+
   Future<List<Photo>> getAllDeletedPhotos() async {
     final db = await instance.database;
     final results = await db.query(
