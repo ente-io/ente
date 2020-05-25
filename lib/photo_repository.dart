@@ -5,7 +5,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/photo.dart';
 
 class PhotoRepository {
-  final logger = Logger("PhotoLoader");
+  final _logger = Logger("PhotoRepository");
   final _photos = List<Photo>();
 
   PhotoRepository._privateConstructor();
@@ -26,7 +26,7 @@ class PhotoRepository {
   }
 
   void reloadPhotos() async {
-    logger.info("Reloading...");
+    _logger.info("Reloading...");
     await loadPhotos();
     Bus.instance.fire(LocalPhotosUpdatedEvent());
   }
