@@ -89,7 +89,7 @@ class _DetailPageState extends State<DetailPage> {
 
   AppBar _buildAppBar() {
     final actions = List<Widget>();
-    if (widget.photos[_selectedIndex].localId != null) {
+    if (_photos[_selectedIndex].localId != null) {
       actions.add(_getFavoriteButton());
     }
     actions.add(IconButton(
