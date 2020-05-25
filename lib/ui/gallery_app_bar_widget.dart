@@ -11,7 +11,11 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/ui/share_folder_widget.dart';
 import 'package:photos/utils/share_util.dart';
 
-enum GalleryAppBarType { homepage, folder }
+enum GalleryAppBarType {
+  homepage,
+  local_folder,
+  remote_folder,
+}
 
 class GalleryAppBarWidget extends StatefulWidget
     implements PreferredSizeWidget {
@@ -75,7 +79,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           _openSyncConfiguration(context);
         },
       ));
-    } else if (widget.type == GalleryAppBarType.folder) {
+    } else if (widget.type == GalleryAppBarType.local_folder) {
       actions.add(IconButton(
         icon: Icon(Icons.person_add),
         onPressed: () {
@@ -98,12 +102,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   List<Widget> _getPhotoActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
     if (widget.selectedPhotos.isNotEmpty) {
-      actions.add(IconButton(
-        icon: Icon(Icons.delete),
-        onPressed: () {
-          _showDeletePhotosSheet(context);
-        },
-      ));
+      if (widget.type != GalleryAppBarType.remote_folder) {
+        actions.add(IconButton(
+          icon: Icon(Icons.delete),
+          onPressed: () {
+            _showDeletePhotosSheet(context);
+          },
+        ));
+      }
       actions.add(IconButton(
         icon: Icon(Icons.share),
         onPressed: () {

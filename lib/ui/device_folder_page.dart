@@ -36,7 +36,7 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
   Widget build(Object context) {
     return Scaffold(
       appBar: GalleryAppBarWidget(
-        GalleryAppBarType.folder,
+        GalleryAppBarType.local_folder,
         widget.folder.name,
         widget.folder.thumbnailPhoto.deviceFolder,
         _selectedPhotos,

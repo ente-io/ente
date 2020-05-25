@@ -39,7 +39,7 @@ class _RemoteFolderPageState extends State<RemoteFolderPage> {
   Widget build(Object context) {
     return Scaffold(
       appBar: GalleryAppBarWidget(
-        GalleryAppBarType.local_folder,
+        GalleryAppBarType.remote_folder,
         widget.folder.name,
         widget.folder.thumbnailPhoto.deviceFolder,
         _selectedPhotos,
