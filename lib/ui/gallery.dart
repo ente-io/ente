@@ -133,7 +133,7 @@ class _GalleryState extends State<Gallery> {
   void _deduplicatePhotos() {
     for (int index = 1; index < _photos.length; index++) {
       final current = _photos[index], previous = _photos[index - 1];
-      if (current.localId == previous.localId) {
+      if (current.localId != null && current.localId == previous.localId) {
         _photos.removeAt(index);
         index--;
       }
