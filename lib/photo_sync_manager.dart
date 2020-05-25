@@ -111,7 +111,7 @@ class PhotoSyncManager {
         await _storeDiff(diff, prefs);
         PhotoRepository.instance.reloadPhotos();
       }
-      if (diff.length < _diffLimit) {
+      if (diff == null || diff.length < _diffLimit) {
         shouldFetchDiff = false;
       }
     }
