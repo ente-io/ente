@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart';
@@ -6,7 +7,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
 class FolderDB {
-  static final _databaseName = "ente.db";
+  // TODO: Use different tables within the same database
+  static final _databaseName = "ente.folder.db";
   static final _databaseVersion = 1;
 
   static final table = 'folders';
@@ -87,7 +89,7 @@ class FolderDB {
     row[columnName] = folder.name;
     row[columnOwner] = folder.owner;
     row[columnDeviceFolder] = folder.deviceFolder;
-    row[columnSharedWith] = folder.sharedWith.toString();
+    row[columnSharedWith] = jsonEncode(folder.sharedWith.toList());
     row[columnUpdateTimestamp] = folder.updateTimestamp;
     return row;
   }
@@ -98,7 +100,9 @@ class FolderDB {
       row[columnName],
       row[columnOwner],
       row[columnDeviceFolder],
-      Set<String>.from(row[columnSharedWith]),
+      (jsonDecode(row[columnSharedWith]) as List<dynamic>)
+          .cast<String>()
+          .toSet(),
       row[columnUpdateTimestamp],
     );
   }

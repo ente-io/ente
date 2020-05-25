@@ -6,7 +6,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PhotoDB {
-  static final _databaseName = "ente.db";
+  // TODO: Use different tables within the same database
+  static final _databaseName = "ente.photos.db";
   static final _databaseVersion = 1;
 
   static final table = 'photos';
@@ -85,7 +86,7 @@ class PhotoDB {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where: '$columnIsDeleted = 0',
+      where: '$columnLocalId IS NOT NULL AND $columnIsDeleted = 0',
       orderBy: '$columnCreateTimestamp DESC',
     );
     return _convertToPhotos(results);
