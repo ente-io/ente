@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/favorite_photos_repository.dart';
+import 'package:photos/folder_service.dart';
 import 'package:photos/photo_sync_manager.dart';
 import 'package:photos/ui/home_widget.dart';
 import 'package:sentry/sentry.dart';
@@ -23,12 +24,13 @@ void main() async {
   ));
 }
 
-void _main() {
+void _main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  Configuration.instance.init();
+  await Configuration.instance.init();
   FavoritePhotosRepository.instance.init();
   PhotoSyncManager.instance.sync();
+  FolderSharingService.instance.sync();
 
   final SentryClient sentry = new SentryClient(dsn: SENTRY_DSN);
 
@@ -75,6 +77,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       PhotoSyncManager.instance.sync();
+      FolderSharingService.instance.sync();
     }
   }
 }
