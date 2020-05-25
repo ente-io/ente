@@ -73,19 +73,25 @@ class PhotoSyncManager {
     }
     if (photos.isEmpty) {
       _isSyncInProgress = false;
-      _syncPhotosWithServer().then((_) {
-        _deletePhotosOnServer();
-      });
+      _syncWithRemote(prefs);
     } else {
       photos.sort((first, second) =>
           first.createTimestamp.compareTo(second.createTimestamp));
       _updateDatabase(photos, prefs, lastDBUpdateTimestamp).then((_) {
         _isSyncInProgress = false;
-        _syncPhotosWithServer().then((_) {
-          _deletePhotosOnServer();
-        });
+        _syncWithRemote(prefs);
       });
     }
+  }
+
+  Future<void> _syncWithRemote(SharedPreferences prefs) {
+    // TODO:  Fix race conditions triggered due to concurrent syncs.
+    //        Add device_id/last_sync_timestamp to the upload request?
+    return _downloadDiff(prefs).then((_) {
+      _uploadDiff(prefs).then((_) {
+        _deletePhotosOnServer();
+      });
+    });
   }
 
   Future<bool> _updateDatabase(final List<Photo> photos,
@@ -100,25 +106,16 @@ class PhotoSyncManager {
         photosToBeAdded, prefs, DateTime.now().microsecondsSinceEpoch);
   }
 
-  _syncPhotosWithServer() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    var shouldFetchDiff = true;
-    while (shouldFetchDiff) {
-      int lastSyncTimestamp = _getLastSyncTimestamp(prefs);
-      var diff = await _getDiff(lastSyncTimestamp, _diffLimit);
-      if (diff != null && diff.isNotEmpty) {
-        await _storeDiff(diff, prefs);
-        PhotoRepository.instance.reloadPhotos();
-      }
-      if (diff == null || diff.length < _diffLimit) {
-        shouldFetchDiff = false;
+  Future<void> _downloadDiff(SharedPreferences prefs) async {
+    int lastSyncTimestamp = _getLastSyncTimestamp(prefs);
+    var diff = await _getDiff(lastSyncTimestamp, _diffLimit);
+    if (diff != null && diff.isNotEmpty) {
+      await _storeDiff(diff, prefs);
+      PhotoRepository.instance.reloadPhotos();
+      if (diff.length == _diffLimit) {
+        return await _downloadDiff(prefs);
       }
     }
-    _uploadDiff(prefs);
-
-    // TODO:  Fix race conditions triggered due to concurrent syncs.
-    //        Add device_id/last_sync_timestamp to the upload request?
   }
 
   int _getLastSyncTimestamp(SharedPreferences prefs) {
