@@ -240,7 +240,7 @@ class PhotoDB {
     if (rows.isNotEmpty) {
       return _getPhotoFromRow(rows[0]);
     } else {
-      throw ("No photo found in path");
+      throw ("No photo found in remote folder");
     }
   }
 
