@@ -100,14 +100,25 @@ class FolderSharingService {
   Future<Folder> getFolder(String deviceFolder) async {
     return _dio
         .get(
-          Configuration.instance.getHttpEndpoint() + "/folders/folder/",
-          queryParameters: {
-            "deviceFolder": deviceFolder,
-          },
-          options: Options(
-              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-        )
-        .then((response) => Folder.fromMap(response.data));
+      Configuration.instance.getHttpEndpoint() + "/folders/folder/",
+      queryParameters: {
+        "deviceFolder": deviceFolder,
+      },
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    )
+        .then((response) {
+      return Folder.fromMap(response.data);
+    }).catchError((e) {
+      return Folder(
+        null,
+        Configuration.instance.getUsername() + "'s " + deviceFolder,
+        Configuration.instance.getUsername(),
+        deviceFolder,
+        Set<String>(),
+        null,
+      );
+    });
   }
 
   Future<Map<String, bool>> getSharingStatus(Folder folder) async {
