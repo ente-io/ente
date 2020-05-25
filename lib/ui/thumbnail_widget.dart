@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/photo.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -28,6 +29,23 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.photo.localId == null) {
+      _loadNetworkImage();
+    } else {
+      _loadLocalImage(context);
+    }
+
+    if (_imageProvider != null) {
+      return Image(
+        image: _imageProvider,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return loadingWidget;
+    }
+  }
+
+  void _loadLocalImage(BuildContext context) {
     if (!_hasLoadedThumbnail && !_encounteredErrorLoadingThumbnail) {
       final cachedSmallThumbnail =
           ThumbnailLruCache.get(widget.photo, THUMBNAIL_SMALL_SIZE);
@@ -68,15 +86,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         });
       }
     }
+  }
 
-    if (_imageProvider != null) {
-      return Image(
-        image: _imageProvider,
-        fit: BoxFit.cover,
-      );
-    } else {
-      return loadingWidget;
-    }
+  void _loadNetworkImage() {
+    _imageProvider = Image.network(Configuration.instance.getHttpEndpoint() +
+            "/" +
+            widget.photo.remotePath)
+        .image;
   }
 
   @override

@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
+import 'package:photos/db/folder_db.dart';
 import 'package:photos/db/photo_db.dart';
-import 'package:photos/favorite_photos_repository.dart';
-import 'package:photos/models/device_folder.dart';
-import 'package:photos/models/filters/favorite_items_filter.dart';
-import 'package:photos/models/filters/folder_name_filter.dart';
-import 'package:photos/ui/device_folder_page.dart';
+import 'package:photos/models/folder.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
-import 'package:path/path.dart' as p;
 
 class RemoteFolderGalleryWidget extends StatefulWidget {
   const RemoteFolderGalleryWidget({Key key}) : super(key: key);
@@ -19,14 +16,21 @@ class RemoteFolderGalleryWidget extends StatefulWidget {
 }
 
 class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
+  Logger _logger = Logger("RemoteFolderGalleryWidget");
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _getDeviceFolders(),
+    return FutureBuilder<List<Folder>>(
+      future: _getRemoteFolders(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _getDeviceFolderGalleryWidget(snapshot.data);
+          if (snapshot.data.isEmpty) {
+            return Text("Nothing to see here!");
+          } else {
+            return _getRemoteFolderGalleryWidget(snapshot.data);
+          }
         } else if (snapshot.hasError) {
+          _logger.shout(snapshot.error);
           return Text(snapshot.error.toString());
         } else {
           return loadWidget;
@@ -35,7 +39,7 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
     );
   }
 
-  Widget _getDeviceFolderGalleryWidget(List<DeviceFolder> folders) {
+  Widget _getRemoteFolderGalleryWidget(List<Folder> folders) {
     return Container(
       margin: EdgeInsets.only(top: 24),
       child: GridView.builder(
@@ -53,29 +57,16 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
     );
   }
 
-  Future<List<DeviceFolder>> _getDeviceFolders() async {
-    final paths = await PhotoDB.instance.getDistinctPaths();
-    final folders = List<DeviceFolder>();
-    for (final path in paths) {
-      final photo = await PhotoDB.instance.getLatestPhotoInPath(path);
-      final folderName = p.basename(path);
-      folders
-          .add(DeviceFolder(folderName, photo, FolderNameFilter(folderName)));
-    }
-    folders.sort((first, second) {
-      return second.thumbnailPhoto.createTimestamp
-          .compareTo(first.thumbnailPhoto.createTimestamp);
-    });
-    if (FavoritePhotosRepository.instance.hasFavorites()) {
-      final photo = await PhotoDB.instance.getLatestPhotoAmongGeneratedIds(
-          FavoritePhotosRepository.instance.getLiked().toList());
-      folders.insert(
-          0, DeviceFolder("Favorites", photo, FavoriteItemsFilter()));
+  Future<List<Folder>> _getRemoteFolders() async {
+    final folders = await FolderDB.instance.getFolders();
+    for (final folder in folders) {
+      folder.thumbnailPhoto =
+          await PhotoDB.instance.getLatestPhotoInRemoteFolder(folder.id);
     }
     return folders;
   }
 
-  Widget _buildFolder(BuildContext context, DeviceFolder folder) {
+  Widget _buildFolder(BuildContext context, Folder folder) {
     return GestureDetector(
       child: Column(
         children: <Widget>[
@@ -96,14 +87,14 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
         ],
       ),
       onTap: () {
-        final page = DeviceFolderPage(folder);
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return page;
-            },
-          ),
-        );
+        // final page = DeviceFolderPage(folder);
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(
+        //     builder: (BuildContext context) {
+        //       return page;
+        //     },
+        //   ),
+        // );
       },
     );
   }
