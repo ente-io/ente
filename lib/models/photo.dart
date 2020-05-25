@@ -4,6 +4,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 
 class Photo {
   int generatedId;
@@ -62,6 +63,10 @@ class Photo {
     } else {
       return asset.originBytes;
     }
+  }
+
+  String getRemoteUrl() {
+    return Configuration.instance.getHttpEndpoint() + "/" + remotePath;
   }
 
   Future<Uint8List> getOriginalBytes() {

@@ -60,10 +60,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   }
 
   void _loadNetworkImage() {
-    _imageProvider = Image.network(Configuration.instance.getHttpEndpoint() +
-            "/" +
-            widget.photo.remotePath)
-        .image;
+    _imageProvider = Image.network(widget.photo.getRemoteUrl()).image;
   }
 
   void _loadLocalImage(BuildContext context) {
