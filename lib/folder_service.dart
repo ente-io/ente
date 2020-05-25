@@ -112,7 +112,7 @@ class FolderSharingService {
     }).catchError((e) {
       return Folder(
         null,
-        Configuration.instance.getUsername() + "'s " + deviceFolder,
+        Configuration.instance.getUsername() + "s " + deviceFolder,
         Configuration.instance.getUsername(),
         deviceFolder,
         Set<String>(),
