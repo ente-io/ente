@@ -5,15 +5,23 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/folder_db.dart';
 import 'package:photos/db/photo_db.dart';
+import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/models/photo.dart';
+
+import 'core/event_bus.dart';
 
 class FolderSharingService {
   final _logger = Logger("FolderSharingService");
   final _dio = Dio();
   static final _diffLimit = 100;
 
-  FolderSharingService._privateConstructor();
+  FolderSharingService._privateConstructor() {
+    Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
+      sync();
+    });
+  }
+
   static final FolderSharingService instance =
       FolderSharingService._privateConstructor();
 
