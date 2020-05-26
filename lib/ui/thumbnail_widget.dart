@@ -90,7 +90,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   void _loadNetworkImage() {
     _imageProvider = Image.network(Configuration.instance.getHttpEndpoint() +
-            "/" +
+                "/" +
+                widget.photo.thumbnailPath ??
             widget.photo.remotePath)
         .image;
   }
