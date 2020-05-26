@@ -14,6 +14,7 @@ class Photo {
   String deviceFolder;
   int remoteFolderId;
   String remotePath;
+  String thumbnailPath;
   int createTimestamp;
   int updateTimestamp;
 
@@ -24,6 +25,7 @@ class Photo {
         deviceFolder = json["deviceFolder"],
         title = json["title"],
         remotePath = json["path"],
+        thumbnailPath = json["previewURL"],
         createTimestamp = json["createTimestamp"],
         updateTimestamp = json["updateTimestamp"];
 

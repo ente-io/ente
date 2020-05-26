@@ -149,7 +149,7 @@ class PhotoSyncManager {
         var existingPhoto = await _db.getMatchingPhoto(photo.localId,
             photo.title, photo.deviceFolder, photo.createTimestamp);
         await _db.updatePhoto(existingPhoto.generatedId, photo.uploadedFileId,
-            photo.remotePath, photo.updateTimestamp);
+            photo.remotePath, photo.updateTimestamp, photo.thumbnailPath);
       } catch (e) {
         await _db.insertPhoto(photo);
       }

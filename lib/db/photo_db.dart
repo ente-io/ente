@@ -19,6 +19,7 @@ class PhotoDB {
   static final columnDeviceFolder = 'device_folder';
   static final columnRemoteFolderId = 'remote_folder_id';
   static final columnRemotePath = 'remote_path';
+  static final columnThumbnailPath = 'thumbnail_path';
   static final columnIsDeleted = 'is_deleted';
   static final columnCreateTimestamp = 'create_timestamp';
   static final columnUpdateTimestamp = 'update_timestamp';
@@ -55,6 +56,7 @@ class PhotoDB {
             $columnDeviceFolder TEXT NOT NULL,
             $columnRemoteFolderId INTEGER DEFAULT -1,
             $columnRemotePath TEXT,
+            $columnThumbnailPath TEXT,
             $columnIsDeleted INTEGER DEFAULT 0,
             $columnCreateTimestamp TEXT NOT NULL,
             $columnUpdateTimestamp TEXT
@@ -138,12 +140,14 @@ class PhotoDB {
     }
   }
 
-  Future<int> updatePhoto(int generatedId, int uploadedId, String remotePath,
-      int updateTimestamp) async {
+  Future<int> updatePhoto(
+      int generatedId, int uploadedId, String remotePath, int updateTimestamp,
+      [String thumbnailPath]) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
     values[columnUploadedFileId] = uploadedId;
     values[columnRemotePath] = remotePath;
+    values[columnThumbnailPath] = thumbnailPath;
     values[columnUpdateTimestamp] = updateTimestamp;
     return await db.update(
       table,
@@ -277,6 +281,7 @@ class PhotoDB {
     row[columnDeviceFolder] = photo.deviceFolder;
     row[columnRemoteFolderId] = photo.remoteFolderId;
     row[columnRemotePath] = photo.remotePath;
+    row[columnThumbnailPath] = photo.thumbnailPath;
     row[columnCreateTimestamp] = photo.createTimestamp;
     row[columnUpdateTimestamp] = photo.updateTimestamp;
     return row;
@@ -291,6 +296,7 @@ class PhotoDB {
     photo.deviceFolder = row[columnDeviceFolder];
     photo.remoteFolderId = row[columnRemoteFolderId];
     photo.remotePath = row[columnRemotePath];
+    photo.thumbnailPath = row[columnThumbnailPath];
     photo.createTimestamp = int.parse(row[columnCreateTimestamp]);
     photo.updateTimestamp = row[columnUpdateTimestamp] == null
         ? -1
