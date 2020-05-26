@@ -21,7 +21,7 @@ class PhotoDB {
   static final columnRemotePath = 'remote_path';
   static final columnIsDeleted = 'is_deleted';
   static final columnCreateTimestamp = 'create_timestamp';
-  static final columnSyncTimestamp = 'sync_timestamp';
+  static final columnUpdateTimestamp = 'update_timestamp';
 
   // make this a singleton class
   PhotoDB._privateConstructor();
@@ -57,7 +57,7 @@ class PhotoDB {
             $columnRemotePath TEXT,
             $columnIsDeleted INTEGER DEFAULT 0,
             $columnCreateTimestamp TEXT NOT NULL,
-            $columnSyncTimestamp TEXT
+            $columnUpdateTimestamp TEXT
           )
           ''');
   }
@@ -139,12 +139,12 @@ class PhotoDB {
   }
 
   Future<int> updatePhoto(int generatedId, int uploadedId, String remotePath,
-      int syncTimestamp) async {
+      int updateTimestamp) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
     values[columnUploadedFileId] = uploadedId;
     values[columnRemotePath] = remotePath;
-    values[columnSyncTimestamp] = syncTimestamp;
+    values[columnUpdateTimestamp] = updateTimestamp;
     return await db.update(
       table,
       values,
@@ -278,7 +278,7 @@ class PhotoDB {
     row[columnRemoteFolderId] = photo.remoteFolderId;
     row[columnRemotePath] = photo.remotePath;
     row[columnCreateTimestamp] = photo.createTimestamp;
-    row[columnSyncTimestamp] = photo.syncTimestamp;
+    row[columnUpdateTimestamp] = photo.updateTimestamp;
     return row;
   }
 
@@ -292,9 +292,9 @@ class PhotoDB {
     photo.remoteFolderId = row[columnRemoteFolderId];
     photo.remotePath = row[columnRemotePath];
     photo.createTimestamp = int.parse(row[columnCreateTimestamp]);
-    photo.syncTimestamp = row[columnSyncTimestamp] == null
+    photo.updateTimestamp = row[columnUpdateTimestamp] == null
         ? -1
-        : int.parse(row[columnSyncTimestamp]);
+        : int.parse(row[columnUpdateTimestamp]);
     return photo;
   }
 }

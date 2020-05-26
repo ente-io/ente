@@ -15,7 +15,7 @@ class Photo {
   int remoteFolderId;
   String remotePath;
   int createTimestamp;
-  int syncTimestamp;
+  int updateTimestamp;
 
   Photo();
   Photo.fromJson(Map<String, dynamic> json)
@@ -25,7 +25,7 @@ class Photo {
         title = json["title"],
         remotePath = json["path"],
         createTimestamp = json["createTimestamp"],
-        syncTimestamp = json["syncTimestamp"];
+        updateTimestamp = json["updateTimestamp"];
 
   static Future<Photo> fromAsset(
       AssetPathEntity pathEntity, AssetEntity asset) async {
@@ -75,7 +75,7 @@ class Photo {
 
   @override
   String toString() {
-    return 'Photo(generatedId: $generatedId, uploadedFileId: $uploadedFileId, localId: $localId, title: $title, deviceFolder: $deviceFolder, remotePath: $remotePath, createTimestamp: $createTimestamp, syncTimestamp: $syncTimestamp)';
+    return 'Photo(generatedId: $generatedId, uploadedFileId: $uploadedFileId, localId: $localId, title: $title, deviceFolder: $deviceFolder, remotePath: $remotePath, createTimestamp: $createTimestamp, updateTimestamp: $updateTimestamp)';
   }
 
   @override
@@ -90,7 +90,7 @@ class Photo {
         o.deviceFolder == deviceFolder &&
         o.remotePath == remotePath &&
         o.createTimestamp == createTimestamp &&
-        o.syncTimestamp == syncTimestamp;
+        o.updateTimestamp == updateTimestamp;
   }
 
   @override
@@ -102,6 +102,6 @@ class Photo {
         deviceFolder.hashCode ^
         remotePath.hashCode ^
         createTimestamp.hashCode ^
-        syncTimestamp.hashCode;
+        updateTimestamp.hashCode;
   }
 }

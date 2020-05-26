@@ -135,8 +135,8 @@ class PhotoSyncManager {
           return;
         }
         await _db.updatePhoto(photo.generatedId, uploadedPhoto.uploadedFileId,
-            uploadedPhoto.remotePath, uploadedPhoto.syncTimestamp);
-        prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.syncTimestamp);
+            uploadedPhoto.remotePath, uploadedPhoto.updateTimestamp);
+        prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.updateTimestamp);
       } catch (e) {
         _logger.severe(e);
       }
@@ -149,11 +149,11 @@ class PhotoSyncManager {
         var existingPhoto = await _db.getMatchingPhoto(photo.localId,
             photo.title, photo.deviceFolder, photo.createTimestamp);
         await _db.updatePhoto(existingPhoto.generatedId, photo.uploadedFileId,
-            photo.remotePath, photo.syncTimestamp);
+            photo.remotePath, photo.updateTimestamp);
       } catch (e) {
         await _db.insertPhoto(photo);
       }
-      await prefs.setInt(_lastSyncTimestampKey, photo.syncTimestamp);
+      await prefs.setInt(_lastSyncTimestampKey, photo.updateTimestamp);
     }
   }
 

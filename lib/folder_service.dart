@@ -47,7 +47,7 @@ class FolderSharingService {
     try {
       Photo photo =
           await PhotoDB.instance.getLatestPhotoInRemoteFolder(folder.id);
-      lastSyncTimestamp = photo.syncTimestamp;
+      lastSyncTimestamp = photo.updateTimestamp;
     } catch (e) {
       // Folder has never been synced
     }
