@@ -61,8 +61,12 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
   Future<List<Folder>> _getRemoteFolders() async {
     final folders = await FolderDB.instance.getFolders();
     for (final folder in folders) {
-      folder.thumbnailPhoto =
-          await PhotoDB.instance.getLatestPhotoInRemoteFolder(folder.id);
+      try {
+        folder.thumbnailPhoto =
+            await PhotoDB.instance.getLatestPhotoInRemoteFolder(folder.id);
+      } catch (e) {
+        _logger.warning(e.toString());
+      }
     }
     return folders;
   }
@@ -72,7 +76,10 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
       child: Column(
         children: <Widget>[
           Container(
-            child: ThumbnailWidget(folder.thumbnailPhoto),
+            child: folder.thumbnailPhoto ==
+                    null // When the user has shared a folder without photos
+                ? Icon(Icons.error)
+                : ThumbnailWidget(folder.thumbnailPhoto),
             height: 150,
             width: 150,
           ),
