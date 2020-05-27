@@ -54,7 +54,7 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
   }
 
   Future<List<DeviceFolder>> _getDeviceFolders() async {
-    final paths = await PhotoDB.instance.getDistinctPaths();
+    final paths = await PhotoDB.instance.getLocalPaths();
     final folders = List<DeviceFolder>();
     for (final path in paths) {
       final photo = await PhotoDB.instance.getLatestPhotoInPath(path);

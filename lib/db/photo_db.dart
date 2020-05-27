@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:logging/logging.dart';
 import 'package:photos/models/photo.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -9,6 +10,8 @@ class PhotoDB {
   // TODO: Use different tables within the same database
   static final _databaseName = "ente.photos.db";
   static final _databaseVersion = 1;
+
+  static final Logger _logger = Logger("PhotoDB");
 
   static final table = 'photos';
 
@@ -202,12 +205,13 @@ class PhotoDB {
     );
   }
 
-  Future<List<String>> getDistinctPaths() async {
+  Future<List<String>> getLocalPaths() async {
     final db = await instance.database;
     final rows = await db.query(
       table,
       columns: [columnDeviceFolder],
       distinct: true,
+      where: '$columnRemoteFolderId IS NULL',
     );
     List<String> result = List<String>();
     for (final row in rows) {
@@ -233,6 +237,7 @@ class PhotoDB {
   }
 
   Future<Photo> getLatestPhotoInRemoteFolder(int folderId) async {
+    _logger.info("Querying for folder: " + folderId.toString());
     final db = await instance.database;
     var rows = await db.query(
       table,
