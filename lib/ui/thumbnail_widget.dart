@@ -89,12 +89,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   void _loadNetworkImage() {
-    final path = widget.photo.thumbnailPath.isNotEmpty
-        ? widget.photo.thumbnailPath
-        : widget.photo.remotePath;
-    _imageProvider =
-        Image.network(Configuration.instance.getHttpEndpoint() + "/" + path)
-            .image;
+    final url = widget.photo.thumbnailPath.isNotEmpty
+        ? widget.photo.getThumbnailUrl()
+        : widget.photo.getRemoteUrl();
+    _imageProvider = Image.network(url).image;
   }
 
   @override

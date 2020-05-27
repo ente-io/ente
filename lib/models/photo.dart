@@ -71,6 +71,10 @@ class Photo {
     return Configuration.instance.getHttpEndpoint() + "/" + remotePath;
   }
 
+  String getThumbnailUrl() {
+    return Configuration.instance.getHttpEndpoint() + "/" + thumbnailPath;
+  }
+
   Future<Uint8List> getOriginalBytes() {
     return getAsset().originBytes;
   }
