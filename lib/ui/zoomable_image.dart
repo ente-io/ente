@@ -1,8 +1,8 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';
@@ -60,7 +60,15 @@ class _ZoomableImageState extends State<ZoomableImage> {
   }
 
   void _loadNetworkImage() {
-    _imageProvider = Image.network(widget.photo.getRemoteUrl()).image;
+    if (!_loadedSmallThumbnail && widget.photo.thumbnailPath.isNotEmpty) {
+      _imageProvider = Image.network(widget.photo.getThumbnailUrl()).image;
+      _loadedSmallThumbnail = true;
+    }
+    if (!_loadedFinalImage) {
+      widget.photo.getBytes().then((data) {
+        _onFinalImageLoaded(Image.memory(data).image, context);
+      });
+    }
   }
 
   void _loadLocalImage(BuildContext context) {
@@ -94,12 +102,14 @@ class _ZoomableImageState extends State<ZoomableImage> {
     if (!_loadedFinalImage) {
       final cachedFile = ImageLruCache.get(widget.photo);
       if (cachedFile != null) {
-        _onFinalImageLoaded(cachedFile, context);
+        final imageProvider = Image.file(cachedFile).image;
+        _onFinalImageLoaded(imageProvider, context);
       } else {
         widget.photo.getAsset().file.then((file) {
           if (mounted) {
             setState(() {
-              _onFinalImageLoaded(file, context);
+              final imageProvider = Image.file(file).image;
+              _onFinalImageLoaded(imageProvider, context);
               ImageLruCache.put(widget.photo, file);
             });
           }
@@ -120,8 +130,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
     });
   }
 
-  void _onFinalImageLoaded(File file, BuildContext context) {
-    final imageProvider = Image.file(file).image;
+  void _onFinalImageLoaded(ImageProvider imageProvider, BuildContext context) {
     precacheImage(imageProvider, context).then((value) {
       if (mounted) {
         setState(() {

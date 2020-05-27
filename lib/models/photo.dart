@@ -1,5 +1,8 @@
+import 'dart:developer';
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
@@ -58,12 +61,28 @@ class Photo {
 
   Future<Uint8List> getBytes({int quality = 100}) {
     final asset = getAsset();
-    if (extension(title) == ".HEIC" || quality != 100) {
-      return asset.originBytes.then((bytes) =>
-          FlutterImageCompress.compressWithList(bytes, quality: quality)
-              .then((result) => Uint8List.fromList(result)));
+    Future<Uint8List> dataFuture;
+    final start = DateTime.now();
+    if (localId == null) {
+      dataFuture =
+          HttpClient().getUrl(Uri.parse(getRemoteUrl())).then((request) {
+        return request.close().then((response) {
+          return consolidateHttpClientResponseBytes(response);
+        });
+      });
     } else {
-      return asset.originBytes;
+      dataFuture = asset.originBytes;
+    }
+    if (extension(title) == ".HEIC" || quality != 100) {
+      return dataFuture.then((bytes) =>
+          FlutterImageCompress.compressWithList(bytes, quality: quality)
+              .then((result) {
+            log("Time taken: " +
+                DateTime.now().difference(start).inMilliseconds.toString());
+            return Uint8List.fromList(result);
+          }));
+    } else {
+      return dataFuture;
     }
   }
 
