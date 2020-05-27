@@ -91,23 +91,11 @@ class Photo {
     return o is Photo &&
         o.generatedId == generatedId &&
         o.uploadedFileId == uploadedFileId &&
-        o.localId == localId &&
-        o.title == title &&
-        o.deviceFolder == deviceFolder &&
-        o.remotePath == remotePath &&
-        o.createTimestamp == createTimestamp &&
-        o.updateTimestamp == updateTimestamp;
+        o.localId == localId;
   }
 
   @override
   int get hashCode {
-    return generatedId.hashCode ^
-        uploadedFileId.hashCode ^
-        localId.hashCode ^
-        title.hashCode ^
-        deviceFolder.hashCode ^
-        remotePath.hashCode ^
-        createTimestamp.hashCode ^
-        updateTimestamp.hashCode;
+    return generatedId.hashCode ^ uploadedFileId.hashCode ^ localId.hashCode;
   }
 }

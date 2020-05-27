@@ -14,7 +14,10 @@ class PhotoProvider {
     final filterOptionGroup = FilterOptionGroup();
     filterOptionGroup.setOption(AssetType.image, FilterOption(needTitle: true));
     var galleryList = await PhotoManager.getAssetPathList(
-        type: RequestType.image, filterOption: filterOptionGroup);
+      hasAll: true,
+      type: RequestType.image,
+      filterOption: filterOptionGroup,
+    );
 
     galleryList.sort((s1, s2) {
       return s2.assetCount.compareTo(s1.assetCount);

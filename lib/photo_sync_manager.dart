@@ -54,23 +54,18 @@ class PhotoSyncManager {
     await PhotoProvider.instance.refreshGalleryList();
     final pathEntities = PhotoProvider.instance.list;
     final photos = List<Photo>();
+    AssetPathEntity recents;
     for (AssetPathEntity pathEntity in pathEntities) {
-      if (Platform.isIOS || pathEntity.name != "Recent") {
-        // "Recents" contain duplicate information on Android
-        var assetList = await pathEntity.assetList;
-        for (AssetEntity entity in assetList) {
-          if (max(entity.createDateTime.microsecondsSinceEpoch,
-                  entity.modifiedDateTime.microsecondsSinceEpoch) >
-              lastDBUpdateTimestamp) {
-            try {
-              photos.add(await Photo.fromAsset(pathEntity, entity));
-            } catch (e) {
-              _logger.severe(e);
-            }
-          }
-        }
+      if (pathEntity.name == "Recent" || pathEntity.name == "Recents") {
+        recents = pathEntity;
+      } else {
+        await _addToPhotos(pathEntity, lastDBUpdateTimestamp, photos);
       }
     }
+    if (recents != null) {
+      await _addToPhotos(recents, lastDBUpdateTimestamp, photos);
+    }
+
     if (photos.isEmpty) {
       _isSyncInProgress = false;
       _syncWithRemote(prefs);
@@ -81,6 +76,25 @@ class PhotoSyncManager {
         _isSyncInProgress = false;
         _syncWithRemote(prefs);
       });
+    }
+  }
+
+  Future _addToPhotos(AssetPathEntity pathEntity, int lastDBUpdateTimestamp,
+      List<Photo> photos) async {
+    final assetList = await pathEntity.assetList;
+    for (AssetEntity entity in assetList) {
+      if (max(entity.createDateTime.microsecondsSinceEpoch,
+              entity.modifiedDateTime.microsecondsSinceEpoch) >
+          lastDBUpdateTimestamp) {
+        try {
+          final photo = await Photo.fromAsset(pathEntity, entity);
+          if (!photos.contains(photo)) {
+            photos.add(photo);
+          }
+        } catch (e) {
+          _logger.severe(e);
+        }
+      }
     }
   }
 
