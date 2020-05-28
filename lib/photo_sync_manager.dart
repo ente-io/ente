@@ -98,10 +98,13 @@ class PhotoSyncManager {
     }
   }
 
-  Future<void> _syncWithRemote(SharedPreferences prefs) {
+  _syncWithRemote(SharedPreferences prefs) {
     // TODO:  Fix race conditions triggered due to concurrent syncs.
     //        Add device_id/last_sync_timestamp to the upload request?
-    return _downloadDiff(prefs).then((_) {
+    if (!Configuration.instance.hasConfiguredAccount()) {
+      return;
+    }
+    _downloadDiff(prefs).then((_) {
       _uploadDiff(prefs).then((_) {
         _deletePhotosOnServer();
       });

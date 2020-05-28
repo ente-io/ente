@@ -53,4 +53,8 @@ class Configuration {
   void setPassword(String password) async {
     await _preferences.setString(_passwordKey, password);
   }
+
+  bool hasConfiguredAccount() {
+    return getEndpoint() != null && getToken() != null;
+  }
 }

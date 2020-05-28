@@ -26,6 +26,9 @@ class FolderSharingService {
       FolderSharingService._privateConstructor();
 
   void sync() {
+    if (!Configuration.instance.hasConfiguredAccount()) {
+      return;
+    }
     getFolders().then((f) async {
       var folders = f.toSet();
       var currentFolders = await FolderDB.instance.getFolders();
