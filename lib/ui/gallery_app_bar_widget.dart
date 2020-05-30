@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/photo_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
@@ -72,9 +73,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getDefaultActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
-    if (_hasSyncErrors) {
+    if (_hasSyncErrors || !Configuration.instance.hasConfiguredAccount()) {
       actions.add(IconButton(
-        icon: Icon(Icons.sync_problem),
+        icon: Icon(Configuration.instance.hasConfiguredAccount()
+            ? Icons.sync_problem
+            : Icons.sync_disabled),
         onPressed: () {
           _openSyncConfiguration(context);
         },
