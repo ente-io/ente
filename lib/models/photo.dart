@@ -60,34 +60,21 @@ class Photo {
   }
 
   Future<Uint8List> getBytes({int quality = 100}) {
-    final asset = getAsset();
-    Future<Uint8List> dataFuture;
-    final start = DateTime.now();
     if (localId == null) {
-      dataFuture =
-          HttpClient().getUrl(Uri.parse(getRemoteUrl())).then((request) {
+      return HttpClient().getUrl(Uri.parse(getRemoteUrl())).then((request) {
         return request.close().then((response) {
           return consolidateHttpClientResponseBytes(response);
         });
       });
     } else {
-      dataFuture = asset.originBytes;
-    }
-    if (extension(title) == ".HEIC" || quality != 100) {
-      return dataFuture.then((bytes) =>
-          FlutterImageCompress.compressWithList(bytes, quality: quality)
-              .then((result) {
-            log("Time taken: " +
-                DateTime.now().difference(start).inMilliseconds.toString());
-            return Uint8List.fromList(result);
-          }));
-    } else {
-      return dataFuture;
+      return getAsset().originBytes;
     }
   }
 
   String getRemoteUrl() {
-    return Configuration.instance.getHttpEndpoint() + "/" + remotePath;
+    return Configuration.instance.getHttpEndpoint() +
+        "/files/file/" +
+        uploadedFileId.toString();
   }
 
   String getThumbnailUrl() {
