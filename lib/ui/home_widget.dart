@@ -34,6 +34,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   int _selectedNavBarItem = 0;
   Set<Photo> _selectedPhotos = HashSet<Photo>();
   StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
+  final _deviceFolderGalleryWidget = DeviceFolderGalleryWidget();
+  final _remoteFolderGalleryWidget = RemoteFolderGalleryWidget();
 
   @override
   void initState() {
@@ -75,8 +77,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                     });
                   },
                 ),
-                DeviceFolderGalleryWidget(),
-                RemoteFolderGalleryWidget(),
+                _deviceFolderGalleryWidget,
+                _remoteFolderGalleryWidget,
               ],
               index: _selectedNavBarItem,
             );
