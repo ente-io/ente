@@ -1,12 +1,9 @@
-import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 
 class Photo {
