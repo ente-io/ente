@@ -237,7 +237,6 @@ class PhotoDB {
   }
 
   Future<Photo> getLatestPhotoInRemoteFolder(int folderId) async {
-    _logger.info("Querying for folder: " + folderId.toString());
     final db = await instance.database;
     var rows = await db.query(
       table,
@@ -249,7 +248,7 @@ class PhotoDB {
     if (rows.isNotEmpty) {
       return _getPhotoFromRow(rows[0]);
     } else {
-      throw ("No photo found in remote folder");
+      throw ("No photo found in remote folder " + folderId.toString());
     }
   }
 
