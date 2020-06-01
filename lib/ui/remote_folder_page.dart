@@ -41,7 +41,7 @@ class _RemoteFolderPageState extends State<RemoteFolderPage> {
       appBar: GalleryAppBarWidget(
         GalleryAppBarType.remote_folder,
         widget.folder.name,
-        widget.folder.thumbnailPhoto.deviceFolder,
+        widget.folder.deviceFolder,
         _selectedPhotos,
         onSelectionClear: () {
           setState(() {
