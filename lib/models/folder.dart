@@ -26,7 +26,7 @@ class Folder {
 
     return Folder(
       map['id'],
-      map['name'],
+      map['owner'] + "'s " + map['deviceFolder'],
       map['owner'],
       map['deviceFolder'],
       Set<String>.from(map['sharedWith']),
