@@ -58,22 +58,11 @@ class Folder {
   bool operator ==(Object o) {
     if (identical(this, o)) return true;
 
-    return o is Folder &&
-        o.id == id &&
-        o.name == name &&
-        o.owner == owner &&
-        o.deviceFolder == deviceFolder &&
-        setEquals(o.sharedWith, sharedWith) &&
-        o.updateTimestamp == updateTimestamp;
+    return o is Folder && o.id == id;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        name.hashCode ^
-        owner.hashCode ^
-        deviceFolder.hashCode ^
-        sharedWith.hashCode ^
-        updateTimestamp.hashCode;
+    return id.hashCode;
   }
 }

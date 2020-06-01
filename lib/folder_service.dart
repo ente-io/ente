@@ -34,6 +34,7 @@ class FolderSharingService {
       var currentFolders = await FolderDB.instance.getFolders();
       for (final currentFolder in currentFolders) {
         if (!folders.contains(currentFolder)) {
+          _logger.info("Folder deleted: " + currentFolder.toString());
           await PhotoDB.instance.deletePhotosInRemoteFolder(currentFolder.id);
           await FolderDB.instance.deleteFolder(currentFolder);
         }
