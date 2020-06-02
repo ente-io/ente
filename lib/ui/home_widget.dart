@@ -100,9 +100,12 @@ class _HomeWidgetState extends State<HomeWidget> {
             ),
           );
         },
-        child: Icon(Icons.search),
+        child: Icon(
+          Icons.search,
+          size: 28,
+        ),
         elevation: 1,
-        backgroundColor: Colors.white30,
+        backgroundColor: Colors.black38,
         foregroundColor: Colors.amber,
       ),
     );
