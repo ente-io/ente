@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
+import 'package:path/path.dart';
 import 'package:photos/models/photo.dart';
 
 import 'package:photos/core/configuration.dart';
@@ -197,11 +198,13 @@ class PhotoSyncManager {
 
   Future<Photo> _uploadFile(Photo localPhoto) async {
     var formData = FormData.fromMap({
-      "file": MultipartFile.fromBytes((await localPhoto.getOriginalBytes()),
+      "file": MultipartFile.fromBytes((await localPhoto.getBytes()),
           filename: localPhoto.title),
       "deviceFileID": localPhoto.localId,
       "deviceFolder": localPhoto.deviceFolder,
-      "title": localPhoto.title,
+      "title": extension(localPhoto.title) == ".HEIC"
+          ? basenameWithoutExtension(localPhoto.title) + ".JPG"
+          : localPhoto.title,
       "createTimestamp": localPhoto.createTimestamp,
     });
     return _dio

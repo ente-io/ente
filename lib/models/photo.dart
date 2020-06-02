@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
@@ -64,7 +65,17 @@ class Photo {
         });
       });
     } else {
-      return getAsset().originBytes;
+      final originalBytes = getAsset().originBytes;
+      if (extension(title) == ".HEIC" || quality != 100) {
+        return originalBytes.then((bytes) {
+          return FlutterImageCompress.compressWithList(bytes, quality: quality)
+              .then((converted) {
+            return Uint8List.fromList(converted);
+          });
+        });
+      } else {
+        return originalBytes;
+      }
     }
   }
 
@@ -76,10 +87,6 @@ class Photo {
 
   String getThumbnailUrl() {
     return Configuration.instance.getHttpEndpoint() + "/" + thumbnailPath;
-  }
-
-  Future<Uint8List> getOriginalBytes() {
-    return getAsset().originBytes;
   }
 
   @override
