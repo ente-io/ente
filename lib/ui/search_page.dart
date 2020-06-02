@@ -63,12 +63,9 @@ class SearchPage extends StatelessWidget {
       onTap: () {
         _routeToSearchResults(face, context);
       },
-      child: Hero(
-        tag: "face_" + face.faceID.toString(),
-        child: CircularNetworkImageWidget(
-            Configuration.instance.getHttpEndpoint() + "/" + face.thumbnailPath,
-            60),
-      ),
+      child: CircularNetworkImageWidget(
+          Configuration.instance.getHttpEndpoint() + "/" + face.thumbnailPath,
+          60),
     );
   }
 

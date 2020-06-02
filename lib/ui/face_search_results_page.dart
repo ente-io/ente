@@ -4,6 +4,7 @@ import 'package:photos/face_search_manager.dart';
 import 'package:photos/models/face.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
+import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/ui/detail_page.dart';
@@ -22,14 +23,11 @@ class FaceSearchResultsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text("Search results"),
         actions: <Widget>[
-          Hero(
-            tag: "face_" + _face.faceID.toString(),
-            child: CircularNetworkImageWidget(
-                Configuration.instance.getHttpEndpoint() +
-                    "/" +
-                    _face.thumbnailPath,
-                20),
-          )
+          CircularNetworkImageWidget(
+              Configuration.instance.getHttpEndpoint() +
+                  "/" +
+                  _face.thumbnailPath,
+              20),
         ],
       ),
       body: Container(
@@ -43,13 +41,10 @@ class FaceSearchResultsPage extends StatelessWidget {
       future: _faceSearchManager.getFaceSearchResults(_face),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return GridView.builder(
-              itemBuilder: (_, index) =>
-                  _buildItem(context, snapshot.data, index),
-              itemCount: snapshot.data.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-              ));
+          return Gallery(
+            snapshot.data,
+            Set<Photo>(),
+          );
         } else {
           return Center(child: loadWidget);
         }

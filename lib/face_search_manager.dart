@@ -7,7 +7,7 @@ import 'package:photos/models/face.dart';
 import 'package:photos/models/photo.dart';
 
 class FaceSearchManager {
-  final logger = Logger("FaceSearchManager");
+  final _logger = Logger("FaceSearchManager");
   final _dio = Dio();
 
   FaceSearchManager._privateConstructor();
@@ -28,20 +28,36 @@ class FaceSearchManager {
   }
 
   Future<List<Photo>> getFaceSearchResults(Face face) async {
-    var futures = _dio
+    final result = await _dio
         .get(
-          Configuration.instance.getHttpEndpoint() +
-              "/photos/search/face/" +
-              face.faceID.toString(),
-          options: Options(
-              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-        )
-        .then((response) => (response.data["results"] as List)
-            .map((result) => (PhotoDB.instance.getPhotoByPath(result))));
-    return Future.wait(await futures);
+      Configuration.instance.getHttpEndpoint() +
+          "/photos/search/face/" +
+          face.faceID.toString(),
+      queryParameters: {
+        "limit": 100,
+      },
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    )
+        .then((response) {
+      return (response.data["result"] as List)
+          .map((p) => Photo.fromJson(p))
+          .toList();
+    }).catchError(_onError);
+    final photos = List<Photo>();
+    for (Photo photo in result) {
+      try {
+        photos.add(await PhotoDB.instance.getMatchingPhoto(photo.localId,
+            photo.title, photo.deviceFolder, photo.createTimestamp));
+      } catch (e) {
+        // Not available locally
+        photos.add(photo);
+      }
+    }
+    return photos;
   }
 
   void _onError(error) {
-    logger.severe(error);
+    _logger.severe(error);
   }
 }
