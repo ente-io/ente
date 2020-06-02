@@ -14,6 +14,7 @@ import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/remote_folder_gallery_widget.dart';
+import 'package:photos/ui/search_page.dart';
 import 'package:photos/utils/logging_util.dart';
 import 'package:shake/shake.dart';
 import 'package:logging/logging.dart';
@@ -88,6 +89,21 @@ class _HomeWidgetState extends State<HomeWidget> {
             return loadWidget;
           }
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return SearchPage();
+              },
+            ),
+          );
+        },
+        child: Icon(Icons.search),
+        elevation: 1,
+        backgroundColor: Colors.white30,
+        foregroundColor: Colors.amber,
       ),
     );
   }

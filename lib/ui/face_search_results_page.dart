@@ -4,6 +4,7 @@ import 'package:photos/face_search_manager.dart';
 import 'package:photos/models/face.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
+import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/ui/detail_page.dart';
 
@@ -50,7 +51,7 @@ class FaceSearchResultsPage extends StatelessWidget {
                 crossAxisCount: 4,
               ));
         } else {
-          return Text("Loading...");
+          return Center(child: loadWidget);
         }
       },
     );

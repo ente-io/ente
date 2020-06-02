@@ -4,6 +4,7 @@ import 'package:photos/face_search_manager.dart';
 import 'package:photos/models/face.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
 import 'package:photos/ui/face_search_results_page.dart';
+import 'package:photos/ui/loading_widget.dart';
 
 class SearchPage extends StatelessWidget {
   final FaceSearchManager _faceSearchManager = FaceSearchManager.instance;
@@ -11,21 +12,12 @@ class SearchPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Hero(
-          tag: "search",
-          flightShuttleBuilder: (BuildContext flightContext,
-                  Animation<double> animation,
-                  HeroFlightDirection flightDirection,
-                  BuildContext fromHeroContext,
-                  BuildContext toHeroContext) =>
-              Material(child: toHeroContext.widget),
-          child: TextField(
-            autofocus: true,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: 'Search your photos',
-              contentPadding: const EdgeInsets.all(0.0),
-            ),
+        title: TextField(
+          autofocus: true,
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: 'Search your photos',
+            contentPadding: const EdgeInsets.all(0.0),
           ),
         ),
         actions: <Widget>[
@@ -57,8 +49,10 @@ class SearchPage extends StatelessWidget {
                   return _buildItem(context, snapshot.data[index]);
                 }),
           );
+        } else if (snapshot.hasError) {
+          return Center(child: Text("Error: " + snapshot.error.toString()));
         } else {
-          return Text("Loading...");
+          return Center(child: loadWidget);
         }
       },
     );
