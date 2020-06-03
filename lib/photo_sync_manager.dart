@@ -148,7 +148,7 @@ class PhotoSyncManager {
     List<Photo> photosToBeUploaded = await _db.getPhotosToBeUploaded();
     for (Photo photo in photosToBeUploaded) {
       // TODO: Remove
-      if (photo.deviceFolder != "Camera") {
+      if (photo.deviceFolder != "Camera" && photo.deviceFolder != "Downloads") {
         continue;
       }
       try {
