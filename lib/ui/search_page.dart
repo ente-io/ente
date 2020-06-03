@@ -1,12 +1,18 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:latlong/latlong.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/face_search_manager.dart';
 import 'package:photos/models/face.dart';
+import 'package:photos/models/photo.dart';
+import 'package:photos/photo_repository.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
 import 'package:photos/ui/face_search_results_page.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/location_search_results_page.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -55,8 +61,14 @@ class _SearchPageState extends State<SearchPage> {
             return LocationSearchResultWidget(suggestion['name']);
           },
           onSuggestionSelected: (suggestion) {
-            // Navigator.of(context).push(MaterialPageRoute(
-            //     builder: (context) => ProductPage(product: suggestion)));
+            double latitude = suggestion['geometry']['location']['lat'];
+            double longitude = suggestion['geometry']['location']['lng'];
+            Navigator.pop(context);
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => LocationSearchResultsPage(
+                      new LatLng(latitude, longitude),
+                      suggestion['name'],
+                    )));
           },
         ),
         actions: <Widget>[
@@ -108,9 +120,8 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _routeToSearchResults(Face face, BuildContext context) {
-    final page = FaceSearchResultsPage(
-      face: face,
-    );
+    final page = FaceSearchResultsPage(face);
+    Navigator.pop(context);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {

@@ -18,6 +18,8 @@ class Photo {
   String thumbnailPath;
   int createTimestamp;
   int updateTimestamp;
+  double latitude;
+  double longitude;
 
   Photo();
   Photo.fromJson(Map<String, dynamic> json)
@@ -37,6 +39,9 @@ class Photo {
     photo.localId = asset.id;
     photo.title = asset.title;
     photo.deviceFolder = pathEntity.name;
+    final location = await asset.latlngAsync();
+    photo.latitude = location.latitude;
+    photo.longitude = location.longitude;
     photo.createTimestamp = asset.createDateTime.microsecondsSinceEpoch;
     if (photo.createTimestamp == 0) {
       try {

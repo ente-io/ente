@@ -20,6 +20,8 @@ class PhotoDB {
   static final columnLocalId = 'local_id';
   static final columnTitle = 'title';
   static final columnDeviceFolder = 'device_folder';
+  static final columnLatitude = 'latitude';
+  static final columnLongitude = 'longitude';
   static final columnRemoteFolderId = 'remote_folder_id';
   static final columnRemotePath = 'remote_path';
   static final columnThumbnailPath = 'thumbnail_path';
@@ -57,6 +59,8 @@ class PhotoDB {
             $columnUploadedFileId INTEGER NOT NULL,
             $columnTitle TEXT NOT NULL,
             $columnDeviceFolder TEXT NOT NULL,
+            $columnLatitude REAL,
+            $columnLongitude REAL,
             $columnRemoteFolderId INTEGER DEFAULT -1,
             $columnRemotePath TEXT,
             $columnThumbnailPath TEXT,
@@ -283,6 +287,8 @@ class PhotoDB {
         photo.uploadedFileId == null ? -1 : photo.uploadedFileId;
     row[columnTitle] = photo.title;
     row[columnDeviceFolder] = photo.deviceFolder;
+    row[columnLatitude] = photo.latitude;
+    row[columnLongitude] = photo.longitude;
     row[columnRemoteFolderId] = photo.remoteFolderId;
     row[columnRemotePath] = photo.remotePath;
     row[columnThumbnailPath] = photo.thumbnailPath;
@@ -298,6 +304,8 @@ class PhotoDB {
     photo.uploadedFileId = row[columnUploadedFileId];
     photo.title = row[columnTitle];
     photo.deviceFolder = row[columnDeviceFolder];
+    photo.latitude = row[columnLatitude];
+    photo.longitude = row[columnLongitude];
     photo.remoteFolderId = row[columnRemoteFolderId];
     photo.remotePath = row[columnRemotePath];
     photo.thumbnailPath = row[columnThumbnailPath];
