@@ -128,6 +128,7 @@ class PhotoDB {
     final results = await db.query(
       table,
       where: '$columnUploadedFileId = -1',
+      orderBy: '$columnCreateTimestamp DESC',
     );
     return _convertToPhotos(results);
   }
