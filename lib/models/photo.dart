@@ -95,7 +95,7 @@ class Photo {
 
   @override
   String toString() {
-    return 'Photo(generatedId: $generatedId, uploadedFileId: $uploadedFileId, localId: $localId, title: $title, deviceFolder: $deviceFolder, remotePath: $remotePath, createTimestamp: $createTimestamp, updateTimestamp: $updateTimestamp)';
+    return 'Photo(generatedId: $generatedId, uploadedFileId: $uploadedFileId, localId: $localId, title: $title, deviceFolder: $deviceFolder, location: $location, remotePath: $remotePath, createTimestamp: $createTimestamp, updateTimestamp: $updateTimestamp)';
   }
 
   @override

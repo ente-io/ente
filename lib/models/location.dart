@@ -3,4 +3,7 @@ class Location {
   final double longitude;
 
   Location(this.latitude, this.longitude);
+
+  @override
+  String toString() => 'Location(latitude: $latitude, longitude: $longitude)';
 }
