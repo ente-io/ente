@@ -9,11 +9,9 @@ import 'package:photos/ui/loading_widget.dart';
 
 class FaceSearchResultsPage extends StatelessWidget {
   final FaceSearchManager _faceSearchManager = FaceSearchManager.instance;
-  final Face _face;
+  final Face face;
 
-  FaceSearchResultsPage({Key key, Face face})
-      : this._face = face,
-        super(key: key);
+  FaceSearchResultsPage(this.face, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +22,7 @@ class FaceSearchResultsPage extends StatelessWidget {
           CircularNetworkImageWidget(
               Configuration.instance.getHttpEndpoint() +
                   "/" +
-                  _face.thumbnailPath,
+                  face.thumbnailPath,
               20),
         ],
       ),
@@ -36,7 +34,7 @@ class FaceSearchResultsPage extends StatelessWidget {
 
   FutureBuilder<List<Photo>> _getBody() {
     return FutureBuilder<List<Photo>>(
-      future: _faceSearchManager.getFaceSearchResults(_face),
+      future: _faceSearchManager.getFaceSearchResults(face),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Gallery(
