@@ -6,8 +6,6 @@ import 'package:photos/models/photo.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/thumbnail_widget.dart';
-import 'package:photos/ui/detail_page.dart';
 
 class FaceSearchResultsPage extends StatelessWidget {
   final FaceSearchManager _faceSearchManager = FaceSearchManager.instance;
@@ -49,27 +47,6 @@ class FaceSearchResultsPage extends StatelessWidget {
           return Center(child: loadWidget);
         }
       },
-    );
-  }
-
-  Widget _buildItem(BuildContext context, List<Photo> photos, int index) {
-    return GestureDetector(
-      onTap: () async {
-        _routeToDetailPage(photos, index, context);
-      },
-      child: ThumbnailWidget(photos[index]),
-    );
-  }
-
-  void _routeToDetailPage(
-      List<Photo> photos, int index, BuildContext context) async {
-    var page = DetailPage(photos, index);
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return page;
-        },
-      ),
     );
   }
 }
