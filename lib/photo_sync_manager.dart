@@ -147,6 +147,10 @@ class PhotoSyncManager {
   Future _uploadDiff(SharedPreferences prefs) async {
     List<Photo> photosToBeUploaded = await _db.getPhotosToBeUploaded();
     for (Photo photo in photosToBeUploaded) {
+      // TODO: Remove
+      if (photo.deviceFolder != "Camera") {
+        continue;
+      }
       try {
         var uploadedPhoto = await _uploadFile(photo);
         if (uploadedPhoto == null) {
