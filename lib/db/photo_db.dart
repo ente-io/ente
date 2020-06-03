@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import 'package:photos/models/location.dart';
 import 'package:photos/models/photo.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -287,8 +288,8 @@ class PhotoDB {
         photo.uploadedFileId == null ? -1 : photo.uploadedFileId;
     row[columnTitle] = photo.title;
     row[columnDeviceFolder] = photo.deviceFolder;
-    row[columnLatitude] = photo.latitude;
-    row[columnLongitude] = photo.longitude;
+    row[columnLatitude] = photo.location.latitude;
+    row[columnLongitude] = photo.location.longitude;
     row[columnRemoteFolderId] = photo.remoteFolderId;
     row[columnRemotePath] = photo.remotePath;
     row[columnThumbnailPath] = photo.thumbnailPath;
@@ -304,8 +305,7 @@ class PhotoDB {
     photo.uploadedFileId = row[columnUploadedFileId];
     photo.title = row[columnTitle];
     photo.deviceFolder = row[columnDeviceFolder];
-    photo.latitude = row[columnLatitude];
-    photo.longitude = row[columnLongitude];
+    photo.location = Location(row[columnLatitude], row[columnLongitude]);
     photo.remoteFolderId = row[columnRemoteFolderId];
     photo.remotePath = row[columnRemotePath];
     photo.thumbnailPath = row[columnThumbnailPath];

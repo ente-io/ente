@@ -6,6 +6,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/models/location.dart';
 
 class Photo {
   int generatedId;
@@ -18,8 +19,7 @@ class Photo {
   String thumbnailPath;
   int createTimestamp;
   int updateTimestamp;
-  double latitude;
-  double longitude;
+  Location location;
 
   Photo();
   Photo.fromJson(Map<String, dynamic> json)
@@ -40,8 +40,7 @@ class Photo {
     photo.title = asset.title;
     photo.deviceFolder = pathEntity.name;
     final location = await asset.latlngAsync();
-    photo.latitude = location.latitude;
-    photo.longitude = location.longitude;
+    photo.location = Location(location.latitude, location.longitude);
     photo.createTimestamp = asset.createDateTime.microsecondsSinceEpoch;
     if (photo.createTimestamp == 0) {
       try {

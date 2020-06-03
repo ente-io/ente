@@ -1,14 +1,10 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:latlong/latlong.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/face_search_manager.dart';
 import 'package:photos/models/face.dart';
-import 'package:photos/models/photo.dart';
-import 'package:photos/photo_repository.dart';
+import 'package:photos/models/location.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
 import 'package:photos/ui/face_search_results_page.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -41,7 +37,7 @@ class _SearchPageState extends State<SearchPage> {
           loadingBuilder: (context) {
             return loadWidget;
           },
-          debounceDuration: Duration(milliseconds: 100),
+          debounceDuration: Duration(milliseconds: 300),
           suggestionsCallback: (pattern) async {
             if (pattern.isEmpty) {
               return null;
@@ -55,18 +51,23 @@ class _SearchPageState extends State<SearchPage> {
                 .data["results"];
           },
           itemBuilder: (context, suggestion) {
-            if (suggestion == null) {
-              return null;
-            }
             return LocationSearchResultWidget(suggestion['name']);
           },
           onSuggestionSelected: (suggestion) {
-            double latitude = suggestion['geometry']['location']['lat'];
-            double longitude = suggestion['geometry']['location']['lng'];
             Navigator.pop(context);
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => LocationSearchResultsPage(
-                      new LatLng(latitude, longitude),
+                      ViewPort(
+                          Location(
+                              suggestion['geometry']['viewport']['northeast']
+                                  ['lat'],
+                              suggestion['geometry']['viewport']['northeast']
+                                  ['lng']),
+                          Location(
+                              suggestion['geometry']['viewport']['southwest']
+                                  ['lat'],
+                              suggestion['geometry']['viewport']['southwest']
+                                  ['lng'])),
                       suggestion['name'],
                     )));
           },
