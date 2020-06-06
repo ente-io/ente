@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/photo_db.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/favorite_photos_repository.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/filters/favorite_items_filter.dart';
@@ -19,6 +23,16 @@ class DeviceFolderGalleryWidget extends StatefulWidget {
 }
 
 class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
+  StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
+
+  @override
+  void initState() {
+    _subscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      setState(() {});
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -106,5 +120,11 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
   }
 }
