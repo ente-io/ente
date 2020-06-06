@@ -14,9 +14,10 @@ class Gallery extends StatefulWidget {
   final List<Photo> photos;
   final Set<Photo> selectedPhotos;
   final Function(Set<Photo>) photoSelectionChangeCallback;
+  final bool enablePullToSync;
 
   Gallery(this.photos, this.selectedPhotos,
-      {this.photoSelectionChangeCallback});
+      {this.photoSelectionChangeCallback, this.enablePullToSync = false});
 
   @override
   _GalleryState createState() {
@@ -39,31 +40,35 @@ class _GalleryState extends State<Gallery> {
     _selectedPhotos = widget.selectedPhotos;
     _deduplicatePhotos();
     _collatePhotos();
-
-    return SmartRefresher(
-      controller: _refreshController,
-      enablePullUp: true,
-      child: ListView.builder(
-        itemCount: _collatedPhotos.length,
-        itemBuilder: _buildListItem,
-        controller: _scrollController,
-        cacheExtent: 1000,
-      ),
-      header: ClassicHeader(
-        idleText: "Pull down to sync.",
-        refreshingText: "Syncing...",
-        releaseText: "Release to sync.",
-        completeText: "Sync completed.",
-        failedText: "Sync unsuccessful.",
-      ),
-      onRefresh: () async {
-        PhotoSyncManager.instance.sync().then((value) {
-          _refreshController.refreshCompleted();
-        }).catchError((e) {
-          _refreshController.refreshFailed();
-        });
-      },
+    final list = ListView.builder(
+      itemCount: _collatedPhotos.length,
+      itemBuilder: _buildListItem,
+      controller: _scrollController,
+      cacheExtent: 1000,
     );
+    if (widget.enablePullToSync) {
+      return SmartRefresher(
+        controller: _refreshController,
+        enablePullUp: true,
+        child: list,
+        header: ClassicHeader(
+          idleText: "Pull down to sync.",
+          refreshingText: "Syncing...",
+          releaseText: "Release to sync.",
+          completeText: "Sync completed.",
+          failedText: "Sync unsuccessful.",
+        ),
+        onRefresh: () async {
+          PhotoSyncManager.instance.sync().then((value) {
+            _refreshController.refreshCompleted();
+          }).catchError((e) {
+            _refreshController.refreshFailed();
+          });
+        },
+      );
+    } else {
+      return list;
+    }
   }
 
   Widget _buildListItem(BuildContext context, int index) {

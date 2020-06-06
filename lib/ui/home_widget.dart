@@ -77,6 +77,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                       _selectedPhotos = selectedPhotos;
                     });
                   },
+                  enablePullToSync: true,
                 ),
                 _deviceFolderGalleryWidget,
                 _remoteFolderGalleryWidget,
