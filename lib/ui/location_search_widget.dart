@@ -34,7 +34,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
       loadingBuilder: (context) {
         return loadWidget;
       },
-      debounceDuration: Duration(milliseconds: 300),
+      debounceDuration: Duration(milliseconds: 0),
       suggestionsCallback: (pattern) async {
         if (pattern.isEmpty) {
           return null;
