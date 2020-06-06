@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/folder_db.dart';
 import 'package:photos/db/photo_db.dart';
+import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/remote_folder_page.dart';
@@ -18,6 +23,17 @@ class RemoteFolderGalleryWidget extends StatefulWidget {
 
 class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
   Logger _logger = Logger("RemoteFolderGalleryWidget");
+  StreamSubscription<RemoteSyncEvent> _subscription;
+
+  @override
+  void initState() {
+    _subscription = Bus.instance.on<RemoteSyncEvent>().listen((event) {
+      if (event.success) {
+        setState(() {});
+      }
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,15 +76,20 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
 
   Future<List<Folder>> _getRemoteFolders() async {
     final folders = await FolderDB.instance.getFolders();
+    final filteredFolders = List<Folder>();
     for (final folder in folders) {
+      if (folder.owner == Configuration.instance.getUsername()) {
+        continue;
+      }
       try {
         folder.thumbnailPhoto =
             await PhotoDB.instance.getLatestPhotoInRemoteFolder(folder.id);
       } catch (e) {
         _logger.warning(e.toString());
       }
+      filteredFolders.add(folder);
     }
-    return folders;
+    return filteredFolders;
   }
 
   Widget _buildFolder(BuildContext context, Folder folder) {
@@ -105,5 +126,11 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
   }
 }
