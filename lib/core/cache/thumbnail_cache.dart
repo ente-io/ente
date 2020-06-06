@@ -26,7 +26,7 @@ class _ThumbnailCacheKey {
       identical(this, other) ||
       other is _ThumbnailCacheKey &&
           runtimeType == other.runtimeType &&
-          photo.generatedId == other.photo.generatedId &&
+          photo.hashCode == other.photo.hashCode &&
           size == other.size;
 
   @override
