@@ -40,7 +40,7 @@ class _GalleryState extends State<Gallery> {
       itemCount: _collatedPhotos.length,
       itemBuilder: _buildListItem,
       controller: _scrollController,
-      cacheExtent: 2000,
+      cacheExtent: 1000,
     );
   }
 
@@ -100,7 +100,10 @@ class _GalleryState extends State<Gallery> {
               ? Border.all(width: 4.0, color: Colors.blue)
               : null,
         ),
-        child: ThumbnailWidget(photo),
+        child: Hero(
+          tag: photo.generatedId,
+          child: ThumbnailWidget(photo),
+        ),
       ),
     );
   }

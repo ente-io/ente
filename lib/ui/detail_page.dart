@@ -4,7 +4,6 @@ import 'package:like_button/like_button.dart';
 import 'package:photos/core/cache/lru_map.dart';
 import 'package:photos/favorite_photos_repository.dart';
 import 'package:photos/models/photo.dart';
-import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:logging/logging.dart';
@@ -56,7 +55,7 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget _buildPageView() {
     _pageController = PageController(initialPage: _selectedIndex);
-    return ExtentsPageView.extents(
+    return PageView.builder(
       itemBuilder: (context, index) {
         final photo = _photos[index];
         if (_cachedImages.get(photo.generatedId) != null) {
@@ -73,7 +72,6 @@ class _DetailPageState extends State<DetailPage> {
         _cachedImages.put(photo.generatedId, image);
         return image;
       },
-      extents: 1,
       onPageChanged: (int index) {
         setState(() {
           _selectedIndex = index;
