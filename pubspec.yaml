@@ -49,6 +49,7 @@ dependencies:
   flutter_image_compress: ^0.6.5+1
   flutter_typeahead: ^1.8.1
   pull_to_refresh: ^1.5.7
+  fluttertoast: ^4.0.1
 
 dev_dependencies:
   flutter_test:
