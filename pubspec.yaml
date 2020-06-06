@@ -36,7 +36,7 @@ dependencies:
   esys_flutter_share: ^1.0.2
   draggable_scrollbar: ^0.0.4
   photo_view: ^0.9.2
-  visibility_detector: ^0.1.4
+  visibility_detector: ^0.1.5
   connectivity: ^0.4.8+2
   event_bus: ^1.1.1
   sentry: ">=3.0.0 <4.0.0"
