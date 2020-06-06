@@ -4,9 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/models/photo.dart';
+import 'package:photos/photo_sync_manager.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Gallery extends StatefulWidget {
   final List<Photo> photos;
@@ -27,6 +29,8 @@ class _GalleryState extends State<Gallery> {
   final List<List<Photo>> _collatedPhotos = List<List<Photo>>();
   Set<Photo> _selectedPhotos = HashSet<Photo>();
   List<Photo> _photos;
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +40,29 @@ class _GalleryState extends State<Gallery> {
     _deduplicatePhotos();
     _collatePhotos();
 
-    return ListView.builder(
-      itemCount: _collatedPhotos.length,
-      itemBuilder: _buildListItem,
-      controller: _scrollController,
-      cacheExtent: 1000,
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullUp: true,
+      child: ListView.builder(
+        itemCount: _collatedPhotos.length,
+        itemBuilder: _buildListItem,
+        controller: _scrollController,
+        cacheExtent: 1000,
+      ),
+      header: ClassicHeader(
+        idleText: "Pull down to sync.",
+        refreshingText: "Syncing...",
+        releaseText: "Release to sync.",
+        completeText: "Sync completed.",
+        failedText: "Sync unsuccessful.",
+      ),
+      onRefresh: () async {
+        PhotoSyncManager.instance.sync().then((value) {
+          _refreshController.refreshCompleted();
+        }).catchError((e) {
+          _refreshController.refreshFailed();
+        });
+      },
     );
   }
 
