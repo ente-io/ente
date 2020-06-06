@@ -1,14 +1,11 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/face_search_manager.dart';
 import 'package:photos/models/face.dart';
-import 'package:photos/models/location.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
 import 'package:photos/ui/face_search_results_page.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/location_search_results_page.dart';
+import 'package:photos/ui/location_search_widget.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -23,55 +20,7 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: TypeAheadField(
-          textFieldConfiguration: TextFieldConfiguration(
-            autofocus: true,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: 'Search your photos',
-              contentPadding: const EdgeInsets.all(0.0),
-            ),
-          ),
-          hideOnEmpty: true,
-          hideOnLoading: true,
-          loadingBuilder: (context) {
-            return loadWidget;
-          },
-          debounceDuration: Duration(milliseconds: 300),
-          suggestionsCallback: (pattern) async {
-            if (pattern.isEmpty) {
-              return null;
-            }
-            return (await Dio().get(
-                    "https://maps.googleapis.com/maps/api/place/textsearch/json",
-                    queryParameters: {
-                  "query": pattern,
-                  "key": "AIzaSyC9lAYIERrNFsCkdLxX6DmZfPhybTKod8U",
-                }))
-                .data["results"];
-          },
-          itemBuilder: (context, suggestion) {
-            return LocationSearchResultWidget(suggestion['name']);
-          },
-          onSuggestionSelected: (suggestion) {
-            Navigator.pop(context);
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => LocationSearchResultsPage(
-                      ViewPort(
-                          Location(
-                              suggestion['geometry']['viewport']['northeast']
-                                  ['lat'],
-                              suggestion['geometry']['viewport']['northeast']
-                                  ['lng']),
-                          Location(
-                              suggestion['geometry']['viewport']['southwest']
-                                  ['lat'],
-                              suggestion['geometry']['viewport']['southwest']
-                                  ['lng'])),
-                      suggestion['name'],
-                    )));
-          },
-        ),
+        title: LocationSearchWidget(),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.search),
@@ -129,41 +78,6 @@ class _SearchPageState extends State<SearchPage> {
           return page;
         },
       ),
-    );
-  }
-}
-
-class LocationSearchResultWidget extends StatelessWidget {
-  final String name;
-  const LocationSearchResultWidget(
-    this.name, {
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: new EdgeInsets.symmetric(vertical: 6.0, horizontal: 6.0),
-      margin: EdgeInsets.symmetric(vertical: 6.0),
-      child: Column(children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Icon(
-              Icons.location_on,
-            ),
-            Padding(padding: EdgeInsets.only(left: 20.0)),
-            Flexible(
-              child: Container(
-                child: Text(
-                  name,
-                  overflow: TextOverflow.clip,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ]),
     );
   }
 }
