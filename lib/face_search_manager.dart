@@ -34,7 +34,7 @@ class FaceSearchManager {
           "/photos/search/face/" +
           face.faceID.toString(),
       queryParameters: {
-        "limit": 200,
+        "limit": 100,
       },
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
