@@ -54,6 +54,9 @@ class FaceSearchManager {
         photos.add(photo);
       }
     }
+    photos.sort((first, second) {
+      return second.createTimestamp.compareTo(first.createTimestamp);
+    });
     return photos;
   }
 
