@@ -69,16 +69,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           if (snapshot.hasData) {
             return IndexedStack(
               children: <Widget>[
-                Gallery(
-                  _getFilteredPhotos(PhotoRepository.instance.photos),
-                  _selectedPhotos,
-                  photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
-                    setState(() {
-                      _selectedPhotos = selectedPhotos;
-                    });
-                  },
-                  enablePullToSync: true,
-                ),
+                _getMainGalleryWidget(),
                 _deviceFolderGalleryWidget,
                 _remoteFolderGalleryWidget,
               ],
@@ -109,6 +100,19 @@ class _HomeWidgetState extends State<HomeWidget> {
         backgroundColor: Colors.black38,
         foregroundColor: Colors.amber,
       ),
+    );
+  }
+
+  Gallery _getMainGalleryWidget() {
+    return Gallery(
+      _getFilteredPhotos(PhotoRepository.instance.photos),
+      _selectedPhotos,
+      photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
+        setState(() {
+          _selectedPhotos = selectedPhotos;
+        });
+      },
+      enablePullToSync: true,
     );
   }
 
