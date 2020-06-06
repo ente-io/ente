@@ -258,6 +258,22 @@ class PhotoDB {
     }
   }
 
+  Future<Photo> getLastSyncedPhotoInRemoteFolder(int folderId) async {
+    final db = await instance.database;
+    var rows = await db.query(
+      table,
+      where: '$columnRemoteFolderId =?',
+      whereArgs: [folderId],
+      orderBy: '$columnUpdateTimestamp DESC',
+      limit: 1,
+    );
+    if (rows.isNotEmpty) {
+      return _getPhotoFromRow(rows[0]);
+    } else {
+      throw ("No photo found in remote folder " + folderId.toString());
+    }
+  }
+
   Future<Photo> getLatestPhotoAmongGeneratedIds(
       List<String> generatedIds) async {
     final db = await instance.database;
@@ -289,8 +305,10 @@ class PhotoDB {
         photo.uploadedFileId == null ? -1 : photo.uploadedFileId;
     row[columnTitle] = photo.title;
     row[columnDeviceFolder] = photo.deviceFolder;
-    row[columnLatitude] = photo.location.latitude;
-    row[columnLongitude] = photo.location.longitude;
+    if (photo.location != null) {
+      row[columnLatitude] = photo.location.latitude;
+      row[columnLongitude] = photo.location.longitude;
+    }
     row[columnRemoteFolderId] = photo.remoteFolderId;
     row[columnRemotePath] = photo.remotePath;
     row[columnThumbnailPath] = photo.thumbnailPath;
