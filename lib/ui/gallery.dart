@@ -101,7 +101,7 @@ class _GalleryState extends State<Gallery> {
               : null,
         ),
         child: Hero(
-          tag: photo.generatedId,
+          tag: photo.hashCode,
           child: ThumbnailWidget(photo),
         ),
       ),
