@@ -49,15 +49,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       final cachedSmallThumbnail =
           ThumbnailLruCache.get(widget.photo, THUMBNAIL_SMALL_SIZE);
       if (cachedSmallThumbnail != null) {
-        final imageProvider = Image.memory(cachedSmallThumbnail).image;
-        precacheImage(imageProvider, context).then((value) {
-          if (mounted) {
-            setState(() {
-              _imageProvider = imageProvider;
-              _hasLoadedThumbnail = true;
-            });
-          }
-        });
+        _imageProvider = Image.memory(cachedSmallThumbnail).image;
+        _hasLoadedThumbnail = true;
       } else {
         widget.photo
             .getAsset()
