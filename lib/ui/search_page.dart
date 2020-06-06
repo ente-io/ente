@@ -71,7 +71,6 @@ class _SearchPageState extends State<SearchPage> {
 
   void _routeToSearchResults(Face face, BuildContext context) {
     final page = FaceSearchResultsPage(face);
-    Navigator.pop(context);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
