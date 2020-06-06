@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
-import 'package:photos/core/cache/lru_map.dart';
 import 'package:photos/favorite_photos_repository.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/zoomable_image.dart';
@@ -24,13 +23,11 @@ class _DetailPageState extends State<DetailPage> {
   List<Photo> _photos;
   int _selectedIndex = 0;
   PageController _pageController;
-  LRUMap<int, ZoomableImage> _cachedImages;
 
   @override
   void initState() {
     _photos = widget.photos;
     _selectedIndex = widget.selectedIndex;
-    _cachedImages = LRUMap<int, ZoomableImage>(5);
     super.initState();
   }
 
@@ -58,9 +55,6 @@ class _DetailPageState extends State<DetailPage> {
     return PageView.builder(
       itemBuilder: (context, index) {
         final photo = _photos[index];
-        if (_cachedImages.get(photo.generatedId) != null) {
-          return _cachedImages.get(photo.generatedId);
-        }
         final image = ZoomableImage(
           photo,
           shouldDisableScroll: (value) {
@@ -69,7 +63,6 @@ class _DetailPageState extends State<DetailPage> {
             });
           },
         );
-        _cachedImages.put(photo.generatedId, image);
         return image;
       },
       onPageChanged: (int index) {
