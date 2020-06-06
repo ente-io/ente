@@ -324,7 +324,9 @@ class PhotoDB {
     photo.uploadedFileId = row[columnUploadedFileId];
     photo.title = row[columnTitle];
     photo.deviceFolder = row[columnDeviceFolder];
-    photo.location = Location(row[columnLatitude], row[columnLongitude]);
+    if (row[columnLatitude] != null && row[columnLongitude] != null) {
+      photo.location = Location(row[columnLatitude], row[columnLongitude]);
+    }
     photo.remoteFolderId = row[columnRemoteFolderId];
     photo.remotePath = row[columnRemotePath];
     photo.thumbnailPath = row[columnThumbnailPath];

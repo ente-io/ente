@@ -13,6 +13,9 @@ class ViewPort {
   final Location southWest;
 
   ViewPort(this.northEast, this.southWest);
+
+  @override
+  String toString() => 'ViewPort(northEast: $northEast, southWest: $southWest)';
 }
 
 class LocationSearchResultsPage extends StatefulWidget {
@@ -74,7 +77,8 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
     ViewPort viewPort = args['viewPort'];
     final result = List<Photo>();
     for (final photo in photos) {
-      if (viewPort.northEast.latitude > photo.location.latitude &&
+      if (photo.location != null &&
+          viewPort.northEast.latitude > photo.location.latitude &&
           viewPort.southWest.latitude < photo.location.latitude &&
           viewPort.northEast.longitude > photo.location.longitude &&
           viewPort.southWest.longitude < photo.location.longitude) {
