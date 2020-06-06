@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/folder_db.dart';
 import 'package:photos/db/photo_db.dart';
+import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/models/photo.dart';
@@ -43,6 +44,7 @@ class FolderSharingService {
         await syncDiff(folder);
         await FolderDB.instance.putFolder(folder);
       }
+      Bus.instance.fire(RemoteSyncEvent(true));
     });
   }
 
@@ -50,7 +52,7 @@ class FolderSharingService {
     int lastSyncTimestamp = 0;
     try {
       Photo photo =
-          await PhotoDB.instance.getLatestPhotoInRemoteFolder(folder.id);
+          await PhotoDB.instance.getLastSyncedPhotoInRemoteFolder(folder.id);
       lastSyncTimestamp = photo.updateTimestamp;
     } catch (e) {
       // Folder has never been synced
