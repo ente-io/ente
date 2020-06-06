@@ -56,6 +56,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
         return LocationSearchResultWidget(suggestion['name']);
       },
       onSuggestionSelected: (suggestion) {
+        Navigator.pop(context);
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => LocationSearchResultsPage(
                   ViewPort(
