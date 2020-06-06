@@ -1,3 +1,5 @@
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/photo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,6 +30,7 @@ class FavoritePhotosRepository {
     } else {
       liked.remove(photo.generatedId.toString());
     }
+    Bus.instance.fire(LocalPhotosUpdatedEvent());
     return _preferences
         .setStringList(_favoritePhotoIdsKey, liked.toList())
         .then((_) => isLiked);
