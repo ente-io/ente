@@ -18,7 +18,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SuperLogging.main(LogConfig(
     body: _main,
-    sentryDsn: SENTRY_DSN,
     logDirPath: (await getTemporaryDirectory()).path + "/logs",
     enableInDebugMode: true,
   ));
