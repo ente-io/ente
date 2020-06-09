@@ -115,7 +115,7 @@ class _SetupPageState extends State<SetupPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           AnimatedSearchIconWidget(),
-          Text("Searching for Orma server..."),
+          Text("Searching for server..."),
           CupertinoButton(
             child: Text("Enter manually instead"),
             onPressed: () async {
