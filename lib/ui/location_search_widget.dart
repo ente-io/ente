@@ -30,6 +30,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
         ),
       ),
       hideOnEmpty: true,
+      hideOnLoading: true,
       loadingBuilder: (context) {
         return loadWidget;
       },
