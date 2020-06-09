@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/sign_in_widget.dart';
 import 'package:photos/utils/endpoint_finder.dart';
@@ -21,6 +22,14 @@ class _SetupPageState extends State<SetupPage> {
         _shouldSearchForEndpoint) {
       EndpointFinder.instance.findEndpoint().then((endpoint) {
         if (mounted && endpoint != null) {
+          Fluttertoast.showToast(
+              msg: "Server discovery successful!",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.grey[600],
+              textColor: Colors.white,
+              fontSize: 16.0);
           setState(() {
             Configuration.instance.setEndpoint(endpoint);
           });
@@ -106,7 +115,7 @@ class _SetupPageState extends State<SetupPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           AnimatedSearchIconWidget(),
-          Text("Searching for ente server..."),
+          Text("Searching for Orma server..."),
           CupertinoButton(
             child: Text("Enter manually instead"),
             onPressed: () async {
