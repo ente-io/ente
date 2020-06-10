@@ -59,17 +59,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           _logger.warning("Could not load image: ", e);
           _encounteredErrorLoadingThumbnail = true;
         }).then((data) {
-          if (mounted) {
-            setState(() {
-              if (data != null) {
-                final imageProvider = Image.memory(data).image;
-                precacheImage(imageProvider, context).then((value) {
-                  if (mounted) {
-                    setState(() {
-                      _imageProvider = imageProvider;
-                      _hasLoadedThumbnail = true;
-                    });
-                  }
+          if (data != null && mounted) {
+            final imageProvider = Image.memory(data).image;
+            precacheImage(imageProvider, context).then((value) {
+              if (mounted) {
+                setState(() {
+                  _imageProvider = imageProvider;
+                  _hasLoadedThumbnail = true;
                 });
               }
             });
