@@ -129,12 +129,18 @@ class _GalleryState extends State<Gallery> {
   }
 
   Widget _buildPhoto(BuildContext context, Photo photo) {
+    Widget thumbnail;
+    if (_openedPhoto == null || _openedPhoto == photo) {
+      thumbnail = Hero(tag: photo.hashCode, child: ThumbnailWidget(photo));
+    } else {
+      thumbnail = ThumbnailWidget(photo);
+    }
     return GestureDetector(
       onTap: () {
         if (_selectedPhotos.isNotEmpty) {
           _selectPhoto(photo);
         } else {
-          routeToDetailPage(photo, context);
+          _routeToDetailPage(photo, context);
         }
       },
       onLongPress: () {
@@ -148,9 +154,7 @@ class _GalleryState extends State<Gallery> {
               ? Border.all(width: 4.0, color: Colors.blue)
               : null,
         ),
-        child: photo == _openedPhoto
-            ? Hero(tag: photo.hashCode, child: ThumbnailWidget(photo))
-            : ThumbnailWidget(photo),
+        child: thumbnail,
       ),
     );
   }
@@ -166,7 +170,7 @@ class _GalleryState extends State<Gallery> {
     });
   }
 
-  void routeToDetailPage(Photo photo, BuildContext context) {
+  void _routeToDetailPage(Photo photo, BuildContext context) {
     final page = DetailPage(
       _photos,
       _photos.indexOf(photo),

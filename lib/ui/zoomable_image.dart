@@ -99,6 +99,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         scaleStateChangedCallback: _scaleStateChangedCallback,
         minScale: PhotoViewComputedScale.contained,
         gaplessPlayback: true,
+        heroAttributes: PhotoViewHeroAttributes(tag: widget.photo.hashCode),
       );
     } else {
       return loadWidget;

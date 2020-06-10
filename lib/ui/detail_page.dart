@@ -25,13 +25,18 @@ class _DetailPageState extends State<DetailPage> {
   bool _shouldDisableScroll = false;
   List<Photo> _photos;
   int _selectedIndex = 0;
-  PageController _pageController;
 
   @override
   void initState() {
     _photos = widget.photos;
     _selectedIndex = widget.selectedIndex;
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    Bus.instance.fire(PhotoOpenedEvent(null));
+    super.dispose();
   }
 
   @override
@@ -54,20 +59,16 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget _buildPageView() {
-    _pageController = PageController(initialPage: _selectedIndex);
     return ExtentsPageView.extents(
       itemBuilder: (context, index) {
         final photo = _photos[index];
-        final image = Hero(
-          tag: photo.hashCode,
-          child: ZoomableImage(
-            photo,
-            shouldDisableScroll: (value) {
-              setState(() {
-                _shouldDisableScroll = value;
-              });
-            },
-          ),
+        final image = ZoomableImage(
+          photo,
+          shouldDisableScroll: (value) {
+            setState(() {
+              _shouldDisableScroll = value;
+            });
+          },
         );
         if (index == _selectedIndex) {
           Bus.instance.fire(PhotoOpenedEvent(photo));
@@ -81,7 +82,7 @@ class _DetailPageState extends State<DetailPage> {
       physics: _shouldDisableScroll
           ? NeverScrollableScrollPhysics()
           : PageScrollPhysics(),
-      controller: _pageController,
+      controller: PageController(initialPage: _selectedIndex),
       itemCount: _photos.length,
       extents: 1,
     );
