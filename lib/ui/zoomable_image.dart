@@ -1,3 +1,4 @@
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/cache/image_cache.dart';
@@ -21,7 +22,8 @@ class ZoomableImage extends StatefulWidget {
   _ZoomableImageState createState() => _ZoomableImageState();
 }
 
-class _ZoomableImageState extends State<ZoomableImage> {
+class _ZoomableImageState extends State<ZoomableImage>
+    with SingleTickerProviderStateMixin {
   ImageProvider _imageProvider;
   bool _loadedSmallThumbnail = false;
   bool _loadingLargeThumbnail = false;
@@ -29,6 +31,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
   ValueChanged<PhotoViewScaleState> _scaleStateChangedCallback;
+  // AnimationController _animationController;
+  // Animation _animation;
+  // VoidCallback _animationListener;
+  final doubleTapScales = [1.0, 2.0];
 
   @override
   void initState() {
@@ -37,6 +43,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
         widget.shouldDisableScroll(value != PhotoViewScaleState.initial);
       }
     };
+    // _animationController = AnimationController(
+    //   vsync: this,
+    //   duration: const Duration(milliseconds: 100),
+    // );
     super.initState();
   }
 
@@ -49,12 +59,46 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
 
     if (_imageProvider != null) {
+      // return ExtendedImage(
+      //   image: _imageProvider,
+      //   gaplessPlayback: true,
+      //   mode: ExtendedImageMode.gesture,
+      //   enableSlideOutPage: true,
+      //   initGestureConfigHandler: (state) {
+      //     return GestureConfig(
+      //       inPageView: true,
+      //       initialScale: 1.0,
+      //       minScale: 1.0,
+      //     );
+      //   },
+      //   onDoubleTap: (ExtendedImageGestureState state) {
+      //     var pointerDownPosition = state.pointerDownPosition;
+      //     double begin = state.gestureDetails.totalScale;
+      //     double end;
+      //     _animation?.removeListener(_animationListener);
+      //     _animationController.stop();
+      //     _animationController.reset();
+      //     if (begin == doubleTapScales[0]) {
+      //       end = doubleTapScales[1];
+      //     } else {
+      //       end = doubleTapScales[0];
+      //     }
+      //     _animationListener = () {
+      //       state.handleDoubleTap(
+      //           scale: _animation.value,
+      //           doubleTapPosition: pointerDownPosition);
+      //     };
+      //     _animation =
+      //         _animationController.drive(Tween<double>(begin: begin, end: end));
+      //     _animation.addListener(_animationListener);
+      //     _animationController.forward();
+      //   },
+      // );
       return PhotoView(
         imageProvider: _imageProvider,
         scaleStateChangedCallback: _scaleStateChangedCallback,
         minScale: PhotoViewComputedScale.contained,
         gaplessPlayback: true,
-        heroAttributes: PhotoViewHeroAttributes(tag: widget.photo.hashCode),
       );
     } else {
       return loadWidget;

@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/photo_opened_event.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/photo_sync_manager.dart';
 import 'package:photos/ui/detail_page.dart';
@@ -32,6 +35,24 @@ class _GalleryState extends State<Gallery> {
   List<Photo> _photos;
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+  StreamSubscription<PhotoOpenedEvent> _subscription;
+  Photo _openedPhoto;
+
+  @override
+  void initState() {
+    _subscription = Bus.instance.on<PhotoOpenedEvent>().listen((event) {
+      setState(() {
+        _openedPhoto = event.photo;
+      });
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,10 +148,9 @@ class _GalleryState extends State<Gallery> {
               ? Border.all(width: 4.0, color: Colors.blue)
               : null,
         ),
-        child: Hero(
-          tag: photo.hashCode,
-          child: ThumbnailWidget(photo),
-        ),
+        child: photo == _openedPhoto
+            ? Hero(tag: photo.hashCode, child: ThumbnailWidget(photo))
+            : ThumbnailWidget(photo),
       ),
     );
   }

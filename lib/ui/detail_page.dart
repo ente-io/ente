@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/photo_opened_event.dart';
 import 'package:photos/favorite_photos_repository.dart';
 import 'package:photos/models/photo.dart';
+import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:logging/logging.dart';
@@ -52,29 +55,35 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget _buildPageView() {
     _pageController = PageController(initialPage: _selectedIndex);
-    return PageView.builder(
+    return ExtentsPageView.extents(
       itemBuilder: (context, index) {
         final photo = _photos[index];
-        final image = ZoomableImage(
-          photo,
-          shouldDisableScroll: (value) {
-            setState(() {
-              _shouldDisableScroll = value;
-            });
-          },
+        final image = Hero(
+          tag: photo.hashCode,
+          child: ZoomableImage(
+            photo,
+            shouldDisableScroll: (value) {
+              setState(() {
+                _shouldDisableScroll = value;
+              });
+            },
+          ),
         );
+        if (index == _selectedIndex) {
+          Bus.instance.fire(PhotoOpenedEvent(photo));
+        }
         return image;
       },
       onPageChanged: (int index) {
-        setState(() {
-          _selectedIndex = index;
-        });
+        _selectedIndex = index;
+        Bus.instance.fire(PhotoOpenedEvent(widget.photos[index]));
       },
       physics: _shouldDisableScroll
           ? NeverScrollableScrollPhysics()
           : PageScrollPhysics(),
       controller: _pageController,
       itemCount: _photos.length,
+      extents: 1,
     );
   }
 

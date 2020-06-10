@@ -50,6 +50,7 @@ dependencies:
   flutter_typeahead: ^1.8.1
   pull_to_refresh: ^1.5.7
   fluttertoast: ^4.0.1
+  extended_image: ^0.9.0
 
 dev_dependencies:
   flutter_test:
