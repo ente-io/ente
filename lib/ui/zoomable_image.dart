@@ -168,7 +168,7 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _onLargeThumbnailLoaded(
       ImageProvider imageProvider, BuildContext context) {
-    if (!_loadedFinalImage) {
+    if (mounted && !_loadedFinalImage) {
       precacheImage(imageProvider, context).then((value) {
         if (mounted) {
           setState(() {
