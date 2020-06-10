@@ -24,7 +24,9 @@ class ZoomableImage extends StatefulWidget {
 class _ZoomableImageState extends State<ZoomableImage> {
   ImageProvider _imageProvider;
   bool _loadedSmallThumbnail = false;
+  bool _loadingLargeThumbnail = false;
   bool _loadedLargeThumbnail = false;
+  bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
   ValueChanged<PhotoViewScaleState> _scaleStateChangedCallback;
 
@@ -83,7 +85,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
       }
     }
 
-    if (!_loadedLargeThumbnail && !_loadedFinalImage) {
+    if (!_loadingLargeThumbnail &&
+        !_loadedLargeThumbnail &&
+        !_loadedFinalImage) {
+      _loadingLargeThumbnail = true;
       final cachedThumbnail =
           ThumbnailLruCache.get(widget.photo, THUMBNAIL_LARGE_SIZE);
       if (cachedThumbnail != null) {
@@ -99,7 +104,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
       }
     }
 
-    if (!_loadedFinalImage) {
+    if (!_loadingFinalImage && !_loadedFinalImage) {
+      _loadingFinalImage = true;
       final cachedFile = ImageLruCache.get(widget.photo);
       if (cachedFile != null) {
         final imageProvider = Image.file(cachedFile).image;
@@ -107,11 +113,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
       } else {
         widget.photo.getAsset().file.then((file) {
           if (mounted) {
-            setState(() {
-              final imageProvider = Image.file(file).image;
-              _onFinalImageLoaded(imageProvider, context);
-              ImageLruCache.put(widget.photo, file);
-            });
+            final imageProvider = Image.file(file).image;
+            _onFinalImageLoaded(imageProvider, context);
+            ImageLruCache.put(widget.photo, file);
           }
         });
       }
@@ -120,14 +124,16 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   void _onLargeThumbnailLoaded(
       ImageProvider imageProvider, BuildContext context) {
-    precacheImage(imageProvider, context).then((value) {
-      if (mounted) {
-        setState(() {
-          _imageProvider = imageProvider;
-          _loadedLargeThumbnail = true;
-        });
-      }
-    });
+    if (!_loadedFinalImage) {
+      precacheImage(imageProvider, context).then((value) {
+        if (mounted) {
+          setState(() {
+            _imageProvider = imageProvider;
+            _loadedLargeThumbnail = true;
+          });
+        }
+      });
+    }
   }
 
   void _onFinalImageLoaded(ImageProvider imageProvider, BuildContext context) {
