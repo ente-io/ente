@@ -201,14 +201,15 @@ class PhotoSyncManager {
   }
 
   Future<Photo> _uploadFile(Photo localPhoto) async {
+    var title = extension(localPhoto.title) == ".HEIC"
+        ? basenameWithoutExtension(localPhoto.title) + ".JPG"
+        : localPhoto.title;
     var formData = FormData.fromMap({
       "file": MultipartFile.fromBytes((await localPhoto.getBytes()),
-          filename: localPhoto.title),
+          filename: title),
       "deviceFileID": localPhoto.localId,
       "deviceFolder": localPhoto.deviceFolder,
-      "title": extension(localPhoto.title) == ".HEIC"
-          ? basenameWithoutExtension(localPhoto.title) + ".JPG"
-          : localPhoto.title,
+      "title": title,
       "createTimestamp": localPhoto.createTimestamp,
     });
     return _dio
