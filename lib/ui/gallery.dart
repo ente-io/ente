@@ -34,7 +34,7 @@ class _GalleryState extends State<Gallery> {
   Set<Photo> _selectedPhotos = HashSet<Photo>();
   List<Photo> _photos;
   RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+      RefreshController(initialRefresh: true);
   StreamSubscription<PhotoOpenedEvent> _subscription;
   Photo _openedPhoto;
 
