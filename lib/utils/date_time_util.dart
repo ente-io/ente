@@ -34,3 +34,33 @@ String getDayAndMonth(DateTime dateTime) {
       " " +
       dateTime.day.toString();
 }
+
+String getDay(DateTime dateTime) {
+  return _days[dateTime.weekday];
+}
+
+String getMonth(DateTime dateTime) {
+  return _months[dateTime.month];
+}
+
+String getTime(DateTime dateTime) {
+  final hours = dateTime.hour > 9
+      ? dateTime.hour.toString()
+      : "0" + dateTime.hour.toString();
+  final minutes = dateTime.minute > 9
+      ? dateTime.minute.toString()
+      : "0" + dateTime.minute.toString();
+  return hours + ":" + minutes;
+}
+
+String getFormattedTime(DateTime dateTime) {
+  return getDay(dateTime) +
+      ", " +
+      getMonth(dateTime) +
+      " " +
+      dateTime.day.toString() +
+      ", " +
+      dateTime.year.toString() +
+      " - " +
+      getTime(dateTime);
+}

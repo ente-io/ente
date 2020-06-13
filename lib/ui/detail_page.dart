@@ -7,6 +7,7 @@ import 'package:photos/favorite_photos_repository.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/zoomable_image.dart';
+import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:logging/logging.dart';
 
@@ -93,10 +94,41 @@ class _DetailPageState extends State<DetailPage> {
     if (_photos[_selectedIndex].localId != null) {
       actions.add(_getFavoriteButton());
     }
-    actions.add(IconButton(
-      icon: Icon(Icons.share),
-      onPressed: () async {
-        share(_photos[_selectedIndex]);
+    actions.add(PopupMenuButton(
+      itemBuilder: (context) {
+        return [
+          PopupMenuItem(
+            value: 1,
+            child: Row(
+              children: [
+                Icon(Icons.share),
+                Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text("Share"),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 2,
+            child: Row(
+              children: [
+                Icon(Icons.info),
+                Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text("Info"),
+              ],
+            ),
+          )
+        ];
+      },
+      onSelected: (value) {
+        if (value == 1) {
+          share(_photos[_selectedIndex]);
+        } else if (value == 2) {
+          _displayInfo(_photos[_selectedIndex]);
+        }
       },
     ));
     return AppBar(
@@ -110,6 +142,58 @@ class _DetailPageState extends State<DetailPage> {
       isLiked: FavoritePhotosRepository.instance.isLiked(photo),
       onTap: (oldValue) {
         return FavoritePhotosRepository.instance.setLiked(photo, !oldValue);
+      },
+    );
+  }
+
+  Future<void> _displayInfo(Photo photo) async {
+    final asset = await photo.getAsset();
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(photo.title),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Row(
+                  children: [
+                    Icon(Icons.timer),
+                    Padding(padding: EdgeInsets.all(4)),
+                    Text(getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(
+                        photo.createTimestamp))),
+                  ],
+                ),
+                Padding(padding: EdgeInsets.all(4)),
+                Row(
+                  children: [
+                    Icon(Icons.folder),
+                    Padding(padding: EdgeInsets.all(4)),
+                    Text(photo.deviceFolder),
+                  ],
+                ),
+                Padding(padding: EdgeInsets.all(4)),
+                Row(
+                  children: [
+                    Icon(Icons.photo_size_select_actual),
+                    Padding(padding: EdgeInsets.all(4)),
+                    Text(asset.width.toString() +
+                        " x " +
+                        asset.height.toString()),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
       },
     );
   }
