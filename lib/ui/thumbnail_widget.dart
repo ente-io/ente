@@ -52,25 +52,26 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
       } else {
-        widget.photo
-            .getAsset()
-            .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
-            .catchError((e) {
+        widget.photo.getAsset().then((asset) {
+          asset
+              .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
+              .then((data) {
+            if (data != null && mounted) {
+              final imageProvider = Image.memory(data).image;
+              precacheImage(imageProvider, context).then((value) {
+                if (mounted) {
+                  setState(() {
+                    _imageProvider = imageProvider;
+                    _hasLoadedThumbnail = true;
+                  });
+                }
+              });
+            }
+            ThumbnailLruCache.put(widget.photo, THUMBNAIL_SMALL_SIZE, data);
+          });
+        }).catchError((e) {
           _logger.warning("Could not load image: ", e);
           _encounteredErrorLoadingThumbnail = true;
-        }).then((data) {
-          if (data != null && mounted) {
-            final imageProvider = Image.memory(data).image;
-            precacheImage(imageProvider, context).then((value) {
-              if (mounted) {
-                setState(() {
-                  _imageProvider = imageProvider;
-                  _hasLoadedThumbnail = true;
-                });
-              }
-            });
-          }
-          ThumbnailLruCache.put(widget.photo, THUMBNAIL_SMALL_SIZE, data);
         });
       }
     }

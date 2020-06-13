@@ -139,12 +139,13 @@ class _ZoomableImageState extends State<ZoomableImage>
       if (cachedThumbnail != null) {
         _onLargeThumbnailLoaded(Image.memory(cachedThumbnail).image, context);
       } else {
-        widget.photo
-            .getAsset()
-            .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE)
-            .then((data) {
-          _onLargeThumbnailLoaded(Image.memory(data).image, context);
-          ThumbnailLruCache.put(widget.photo, THUMBNAIL_LARGE_SIZE, data);
+        widget.photo.getAsset().then((asset) {
+          asset
+              .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE)
+              .then((data) {
+            _onLargeThumbnailLoaded(Image.memory(data).image, context);
+            ThumbnailLruCache.put(widget.photo, THUMBNAIL_LARGE_SIZE, data);
+          });
         });
       }
     }
@@ -156,12 +157,14 @@ class _ZoomableImageState extends State<ZoomableImage>
         final imageProvider = Image.file(cachedFile).image;
         _onFinalImageLoaded(imageProvider, context);
       } else {
-        widget.photo.getAsset().file.then((file) {
-          if (mounted) {
-            final imageProvider = Image.file(file).image;
-            _onFinalImageLoaded(imageProvider, context);
-            ImageLruCache.put(widget.photo, file);
-          }
+        widget.photo.getAsset().then((asset) {
+          asset.file.then((file) {
+            if (mounted) {
+              final imageProvider = Image.file(file).image;
+              _onFinalImageLoaded(imageProvider, context);
+              ImageLruCache.put(widget.photo, file);
+            }
+          });
         });
       }
     }

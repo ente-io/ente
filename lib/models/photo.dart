@@ -57,11 +57,11 @@ class Photo {
     return photo;
   }
 
-  AssetEntity getAsset() {
-    return AssetEntity(id: localId);
+  Future<AssetEntity> getAsset() {
+    return AssetEntity.fromId(localId);
   }
 
-  Future<Uint8List> getBytes({int quality = 100}) {
+  Future<Uint8List> getBytes({int quality = 100}) async {
     if (localId == null) {
       return HttpClient().getUrl(Uri.parse(getRemoteUrl())).then((request) {
         return request.close().then((response) {
@@ -69,7 +69,7 @@ class Photo {
         });
       });
     } else {
-      final originalBytes = getAsset().originBytes;
+      final originalBytes = (await getAsset()).originBytes;
       if (extension(title) == ".HEIC" || quality != 100) {
         return originalBytes.then((bytes) {
           return FlutterImageCompress.compressWithList(bytes, quality: quality)
