@@ -46,13 +46,15 @@ class PhotoSyncManager {
     _logger.info("Syncing...");
 
     final prefs = await SharedPreferences.getInstance();
+    final syncStartTimestamp = DateTime.now().microsecondsSinceEpoch;
     var lastDBUpdateTimestamp = prefs.getInt(_lastDBUpdateTimestampKey);
     if (lastDBUpdateTimestamp == null) {
       lastDBUpdateTimestamp = 0;
       await _initializeDirectories();
     }
 
-    await PhotoProvider.instance.refreshGalleryList();
+    await PhotoProvider.instance
+        .refreshGalleryList(lastDBUpdateTimestamp, syncStartTimestamp);
     final pathEntities = PhotoProvider.instance.list;
     final photos = List<Photo>();
     AssetPathEntity recents;
@@ -73,7 +75,8 @@ class PhotoSyncManager {
     } else {
       photos.sort((first, second) =>
           first.createTimestamp.compareTo(second.createTimestamp));
-      _updateDatabase(photos, prefs, lastDBUpdateTimestamp).then((_) {
+      _updateDatabase(photos, prefs, lastDBUpdateTimestamp, syncStartTimestamp)
+          .then((_) {
         _isSyncInProgress = false;
         _syncWithRemote(prefs);
       });
@@ -112,16 +115,18 @@ class PhotoSyncManager {
     });
   }
 
-  Future<bool> _updateDatabase(final List<Photo> photos,
-      SharedPreferences prefs, int lastDBUpdateTimestamp) async {
+  Future<bool> _updateDatabase(
+      final List<Photo> photos,
+      SharedPreferences prefs,
+      int lastDBUpdateTimestamp,
+      int syncStartTimestamp) async {
     var photosToBeAdded = List<Photo>();
     for (Photo photo in photos) {
       if (photo.createTimestamp > lastDBUpdateTimestamp) {
         photosToBeAdded.add(photo);
       }
     }
-    return await _insertPhotosToDB(
-        photosToBeAdded, prefs, DateTime.now().microsecondsSinceEpoch);
+    return await _insertPhotosToDB(photosToBeAdded, prefs, syncStartTimestamp);
   }
 
   Future<void> _downloadDiff(SharedPreferences prefs) async {

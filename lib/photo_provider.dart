@@ -6,13 +6,18 @@ class PhotoProvider {
 
   List<AssetPathEntity> list = [];
 
-  Future<void> refreshGalleryList() async {
+  Future<void> refreshGalleryList(
+      final int fromTimestamp, final int toTimestamp) async {
     var result = await PhotoManager.requestPermission();
     if (!result) {
       print("Did not get permission");
     }
     final filterOptionGroup = FilterOptionGroup();
     filterOptionGroup.setOption(AssetType.image, FilterOption(needTitle: true));
+    filterOptionGroup.dateTimeCond = DateTimeCond(
+      min: DateTime.fromMicrosecondsSinceEpoch(fromTimestamp),
+      max: DateTime.fromMicrosecondsSinceEpoch(toTimestamp),
+    );
     var galleryList = await PhotoManager.getAssetPathList(
       hasAll: true,
       type: RequestType.image,
