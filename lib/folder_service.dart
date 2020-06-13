@@ -85,7 +85,7 @@ class FolderSharingService {
         return photo;
       }).toList();
     } else {
-      return null;
+      return List<Photo>();
     }
   }
 
