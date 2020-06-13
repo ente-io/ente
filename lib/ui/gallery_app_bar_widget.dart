@@ -82,7 +82,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           _openSyncConfiguration(context);
         },
       ));
-    } else if (widget.type == GalleryAppBarType.local_folder) {
+    } else if (widget.type == GalleryAppBarType.local_folder &&
+        widget.title != "Favorites") {
       actions.add(IconButton(
         icon: Icon(Icons.person_add),
         onPressed: () {
