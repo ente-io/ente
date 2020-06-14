@@ -99,7 +99,9 @@ class _ZoomableImageState extends State<ZoomableImage>
         scaleStateChangedCallback: _scaleStateChangedCallback,
         minScale: PhotoViewComputedScale.contained,
         gaplessPlayback: true,
-        heroAttributes: PhotoViewHeroAttributes(tag: widget.photo.hashCode),
+        heroAttributes: PhotoViewHeroAttributes(
+            tag: widget.photo.localId ??
+                "uploaded_" + widget.photo.uploadedFileId.toString()),
       );
     } else {
       return loadWidget;
@@ -185,13 +187,15 @@ class _ZoomableImageState extends State<ZoomableImage>
   }
 
   void _onFinalImageLoaded(ImageProvider imageProvider, BuildContext context) {
-    precacheImage(imageProvider, context).then((value) {
-      if (mounted) {
-        setState(() {
-          _imageProvider = imageProvider;
-          _loadedFinalImage = true;
-        });
-      }
-    });
+    if (mounted) {
+      precacheImage(imageProvider, context).then((value) {
+        if (mounted) {
+          setState(() {
+            _imageProvider = imageProvider;
+            _loadedFinalImage = true;
+          });
+        }
+      });
+    }
   }
 }
