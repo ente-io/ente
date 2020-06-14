@@ -149,6 +149,20 @@ class PhotoDB {
     }
   }
 
+  Future<Photo> getMatchingRemotePhoto(int uploadedFileId) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      where: '$columnUploadedFileId=?',
+      whereArgs: [uploadedFileId],
+    );
+    if (rows.isNotEmpty) {
+      return _getPhotoFromRow(rows[0]);
+    } else {
+      throw ("No matching photo found");
+    }
+  }
+
   Future<int> updatePhoto(
       int generatedId, int uploadedId, String remotePath, int updateTimestamp,
       [String thumbnailPath]) async {

@@ -57,9 +57,22 @@ class FolderSharingService {
     } catch (e) {
       // Folder has never been synced
     }
-    var photos = await getDiff(folder.id, lastSyncTimestamp, _diffLimit);
-    await PhotoDB.instance.insertPhotos(photos);
-    if (photos.length == _diffLimit) {
+    var diff = await getDiff(folder.id, lastSyncTimestamp, _diffLimit);
+    for (Photo photo in diff) {
+      try {
+        var existingPhoto =
+            await PhotoDB.instance.getMatchingRemotePhoto(photo.uploadedFileId);
+        await PhotoDB.instance.updatePhoto(
+            existingPhoto.generatedId,
+            photo.uploadedFileId,
+            photo.remotePath,
+            photo.updateTimestamp,
+            photo.thumbnailPath);
+      } catch (e) {
+        await PhotoDB.instance.insertPhoto(photo);
+      }
+    }
+    if (diff.length == _diffLimit) {
       await syncDiff(folder);
     }
   }
