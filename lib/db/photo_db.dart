@@ -57,12 +57,12 @@ class PhotoDB {
           CREATE TABLE $table (
             $columnGeneratedId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             $columnLocalId TEXT,
-            $columnUploadedFileId INTEGER NOT NULL,
+            $columnUploadedFileId INTEGER,
             $columnTitle TEXT NOT NULL,
             $columnDeviceFolder TEXT NOT NULL,
             $columnLatitude REAL,
             $columnLongitude REAL,
-            $columnRemoteFolderId INTEGER DEFAULT -1,
+            $columnRemoteFolderId INTEGER,
             $columnRemotePath TEXT,
             $columnThumbnailPath TEXT,
             $columnIsDeleted INTEGER DEFAULT 0,
@@ -127,7 +127,7 @@ class PhotoDB {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where: '$columnUploadedFileId = -1',
+      where: '$columnUploadedFileId IS NULL',
       orderBy: '$columnCreateTimestamp DESC',
     );
     return _convertToPhotos(results);
@@ -315,8 +315,7 @@ class PhotoDB {
   Map<String, dynamic> _getRowForPhoto(Photo photo) {
     var row = new Map<String, dynamic>();
     row[columnLocalId] = photo.localId;
-    row[columnUploadedFileId] =
-        photo.uploadedFileId == null ? -1 : photo.uploadedFileId;
+    row[columnUploadedFileId] = photo.uploadedFileId;
     row[columnTitle] = photo.title;
     row[columnDeviceFolder] = photo.deviceFolder;
     if (photo.location != null) {
