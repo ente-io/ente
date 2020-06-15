@@ -58,6 +58,11 @@ class PhotoSyncManager {
     return _existingSync;
   }
 
+  Future<bool> hasScannedDisk() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey(_lastDBUpdateTimestampKey);
+  }
+
   Future<void> _doSync() async {
     final prefs = await SharedPreferences.getInstance();
     final syncStartTimestamp = DateTime.now().microsecondsSinceEpoch;

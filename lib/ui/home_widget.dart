@@ -13,6 +13,7 @@ import 'package:photos/photo_sync_manager.dart';
 import 'package:photos/ui/device_folders_gallery_widget.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
+import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/remote_folder_gallery_widget.dart';
 import 'package:photos/ui/search_page.dart';
@@ -32,11 +33,14 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static final importantItemsFilter = ImportantItemsFilter();
   final _logger = Logger("HomeWidgetState");
+  final _remoteFolderGalleryWidget = RemoteFolderGalleryWidget();
+  final _deviceFolderGalleryWidget = DeviceFolderGalleryWidget();
+
   ShakeDetector _detector;
   int _selectedNavBarItem = 0;
   Set<Photo> _selectedPhotos = HashSet<Photo>();
-  final _deviceFolderGalleryWidget = DeviceFolderGalleryWidget();
-  final _remoteFolderGalleryWidget = RemoteFolderGalleryWidget();
+  StreamSubscription<LocalPhotosUpdatedEvent>
+      _localPhotosUpdatedEventSubscription;
 
   @override
   void initState() {
@@ -46,6 +50,10 @@ class _HomeWidgetState extends State<HomeWidget> {
           _logger.info("Emailing logs");
           LoggingUtil.instance.emailLogs();
         });
+    _localPhotosUpdatedEventSubscription =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      setState(() {});
+    });
     super.initState();
   }
 
@@ -61,19 +69,19 @@ class _HomeWidgetState extends State<HomeWidget> {
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
       body: FutureBuilder<bool>(
-        future: PhotoRepository.instance.loadPhotos(),
+        future: PhotoSyncManager.instance.hasScannedDisk(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return IndexedStack(
               children: <Widget>[
-                _getMainGalleryWidget(),
+                snapshot.data ? _getMainGalleryWidget() : LoadingPhotosWidget(),
                 _deviceFolderGalleryWidget,
                 _remoteFolderGalleryWidget,
               ],
               index: _selectedNavBarItem,
             );
           } else if (snapshot.hasError) {
-            return Text("Error!");
+            return Center(child: Text(snapshot.error.toString()));
           } else {
             return loadWidget;
           }
@@ -100,19 +108,31 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  Gallery _getMainGalleryWidget() {
-    return Gallery(
-      () => Future.value(_getFilteredPhotos(PhotoRepository.instance.photos)),
-      selectedPhotos: _selectedPhotos,
-      photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
-        setState(() {
-          _selectedPhotos = selectedPhotos;
-        });
+  Widget _getMainGalleryWidget() {
+    return FutureBuilder<bool>(
+      future: PhotoRepository.instance.loadPhotos(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Gallery(
+            () => Future.value(
+                _getFilteredPhotos(PhotoRepository.instance.photos)),
+            selectedPhotos: _selectedPhotos,
+            photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
+              setState(() {
+                _selectedPhotos = selectedPhotos;
+              });
+            },
+            syncFunction: () {
+              return PhotoSyncManager.instance.sync();
+            },
+            reloadTrigger: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+          );
+        } else if (snapshot.hasError) {
+          return Center(child: Text(snapshot.error.toString()));
+        } else {
+          return loadWidget;
+        }
       },
-      syncFunction: () {
-        return PhotoSyncManager.instance.sync();
-      },
-      reloadTrigger: Bus.instance.on<LocalPhotosUpdatedEvent>(),
     );
   }
 
@@ -161,6 +181,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void dispose() {
     _detector.stopListening();
+    _localPhotosUpdatedEventSubscription.cancel();
     super.dispose();
   }
 }
