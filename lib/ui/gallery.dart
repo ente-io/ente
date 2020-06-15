@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/photo_opened_event.dart';
 import 'package:photos/models/photo.dart';
-import 'package:photos/photo_sync_manager.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -17,10 +16,10 @@ class Gallery extends StatefulWidget {
   final List<Photo> photos;
   final Set<Photo> selectedPhotos;
   final Function(Set<Photo>) photoSelectionChangeCallback;
-  final bool enablePullToSync;
+  final Future<void> Function() syncFunction;
 
   Gallery(this.photos, this.selectedPhotos,
-      {this.photoSelectionChangeCallback, this.enablePullToSync = false});
+      {this.photoSelectionChangeCallback, this.syncFunction});
 
   @override
   _GalleryState createState() {
@@ -33,8 +32,7 @@ class _GalleryState extends State<Gallery> {
   final List<List<Photo>> _collatedPhotos = List<List<Photo>>();
   Set<Photo> _selectedPhotos = HashSet<Photo>();
   List<Photo> _photos;
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: true);
+  RefreshController _refreshController = RefreshController();
   StreamSubscription<PhotoOpenedEvent> _subscription;
   Photo _openedPhoto;
 
@@ -66,10 +64,9 @@ class _GalleryState extends State<Gallery> {
       controller: _scrollController,
       cacheExtent: 1000,
     );
-    if (widget.enablePullToSync) {
+    if (widget.syncFunction != null) {
       return SmartRefresher(
         controller: _refreshController,
-        enablePullUp: true,
         child: list,
         header: ClassicHeader(
           idleText: "Pull down to sync.",
@@ -78,8 +75,8 @@ class _GalleryState extends State<Gallery> {
           completeText: "Sync completed.",
           failedText: "Sync unsuccessful.",
         ),
-        onRefresh: () async {
-          PhotoSyncManager.instance.sync().then((value) {
+        onRefresh: () {
+          widget.syncFunction().then((value) {
             _refreshController.refreshCompleted();
           }).catchError((e) {
             _refreshController.refreshFailed();

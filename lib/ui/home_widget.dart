@@ -9,6 +9,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/photo_repository.dart';
+import 'package:photos/photo_sync_manager.dart';
 import 'package:photos/ui/device_folders_gallery_widget.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
@@ -112,7 +113,9 @@ class _HomeWidgetState extends State<HomeWidget> {
           _selectedPhotos = selectedPhotos;
         });
       },
-      enablePullToSync: true,
+      syncFunction: () {
+        return PhotoSyncManager.instance.sync();
+      },
     );
   }
 
