@@ -28,8 +28,7 @@ void _main() async {
 
   await Configuration.instance.init();
   FavoritePhotosRepository.instance.init();
-  PhotoSyncManager.instance.sync();
-  FolderSharingService.instance.sync();
+  _sync();
 
   final SentryClient sentry = new SentryClient(dsn: SENTRY_DSN);
 
@@ -43,6 +42,15 @@ void _main() async {
     onError: (Object error, StackTrace stackTrace) =>
         _sendErrorToSentry(sentry, error, stackTrace),
   );
+}
+
+void _sync() async {
+  try {
+    await PhotoSyncManager.instance.sync();
+    await FolderSharingService.instance.sync();
+  } catch (e) {
+    logger.warning(e);
+  }
 }
 
 void _sendErrorToSentry(SentryClient sentry, Object error, StackTrace stack) {
@@ -75,8 +83,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      PhotoSyncManager.instance.sync();
-      FolderSharingService.instance.sync();
+      _sync();
     }
   }
 }
