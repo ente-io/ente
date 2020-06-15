@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/event.dart';
 import 'package:photos/events/photo_opened_event.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/detail_page.dart';
@@ -19,12 +20,14 @@ class Gallery extends StatefulWidget {
   final Set<Photo> selectedPhotos;
   final Function(Set<Photo>) photoSelectionChangeCallback;
   final Future<void> Function() syncFunction;
+  final Stream<Event> reloadTrigger;
 
   Gallery(
     this.loadFunction, {
     this.selectedPhotos,
     this.photoSelectionChangeCallback,
     this.syncFunction,
+    this.reloadTrigger,
   });
 
   @override
@@ -52,6 +55,11 @@ class _GalleryState extends State<Gallery> {
         Bus.instance.on<PhotoOpenedEvent>().listen((event) {
       setState(() {
         _openedPhoto = event.photo;
+      });
+    });
+    widget.reloadTrigger.listen((event) {
+      setState(() {
+        _requiresLoad = true;
       });
     });
     super.initState();

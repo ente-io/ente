@@ -35,15 +35,11 @@ class _HomeWidgetState extends State<HomeWidget> {
   ShakeDetector _detector;
   int _selectedNavBarItem = 0;
   Set<Photo> _selectedPhotos = HashSet<Photo>();
-  StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
   final _deviceFolderGalleryWidget = DeviceFolderGalleryWidget();
   final _remoteFolderGalleryWidget = RemoteFolderGalleryWidget();
 
   @override
   void initState() {
-    _subscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      setState(() {});
-    });
     _detector = ShakeDetector.autoStart(
         shakeThresholdGravity: 3,
         onPhoneShake: () {
@@ -116,6 +112,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       syncFunction: () {
         return PhotoSyncManager.instance.sync();
       },
+      reloadTrigger: Bus.instance.on<LocalPhotosUpdatedEvent>(),
     );
   }
 
@@ -164,7 +161,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void dispose() {
     _detector.stopListening();
-    _subscription.cancel();
     super.dispose();
   }
 }
