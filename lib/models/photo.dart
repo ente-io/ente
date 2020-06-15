@@ -35,7 +35,6 @@ class Photo {
   static Future<Photo> fromAsset(
       AssetPathEntity pathEntity, AssetEntity asset) async {
     Photo photo = Photo();
-    photo.uploadedFileId = -1;
     photo.localId = asset.id;
     photo.title = asset.title;
     photo.deviceFolder = pathEntity.name;
