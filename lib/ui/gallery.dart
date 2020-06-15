@@ -35,6 +35,9 @@ class Gallery extends StatefulWidget {
 class _GalleryState extends State<Gallery> {
   final ScrollController _scrollController = ScrollController();
   final List<List<Photo>> _collatedPhotos = List<List<Photo>>();
+
+  bool _requiresLoad = false;
+  AsyncSnapshot<List<Photo>> _lastSnapshot;
   Set<Photo> _selectedPhotos = HashSet<Photo>();
   List<Photo> _photos;
   RefreshController _refreshController = RefreshController();
@@ -43,6 +46,7 @@ class _GalleryState extends State<Gallery> {
 
   @override
   void initState() {
+    _requiresLoad = true;
     _subscription = Bus.instance.on<PhotoOpenedEvent>().listen((event) {
       setState(() {
         _openedPhoto = event.photo;
@@ -59,26 +63,34 @@ class _GalleryState extends State<Gallery> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Investigate reason for multiple rebuilds on selection change
+    if (!_requiresLoad) {
+      return _onSnapshotAvailable(_lastSnapshot);
+    }
     return FutureBuilder<List<Photo>>(
       future: widget.loadFunction(),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return _onDataLoaded(snapshot);
-        } else if (snapshot.hasError) {
-          return Center(child: Text(snapshot.error.toString()));
-        } else {
-          return Center(child: loadWidget);
-        }
+        _requiresLoad = false;
+        _lastSnapshot = snapshot;
+        return _onSnapshotAvailable(snapshot);
       },
     );
   }
 
-  Widget _onDataLoaded(AsyncSnapshot<List<Photo>> snapshot) {
-    if (snapshot.data.isEmpty) {
+  Widget _onSnapshotAvailable(AsyncSnapshot<List<Photo>> snapshot) {
+    if (snapshot.hasData) {
+      return _onDataLoaded(snapshot.data);
+    } else if (snapshot.hasError) {
+      return Center(child: Text(snapshot.error.toString()));
+    } else {
+      return Center(child: loadWidget);
+    }
+  }
+
+  Widget _onDataLoaded(List<Photo> photos) {
+    _photos = photos;
+    if (_photos.isEmpty) {
       return Center(child: Text("Nothing to see here."));
     }
-    _photos = snapshot.data;
     _selectedPhotos = widget.selectedPhotos ?? Set<Photo>();
     _collatePhotos();
     final list = ListView.builder(
@@ -101,7 +113,9 @@ class _GalleryState extends State<Gallery> {
         onRefresh: () {
           widget.syncFunction().then((_) {
             _refreshController.refreshCompleted();
-            widget.loadFunction().then((_) => setState(() {}));
+            widget.loadFunction().then((_) => setState(() {
+                  _requiresLoad = true;
+                }));
           }).catchError((e) {
             _refreshController.refreshFailed();
           });
