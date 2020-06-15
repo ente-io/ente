@@ -100,8 +100,8 @@ class _ZoomableImageState extends State<ZoomableImage>
         minScale: PhotoViewComputedScale.contained,
         gaplessPlayback: true,
         heroAttributes: PhotoViewHeroAttributes(
-            tag: widget.photo.localId ??
-                "uploaded_" + widget.photo.uploadedFileId.toString()),
+          tag: widget.photo.generatedId.toString(),
+        ),
       );
     } else {
       return loadWidget;

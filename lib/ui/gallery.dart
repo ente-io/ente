@@ -130,7 +130,10 @@ class _GalleryState extends State<Gallery> {
   Widget _buildPhoto(BuildContext context, Photo photo) {
     Widget thumbnail;
     if (_openedPhoto == null || _openedPhoto == photo) {
-      thumbnail = Hero(tag: photo.hashCode, child: ThumbnailWidget(photo));
+      thumbnail = Hero(
+        tag: photo.generatedId.toString(),
+        child: ThumbnailWidget(photo),
+      );
     } else {
       thumbnail = ThumbnailWidget(photo);
     }
