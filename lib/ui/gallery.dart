@@ -59,7 +59,6 @@ class _GalleryState extends State<Gallery> {
     // TODO: Investigate reason for multiple rebuilds on selection change
     _photos = widget.photos;
     _selectedPhotos = widget.selectedPhotos;
-    _deduplicatePhotos();
     _collatePhotos();
     final list = ListView.builder(
       itemCount: _collatedPhotos.length,
@@ -182,16 +181,6 @@ class _GalleryState extends State<Gallery> {
         },
       ),
     );
-  }
-
-  void _deduplicatePhotos() {
-    for (int index = 1; index < _photos.length; index++) {
-      final current = _photos[index], previous = _photos[index - 1];
-      if (current.localId != null && current.localId == previous.localId) {
-        _photos.removeAt(index);
-        index--;
-      }
-    }
   }
 
   void _collatePhotos() {
