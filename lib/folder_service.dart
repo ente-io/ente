@@ -41,8 +41,10 @@ class FolderSharingService {
         }
       }
       for (final folder in folders) {
-        await syncDiff(folder);
-        await FolderDB.instance.putFolder(folder);
+        if (folder.owner != Configuration.instance.getUsername()) {
+          await syncDiff(folder);
+          await FolderDB.instance.putFolder(folder);
+        }
       }
       Bus.instance.fire(RemoteSyncEvent(true));
     });
