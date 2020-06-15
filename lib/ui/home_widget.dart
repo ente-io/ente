@@ -106,8 +106,8 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Gallery _getMainGalleryWidget() {
     return Gallery(
-      _getFilteredPhotos(PhotoRepository.instance.photos),
-      _selectedPhotos,
+      () => Future.value(_getFilteredPhotos(PhotoRepository.instance.photos)),
+      selectedPhotos: _selectedPhotos,
       photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
         setState(() {
           _selectedPhotos = selectedPhotos;

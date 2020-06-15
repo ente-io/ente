@@ -38,29 +38,10 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
         title: Text(widget.name),
       ),
       body: Container(
-        child: _getBody(),
+        child: Gallery(
+          () => _getResult(),
+        ),
       ),
-    );
-  }
-
-  FutureBuilder<List<Photo>> _getBody() {
-    return FutureBuilder<List<Photo>>(
-      future: _getResult(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          if (snapshot.data.isEmpty) {
-            return Center(child: Text("Nothing to see here."));
-          }
-          return Gallery(
-            snapshot.data,
-            Set<Photo>(),
-          );
-        } else if (snapshot.hasError) {
-          return Center(child: Text(snapshot.error.toString()));
-        } else {
-          return Center(child: loadWidget);
-        }
-      },
     );
   }
 

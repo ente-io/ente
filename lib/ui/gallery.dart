@@ -8,18 +8,23 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/photo_opened_event.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/detail_page.dart';
+import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Gallery extends StatefulWidget {
-  final List<Photo> photos;
+  final Future<List<Photo>> Function() loadFunction;
   final Set<Photo> selectedPhotos;
   final Function(Set<Photo>) photoSelectionChangeCallback;
   final Future<void> Function() syncFunction;
 
-  Gallery(this.photos, this.selectedPhotos,
-      {this.photoSelectionChangeCallback, this.syncFunction});
+  Gallery(
+    this.loadFunction, {
+    this.selectedPhotos,
+    this.photoSelectionChangeCallback,
+    this.syncFunction,
+  });
 
   @override
   _GalleryState createState() {
@@ -55,8 +60,26 @@ class _GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
     // TODO: Investigate reason for multiple rebuilds on selection change
-    _photos = widget.photos;
-    _selectedPhotos = widget.selectedPhotos;
+    return FutureBuilder<List<Photo>>(
+      future: widget.loadFunction(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return _onDataLoaded(snapshot);
+        } else if (snapshot.hasError) {
+          return Center(child: Text(snapshot.error.toString()));
+        } else {
+          return Center(child: loadWidget);
+        }
+      },
+    );
+  }
+
+  Widget _onDataLoaded(AsyncSnapshot<List<Photo>> snapshot) {
+    if (snapshot.data.isEmpty) {
+      return Center(child: Text("Nothing to see here."));
+    }
+    _photos = snapshot.data;
+    _selectedPhotos = widget.selectedPhotos ?? Set<Photo>();
     _collatePhotos();
     final list = ListView.builder(
       itemCount: _collatedPhotos.length,
@@ -76,8 +99,9 @@ class _GalleryState extends State<Gallery> {
           failedText: "Sync unsuccessful.",
         ),
         onRefresh: () {
-          widget.syncFunction().then((value) {
+          widget.syncFunction().then((_) {
             _refreshController.refreshCompleted();
+            widget.loadFunction().then((_) => setState(() {}));
           }).catchError((e) {
             _refreshController.refreshFailed();
           });

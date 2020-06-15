@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/face_search_manager.dart';
 import 'package:photos/models/face.dart';
-import 'package:photos/models/photo.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
 import 'package:photos/ui/gallery.dart';
-import 'package:photos/ui/loading_widget.dart';
 
 class FaceSearchResultsPage extends StatelessWidget {
   final FaceSearchManager _faceSearchManager = FaceSearchManager.instance;
@@ -27,24 +25,10 @@ class FaceSearchResultsPage extends StatelessWidget {
         ],
       ),
       body: Container(
-        child: _getBody(),
+        child: Gallery(
+          () => _faceSearchManager.getFaceSearchResults(face),
+        ),
       ),
-    );
-  }
-
-  FutureBuilder<List<Photo>> _getBody() {
-    return FutureBuilder<List<Photo>>(
-      future: _faceSearchManager.getFaceSearchResults(face),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Gallery(
-            snapshot.data,
-            Set<Photo>(),
-          );
-        } else {
-          return Center(child: loadWidget);
-        }
-      },
     );
   }
 }
