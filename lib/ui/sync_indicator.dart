@@ -6,6 +6,10 @@ import 'package:photos/events/photo_upload_event.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class SyncIndicator extends StatefulWidget {
+  final RefreshController refreshController;
+
+  const SyncIndicator(this.refreshController, {Key key}) : super(key: key);
+
   @override
   _SyncIndicatorState createState() => _SyncIndicatorState();
 }
@@ -38,7 +42,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       releaseText: "Release to sync.",
       completeText: "Sync completed.",
       failedText: "Sync unsuccessful.",
-      completeDuration: const Duration(milliseconds: 600),
+      completeDuration: const Duration(milliseconds: 1000),
       refreshStyle: RefreshStyle.UnFollow,
     );
   }
@@ -49,6 +53,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     } else {
       var s;
       if (_event.hasError) {
+        widget.refreshController.refreshFailed();
         s = "Upload failed.";
       } else {
         s = "Uploading " +

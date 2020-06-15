@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/photo_opened_event.dart';
-import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -44,7 +43,6 @@ class _GalleryState extends State<Gallery> {
   List<Photo> _photos;
   RefreshController _refreshController = RefreshController();
   StreamSubscription<PhotoOpenedEvent> _photoOpenEventSubscription;
-  StreamSubscription<PhotoUploadEvent> _photoUploadEventSubscription;
   Photo _openedPhoto;
 
   @override
@@ -56,19 +54,12 @@ class _GalleryState extends State<Gallery> {
         _openedPhoto = event.photo;
       });
     });
-    _photoUploadEventSubscription =
-        Bus.instance.on<PhotoUploadEvent>().listen((event) {
-      if (event.hasError) {
-        _refreshController.refreshFailed();
-      }
-    });
     super.initState();
   }
 
   @override
   void dispose() {
     _photoOpenEventSubscription.cancel();
-    _photoUploadEventSubscription.cancel();
     super.dispose();
   }
 
@@ -114,7 +105,7 @@ class _GalleryState extends State<Gallery> {
       return SmartRefresher(
         controller: _refreshController,
         child: list,
-        header: SyncIndicator(),
+        header: SyncIndicator(_refreshController),
         onRefresh: () {
           widget.syncFunction().then((_) {
             _refreshController.refreshCompleted();
