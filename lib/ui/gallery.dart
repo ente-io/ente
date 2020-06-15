@@ -99,7 +99,7 @@ class _GalleryState extends State<Gallery> {
   Widget _onDataLoaded(List<Photo> photos) {
     _photos = photos;
     if (_photos.isEmpty) {
-      return Center(child: Text("Nothing to see here."));
+      return Center(child: Text("Nothing to see here! 👀"));
     }
     _selectedPhotos = widget.selectedPhotos ?? Set<Photo>();
     _collatePhotos();

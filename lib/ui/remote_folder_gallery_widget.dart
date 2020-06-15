@@ -42,7 +42,7 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data.isEmpty) {
-            return Center(child: Text("Nothing to see here!"));
+            return Center(child: Text("Nothing to see here! 👀"));
           } else {
             return _getRemoteFolderGalleryWidget(snapshot.data);
           }
