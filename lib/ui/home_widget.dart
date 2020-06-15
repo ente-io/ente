@@ -140,12 +140,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     return BottomNavigationBar(
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.photo_filter),
+          icon: Icon(Icons.photo_library),
           title: Text('Photos'),
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.photo_library),
-          title: Text('Gallery'),
+          icon: Icon(Icons.folder),
+          title: Text('Folders'),
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.folder_shared),
