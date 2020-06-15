@@ -17,6 +17,8 @@ class FolderSharingService {
   final _dio = Dio();
   static final _diffLimit = 100;
 
+  bool _isSyncInProgress = false;
+
   FolderSharingService._privateConstructor() {
     Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
       sync();
@@ -26,11 +28,12 @@ class FolderSharingService {
   static final FolderSharingService instance =
       FolderSharingService._privateConstructor();
 
-  void sync() {
-    if (!Configuration.instance.hasConfiguredAccount()) {
-      return;
+  Future<void> sync() {
+    if (_isSyncInProgress || !Configuration.instance.hasConfiguredAccount()) {
+      return Future.value();
     }
-    getFolders().then((f) async {
+    _isSyncInProgress = true;
+    return getFolders().then((f) async {
       var folders = f.toSet();
       var currentFolders = await FolderDB.instance.getFolders();
       for (final currentFolder in currentFolders) {
@@ -47,6 +50,8 @@ class FolderSharingService {
         }
       }
       Bus.instance.fire(RemoteSyncEvent(true));
+      _isSyncInProgress = false;
+      return Future.value();
     });
   }
 
