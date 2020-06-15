@@ -38,8 +38,7 @@ class Photo {
     photo.localId = asset.id;
     photo.title = asset.title;
     photo.deviceFolder = pathEntity.name;
-    final location = await asset.latlngAsync();
-    photo.location = Location(location.latitude, location.longitude);
+    photo.location = Location(asset.latitude, asset.longitude);
     photo.createTimestamp = asset.createDateTime.microsecondsSinceEpoch;
     if (photo.createTimestamp == 0) {
       try {
