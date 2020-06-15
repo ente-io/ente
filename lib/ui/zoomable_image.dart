@@ -110,13 +110,31 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _loadNetworkImage() {
     if (!_loadedSmallThumbnail && widget.photo.thumbnailPath.isNotEmpty) {
-      _imageProvider = Image.network(widget.photo.getThumbnailUrl()).image;
+      _imageProvider = Image.network(
+        widget.photo.getThumbnailUrl(),
+        gaplessPlayback: true,
+      ).image;
       _loadedSmallThumbnail = true;
     }
     if (!_loadedFinalImage) {
-      widget.photo.getBytes().then((data) {
-        _onFinalImageLoaded(Image.memory(data).image, context);
-      });
+      if (BytesLruCache.get(widget.photo) != null) {
+        _onFinalImageLoaded(
+            Image.memory(
+              BytesLruCache.get(widget.photo),
+              gaplessPlayback: true,
+            ).image,
+            context);
+      } else {
+        widget.photo.getBytes().then((data) {
+          _onFinalImageLoaded(
+              Image.memory(
+                data,
+                gaplessPlayback: true,
+              ).image,
+              context);
+          BytesLruCache.put(widget.photo, data);
+        });
+      }
     }
   }
 
@@ -154,7 +172,7 @@ class _ZoomableImageState extends State<ZoomableImage>
 
     if (!_loadingFinalImage && !_loadedFinalImage) {
       _loadingFinalImage = true;
-      final cachedFile = ImageLruCache.get(widget.photo);
+      final cachedFile = FileLruCache.get(widget.photo);
       if (cachedFile != null) {
         final imageProvider = Image.file(cachedFile).image;
         _onFinalImageLoaded(imageProvider, context);
@@ -164,7 +182,7 @@ class _ZoomableImageState extends State<ZoomableImage>
             if (mounted) {
               final imageProvider = Image.file(file).image;
               _onFinalImageLoaded(imageProvider, context);
-              ImageLruCache.put(widget.photo, file);
+              FileLruCache.put(widget.photo, file);
             }
           });
         });
