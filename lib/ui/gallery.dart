@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/photo_opened_event.dart';
+import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/sync_indicator.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -41,23 +43,32 @@ class _GalleryState extends State<Gallery> {
   Set<Photo> _selectedPhotos = HashSet<Photo>();
   List<Photo> _photos;
   RefreshController _refreshController = RefreshController();
-  StreamSubscription<PhotoOpenedEvent> _subscription;
+  StreamSubscription<PhotoOpenedEvent> _photoOpenEventSubscription;
+  StreamSubscription<PhotoUploadEvent> _photoUploadEventSubscription;
   Photo _openedPhoto;
 
   @override
   void initState() {
     _requiresLoad = true;
-    _subscription = Bus.instance.on<PhotoOpenedEvent>().listen((event) {
+    _photoOpenEventSubscription =
+        Bus.instance.on<PhotoOpenedEvent>().listen((event) {
       setState(() {
         _openedPhoto = event.photo;
       });
+    });
+    _photoUploadEventSubscription =
+        Bus.instance.on<PhotoUploadEvent>().listen((event) {
+      if (event.hasError) {
+        _refreshController.refreshFailed();
+      }
     });
     super.initState();
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _photoOpenEventSubscription.cancel();
+    _photoUploadEventSubscription.cancel();
     super.dispose();
   }
 
@@ -103,13 +114,7 @@ class _GalleryState extends State<Gallery> {
       return SmartRefresher(
         controller: _refreshController,
         child: list,
-        header: ClassicHeader(
-          idleText: "Pull down to sync.",
-          refreshingText: "Syncing...",
-          releaseText: "Release to sync.",
-          completeText: "Sync completed.",
-          failedText: "Sync unsuccessful.",
-        ),
+        header: SyncIndicator(),
         onRefresh: () {
           widget.syncFunction().then((_) {
             _refreshController.refreshCompleted();
@@ -118,6 +123,7 @@ class _GalleryState extends State<Gallery> {
                 }));
           }).catchError((e) {
             _refreshController.refreshFailed();
+            setState(() {});
           });
         },
       );

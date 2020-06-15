@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/photo_db.dart';
+import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/photo_repository.dart';
 import 'package:photos/photo_provider.dart';
@@ -23,6 +24,7 @@ class PhotoSyncManager {
   final _dio = Dio();
   final _db = PhotoDB.instance;
   bool _isSyncInProgress = false;
+  Future<void> _existingSync;
 
   static final _lastSyncTimestampKey = "last_sync_timestamp_0";
   static final _lastDBUpdateTimestampKey = "last_db_update_timestamp";
@@ -40,11 +42,23 @@ class PhotoSyncManager {
   Future<void> sync() async {
     if (_isSyncInProgress) {
       _logger.warning("Sync already in progress, skipping.");
-      return;
+      return _existingSync;
     }
     _isSyncInProgress = true;
-    _logger.info("Syncing...");
+    _existingSync = Future<void>(() async {
+      _logger.info("Syncing...");
+      try {
+        await _doSync();
+      } catch (e) {
+        throw e;
+      } finally {
+        _isSyncInProgress = false;
+      }
+    });
+    return _existingSync;
+  }
 
+  Future<void> _doSync() async {
     final prefs = await SharedPreferences.getInstance();
     final syncStartTimestamp = DateTime.now().microsecondsSinceEpoch;
     var lastDBUpdateTimestamp = prefs.getInt(_lastDBUpdateTimestampKey);
@@ -69,18 +83,13 @@ class PhotoSyncManager {
       await _addToPhotos(recents, lastDBUpdateTimestamp, photos);
     }
 
-    if (photos.isEmpty) {
-      _isSyncInProgress = false;
-      _syncWithRemote(prefs);
-    } else {
+    if (photos.isNotEmpty) {
       photos.sort((first, second) =>
           first.createTimestamp.compareTo(second.createTimestamp));
-      _updateDatabase(photos, prefs, lastDBUpdateTimestamp, syncStartTimestamp)
-          .then((_) {
-        _isSyncInProgress = false;
-        _syncWithRemote(prefs);
-      });
+      await _updateDatabase(
+          photos, prefs, lastDBUpdateTimestamp, syncStartTimestamp);
     }
+    await _syncWithRemote(prefs);
   }
 
   Future _addToPhotos(AssetPathEntity pathEntity, int lastDBUpdateTimestamp,
@@ -102,17 +111,15 @@ class PhotoSyncManager {
     }
   }
 
-  _syncWithRemote(SharedPreferences prefs) {
+  Future<void> _syncWithRemote(SharedPreferences prefs) async {
     // TODO:  Fix race conditions triggered due to concurrent syncs.
     //        Add device_id/last_sync_timestamp to the upload request?
     if (!Configuration.instance.hasConfiguredAccount()) {
-      return;
+      return Future.error("Account not configured yet");
     }
-    _downloadDiff(prefs).then((_) {
-      _uploadDiff(prefs).then((_) {
-        _deletePhotosOnServer();
-      });
-    });
+    await _downloadDiff(prefs);
+    await _uploadDiff(prefs);
+    await _deletePhotosOnServer();
   }
 
   Future<bool> _updateDatabase(
@@ -149,19 +156,22 @@ class PhotoSyncManager {
     return lastSyncTimestamp;
   }
 
-  Future _uploadDiff(SharedPreferences prefs) async {
+  Future<void> _uploadDiff(SharedPreferences prefs) async {
     List<Photo> photosToBeUploaded = await _db.getPhotosToBeUploaded();
-    for (Photo photo in photosToBeUploaded) {
+    for (int i = 0; i < photosToBeUploaded.length; i++) {
+      Photo photo = photosToBeUploaded[i];
+      _logger.info("Uploading " + photo.toString());
       try {
         var uploadedPhoto = await _uploadFile(photo);
-        if (uploadedPhoto == null) {
-          return;
-        }
         await _db.updatePhoto(photo.generatedId, uploadedPhoto.uploadedFileId,
             uploadedPhoto.remotePath, uploadedPhoto.updateTimestamp);
         prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.updateTimestamp);
+
+        Bus.instance.fire(PhotoUploadEvent(
+            completed: i + 1, total: photosToBeUploaded.length));
       } catch (e) {
-        _logger.severe(e);
+        Bus.instance.fire(PhotoUploadEvent(hasError: true));
+        throw e;
       }
     }
   }
@@ -222,16 +232,14 @@ class PhotoSyncManager {
     )
         .then((response) {
       return Photo.fromJson(response.data);
-    }).catchError((e) {
-      _logger.severe("Error in uploading ", e);
     });
   }
 
   Future<void> _deletePhotosOnServer() async {
-    _db.getAllDeletedPhotos().then((deletedPhotos) {
+    return _db.getAllDeletedPhotos().then((deletedPhotos) async {
       for (Photo deletedPhoto in deletedPhotos) {
-        _deletePhotoOnServer(deletedPhoto)
-            .then((value) => _db.deletePhoto(deletedPhoto));
+        await _deletePhotoOnServer(deletedPhoto);
+        await _db.deletePhoto(deletedPhoto);
       }
     });
   }
