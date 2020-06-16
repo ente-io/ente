@@ -116,16 +116,16 @@ class _HomeWidgetState extends State<HomeWidget> {
           return Gallery(
             () => Future.value(
                 _getFilteredPhotos(PhotoRepository.instance.photos)),
+            reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+            onRefresh: () {
+              return PhotoSyncManager.instance.sync();
+            },
             selectedPhotos: _selectedPhotos,
-            photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
+            onPhotoSelectionChange: (Set<Photo> selectedPhotos) {
               setState(() {
                 _selectedPhotos = selectedPhotos;
               });
             },
-            syncFunction: () {
-              return PhotoSyncManager.instance.sync();
-            },
-            reloadTrigger: Bus.instance.on<LocalPhotosUpdatedEvent>(),
           );
         } else if (snapshot.hasError) {
           return Center(child: Text(snapshot.error.toString()));

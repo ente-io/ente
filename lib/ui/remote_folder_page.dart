@@ -34,10 +34,10 @@ class _RemoteFolderPageState extends State<RemoteFolderPage> {
       ),
       body: Gallery(
           () => PhotoDB.instance.getAllPhotosInFolder(widget.folder.id),
-          syncFunction: () =>
+          onRefresh: () =>
               FolderSharingService.instance.syncDiff(widget.folder),
           selectedPhotos: _selectedPhotos,
-          photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
+          onPhotoSelectionChange: (Set<Photo> selectedPhotos) {
             setState(
               () {
                 _selectedPhotos = selectedPhotos;

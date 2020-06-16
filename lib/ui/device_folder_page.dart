@@ -49,7 +49,7 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
       body: Gallery(
         () => Future.value(_getFilteredPhotos(PhotoRepository.instance.photos)),
         selectedPhotos: _selectedPhotos,
-        photoSelectionChangeCallback: (Set<Photo> selectedPhotos) {
+        onPhotoSelectionChange: (Set<Photo> selectedPhotos) {
           setState(() {
             _selectedPhotos = selectedPhotos;
           });

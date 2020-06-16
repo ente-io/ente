@@ -16,18 +16,20 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Gallery extends StatefulWidget {
-  final Future<List<Photo>> Function() loadFunction;
+  final Future<List<Photo>> Function() loader;
+  // TODO: Verify why the event is necessary when calling loader post onRefresh
+  // should have done the job.
+  final Stream<Event> reloadEvent;
+  final Future<void> Function() onRefresh;
   final Set<Photo> selectedPhotos;
-  final Function(Set<Photo>) photoSelectionChangeCallback;
-  final Future<void> Function() syncFunction;
-  final Stream<Event> reloadTrigger;
+  final Function(Set<Photo>) onPhotoSelectionChange;
 
   Gallery(
-    this.loadFunction, {
+    this.loader, {
+    this.reloadEvent,
+    this.onRefresh,
     this.selectedPhotos,
-    this.photoSelectionChangeCallback,
-    this.syncFunction,
-    this.reloadTrigger,
+    this.onPhotoSelectionChange,
   });
 
   @override
@@ -57,11 +59,13 @@ class _GalleryState extends State<Gallery> {
         _openedPhoto = event.photo;
       });
     });
-    widget.reloadTrigger.listen((event) {
-      setState(() {
-        _requiresLoad = true;
+    if (widget.reloadEvent != null) {
+      widget.reloadEvent.listen((event) {
+        setState(() {
+          _requiresLoad = true;
+        });
       });
-    });
+    }
     super.initState();
   }
 
@@ -77,7 +81,7 @@ class _GalleryState extends State<Gallery> {
       return _onSnapshotAvailable(_lastSnapshot);
     }
     return FutureBuilder<List<Photo>>(
-      future: widget.loadFunction(),
+      future: widget.loader(),
       builder: (context, snapshot) {
         _requiresLoad = false;
         _lastSnapshot = snapshot;
@@ -109,15 +113,15 @@ class _GalleryState extends State<Gallery> {
       controller: _scrollController,
       cacheExtent: 1000,
     );
-    if (widget.syncFunction != null) {
+    if (widget.onRefresh != null) {
       return SmartRefresher(
         controller: _refreshController,
         child: list,
         header: SyncIndicator(_refreshController),
         onRefresh: () {
-          widget.syncFunction().then((_) {
+          widget.onRefresh().then((_) {
             _refreshController.refreshCompleted();
-            widget.loadFunction().then((_) => setState(() {
+            widget.loader().then((_) => setState(() {
                   _requiresLoad = true;
                 }));
           }).catchError((e) {
@@ -208,7 +212,7 @@ class _GalleryState extends State<Gallery> {
       } else {
         _selectedPhotos.add(photo);
       }
-      widget.photoSelectionChangeCallback(_selectedPhotos);
+      widget.onPhotoSelectionChange(_selectedPhotos);
     });
   }
 
