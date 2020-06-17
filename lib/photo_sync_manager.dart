@@ -10,9 +10,9 @@ import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/photo_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/utils/file_name_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
-import 'package:path/path.dart';
 import 'package:photos/models/photo.dart';
 
 import 'package:photos/core/configuration.dart';
@@ -166,8 +166,7 @@ class PhotoSyncManager {
   }
 
   Future<void> _downloadDiff(SharedPreferences prefs) async {
-    int lastSyncTimestamp = _getLastSyncTimestamp(prefs);
-    var diff = await _getDiff(lastSyncTimestamp, _diffLimit);
+    var diff = await _getDiff(_getLastSyncTimestamp(prefs), _diffLimit);
     if (diff != null && diff.isNotEmpty) {
       await _storeDiff(diff, prefs);
       PhotoRepository.instance.reloadPhotos();
@@ -209,12 +208,15 @@ class PhotoSyncManager {
     for (Photo photo in diff) {
       try {
         var existingPhoto = await _db.getMatchingPhoto(photo.localId,
-            photo.title, photo.deviceFolder, photo.createTimestamp);
+            photo.title, photo.deviceFolder, photo.createTimestamp,
+            alternateTitle: getHEICFileNameForJPG(photo));
         await _db.updatePhoto(existingPhoto.generatedId, photo.uploadedFileId,
             photo.remotePath, photo.updateTimestamp, photo.thumbnailPath);
       } catch (e) {
         await _db.insertPhoto(photo);
       }
+      // _logger.info(
+      //     "Setting update timestamp to " + photo.updateTimestamp.toString());
       await prefs.setInt(_lastSyncTimestampKey, photo.updateTimestamp);
     }
   }
@@ -241,9 +243,7 @@ class PhotoSyncManager {
   }
 
   Future<Photo> _uploadFile(Photo localPhoto) async {
-    var title = extension(localPhoto.title) == ".HEIC"
-        ? basenameWithoutExtension(localPhoto.title) + ".JPG"
-        : localPhoto.title;
+    var title = getJPGFileNameForHEIC(localPhoto);
     var formData = FormData.fromMap({
       "file": MultipartFile.fromBytes((await localPhoto.getBytes()),
           filename: title),

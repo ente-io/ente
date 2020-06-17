@@ -133,14 +133,21 @@ class PhotoDB {
     return _convertToPhotos(results);
   }
 
-  Future<Photo> getMatchingPhoto(String localId, String title,
-      String deviceFolder, int createTimestamp) async {
+  Future<Photo> getMatchingPhoto(
+      String localId, String title, String deviceFolder, int createTimestamp,
+      {String alternateTitle}) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where:
-          '$columnLocalId=? AND $columnTitle=? AND $columnDeviceFolder=? AND $columnCreateTimestamp=?',
-      whereArgs: [localId, title, deviceFolder, createTimestamp],
+      where: '''$columnLocalId=? AND ($columnTitle=? OR $columnTitle=?) AND 
+          $columnDeviceFolder=? AND $columnCreateTimestamp=?''',
+      whereArgs: [
+        localId,
+        title,
+        alternateTitle,
+        deviceFolder,
+        createTimestamp
+      ],
     );
     if (rows.isNotEmpty) {
       return _getPhotoFromRow(rows[0]);

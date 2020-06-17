@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 
 import 'package:photos/models/face.dart';
 import 'package:photos/models/photo.dart';
+import 'package:photos/utils/file_name_util.dart';
 
 class FaceSearchManager {
   final _logger = Logger("FaceSearchManager");
@@ -48,7 +49,8 @@ class FaceSearchManager {
     for (Photo photo in result) {
       try {
         photos.add(await PhotoDB.instance.getMatchingPhoto(photo.localId,
-            photo.title, photo.deviceFolder, photo.createTimestamp));
+            photo.title, photo.deviceFolder, photo.createTimestamp,
+            alternateTitle: getHEICFileNameForJPG(photo)));
       } catch (e) {
         // Not available locally
         photos.add(photo);
