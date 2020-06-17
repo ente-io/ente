@@ -25,7 +25,7 @@ class PhotoRepository {
     return true;
   }
 
-  void reloadPhotos() async {
+  Future<void> reloadPhotos() async {
     _logger.info("Reloading...");
     await loadPhotos();
     Bus.instance.fire(LocalPhotosUpdatedEvent());

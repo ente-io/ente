@@ -91,6 +91,7 @@ class PhotoSyncManager {
           first.createTimestamp.compareTo(second.createTimestamp));
       await _updateDatabase(
           photos, prefs, lastDBUpdateTimestamp, syncStartTimestamp);
+      await PhotoRepository.instance.reloadPhotos();
     }
     await _syncWithRemote(prefs);
   }
@@ -294,7 +295,6 @@ class PhotoSyncManager {
       List<Photo> photos, SharedPreferences prefs, int timestamp) async {
     await _db.insertPhotos(photos);
     _logger.info("Inserted " + photos.length.toString() + " photos.");
-    PhotoRepository.instance.reloadPhotos();
     return await prefs.setInt(_lastDBUpdateTimestampKey, timestamp);
   }
 }
