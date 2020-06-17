@@ -4,9 +4,8 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:photos/core/event_bus.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/events/event.dart';
-import 'package:photos/events/photo_opened_event.dart';
 import 'package:photos/models/photo.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -39,6 +38,7 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
+  final Logger _logger = Logger("Gallery");
   final ScrollController _scrollController = ScrollController();
   final List<List<Photo>> _collatedPhotos = List<List<Photo>>();
 
@@ -47,18 +47,10 @@ class _GalleryState extends State<Gallery> {
   Set<Photo> _selectedPhotos = HashSet<Photo>();
   List<Photo> _photos;
   RefreshController _refreshController = RefreshController();
-  StreamSubscription<PhotoOpenedEvent> _photoOpenEventSubscription;
-  Photo _openedPhoto;
 
   @override
   void initState() {
     _requiresLoad = true;
-    _photoOpenEventSubscription =
-        Bus.instance.on<PhotoOpenedEvent>().listen((event) {
-      setState(() {
-        _openedPhoto = event.photo;
-      });
-    });
     if (widget.reloadEvent != null) {
       widget.reloadEvent.listen((event) {
         setState(() {
@@ -67,12 +59,6 @@ class _GalleryState extends State<Gallery> {
       });
     }
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _photoOpenEventSubscription.cancel();
-    super.dispose();
   }
 
   @override
@@ -173,15 +159,6 @@ class _GalleryState extends State<Gallery> {
   }
 
   Widget _buildPhoto(BuildContext context, Photo photo) {
-    Widget thumbnail;
-    if (_openedPhoto == null || _openedPhoto == photo) {
-      thumbnail = Hero(
-        tag: photo.generatedId.toString(),
-        child: ThumbnailWidget(photo),
-      );
-    } else {
-      thumbnail = ThumbnailWidget(photo);
-    }
     return GestureDetector(
       onTap: () {
         if (_selectedPhotos.isNotEmpty) {
@@ -201,7 +178,10 @@ class _GalleryState extends State<Gallery> {
               ? Border.all(width: 4.0, color: Colors.blue)
               : null,
         ),
-        child: thumbnail,
+        child: Hero(
+          tag: photo.generatedId.toString(),
+          child: ThumbnailWidget(photo),
+        ),
       ),
     );
   }

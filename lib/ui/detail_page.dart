@@ -1,11 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/photo_opened_event.dart';
+import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/favorite_photos_repository.dart';
 import 'package:photos/models/photo.dart';
-import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/share_util.dart';
@@ -35,12 +33,6 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   @override
-  void dispose() {
-    Bus.instance.fire(PhotoOpenedEvent(null));
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     _logger.info("Opening " +
         _photos[_selectedIndex].toString() +
@@ -60,7 +52,7 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget _buildPageView() {
-    return ExtentsPageView.extents(
+    return PageView.builder(
       itemBuilder: (context, index) {
         final photo = _photos[index];
         final image = ZoomableImage(
@@ -71,22 +63,45 @@ class _DetailPageState extends State<DetailPage> {
             });
           },
         );
-        if (index == _selectedIndex) {
-          Bus.instance.fire(PhotoOpenedEvent(photo));
-        }
+        _preloadPhotos(index);
         return image;
       },
-      onPageChanged: (int index) {
+      onPageChanged: (index) {
         _selectedIndex = index;
-        Bus.instance.fire(PhotoOpenedEvent(widget.photos[index]));
+        _preloadPhotos(index);
       },
       physics: _shouldDisableScroll
           ? NeverScrollableScrollPhysics()
           : PageScrollPhysics(),
       controller: PageController(initialPage: _selectedIndex),
       itemCount: _photos.length,
-      extents: 1,
     );
+  }
+
+  void _preloadPhotos(int index) {
+    if (index > 0) {
+      _preloadPhoto(_photos[index - 1]);
+    }
+    if (index < _photos.length - 1) {
+      _preloadPhoto(_photos[index + 1]);
+    }
+  }
+
+  void _preloadPhoto(Photo photo) {
+    if (photo.localId == null) {
+      photo.getBytes().then((data) {
+        BytesLruCache.put(photo, data);
+      });
+    } else {
+      final cachedFile = FileLruCache.get(photo);
+      if (cachedFile == null) {
+        photo.getAsset().then((asset) {
+          asset.file.then((file) {
+            FileLruCache.put(photo, file);
+          });
+        });
+      }
+    }
   }
 
   AppBar _buildAppBar() {
