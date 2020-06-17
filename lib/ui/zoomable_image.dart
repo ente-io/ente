@@ -32,7 +32,6 @@ class _ZoomableImageState extends State<ZoomableImage>
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
   ValueChanged<PhotoViewScaleState> _scaleStateChangedCallback;
-  final doubleTapScales = [1.0, 2.0];
 
   @override
   void initState() {
