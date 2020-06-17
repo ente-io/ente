@@ -83,7 +83,6 @@ class _GalleryState extends State<Gallery> {
     return FutureBuilder<List<Photo>>(
       future: widget.loader(),
       builder: (context, snapshot) {
-        _requiresLoad = false;
         _lastSnapshot = snapshot;
         return _onSnapshotAvailable(snapshot);
       },
@@ -92,8 +91,10 @@ class _GalleryState extends State<Gallery> {
 
   Widget _onSnapshotAvailable(AsyncSnapshot<List<Photo>> snapshot) {
     if (snapshot.hasData) {
+      _requiresLoad = false;
       return _onDataLoaded(snapshot.data);
     } else if (snapshot.hasError) {
+      _requiresLoad = false;
       return Center(child: Text(snapshot.error.toString()));
     } else {
       return Center(child: loadWidget);
