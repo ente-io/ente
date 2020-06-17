@@ -27,7 +27,7 @@ class EndpointFinder {
           prefix += ipSplit[index] + ".";
         }
       }
-      logger.info(prefix);
+      logger.info(prefix + "*");
 
       for (int i = 1; i <= 255 && _shouldContinueSearch; i++) {
         var endpoint = prefix + i.toString();
