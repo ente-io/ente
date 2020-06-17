@@ -56,7 +56,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
         widget.refreshController.refreshFailed();
         s = "Upload failed.";
       } else {
-        s = "Uploading " +
+        s = "Backing up " +
             _event.completed.toString() +
             "/" +
             _event.total.toString();
