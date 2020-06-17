@@ -8,7 +8,6 @@ import 'package:photos/db/photo_db.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/photo_repository.dart';
-import 'package:photos/photo_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,9 +71,8 @@ class PhotoSyncManager {
       await _initializeDirectories();
     }
 
-    await PhotoProvider.instance
-        .refreshGalleryList(lastDBUpdateTimestamp, syncStartTimestamp);
-    final pathEntities = PhotoProvider.instance.list;
+    final pathEntities =
+        await _getGalleryList(lastDBUpdateTimestamp, syncStartTimestamp);
     final photos = List<Photo>();
     AssetPathEntity recents;
     for (AssetPathEntity pathEntity in pathEntities) {
@@ -95,6 +93,31 @@ class PhotoSyncManager {
           photos, prefs, lastDBUpdateTimestamp, syncStartTimestamp);
     }
     await _syncWithRemote(prefs);
+  }
+
+  Future<List<AssetPathEntity>> _getGalleryList(
+      final int fromTimestamp, final int toTimestamp) async {
+    var result = await PhotoManager.requestPermission();
+    if (!result) {
+      print("Did not get permission");
+    }
+    final filterOptionGroup = FilterOptionGroup();
+    filterOptionGroup.setOption(AssetType.image, FilterOption(needTitle: true));
+    filterOptionGroup.dateTimeCond = DateTimeCond(
+      min: DateTime.fromMicrosecondsSinceEpoch(fromTimestamp),
+      max: DateTime.fromMicrosecondsSinceEpoch(toTimestamp),
+    );
+    var galleryList = await PhotoManager.getAssetPathList(
+      hasAll: true,
+      type: RequestType.image,
+      filterOption: filterOptionGroup,
+    );
+
+    galleryList.sort((s1, s2) {
+      return s2.assetCount.compareTo(s1.assetCount);
+    });
+
+    return galleryList;
   }
 
   Future _addToPhotos(AssetPathEntity pathEntity, int lastDBUpdateTimestamp,
