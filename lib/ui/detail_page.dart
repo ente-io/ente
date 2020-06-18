@@ -67,7 +67,9 @@ class _DetailPageState extends State<DetailPage> {
         return image;
       },
       onPageChanged: (index) {
-        _selectedIndex = index;
+        setState(() {
+          _selectedIndex = index;
+        });
         _preloadPhotos(index);
       },
       physics: _shouldDisableScroll
