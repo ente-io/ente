@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/favorite_photos_repository.dart';
+import 'package:photos/favorite_files_repository.dart';
 import 'package:photos/folder_service.dart';
 import 'package:photos/photo_sync_manager.dart';
 import 'package:photos/ui/home_widget.dart';

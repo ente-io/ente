@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/photo_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/favorite_photos_repository.dart';
+import 'package:photos/favorite_files_repository.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/filters/favorite_items_filter.dart';
 import 'package:photos/models/filters/folder_name_filter.dart';
@@ -73,8 +73,7 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
     for (final path in paths) {
       final file = await FileDB.instance.getLatestFileInPath(path);
       final folderName = p.basename(path);
-      folders
-          .add(DeviceFolder(folderName, file, FolderNameFilter(folderName)));
+      folders.add(DeviceFolder(folderName, file, FolderNameFilter(folderName)));
     }
     folders.sort((first, second) {
       return second.thumbnail.createTimestamp
@@ -83,8 +82,7 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
     if (FavoriteFilesRepository.instance.hasFavorites()) {
       final file = await FileDB.instance.getLatestFileAmongGeneratedIds(
           FavoriteFilesRepository.instance.getLiked().toList());
-      folders.insert(
-          0, DeviceFolder("Favorites", file, FavoriteItemsFilter()));
+      folders.insert(0, DeviceFolder("Favorites", file, FavoriteItemsFilter()));
     }
     return folders;
   }

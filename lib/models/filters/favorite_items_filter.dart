@@ -1,4 +1,4 @@
-import 'package:photos/favorite_photos_repository.dart';
+import 'package:photos/favorite_files_repository.dart';
 import 'package:photos/models/filters/gallery_items_filter.dart';
 import 'package:photos/models/file.dart';
 
