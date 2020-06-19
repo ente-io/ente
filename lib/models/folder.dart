@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 
 class Folder {
   final int id;
@@ -9,7 +9,7 @@ class Folder {
   final String deviceFolder;
   final Set<String> sharedWith;
   final int updateTimestamp;
-  Photo thumbnailPhoto;
+  File thumbnailPhoto;
 
   Folder(
     this.id,

@@ -1,7 +1,7 @@
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 
 class GalleryItemsFilter {
-  bool shouldInclude(Photo photo) {
+  bool shouldInclude(File file) {
     return true;
   }
 }

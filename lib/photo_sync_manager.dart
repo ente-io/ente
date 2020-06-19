@@ -7,13 +7,13 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/photo_db.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
-import 'package:photos/photo_repository.dart';
+import 'package:photos/file_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/utils/file_name_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 
 import 'package:photos/core/configuration.dart';
 import 'package:photos/events/remote_sync_event.dart';
@@ -21,7 +21,7 @@ import 'package:photos/events/remote_sync_event.dart';
 class PhotoSyncManager {
   final _logger = Logger("PhotoSyncManager");
   final _dio = Dio();
-  final _db = PhotoDB.instance;
+  final _db = FileDB.instance;
   bool _isSyncInProgress = false;
   Future<void> _existingSync;
 
@@ -73,25 +73,25 @@ class PhotoSyncManager {
 
     final pathEntities =
         await _getGalleryList(lastDBUpdateTimestamp, syncStartTimestamp);
-    final photos = List<Photo>();
+    final files = List<File>();
     AssetPathEntity recents;
     for (AssetPathEntity pathEntity in pathEntities) {
       if (pathEntity.name == "Recent" || pathEntity.name == "Recents") {
         recents = pathEntity;
       } else {
-        await _addToPhotos(pathEntity, lastDBUpdateTimestamp, photos);
+        await _addToPhotos(pathEntity, lastDBUpdateTimestamp, files);
       }
     }
     if (recents != null) {
-      await _addToPhotos(recents, lastDBUpdateTimestamp, photos);
+      await _addToPhotos(recents, lastDBUpdateTimestamp, files);
     }
 
-    if (photos.isNotEmpty) {
-      photos.sort((first, second) =>
+    if (files.isNotEmpty) {
+      files.sort((first, second) =>
           first.createTimestamp.compareTo(second.createTimestamp));
       await _updateDatabase(
-          photos, prefs, lastDBUpdateTimestamp, syncStartTimestamp);
-      await PhotoRepository.instance.reloadPhotos();
+          files, prefs, lastDBUpdateTimestamp, syncStartTimestamp);
+      await FileRepository.instance.reloadFiles();
     }
     await _syncWithRemote(prefs);
   }
@@ -104,13 +104,14 @@ class PhotoSyncManager {
     }
     final filterOptionGroup = FilterOptionGroup();
     filterOptionGroup.setOption(AssetType.image, FilterOption(needTitle: true));
+    filterOptionGroup.setOption(AssetType.video, FilterOption(needTitle: true));
     filterOptionGroup.dateTimeCond = DateTimeCond(
       min: DateTime.fromMicrosecondsSinceEpoch(fromTimestamp),
       max: DateTime.fromMicrosecondsSinceEpoch(toTimestamp),
     );
     var galleryList = await PhotoManager.getAssetPathList(
       hasAll: true,
-      type: RequestType.image,
+      type: RequestType.common,
       filterOption: filterOptionGroup,
     );
 
@@ -122,16 +123,16 @@ class PhotoSyncManager {
   }
 
   Future _addToPhotos(AssetPathEntity pathEntity, int lastDBUpdateTimestamp,
-      List<Photo> photos) async {
+      List<File> files) async {
     final assetList = await pathEntity.assetList;
     for (AssetEntity entity in assetList) {
       if (max(entity.createDateTime.microsecondsSinceEpoch,
               entity.modifiedDateTime.microsecondsSinceEpoch) >
           lastDBUpdateTimestamp) {
         try {
-          final photo = await Photo.fromAsset(pathEntity, entity);
-          if (!photos.contains(photo)) {
-            photos.add(photo);
+          final file = await File.fromAsset(pathEntity, entity);
+          if (!files.contains(file)) {
+            files.add(file);
           }
         } catch (e) {
           _logger.severe(e);
@@ -151,25 +152,22 @@ class PhotoSyncManager {
     await _deletePhotosOnServer();
   }
 
-  Future<bool> _updateDatabase(
-      final List<Photo> photos,
-      SharedPreferences prefs,
-      int lastDBUpdateTimestamp,
-      int syncStartTimestamp) async {
-    var photosToBeAdded = List<Photo>();
-    for (Photo photo in photos) {
-      if (photo.createTimestamp > lastDBUpdateTimestamp) {
-        photosToBeAdded.add(photo);
+  Future<bool> _updateDatabase(final List<File> files, SharedPreferences prefs,
+      int lastDBUpdateTimestamp, int syncStartTimestamp) async {
+    var filesToBeAdded = List<File>();
+    for (File file in files) {
+      if (file.createTimestamp > lastDBUpdateTimestamp) {
+        filesToBeAdded.add(file);
       }
     }
-    return await _insertPhotosToDB(photosToBeAdded, prefs, syncStartTimestamp);
+    return await _insertFilesToDB(filesToBeAdded, prefs, syncStartTimestamp);
   }
 
   Future<void> _downloadDiff(SharedPreferences prefs) async {
     var diff = await _getDiff(_getLastSyncTimestamp(prefs), _diffLimit);
     if (diff != null && diff.isNotEmpty) {
       await _storeDiff(diff, prefs);
-      PhotoRepository.instance.reloadPhotos();
+      FileRepository.instance.reloadFiles();
       if (diff.length == _diffLimit) {
         return await _downloadDiff(prefs);
       }
@@ -185,15 +183,15 @@ class PhotoSyncManager {
   }
 
   Future<void> _uploadDiff(SharedPreferences prefs) async {
-    List<Photo> photosToBeUploaded = await _db.getPhotosToBeUploaded();
+    List<File> photosToBeUploaded = await _db.getFilesToBeUploaded();
     for (int i = 0; i < photosToBeUploaded.length; i++) {
-      Photo photo = photosToBeUploaded[i];
-      _logger.info("Uploading " + photo.toString());
+      File file = photosToBeUploaded[i];
+      _logger.info("Uploading " + file.toString());
       try {
-        var uploadedPhoto = await _uploadFile(photo);
-        await _db.updatePhoto(photo.generatedId, uploadedPhoto.uploadedFileId,
-            uploadedPhoto.remotePath, uploadedPhoto.updateTimestamp);
-        prefs.setInt(_lastSyncTimestampKey, uploadedPhoto.updateTimestamp);
+        var uploadedFile = await _uploadFile(file);
+        await _db.update(file.generatedId, uploadedFile.uploadedFileId,
+            uploadedFile.remotePath, uploadedFile.updateTimestamp);
+        prefs.setInt(_lastSyncTimestampKey, uploadedFile.updateTimestamp);
 
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: photosToBeUploaded.length));
@@ -204,24 +202,22 @@ class PhotoSyncManager {
     }
   }
 
-  Future _storeDiff(List<Photo> diff, SharedPreferences prefs) async {
-    for (Photo photo in diff) {
+  Future _storeDiff(List<File> diff, SharedPreferences prefs) async {
+    for (File file in diff) {
       try {
-        var existingPhoto = await _db.getMatchingPhoto(photo.localId,
-            photo.title, photo.deviceFolder, photo.createTimestamp,
-            alternateTitle: getHEICFileNameForJPG(photo));
-        await _db.updatePhoto(existingPhoto.generatedId, photo.uploadedFileId,
-            photo.remotePath, photo.updateTimestamp, photo.thumbnailPath);
+        var existingPhoto = await _db.getMatchingFile(
+            file.localId, file.title, file.deviceFolder, file.createTimestamp,
+            alternateTitle: getHEICFileNameForJPG(file));
+        await _db.update(existingPhoto.generatedId, file.uploadedFileId,
+            file.remotePath, file.updateTimestamp, file.previewURL);
       } catch (e) {
-        await _db.insertPhoto(photo);
+        await _db.insert(file);
       }
-      // _logger.info(
-      //     "Setting update timestamp to " + photo.updateTimestamp.toString());
-      await prefs.setInt(_lastSyncTimestampKey, photo.updateTimestamp);
+      await prefs.setInt(_lastSyncTimestampKey, file.updateTimestamp);
     }
   }
 
-  Future<List<Photo>> _getDiff(int lastSyncTimestamp, int limit) async {
+  Future<List<File>> _getDiff(int lastSyncTimestamp, int limit) async {
     Response response = await _dio.get(
       Configuration.instance.getHttpEndpoint() + "/files/diff",
       options:
@@ -234,7 +230,7 @@ class PhotoSyncManager {
     if (response != null) {
       Bus.instance.fire(RemoteSyncEvent(true));
       return (response.data["diff"] as List)
-          .map((photo) => new Photo.fromJson(photo))
+          .map((file) => new File.fromJson(file))
           .toList();
     } else {
       Bus.instance.fire(RemoteSyncEvent(false));
@@ -242,7 +238,7 @@ class PhotoSyncManager {
     }
   }
 
-  Future<Photo> _uploadFile(Photo localPhoto) async {
+  Future<File> _uploadFile(File localPhoto) async {
     var title = getJPGFileNameForHEIC(localPhoto);
     var formData = FormData.fromMap({
       "file": MultipartFile.fromBytes((await localPhoto.getBytes()),
@@ -260,25 +256,25 @@ class PhotoSyncManager {
       data: formData,
     )
         .then((response) {
-      return Photo.fromJson(response.data);
+      return File.fromJson(response.data);
     });
   }
 
   Future<void> _deletePhotosOnServer() async {
-    return _db.getAllDeletedPhotos().then((deletedPhotos) async {
-      for (Photo deletedPhoto in deletedPhotos) {
-        await _deletePhotoOnServer(deletedPhoto);
-        await _db.deletePhoto(deletedPhoto);
+    return _db.getAllDeleted().then((deletedPhotos) async {
+      for (File deletedPhoto in deletedPhotos) {
+        await _deleteFileOnServer(deletedPhoto);
+        await _db.delete(deletedPhoto);
       }
     });
   }
 
-  Future<void> _deletePhotoOnServer(Photo photo) async {
+  Future<void> _deleteFileOnServer(File file) async {
     return _dio
         .delete(
           Configuration.instance.getHttpEndpoint() +
               "/files/" +
-              photo.uploadedFileId.toString(),
+              file.uploadedFileId.toString(),
           options: Options(
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         )
@@ -291,10 +287,10 @@ class PhotoSyncManager {
         .createSync(recursive: true);
   }
 
-  Future<bool> _insertPhotosToDB(
-      List<Photo> photos, SharedPreferences prefs, int timestamp) async {
-    await _db.insertPhotos(photos);
-    _logger.info("Inserted " + photos.length.toString() + " photos.");
+  Future<bool> _insertFilesToDB(
+      List<File> files, SharedPreferences prefs, int timestamp) async {
+    await _db.insertMultiple(files);
+    _logger.info("Inserted " + files.length.toString() + " files.");
     return await prefs.setInt(_lastDBUpdateTimestampKey, timestamp);
   }
 }

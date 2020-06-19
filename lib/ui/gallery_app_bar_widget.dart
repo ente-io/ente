@@ -5,8 +5,8 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/photo_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
-import 'package:photos/models/photo.dart';
-import 'package:photos/photo_repository.dart';
+import 'package:photos/models/file.dart';
+import 'package:photos/file_repository.dart';
 import 'package:photos/ui/setup_page.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/ui/share_folder_widget.dart';
@@ -23,10 +23,10 @@ class GalleryAppBarWidget extends StatefulWidget
   final GalleryAppBarType type;
   final String title;
   final String path;
-  final Set<Photo> selectedPhotos;
+  final Set<File> selectedFiles;
   final Function() onSelectionClear;
 
-  GalleryAppBarWidget(this.type, this.title, this.path, this.selectedPhotos,
+  GalleryAppBarWidget(this.type, this.title, this.path, this.selectedFiles,
       {this.onSelectionClear});
 
   @override
@@ -52,7 +52,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.selectedPhotos.isEmpty) {
+    if (widget.selectedFiles.isEmpty) {
       return AppBar(
         title: Text(widget.title),
         actions: _getDefaultActions(context),
@@ -63,11 +63,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       leading: IconButton(
         icon: Icon(Icons.close),
         onPressed: () {
-          _clearSelectedPhotos();
+          _clearSelectedFiles();
         },
       ),
-      title: Text(widget.selectedPhotos.length.toString()),
-      actions: _getPhotoActions(context),
+      title: Text(widget.selectedFiles.length.toString()),
+      actions: _getActions(context),
     );
   }
 
@@ -103,46 +103,46 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     );
   }
 
-  List<Widget> _getPhotoActions(BuildContext context) {
+  List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
-    if (widget.selectedPhotos.isNotEmpty) {
+    if (widget.selectedFiles.isNotEmpty) {
       if (widget.type != GalleryAppBarType.remote_folder) {
         actions.add(IconButton(
           icon: Icon(Icons.delete),
           onPressed: () {
-            _showDeletePhotosSheet(context);
+            _showDeleteSheet(context);
           },
         ));
       }
       actions.add(IconButton(
         icon: Icon(Icons.share),
         onPressed: () {
-          _shareSelectedPhotos(context);
+          _shareSelected(context);
         },
       ));
     }
     return actions;
   }
 
-  void _shareSelectedPhotos(BuildContext context) {
-    shareMultiple(widget.selectedPhotos.toList());
+  void _shareSelected(BuildContext context) {
+    shareMultiple(widget.selectedFiles.toList());
   }
 
-  void _showDeletePhotosSheet(BuildContext context) {
+  void _showDeleteSheet(BuildContext context) {
     final action = CupertinoActionSheet(
       actions: <Widget>[
         CupertinoActionSheetAction(
           child: Text("Delete on device"),
           isDestructiveAction: true,
           onPressed: () async {
-            await _deleteSelectedPhotos(context, false);
+            await _deleteSelected(context, false);
           },
         ),
         CupertinoActionSheetAction(
           child: Text("Delete everywhere [WiP]"),
           isDestructiveAction: true,
           onPressed: () async {
-            await _deleteSelectedPhotos(context, true);
+            await _deleteSelected(context, true);
           },
         )
       ],
@@ -156,24 +156,23 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     showCupertinoModalPopup(context: context, builder: (_) => action);
   }
 
-  Future _deleteSelectedPhotos(
-      BuildContext context, bool deleteEverywhere) async {
+  Future _deleteSelected(BuildContext context, bool deleteEverywhere) async {
     await PhotoManager.editor
-        .deleteWithIds(widget.selectedPhotos.map((p) => p.localId).toList());
+        .deleteWithIds(widget.selectedFiles.map((p) => p.localId).toList());
 
-    for (Photo photo in widget.selectedPhotos) {
+    for (File file in widget.selectedFiles) {
       deleteEverywhere
-          ? await PhotoDB.instance.markPhotoForDeletion(photo)
-          : await PhotoDB.instance.deletePhoto(photo);
+          ? await FileDB.instance.markForDeletion(file)
+          : await FileDB.instance.delete(file);
     }
     Navigator.of(context, rootNavigator: true).pop();
-    PhotoRepository.instance.reloadPhotos();
-    _clearSelectedPhotos();
+    FileRepository.instance.reloadFiles();
+    _clearSelectedFiles();
   }
 
-  void _clearSelectedPhotos() {
+  void _clearSelectedFiles() {
     setState(() {
-      widget.selectedPhotos.clear();
+      widget.selectedFiles.clear();
     });
     if (widget.onSelectionClear != null) {
       widget.onSelectionClear();

@@ -1,14 +1,14 @@
 import 'dart:io';
 
 import 'package:photos/models/filters/gallery_items_filter.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 import 'package:path/path.dart';
 
 class ImportantItemsFilter implements GalleryItemsFilter {
   @override
-  bool shouldInclude(Photo photo) {
+  bool shouldInclude(File file) {
     if (Platform.isAndroid) {
-      final String folder = basename(photo.deviceFolder);
+      final String folder = basename(file.deviceFolder);
       return folder == "Camera" ||
           folder == "DCIM" ||
           folder == "Download" ||

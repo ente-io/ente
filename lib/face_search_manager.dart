@@ -4,7 +4,7 @@ import 'package:photos/db/photo_db.dart';
 import 'package:logging/logging.dart';
 
 import 'package:photos/models/face.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/utils/file_name_util.dart';
 
 class FaceSearchManager {
@@ -28,7 +28,7 @@ class FaceSearchManager {
         .catchError(_onError);
   }
 
-  Future<List<Photo>> getFaceSearchResults(Face face) async {
+  Future<List<File>> getFaceSearchResults(Face face) async {
     final result = await _dio
         .get(
       Configuration.instance.getHttpEndpoint() +
@@ -42,24 +42,24 @@ class FaceSearchManager {
     )
         .then((response) {
       return (response.data["result"] as List)
-          .map((p) => Photo.fromJson(p))
+          .map((p) => File.fromJson(p))
           .toList();
     }).catchError(_onError);
-    final photos = List<Photo>();
-    for (Photo photo in result) {
+    final files = List<File>();
+    for (File file in result) {
       try {
-        photos.add(await PhotoDB.instance.getMatchingPhoto(photo.localId,
-            photo.title, photo.deviceFolder, photo.createTimestamp,
-            alternateTitle: getHEICFileNameForJPG(photo)));
+        files.add(await FileDB.instance.getMatchingFile(file.localId,
+            file.title, file.deviceFolder, file.createTimestamp,
+            alternateTitle: getHEICFileNameForJPG(file)));
       } catch (e) {
         // Not available locally
-        photos.add(photo);
+        files.add(file);
       }
     }
-    photos.sort((first, second) {
+    files.sort((first, second) {
       return second.createTimestamp.compareTo(first.createTimestamp);
     });
-    return photos;
+    return files;
   }
 
   void _onError(error) {

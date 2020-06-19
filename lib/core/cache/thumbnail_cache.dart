@@ -1,22 +1,22 @@
 import 'dart:typed_data';
 
 import 'package:photos/core/cache/lru_map.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 
 class ThumbnailLruCache {
   static LRUMap<_ThumbnailCacheKey, Uint8List> _map = LRUMap(1000);
 
-  static Uint8List get(Photo photo, int size) {
+  static Uint8List get(File photo, int size) {
     return _map.get(_ThumbnailCacheKey(photo, size));
   }
 
-  static void put(Photo photo, int size, Uint8List imageData) {
+  static void put(File photo, int size, Uint8List imageData) {
     _map.put(_ThumbnailCacheKey(photo, size), imageData);
   }
 }
 
 class _ThumbnailCacheKey {
-  Photo photo;
+  File photo;
   int size;
 
   _ThumbnailCacheKey(this.photo, this.size);

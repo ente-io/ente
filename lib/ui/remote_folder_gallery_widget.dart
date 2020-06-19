@@ -83,7 +83,7 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
       }
       try {
         folder.thumbnailPhoto =
-            await PhotoDB.instance.getLatestPhotoInRemoteFolder(folder.id);
+            await FileDB.instance.getLatestFileInRemoteFolder(folder.id);
       } catch (e) {
         _logger.warning(e.toString());
       }

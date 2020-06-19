@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/events/event.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/sync_indicator.dart';
@@ -15,20 +15,20 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Gallery extends StatefulWidget {
-  final Future<List<Photo>> Function() loader;
+  final Future<List<File>> Function() loader;
   // TODO: Verify why the event is necessary when calling loader post onRefresh
   // should have done the job.
   final Stream<Event> reloadEvent;
   final Future<void> Function() onRefresh;
-  final Set<Photo> selectedPhotos;
-  final Function(Set<Photo>) onPhotoSelectionChange;
+  final Set<File> selectedFiles;
+  final Function(Set<File>) onFileSelectionChange;
 
   Gallery(
     this.loader, {
     this.reloadEvent,
     this.onRefresh,
-    this.selectedPhotos,
-    this.onPhotoSelectionChange,
+    this.selectedFiles,
+    this.onFileSelectionChange,
   });
 
   @override
@@ -40,12 +40,12 @@ class Gallery extends StatefulWidget {
 class _GalleryState extends State<Gallery> {
   final Logger _logger = Logger("Gallery");
   final ScrollController _scrollController = ScrollController();
-  final List<List<Photo>> _collatedPhotos = List<List<Photo>>();
+  final List<List<File>> _collatedFiles = List<List<File>>();
 
   bool _requiresLoad = false;
-  AsyncSnapshot<List<Photo>> _lastSnapshot;
-  Set<Photo> _selectedPhotos = HashSet<Photo>();
-  List<Photo> _photos;
+  AsyncSnapshot<List<File>> _lastSnapshot;
+  Set<File> _selectedFiles = HashSet<File>();
+  List<File> _files;
   RefreshController _refreshController = RefreshController();
 
   @override
@@ -66,7 +66,7 @@ class _GalleryState extends State<Gallery> {
     if (!_requiresLoad) {
       return _onSnapshotAvailable(_lastSnapshot);
     }
-    return FutureBuilder<List<Photo>>(
+    return FutureBuilder<List<File>>(
       future: widget.loader(),
       builder: (context, snapshot) {
         _lastSnapshot = snapshot;
@@ -75,7 +75,7 @@ class _GalleryState extends State<Gallery> {
     );
   }
 
-  Widget _onSnapshotAvailable(AsyncSnapshot<List<Photo>> snapshot) {
+  Widget _onSnapshotAvailable(AsyncSnapshot<List<File>> snapshot) {
     if (snapshot.hasData) {
       _requiresLoad = false;
       return _onDataLoaded(snapshot.data);
@@ -87,15 +87,15 @@ class _GalleryState extends State<Gallery> {
     }
   }
 
-  Widget _onDataLoaded(List<Photo> photos) {
-    _photos = photos;
-    if (_photos.isEmpty) {
+  Widget _onDataLoaded(List<File> files) {
+    _files = files;
+    if (_files.isEmpty) {
       return Center(child: Text("Nothing to see here! 👀"));
     }
-    _selectedPhotos = widget.selectedPhotos ?? Set<Photo>();
-    _collatePhotos();
+    _selectedFiles = widget.selectedFiles ?? Set<File>();
+    _collateFiles();
     final list = ListView.builder(
-      itemCount: _collatedPhotos.length,
+      itemCount: _collatedFiles.length,
       itemBuilder: _buildListItem,
       controller: _scrollController,
       cacheExtent: 1000,
@@ -123,12 +123,9 @@ class _GalleryState extends State<Gallery> {
   }
 
   Widget _buildListItem(BuildContext context, int index) {
-    var photos = _collatedPhotos[index];
+    var files = _collatedFiles[index];
     return Column(
-      children: <Widget>[
-        _getDay(photos[0].createTimestamp),
-        _getGallery(photos)
-      ],
+      children: <Widget>[_getDay(files[0].createTimestamp), _getGallery(files)],
     );
   }
 
@@ -143,64 +140,64 @@ class _GalleryState extends State<Gallery> {
     );
   }
 
-  Widget _getGallery(List<Photo> photos) {
+  Widget _getGallery(List<File> files) {
     return GridView.builder(
       shrinkWrap: true,
       padding: EdgeInsets.only(bottom: 12),
       physics: ScrollPhysics(), // to disable GridView's scrolling
       itemBuilder: (context, index) {
-        return _buildPhoto(context, photos[index]);
+        return _buildFile(context, files[index]);
       },
-      itemCount: photos.length,
+      itemCount: files.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
       ),
     );
   }
 
-  Widget _buildPhoto(BuildContext context, Photo photo) {
+  Widget _buildFile(BuildContext context, File file) {
     return GestureDetector(
       onTap: () {
-        if (_selectedPhotos.isNotEmpty) {
-          _selectPhoto(photo);
+        if (_selectedFiles.isNotEmpty) {
+          _selectFile(file);
         } else {
-          _routeToDetailPage(photo, context);
+          _routeToDetailPage(file, context);
         }
       },
       onLongPress: () {
         HapticFeedback.lightImpact();
-        _selectPhoto(photo);
+        _selectFile(file);
       },
       child: Container(
         margin: const EdgeInsets.all(2.0),
         decoration: BoxDecoration(
-          border: _selectedPhotos.contains(photo)
+          border: _selectedFiles.contains(file)
               ? Border.all(width: 4.0, color: Colors.blue)
               : null,
         ),
         child: Hero(
-          tag: photo.generatedId.toString(),
-          child: ThumbnailWidget(photo),
+          tag: file.generatedId.toString(),
+          child: ThumbnailWidget(file),
         ),
       ),
     );
   }
 
-  void _selectPhoto(Photo photo) {
+  void _selectFile(File file) {
     setState(() {
-      if (_selectedPhotos.contains(photo)) {
-        _selectedPhotos.remove(photo);
+      if (_selectedFiles.contains(file)) {
+        _selectedFiles.remove(file);
       } else {
-        _selectedPhotos.add(photo);
+        _selectedFiles.add(file);
       }
-      widget.onPhotoSelectionChange(_selectedPhotos);
+      widget.onFileSelectionChange(_selectedFiles);
     });
   }
 
-  void _routeToDetailPage(Photo photo, BuildContext context) {
+  void _routeToDetailPage(File file, BuildContext context) {
     final page = DetailPage(
-      _photos,
-      _photos.indexOf(photo),
+      _files,
+      _files.indexOf(file),
     );
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -211,31 +208,30 @@ class _GalleryState extends State<Gallery> {
     );
   }
 
-  void _collatePhotos() {
-    final dailyPhotos = List<Photo>();
-    final collatedPhotos = List<List<Photo>>();
-    for (int index = 0; index < _photos.length; index++) {
+  void _collateFiles() {
+    final dailyFiles = List<File>();
+    final collatedFiles = List<List<File>>();
+    for (int index = 0; index < _files.length; index++) {
       if (index > 0 &&
-          !_arePhotosFromSameDay(_photos[index], _photos[index - 1])) {
-        var collatedDailyPhotos = List<Photo>();
-        collatedDailyPhotos.addAll(dailyPhotos);
-        collatedPhotos.add(collatedDailyPhotos);
-        dailyPhotos.clear();
+          !_areFilesFromSameDay(_files[index], _files[index - 1])) {
+        var collatedDailyFiles = List<File>();
+        collatedDailyFiles.addAll(dailyFiles);
+        collatedFiles.add(collatedDailyFiles);
+        dailyFiles.clear();
       }
-      dailyPhotos.add(_photos[index]);
+      dailyFiles.add(_files[index]);
     }
-    if (dailyPhotos.isNotEmpty) {
-      collatedPhotos.add(dailyPhotos);
+    if (dailyFiles.isNotEmpty) {
+      collatedFiles.add(dailyFiles);
     }
-    _collatedPhotos.clear();
-    _collatedPhotos.addAll(collatedPhotos);
+    _collatedFiles.clear();
+    _collatedFiles.addAll(collatedFiles);
   }
 
-  bool _arePhotosFromSameDay(Photo firstPhoto, Photo secondPhoto) {
-    var firstDate =
-        DateTime.fromMicrosecondsSinceEpoch(firstPhoto.createTimestamp);
+  bool _areFilesFromSameDay(File first, File second) {
+    var firstDate = DateTime.fromMicrosecondsSinceEpoch(first.createTimestamp);
     var secondDate =
-        DateTime.fromMicrosecondsSinceEpoch(secondPhoto.createTimestamp);
+        DateTime.fromMicrosecondsSinceEpoch(second.createTimestamp);
     return firstDate.year == secondDate.year &&
         firstDate.month == secondDate.month &&
         firstDate.day == secondDate.day;

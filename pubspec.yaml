@@ -51,6 +51,8 @@ dependencies:
   pull_to_refresh: ^1.5.7
   fluttertoast: ^4.0.1
   extended_image: ^0.9.0
+  video_player: ^0.10.11+1
+  chewie: ^0.9.10
 
 dev_dependencies:
   flutter_test:

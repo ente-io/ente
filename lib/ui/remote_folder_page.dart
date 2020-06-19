@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/db/photo_db.dart';
 import 'package:photos/folder_service.dart';
 import 'package:photos/models/folder.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 
@@ -16,7 +16,7 @@ class RemoteFolderPage extends StatefulWidget {
 }
 
 class _RemoteFolderPageState extends State<RemoteFolderPage> {
-  Set<Photo> _selectedPhotos = Set<Photo>();
+  Set<File> _selectedPhotos = Set<File>();
 
   @override
   Widget build(Object context) {
@@ -32,12 +32,11 @@ class _RemoteFolderPageState extends State<RemoteFolderPage> {
           });
         },
       ),
-      body: Gallery(
-          () => PhotoDB.instance.getAllPhotosInFolder(widget.folder.id),
+      body: Gallery(() => FileDB.instance.getAllInFolder(widget.folder.id),
           onRefresh: () =>
               FolderSharingService.instance.syncDiff(widget.folder),
-          selectedPhotos: _selectedPhotos,
-          onPhotoSelectionChange: (Set<Photo> selectedPhotos) {
+          selectedFiles: _selectedPhotos,
+          onFileSelectionChange: (Set<File> selectedPhotos) {
             setState(
               () {
                 _selectedPhotos = selectedPhotos;

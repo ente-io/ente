@@ -3,17 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/favorite_photos_repository.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file_type.dart';
+import 'package:photos/models/file.dart';
+import 'package:photos/ui/video_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:logging/logging.dart';
 
 class DetailPage extends StatefulWidget {
-  final List<Photo> photos;
+  final List<File> files;
   final int selectedIndex;
 
-  DetailPage(this.photos, this.selectedIndex, {key}) : super(key: key);
+  DetailPage(this.files, this.selectedIndex, {key}) : super(key: key);
 
   @override
   _DetailPageState createState() => _DetailPageState();
@@ -22,12 +24,12 @@ class DetailPage extends StatefulWidget {
 class _DetailPageState extends State<DetailPage> {
   final _logger = Logger("DetailPageState");
   bool _shouldDisableScroll = false;
-  List<Photo> _photos;
+  List<File> _files;
   int _selectedIndex = 0;
 
   @override
   void initState() {
-    _photos = widget.photos;
+    _files = widget.files;
     _selectedIndex = widget.selectedIndex;
     super.initState();
   }
@@ -35,12 +37,12 @@ class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Opening " +
-        _photos[_selectedIndex].toString() +
+        _files[_selectedIndex].toString() +
         ". " +
         _selectedIndex.toString() +
         " / " +
-        _photos.length.toString() +
-        " photos .");
+        _files.length.toString() +
+        " files .");
     return Scaffold(
       appBar: _buildAppBar(),
       body: Center(
@@ -54,52 +56,59 @@ class _DetailPageState extends State<DetailPage> {
   Widget _buildPageView() {
     return PageView.builder(
       itemBuilder: (context, index) {
-        final photo = _photos[index];
-        final image = ZoomableImage(
-          photo,
-          shouldDisableScroll: (value) {
-            setState(() {
-              _shouldDisableScroll = value;
-            });
-          },
-        );
-        _preloadPhotos(index);
-        return image;
+        final file = _files[index];
+        Widget content;
+        if (file.fileType == FileType.image) {
+          content = ZoomableImage(
+            file,
+            shouldDisableScroll: (value) {
+              setState(() {
+                _shouldDisableScroll = value;
+              });
+            },
+          );
+        } else if (file.fileType == FileType.video) {
+          content = VideoWidget(file);
+        } else {
+          content = Icon(Icons.error);
+        }
+        _preloadFiles(index);
+        return content;
       },
       onPageChanged: (index) {
         setState(() {
           _selectedIndex = index;
         });
-        _preloadPhotos(index);
+        _preloadFiles(index);
       },
       physics: _shouldDisableScroll
           ? NeverScrollableScrollPhysics()
           : PageScrollPhysics(),
       controller: PageController(initialPage: _selectedIndex),
-      itemCount: _photos.length,
+      itemCount: _files.length,
     );
   }
 
-  void _preloadPhotos(int index) {
+  void _preloadFiles(int index) {
     if (index > 0) {
-      _preloadPhoto(_photos[index - 1]);
+      _preloadFile(_files[index - 1]);
     }
-    if (index < _photos.length - 1) {
-      _preloadPhoto(_photos[index + 1]);
+    if (index < _files.length - 1) {
+      _preloadFile(_files[index + 1]);
     }
   }
 
-  void _preloadPhoto(Photo photo) {
-    if (photo.localId == null) {
-      photo.getBytes().then((data) {
-        BytesLruCache.put(photo, data);
+  void _preloadFile(File file) {
+    if (file.localId == null) {
+      file.getBytes().then((data) {
+        BytesLruCache.put(file, data);
       });
     } else {
-      final cachedFile = FileLruCache.get(photo);
+      final cachedFile = FileLruCache.get(file);
       if (cachedFile == null) {
-        photo.getAsset().then((asset) {
-          asset.file.then((file) {
-            FileLruCache.put(photo, file);
+        file.getAsset().then((asset) {
+          asset.file.then((assetFile) {
+            FileLruCache.put(file, assetFile);
           });
         });
       }
@@ -108,7 +117,7 @@ class _DetailPageState extends State<DetailPage> {
 
   AppBar _buildAppBar() {
     final actions = List<Widget>();
-    if (_photos[_selectedIndex].localId != null) {
+    if (_files[_selectedIndex].localId != null) {
       actions.add(_getFavoriteButton());
     }
     actions.add(PopupMenuButton(
@@ -142,9 +151,9 @@ class _DetailPageState extends State<DetailPage> {
       },
       onSelected: (value) {
         if (value == 1) {
-          share(_photos[_selectedIndex]);
+          share(_files[_selectedIndex]);
         } else if (value == 2) {
-          _displayInfo(_photos[_selectedIndex]);
+          _displayInfo(_files[_selectedIndex]);
         }
       },
     ));
@@ -154,52 +163,61 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget _getFavoriteButton() {
-    final photo = _photos[_selectedIndex];
+    final file = _files[_selectedIndex];
     return LikeButton(
-      isLiked: FavoritePhotosRepository.instance.isLiked(photo),
+      isLiked: FavoriteFilesRepository.instance.isLiked(file),
       onTap: (oldValue) {
-        return FavoritePhotosRepository.instance.setLiked(photo, !oldValue);
+        return FavoriteFilesRepository.instance.setLiked(file, !oldValue);
       },
     );
   }
 
-  Future<void> _displayInfo(Photo photo) async {
-    final asset = await photo.getAsset();
+  Future<void> _displayInfo(File file) async {
+    final asset = await file.getAsset();
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
+        var items = <Widget>[
+          Row(
+            children: [
+              Icon(Icons.timer),
+              Padding(padding: EdgeInsets.all(4)),
+              Text(getFormattedTime(
+                  DateTime.fromMicrosecondsSinceEpoch(file.createTimestamp))),
+            ],
+          ),
+          Padding(padding: EdgeInsets.all(4)),
+          Row(
+            children: [
+              Icon(Icons.folder),
+              Padding(padding: EdgeInsets.all(4)),
+              Text(file.deviceFolder),
+            ],
+          ),
+          Padding(padding: EdgeInsets.all(4)),
+        ];
+        if (file.fileType == FileType.image) {
+          items.add(Row(
+            children: [
+              Icon(Icons.photo_size_select_actual),
+              Padding(padding: EdgeInsets.all(4)),
+              Text(asset.width.toString() + " x " + asset.height.toString()),
+            ],
+          ));
+        } else {
+          items.add(Row(
+            children: [
+              Icon(Icons.timer),
+              Padding(padding: EdgeInsets.all(4)),
+              Text(asset.videoDuration.toString()),
+            ],
+          ));
+        }
         return AlertDialog(
-          title: Text(photo.title),
+          title: Text(file.title),
           content: SingleChildScrollView(
             child: ListBody(
-              children: <Widget>[
-                Row(
-                  children: [
-                    Icon(Icons.timer),
-                    Padding(padding: EdgeInsets.all(4)),
-                    Text(getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(
-                        photo.createTimestamp))),
-                  ],
-                ),
-                Padding(padding: EdgeInsets.all(4)),
-                Row(
-                  children: [
-                    Icon(Icons.folder),
-                    Padding(padding: EdgeInsets.all(4)),
-                    Text(photo.deviceFolder),
-                  ],
-                ),
-                Padding(padding: EdgeInsets.all(4)),
-                Row(
-                  children: [
-                    Icon(Icons.photo_size_select_actual),
-                    Padding(padding: EdgeInsets.all(4)),
-                    Text(asset.width.toString() +
-                        " x " +
-                        asset.height.toString()),
-                  ],
-                ),
-              ],
+              children: items,
             ),
           ),
           actions: <Widget>[

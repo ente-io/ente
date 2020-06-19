@@ -1,20 +1,21 @@
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
-class PhotoDB {
+class FileDB {
   // TODO: Use different tables within the same database
-  static final _databaseName = "ente.photos.db";
+  static final _databaseName = "ente.files.db";
   static final _databaseVersion = 1;
 
-  static final Logger _logger = Logger("PhotoDB");
+  static final Logger _logger = Logger("FileDB");
 
-  static final table = 'photos';
+  static final table = 'files';
 
   static final columnGeneratedId = '_id';
   static final columnUploadedFileId = 'uploaded_file_id';
@@ -23,6 +24,7 @@ class PhotoDB {
   static final columnDeviceFolder = 'device_folder';
   static final columnLatitude = 'latitude';
   static final columnLongitude = 'longitude';
+  static final columnFileType = 'file_type';
   static final columnRemoteFolderId = 'remote_folder_id';
   static final columnRemotePath = 'remote_path';
   static final columnThumbnailPath = 'thumbnail_path';
@@ -31,8 +33,8 @@ class PhotoDB {
   static final columnUpdateTimestamp = 'update_timestamp';
 
   // make this a singleton class
-  PhotoDB._privateConstructor();
-  static final PhotoDB instance = PhotoDB._privateConstructor();
+  FileDB._privateConstructor();
+  static final FileDB instance = FileDB._privateConstructor();
 
   // only have a single app-wide reference to the database
   static Database _database;
@@ -62,6 +64,7 @@ class PhotoDB {
             $columnDeviceFolder TEXT NOT NULL,
             $columnLatitude REAL,
             $columnLongitude REAL,
+            $columnFileType INTEGER,
             $columnRemoteFolderId INTEGER,
             $columnRemotePath TEXT,
             $columnThumbnailPath TEXT,
@@ -72,37 +75,37 @@ class PhotoDB {
           ''');
   }
 
-  Future<int> insertPhoto(Photo photo) async {
+  Future<int> insert(File file) async {
     final db = await instance.database;
-    return await db.insert(table, _getRowForPhoto(photo));
+    return await db.insert(table, _getRowForFile(file));
   }
 
-  Future<List<dynamic>> insertPhotos(List<Photo> photos) async {
+  Future<List<dynamic>> insertMultiple(List<File> files) async {
     final db = await instance.database;
     var batch = db.batch();
     int batchCounter = 0;
-    for (Photo photo in photos) {
+    for (File file in files) {
       if (batchCounter == 400) {
         await batch.commit();
         batch = db.batch();
       }
-      batch.insert(table, _getRowForPhoto(photo));
+      batch.insert(table, _getRowForFile(file));
       batchCounter++;
     }
     return await batch.commit();
   }
 
-  Future<List<Photo>> getAllPhotos() async {
+  Future<List<File>> getAll() async {
     final db = await instance.database;
     final results = await db.query(
       table,
       where: '$columnLocalId IS NOT NULL AND $columnIsDeleted = 0',
       orderBy: '$columnCreateTimestamp DESC',
     );
-    return _convertToPhotos(results);
+    return _convertToFiles(results);
   }
 
-  Future<List<Photo>> getAllPhotosInFolder(int folderId) async {
+  Future<List<File>> getAllInFolder(int folderId) async {
     final db = await instance.database;
     final results = await db.query(
       table,
@@ -110,30 +113,30 @@ class PhotoDB {
       whereArgs: [folderId],
       orderBy: '$columnCreateTimestamp DESC',
     );
-    return _convertToPhotos(results);
+    return _convertToFiles(results);
   }
 
-  Future<List<Photo>> getAllDeletedPhotos() async {
+  Future<List<File>> getAllDeleted() async {
     final db = await instance.database;
     final results = await db.query(
       table,
       where: '$columnIsDeleted = 1',
       orderBy: '$columnCreateTimestamp DESC',
     );
-    return _convertToPhotos(results);
+    return _convertToFiles(results);
   }
 
-  Future<List<Photo>> getPhotosToBeUploaded() async {
+  Future<List<File>> getFilesToBeUploaded() async {
     final db = await instance.database;
     final results = await db.query(
       table,
       where: '$columnUploadedFileId IS NULL',
       orderBy: '$columnCreateTimestamp DESC',
     );
-    return _convertToPhotos(results);
+    return _convertToFiles(results);
   }
 
-  Future<Photo> getMatchingPhoto(
+  Future<File> getMatchingFile(
       String localId, String title, String deviceFolder, int createTimestamp,
       {String alternateTitle}) async {
     final db = await instance.database;
@@ -150,13 +153,13 @@ class PhotoDB {
       ],
     );
     if (rows.isNotEmpty) {
-      return _getPhotoFromRow(rows[0]);
+      return _getFileFromRow(rows[0]);
     } else {
-      throw ("No matching photo found");
+      throw ("No matching file found");
     }
   }
 
-  Future<Photo> getMatchingRemotePhoto(int uploadedFileId) async {
+  Future<File> getMatchingRemoteFile(int uploadedFileId) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
@@ -164,13 +167,13 @@ class PhotoDB {
       whereArgs: [uploadedFileId],
     );
     if (rows.isNotEmpty) {
-      return _getPhotoFromRow(rows[0]);
+      return _getFileFromRow(rows[0]);
     } else {
-      throw ("No matching photo found");
+      throw ("No matching file found");
     }
   }
 
-  Future<int> updatePhoto(
+  Future<int> update(
       int generatedId, int uploadedId, String remotePath, int updateTimestamp,
       [String thumbnailPath]) async {
     final db = await instance.database;
@@ -187,22 +190,8 @@ class PhotoDB {
     );
   }
 
-  Future<Photo> getPhotoByPath(String path) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '$columnRemotePath =?',
-      whereArgs: [path],
-    );
-    if (rows.isNotEmpty) {
-      return _getPhotoFromRow(rows[0]);
-    } else {
-      throw ("No cached photo");
-    }
-  }
-
-  // TODO: Remove deleted photos on remote
-  Future<int> markPhotoForDeletion(Photo photo) async {
+  // TODO: Remove deleted files on remote
+  Future<int> markForDeletion(File file) async {
     final db = await instance.database;
     var values = new Map<String, dynamic>();
     values[columnIsDeleted] = 1;
@@ -210,20 +199,20 @@ class PhotoDB {
       table,
       values,
       where: '$columnGeneratedId =?',
-      whereArgs: [photo.generatedId],
+      whereArgs: [file.generatedId],
     );
   }
 
-  Future<int> deletePhoto(Photo photo) async {
+  Future<int> delete(File file) async {
     final db = await instance.database;
     return db.delete(
       table,
       where: '$columnGeneratedId =?',
-      whereArgs: [photo.generatedId],
+      whereArgs: [file.generatedId],
     );
   }
 
-  Future<int> deletePhotosInRemoteFolder(int folderId) async {
+  Future<int> deleteFilesInRemoteFolder(int folderId) async {
     final db = await instance.database;
     return db.delete(
       table,
@@ -247,7 +236,7 @@ class PhotoDB {
     return result;
   }
 
-  Future<Photo> getLatestPhotoInPath(String path) async {
+  Future<File> getLatestFileInPath(String path) async {
     final db = await instance.database;
     var rows = await db.query(
       table,
@@ -257,13 +246,13 @@ class PhotoDB {
       limit: 1,
     );
     if (rows.isNotEmpty) {
-      return _getPhotoFromRow(rows[0]);
+      return _getFileFromRow(rows[0]);
     } else {
-      throw ("No photo found in path");
+      throw ("No file found in path");
     }
   }
 
-  Future<Photo> getLatestPhotoInRemoteFolder(int folderId) async {
+  Future<File> getLatestFileInRemoteFolder(int folderId) async {
     final db = await instance.database;
     var rows = await db.query(
       table,
@@ -273,13 +262,13 @@ class PhotoDB {
       limit: 1,
     );
     if (rows.isNotEmpty) {
-      return _getPhotoFromRow(rows[0]);
+      return _getFileFromRow(rows[0]);
     } else {
-      throw ("No photo found in remote folder " + folderId.toString());
+      throw ("No file found in remote folder " + folderId.toString());
     }
   }
 
-  Future<Photo> getLastSyncedPhotoInRemoteFolder(int folderId) async {
+  Future<File> getLastSyncedFileInRemoteFolder(int folderId) async {
     final db = await instance.database;
     var rows = await db.query(
       table,
@@ -289,14 +278,13 @@ class PhotoDB {
       limit: 1,
     );
     if (rows.isNotEmpty) {
-      return _getPhotoFromRow(rows[0]);
+      return _getFileFromRow(rows[0]);
     } else {
-      throw ("No photo found in remote folder " + folderId.toString());
+      throw ("No file found in remote folder " + folderId.toString());
     }
   }
 
-  Future<Photo> getLatestPhotoAmongGeneratedIds(
-      List<String> generatedIds) async {
+  Future<File> getLatestFileAmongGeneratedIds(List<String> generatedIds) async {
     final db = await instance.database;
     var rows = await db.query(
       table,
@@ -305,55 +293,66 @@ class PhotoDB {
       limit: 1,
     );
     if (rows.isNotEmpty) {
-      return _getPhotoFromRow(rows[0]);
+      return _getFileFromRow(rows[0]);
     } else {
-      throw ("No photo found with ids " + generatedIds.join(", ").toString());
+      throw ("No file found with ids " + generatedIds.join(", ").toString());
     }
   }
 
-  List<Photo> _convertToPhotos(List<Map<String, dynamic>> results) {
-    var photos = List<Photo>();
+  List<File> _convertToFiles(List<Map<String, dynamic>> results) {
+    var files = List<File>();
     for (var result in results) {
-      photos.add(_getPhotoFromRow(result));
+      files.add(_getFileFromRow(result));
     }
-    return photos;
+    return files;
   }
 
-  Map<String, dynamic> _getRowForPhoto(Photo photo) {
+  Map<String, dynamic> _getRowForFile(File file) {
     var row = new Map<String, dynamic>();
-    row[columnLocalId] = photo.localId;
-    row[columnUploadedFileId] = photo.uploadedFileId;
-    row[columnTitle] = photo.title;
-    row[columnDeviceFolder] = photo.deviceFolder;
-    if (photo.location != null) {
-      row[columnLatitude] = photo.location.latitude;
-      row[columnLongitude] = photo.location.longitude;
+    row[columnLocalId] = file.localId;
+    row[columnUploadedFileId] = file.uploadedFileId;
+    row[columnTitle] = file.title;
+    row[columnDeviceFolder] = file.deviceFolder;
+    if (file.location != null) {
+      row[columnLatitude] = file.location.latitude;
+      row[columnLongitude] = file.location.longitude;
     }
-    row[columnRemoteFolderId] = photo.remoteFolderId;
-    row[columnRemotePath] = photo.remotePath;
-    row[columnThumbnailPath] = photo.thumbnailPath;
-    row[columnCreateTimestamp] = photo.createTimestamp;
-    row[columnUpdateTimestamp] = photo.updateTimestamp;
+    switch (file.fileType) {
+      case FileType.image:
+        row[columnFileType] = 0;
+        break;
+      case FileType.video:
+        row[columnFileType] = 1;
+        break;
+      default:
+        row[columnFileType] = -1;
+    }
+    row[columnRemoteFolderId] = file.remoteFolderId;
+    row[columnRemotePath] = file.remotePath;
+    row[columnThumbnailPath] = file.previewURL;
+    row[columnCreateTimestamp] = file.createTimestamp;
+    row[columnUpdateTimestamp] = file.updateTimestamp;
     return row;
   }
 
-  Photo _getPhotoFromRow(Map<String, dynamic> row) {
-    Photo photo = Photo();
-    photo.generatedId = row[columnGeneratedId];
-    photo.localId = row[columnLocalId];
-    photo.uploadedFileId = row[columnUploadedFileId];
-    photo.title = row[columnTitle];
-    photo.deviceFolder = row[columnDeviceFolder];
+  File _getFileFromRow(Map<String, dynamic> row) {
+    File file = File();
+    file.generatedId = row[columnGeneratedId];
+    file.localId = row[columnLocalId];
+    file.uploadedFileId = row[columnUploadedFileId];
+    file.title = row[columnTitle];
+    file.deviceFolder = row[columnDeviceFolder];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {
-      photo.location = Location(row[columnLatitude], row[columnLongitude]);
+      file.location = Location(row[columnLatitude], row[columnLongitude]);
     }
-    photo.remoteFolderId = row[columnRemoteFolderId];
-    photo.remotePath = row[columnRemotePath];
-    photo.thumbnailPath = row[columnThumbnailPath];
-    photo.createTimestamp = int.parse(row[columnCreateTimestamp]);
-    photo.updateTimestamp = row[columnUpdateTimestamp] == null
+    file.fileType = getFileType(row[columnFileType]);
+    file.remoteFolderId = row[columnRemoteFolderId];
+    file.remotePath = row[columnRemotePath];
+    file.previewURL = row[columnThumbnailPath];
+    file.createTimestamp = int.parse(row[columnCreateTimestamp]);
+    file.updateTimestamp = row[columnUpdateTimestamp] == null
         ? -1
         : int.parse(row[columnUpdateTimestamp]);
-    return photo;
+    return file;
   }
 }

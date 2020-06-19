@@ -6,9 +6,10 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 
-class Photo {
+class File {
   int generatedId;
   int uploadedFileId;
   String localId;
@@ -16,43 +17,57 @@ class Photo {
   String deviceFolder;
   int remoteFolderId;
   String remotePath;
-  String thumbnailPath;
+  String previewURL;
   int createTimestamp;
   int updateTimestamp;
   Location location;
+  FileType fileType;
 
-  Photo();
-  Photo.fromJson(Map<String, dynamic> json)
-      : uploadedFileId = json["fileID"],
-        localId = json["deviceFileID"],
-        deviceFolder = json["deviceFolder"],
-        title = json["title"],
-        remotePath = json["path"],
-        thumbnailPath = json["previewURL"],
-        createTimestamp = json["createTimestamp"],
-        updateTimestamp = json["updateTimestamp"];
+  File();
+  File.fromJson(Map<String, dynamic> json) {
+    uploadedFileId = json["fileID"];
+    localId = json["deviceFileID"];
+    deviceFolder = json["deviceFolder"];
+    title = json["title"];
+    fileType = getFileType(json["fileType"]);
+    remotePath = json["path"];
+    previewURL = json["previewURL"];
+    createTimestamp = json["createTimestamp"];
+    updateTimestamp = json["updateTimestamp"];
+  }
 
-  static Future<Photo> fromAsset(
+  static Future<File> fromAsset(
       AssetPathEntity pathEntity, AssetEntity asset) async {
-    Photo photo = Photo();
-    photo.localId = asset.id;
-    photo.title = asset.title;
-    photo.deviceFolder = pathEntity.name;
-    photo.location = Location(asset.latitude, asset.longitude);
-    photo.createTimestamp = asset.createDateTime.microsecondsSinceEpoch;
-    if (photo.createTimestamp == 0) {
+    File file = File();
+    file.localId = asset.id;
+    file.title = asset.title;
+    file.deviceFolder = pathEntity.name;
+    file.location = Location(asset.latitude, asset.longitude);
+    switch (asset.type) {
+      case AssetType.image:
+        file.fileType = FileType.image;
+        break;
+      case AssetType.video:
+        file.fileType = FileType.video;
+        break;
+      default:
+        file.fileType = FileType.other;
+        break;
+    }
+    file.createTimestamp = asset.createDateTime.microsecondsSinceEpoch;
+    if (file.createTimestamp == 0) {
       try {
         final parsedDateTime = DateTime.parse(
-            basenameWithoutExtension(photo.title)
+            basenameWithoutExtension(file.title)
                 .replaceAll("IMG_", "")
                 .replaceAll("DCIM_", "")
                 .replaceAll("_", " "));
-        photo.createTimestamp = parsedDateTime.microsecondsSinceEpoch;
+        file.createTimestamp = parsedDateTime.microsecondsSinceEpoch;
       } catch (e) {
-        photo.createTimestamp = asset.modifiedDateTime.microsecondsSinceEpoch;
+        file.createTimestamp = asset.modifiedDateTime.microsecondsSinceEpoch;
       }
     }
-    return photo;
+    return file;
   }
 
   Future<AssetEntity> getAsset() {
@@ -88,19 +103,22 @@ class Photo {
   }
 
   String getThumbnailUrl() {
-    return Configuration.instance.getHttpEndpoint() + "/" + thumbnailPath;
+    return Configuration.instance.getHttpEndpoint() + "/" + previewURL;
   }
 
   @override
   String toString() {
-    return 'Photo(generatedId: $generatedId, uploadedFileId: $uploadedFileId, localId: $localId, title: $title, deviceFolder: $deviceFolder, location: $location, remotePath: $remotePath, createTimestamp: $createTimestamp, updateTimestamp: $updateTimestamp)';
+    return '''File(generatedId: $generatedId, uploadedFileId: $uploadedFileId, 
+      localId: $localId, title: $title, deviceFolder: $deviceFolder, 
+      location: $location, remotePath: $remotePath, fileType: $fileType,
+      createTimestamp: $createTimestamp, updateTimestamp: $updateTimestamp)''';
   }
 
   @override
   bool operator ==(Object o) {
     if (identical(this, o)) return true;
 
-    return o is Photo &&
+    return o is File &&
         o.generatedId == generatedId &&
         o.uploadedFileId == uploadedFileId &&
         o.localId == localId;

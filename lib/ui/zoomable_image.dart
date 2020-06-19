@@ -3,13 +3,13 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/constants.dart';
 
 class ZoomableImage extends StatefulWidget {
-  final Photo photo;
+  final File photo;
   final Function(bool) shouldDisableScroll;
 
   ZoomableImage(
@@ -67,7 +67,7 @@ class _ZoomableImageState extends State<ZoomableImage>
   }
 
   void _loadNetworkImage() {
-    if (!_loadedSmallThumbnail && widget.photo.thumbnailPath.isNotEmpty) {
+    if (!_loadedSmallThumbnail && widget.photo.previewURL.isNotEmpty) {
       _imageProvider = Image.network(
         widget.photo.getThumbnailUrl(),
         gaplessPlayback: true,

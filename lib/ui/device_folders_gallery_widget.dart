@@ -68,23 +68,23 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
   }
 
   Future<List<DeviceFolder>> _getDeviceFolders() async {
-    final paths = await PhotoDB.instance.getLocalPaths();
+    final paths = await FileDB.instance.getLocalPaths();
     final folders = List<DeviceFolder>();
     for (final path in paths) {
-      final photo = await PhotoDB.instance.getLatestPhotoInPath(path);
+      final file = await FileDB.instance.getLatestFileInPath(path);
       final folderName = p.basename(path);
       folders
-          .add(DeviceFolder(folderName, photo, FolderNameFilter(folderName)));
+          .add(DeviceFolder(folderName, file, FolderNameFilter(folderName)));
     }
     folders.sort((first, second) {
-      return second.thumbnailPhoto.createTimestamp
-          .compareTo(first.thumbnailPhoto.createTimestamp);
+      return second.thumbnail.createTimestamp
+          .compareTo(first.thumbnail.createTimestamp);
     });
-    if (FavoritePhotosRepository.instance.hasFavorites()) {
-      final photo = await PhotoDB.instance.getLatestPhotoAmongGeneratedIds(
-          FavoritePhotosRepository.instance.getLiked().toList());
+    if (FavoriteFilesRepository.instance.hasFavorites()) {
+      final file = await FileDB.instance.getLatestFileAmongGeneratedIds(
+          FavoriteFilesRepository.instance.getLiked().toList());
       folders.insert(
-          0, DeviceFolder("Favorites", photo, FavoriteItemsFilter()));
+          0, DeviceFolder("Favorites", file, FavoriteItemsFilter()));
     }
     return folders;
   }
@@ -94,7 +94,7 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
       child: Column(
         children: <Widget>[
           Container(
-            child: ThumbnailWidget(folder.thumbnailPhoto),
+            child: ThumbnailWidget(folder.thumbnail),
             height: 150,
             width: 150,
           ),

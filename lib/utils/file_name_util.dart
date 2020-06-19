@@ -1,14 +1,14 @@
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 import 'package:path/path.dart';
 
-String getJPGFileNameForHEIC(Photo photo) {
-  return extension(photo.title) == ".HEIC"
-      ? basenameWithoutExtension(photo.title) + ".JPG"
-      : photo.title;
+String getJPGFileNameForHEIC(File file) {
+  return extension(file.title) == ".HEIC"
+      ? basenameWithoutExtension(file.title) + ".JPG"
+      : file.title;
 }
 
-String getHEICFileNameForJPG(Photo photo) {
-  return extension(photo.title) == ".JPG"
-      ? basenameWithoutExtension(photo.title) + ".HEIC"
-      : photo.title;
+String getHEICFileNameForJPG(File file) {
+  return extension(file.title) == ".JPG"
+      ? basenameWithoutExtension(file.title) + ".HEIC"
+      : file.title;
 }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 
 class ThumbnailWidget extends StatefulWidget {
-  final Photo photo;
+  final File photo;
 
   const ThumbnailWidget(
     this.photo, {
@@ -78,7 +78,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   void _loadNetworkImage() {
-    final url = widget.photo.thumbnailPath.isNotEmpty
+    final url = widget.photo.previewURL.isNotEmpty
         ? widget.photo.getThumbnailUrl()
         : widget.photo.getRemoteUrl();
     _imageProvider = Image.network(url).image;

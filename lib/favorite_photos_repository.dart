@@ -1,13 +1,13 @@
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class FavoritePhotosRepository {
+class FavoriteFilesRepository {
   static final _favoritePhotoIdsKey = "favorite_photo_ids";
-  FavoritePhotosRepository._privateConstructor();
-  static FavoritePhotosRepository instance =
-      FavoritePhotosRepository._privateConstructor();
+  FavoriteFilesRepository._privateConstructor();
+  static FavoriteFilesRepository instance =
+      FavoriteFilesRepository._privateConstructor();
 
   SharedPreferences _preferences;
 
@@ -15,7 +15,7 @@ class FavoritePhotosRepository {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  bool isLiked(Photo photo) {
+  bool isLiked(File photo) {
     return getLiked().contains(photo.generatedId.toString());
   }
 
@@ -23,7 +23,7 @@ class FavoritePhotosRepository {
     return getLiked().isNotEmpty;
   }
 
-  Future<bool> setLiked(Photo photo, bool isLiked) {
+  Future<bool> setLiked(File photo, bool isLiked) {
     final liked = getLiked();
     if (isLiked) {
       liked.add(photo.generatedId.toString());

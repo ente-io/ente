@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_folder.dart';
-import 'package:photos/models/photo.dart';
-import 'package:photos/photo_repository.dart';
+import 'package:photos/models/file.dart';
+import 'package:photos/file_repository.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:logging/logging.dart';
@@ -21,7 +21,7 @@ class DeviceFolderPage extends StatefulWidget {
 
 class _DeviceFolderPageState extends State<DeviceFolderPage> {
   final logger = Logger("DeviceFolderPageState");
-  Set<Photo> _selectedPhotos = Set<Photo>();
+  Set<File> _selectedFiles = Set<File>();
   StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
 
   @override
@@ -38,34 +38,34 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
       appBar: GalleryAppBarWidget(
         GalleryAppBarType.local_folder,
         widget.folder.name,
-        widget.folder.thumbnailPhoto.deviceFolder,
-        _selectedPhotos,
+        widget.folder.thumbnail.deviceFolder,
+        _selectedFiles,
         onSelectionClear: () {
           setState(() {
-            _selectedPhotos.clear();
+            _selectedFiles.clear();
           });
         },
       ),
       body: Gallery(
-        () => Future.value(_getFilteredPhotos(PhotoRepository.instance.photos)),
-        selectedPhotos: _selectedPhotos,
-        onPhotoSelectionChange: (Set<Photo> selectedPhotos) {
+        () => Future.value(_getFilteredFiles(FileRepository.instance.files)),
+        selectedFiles: _selectedFiles,
+        onFileSelectionChange: (Set<File> selectedFiles) {
           setState(() {
-            _selectedPhotos = selectedPhotos;
+            _selectedFiles = selectedFiles;
           });
         },
       ),
     );
   }
 
-  List<Photo> _getFilteredPhotos(List<Photo> unfilteredPhotos) {
-    final List<Photo> filteredPhotos = List<Photo>();
-    for (Photo photo in unfilteredPhotos) {
-      if (widget.folder.filter.shouldInclude(photo)) {
-        filteredPhotos.add(photo);
+  List<File> _getFilteredFiles(List<File> unfilteredFiles) {
+    final List<File> filteredFiles = List<File>();
+    for (File file in unfilteredFiles) {
+      if (widget.folder.filter.shouldInclude(file)) {
+        filteredFiles.add(file);
       }
     }
-    return filteredPhotos;
+    return filteredFiles;
   }
 
   @override

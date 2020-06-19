@@ -8,7 +8,7 @@ import 'package:photos/db/photo_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/folder.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 
 import 'core/event_bus.dart';
 
@@ -39,7 +39,7 @@ class FolderSharingService {
       for (final currentFolder in currentFolders) {
         if (!folders.contains(currentFolder)) {
           _logger.info("Folder deleted: " + currentFolder.toString());
-          await PhotoDB.instance.deletePhotosInRemoteFolder(currentFolder.id);
+          await FileDB.instance.deleteFilesInRemoteFolder(currentFolder.id);
           await FolderDB.instance.deleteFolder(currentFolder);
         }
       }
@@ -58,25 +58,25 @@ class FolderSharingService {
   Future<void> syncDiff(Folder folder) async {
     int lastSyncTimestamp = 0;
     try {
-      Photo photo =
-          await PhotoDB.instance.getLastSyncedPhotoInRemoteFolder(folder.id);
-      lastSyncTimestamp = photo.updateTimestamp;
+      File file =
+          await FileDB.instance.getLastSyncedFileInRemoteFolder(folder.id);
+      lastSyncTimestamp = file.updateTimestamp;
     } catch (e) {
       // Folder has never been synced
     }
     var diff = await getDiff(folder.id, lastSyncTimestamp, _diffLimit);
-    for (Photo photo in diff) {
+    for (File file in diff) {
       try {
         var existingPhoto =
-            await PhotoDB.instance.getMatchingRemotePhoto(photo.uploadedFileId);
-        await PhotoDB.instance.updatePhoto(
+            await FileDB.instance.getMatchingRemoteFile(file.uploadedFileId);
+        await FileDB.instance.update(
             existingPhoto.generatedId,
-            photo.uploadedFileId,
-            photo.remotePath,
-            photo.updateTimestamp,
-            photo.thumbnailPath);
+            file.uploadedFileId,
+            file.remotePath,
+            file.updateTimestamp,
+            file.previewURL);
       } catch (e) {
-        await PhotoDB.instance.insertPhoto(photo);
+        await FileDB.instance.insert(file);
       }
     }
     if (diff.length == _diffLimit) {
@@ -84,7 +84,7 @@ class FolderSharingService {
     }
   }
 
-  Future<List<Photo>> getDiff(
+  Future<List<File>> getDiff(
       int folderId, int sinceTimestamp, int limit) async {
     Response response = await _dio.get(
       Configuration.instance.getHttpEndpoint() +
@@ -99,13 +99,13 @@ class FolderSharingService {
     ).catchError((e) => _logger.severe(e));
     if (response != null) {
       return (response.data["diff"] as List).map((p) {
-        Photo photo = new Photo.fromJson(p);
-        photo.localId = null;
-        photo.remoteFolderId = folderId;
-        return photo;
+        File file = new File.fromJson(p);
+        file.localId = null;
+        file.remoteFolderId = folderId;
+        return file;
       }).toList();
     } else {
-      return List<Photo>();
+      return List<File>();
     }
   }
 

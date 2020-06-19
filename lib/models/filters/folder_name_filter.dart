@@ -1,5 +1,5 @@
 import 'package:photos/models/filters/gallery_items_filter.dart';
-import 'package:photos/models/photo.dart';
+import 'package:photos/models/file.dart';
 import 'package:path/path.dart' as path;
 
 class FolderNameFilter implements GalleryItemsFilter {
@@ -8,7 +8,7 @@ class FolderNameFilter implements GalleryItemsFilter {
   FolderNameFilter(this.folderName);
 
   @override
-  bool shouldInclude(Photo photo) {
-    return path.basename(photo.deviceFolder) == folderName;
+  bool shouldInclude(File file) {
+    return path.basename(file.deviceFolder) == folderName;
   }
 }

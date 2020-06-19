@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
-import 'package:photos/models/photo.dart';
-import 'package:photos/photo_repository.dart';
+import 'package:photos/models/file.dart';
+import 'package:photos/file_repository.dart';
 import 'package:photos/photo_sync_manager.dart';
 import 'package:photos/ui/device_folders_gallery_widget.dart';
 import 'package:photos/ui/gallery.dart';
@@ -38,7 +38,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   ShakeDetector _detector;
   int _selectedNavBarItem = 0;
-  Set<Photo> _selectedPhotos = HashSet<Photo>();
+  Set<File> _selectedPhotos = HashSet<File>();
   StreamSubscription<LocalPhotosUpdatedEvent>
       _localPhotosUpdatedEventSubscription;
 
@@ -110,18 +110,18 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _getMainGalleryWidget() {
     return FutureBuilder<bool>(
-      future: PhotoRepository.instance.loadPhotos(),
+      future: FileRepository.instance.loadFiles(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Gallery(
-            () => Future.value(
-                _getFilteredPhotos(PhotoRepository.instance.photos)),
+            () =>
+                Future.value(_getFilteredPhotos(FileRepository.instance.files)),
             reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
             onRefresh: () {
               return PhotoSyncManager.instance.sync();
             },
-            selectedPhotos: _selectedPhotos,
-            onPhotoSelectionChange: (Set<Photo> selectedPhotos) {
+            selectedFiles: _selectedPhotos,
+            onFileSelectionChange: (Set<File> selectedPhotos) {
               setState(() {
                 _selectedPhotos = selectedPhotos;
               });
@@ -162,11 +162,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  List<Photo> _getFilteredPhotos(List<Photo> unfilteredPhotos) {
-    final List<Photo> filteredPhotos = List<Photo>();
-    for (Photo photo in unfilteredPhotos) {
-      if (importantItemsFilter.shouldInclude(photo)) {
-        filteredPhotos.add(photo);
+  List<File> _getFilteredPhotos(List<File> unfilteredFiles) {
+    final List<File> filteredPhotos = List<File>();
+    for (File file in unfilteredFiles) {
+      if (importantItemsFilter.shouldInclude(file)) {
+        filteredPhotos.add(file);
       }
     }
     return filteredPhotos;

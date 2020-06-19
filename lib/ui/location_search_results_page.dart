@@ -3,10 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/models/location.dart';
-import 'package:photos/models/photo.dart';
-import 'package:photos/photo_repository.dart';
+import 'package:photos/models/file.dart';
+import 'package:photos/file_repository.dart';
 import 'package:photos/ui/gallery.dart';
-import 'package:photos/ui/loading_widget.dart';
 
 class ViewPort {
   final Location northEast;
@@ -45,25 +44,25 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
     );
   }
 
-  FutureOr<List<Photo>> _getResult() async {
-    final photos = PhotoRepository.instance.photos;
+  FutureOr<List<File>> _getResult() async {
+    final files = FileRepository.instance.files;
     final args = Map<String, dynamic>();
-    args['photos'] = photos;
+    args['files'] = files;
     args['viewPort'] = widget.viewPort;
     return _filterPhotos(args);
   }
 
-  static List<Photo> _filterPhotos(Map<String, dynamic> args) {
-    List<Photo> photos = args['photos'];
+  static List<File> _filterPhotos(Map<String, dynamic> args) {
+    List<File> files = args['files'];
     ViewPort viewPort = args['viewPort'];
-    final result = List<Photo>();
-    for (final photo in photos) {
-      if (photo.location != null &&
-          viewPort.northEast.latitude > photo.location.latitude &&
-          viewPort.southWest.latitude < photo.location.latitude &&
-          viewPort.northEast.longitude > photo.location.longitude &&
-          viewPort.southWest.longitude < photo.location.longitude) {
-        result.add(photo);
+    final result = List<File>();
+    for (final file in files) {
+      if (file.location != null &&
+          viewPort.northEast.latitude > file.location.latitude &&
+          viewPort.southWest.latitude < file.location.latitude &&
+          viewPort.northEast.longitude > file.location.longitude &&
+          viewPort.southWest.longitude < file.location.longitude) {
+        result.add(file);
       } else {}
     }
     return result;

@@ -27,7 +27,7 @@ void _main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Configuration.instance.init();
-  FavoritePhotosRepository.instance.init();
+  FavoriteFilesRepository.instance.init();
   _sync();
 
   final SentryClient sentry = new SentryClient(dsn: SENTRY_DSN);
