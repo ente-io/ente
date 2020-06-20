@@ -1,6 +1,8 @@
 import 'package:chewie/chewie.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/ui/video_controls.dart';
 import 'package:video_player/video_player.dart';
 
 import 'loading_widget.dart';
@@ -61,6 +63,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       autoInitialize: true,
       looping: true,
       allowFullScreen: false,
+      customControls: VideoControls(),
     );
   }
 }
