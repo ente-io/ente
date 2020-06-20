@@ -45,6 +45,7 @@ class _DetailPageState extends State<DetailPage> {
         " files .");
     return Scaffold(
       appBar: _buildAppBar(),
+      extendBodyBehindAppBar: true,
       body: Center(
         child: Container(
           child: _buildPageView(),
@@ -160,6 +161,8 @@ class _DetailPageState extends State<DetailPage> {
     ));
     return AppBar(
       actions: actions,
+      backgroundColor: Color(0x00000000),
+      elevation: 0,
     );
   }
 
@@ -169,6 +172,13 @@ class _DetailPageState extends State<DetailPage> {
       isLiked: FavoriteFilesRepository.instance.isLiked(file),
       onTap: (oldValue) {
         return FavoriteFilesRepository.instance.setLiked(file, !oldValue);
+      },
+      likeBuilder: (isLiked) {
+        return Icon(
+          Icons.favorite_border,
+          color: isLiked ? Colors.pinkAccent : Colors.white,
+          size: 30,
+        );
       },
     );
   }
