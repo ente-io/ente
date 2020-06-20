@@ -16,8 +16,10 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         children: [
           loadWidget,
           Padding(padding: EdgeInsets.all(16)),
-          Text(
-            "Hang on tight, your photos will appear in a jiffy! 🐣",
+          Center(
+            child: Text(
+              "Hang on tight, your photos will appear in a jiffy! 🐣",
+            ),
           )
         ],
       ),
