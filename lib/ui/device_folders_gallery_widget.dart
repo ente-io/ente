@@ -96,13 +96,14 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
             height: 150,
             width: 150,
           ),
-          Padding(padding: EdgeInsets.all(2)),
-          Expanded(
+          Padding(
+            padding: const EdgeInsets.all(12.0),
             child: Text(
               folder.name,
               style: TextStyle(
                 fontSize: 16,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
