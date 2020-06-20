@@ -50,6 +50,7 @@ class _DetailPageState extends State<DetailPage> {
           child: _buildPageView(),
         ),
       ),
+      backgroundColor: Colors.black,
     );
   }
 
