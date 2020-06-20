@@ -39,8 +39,10 @@ class _VideoWidgetState extends State<VideoWidget> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return loadWidget;
         }
-        return Chewie(
-          controller: _chewieController,
+        return Container(
+          child: Chewie(
+            controller: _chewieController,
+          ),
         );
       },
     );
@@ -52,13 +54,13 @@ class _VideoWidgetState extends State<VideoWidget> {
         : await (await widget.file.getAsset()).getMediaUrl();
     _videoPlayerController = VideoPlayerController.network(url);
     await _videoPlayerController.initialize();
-    setState(() {
-      _chewieController = ChewieController(
-        videoPlayerController: _videoPlayerController,
-        aspectRatio: _videoPlayerController.value.aspectRatio,
-        autoPlay: true,
-        autoInitialize: true,
-      );
-    });
+    _chewieController = ChewieController(
+      videoPlayerController: _videoPlayerController,
+      aspectRatio: _videoPlayerController.value.aspectRatio,
+      autoPlay: true,
+      autoInitialize: true,
+      looping: true,
+      allowFullScreen: false,
+    );
   }
 }
