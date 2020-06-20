@@ -3,6 +3,7 @@ import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/models/file.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/models/file_type.dart';
 
 class ThumbnailWidget extends StatefulWidget {
   final File photo;
@@ -35,10 +36,21 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
 
     if (_imageProvider != null) {
-      return Image(
+      var image = Image(
         image: _imageProvider,
         fit: BoxFit.cover,
       );
+      if (widget.photo.fileType == FileType.video) {
+        return Stack(
+          children: [
+            image,
+            Icon(Icons.play_circle_outline),
+          ],
+          fit: StackFit.expand,
+        );
+      } else {
+        return image;
+      }
     } else {
       return loadingWidget;
     }
