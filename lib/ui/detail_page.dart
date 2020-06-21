@@ -30,6 +30,7 @@ class _DetailPageState extends State<DetailPage> {
   List<File> _files;
   PageController _pageController;
   int _selectedIndex = 0;
+  bool _hasPageChanged = false;
 
   @override
   void initState() {
@@ -75,7 +76,10 @@ class _DetailPageState extends State<DetailPage> {
             },
           );
         } else if (file.fileType == FileType.video) {
-          content = VideoWidget(file);
+          content = VideoWidget(
+            file,
+            autoPlay: !_hasPageChanged, // Autoplay if it was opened directly
+          );
         } else {
           content = Icon(Icons.error);
         }
@@ -85,6 +89,7 @@ class _DetailPageState extends State<DetailPage> {
       onPageChanged: (index) {
         setState(() {
           _selectedIndex = index;
+          _hasPageChanged = true;
         });
         _preloadFiles(index);
       },

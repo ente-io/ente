@@ -9,7 +9,8 @@ import 'loading_widget.dart';
 
 class VideoWidget extends StatefulWidget {
   final File file;
-  VideoWidget(this.file, {Key key}) : super(key: key);
+  final bool autoPlay;
+  VideoWidget(this.file, {this.autoPlay = false, Key key}) : super(key: key);
 
   @override
   _VideoWidgetState createState() => _VideoWidgetState();
@@ -59,7 +60,7 @@ class _VideoWidgetState extends State<VideoWidget> {
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController,
       aspectRatio: _videoPlayerController.value.aspectRatio,
-      autoPlay: true,
+      autoPlay: widget.autoPlay,
       autoInitialize: true,
       looping: true,
       allowFullScreen: false,
