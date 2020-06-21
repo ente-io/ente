@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/image_cache.dart';
+import 'package:photos/db/photo_db.dart';
 import 'package:photos/favorite_files_repository.dart';
+import 'package:photos/file_repository.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/video_widget.dart';
@@ -25,6 +28,7 @@ class _DetailPageState extends State<DetailPage> {
   final _logger = Logger("DetailPageState");
   bool _shouldDisableScroll = false;
   List<File> _files;
+  PageController _pageController;
   int _selectedIndex = 0;
 
   @override
@@ -56,6 +60,7 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget _buildPageView() {
+    _pageController = PageController(initialPage: _selectedIndex);
     return PageView.builder(
       itemBuilder: (context, index) {
         final file = _files[index];
@@ -86,7 +91,7 @@ class _DetailPageState extends State<DetailPage> {
       physics: _shouldDisableScroll
           ? NeverScrollableScrollPhysics()
           : PageScrollPhysics(),
-      controller: PageController(initialPage: _selectedIndex),
+      controller: _pageController,
       itemCount: _files.length,
     );
   }
@@ -121,6 +126,7 @@ class _DetailPageState extends State<DetailPage> {
     final actions = List<Widget>();
     if (_files[_selectedIndex].localId != null) {
       actions.add(_getFavoriteButton());
+      actions.add(_getDeleteButton());
     }
     actions.add(PopupMenuButton(
       itemBuilder: (context) {
@@ -179,6 +185,16 @@ class _DetailPageState extends State<DetailPage> {
           color: isLiked ? Colors.pinkAccent : Colors.white,
           size: 30,
         );
+      },
+    );
+  }
+
+  Widget _getDeleteButton() {
+    return IconButton(
+      icon: Icon(Icons.delete_outline),
+      iconSize: 30,
+      onPressed: () {
+        _showDeleteSheet();
       },
     );
   }
@@ -242,5 +258,65 @@ class _DetailPageState extends State<DetailPage> {
         );
       },
     );
+  }
+
+  void _showDeleteSheet() {
+    final action = CupertinoActionSheet(
+      actions: <Widget>[
+        CupertinoActionSheetAction(
+          child: Text("Delete on device"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            await _delete(false);
+          },
+        ),
+        CupertinoActionSheetAction(
+          child: Text("Delete everywhere [WiP]"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            await _delete(true);
+          },
+        )
+      ],
+      cancelButton: CupertinoActionSheetAction(
+        child: Text("Cancel"),
+        onPressed: () {
+          Navigator.of(context, rootNavigator: true).pop();
+        },
+      ),
+    );
+    showCupertinoModalPopup(context: context, builder: (_) => action);
+  }
+
+  Future _delete(bool deleteEverywhere) async {
+    final file = _files[_selectedIndex];
+    final totalFiles = _files.length;
+    if (_selectedIndex == totalFiles - 1) {
+      // Deleted the last file
+      await _pageController.previousPage(
+          duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
+    } else {
+      await _pageController.nextPage(
+          duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
+      setState(() {
+        _files.remove(file);
+      });
+      Future.delayed(Duration(milliseconds: 200), () {
+        _pageController.jumpToPage(_selectedIndex - 1);
+      });
+    }
+    Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+    if (_files.length == 0) {
+      // Deleted the last file in gallery
+      Navigator.of(context, rootNavigator: true).pop(); // Close pageview
+      Navigator.of(context, rootNavigator: true).pop(); // Close gallery
+    }
+
+    await PhotoManager.editor.deleteWithIds([file.localId]);
+    deleteEverywhere
+        ? await FileDB.instance.markForDeletion(file)
+        : await FileDB.instance.delete(file);
+
+    FileRepository.instance.reloadFiles();
   }
 }
