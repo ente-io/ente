@@ -239,9 +239,10 @@ class PhotoSyncManager {
   }
 
   Future<File> _uploadFile(File localPhoto) async {
-    var title = getJPGFileNameForHEIC(localPhoto);
-    var formData = FormData.fromMap({
-      "file": MultipartFile.fromBytes((await localPhoto.getBytes()),
+    final title = getJPGFileNameForHEIC(localPhoto);
+    final formData = FormData.fromMap({
+      "file": MultipartFile.fromFileSync(
+          (await (await localPhoto.getAsset()).originFile).path,
           filename: title),
       "deviceFileID": localPhoto.localId,
       "deviceFolder": localPhoto.deviceFolder,
