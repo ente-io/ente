@@ -105,6 +105,17 @@ class FileDB {
     return _convertToFiles(results);
   }
 
+  Future<List<File>> getAllVideos() async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where:
+          '$columnLocalId IS NOT NULL AND $columnFileType = 1 AND $columnIsDeleted = 0',
+      orderBy: '$columnCreateTimestamp DESC',
+    );
+    return _convertToFiles(results);
+  }
+
   Future<List<File>> getAllInFolder(int folderId) async {
     final db = await instance.database;
     final results = await db.query(

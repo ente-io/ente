@@ -59,6 +59,9 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
   }
 
   List<File> _getFilteredFiles(List<File> unfilteredFiles) {
+    if (widget.folder.filter == null) {
+      return unfilteredFiles;
+    }
     final List<File> filteredFiles = List<File>();
     for (File file in unfilteredFiles) {
       if (widget.folder.filter.shouldInclude(file)) {

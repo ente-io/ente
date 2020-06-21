@@ -9,6 +9,7 @@ import 'package:photos/favorite_files_repository.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/filters/favorite_items_filter.dart';
 import 'package:photos/models/filters/folder_name_filter.dart';
+import 'package:photos/models/filters/video_file_filter.dart';
 import 'package:photos/ui/device_folder_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -83,6 +84,10 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
       final file = await FileDB.instance.getLatestFileAmongGeneratedIds(
           FavoriteFilesRepository.instance.getLiked().toList());
       folders.insert(0, DeviceFolder("Favorites", file, FavoriteItemsFilter()));
+    }
+    final videos = await FileDB.instance.getAllVideos();
+    if (videos.length > 0) {
+      folders.insert(0, DeviceFolder("Videos", videos[0], VideoFileFilter()));
     }
     return folders;
   }
