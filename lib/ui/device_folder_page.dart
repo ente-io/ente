@@ -22,15 +22,6 @@ class DeviceFolderPage extends StatefulWidget {
 class _DeviceFolderPageState extends State<DeviceFolderPage> {
   final logger = Logger("DeviceFolderPageState");
   Set<File> _selectedFiles = Set<File>();
-  StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
-
-  @override
-  void initState() {
-    _subscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      setState(() {});
-    });
-    super.initState();
-  }
 
   @override
   Widget build(Object context) {
@@ -54,6 +45,7 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
             _selectedFiles = selectedFiles;
           });
         },
+        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       ),
     );
   }
@@ -69,11 +61,5 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
       }
     }
     return filteredFiles;
-  }
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
   }
 }
