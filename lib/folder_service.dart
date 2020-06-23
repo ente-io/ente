@@ -29,6 +29,7 @@ class FolderSharingService {
       FolderSharingService._privateConstructor();
 
   Future<void> sync() {
+    _logger.info("Syncing...");
     if (_isSyncInProgress || !Configuration.instance.hasConfiguredAccount()) {
       return Future.value();
     }
