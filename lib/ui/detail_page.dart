@@ -111,6 +111,9 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   void _preloadFile(File file) {
+    if (file.fileType == FileType.video) {
+      return;
+    }
     if (file.localId == null) {
       file.getBytes().then((data) {
         BytesLruCache.put(file, data);
