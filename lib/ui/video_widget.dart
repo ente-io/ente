@@ -52,10 +52,14 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return _videoPlayerController != null &&
+    final content = _videoPlayerController != null &&
             _videoPlayerController.value.initialized
         ? _getVideoPlayer()
         : _getLoadingWidget();
+    return Hero(
+      tag: widget.file.generatedId.toString(),
+      child: content,
+    );
   }
 
   Widget _getLoadingWidget() {
