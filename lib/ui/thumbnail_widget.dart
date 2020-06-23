@@ -22,7 +22,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   static final _logger = Logger("ThumbnailWidget");
   static final Widget loadingWidget = Container(
     alignment: Alignment.center,
-    color: Colors.grey[500],
+    color: Colors.grey[800],
   );
 
   bool _hasLoadedThumbnail = false;
@@ -36,13 +36,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
 
     _loadLocalImage(context);
+    var content;
     if (_imageProvider != null) {
-      var image = Image(
+      final image = Image(
         image: _imageProvider,
         fit: BoxFit.cover,
       );
       if (widget.photo.fileType == FileType.video) {
-        return Stack(
+        content = Stack(
           children: [
             image,
             Icon(Icons.play_circle_outline),
@@ -50,11 +51,20 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           fit: StackFit.expand,
         );
       } else {
-        return image;
+        content = image;
       }
-    } else {
-      return loadingWidget;
     }
+    return Stack(
+      children: [
+        loadingWidget,
+        AnimatedOpacity(
+          opacity: content == null ? 0 : 1.0,
+          duration: Duration(milliseconds: 400),
+          child: content,
+        ),
+      ],
+      fit: StackFit.expand,
+    );
   }
 
   void _loadLocalImage(BuildContext context) {
