@@ -58,7 +58,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         ? _getVideoPlayer()
         : _getLoadingWidget();
     return Hero(
-      tag: widget.file.heroTag(),
+      tag: widget.file.tag(),
       child: content,
     );
   }

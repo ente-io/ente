@@ -176,7 +176,7 @@ class _GalleryState extends State<Gallery> {
               : null,
         ),
         child: Hero(
-          tag: file.heroTag(),
+          tag: file.tag(),
           child: ThumbnailWidget(file),
         ),
       ),
