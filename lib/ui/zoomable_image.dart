@@ -68,7 +68,9 @@ class _ZoomableImageState extends State<ZoomableImage>
   }
 
   void _loadNetworkImage() {
-    if (!_loadedSmallThumbnail && widget.photo.previewURL.isNotEmpty) {
+    if (!_loadedSmallThumbnail &&
+        !_loadedFinalImage &&
+        widget.photo.previewURL.isNotEmpty) {
       _imageProvider =
           CachedNetworkImageProvider(widget.photo.getThumbnailUrl());
       _loadedSmallThumbnail = true;
