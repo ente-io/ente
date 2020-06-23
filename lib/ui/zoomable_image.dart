@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -68,10 +69,8 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _loadNetworkImage() {
     if (!_loadedSmallThumbnail && widget.photo.previewURL.isNotEmpty) {
-      _imageProvider = Image.network(
-        widget.photo.getThumbnailUrl(),
-        gaplessPlayback: true,
-      ).image;
+      _imageProvider =
+          CachedNetworkImageProvider(widget.photo.getThumbnailUrl());
       _loadedSmallThumbnail = true;
     }
     if (!_loadedFinalImage) {
