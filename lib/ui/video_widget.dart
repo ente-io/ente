@@ -1,6 +1,8 @@
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/video_controls.dart';
 import 'package:video_player/video_player.dart';
@@ -17,14 +19,21 @@ class VideoWidget extends StatefulWidget {
 }
 
 class _VideoWidgetState extends State<VideoWidget> {
-  ChewieController _chewieController;
   VideoPlayerController _videoPlayerController;
-  Future<void> _future;
+  ChewieController _chewieController;
 
   @override
   void initState() {
     super.initState();
-    _future = _initVideoPlayer();
+    if (widget.file.localId == null) {
+      _setVideoPlayerController(widget.file.getRemoteUrl());
+    } else {
+      widget.file.getAsset().then((asset) {
+        asset.getMediaUrl().then((url) {
+          _setVideoPlayerController(url);
+        });
+      });
+    }
   }
 
   @override
@@ -34,29 +43,37 @@ class _VideoWidgetState extends State<VideoWidget> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return loadWidget;
-        }
-        return Container(
-          child: Chewie(
-            controller: _chewieController,
-          ),
-        );
-      },
-    );
+  VideoPlayerController _setVideoPlayerController(String url) {
+    return _videoPlayerController = VideoPlayerController.network(url)
+      ..initialize().whenComplete(() {
+        setState(() {});
+      });
   }
 
-  Future<void> _initVideoPlayer() async {
-    final url = widget.file.localId == null
-        ? widget.file.getRemoteUrl()
-        : await (await widget.file.getAsset()).getMediaUrl();
-    _videoPlayerController = VideoPlayerController.network(url);
-    await _videoPlayerController.initialize();
+  @override
+  Widget build(BuildContext context) {
+    return _videoPlayerController != null &&
+            _videoPlayerController.value.initialized
+        ? _getVideoPlayer()
+        : _getLoadingWidget();
+  }
+
+  Widget _getLoadingWidget() {
+    return Stack(children: [
+      _getThumbnail(),
+      loadWidget,
+    ]);
+  }
+
+  Center _getThumbnail() {
+    final thumbnail = widget.file.localId == null
+        ? Image.network(widget.file.getThumbnailUrl())
+        : Image.memory(
+            ThumbnailLruCache.get(widget.file, THUMBNAIL_SMALL_SIZE));
+    return Center(child: thumbnail);
+  }
+
+  Widget _getVideoPlayer() {
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController,
       aspectRatio: _videoPlayerController.value.aspectRatio,
@@ -66,5 +83,6 @@ class _VideoWidgetState extends State<VideoWidget> {
       allowFullScreen: false,
       customControls: VideoControls(),
     );
+    return Chewie(controller: _chewieController);
   }
 }
