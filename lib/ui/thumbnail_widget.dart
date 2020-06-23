@@ -1,9 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/models/file.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/ui/loading_widget.dart';
 
 class ThumbnailWidget extends StatefulWidget {
   final File photo;
@@ -30,11 +32,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.photo.localId == null) {
-      _loadNetworkImage();
-    } else {
-      _loadLocalImage(context);
+      return _getNetworkImage();
     }
 
+    _loadLocalImage(context);
     if (_imageProvider != null) {
       var image = Image(
         image: _imageProvider,
@@ -89,11 +90,16 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
   }
 
-  void _loadNetworkImage() {
+  Widget _getNetworkImage() {
     final url = widget.photo.previewURL.isNotEmpty
         ? widget.photo.getThumbnailUrl()
         : widget.photo.getRemoteUrl();
-    _imageProvider = Image.network(url).image;
+    return CachedNetworkImage(
+      imageUrl: url,
+      placeholder: (context, url) => loadWidget,
+      errorWidget: (context, url, error) => Icon(Icons.error),
+      fit: BoxFit.cover,
+    );
   }
 
   @override
