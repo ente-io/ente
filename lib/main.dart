@@ -45,13 +45,9 @@ void _main() async {
 }
 
 void _sync() async {
+  FolderSharingService.instance.sync();
   try {
     await PhotoSyncManager.instance.sync();
-  } catch (e) {
-    logger.warning(e);
-  }
-  try {
-    await FolderSharingService.instance.sync();
   } catch (e) {
     logger.warning(e);
   }
