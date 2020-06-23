@@ -128,4 +128,11 @@ class File {
   int get hashCode {
     return generatedId.hashCode ^ uploadedFileId.hashCode ^ localId.hashCode;
   }
+
+  String heroTag() {
+    return "local_" +
+        localId.toString() +
+        ":remote_" +
+        uploadedFileId.toString();
+  }
 }

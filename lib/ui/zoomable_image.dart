@@ -59,7 +59,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         minScale: PhotoViewComputedScale.contained,
         gaplessPlayback: true,
         heroAttributes: PhotoViewHeroAttributes(
-          tag: widget.photo.generatedId.toString(),
+          tag: widget.photo.heroTag(),
         ),
       );
     } else {
