@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -69,12 +70,20 @@ class _VideoWidgetState extends State<VideoWidget> {
     ]);
   }
 
-  Center _getThumbnail() {
+  Widget _getThumbnail() {
     final thumbnail = widget.file.localId == null
-        ? Image.network(widget.file.getThumbnailUrl())
+        ? CachedNetworkImage(
+            imageUrl: widget.file.getThumbnailUrl(),
+            fit: BoxFit.contain,
+          )
         : Image.memory(
-            ThumbnailLruCache.get(widget.file, THUMBNAIL_SMALL_SIZE));
-    return Center(child: thumbnail);
+            ThumbnailLruCache.get(widget.file, THUMBNAIL_SMALL_SIZE),
+            fit: BoxFit.contain,
+          );
+    return Container(
+      child: thumbnail,
+      constraints: BoxConstraints.expand(),
+    );
   }
 
   Widget _getVideoPlayer() {
