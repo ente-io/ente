@@ -40,7 +40,9 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   void dispose() {
     _videoPlayerController.dispose();
-    _chewieController.dispose();
+    if (_chewieController != null) {
+      _chewieController.dispose();
+    }
     super.dispose();
   }
 
@@ -66,6 +68,10 @@ class _VideoWidgetState extends State<VideoWidget> {
   Widget _getLoadingWidget() {
     return Stack(children: [
       _getThumbnail(),
+      Container(
+        color: Colors.black12,
+        constraints: BoxConstraints.expand(),
+      ),
       loadWidget,
     ]);
   }
