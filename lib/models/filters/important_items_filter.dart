@@ -10,6 +10,7 @@ class ImportantItemsFilter implements GalleryItemsFilter {
     if (Platform.isAndroid) {
       final String folder = basename(file.deviceFolder);
       return folder == "Camera" ||
+          folder == "Recents" ||
           folder == "DCIM" ||
           folder == "Download" ||
           folder == "Screenshot";
