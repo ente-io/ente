@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/image_cache.dart';
-import 'package:photos/db/photo_db.dart';
+import 'package:photos/db/file_db.dart';
 import 'package:photos/favorite_files_repository.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/file_type.dart';
@@ -218,7 +218,7 @@ class _DetailPageState extends State<DetailPage> {
               Icon(Icons.timer),
               Padding(padding: EdgeInsets.all(4)),
               Text(getFormattedTime(
-                  DateTime.fromMicrosecondsSinceEpoch(file.createTimestamp))),
+                  DateTime.fromMicrosecondsSinceEpoch(file.creationTime))),
             ],
           ),
           Padding(padding: EdgeInsets.all(4)),

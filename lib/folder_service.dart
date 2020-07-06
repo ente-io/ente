@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/folder_db.dart';
-import 'package:photos/db/photo_db.dart';
+import 'package:photos/db/file_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/folder.dart';
@@ -61,7 +61,7 @@ class FolderSharingService {
     try {
       File file =
           await FileDB.instance.getLastSyncedFileInRemoteFolder(folder.id);
-      lastSyncTimestamp = file.updateTimestamp;
+      lastSyncTimestamp = file.updationTime;
     } catch (e) {
       // Folder has never been synced
     }
@@ -74,7 +74,7 @@ class FolderSharingService {
             existingPhoto.generatedId,
             file.uploadedFileId,
             file.remotePath,
-            file.updateTimestamp,
+            file.updationTime,
             file.previewURL);
       } catch (e) {
         await FileDB.instance.insert(file);

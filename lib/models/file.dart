@@ -18,8 +18,9 @@ class File {
   int remoteFolderId;
   String remotePath;
   String previewURL;
-  int createTimestamp;
-  int updateTimestamp;
+  int creationTime;
+  int modificationTime;
+  int updationTime;
   Location location;
   FileType fileType;
 
@@ -32,8 +33,9 @@ class File {
     fileType = getFileType(json["fileType"]);
     remotePath = json["path"];
     previewURL = json["previewURL"];
-    createTimestamp = json["createTimestamp"];
-    updateTimestamp = json["updateTimestamp"];
+    creationTime = json["creationTime"];
+    modificationTime = json["modificationTime"];
+    updationTime = json["updationTime"];
   }
 
   static Future<File> fromAsset(
@@ -54,19 +56,20 @@ class File {
         file.fileType = FileType.other;
         break;
     }
-    file.createTimestamp = asset.createDateTime.microsecondsSinceEpoch;
-    if (file.createTimestamp == 0) {
+    file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
+    if (file.creationTime == 0) {
       try {
         final parsedDateTime = DateTime.parse(
             basenameWithoutExtension(file.title)
                 .replaceAll("IMG_", "")
                 .replaceAll("DCIM_", "")
                 .replaceAll("_", " "));
-        file.createTimestamp = parsedDateTime.microsecondsSinceEpoch;
+        file.creationTime = parsedDateTime.microsecondsSinceEpoch;
       } catch (e) {
-        file.createTimestamp = asset.modifiedDateTime.microsecondsSinceEpoch;
+        file.creationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
       }
     }
+    file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     return file;
   }
 
@@ -111,7 +114,7 @@ class File {
     return '''File(generatedId: $generatedId, uploadedFileId: $uploadedFileId, 
       localId: $localId, title: $title, deviceFolder: $deviceFolder, 
       location: $location, remotePath: $remotePath, fileType: $fileType,
-      createTimestamp: $createTimestamp, updateTimestamp: $updateTimestamp)''';
+      createTimestamp: $creationTime, updateTimestamp: $updationTime)''';
   }
 
   @override

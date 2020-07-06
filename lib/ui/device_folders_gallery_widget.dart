@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/photo_db.dart';
+import 'package:photos/db/file_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/favorite_files_repository.dart';
 import 'package:photos/models/device_folder.dart';
@@ -77,8 +77,8 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
       folders.add(DeviceFolder(folderName, file, FolderNameFilter(folderName)));
     }
     folders.sort((first, second) {
-      return second.thumbnail.createTimestamp
-          .compareTo(first.thumbnail.createTimestamp);
+      return second.thumbnail.creationTime
+          .compareTo(first.thumbnail.creationTime);
     });
     if (FavoriteFilesRepository.instance.hasFavorites()) {
       final file = await FileDB.instance.getLatestFileAmongGeneratedIds(

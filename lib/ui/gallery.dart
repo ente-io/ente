@@ -125,7 +125,7 @@ class _GalleryState extends State<Gallery> {
   Widget _buildListItem(BuildContext context, int index) {
     var files = _collatedFiles[index];
     return Column(
-      children: <Widget>[_getDay(files[0].createTimestamp), _getGallery(files)],
+      children: <Widget>[_getDay(files[0].creationTime), _getGallery(files)],
     );
   }
 
@@ -229,9 +229,9 @@ class _GalleryState extends State<Gallery> {
   }
 
   bool _areFilesFromSameDay(File first, File second) {
-    var firstDate = DateTime.fromMicrosecondsSinceEpoch(first.createTimestamp);
+    var firstDate = DateTime.fromMicrosecondsSinceEpoch(first.creationTime);
     var secondDate =
-        DateTime.fromMicrosecondsSinceEpoch(second.createTimestamp);
+        DateTime.fromMicrosecondsSinceEpoch(second.creationTime);
     return firstDate.year == secondDate.year &&
         firstDate.month == secondDate.month &&
         firstDate.day == secondDate.day;

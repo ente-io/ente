@@ -29,8 +29,9 @@ class FileDB {
   static final columnRemotePath = 'remote_path';
   static final columnThumbnailPath = 'thumbnail_path';
   static final columnIsDeleted = 'is_deleted';
-  static final columnCreateTimestamp = 'create_timestamp';
-  static final columnUpdateTimestamp = 'update_timestamp';
+  static final columnCreationTime = 'creation_time';
+  static final columnModificationTime = 'modification_time';
+  static final columnUpdationTime = 'updation_time';
 
   // make this a singleton class
   FileDB._privateConstructor();
@@ -69,8 +70,9 @@ class FileDB {
             $columnRemotePath TEXT,
             $columnThumbnailPath TEXT,
             $columnIsDeleted INTEGER DEFAULT 0,
-            $columnCreateTimestamp TEXT NOT NULL,
-            $columnUpdateTimestamp TEXT
+            $columnCreationTime TEXT NOT NULL,
+            $columnModificationTime TEXT NOT NULL,
+            $columnUpdationTime TEXT
           )
           ''');
   }
@@ -100,7 +102,7 @@ class FileDB {
     final results = await db.query(
       table,
       where: '$columnLocalId IS NOT NULL AND $columnIsDeleted = 0',
-      orderBy: '$columnCreateTimestamp DESC',
+      orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
   }
@@ -111,7 +113,7 @@ class FileDB {
       table,
       where:
           '$columnLocalId IS NOT NULL AND $columnFileType = 1 AND $columnIsDeleted = 0',
-      orderBy: '$columnCreateTimestamp DESC',
+      orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
   }
@@ -122,7 +124,7 @@ class FileDB {
       table,
       where: '$columnRemoteFolderId = ? AND $columnIsDeleted = 0',
       whereArgs: [folderId],
-      orderBy: '$columnCreateTimestamp DESC',
+      orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
   }
@@ -132,7 +134,7 @@ class FileDB {
     final results = await db.query(
       table,
       where: '$columnIsDeleted = 1',
-      orderBy: '$columnCreateTimestamp DESC',
+      orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
   }
@@ -142,25 +144,26 @@ class FileDB {
     final results = await db.query(
       table,
       where: '$columnUploadedFileId IS NULL',
-      orderBy: '$columnCreateTimestamp DESC',
+      orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
   }
 
-  Future<File> getMatchingFile(
-      String localId, String title, String deviceFolder, int createTimestamp,
+  Future<File> getMatchingFile(String localId, String title,
+      String deviceFolder, int creationTime, int modificationTime,
       {String alternateTitle}) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
       where: '''$columnLocalId=? AND ($columnTitle=? OR $columnTitle=?) AND 
-          $columnDeviceFolder=? AND $columnCreateTimestamp=?''',
+          $columnDeviceFolder=? AND $columnCreationTime=? AND $columnModificationTime=?''',
       whereArgs: [
         localId,
         title,
         alternateTitle,
         deviceFolder,
-        createTimestamp
+        creationTime,
+        modificationTime
       ],
     );
     if (rows.isNotEmpty) {
@@ -192,7 +195,7 @@ class FileDB {
     values[columnUploadedFileId] = uploadedId;
     values[columnRemotePath] = remotePath;
     values[columnThumbnailPath] = thumbnailPath;
-    values[columnUpdateTimestamp] = updateTimestamp;
+    values[columnUpdationTime] = updateTimestamp;
     return await db.update(
       table,
       values,
@@ -253,7 +256,7 @@ class FileDB {
       table,
       where: '$columnDeviceFolder =?',
       whereArgs: [path],
-      orderBy: '$columnCreateTimestamp DESC',
+      orderBy: '$columnCreationTime DESC',
       limit: 1,
     );
     if (rows.isNotEmpty) {
@@ -269,7 +272,7 @@ class FileDB {
       table,
       where: '$columnRemoteFolderId =?',
       whereArgs: [folderId],
-      orderBy: '$columnCreateTimestamp DESC',
+      orderBy: '$columnCreationTime DESC',
       limit: 1,
     );
     if (rows.isNotEmpty) {
@@ -285,7 +288,7 @@ class FileDB {
       table,
       where: '$columnRemoteFolderId =?',
       whereArgs: [folderId],
-      orderBy: '$columnUpdateTimestamp DESC',
+      orderBy: '$columnUpdationTime DESC',
       limit: 1,
     );
     if (rows.isNotEmpty) {
@@ -300,7 +303,7 @@ class FileDB {
     var rows = await db.query(
       table,
       where: '$columnGeneratedId IN (${generatedIds.join(",")})',
-      orderBy: '$columnCreateTimestamp DESC',
+      orderBy: '$columnCreationTime DESC',
       limit: 1,
     );
     if (rows.isNotEmpty) {
@@ -341,8 +344,9 @@ class FileDB {
     row[columnRemoteFolderId] = file.remoteFolderId;
     row[columnRemotePath] = file.remotePath;
     row[columnThumbnailPath] = file.previewURL;
-    row[columnCreateTimestamp] = file.createTimestamp;
-    row[columnUpdateTimestamp] = file.updateTimestamp;
+    row[columnCreationTime] = file.creationTime;
+    row[columnModificationTime] = file.modificationTime;
+    row[columnUpdationTime] = file.updationTime;
     return row;
   }
 
@@ -360,10 +364,11 @@ class FileDB {
     file.remoteFolderId = row[columnRemoteFolderId];
     file.remotePath = row[columnRemotePath];
     file.previewURL = row[columnThumbnailPath];
-    file.createTimestamp = int.parse(row[columnCreateTimestamp]);
-    file.updateTimestamp = row[columnUpdateTimestamp] == null
+    file.creationTime = int.parse(row[columnCreationTime]);
+    file.modificationTime = int.parse(row[columnModificationTime]);
+    file.updationTime = row[columnUpdationTime] == null
         ? -1
-        : int.parse(row[columnUpdateTimestamp]);
+        : int.parse(row[columnUpdationTime]);
     return file;
   }
 }

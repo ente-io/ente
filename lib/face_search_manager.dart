@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/db/photo_db.dart';
+import 'package:photos/db/file_db.dart';
 import 'package:logging/logging.dart';
 
 import 'package:photos/models/face.dart';
@@ -48,8 +48,12 @@ class FaceSearchManager {
     final files = List<File>();
     for (File file in result) {
       try {
-        files.add(await FileDB.instance.getMatchingFile(file.localId,
-            file.title, file.deviceFolder, file.createTimestamp,
+        files.add(await FileDB.instance.getMatchingFile(
+            file.localId,
+            file.title,
+            file.deviceFolder,
+            file.creationTime,
+            file.modificationTime,
             alternateTitle: getHEICFileNameForJPG(file)));
       } catch (e) {
         // Not available locally
@@ -57,7 +61,7 @@ class FaceSearchManager {
       }
     }
     files.sort((first, second) {
-      return second.createTimestamp.compareTo(first.createTimestamp);
+      return second.creationTime.compareTo(first.creationTime);
     });
     return files;
   }

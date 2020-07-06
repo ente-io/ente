@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/db/photo_db.dart';
+import 'package:photos/db/file_db.dart';
 import 'package:photos/folder_service.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/models/file.dart';

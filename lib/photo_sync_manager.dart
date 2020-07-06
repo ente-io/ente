@@ -4,12 +4,13 @@ import 'dart:math';
 
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/photo_db.dart';
+import 'package:photos/db/file_db.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/file_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/utils/file_name_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
@@ -87,8 +88,8 @@ class PhotoSyncManager {
     }
 
     if (files.isNotEmpty) {
-      files.sort((first, second) =>
-          first.createTimestamp.compareTo(second.createTimestamp));
+      files.sort(
+          (first, second) => first.creationTime.compareTo(second.creationTime));
       await _updateDatabase(
           files, prefs, lastDBUpdateTimestamp, syncStartTimestamp);
       await FileRepository.instance.reloadFiles();
@@ -156,7 +157,7 @@ class PhotoSyncManager {
       int lastDBUpdateTimestamp, int syncStartTimestamp) async {
     var filesToBeAdded = List<File>();
     for (File file in files) {
-      if (file.createTimestamp > lastDBUpdateTimestamp) {
+      if (file.creationTime > lastDBUpdateTimestamp) {
         filesToBeAdded.add(file);
       }
     }
@@ -186,12 +187,15 @@ class PhotoSyncManager {
     List<File> photosToBeUploaded = await _db.getFilesToBeUploaded();
     for (int i = 0; i < photosToBeUploaded.length; i++) {
       File file = photosToBeUploaded[i];
+      if (file.fileType != FileType.video) {
+        continue;
+      }
       _logger.info("Uploading " + file.toString());
       try {
         var uploadedFile = await _uploadFile(file);
         await _db.update(file.generatedId, uploadedFile.uploadedFileId,
-            uploadedFile.remotePath, uploadedFile.updateTimestamp);
-        prefs.setInt(_lastSyncTimestampKey, uploadedFile.updateTimestamp);
+            uploadedFile.remotePath, uploadedFile.updationTime);
+        prefs.setInt(_lastSyncTimestampKey, uploadedFile.updationTime);
 
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: photosToBeUploaded.length));
@@ -205,15 +209,15 @@ class PhotoSyncManager {
   Future _storeDiff(List<File> diff, SharedPreferences prefs) async {
     for (File file in diff) {
       try {
-        var existingPhoto = await _db.getMatchingFile(
-            file.localId, file.title, file.deviceFolder, file.createTimestamp,
+        var existingPhoto = await _db.getMatchingFile(file.localId, file.title,
+            file.deviceFolder, file.creationTime, file.modificationTime,
             alternateTitle: getHEICFileNameForJPG(file));
         await _db.update(existingPhoto.generatedId, file.uploadedFileId,
-            file.remotePath, file.updateTimestamp, file.previewURL);
+            file.remotePath, file.updationTime, file.previewURL);
       } catch (e) {
         await _db.insert(file);
       }
-      await prefs.setInt(_lastSyncTimestampKey, file.updateTimestamp);
+      await prefs.setInt(_lastSyncTimestampKey, file.updationTime);
     }
   }
 
@@ -247,7 +251,8 @@ class PhotoSyncManager {
       "deviceFileID": localPhoto.localId,
       "deviceFolder": localPhoto.deviceFolder,
       "title": title,
-      "createTimestamp": localPhoto.createTimestamp,
+      "creationTime": localPhoto.creationTime,
+      "modificationTime": localPhoto.modificationTime,
     });
     return _dio
         .post(
