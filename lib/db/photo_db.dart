@@ -95,7 +95,7 @@ class FileDB {
     return await batch.commit();
   }
 
-  Future<List<File>> getAll() async {
+  Future<List<File>> getAllLocalFiles() async {
     final db = await instance.database;
     final results = await db.query(
       table,

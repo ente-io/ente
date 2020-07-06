@@ -16,8 +16,7 @@ class FileRepository {
   }
 
   Future<bool> loadFiles() async {
-    FileDB db = FileDB.instance;
-    var files = await db.getAll();
+    var files = await FileDB.instance.getAllLocalFiles();
 
     _files.clear();
     _files.addAll(files);
