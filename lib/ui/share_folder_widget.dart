@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:photos/folder_service.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class ShareFolderWidget extends StatefulWidget {
   final String title;
@@ -65,14 +66,7 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
             _folder.sharedWith.clear();
             _folder.sharedWith.addAll(sharedWith);
             await FolderSharingService.instance.updateFolder(_folder);
-            Fluttertoast.showToast(
-                msg: "Sharing configuration updated successfully.",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.grey[600],
-                textColor: Colors.white,
-                fontSize: 16.0);
+            showToast("Sharing configuration updated successfully.");
             Navigator.of(context).pop();
           },
         ),

@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/sign_in_widget.dart';
 import 'package:photos/utils/endpoint_finder.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class SetupPage extends StatefulWidget {
   SetupPage({key}) : super(key: key);
@@ -22,14 +23,7 @@ class _SetupPageState extends State<SetupPage> {
         _shouldSearchForEndpoint) {
       EndpointFinder.instance.findEndpoint().then((endpoint) {
         if (mounted && endpoint != null) {
-          Fluttertoast.showToast(
-              msg: "Server discovery successful!",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM,
-              timeInSecForIosWeb: 1,
-              backgroundColor: Colors.grey[600],
-              textColor: Colors.white,
-              fontSize: 16.0);
+          showToast("Server discovery successful!");
           setState(() {
             Configuration.instance.setEndpoint(endpoint);
           });
