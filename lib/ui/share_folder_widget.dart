@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:photos/folder_service.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/ui/loading_widget.dart';

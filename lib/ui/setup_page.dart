@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/sign_in_widget.dart';
 import 'package:photos/utils/endpoint_finder.dart';
