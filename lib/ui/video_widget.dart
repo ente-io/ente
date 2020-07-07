@@ -2,10 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/video_controls.dart';
+import 'package:photos/utils/toast_util.dart';
+import 'package:toast/toast.dart';
 import 'package:video_player/video_player.dart';
 
 import 'loading_widget.dart';
@@ -20,6 +23,7 @@ class VideoWidget extends StatefulWidget {
 }
 
 class _VideoWidgetState extends State<VideoWidget> {
+  Logger _logger = Logger("VideoWidget");
   VideoPlayerController _videoPlayerController;
   ChewieController _chewieController;
 
@@ -28,6 +32,15 @@ class _VideoWidgetState extends State<VideoWidget> {
     super.initState();
     if (widget.file.localId == null) {
       _setVideoPlayerController(widget.file.getStreamUrl());
+      _videoPlayerController.addListener(() {
+        if (_videoPlayerController.value.hasError) {
+          _logger.warning(_videoPlayerController.value.errorDescription);
+          showToast(
+              "The video has not been processed yet. Downloading the original one...",
+              toastLength: Toast.LENGTH_LONG);
+          _setVideoPlayerController(widget.file.getRemoteUrl());
+        }
+      });
     } else {
       widget.file.getAsset().then((asset) {
         asset.getMediaUrl().then((url) {
