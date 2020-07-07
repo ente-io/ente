@@ -27,7 +27,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   void initState() {
     super.initState();
     if (widget.file.localId == null) {
-      _setVideoPlayerController(widget.file.getRemoteUrl());
+      _setVideoPlayerController(widget.file.getStreamUrl());
     } else {
       widget.file.getAsset().then((asset) {
         asset.getMediaUrl().then((url) {

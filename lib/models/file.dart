@@ -105,6 +105,13 @@ class File {
         uploadedFileId.toString();
   }
 
+  String getStreamUrl() {
+    return Configuration.instance.getHttpEndpoint() +
+        "/streams/" +
+        uploadedFileId.toString() +
+        "/index.m3u8";
+  }
+
   String getThumbnailUrl() {
     return Configuration.instance.getHttpEndpoint() + "/" + previewURL;
   }
