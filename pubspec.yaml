@@ -54,6 +54,7 @@ dependencies:
   video_player: ^0.10.11+1
   chewie: ^0.9.10
   cached_network_image: ^2.3.0-beta
+  progress_dialog: ^1.2.4
 
 dev_dependencies:
   flutter_test:

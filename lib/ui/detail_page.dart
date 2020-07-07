@@ -167,7 +167,7 @@ class _DetailPageState extends State<DetailPage> {
       },
       onSelected: (value) {
         if (value == 1) {
-          share(_files[_selectedIndex]);
+          share(context, _files[_selectedIndex]);
         } else if (value == 2) {
           _displayInfo(_files[_selectedIndex]);
         }
