@@ -102,12 +102,17 @@ class File {
   String getRemoteUrl() {
     return Configuration.instance.getHttpEndpoint() +
         "/files/file/" +
-        uploadedFileId.toString();
+        uploadedFileId.toString() +
+        "?token=" +
+        Configuration.instance.getToken();
   }
 
+  // Passing token within the URL due to https://github.com/flutter/flutter/issues/16466
   String getStreamUrl() {
     return Configuration.instance.getHttpEndpoint() +
         "/streams/" +
+        Configuration.instance.getToken() +
+        "/" +
         uploadedFileId.toString() +
         "/index.m3u8";
   }
