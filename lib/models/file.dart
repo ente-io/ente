@@ -118,7 +118,11 @@ class File {
   }
 
   String getThumbnailUrl() {
-    return Configuration.instance.getHttpEndpoint() + "/" + previewURL;
+    return Configuration.instance.getHttpEndpoint() +
+        "/files/preview/" +
+        uploadedFileId.toString() +
+        "?token=" +
+        Configuration.instance.getToken();
   }
 
   @override
