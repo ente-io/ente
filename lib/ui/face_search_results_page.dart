@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/face_search_manager.dart';
 import 'package:photos/models/face.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
@@ -17,11 +16,7 @@ class FaceSearchResultsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text("Search results"),
         actions: <Widget>[
-          CircularNetworkImageWidget(
-              Configuration.instance.getHttpEndpoint() +
-                  "/" +
-                  face.thumbnailPath,
-              20),
+          CircularNetworkImageWidget(face.getThumbnailUrl(), 20),
         ],
       ),
       body: Container(

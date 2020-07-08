@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/face_search_manager.dart';
 import 'package:photos/models/face.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
@@ -63,9 +62,7 @@ class _SearchPageState extends State<SearchPage> {
       onTap: () {
         _routeToSearchResults(face, context);
       },
-      child: CircularNetworkImageWidget(
-          Configuration.instance.getHttpEndpoint() + "/" + face.thumbnailPath,
-          60),
+      child: CircularNetworkImageWidget(face.getThumbnailUrl(), 60),
     );
   }
 
