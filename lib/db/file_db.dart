@@ -26,8 +26,6 @@ class FileDB {
   static final columnLongitude = 'longitude';
   static final columnFileType = 'file_type';
   static final columnRemoteFolderId = 'remote_folder_id';
-  static final columnRemotePath = 'remote_path';
-  static final columnThumbnailPath = 'thumbnail_path';
   static final columnIsDeleted = 'is_deleted';
   static final columnCreationTime = 'creation_time';
   static final columnModificationTime = 'modification_time';
@@ -67,8 +65,6 @@ class FileDB {
             $columnLongitude REAL,
             $columnFileType INTEGER,
             $columnRemoteFolderId INTEGER,
-            $columnRemotePath TEXT,
-            $columnThumbnailPath TEXT,
             $columnIsDeleted INTEGER DEFAULT 0,
             $columnCreationTime TEXT NOT NULL,
             $columnModificationTime TEXT NOT NULL,
@@ -188,13 +184,10 @@ class FileDB {
   }
 
   Future<int> update(
-      int generatedId, int uploadedId, String remotePath, int updateTimestamp,
-      [String thumbnailPath]) async {
+      int generatedId, int uploadedId, int updateTimestamp) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
     values[columnUploadedFileId] = uploadedId;
-    values[columnRemotePath] = remotePath;
-    values[columnThumbnailPath] = thumbnailPath;
     values[columnUpdationTime] = updateTimestamp;
     return await db.update(
       table,
@@ -342,8 +335,6 @@ class FileDB {
         row[columnFileType] = -1;
     }
     row[columnRemoteFolderId] = file.remoteFolderId;
-    row[columnRemotePath] = file.remotePath;
-    row[columnThumbnailPath] = file.previewURL;
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
@@ -362,8 +353,6 @@ class FileDB {
     }
     file.fileType = getFileType(row[columnFileType]);
     file.remoteFolderId = row[columnRemoteFolderId];
-    file.remotePath = row[columnRemotePath];
-    file.previewURL = row[columnThumbnailPath];
     file.creationTime = int.parse(row[columnCreationTime]);
     file.modificationTime = int.parse(row[columnModificationTime]);
     file.updationTime = row[columnUpdationTime] == null

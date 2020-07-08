@@ -16,8 +16,6 @@ class File {
   String title;
   String deviceFolder;
   int remoteFolderId;
-  String remotePath;
-  String previewURL;
   int creationTime;
   int modificationTime;
   int updationTime;
@@ -31,8 +29,6 @@ class File {
     deviceFolder = json["deviceFolder"];
     title = json["title"];
     fileType = getFileType(json["fileType"]);
-    remotePath = json["path"];
-    previewURL = json["previewURL"];
     creationTime = json["creationTime"];
     modificationTime = json["modificationTime"];
     updationTime = json["updationTime"];
@@ -129,8 +125,8 @@ class File {
   String toString() {
     return '''File(generatedId: $generatedId, uploadedFileId: $uploadedFileId, 
       localId: $localId, title: $title, deviceFolder: $deviceFolder, 
-      location: $location, remotePath: $remotePath, fileType: $fileType,
-      createTimestamp: $creationTime, updateTimestamp: $updationTime)''';
+      location: $location, fileType: $fileType, creationTime: $creationTime, 
+      modificationTime: $modificationTime, updationTime: $updationTime)''';
   }
 
   @override

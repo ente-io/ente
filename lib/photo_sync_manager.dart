@@ -191,7 +191,7 @@ class PhotoSyncManager {
       try {
         var uploadedFile = await _uploadFile(file);
         await _db.update(file.generatedId, uploadedFile.uploadedFileId,
-            uploadedFile.remotePath, uploadedFile.updationTime);
+            uploadedFile.updationTime);
         prefs.setInt(_lastSyncTimestampKey, uploadedFile.updationTime);
 
         Bus.instance.fire(PhotoUploadEvent(
@@ -209,8 +209,8 @@ class PhotoSyncManager {
         var existingPhoto = await _db.getMatchingFile(file.localId, file.title,
             file.deviceFolder, file.creationTime, file.modificationTime,
             alternateTitle: getHEICFileNameForJPG(file));
-        await _db.update(existingPhoto.generatedId, file.uploadedFileId,
-            file.remotePath, file.updationTime, file.previewURL);
+        await _db.update(
+            existingPhoto.generatedId, file.uploadedFileId, file.updationTime);
       } catch (e) {
         await _db.insert(file);
       }
