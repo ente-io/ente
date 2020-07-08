@@ -38,7 +38,7 @@ class _VideoWidgetState extends State<VideoWidget> {
           showToast(
               "The video has not been processed yet. Downloading the original one...",
               toastLength: Toast.LENGTH_SHORT);
-          _setVideoPlayerController(widget.file.getRemoteUrl());
+          _setVideoPlayerController(widget.file.getDownloadUrl());
         }
       });
     } else {

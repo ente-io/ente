@@ -79,7 +79,7 @@ class File {
 
   Future<Uint8List> getBytes({int quality = 100}) async {
     if (localId == null) {
-      return HttpClient().getUrl(Uri.parse(getRemoteUrl())).then((request) {
+      return HttpClient().getUrl(Uri.parse(getDownloadUrl())).then((request) {
         return request.close().then((response) {
           return consolidateHttpClientResponseBytes(response);
         });
@@ -99,9 +99,9 @@ class File {
     }
   }
 
-  String getRemoteUrl() {
+  String getDownloadUrl() {
     return Configuration.instance.getHttpEndpoint() +
-        "/files/file/" +
+        "/files/download/" +
         uploadedFileId.toString() +
         "?token=" +
         Configuration.instance.getToken();

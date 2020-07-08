@@ -103,7 +103,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   Widget _getNetworkImage() {
     final url = widget.photo.previewURL.isNotEmpty
         ? widget.photo.getThumbnailUrl()
-        : widget.photo.getRemoteUrl();
+        : widget.photo.getDownloadUrl();
     return CachedNetworkImage(
       imageUrl: url,
       placeholder: (context, url) => loadWidget,
