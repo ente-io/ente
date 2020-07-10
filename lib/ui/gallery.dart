@@ -53,6 +53,7 @@ class _GalleryState extends State<Gallery> {
     _requiresLoad = true;
     if (widget.reloadEvent != null) {
       widget.reloadEvent.listen((event) {
+        _logger.info("widget.reloadEvent triggered");
         setState(() {
           _requiresLoad = true;
         });
@@ -230,8 +231,7 @@ class _GalleryState extends State<Gallery> {
 
   bool _areFilesFromSameDay(File first, File second) {
     var firstDate = DateTime.fromMicrosecondsSinceEpoch(first.creationTime);
-    var secondDate =
-        DateTime.fromMicrosecondsSinceEpoch(second.creationTime);
+    var secondDate = DateTime.fromMicrosecondsSinceEpoch(second.creationTime);
     return firstDate.year == secondDate.year &&
         firstDate.month == secondDate.month &&
         firstDate.day == secondDate.day;

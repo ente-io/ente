@@ -163,6 +163,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   List<File> _getFilteredPhotos(List<File> unfilteredFiles) {
+    _logger.info("Filtering " + unfilteredFiles.length.toString());
     final List<File> filteredPhotos = List<File>();
     for (File file in unfilteredFiles) {
       if (importantItemsFilter.shouldInclude(file)) {
