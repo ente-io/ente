@@ -48,11 +48,9 @@ void _sync() async {
   FolderSharingService.instance.sync().catchError((e) {
     logger.warning(e);
   });
-  try {
-    await PhotoSyncManager.instance.sync();
-  } catch (e) {
+  PhotoSyncManager.instance.sync().catchError((e) {
     logger.warning(e);
-  }
+  });
 }
 
 void _sendErrorToSentry(SentryClient sentry, Object error, StackTrace stack) {
