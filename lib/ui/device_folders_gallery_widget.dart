@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/file_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -114,14 +115,11 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
         ],
       ),
       onTap: () {
-        final page = DeviceFolderPage(folder);
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return page;
-            },
-          ),
-        );
+        Navigator.push(
+            context,
+            PageTransition(
+                type: PageTransitionType.rightToLeftWithFade,
+                child: DeviceFolderPage(folder)));
       },
     );
   }
