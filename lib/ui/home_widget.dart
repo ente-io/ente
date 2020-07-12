@@ -117,9 +117,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             () =>
                 Future.value(_getFilteredPhotos(FileRepository.instance.files)),
             reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-            onRefresh: () {
-              return PhotoSyncManager.instance.sync();
-            },
+            onRefresh: PhotoSyncManager.instance.sync,
             selectedFiles: _selectedPhotos,
             onFileSelectionChange: (Set<File> selectedPhotos) {
               setState(() {
@@ -170,6 +168,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         filteredPhotos.add(file);
       }
     }
+    _logger.info("Filtered down to " + filteredPhotos.length.toString());
     return filteredPhotos;
   }
 
