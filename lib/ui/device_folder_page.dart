@@ -38,7 +38,7 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
         },
       ),
       body: Gallery(
-        () => Future.value(_getFilteredFiles(FileRepository.instance.files)),
+        syncLoader: () => _getFilteredFiles(FileRepository.instance.files),
         selectedFiles: _selectedFiles,
         onFileSelectionChange: (Set<File> selectedFiles) {
           setState(() {

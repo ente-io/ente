@@ -15,7 +15,8 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Gallery extends StatefulWidget {
-  final Future<List<File>> Function() loader;
+  final List<File> Function() syncLoader;
+  final Future<List<File>> Function() asyncLoader;
   // TODO: Verify why the event is necessary when calling loader post onRefresh
   // should have done the job.
   final Stream<Event> reloadEvent;
@@ -23,8 +24,9 @@ class Gallery extends StatefulWidget {
   final Set<File> selectedFiles;
   final Function(Set<File>) onFileSelectionChange;
 
-  Gallery(
-    this.loader, {
+  Gallery({
+    this.syncLoader,
+    this.asyncLoader,
     this.reloadEvent,
     this.onRefresh,
     this.selectedFiles,
@@ -53,7 +55,6 @@ class _GalleryState extends State<Gallery> {
     _requiresLoad = true;
     if (widget.reloadEvent != null) {
       widget.reloadEvent.listen((event) {
-        _logger.info("widget.reloadEvent triggered");
         setState(() {
           _requiresLoad = true;
         });
@@ -65,31 +66,42 @@ class _GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
     if (!_requiresLoad) {
-      return _onSnapshotAvailable(_lastSnapshot);
+      if (widget.syncLoader != null) {
+        return _onDataLoaded();
+      }
+      return _onSnapshotAvailable();
+    }
+    if (widget.syncLoader != null) {
+      _files = widget.syncLoader();
+      return _onDataLoaded();
     }
     return FutureBuilder<List<File>>(
-      future: widget.loader(),
+      future: widget.asyncLoader(),
       builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          _logger.info(snapshot.data.length.toString());
+        }
         _lastSnapshot = snapshot;
-        return _onSnapshotAvailable(snapshot);
+        return _onSnapshotAvailable();
       },
     );
   }
 
-  Widget _onSnapshotAvailable(AsyncSnapshot<List<File>> snapshot) {
-    if (snapshot.hasData) {
+  Widget _onSnapshotAvailable() {
+    if (_lastSnapshot.hasData) {
       _requiresLoad = false;
-      return _onDataLoaded(snapshot.data);
-    } else if (snapshot.hasError) {
+      _files = _lastSnapshot.data;
+      return _onDataLoaded();
+    } else if (_lastSnapshot.hasError) {
       _requiresLoad = false;
-      return Center(child: Text(snapshot.error.toString()));
+      return Center(child: Text(_lastSnapshot.error.toString()));
     } else {
       return Center(child: loadWidget);
     }
   }
 
-  Widget _onDataLoaded(List<File> files) {
-    _files = files;
+  Widget _onDataLoaded() {
+    _logger.info("Loaded " + _files.length.toString());
     if (_files.isEmpty) {
       return Center(child: Text("Nothing to see here! 👀"));
     }
@@ -109,7 +121,7 @@ class _GalleryState extends State<Gallery> {
         onRefresh: () {
           widget.onRefresh().then((_) {
             _refreshController.refreshCompleted();
-            widget.loader().then((_) => setState(() {
+            widget.asyncLoader().then((_) => setState(() {
                   _requiresLoad = true;
                 }));
           }).catchError((e) {

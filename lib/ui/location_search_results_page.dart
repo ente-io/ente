@@ -38,13 +38,13 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
       ),
       body: Container(
         child: Gallery(
-          () => _getResult(),
+          syncLoader: _getResult,
         ),
       ),
     );
   }
 
-  FutureOr<List<File>> _getResult() async {
+  List<File> _getResult() {
     final files = FileRepository.instance.files;
     final args = Map<String, dynamic>();
     args['files'] = files;

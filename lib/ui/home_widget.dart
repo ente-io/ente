@@ -114,8 +114,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Gallery(
-            () =>
-                Future.value(_getFilteredPhotos(FileRepository.instance.files)),
+            syncLoader: () => _getFilteredPhotos(FileRepository.instance.files),
             reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
             onRefresh: PhotoSyncManager.instance.sync,
             selectedFiles: _selectedPhotos,
