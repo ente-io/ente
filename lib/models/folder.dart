@@ -8,7 +8,7 @@ class Folder {
   final String owner;
   final String deviceFolder;
   final Set<String> sharedWith;
-  final int updateTimestamp;
+  final int updationTime;
   File thumbnailPhoto;
 
   Folder(
@@ -17,7 +17,7 @@ class Folder {
     this.owner,
     this.deviceFolder,
     this.sharedWith,
-    this.updateTimestamp,
+    this.updationTime,
   );
 
   static Folder fromMap(Map<String, dynamic> map) {
@@ -29,13 +29,13 @@ class Folder {
       map['owner'],
       map['deviceFolder'],
       Set<String>.from(map['sharedWith']),
-      map['updateTimestamp'],
+      map['updationTime'],
     );
   }
 
   @override
   String toString() {
-    return 'Folder(id: $id, name: $name, owner: $owner, deviceFolder: $deviceFolder, sharedWith: $sharedWith, updateTimestamp: $updateTimestamp)';
+    return 'Folder(id: $id, name: $name, owner: $owner, deviceFolder: $deviceFolder, sharedWith: $sharedWith, updationTime: $updationTime)';
   }
 
   Map<String, dynamic> toMap() {
@@ -45,7 +45,7 @@ class Folder {
       'owner': owner,
       'deviceFolder': deviceFolder,
       'sharedWith': sharedWith.toList(),
-      'updateTimestamp': updateTimestamp,
+      'updationTime': updationTime,
     };
   }
 

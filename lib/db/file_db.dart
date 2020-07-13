@@ -183,12 +183,11 @@ class FileDB {
     }
   }
 
-  Future<int> update(
-      int generatedId, int uploadedId, int updateTimestamp) async {
+  Future<int> update(int generatedId, int uploadedId, int updationTime) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
     values[columnUploadedFileId] = uploadedId;
-    values[columnUpdationTime] = updateTimestamp;
+    values[columnUpdationTime] = updationTime;
     return await db.update(
       table,
       values,

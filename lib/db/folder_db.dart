@@ -18,7 +18,7 @@ class FolderDB {
   static final columnOwner = 'owner';
   static final columnDeviceFolder = 'device_folder';
   static final columnSharedWith = 'shared_with';
-  static final columnUpdateTimestamp = 'update_timestamp';
+  static final columnUpdationTime = 'updation_time';
 
   FolderDB._privateConstructor();
   static final FolderDB instance = FolderDB._privateConstructor();
@@ -45,7 +45,7 @@ class FolderDB {
             $columnOwner TEXT NOT NULL,
             $columnDeviceFolder TEXT NOT NULL,
             $columnSharedWith TEXT NOT NULL,
-            $columnUpdateTimestamp INTEGER NOT NULL,
+            $columnUpdationTime INTEGER NOT NULL,
             UNIQUE($columnOwner, $columnDeviceFolder)
           )
           ''');
@@ -61,7 +61,7 @@ class FolderDB {
     final db = await instance.database;
     final results = await db.query(
       table,
-      orderBy: '$columnUpdateTimestamp DESC',
+      orderBy: '$columnUpdationTime DESC',
     );
     return _convertToFolders(results);
   }
@@ -90,7 +90,7 @@ class FolderDB {
     row[columnOwner] = folder.owner;
     row[columnDeviceFolder] = folder.deviceFolder;
     row[columnSharedWith] = jsonEncode(folder.sharedWith.toList());
-    row[columnUpdateTimestamp] = folder.updateTimestamp;
+    row[columnUpdationTime] = folder.updationTime;
     return row;
   }
 
@@ -103,7 +103,7 @@ class FolderDB {
       (jsonDecode(row[columnSharedWith]) as List<dynamic>)
           .cast<String>()
           .toSet(),
-      row[columnUpdateTimestamp],
+      row[columnUpdationTime],
     );
   }
 }
