@@ -407,7 +407,7 @@ packages:
       name: photo_manager
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.3+1"
+    version: "0.5.5+1"
   photo_view:
     dependency: "direct main"
     description:
