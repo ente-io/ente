@@ -100,7 +100,9 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
             child: folder.thumbnailPhoto ==
                     null // When the user has shared a folder without photos
                 ? Icon(Icons.error)
-                : ThumbnailWidget(folder.thumbnailPhoto),
+                : Hero(
+                    tag: "remote_folder" + folder.thumbnailPhoto.tag(),
+                    child: ThumbnailWidget(folder.thumbnailPhoto)),
             height: 150,
             width: 150,
           ),
