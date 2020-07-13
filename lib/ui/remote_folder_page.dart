@@ -33,17 +33,18 @@ class _RemoteFolderPageState extends State<RemoteFolderPage> {
         },
       ),
       body: Gallery(
-          asyncLoader: () => FileDB.instance.getAllInFolder(widget.folder.id),
-          onRefresh: () =>
-              FolderSharingService.instance.syncDiff(widget.folder),
-          selectedFiles: _selectedPhotos,
-          onFileSelectionChange: (Set<File> selectedPhotos) {
-            setState(
-              () {
-                _selectedPhotos = selectedPhotos;
-              },
-            );
-          }),
+        asyncLoader: () => FileDB.instance.getAllInFolder(widget.folder.id),
+        onRefresh: () => FolderSharingService.instance.syncDiff(widget.folder),
+        selectedFiles: _selectedPhotos,
+        onFileSelectionChange: (Set<File> selectedPhotos) {
+          setState(
+            () {
+              _selectedPhotos = selectedPhotos;
+            },
+          );
+        },
+        tagPrefix: "remote_folder",
+      ),
     );
   }
 }

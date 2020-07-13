@@ -39,6 +39,7 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
       body: Container(
         child: Gallery(
           syncLoader: _getResult,
+          tagPrefix: "location_search",
         ),
       ),
     );

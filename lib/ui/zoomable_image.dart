@@ -12,11 +12,13 @@ import 'package:photos/core/constants.dart';
 class ZoomableImage extends StatefulWidget {
   final File photo;
   final Function(bool) shouldDisableScroll;
+  final String tagPrefix;
 
   ZoomableImage(
     this.photo, {
     Key key,
     this.shouldDisableScroll,
+    this.tagPrefix,
   }) : super(key: key);
 
   @override
@@ -59,7 +61,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         minScale: PhotoViewComputedScale.contained,
         gaplessPlayback: true,
         heroAttributes: PhotoViewHeroAttributes(
-          tag: widget.photo.tag(),
+          tag: widget.tagPrefix + widget.photo.tag(),
         ),
       );
     } else {

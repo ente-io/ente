@@ -22,6 +22,7 @@ class FaceSearchResultsPage extends StatelessWidget {
       body: Container(
         child: Gallery(
           asyncLoader: () => _faceSearchManager.getFaceSearchResults(face),
+          tagPrefix: "face_search_results",
         ),
       ),
     );

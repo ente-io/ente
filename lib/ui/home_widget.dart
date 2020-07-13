@@ -123,6 +123,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 _selectedPhotos = selectedPhotos;
               });
             },
+            tagPrefix: "home_gallery",
           );
         } else if (snapshot.hasError) {
           return Center(child: Text(snapshot.error.toString()));

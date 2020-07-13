@@ -187,6 +187,9 @@ class PhotoSyncManager {
     List<File> photosToBeUploaded = await _db.getFilesToBeUploaded();
     for (int i = 0; i < photosToBeUploaded.length; i++) {
       File file = photosToBeUploaded[i];
+      if (file.fileType == FileType.video) {
+        continue;
+      }
       _logger.info("Uploading " + file.toString());
       try {
         var uploadedFile = await _uploadFile(file);

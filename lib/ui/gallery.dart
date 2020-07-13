@@ -23,6 +23,7 @@ class Gallery extends StatefulWidget {
   final Future<void> Function() onRefresh;
   final Set<File> selectedFiles;
   final Function(Set<File>) onFileSelectionChange;
+  final String tagPrefix;
 
   Gallery({
     this.syncLoader,
@@ -31,6 +32,7 @@ class Gallery extends StatefulWidget {
     this.onRefresh,
     this.selectedFiles,
     this.onFileSelectionChange,
+    this.tagPrefix,
   });
 
   @override
@@ -189,7 +191,7 @@ class _GalleryState extends State<Gallery> {
               : null,
         ),
         child: Hero(
-          tag: file.tag(),
+          tag: widget.tagPrefix + file.tag(),
           child: ThumbnailWidget(file),
         ),
       ),
@@ -211,6 +213,7 @@ class _GalleryState extends State<Gallery> {
     final page = DetailPage(
       _files,
       _files.indexOf(file),
+      widget.tagPrefix,
     );
     Navigator.of(context).push(
       MaterialPageRoute(

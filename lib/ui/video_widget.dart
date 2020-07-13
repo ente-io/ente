@@ -16,7 +16,13 @@ import 'loading_widget.dart';
 class VideoWidget extends StatefulWidget {
   final File file;
   final bool autoPlay;
-  VideoWidget(this.file, {this.autoPlay = false, Key key}) : super(key: key);
+  final String tagPrefix;
+  VideoWidget(
+    this.file, {
+    this.autoPlay = false,
+    this.tagPrefix,
+    Key key,
+  }) : super(key: key);
 
   @override
   _VideoWidgetState createState() => _VideoWidgetState();
@@ -73,7 +79,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         ? _getVideoPlayer()
         : _getLoadingWidget();
     return Hero(
-      tag: widget.file.tag(),
+      tag: widget.tagPrefix + widget.file.tag(),
       child: content,
     );
   }

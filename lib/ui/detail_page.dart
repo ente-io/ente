@@ -17,8 +17,10 @@ import 'package:logging/logging.dart';
 class DetailPage extends StatefulWidget {
   final List<File> files;
   final int selectedIndex;
+  final String tagPrefix;
 
-  DetailPage(this.files, this.selectedIndex, {key}) : super(key: key);
+  DetailPage(this.files, this.selectedIndex, this.tagPrefix, {key})
+      : super(key: key);
 
   @override
   _DetailPageState createState() => _DetailPageState();
@@ -74,11 +76,13 @@ class _DetailPageState extends State<DetailPage> {
                 _shouldDisableScroll = value;
               });
             },
+            tagPrefix: widget.tagPrefix,
           );
         } else if (file.fileType == FileType.video) {
           content = VideoWidget(
             file,
             autoPlay: !_hasPageChanged, // Autoplay if it was opened directly
+            tagPrefix: widget.tagPrefix,
           );
         } else {
           content = Icon(Icons.error);

@@ -46,6 +46,7 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
           });
         },
         reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+        tagPrefix: "device_folder",
       ),
     );
   }
