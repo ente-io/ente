@@ -28,14 +28,16 @@ class FaceSearchManager {
         .catchError(_onError);
   }
 
-  Future<List<File>> getFaceSearchResults(Face face) async {
+  Future<List<File>> getFaceSearchResults(
+      Face face, int offset, int limit) async {
     final result = await _dio
         .get(
       Configuration.instance.getHttpEndpoint() +
           "/photos/search/face/" +
           face.faceID.toString(),
       queryParameters: {
-        "limit": 100,
+        "limit": limit,
+        "offset": offset,
       },
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),

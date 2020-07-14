@@ -114,12 +114,13 @@ class FileDB {
     return _convertToFiles(results);
   }
 
-  Future<List<File>> getAllInFolder(int folderId) async {
+  Future<List<File>> getAllInFolder(int folderId, int offset, int limit) async {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where: '$columnRemoteFolderId = ? AND $columnIsDeleted = 0',
-      whereArgs: [folderId],
+      where:
+          '$columnRemoteFolderId = ? AND $columnIsDeleted = 0 OFFSET ? LIMIT ?',
+      whereArgs: [folderId, offset, limit],
       orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);

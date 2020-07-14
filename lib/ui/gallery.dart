@@ -16,7 +16,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Gallery extends StatefulWidget {
   final List<File> Function() syncLoader;
-  final Future<List<File>> Function() asyncLoader;
+  final Future<List<File>> Function(int offset, int limit) asyncLoader;
   // TODO: Verify why the event is necessary when calling loader post onRefresh
   // should have done the job.
   final Stream<Event> reloadEvent;
@@ -43,11 +43,12 @@ class Gallery extends StatefulWidget {
 
 class _GalleryState extends State<Gallery> {
   final Logger _logger = Logger("Gallery");
+  static final int kLoadLimit = 100;
   final ScrollController _scrollController = ScrollController();
   final List<List<File>> _collatedFiles = List<List<File>>();
 
   bool _requiresLoad = false;
-  AsyncSnapshot<List<File>> _lastSnapshot;
+  bool _hasLoadedAll = false;
   Set<File> _selectedFiles = HashSet<File>();
   List<File> _files;
   RefreshController _refreshController = RefreshController();
@@ -68,38 +69,27 @@ class _GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
     if (!_requiresLoad) {
-      if (widget.syncLoader != null) {
-        return _onDataLoaded();
-      }
-      return _onSnapshotAvailable();
+      return _onDataLoaded();
     }
     if (widget.syncLoader != null) {
       _files = widget.syncLoader();
       return _onDataLoaded();
     }
     return FutureBuilder<List<File>>(
-      future: widget.asyncLoader(),
+      future: widget.asyncLoader(0, kLoadLimit),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          _logger.info(snapshot.data.length.toString());
+          _requiresLoad = false;
+          _files = snapshot.data;
+          return _onDataLoaded();
+        } else if (snapshot.hasError) {
+          _requiresLoad = false;
+          return Center(child: Text(snapshot.error.toString()));
+        } else {
+          return Center(child: loadWidget);
         }
-        _lastSnapshot = snapshot;
-        return _onSnapshotAvailable();
       },
     );
-  }
-
-  Widget _onSnapshotAvailable() {
-    if (_lastSnapshot.hasData) {
-      _requiresLoad = false;
-      _files = _lastSnapshot.data;
-      return _onDataLoaded();
-    } else if (_lastSnapshot.hasError) {
-      _requiresLoad = false;
-      return Center(child: Text(_lastSnapshot.error.toString()));
-    } else {
-      return Center(child: loadWidget);
-    }
   }
 
   Widget _onDataLoaded() {
@@ -110,7 +100,7 @@ class _GalleryState extends State<Gallery> {
     _selectedFiles = widget.selectedFiles ?? Set<File>();
     _collateFiles();
     final list = ListView.builder(
-      itemCount: _collatedFiles.length,
+      itemCount: _collatedFiles.length + 1, // h4ck to load the next set
       itemBuilder: _buildListItem,
       controller: _scrollController,
       cacheExtent: 1000,
@@ -123,9 +113,9 @@ class _GalleryState extends State<Gallery> {
         onRefresh: () {
           widget.onRefresh().then((_) {
             _refreshController.refreshCompleted();
-            widget.asyncLoader().then((_) => setState(() {
-                  _requiresLoad = true;
-                }));
+            setState(() {
+              _requiresLoad = true;
+            });
           }).catchError((e) {
             _refreshController.refreshFailed();
             setState(() {});
@@ -138,6 +128,20 @@ class _GalleryState extends State<Gallery> {
   }
 
   Widget _buildListItem(BuildContext context, int index) {
+    if (index == _collatedFiles.length) {
+      if (_hasLoadedAll || widget.asyncLoader == null) {
+        return Container();
+      }
+      widget.asyncLoader(_files.length, 100).then((files) {
+        setState(() {
+          if (files.length == 0) {
+            _hasLoadedAll = true;
+          }
+          _files.addAll(files);
+        });
+      });
+      return loadWidget;
+    }
     var files = _collatedFiles[index];
     return Column(
       children: <Widget>[_getDay(files[0].creationTime), _getGallery(files)],
