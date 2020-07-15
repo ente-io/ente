@@ -67,7 +67,9 @@ class _GalleryState extends State<Gallery> {
       });
     }
     widget.selectedFiles.addListener(() {
-      setState(() {});
+      setState(() {
+        _scrollOffset = _scrollController.offset;
+      });
     });
     super.initState();
   }
