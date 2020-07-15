@@ -27,6 +27,7 @@ void _main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Configuration.instance.init();
+  await PhotoSyncManager.instance.init();
   FavoriteFilesRepository.instance.init();
   _sync();
 

@@ -25,6 +25,7 @@ class PhotoSyncManager {
   final _db = FileDB.instance;
   bool _isSyncInProgress = false;
   Future<void> _existingSync;
+  SharedPreferences _prefs;
 
   static final _lastSyncTimeKey = "last_sync_time";
   static final _lastDBUpdationTimeKey = "last_db_updation_time";
@@ -38,6 +39,10 @@ class PhotoSyncManager {
 
   static final PhotoSyncManager instance =
       PhotoSyncManager._privateConstructor();
+
+  Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
+  }
 
   Future<void> sync() async {
     if (_isSyncInProgress) {
@@ -58,15 +63,13 @@ class PhotoSyncManager {
     return _existingSync;
   }
 
-  Future<bool> hasScannedDisk() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.containsKey(_lastDBUpdationTimeKey);
+  bool hasScannedDisk() {
+    return _prefs.containsKey(_lastDBUpdationTimeKey);
   }
 
   Future<void> _doSync() async {
-    final prefs = await SharedPreferences.getInstance();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
-    var lastDBUpdationTime = prefs.getInt(_lastDBUpdationTimeKey);
+    var lastDBUpdationTime = _prefs.getInt(_lastDBUpdationTimeKey);
     if (lastDBUpdationTime == null) {
       lastDBUpdationTime = 0;
       await _initializeDirectories();
@@ -90,11 +93,10 @@ class PhotoSyncManager {
     if (files.isNotEmpty) {
       files.sort(
           (first, second) => first.creationTime.compareTo(second.creationTime));
-      await _updateDatabase(
-          files, prefs, lastDBUpdationTime, syncStartTime);
+      await _updateDatabase(files, lastDBUpdationTime, syncStartTime);
       await FileRepository.instance.reloadFiles();
     }
-    await _syncWithRemote(prefs);
+    await _syncWithRemote();
   }
 
   Future<List<AssetPathEntity>> _getGalleryList(
@@ -142,48 +144,48 @@ class PhotoSyncManager {
     }
   }
 
-  Future<void> _syncWithRemote(SharedPreferences prefs) async {
+  Future<void> _syncWithRemote() async {
     // TODO:  Fix race conditions triggered due to concurrent syncs.
     //        Add device_id/last_sync_timestamp to the upload request?
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }
-    await _downloadDiff(prefs);
-    await _uploadDiff(prefs);
+    await _downloadDiff();
+    await _uploadDiff();
     await _deletePhotosOnServer();
   }
 
-  Future<bool> _updateDatabase(final List<File> files, SharedPreferences prefs,
-      int lastDBUpdationTime, int syncStartTimestamp) async {
+  Future<bool> _updateDatabase(final List<File> files, int lastDBUpdationTime,
+      int syncStartTimestamp) async {
     var filesToBeAdded = List<File>();
     for (File file in files) {
       if (file.creationTime > lastDBUpdationTime) {
         filesToBeAdded.add(file);
       }
     }
-    return await _insertFilesToDB(filesToBeAdded, prefs, syncStartTimestamp);
+    return await _insertFilesToDB(filesToBeAdded, syncStartTimestamp);
   }
 
-  Future<void> _downloadDiff(SharedPreferences prefs) async {
-    var diff = await _getDiff(_getLastSyncTimestamp(prefs), _diffLimit);
+  Future<void> _downloadDiff() async {
+    var diff = await _getDiff(_getLastSyncTimestamp(), _diffLimit);
     if (diff != null && diff.isNotEmpty) {
-      await _storeDiff(diff, prefs);
+      await _storeDiff(diff);
       FileRepository.instance.reloadFiles();
       if (diff.length == _diffLimit) {
-        return await _downloadDiff(prefs);
+        return await _downloadDiff();
       }
     }
   }
 
-  int _getLastSyncTimestamp(SharedPreferences prefs) {
-    var lastSyncTimestamp = prefs.getInt(_lastSyncTimeKey);
+  int _getLastSyncTimestamp() {
+    var lastSyncTimestamp = _prefs.getInt(_lastSyncTimeKey);
     if (lastSyncTimestamp == null) {
       lastSyncTimestamp = 0;
     }
     return lastSyncTimestamp;
   }
 
-  Future<void> _uploadDiff(SharedPreferences prefs) async {
+  Future<void> _uploadDiff() async {
     List<File> photosToBeUploaded = await _db.getFilesToBeUploaded();
     for (int i = 0; i < photosToBeUploaded.length; i++) {
       File file = photosToBeUploaded[i];
@@ -195,7 +197,7 @@ class PhotoSyncManager {
         var uploadedFile = await _uploadFile(file);
         await _db.update(file.generatedId, uploadedFile.uploadedFileId,
             uploadedFile.updationTime);
-        prefs.setInt(_lastSyncTimeKey, uploadedFile.updationTime);
+        _prefs.setInt(_lastSyncTimeKey, uploadedFile.updationTime);
 
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: photosToBeUploaded.length));
@@ -206,7 +208,7 @@ class PhotoSyncManager {
     }
   }
 
-  Future _storeDiff(List<File> diff, SharedPreferences prefs) async {
+  Future _storeDiff(List<File> diff) async {
     for (File file in diff) {
       try {
         var existingPhoto = await _db.getMatchingFile(file.localId, file.title,
@@ -217,7 +219,7 @@ class PhotoSyncManager {
       } catch (e) {
         await _db.insert(file);
       }
-      await prefs.setInt(_lastSyncTimeKey, file.updationTime);
+      await _prefs.setInt(_lastSyncTimeKey, file.updationTime);
     }
   }
 
@@ -293,10 +295,9 @@ class PhotoSyncManager {
         .createSync(recursive: true);
   }
 
-  Future<bool> _insertFilesToDB(
-      List<File> files, SharedPreferences prefs, int timestamp) async {
+  Future<bool> _insertFilesToDB(List<File> files, int timestamp) async {
     await _db.insertMultiple(files);
     _logger.info("Inserted " + files.length.toString() + " files.");
-    return await prefs.setInt(_lastDBUpdationTimeKey, timestamp);
+    return await _prefs.setInt(_lastDBUpdationTimeKey, timestamp);
   }
 }
