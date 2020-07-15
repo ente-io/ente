@@ -42,13 +42,15 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
-  final Logger _logger = Logger("Gallery");
   static final int kLoadLimit = 100;
-  final ScrollController _scrollController = ScrollController();
+
+  final Logger _logger = Logger("Gallery");
   final List<List<File>> _collatedFiles = List<List<File>>();
 
+  ScrollController _scrollController = ScrollController();
   bool _requiresLoad = false;
   bool _hasLoadedAll = false;
+  double _scrollOffset = 0;
   Set<File> _selectedFiles = HashSet<File>();
   List<File> _files;
   RefreshController _refreshController = RefreshController();
@@ -99,6 +101,9 @@ class _GalleryState extends State<Gallery> {
     }
     _selectedFiles = widget.selectedFiles ?? Set<File>();
     _collateFiles();
+    _scrollController = ScrollController(
+      initialScrollOffset: _scrollOffset,
+    );
     final list = ListView.builder(
       itemCount: _collatedFiles.length + 1, // h4ck to load the next set
       itemBuilder: _buildListItem,
@@ -134,6 +139,7 @@ class _GalleryState extends State<Gallery> {
       }
       widget.asyncLoader(_files.length, 100).then((files) {
         setState(() {
+          _scrollOffset = _scrollController.offset;
           if (files.length == 0) {
             _hasLoadedAll = true;
           }
@@ -163,7 +169,8 @@ class _GalleryState extends State<Gallery> {
     return GridView.builder(
       shrinkWrap: true,
       padding: EdgeInsets.only(bottom: 12),
-      physics: ScrollPhysics(), // to disable GridView's scrolling
+      physics:
+          NeverScrollableScrollPhysics(), // to disable GridView's scrolling
       itemBuilder: (context, index) {
         return _buildFile(context, files[index]);
       },
