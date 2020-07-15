@@ -49,6 +49,7 @@ class _GalleryState extends State<Gallery> {
   ScrollController _scrollController = ScrollController();
   bool _requiresLoad = false;
   bool _hasLoadedAll = false;
+  bool _isLoadingNext = false;
   double _scrollOffset = 0;
   List<File> _files;
   RefreshController _refreshController = RefreshController();
@@ -152,11 +153,15 @@ class _GalleryState extends State<Gallery> {
   }
 
   bool _shouldLoadNextItems(int index) =>
-      index == _collatedFiles.length - kEagerLoadTrigger;
+      !_isLoadingNext &&
+      (index >= _collatedFiles.length - kEagerLoadTrigger) &&
+      !_hasLoadedAll;
 
   void _loadNextItems() {
+    _isLoadingNext = true;
     widget.asyncLoader(_files.length, 100).then((files) {
       setState(() {
+        _isLoadingNext = false;
         _saveScrollPosition();
         if (files.length == 0) {
           _hasLoadedAll = true;
