@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/sync_indicator.dart';
@@ -21,7 +22,7 @@ class Gallery extends StatefulWidget {
   // should have done the job.
   final Stream<Event> reloadEvent;
   final Future<void> Function() onRefresh;
-  final fileSelectionChangeListeners = new List<Function(Set<File>)>();
+  final SelectedFiles selectedFiles;
   final String tagPrefix;
 
   Gallery({
@@ -29,19 +30,15 @@ class Gallery extends StatefulWidget {
     this.asyncLoader,
     this.reloadEvent,
     this.onRefresh,
-    this.tagPrefix,
+    @required this.selectedFiles,
+    @required this.tagPrefix,
   });
 
   _GalleryState state;
 
   @override
   _GalleryState createState() {
-    state = _GalleryState();
-    return state;
-  }
-
-  void clearSelection() {
-    state.clearSelection();
+    return _GalleryState();
   }
 }
 
@@ -56,7 +53,6 @@ class _GalleryState extends State<Gallery> {
   bool _requiresLoad = false;
   bool _hasLoadedAll = false;
   double _scrollOffset = 0;
-  Set<File> _selectedFiles = Set<File>();
   List<File> _files;
   RefreshController _refreshController = RefreshController();
 
@@ -70,13 +66,10 @@ class _GalleryState extends State<Gallery> {
         });
       });
     }
-    super.initState();
-  }
-
-  void clearSelection() {
-    setState(() {
-      _selectedFiles = Set<File>();
+    widget.selectedFiles.addListener(() {
+      setState(() {});
     });
+    super.initState();
   }
 
   @override
@@ -204,7 +197,7 @@ class _GalleryState extends State<Gallery> {
   Widget _buildFile(BuildContext context, File file) {
     return GestureDetector(
       onTap: () {
-        if (_selectedFiles.isNotEmpty) {
+        if (widget.selectedFiles.files.isNotEmpty) {
           _selectFile(file);
         } else {
           _routeToDetailPage(file, context);
@@ -217,7 +210,7 @@ class _GalleryState extends State<Gallery> {
       child: Container(
         margin: const EdgeInsets.all(2.0),
         decoration: BoxDecoration(
-          border: _selectedFiles.contains(file)
+          border: widget.selectedFiles.files.contains(file)
               ? Border.all(width: 4.0, color: Colors.blue)
               : null,
         ),
@@ -230,16 +223,7 @@ class _GalleryState extends State<Gallery> {
   }
 
   void _selectFile(File file) {
-    setState(() {
-      if (_selectedFiles.contains(file)) {
-        _selectedFiles.remove(file);
-      } else {
-        _selectedFiles.add(file);
-      }
-      for (final listener in widget.fileSelectionChangeListeners) {
-        listener.call(_selectedFiles);
-      }
-    });
+    widget.selectedFiles.toggleSelection(file);
   }
 
   void _routeToDetailPage(File file, BuildContext context) {

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/file_repository.dart';
+import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';
 
 class ViewPort {
@@ -30,6 +31,8 @@ class LocationSearchResultsPage extends StatefulWidget {
 }
 
 class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
+  final _selectedFiles = SelectedFiles();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,6 +43,7 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
         child: Gallery(
           syncLoader: _getResult,
           tagPrefix: "location_search",
+          selectedFiles: _selectedFiles,
         ),
       ),
     );

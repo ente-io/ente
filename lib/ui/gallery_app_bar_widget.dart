@@ -7,7 +7,7 @@ import 'package:photos/db/file_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/file_repository.dart';
-import 'package:photos/ui/gallery.dart';
+import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/setup_page.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/ui/share_folder_widget.dart';
@@ -23,15 +23,15 @@ enum GalleryAppBarType {
 
 class GalleryAppBarWidget extends StatefulWidget
     implements PreferredSizeWidget {
-  final Gallery gallery;
   final GalleryAppBarType type;
   final String title;
+  final SelectedFiles selectedFiles;
   final String path;
 
   GalleryAppBarWidget(
-    this.gallery,
     this.type,
-    this.title, [
+    this.title,
+    this.selectedFiles, [
     this.path,
   ]);
 
@@ -45,7 +45,6 @@ class GalleryAppBarWidget extends StatefulWidget
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   bool _hasSyncErrors = false;
   StreamSubscription<RemoteSyncEvent> _subscription;
-  Set<File> _selectedFiles = Set<File>();
 
   @override
   void initState() {
@@ -54,18 +53,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         _hasSyncErrors = !event.success;
       });
     });
-    if (widget.gallery != null)
-      widget.gallery.fileSelectionChangeListeners.add((selectedFiles) {
-        setState(() {
-          _selectedFiles = selectedFiles;
-        });
-      });
+    widget.selectedFiles.addListener(() {
+      setState(() {});
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_selectedFiles.isEmpty) {
+    if (widget.selectedFiles.files.isEmpty) {
       return AppBar(
         title: Text(widget.title),
         actions: _getDefaultActions(context),
@@ -79,7 +75,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           _clearSelectedFiles();
         },
       ),
-      title: Text(_selectedFiles.length.toString()),
+      title: Text(widget.selectedFiles.files.length.toString()),
       actions: _getActions(context),
     );
   }
@@ -118,7 +114,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
-    if (_selectedFiles.isNotEmpty) {
+    if (widget.selectedFiles.files.isNotEmpty) {
       if (widget.type != GalleryAppBarType.remote_folder &&
           widget.type != GalleryAppBarType.search_results) {
         actions.add(IconButton(
@@ -139,7 +135,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _shareSelected(BuildContext context) {
-    shareMultiple(context, _selectedFiles.toList());
+    shareMultiple(context, widget.selectedFiles.files.toList());
   }
 
   void _showDeleteSheet(BuildContext context) {
@@ -173,10 +169,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   _deleteSelected(BuildContext context, bool deleteEverywhere) async {
     final dialog = createProgressDialog(context, "Deleting...");
     await dialog.show();
-    await PhotoManager.editor
-        .deleteWithIds(_selectedFiles.map((p) => p.localId).toList());
+    await PhotoManager.editor.deleteWithIds(
+        widget.selectedFiles.files.map((p) => p.localId).toList());
 
-    for (File file in _selectedFiles) {
+    for (File file in widget.selectedFiles.files) {
       deleteEverywhere
           ? await FileDB.instance.markForDeletion(file)
           : await FileDB.instance.delete(file);
@@ -188,10 +184,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _clearSelectedFiles() {
-    widget.gallery.clearSelection();
-    setState(() {
-      _selectedFiles.clear();
-    });
+    widget.selectedFiles.clearAll();
   }
 
   void _openSyncConfiguration(BuildContext context) {

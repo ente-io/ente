@@ -9,6 +9,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/file_repository.dart';
+import 'package:photos/models/selected_files.dart';
 import 'package:photos/photo_sync_manager.dart';
 import 'package:photos/ui/device_folders_gallery_widget.dart';
 import 'package:photos/ui/gallery.dart';
@@ -34,10 +35,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _logger = Logger("HomeWidgetState");
   final _remoteFolderGalleryWidget = RemoteFolderGalleryWidget();
   final _deviceFolderGalleryWidget = DeviceFolderGalleryWidget();
+  final _selectedFiles = SelectedFiles();
 
   ShakeDetector _detector;
   int _selectedNavBarItem = 0;
-  Set<File> _selectedPhotos = HashSet<File>();
   StreamSubscription<LocalPhotosUpdatedEvent>
       _localPhotosUpdatedEventSubscription;
 
@@ -61,9 +62,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     var gallery = _getMainGalleryWidget();
     return Scaffold(
       appBar: GalleryAppBarWidget(
-        gallery,
         GalleryAppBarType.homepage,
         widget.title,
+        _selectedFiles,
         "/",
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
@@ -108,6 +109,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       onRefresh: PhotoSyncManager.instance.sync,
       tagPrefix: "home_gallery",
+      selectedFiles: _selectedFiles,
     );
   }
 
@@ -147,12 +149,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     _logger.info("Filtered down to " + filteredPhotos.length.toString());
     return filteredPhotos;
-  }
-
-  void _clearSelectedPhotos() {
-    setState(() {
-      _selectedPhotos.clear();
-    });
   }
 
   @override

@@ -4,9 +4,9 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/file_repository.dart';
+import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
-import 'package:logging/logging.dart';
 
 class DeviceFolderPage extends StatefulWidget {
   final DeviceFolder folder;
@@ -18,7 +18,7 @@ class DeviceFolderPage extends StatefulWidget {
 }
 
 class _DeviceFolderPageState extends State<DeviceFolderPage> {
-  final logger = Logger("DeviceFolderPageState");
+  final _selectedFiles = SelectedFiles();
 
   @override
   Widget build(Object context) {
@@ -26,12 +26,13 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
       syncLoader: () => _getFilteredFiles(FileRepository.instance.files),
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       tagPrefix: "device_folder",
+      selectedFiles: _selectedFiles,
     );
     return Scaffold(
       appBar: GalleryAppBarWidget(
-        gallery,
         GalleryAppBarType.local_folder,
         widget.folder.name,
+        _selectedFiles,
         widget.folder.thumbnail.deviceFolder,
       ),
       body: gallery,
