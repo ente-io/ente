@@ -15,6 +15,7 @@ import 'package:photos/ui/device_folders_gallery_widget.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
+import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/remote_folder_gallery_widget.dart';
 import 'package:photos/ui/search_page.dart';
 import 'package:photos/utils/logging_util.dart';
@@ -59,7 +60,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var gallery = _getMainGalleryWidget();
     return Scaffold(
       appBar: GalleryAppBarWidget(
         GalleryAppBarType.homepage,
@@ -71,7 +71,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       body: IndexedStack(
         children: <Widget>[
           PhotoSyncManager.instance.hasScannedDisk()
-              ? gallery
+              ? _getMainGalleryWidget()
               : LoadingPhotosWidget(),
           _deviceFolderGalleryWidget,
           _remoteFolderGalleryWidget,
@@ -100,16 +100,27 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getMainGalleryWidget() {
-    return Gallery(
-      asyncLoader: (_, __) {
-        return FileRepository.instance.loadFiles().then((files) {
-          return _getFilteredPhotos(files);
-        });
+    return FutureBuilder(
+      future: FileRepository.instance.loadFiles().then((files) {
+        return _getFilteredPhotos(files);
+      }),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Gallery(
+            syncLoader: () {
+              return _getFilteredPhotos(FileRepository.instance.files);
+            },
+            reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+            onRefresh: PhotoSyncManager.instance.sync,
+            tagPrefix: "home_gallery",
+            selectedFiles: _selectedFiles,
+          );
+        } else if (snapshot.hasError) {
+          return Center(child: Text(snapshot.error.toString()));
+        } else {
+          return loadWidget;
+        }
       },
-      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      onRefresh: PhotoSyncManager.instance.sync,
-      tagPrefix: "home_gallery",
-      selectedFiles: _selectedFiles,
     );
   }
 

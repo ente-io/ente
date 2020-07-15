@@ -167,6 +167,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   _deleteSelected(BuildContext context, bool deleteEverywhere) async {
+    Navigator.of(context, rootNavigator: true).pop();
     final dialog = createProgressDialog(context, "Deleting...");
     await dialog.show();
     await PhotoManager.editor.deleteWithIds(
@@ -177,8 +178,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           ? await FileDB.instance.markForDeletion(file)
           : await FileDB.instance.delete(file);
     }
-    Navigator.of(context, rootNavigator: true).pop();
-    FileRepository.instance.reloadFiles();
+    await FileRepository.instance.reloadFiles();
     _clearSelectedFiles();
     await dialog.hide();
   }
