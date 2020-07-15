@@ -11,6 +11,7 @@ import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/setup_page.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/ui/share_folder_widget.dart';
+import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 enum GalleryAppBarType {
@@ -147,15 +148,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         CupertinoActionSheetAction(
           child: Text("Delete on device"),
           isDestructiveAction: true,
-          onPressed: () async {
-            await _deleteSelected(context, false);
+          onPressed: () {
+            _deleteSelected(context, false);
           },
         ),
         CupertinoActionSheetAction(
           child: Text("Delete everywhere [WiP]"),
           isDestructiveAction: true,
-          onPressed: () async {
-            await _deleteSelected(context, true);
+          onPressed: () {
+            _deleteSelected(context, true);
           },
         )
       ],
@@ -169,7 +170,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     showCupertinoModalPopup(context: context, builder: (_) => action);
   }
 
-  Future _deleteSelected(BuildContext context, bool deleteEverywhere) async {
+  _deleteSelected(BuildContext context, bool deleteEverywhere) async {
+    final dialog = createProgressDialog(context, "Deleting...");
+    await dialog.show();
     await PhotoManager.editor
         .deleteWithIds(_selectedFiles.map((p) => p.localId).toList());
 
@@ -181,6 +184,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     Navigator.of(context, rootNavigator: true).pop();
     FileRepository.instance.reloadFiles();
     _clearSelectedFiles();
+    await dialog.hide();
   }
 
   void _clearSelectedFiles() {
