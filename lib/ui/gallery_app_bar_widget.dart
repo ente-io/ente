@@ -17,6 +17,7 @@ enum GalleryAppBarType {
   homepage,
   local_folder,
   remote_folder,
+  search_results,
 }
 
 class GalleryAppBarWidget extends StatefulWidget
@@ -29,9 +30,9 @@ class GalleryAppBarWidget extends StatefulWidget
   GalleryAppBarWidget(
     this.gallery,
     this.type,
-    this.title,
+    this.title, [
     this.path,
-  );
+  ]);
 
   @override
   _GalleryAppBarWidgetState createState() => _GalleryAppBarWidgetState();
@@ -117,7 +118,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
     if (_selectedFiles.isNotEmpty) {
-      if (widget.type != GalleryAppBarType.remote_folder) {
+      if (widget.type != GalleryAppBarType.remote_folder &&
+          widget.type != GalleryAppBarType.search_results) {
         actions.add(IconButton(
           icon: Icon(Icons.delete),
           onPressed: () {
