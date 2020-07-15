@@ -15,13 +15,13 @@ class FileRepository {
     return _files;
   }
 
-  Future<bool> loadFiles() async {
+  Future<List<File>> loadFiles() async {
     var files = await FileDB.instance.getAllLocalFiles();
 
     _files.clear();
     _files.addAll(files);
 
-    return true;
+    return _files;
   }
 
   Future<void> reloadFiles() async {

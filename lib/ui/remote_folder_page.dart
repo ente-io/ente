@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:photos/db/file_db.dart';
 import 'package:photos/folder_service.dart';
 import 'package:photos/models/folder.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 
@@ -16,36 +15,22 @@ class RemoteFolderPage extends StatefulWidget {
 }
 
 class _RemoteFolderPageState extends State<RemoteFolderPage> {
-  Set<File> _selectedPhotos = Set<File>();
-
   @override
   Widget build(Object context) {
+    var gallery = Gallery(
+      asyncLoader: (offset, limit) =>
+          FileDB.instance.getAllInFolder(widget.folder.id, offset, limit),
+      onRefresh: () => FolderSharingService.instance.syncDiff(widget.folder),
+      tagPrefix: "remote_folder",
+    );
     return Scaffold(
       appBar: GalleryAppBarWidget(
+        gallery,
         GalleryAppBarType.remote_folder,
         widget.folder.name,
         widget.folder.deviceFolder,
-        _selectedPhotos,
-        onSelectionClear: () {
-          setState(() {
-            _selectedPhotos.clear();
-          });
-        },
       ),
-      body: Gallery(
-        asyncLoader: (offset, limit) =>
-            FileDB.instance.getAllInFolder(widget.folder.id, offset, limit),
-        onRefresh: () => FolderSharingService.instance.syncDiff(widget.folder),
-        selectedFiles: _selectedPhotos,
-        onFileSelectionChange: (Set<File> selectedPhotos) {
-          setState(
-            () {
-              _selectedPhotos = selectedPhotos;
-            },
-          );
-        },
-        tagPrefix: "remote_folder",
-      ),
+      body: gallery,
     );
   }
 }

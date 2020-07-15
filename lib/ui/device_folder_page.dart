@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -21,33 +19,22 @@ class DeviceFolderPage extends StatefulWidget {
 
 class _DeviceFolderPageState extends State<DeviceFolderPage> {
   final logger = Logger("DeviceFolderPageState");
-  Set<File> _selectedFiles = Set<File>();
 
   @override
   Widget build(Object context) {
+    var gallery = Gallery(
+      syncLoader: () => _getFilteredFiles(FileRepository.instance.files),
+      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      tagPrefix: "device_folder",
+    );
     return Scaffold(
       appBar: GalleryAppBarWidget(
+        gallery,
         GalleryAppBarType.local_folder,
         widget.folder.name,
         widget.folder.thumbnail.deviceFolder,
-        _selectedFiles,
-        onSelectionClear: () {
-          setState(() {
-            _selectedFiles.clear();
-          });
-        },
       ),
-      body: Gallery(
-        syncLoader: () => _getFilteredFiles(FileRepository.instance.files),
-        selectedFiles: _selectedFiles,
-        onFileSelectionChange: (Set<File> selectedFiles) {
-          setState(() {
-            _selectedFiles = selectedFiles;
-          });
-        },
-        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-        tagPrefix: "device_folder",
-      ),
+      body: gallery,
     );
   }
 

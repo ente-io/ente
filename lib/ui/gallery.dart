@@ -21,8 +21,7 @@ class Gallery extends StatefulWidget {
   // should have done the job.
   final Stream<Event> reloadEvent;
   final Future<void> Function() onRefresh;
-  final Set<File> selectedFiles;
-  final Function(Set<File>) onFileSelectionChange;
+  final fileSelectionChangeListeners = new List<Function(Set<File>)>();
   final String tagPrefix;
 
   Gallery({
@@ -30,14 +29,19 @@ class Gallery extends StatefulWidget {
     this.asyncLoader,
     this.reloadEvent,
     this.onRefresh,
-    this.selectedFiles,
-    this.onFileSelectionChange,
     this.tagPrefix,
   });
 
+  _GalleryState state;
+
   @override
   _GalleryState createState() {
-    return _GalleryState();
+    state = _GalleryState();
+    return state;
+  }
+
+  void clearSelection() {
+    state.clearSelection();
   }
 }
 
@@ -52,7 +56,7 @@ class _GalleryState extends State<Gallery> {
   bool _requiresLoad = false;
   bool _hasLoadedAll = false;
   double _scrollOffset = 0;
-  Set<File> _selectedFiles = HashSet<File>();
+  Set<File> _selectedFiles = Set<File>();
   List<File> _files;
   RefreshController _refreshController = RefreshController();
 
@@ -67,6 +71,12 @@ class _GalleryState extends State<Gallery> {
       });
     }
     super.initState();
+  }
+
+  void clearSelection() {
+    setState(() {
+      _selectedFiles = Set<File>();
+    });
   }
 
   @override
@@ -100,7 +110,6 @@ class _GalleryState extends State<Gallery> {
     if (_files.isEmpty) {
       return Center(child: Text("Nothing to see here! 👀"));
     }
-    _selectedFiles = widget.selectedFiles ?? Set<File>();
     _collateFiles();
     _scrollController = ScrollController(
       initialScrollOffset: _scrollOffset,
@@ -227,7 +236,9 @@ class _GalleryState extends State<Gallery> {
       } else {
         _selectedFiles.add(file);
       }
-      widget.onFileSelectionChange(_selectedFiles);
+      for (final listener in widget.fileSelectionChangeListeners) {
+        listener.call(_selectedFiles);
+      }
     });
   }
 

@@ -14,7 +14,6 @@ import 'package:photos/ui/device_folders_gallery_widget.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
-import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/remote_folder_gallery_widget.dart';
 import 'package:photos/ui/search_page.dart';
 import 'package:photos/utils/logging_util.dart';
@@ -59,33 +58,24 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var gallery = _getMainGalleryWidget();
     return Scaffold(
       appBar: GalleryAppBarWidget(
+        gallery,
         GalleryAppBarType.homepage,
         widget.title,
         "/",
-        _selectedPhotos,
-        onSelectionClear: _clearSelectedPhotos,
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
-      body: FutureBuilder<bool>(
-        future: PhotoSyncManager.instance.hasScannedDisk(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return IndexedStack(
-              children: <Widget>[
-                snapshot.data ? _getMainGalleryWidget() : LoadingPhotosWidget(),
-                _deviceFolderGalleryWidget,
-                _remoteFolderGalleryWidget,
-              ],
-              index: _selectedNavBarItem,
-            );
-          } else if (snapshot.hasError) {
-            return Center(child: Text(snapshot.error.toString()));
-          } else {
-            return loadWidget;
-          }
-        },
+      body: IndexedStack(
+        children: <Widget>[
+          PhotoSyncManager.instance.hasScannedDisk()
+              ? gallery
+              : LoadingPhotosWidget(),
+          _deviceFolderGalleryWidget,
+          _remoteFolderGalleryWidget,
+        ],
+        index: _selectedNavBarItem,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -109,28 +99,15 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getMainGalleryWidget() {
-    return FutureBuilder<bool>(
-      future: FileRepository.instance.loadFiles(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Gallery(
-            syncLoader: () => _getFilteredPhotos(FileRepository.instance.files),
-            reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-            onRefresh: PhotoSyncManager.instance.sync,
-            selectedFiles: _selectedPhotos,
-            onFileSelectionChange: (Set<File> selectedPhotos) {
-              setState(() {
-                _selectedPhotos = selectedPhotos;
-              });
-            },
-            tagPrefix: "home_gallery",
-          );
-        } else if (snapshot.hasError) {
-          return Center(child: Text(snapshot.error.toString()));
-        } else {
-          return loadWidget;
-        }
+    return Gallery(
+      asyncLoader: (_, __) {
+        return FileRepository.instance.loadFiles().then((files) {
+          return _getFilteredPhotos(files);
+        });
       },
+      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      onRefresh: PhotoSyncManager.instance.sync,
+      tagPrefix: "home_gallery",
     );
   }
 
