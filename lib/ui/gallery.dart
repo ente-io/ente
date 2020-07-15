@@ -43,6 +43,7 @@ class Gallery extends StatefulWidget {
 
 class _GalleryState extends State<Gallery> {
   static final int kLoadLimit = 100;
+  static final int kEagerLoadTrigger = 10;
 
   final Logger _logger = Logger("Gallery");
   final List<List<File>> _collatedFiles = List<List<File>>();
@@ -133,25 +134,35 @@ class _GalleryState extends State<Gallery> {
   }
 
   Widget _buildListItem(BuildContext context, int index) {
+    if (_shouldLoadNextItems(index)) {
+      // Eagerly load next batch
+      _loadNextItems();
+    }
     if (index == _collatedFiles.length) {
       if (_hasLoadedAll || widget.asyncLoader == null) {
         return Container();
       }
-      widget.asyncLoader(_files.length, 100).then((files) {
-        setState(() {
-          _scrollOffset = _scrollController.offset;
-          if (files.length == 0) {
-            _hasLoadedAll = true;
-          }
-          _files.addAll(files);
-        });
-      });
       return loadWidget;
     }
     var files = _collatedFiles[index];
     return Column(
       children: <Widget>[_getDay(files[0].creationTime), _getGallery(files)],
     );
+  }
+
+  bool _shouldLoadNextItems(int index) =>
+      index == _collatedFiles.length - kEagerLoadTrigger;
+
+  void _loadNextItems() {
+    widget.asyncLoader(_files.length, 100).then((files) {
+      setState(() {
+        _scrollOffset = _scrollController.offset;
+        if (files.length == 0) {
+          _hasLoadedAll = true;
+        }
+        _files.addAll(files);
+      });
+    });
   }
 
   Widget _getDay(int timestamp) {
