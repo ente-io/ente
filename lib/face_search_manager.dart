@@ -48,6 +48,9 @@ class FaceSearchManager {
           .toList();
     }).catchError(_onError);
     final files = List<File>();
+    if (result == null) {
+      return throw ("Oops. Could not fetch search results.");
+    }
     for (File file in result) {
       try {
         files.add(await FileDB.instance.getMatchingFile(
