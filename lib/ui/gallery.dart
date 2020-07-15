@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -34,8 +33,6 @@ class Gallery extends StatefulWidget {
     @required this.tagPrefix,
   });
 
-  _GalleryState state;
-
   @override
   _GalleryState createState() {
     return _GalleryState();
@@ -68,7 +65,7 @@ class _GalleryState extends State<Gallery> {
     }
     widget.selectedFiles.addListener(() {
       setState(() {
-        _scrollOffset = _scrollController.offset;
+        _saveScrollPosition();
       });
     });
     super.initState();
@@ -160,13 +157,17 @@ class _GalleryState extends State<Gallery> {
   void _loadNextItems() {
     widget.asyncLoader(_files.length, 100).then((files) {
       setState(() {
-        _scrollOffset = _scrollController.offset;
+        _saveScrollPosition();
         if (files.length == 0) {
           _hasLoadedAll = true;
         }
         _files.addAll(files);
       });
     });
+  }
+
+  void _saveScrollPosition() {
+    _scrollOffset = _scrollController.offset;
   }
 
   Widget _getDay(int timestamp) {
