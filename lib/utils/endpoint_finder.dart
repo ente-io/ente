@@ -9,7 +9,7 @@ class EndpointFinder {
   final logger = Logger("EndpointFinder");
 
   EndpointFinder._privateConstructor() {
-    _dio.options = BaseOptions(connectTimeout: 200);
+    _dio.options = BaseOptions(connectTimeout: 250);
   }
 
   static final EndpointFinder instance = EndpointFinder._privateConstructor();
