@@ -25,7 +25,7 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
     var gallery = Gallery(
       syncLoader: () => _getFilteredFiles(FileRepository.instance.files),
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      tagPrefix: "device_folder",
+      tagPrefix: "device_folder:" + widget.folder.path,
       selectedFiles: _selectedFiles,
     );
     return Scaffold(

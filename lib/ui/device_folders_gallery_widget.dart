@@ -74,7 +74,8 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
     for (final path in paths) {
       final file = await FileDB.instance.getLatestFileInPath(path);
       final folderName = p.basename(path);
-      folders.add(DeviceFolder(folderName, file, FolderNameFilter(folderName)));
+      folders.add(
+          DeviceFolder(folderName, path, file, FolderNameFilter(folderName)));
     }
     folders.sort((first, second) {
       return second.thumbnail.creationTime
@@ -83,11 +84,13 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
     if (FavoriteFilesRepository.instance.hasFavorites()) {
       final file = await FileDB.instance.getLatestFileAmongGeneratedIds(
           FavoriteFilesRepository.instance.getLiked().toList());
-      folders.insert(0, DeviceFolder("Favorites", file, FavoriteItemsFilter()));
+      folders.insert(0,
+          DeviceFolder("Favorites", "/Favorites", file, FavoriteItemsFilter()));
     }
     final videos = await FileDB.instance.getAllVideos();
     if (videos.length > 0) {
-      folders.insert(0, DeviceFolder("Videos", videos[0], VideoFileFilter()));
+      folders.insert(
+          0, DeviceFolder("Videos", "/Videos", videos[0], VideoFileFilter()));
     }
     return folders;
   }
@@ -98,7 +101,7 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
         children: <Widget>[
           Container(
             child: Hero(
-                tag: "device_folder" + folder.thumbnail.tag(),
+                tag: "device_folder:" + folder.path + folder.thumbnail.tag(),
                 child: ThumbnailWidget(folder.thumbnail)),
             height: 150,
             width: 150,
