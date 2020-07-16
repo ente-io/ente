@@ -153,6 +153,7 @@ class _GalleryState extends State<Gallery> {
   }
 
   bool _shouldLoadNextItems(int index) =>
+      widget.asyncLoader != null &&
       !_isLoadingNext &&
       (index >= _collatedFiles.length - kEagerLoadTrigger) &&
       !_hasLoadedAll;
