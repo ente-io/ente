@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/ui/loading_widget.dart';
 
 class CircularNetworkImageWidget extends StatelessWidget {
   final String _url;
@@ -11,13 +13,21 @@ class CircularNetworkImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return CachedNetworkImage(
+      imageUrl: _url,
+      imageBuilder: (context, imageProvider) => Container(
         width: _size,
         height: _size,
         margin: const EdgeInsets.only(right: 8),
-        decoration: new BoxDecoration(
-            shape: BoxShape.circle,
-            image: new DecorationImage(
-                fit: BoxFit.contain, image: new NetworkImage(_url))));
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: imageProvider,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
+      placeholder: (context, url) => loadWidget,
+    );
   }
 }
