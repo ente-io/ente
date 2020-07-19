@@ -15,8 +15,9 @@ class FaceSearchResultsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var gallery = Gallery(
-      asyncLoader: (offset, limit) =>
-          _faceSearchManager.getFaceSearchResults(face, offset, limit),
+      asyncLoader: (sinceFile, limit) =>
+          _faceSearchManager.getFaceSearchResults(
+              face, sinceFile == null ? 0 : sinceFile.updationTime, limit),
       tagPrefix: "face_search_results",
       selectedFiles: selectedFiles,
     );

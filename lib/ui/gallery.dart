@@ -16,7 +16,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Gallery extends StatefulWidget {
   final List<File> Function() syncLoader;
-  final Future<List<File>> Function(int offset, int limit) asyncLoader;
+  final Future<List<File>> Function(File file, int limit) asyncLoader;
   // TODO: Verify why the event is necessary when calling loader post onRefresh
   // should have done the job.
   final Stream<Event> reloadEvent;
@@ -82,7 +82,7 @@ class _GalleryState extends State<Gallery> {
       return _onDataLoaded();
     }
     return FutureBuilder<List<File>>(
-      future: widget.asyncLoader(0, kLoadLimit),
+      future: widget.asyncLoader(null, kLoadLimit),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           _requiresLoad = false;
@@ -160,14 +160,15 @@ class _GalleryState extends State<Gallery> {
 
   void _loadNextItems() {
     _isLoadingNext = true;
-    widget.asyncLoader(_files.length, 100).then((files) {
+    widget.asyncLoader(_files[_files.length - 1], kLoadLimit).then((files) {
       setState(() {
         _isLoadingNext = false;
         _saveScrollPosition();
-        if (files.length == 0) {
+        if (files.length < kLoadLimit) {
           _hasLoadedAll = true;
+        } else {
+          _files.addAll(files);
         }
-        _files.addAll(files);
       });
     });
   }
