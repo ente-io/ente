@@ -115,14 +115,15 @@ class FileDB {
   }
 
   Future<List<File>> getAllInFolder(
-      int folderId, int sinceUpdationTime, int limit) async {
+      int folderId, int beforeCreationTime, int limit) async {
     final db = await instance.database;
     final results = await db.query(
       table,
       where:
-          '$columnRemoteFolderId = ? AND $columnIsDeleted = 0 AND $columnUpdationTime > ? LIMIT ?',
-      whereArgs: [folderId, sinceUpdationTime, limit],
+          '$columnRemoteFolderId = ? AND $columnIsDeleted = 0 AND $columnCreationTime < ?',
+      whereArgs: [folderId, beforeCreationTime],
       orderBy: '$columnCreationTime DESC',
+      limit: limit,
     );
     return _convertToFiles(results);
   }
