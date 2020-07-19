@@ -16,7 +16,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Gallery extends StatefulWidget {
   final List<File> Function() syncLoader;
-  final Future<List<File>> Function(File file, int limit) asyncLoader;
+  final Future<List<File>> Function(File lastFile, int limit) asyncLoader;
   // TODO: Verify why the event is necessary when calling loader post onRefresh
   // should have done the job.
   final Stream<Event> reloadEvent;
@@ -40,7 +40,7 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
-  static final int kLoadLimit = 100;
+  static final int kLoadLimit = 200;
   static final int kEagerLoadTrigger = 10;
 
   final Logger _logger = Logger("Gallery");

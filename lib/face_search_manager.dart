@@ -29,7 +29,8 @@ class FaceSearchManager {
   }
 
   Future<List<File>> getFaceSearchResults(
-      Face face, int sinceTime, int limit) async {
+      Face face, int beforeCreationTime, int limit) async {
+    _logger.info("Fetching since creation " + beforeCreationTime.toString());
     final result = await _dio
         .get(
       Configuration.instance.getHttpEndpoint() +
@@ -37,7 +38,7 @@ class FaceSearchManager {
           face.faceID.toString(),
       queryParameters: {
         "limit": limit,
-        "sinceTime": sinceTime,
+        "beforeCreationTime": beforeCreationTime,
       },
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),

@@ -21,9 +21,9 @@ class _RemoteFolderPageState extends State<RemoteFolderPage> {
   @override
   Widget build(Object context) {
     var gallery = Gallery(
-      asyncLoader: (sinceFile, limit) => FileDB.instance.getAllInFolder(
+      asyncLoader: (lastFile, limit) => FileDB.instance.getAllInFolder(
           widget.folder.id,
-          sinceFile == null ? 0 : sinceFile.updationTime,
+          lastFile == null ? 0 : lastFile.updationTime,
           limit),
       onRefresh: () => FolderSharingService.instance.syncDiff(widget.folder),
       tagPrefix: "remote_folder",
