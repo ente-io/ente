@@ -5,8 +5,8 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/folder_db.dart';
-import 'package:photos/db/file_db.dart';
+import 'package:photos/db/folders_db.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -75,7 +75,7 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
   }
 
   Future<List<Folder>> _getRemoteFolders() async {
-    final folders = await FolderDB.instance.getFolders();
+    final folders = await FoldersDB.instance.getFolders();
     final filteredFolders = List<Folder>();
     for (final folder in folders) {
       if (folder.owner == Configuration.instance.getUsername()) {
@@ -83,7 +83,7 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
       }
       try {
         folder.thumbnailPhoto =
-            await FileDB.instance.getLatestFileInRemoteFolder(folder.id);
+            await FilesDB.instance.getLatestFileInRemoteFolder(folder.id);
       } catch (e) {
         _logger.warning(e.toString());
       }

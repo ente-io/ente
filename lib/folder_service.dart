@@ -3,8 +3,8 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/db/folder_db.dart';
-import 'package:photos/db/file_db.dart';
+import 'package:photos/db/folders_db.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/folder.dart';
@@ -36,18 +36,18 @@ class FolderSharingService {
     _isSyncInProgress = true;
     return getFolders().then((f) async {
       var folders = f.toSet();
-      var currentFolders = await FolderDB.instance.getFolders();
+      var currentFolders = await FoldersDB.instance.getFolders();
       for (final currentFolder in currentFolders) {
         if (!folders.contains(currentFolder)) {
           _logger.info("Folder deleted: " + currentFolder.toString());
-          await FileDB.instance.deleteFilesInRemoteFolder(currentFolder.id);
-          await FolderDB.instance.deleteFolder(currentFolder);
+          await FilesDB.instance.deleteFilesInRemoteFolder(currentFolder.id);
+          await FoldersDB.instance.deleteFolder(currentFolder);
         }
       }
       for (final folder in folders) {
         if (folder.owner != Configuration.instance.getUsername()) {
           await syncDiff(folder);
-          await FolderDB.instance.putFolder(folder);
+          await FoldersDB.instance.putFolder(folder);
         }
       }
       Bus.instance.fire(RemoteSyncEvent(true));
@@ -60,7 +60,7 @@ class FolderSharingService {
     int lastSyncTimestamp = 0;
     try {
       File file =
-          await FileDB.instance.getLastSyncedFileInRemoteFolder(folder.id);
+          await FilesDB.instance.getLastSyncedFileInRemoteFolder(folder.id);
       lastSyncTimestamp = file.updationTime;
     } catch (e) {
       // Folder has never been synced
@@ -69,11 +69,11 @@ class FolderSharingService {
     for (File file in diff) {
       try {
         var existingPhoto =
-            await FileDB.instance.getMatchingRemoteFile(file.uploadedFileId);
-        await FileDB.instance.update(
+            await FilesDB.instance.getMatchingRemoteFile(file.uploadedFileId);
+        await FilesDB.instance.update(
             existingPhoto.generatedId, file.uploadedFileId, file.updationTime);
       } catch (e) {
-        await FileDB.instance.insert(file);
+        await FilesDB.instance.insert(file);
       }
     }
     if (diff.length == _diffLimit) {

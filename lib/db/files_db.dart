@@ -8,12 +8,12 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
-class FileDB {
+class FilesDB {
   // TODO: Use different tables within the same database
   static final _databaseName = "ente.files.db";
   static final _databaseVersion = 1;
 
-  static final Logger _logger = Logger("FileDB");
+  static final Logger _logger = Logger("FilesDB");
 
   static final table = 'files';
 
@@ -32,8 +32,8 @@ class FileDB {
   static final columnUpdationTime = 'updation_time';
 
   // make this a singleton class
-  FileDB._privateConstructor();
-  static final FileDB instance = FileDB._privateConstructor();
+  FilesDB._privateConstructor();
+  static final FilesDB instance = FilesDB._privateConstructor();
 
   // only have a single app-wide reference to the database
   static Database _database;

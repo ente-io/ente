@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/file_db.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/favorite_files_repository.dart';
 import 'package:photos/models/device_folder.dart';
@@ -69,10 +69,10 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
   }
 
   Future<List<DeviceFolder>> _getDeviceFolders() async {
-    final paths = await FileDB.instance.getLocalPaths();
+    final paths = await FilesDB.instance.getLocalPaths();
     final folders = List<DeviceFolder>();
     for (final path in paths) {
-      final file = await FileDB.instance.getLatestFileInPath(path);
+      final file = await FilesDB.instance.getLatestFileInPath(path);
       final folderName = p.basename(path);
       folders.add(
           DeviceFolder(folderName, path, file, FolderNameFilter(folderName)));
@@ -82,12 +82,12 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
           .compareTo(first.thumbnail.creationTime);
     });
     if (FavoriteFilesRepository.instance.hasFavorites()) {
-      final file = await FileDB.instance.getLatestFileAmongGeneratedIds(
+      final file = await FilesDB.instance.getLatestFileAmongGeneratedIds(
           FavoriteFilesRepository.instance.getLiked().toList());
       folders.insert(0,
           DeviceFolder("Favorites", "/Favorites", file, FavoriteItemsFilter()));
     }
-    final videos = await FileDB.instance.getAllVideos();
+    final videos = await FilesDB.instance.getAllVideos();
     if (videos.length > 0) {
       folders.insert(
           0, DeviceFolder("Videos", "/Videos", videos[0], VideoFileFilter()));

@@ -6,7 +6,7 @@ import 'package:photos/models/folder.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
-class FolderDB {
+class FoldersDB {
   // TODO: Use different tables within the same database
   static final _databaseName = "ente.folder.db";
   static final _databaseVersion = 1;
@@ -20,8 +20,8 @@ class FolderDB {
   static final columnSharedWith = 'shared_with';
   static final columnUpdationTime = 'updation_time';
 
-  FolderDB._privateConstructor();
-  static final FolderDB instance = FolderDB._privateConstructor();
+  FoldersDB._privateConstructor();
+  static final FoldersDB instance = FoldersDB._privateConstructor();
 
   static Database _database;
   Future<Database> get database async {

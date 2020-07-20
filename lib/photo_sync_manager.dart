@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/file_db.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/file_repository.dart';
@@ -22,7 +22,7 @@ import 'package:photos/events/remote_sync_event.dart';
 class PhotoSyncManager {
   final _logger = Logger("PhotoSyncManager");
   final _dio = Dio();
-  final _db = FileDB.instance;
+  final _db = FilesDB.instance;
   bool _isSyncInProgress = false;
   Future<void> _existingSync;
   SharedPreferences _prefs;

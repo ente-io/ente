@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/file_db.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/file_repository.dart';
@@ -175,8 +175,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     for (File file in widget.selectedFiles.files) {
       deleteEverywhere
-          ? await FileDB.instance.markForDeletion(file)
-          : await FileDB.instance.delete(file);
+          ? await FilesDB.instance.markForDeletion(file)
+          : await FilesDB.instance.delete(file);
     }
     await FileRepository.instance.reloadFiles();
     _clearSelectedFiles();

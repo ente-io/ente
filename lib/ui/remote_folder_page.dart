@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/db/file_db.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/folder_service.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/models/selected_files.dart';
@@ -21,7 +21,7 @@ class _RemoteFolderPageState extends State<RemoteFolderPage> {
   @override
   Widget build(Object context) {
     var gallery = Gallery(
-      asyncLoader: (lastFile, limit) => FileDB.instance.getAllInFolder(
+      asyncLoader: (lastFile, limit) => FilesDB.instance.getAllInFolder(
           widget.folder.id,
           lastFile == null
               ? DateTime.now().microsecondsSinceEpoch

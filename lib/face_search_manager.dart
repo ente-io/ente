@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/db/file_db.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:logging/logging.dart';
 
 import 'package:photos/models/face.dart';
@@ -54,7 +54,7 @@ class FaceSearchManager {
     }
     for (File file in result) {
       try {
-        files.add(await FileDB.instance.getMatchingFile(
+        files.add(await FilesDB.instance.getMatchingFile(
             file.localId,
             file.title,
             file.deviceFolder,

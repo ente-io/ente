@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/file_db.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 
@@ -16,7 +16,7 @@ class FileRepository {
   }
 
   Future<List<File>> loadFiles() async {
-    var files = await FileDB.instance.getAllLocalFiles();
+    var files = await FilesDB.instance.getAllLocalFiles();
 
     _files.clear();
     _files.addAll(files);

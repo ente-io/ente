@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/image_cache.dart';
-import 'package:photos/db/file_db.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/favorite_files_repository.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/file_type.dart';
@@ -326,8 +326,8 @@ class _DetailPageState extends State<DetailPage> {
 
     await PhotoManager.editor.deleteWithIds([file.localId]);
     deleteEverywhere
-        ? await FileDB.instance.markForDeletion(file)
-        : await FileDB.instance.delete(file);
+        ? await FilesDB.instance.markForDeletion(file)
+        : await FilesDB.instance.delete(file);
 
     FileRepository.instance.reloadFiles();
   }
