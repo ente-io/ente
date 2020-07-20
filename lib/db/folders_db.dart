@@ -76,15 +76,15 @@ class FoldersDB {
   }
 
   List<Folder> _convertToFolders(List<Map<String, dynamic>> results) {
-    var folders = List<Folder>();
-    for (var result in results) {
+    final folders = List<Folder>();
+    for (final result in results) {
       folders.add(_getFolderFromRow(result));
     }
     return folders;
   }
 
   Map<String, dynamic> _getRowForFolder(Folder folder) {
-    var row = new Map<String, dynamic>();
+    final row = new Map<String, dynamic>();
     row[columnId] = folder.id;
     row[columnName] = folder.name;
     row[columnOwner] = folder.owner;
