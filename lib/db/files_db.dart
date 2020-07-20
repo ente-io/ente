@@ -132,7 +132,8 @@ class FilesDB {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where: '$columnCreationTime >= ? AND $columnCreationTime <= ?',
+      where:
+          '$columnCreationTime > ? AND $columnCreationTime < ? AND $columnIsDeleted = 0',
       whereArgs: [startCreationTime, endCreationTime],
       orderBy: '$columnCreationTime DESC',
     );
