@@ -23,12 +23,14 @@ class Gallery extends StatefulWidget {
   final Future<void> Function() onRefresh;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
+  final Widget headerWidget;
 
   Gallery({
     this.syncLoader,
     this.asyncLoader,
     this.reloadEvent,
     this.onRefresh,
+    this.headerWidget,
     @required this.selectedFiles,
     @required this.tagPrefix,
   });
@@ -108,7 +110,8 @@ class _GalleryState extends State<Gallery> {
       initialScrollOffset: _scrollOffset,
     );
     final list = ListView.builder(
-      itemCount: _collatedFiles.length + 1, // h4ck to load the next set
+      itemCount:
+          _collatedFiles.length + (widget.headerWidget == null ? 1 : 2), // h4ck
       itemBuilder: _buildListItem,
       controller: _scrollController,
       cacheExtent: 1000,
@@ -146,7 +149,14 @@ class _GalleryState extends State<Gallery> {
       }
       return loadWidget;
     }
-    var files = _collatedFiles[index];
+    var fileIndex = index;
+    if (widget.headerWidget != null) {
+      if (index == 0) {
+        return widget.headerWidget;
+      }
+      fileIndex--;
+    }
+    var files = _collatedFiles[fileIndex];
     return Column(
       children: <Widget>[_getDay(files[0].creationTime), _getGallery(files)],
     );
