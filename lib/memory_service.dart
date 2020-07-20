@@ -24,13 +24,13 @@ class MemoryService {
 
   Future<List<Memory>> getMemories() async {
     final files = List<File>();
+    var now = DateTime.now().microsecondsSinceEpoch;
     for (var yearAgo = 1; yearAgo <= 100; yearAgo++) {
-      var now = DateTime.now().microsecondsSinceEpoch;
       var checkPointDay = yearAgo * daysInAYear;
       final startCreationTime =
-          now - ((checkPointDay - daysBefore) * microSecondsInADay);
+          now - ((checkPointDay + daysBefore) * microSecondsInADay);
       final endCreationTime =
-          now - ((checkPointDay + daysAfter) * microSecondsInADay);
+          now - ((checkPointDay - daysAfter) * microSecondsInADay);
       files.addAll(await _filesDB.getFilesCreatedWithinDuration(
           startCreationTime, endCreationTime));
     }
@@ -39,6 +39,7 @@ class MemoryService {
     for (final file in files) {
       memories.add(Memory(file, seenFileIDs.contains(file.generatedId)));
     }
+    _logger.info("Number of memories: " + memories.length.toString());
     return memories;
   }
 
