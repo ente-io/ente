@@ -48,7 +48,7 @@ class MemoriesDB {
     final db = await instance.database;
     return db.delete(
       table,
-      where: '$columnSeenTime < ',
+      where: '$columnSeenTime < ?',
       whereArgs: [timestamp],
     );
   }
