@@ -17,7 +17,7 @@ class MemoryService {
 
   static final MemoryService instance = MemoryService._privateConstructor();
 
-  Future<void> sync() async {
+  Future<void> init() async {
     await _memoriesDB.clearMemoriesSeenBeforeTime(
         DateTime.now().microsecondsSinceEpoch - (7 * microSecondsInADay));
   }
