@@ -9,7 +9,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
 class FilesDB {
-  // TODO: Use different tables within the same database
   static final _databaseName = "ente.files.db";
   static final _databaseVersion = 1;
 

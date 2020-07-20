@@ -7,7 +7,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
 class FoldersDB {
-  // TODO: Use different tables within the same database
   static final _databaseName = "ente.folder.db";
   static final _databaseVersion = 1;
 
