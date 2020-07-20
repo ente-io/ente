@@ -59,7 +59,7 @@ class MemoriesDB {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Future<List<int>> getSeenFileIDs() async {
+  Future<Set<int>> getSeenFileIDs() async {
     final db = await instance.database;
     return _convertToFileIDs(await db.query(table));
   }
@@ -71,8 +71,8 @@ class MemoriesDB {
     return row;
   }
 
-  List<int> _convertToFileIDs(List<Map<String, dynamic>> rows) {
-    final fileIDs = List<int>();
+  Set<int> _convertToFileIDs(List<Map<String, dynamic>> rows) {
+    final fileIDs = Set<int>();
     for (final row in rows) {
       fileIDs.add(int.parse(row[columnFileId]));
     }
