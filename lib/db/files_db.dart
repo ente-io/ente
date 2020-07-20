@@ -202,7 +202,7 @@ class FilesDB {
   // TODO: Remove deleted files on remote
   Future<int> markForDeletion(File file) async {
     final db = await instance.database;
-    var values = new Map<String, dynamic>();
+    final values = new Map<String, dynamic>();
     values[columnIsDeleted] = 1;
     return db.update(
       table,
@@ -247,7 +247,7 @@ class FilesDB {
 
   Future<File> getLatestFileInPath(String path) async {
     final db = await instance.database;
-    var rows = await db.query(
+    final rows = await db.query(
       table,
       where: '$columnDeviceFolder =?',
       whereArgs: [path],
@@ -263,7 +263,7 @@ class FilesDB {
 
   Future<File> getLatestFileInRemoteFolder(int folderId) async {
     final db = await instance.database;
-    var rows = await db.query(
+    final rows = await db.query(
       table,
       where: '$columnRemoteFolderId =?',
       whereArgs: [folderId],
@@ -279,7 +279,7 @@ class FilesDB {
 
   Future<File> getLastSyncedFileInRemoteFolder(int folderId) async {
     final db = await instance.database;
-    var rows = await db.query(
+    final rows = await db.query(
       table,
       where: '$columnRemoteFolderId =?',
       whereArgs: [folderId],
@@ -295,7 +295,7 @@ class FilesDB {
 
   Future<File> getLatestFileAmongGeneratedIds(List<String> generatedIds) async {
     final db = await instance.database;
-    var rows = await db.query(
+    final rows = await db.query(
       table,
       where: '$columnGeneratedId IN (${generatedIds.join(",")})',
       orderBy: '$columnCreationTime DESC',
@@ -309,15 +309,15 @@ class FilesDB {
   }
 
   List<File> _convertToFiles(List<Map<String, dynamic>> results) {
-    var files = List<File>();
-    for (var result in results) {
+    final files = List<File>();
+    for (final result in results) {
       files.add(_getFileFromRow(result));
     }
     return files;
   }
 
   Map<String, dynamic> _getRowForFile(File file) {
-    var row = new Map<String, dynamic>();
+    final row = new Map<String, dynamic>();
     row[columnLocalId] = file.localId;
     row[columnUploadedFileId] = file.uploadedFileId;
     row[columnTitle] = file.title;
@@ -344,7 +344,7 @@ class FilesDB {
   }
 
   File _getFileFromRow(Map<String, dynamic> row) {
-    File file = File();
+    final file = File();
     file.generatedId = row[columnGeneratedId];
     file.localId = row[columnLocalId];
     file.uploadedFileId = row[columnUploadedFileId];
