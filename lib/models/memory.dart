@@ -4,7 +4,7 @@ class Memory {
   final File file;
   bool _isSeen;
 
-  Memory(this.file);
+  Memory(this.file, this._isSeen);
 
   bool isSeen() {
     return _isSeen;
