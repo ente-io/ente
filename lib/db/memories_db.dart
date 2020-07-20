@@ -71,10 +71,11 @@ class MemoriesDB {
     return row;
   }
 
-  _convertToFileIDs(List<Map<String, dynamic>> rows) {
+  List<int> _convertToFileIDs(List<Map<String, dynamic>> rows) {
     final fileIDs = List<int>();
     for (final row in rows) {
       fileIDs.add(int.parse(row[columnFileId]));
     }
+    return fileIDs;
   }
 }
