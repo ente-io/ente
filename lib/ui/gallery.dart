@@ -266,8 +266,8 @@ class _GalleryState extends State<Gallery> {
     final collatedFiles = List<List<File>>();
     for (int index = 0; index < _files.length; index++) {
       if (index > 0 &&
-          !_areFilesFromSameDay(_files[index], _files[index - 1])) {
-        var collatedDailyFiles = List<File>();
+          !_areFilesFromSameDay(_files[index - 1], _files[index])) {
+        final collatedDailyFiles = List<File>();
         collatedDailyFiles.addAll(dailyFiles);
         collatedFiles.add(collatedDailyFiles);
         dailyFiles.clear();
