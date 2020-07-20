@@ -127,6 +127,18 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
+  Future<List<File>> getFilesCreatedWithinDuration(
+      int startCreationTime, int endCreationTime) async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnCreationTime >= ? AND $columnCreationTime <= ?',
+      whereArgs: [startCreationTime, endCreationTime],
+      orderBy: '$columnCreationTime DESC',
+    );
+    return _convertToFiles(results);
+  }
+
   Future<List<File>> getAllDeleted() async {
     final db = await instance.database;
     final results = await db.query(
