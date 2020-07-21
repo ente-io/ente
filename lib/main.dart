@@ -6,7 +6,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/favorite_files_repository.dart';
 import 'package:photos/folder_service.dart';
-import 'package:photos/memory_service.dart';
+import 'package:photos/memories_service.dart';
 import 'package:photos/photo_sync_manager.dart';
 import 'package:photos/ui/home_widget.dart';
 import 'package:sentry/sentry.dart';
@@ -29,7 +29,7 @@ void _main() async {
 
   await Configuration.instance.init();
   await PhotoSyncManager.instance.init();
-  await MemoryService.instance.init();
+  await MemoriesService.instance.init();
   await FavoriteFilesRepository.instance.init();
   _sync();
 

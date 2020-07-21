@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:photos/memory_service.dart';
+import 'package:photos/memories_service.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -14,7 +14,7 @@ class MemoriesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Memory>>(
-      future: MemoryService.instance.getMemories(),
+      future: MemoriesService.instance.getMemories(),
       builder: (context, snapshot) {
         if (snapshot.hasError ||
             !snapshot.hasData ||

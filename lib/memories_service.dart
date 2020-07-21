@@ -6,7 +6,7 @@ import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/utils/date_time_util.dart';
 
-class MemoryService {
+class MemoriesService {
   final _logger = Logger("MemoryService");
   final _memoriesDB = MemoriesDB.instance;
   final _filesDB = FilesDB.instance;
@@ -15,9 +15,9 @@ class MemoryService {
   static final daysBefore = 7;
   static final daysAfter = 1;
 
-  MemoryService._privateConstructor();
+  MemoriesService._privateConstructor();
 
-  static final MemoryService instance = MemoryService._privateConstructor();
+  static final MemoriesService instance = MemoriesService._privateConstructor();
 
   Future<void> init() async {
     await _memoriesDB.clearMemoriesSeenBeforeTime(
