@@ -12,6 +12,7 @@ class MemoriesService {
   final _filesDB = FilesDB.instance;
   static final microSecondsInADay = 86400000000;
   static final daysInAYear = 365;
+  static final yearsBefore = 30;
   static final daysBefore = 7;
   static final daysAfter = 1;
 
@@ -32,24 +33,24 @@ class MemoriesService {
         hours: presentTime.hour,
         minutes: presentTime.minute,
         seconds: presentTime.second));
-    for (var yearAgo = 1; yearAgo <= 100; yearAgo++) {
+    for (var yearAgo = 1; yearAgo <= yearsBefore; yearAgo++) {
       final date = _getDate(present, yearAgo);
       final startCreationTime =
-          date.subtract(Duration(days: 7)).microsecondsSinceEpoch;
+          date.subtract(Duration(days: daysBefore)).microsecondsSinceEpoch;
       final endCreationTime =
-          date.add(Duration(days: 1)).microsecondsSinceEpoch;
-      final memories = await _filesDB.getFilesCreatedWithinDuration(
+          date.add(Duration(days: daysAfter)).microsecondsSinceEpoch;
+      final filesInYear = await _filesDB.getFilesCreatedWithinDuration(
           startCreationTime, endCreationTime);
-      if (memories.length > 0)
+      if (filesInYear.length > 0)
         _logger.info("Got " +
-            memories.length.toString() +
+            filesInYear.length.toString() +
             " memories between " +
             getFormattedTime(
                 DateTime.fromMicrosecondsSinceEpoch(startCreationTime)) +
             " to " +
             getFormattedTime(
                 DateTime.fromMicrosecondsSinceEpoch(endCreationTime)));
-      files.addAll(memories);
+      files.addAll(filesInYear);
     }
     final seenFileIDs = await _memoriesDB.getSeenFileIDs();
     final memories = List<Memory>();
