@@ -218,7 +218,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   child: Text(
                     widget.title,
                     style: TextStyle(
-                        fontSize: 32,
+                        fontSize: 40,
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.none),
                   ),
