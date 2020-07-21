@@ -2,6 +2,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/utils/date_time_util.dart';
 
@@ -24,6 +25,7 @@ class MemoryService {
   }
 
   Future<List<Memory>> getMemories() async {
+    final filter = ImportantItemsFilter();
     final files = List<File>();
     final presentTime = DateTime.now();
     final present = presentTime.subtract(Duration(
@@ -31,19 +33,12 @@ class MemoryService {
         minutes: presentTime.minute,
         seconds: presentTime.second));
     for (var yearAgo = 1; yearAgo <= 100; yearAgo++) {
-      final year = (present.year - yearAgo).toString();
-      final month = present.month > 9
-          ? present.month.toString()
-          : "0" + present.month.toString();
-      final day = present.day > 9
-          ? present.day.toString()
-          : "0" + present.day.toString();
-      final date = DateTime.parse(year + "-" + month + "-" + day);
+      final date = _getDate(present, yearAgo);
       final startCreationTime =
           date.subtract(Duration(days: 7)).microsecondsSinceEpoch;
       final endCreationTime =
           date.add(Duration(days: 1)).microsecondsSinceEpoch;
-      var memories = await _filesDB.getFilesCreatedWithinDuration(
+      final memories = await _filesDB.getFilesCreatedWithinDuration(
           startCreationTime, endCreationTime);
       if (memories.length > 0)
         _logger.info("Got " +
@@ -59,10 +54,23 @@ class MemoryService {
     final seenFileIDs = await _memoriesDB.getSeenFileIDs();
     final memories = List<Memory>();
     for (final file in files) {
-      memories.add(Memory(file, seenFileIDs.contains(file.generatedId)));
+      if (filter.shouldInclude(file)) {
+        memories.add(Memory(file, seenFileIDs.contains(file.generatedId)));
+      }
     }
     _logger.info("Number of memories: " + memories.length.toString());
     return memories;
+  }
+
+  DateTime _getDate(DateTime present, int yearAgo) {
+    final year = (present.year - yearAgo).toString();
+    final month = present.month > 9
+        ? present.month.toString()
+        : "0" + present.month.toString();
+    final day =
+        present.day > 9 ? present.day.toString() : "0" + present.day.toString();
+    final date = DateTime.parse(year + "-" + month + "-" + day);
+    return date;
   }
 
   Future markMemoryAsSeen(Memory memory) async {
