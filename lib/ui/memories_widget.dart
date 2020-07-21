@@ -199,6 +199,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
             pagination: SwiperPagination(
                 builder: DotSwiperPaginationBuilder(activeColor: Colors.white)),
             loop: false,
+            control: SwiperControl(),
           ),
           Center(
             child: AnimatedOpacity(
