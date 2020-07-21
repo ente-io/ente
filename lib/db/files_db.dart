@@ -135,7 +135,7 @@ class FilesDB {
       where:
           '$columnCreationTime > ? AND $columnCreationTime < ? AND $columnIsDeleted = 0',
       whereArgs: [startCreationTime, endCreationTime],
-      orderBy: '$columnCreationTime DESC',
+      orderBy: '$columnCreationTime ASC',
     );
     return _convertToFiles(results);
   }
