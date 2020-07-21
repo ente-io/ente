@@ -12,7 +12,7 @@ class MemoriesDB {
 
   static final table = 'memories';
 
-  static final columnFileId = 'file_id';
+  static final columnFileID = 'file_id';
   static final columnSeenTime = 'seen_time';
 
   MemoriesDB._privateConstructor();
@@ -38,7 +38,7 @@ class MemoriesDB {
   Future _onCreate(Database db, int version) async {
     await db.execute('''
                 CREATE TABLE $table (
-                  $columnFileId INTEGER PRIMARY KEY NOT NULL,
+                  $columnFileID INTEGER PRIMARY KEY NOT NULL,
                   $columnSeenTime TEXT NOT NULL
                 )
                 ''');
@@ -66,7 +66,7 @@ class MemoriesDB {
 
   Map<String, dynamic> _getRowForSeenMemory(Memory memory, int timestamp) {
     var row = new Map<String, dynamic>();
-    row[columnFileId] = memory.file.generatedId;
+    row[columnFileID] = memory.file.generatedId;
     row[columnSeenTime] = timestamp;
     return row;
   }
@@ -74,7 +74,7 @@ class MemoriesDB {
   Set<int> _convertToFileIDs(List<Map<String, dynamic>> rows) {
     final fileIDs = Set<int>();
     for (final row in rows) {
-      fileIDs.add(row[columnFileId]);
+      fileIDs.add(row[columnFileID]);
     }
     return fileIDs;
   }
