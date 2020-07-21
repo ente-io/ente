@@ -37,6 +37,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _remoteFolderGalleryWidget = RemoteFolderGalleryWidget();
   final _deviceFolderGalleryWidget = DeviceFolderGalleryWidget();
   final _selectedFiles = SelectedFiles();
+  final _memoriesWidget = MemoriesWidget();
 
   ShakeDetector _detector;
   int _selectedNavBarItem = 0;
@@ -114,7 +115,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             onRefresh: PhotoSyncManager.instance.sync,
             tagPrefix: "home_gallery",
             selectedFiles: _selectedFiles,
-            headerWidget: MemoriesWidget(),
+            headerWidget: _memoriesWidget,
           );
         } else if (snapshot.hasError) {
           return Center(child: Text(snapshot.error.toString()));
