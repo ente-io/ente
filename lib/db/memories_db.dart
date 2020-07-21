@@ -74,7 +74,7 @@ class MemoriesDB {
   Set<int> _convertToFileIDs(List<Map<String, dynamic>> rows) {
     final fileIDs = Set<int>();
     for (final row in rows) {
-      fileIDs.add(int.parse(row[columnFileId]));
+      fileIDs.add(row[columnFileId]);
     }
     return fileIDs;
   }
