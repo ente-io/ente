@@ -209,7 +209,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
             tag: widget.title,
             child: Container(
               alignment: Alignment.bottomCenter,
-              padding: EdgeInsets.fromLTRB(0, 0, 0, 44),
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 160),
               child: AnimatedOpacity(
                 opacity: _opacity,
                 duration: Duration(milliseconds: 500),
@@ -273,9 +273,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       index: _index,
       itemCount: widget.memories.length,
       pagination: SwiperPagination(
-          alignment: Alignment.topCenter,
+          alignment: Alignment.bottomCenter,
           margin: EdgeInsets.all(36),
-          builder: DotSwiperPaginationBuilder(activeColor: Colors.white)),
+          builder: FractionPaginationBuilder(
+            activeColor: Colors.white,
+            color: Colors.grey,
+          )),
       loop: false,
       control: SwiperControl(),
       onIndexChanged: (index) async {
