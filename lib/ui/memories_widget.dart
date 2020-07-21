@@ -166,7 +166,11 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         file,
                         tagPrefix: "memories",
                       )
-                    : VideoWidget(file, tagPrefix: "memories"),
+                    : VideoWidget(
+                        file,
+                        tagPrefix: "memories",
+                        autoPlay: true,
+                      ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
                   child: Row(
