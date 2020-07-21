@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
@@ -152,7 +154,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   getFormattedDate(
                       DateTime.fromMicrosecondsSinceEpoch(file.creationTime)),
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -160,14 +162,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
             ]);
           },
           itemCount: widget.memories.length,
-          pagination: new SwiperPagination(
+          pagination: SwiperPagination(
               builder: DotSwiperPaginationBuilder(activeColor: Colors.white)),
-          control: new SwiperControl(),
           loop: false,
-          autoplay: true,
-          autoplayDelay: 5000,
-          autoplayDisableOnInteraction: true,
-          layout: SwiperLayout.DEFAULT,
         ),
       ),
     );
