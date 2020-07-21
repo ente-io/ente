@@ -201,6 +201,21 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(getFormattedDate(DateTime.fromMicrosecondsSinceEpoch(
+            widget.memories[_index].file.creationTime))),
+        backgroundColor: Color(0x00000000),
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: () {
+              share(context, widget.memories[_index].file);
+            },
+          ),
+        ],
+      ),
+      extendBodyBehindAppBar: true,
       body: Container(
         color: Colors.black,
         child: Stack(children: [
@@ -235,40 +250,16 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     return Swiper(
       itemBuilder: (BuildContext context, int index) {
         final file = widget.memories[index].file;
-        return Stack(children: [
-          file.fileType == FileType.image
-              ? ZoomableImage(
-                  file,
-                  tagPrefix: "memories",
-                )
-              : VideoWidget(
-                  file,
-                  tagPrefix: "memories",
-                  autoPlay: true,
-                ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 56, 16, 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  getFormattedDate(
-                      DateTime.fromMicrosecondsSinceEpoch(file.creationTime)),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.share),
-                  onPressed: () {
-                    share(context, file);
-                  },
-                ),
-              ],
-            ),
-          )
-        ]);
+        return file.fileType == FileType.image
+            ? ZoomableImage(
+                file,
+                tagPrefix: "memories",
+              )
+            : VideoWidget(
+                file,
+                tagPrefix: "memories",
+                autoPlay: true,
+              );
       },
       index: _index,
       itemCount: widget.memories.length,
@@ -280,10 +271,14 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
             color: Colors.grey,
           )),
       loop: false,
-      control: SwiperControl(),
+      control: SwiperControl(
+        color: _opacity == 1 ? Colors.white54 : Colors.transparent,
+      ),
       onIndexChanged: (index) async {
         await MemoriesService.instance.markMemoryAsSeen(widget.memories[index]);
-        _index = index;
+        setState(() {
+          _index = index;
+        });
       },
     );
   }
