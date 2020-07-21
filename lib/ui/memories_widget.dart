@@ -74,12 +74,13 @@ class MemoryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final title = _getTitle(memories[0]);
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return FullScreenMemory(memories);
+              return FullScreenMemory(memories, title);
             },
           ),
         );
@@ -102,7 +103,7 @@ class MemoryWidget extends StatelessWidget {
                 ),
               ),
               Padding(padding: EdgeInsets.all(2)),
-              _getTitle(memories[0]),
+              Text(title),
             ],
           ),
         ),
@@ -110,72 +111,105 @@ class MemoryWidget extends StatelessWidget {
     );
   }
 
-  Text _getTitle(Memory memory) {
+  String _getTitle(Memory memory) {
     final present = DateTime.now();
     final then = DateTime.fromMicrosecondsSinceEpoch(memory.file.creationTime);
     final diffInYears = present.year - then.year;
     if (diffInYears == 1) {
-      return Text("1 year ago");
+      return "1 year ago";
     } else {
-      return Text(diffInYears.toString() + " years ago");
+      return diffInYears.toString() + " years ago";
     }
   }
 }
 
 class FullScreenMemory extends StatefulWidget {
   final List<Memory> memories;
+  final String title;
 
-  FullScreenMemory(this.memories, {Key key}) : super(key: key);
+  FullScreenMemory(this.memories, this.title, {Key key}) : super(key: key);
 
   @override
   _FullScreenMemoryState createState() => _FullScreenMemoryState();
 }
 
 class _FullScreenMemoryState extends State<FullScreenMemory> {
+  double _opacity = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(milliseconds: 300), () {
+      setState(() {
+        _opacity = 1;
+      });
+    });
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        _opacity = 0;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
       type: MaterialType.transparency,
       child: Container(
-        child: new Swiper(
-          itemBuilder: (BuildContext context, int index) {
-            final file = widget.memories[index].file;
-            return Stack(children: [
-              file.fileType == FileType.image
-                  ? ZoomableImage(
-                      file,
-                      tagPrefix: "memories",
-                    )
-                  : VideoWidget(file, tagPrefix: "memories"),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      getFormattedDate(DateTime.fromMicrosecondsSinceEpoch(
-                          file.creationTime)),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+        child: Stack(children: [
+          Swiper(
+            itemBuilder: (BuildContext context, int index) {
+              final file = widget.memories[index].file;
+              return Stack(children: [
+                file.fileType == FileType.image
+                    ? ZoomableImage(
+                        file,
+                        tagPrefix: "memories",
+                      )
+                    : VideoWidget(file, tagPrefix: "memories"),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        getFormattedDate(DateTime.fromMicrosecondsSinceEpoch(
+                            file.creationTime)),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.share),
-                      onPressed: () {
-                        share(context, file);
-                      },
-                    ),
-                  ],
+                      IconButton(
+                        icon: Icon(Icons.share),
+                        onPressed: () {
+                          share(context, file);
+                        },
+                      ),
+                    ],
+                  ),
+                )
+              ]);
+            },
+            itemCount: widget.memories.length,
+            pagination: SwiperPagination(
+                builder: DotSwiperPaginationBuilder(activeColor: Colors.white)),
+            loop: false,
+          ),
+          Center(
+            child: AnimatedOpacity(
+              opacity: _opacity,
+              duration: Duration(seconds: 1),
+              child: Text(
+                widget.title,
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
                 ),
-              )
-            ]);
-          },
-          itemCount: widget.memories.length,
-          pagination: SwiperPagination(
-              builder: DotSwiperPaginationBuilder(activeColor: Colors.white)),
-          loop: false,
-        ),
+              ),
+            ),
+          ),
+        ]),
       ),
     );
   }
