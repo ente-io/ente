@@ -3,6 +3,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/memory.dart';
+import 'package:photos/utils/date_time_util.dart';
 
 class MemoryService {
   final _logger = Logger("MemoryService");
@@ -24,15 +25,36 @@ class MemoryService {
 
   Future<List<Memory>> getMemories() async {
     final files = List<File>();
-    var now = DateTime.now().microsecondsSinceEpoch;
+    final presentTime = DateTime.now();
+    final present = presentTime.subtract(Duration(
+        hours: presentTime.hour,
+        minutes: presentTime.minute,
+        seconds: presentTime.second));
     for (var yearAgo = 1; yearAgo <= 100; yearAgo++) {
-      var checkPointDay = yearAgo * daysInAYear;
+      final year = (present.year - yearAgo).toString();
+      final month = present.month > 9
+          ? present.month.toString()
+          : "0" + present.month.toString();
+      final day = present.day > 9
+          ? present.day.toString()
+          : "0" + present.day.toString();
+      final date = DateTime.parse(year + "-" + month + "-" + day);
       final startCreationTime =
-          now - ((checkPointDay + daysBefore) * microSecondsInADay);
+          date.subtract(Duration(days: 7)).microsecondsSinceEpoch;
       final endCreationTime =
-          now - ((checkPointDay - daysAfter) * microSecondsInADay);
-      files.addAll(await _filesDB.getFilesCreatedWithinDuration(
-          startCreationTime, endCreationTime));
+          date.add(Duration(days: 1)).microsecondsSinceEpoch;
+      var memories = await _filesDB.getFilesCreatedWithinDuration(
+          startCreationTime, endCreationTime);
+      if (memories.length > 0)
+        _logger.info("Got " +
+            memories.length.toString() +
+            " memories between " +
+            getFormattedTime(
+                DateTime.fromMicrosecondsSinceEpoch(startCreationTime)) +
+            " to " +
+            getFormattedTime(
+                DateTime.fromMicrosecondsSinceEpoch(endCreationTime)));
+      files.addAll(memories);
     }
     final seenFileIDs = await _memoriesDB.getSeenFileIDs();
     final memories = List<Memory>();
