@@ -8,11 +8,12 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/loading_widget.dart';
 
 class ThumbnailWidget extends StatefulWidget {
-  final File photo;
-
+  final File file;
+  final BoxFit fit;
   const ThumbnailWidget(
-    this.photo, {
+    this.file, {
     Key key,
+    this.fit = BoxFit.cover,
   }) : super(key: key);
   @override
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
@@ -31,7 +32,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.photo.localId == null) {
+    if (widget.file.localId == null) {
       return _getNetworkImage();
     }
 
@@ -40,9 +41,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     if (_imageProvider != null) {
       final image = Image(
         image: _imageProvider,
-        fit: BoxFit.cover,
+        fit: widget.fit,
       );
-      if (widget.photo.fileType == FileType.video) {
+      if (widget.file.fileType == FileType.video) {
         content = Stack(
           children: [
             image,
@@ -70,12 +71,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   void _loadLocalImage(BuildContext context) {
     if (!_hasLoadedThumbnail && !_encounteredErrorLoadingThumbnail) {
       final cachedSmallThumbnail =
-          ThumbnailLruCache.get(widget.photo, THUMBNAIL_SMALL_SIZE);
+          ThumbnailLruCache.get(widget.file, THUMBNAIL_SMALL_SIZE);
       if (cachedSmallThumbnail != null) {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
       } else {
-        widget.photo.getAsset().then((asset) {
+        widget.file.getAsset().then((asset) {
           asset
               .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
               .then((data) {
@@ -90,7 +91,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
                 }
               });
             }
-            ThumbnailLruCache.put(widget.photo, THUMBNAIL_SMALL_SIZE, data);
+            ThumbnailLruCache.put(widget.file, THUMBNAIL_SMALL_SIZE, data);
           });
         }).catchError((e) {
           _logger.warning("Could not load image: ", e);
@@ -102,7 +103,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   Widget _getNetworkImage() {
     return CachedNetworkImage(
-      imageUrl: widget.photo.getThumbnailUrl(),
+      imageUrl: widget.file.getThumbnailUrl(),
       placeholder: (context, url) => loadWidget,
       errorWidget: (context, url, error) => Icon(Icons.error),
       fit: BoxFit.cover,
@@ -112,7 +113,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   @override
   void didUpdateWidget(ThumbnailWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.photo.generatedId != oldWidget.photo.generatedId) {
+    if (widget.file.generatedId != oldWidget.file.generatedId) {
       setState(() {
         _hasLoadedThumbnail = false;
         _imageProvider = null;

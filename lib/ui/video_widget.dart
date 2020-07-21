@@ -1,12 +1,12 @@
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/cache/thumbnail_cache.dart';
-import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/ui/video_controls.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:video_player/video_player.dart';
@@ -101,8 +101,8 @@ class _VideoWidgetState extends State<VideoWidget> {
             imageUrl: widget.file.getThumbnailUrl(),
             fit: BoxFit.contain,
           )
-        : Image.memory(
-            ThumbnailLruCache.get(widget.file, THUMBNAIL_SMALL_SIZE),
+        : ThumbnailWidget(
+            widget.file,
             fit: BoxFit.contain,
           );
     return Container(
