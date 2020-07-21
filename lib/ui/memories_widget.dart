@@ -128,7 +128,13 @@ class MemoryWidget extends StatelessWidget {
                 ),
               ),
               Padding(padding: EdgeInsets.all(2)),
-              Text(title),
+              Hero(
+                tag: title,
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: Text(title),
+                ),
+              ),
             ],
           ),
         ),
@@ -171,19 +177,12 @@ class FullScreenMemory extends StatefulWidget {
 
 class _FullScreenMemoryState extends State<FullScreenMemory> {
   int _index = 0;
-  double _opacity = 0;
+  double _opacity = 1;
 
   @override
   void initState() {
     super.initState();
     _index = widget.index;
-    Future.delayed(Duration(milliseconds: 300), () {
-      if (mounted) {
-        setState(() {
-          _opacity = 1;
-        });
-      }
-    });
     Future.delayed(Duration(seconds: 3), () {
       if (mounted) {
         setState(() {
@@ -196,26 +195,31 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: Container(
-        child: Stack(children: [
-          _buildSwiper(),
-          Center(
+    return Scaffold(
+      body: Stack(children: [
+        _buildSwiper(),
+        Hero(
+          tag: widget.title,
+          child: Container(
+            alignment: Alignment.bottomCenter,
+            padding: EdgeInsets.fromLTRB(0, 0, 0, 44),
             child: AnimatedOpacity(
               opacity: _opacity,
-              duration: Duration(seconds: 1),
-              child: Text(
-                widget.title,
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+              duration: Duration(milliseconds: 500),
+              child: Material(
+                type: MaterialType.transparency,
+                child: Text(
+                  widget.title,
+                  style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.none),
                 ),
               ),
             ),
           ),
-        ]),
-      ),
+        ),
+      ]),
     );
   }
 
