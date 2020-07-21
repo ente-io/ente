@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
@@ -6,7 +7,7 @@ import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/utils/date_time_util.dart';
 
-class MemoriesService {
+class MemoriesService extends ChangeNotifier {
   final _logger = Logger("MemoryService");
   final _memoriesDB = MemoriesDB.instance;
   final _filesDB = FilesDB.instance;
@@ -75,7 +76,8 @@ class MemoriesService {
   }
 
   Future markMemoryAsSeen(Memory memory) async {
-    return _memoriesDB.markMemoryAsSeen(
+    await _memoriesDB.markMemoryAsSeen(
         memory, DateTime.now().microsecondsSinceEpoch);
+    notifyListeners();
   }
 }

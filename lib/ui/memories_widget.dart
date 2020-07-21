@@ -10,7 +10,20 @@ import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/share_util.dart';
 
-class MemoriesWidget extends StatelessWidget {
+class MemoriesWidget extends StatefulWidget {
+  @override
+  _MemoriesWidgetState createState() => _MemoriesWidgetState();
+}
+
+class _MemoriesWidgetState extends State<MemoriesWidget> {
+  @override
+  void initState() {
+    MemoriesService.instance.addListener(() {
+      setState(() {});
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Memory>>(
@@ -74,13 +87,14 @@ class MemoryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = _getTitle(memories[0]);
+    final index = _getUnseenMemoryIndex();
+    final title = _getTitle(memories[index]);
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return FullScreenMemory(memories, title);
+              return FullScreenMemory(title, memories, index);
             },
           ),
         );
@@ -92,13 +106,24 @@ class MemoryWidget extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              ClipOval(
-                child: Container(
-                  width: 76,
-                  height: 76,
-                  child: Hero(
-                    tag: "memories" + memories[0].file.tag(),
-                    child: ThumbnailWidget(memories[0].file),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.amber,
+                    width: memories[index].isSeen() ? 0 : 2,
+                  ),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(40),
+                  ),
+                ),
+                child: ClipOval(
+                  child: Container(
+                    width: memories[index].isSeen() ? 76 : 72,
+                    height: memories[index].isSeen() ? 76 : 72,
+                    child: Hero(
+                      tag: "memories" + memories[index].file.tag(),
+                      child: ThumbnailWidget(memories[index].file),
+                    ),
                   ),
                 ),
               ),
@@ -109,6 +134,15 @@ class MemoryWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  int _getUnseenMemoryIndex() {
+    for (var index = 0; index < memories.length; index++) {
+      if (!memories[index].isSeen()) {
+        return index;
+      }
+    }
+    return 0;
   }
 
   String _getTitle(Memory memory) {
@@ -124,31 +158,40 @@ class MemoryWidget extends StatelessWidget {
 }
 
 class FullScreenMemory extends StatefulWidget {
-  final List<Memory> memories;
   final String title;
+  final List<Memory> memories;
+  final int index;
 
-  FullScreenMemory(this.memories, this.title, {Key key}) : super(key: key);
+  FullScreenMemory(this.title, this.memories, this.index, {Key key})
+      : super(key: key);
 
   @override
   _FullScreenMemoryState createState() => _FullScreenMemoryState();
 }
 
 class _FullScreenMemoryState extends State<FullScreenMemory> {
+  int _index = 0;
   double _opacity = 0;
 
   @override
   void initState() {
     super.initState();
+    _index = widget.index;
     Future.delayed(Duration(milliseconds: 300), () {
-      setState(() {
-        _opacity = 1;
-      });
+      if (mounted) {
+        setState(() {
+          _opacity = 1;
+        });
+      }
     });
     Future.delayed(Duration(seconds: 3), () {
-      setState(() {
-        _opacity = 0;
-      });
+      if (mounted) {
+        setState(() {
+          _opacity = 0;
+        });
+      }
     });
+    MemoriesService.instance.markMemoryAsSeen(widget.memories[_index]);
   }
 
   @override
@@ -157,50 +200,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       type: MaterialType.transparency,
       child: Container(
         child: Stack(children: [
-          Swiper(
-            itemBuilder: (BuildContext context, int index) {
-              final file = widget.memories[index].file;
-              return Stack(children: [
-                file.fileType == FileType.image
-                    ? ZoomableImage(
-                        file,
-                        tagPrefix: "memories",
-                      )
-                    : VideoWidget(
-                        file,
-                        tagPrefix: "memories",
-                        autoPlay: true,
-                      ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        getFormattedDate(DateTime.fromMicrosecondsSinceEpoch(
-                            file.creationTime)),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.share),
-                        onPressed: () {
-                          share(context, file);
-                        },
-                      ),
-                    ],
-                  ),
-                )
-              ]);
-            },
-            itemCount: widget.memories.length,
-            pagination: SwiperPagination(
-                builder: DotSwiperPaginationBuilder(activeColor: Colors.white)),
-            loop: false,
-            control: SwiperControl(),
-          ),
+          _buildSwiper(),
           Center(
             child: AnimatedOpacity(
               opacity: _opacity,
@@ -216,6 +216,58 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           ),
         ]),
       ),
+    );
+  }
+
+  Swiper _buildSwiper() {
+    return Swiper(
+      itemBuilder: (BuildContext context, int index) {
+        final file = widget.memories[index].file;
+        return Stack(children: [
+          file.fileType == FileType.image
+              ? ZoomableImage(
+                  file,
+                  tagPrefix: "memories",
+                )
+              : VideoWidget(
+                  file,
+                  tagPrefix: "memories",
+                  autoPlay: true,
+                ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  getFormattedDate(
+                      DateTime.fromMicrosecondsSinceEpoch(file.creationTime)),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.share),
+                  onPressed: () {
+                    share(context, file);
+                  },
+                ),
+              ],
+            ),
+          )
+        ]);
+      },
+      index: _index,
+      itemCount: widget.memories.length,
+      pagination: SwiperPagination(
+          builder: DotSwiperPaginationBuilder(activeColor: Colors.white)),
+      loop: false,
+      control: SwiperControl(),
+      onIndexChanged: (index) async {
+        await MemoriesService.instance.markMemoryAsSeen(widget.memories[index]);
+        _index = index;
+      },
     );
   }
 }
