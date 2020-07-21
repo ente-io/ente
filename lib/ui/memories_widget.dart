@@ -201,30 +201,33 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(children: [
-        _buildSwiper(),
-        Hero(
-          tag: widget.title,
-          child: Container(
-            alignment: Alignment.bottomCenter,
-            padding: EdgeInsets.fromLTRB(0, 0, 0, 44),
-            child: AnimatedOpacity(
-              opacity: _opacity,
-              duration: Duration(milliseconds: 500),
-              child: Material(
-                type: MaterialType.transparency,
-                child: Text(
-                  widget.title,
-                  style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.none),
+      body: Container(
+        color: Colors.black,
+        child: Stack(children: [
+          _buildSwiper(),
+          Hero(
+            tag: widget.title,
+            child: Container(
+              alignment: Alignment.bottomCenter,
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 44),
+              child: AnimatedOpacity(
+                opacity: _opacity,
+                duration: Duration(milliseconds: 500),
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: Text(
+                    widget.title,
+                    style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ]),
+        ]),
+      ),
     );
   }
 
@@ -244,7 +247,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   autoPlay: true,
                 ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 56, 16, 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -270,6 +273,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       index: _index,
       itemCount: widget.memories.length,
       pagination: SwiperPagination(
+          alignment: Alignment.topCenter,
+          margin: EdgeInsets.all(36),
           builder: DotSwiperPaginationBuilder(activeColor: Colors.white)),
       loop: false,
       control: SwiperControl(),
