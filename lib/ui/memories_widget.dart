@@ -106,27 +106,7 @@ class MemoryWidget extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.amber,
-                    width: memories[index].isSeen() ? 0 : 2,
-                  ),
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(40),
-                  ),
-                ),
-                child: ClipOval(
-                  child: Container(
-                    width: memories[index].isSeen() ? 76 : 72,
-                    height: memories[index].isSeen() ? 76 : 72,
-                    child: Hero(
-                      tag: "memories" + memories[index].file.tag(),
-                      child: ThumbnailWidget(memories[index].file),
-                    ),
-                  ),
-                ),
-              ),
+              _buildMemoryItem(index),
               Padding(padding: EdgeInsets.all(2)),
               Hero(
                 tag: title,
@@ -136,6 +116,31 @@ class MemoryWidget extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Container _buildMemoryItem(int index) {
+    final isSeen = memories[index].isSeen();
+    return Container(
+      decoration: BoxDecoration(
+        border: isSeen
+            ? Border()
+            : Border.all(
+                color: Colors.amber,
+                width: isSeen ? 0 : 2,
+              ),
+        borderRadius: BorderRadius.circular(40),
+      ),
+      child: ClipOval(
+        child: Container(
+          width: isSeen ? 76 : 72,
+          height: isSeen ? 76 : 72,
+          child: Hero(
+            tag: "memories" + memories[index].file.tag(),
+            child: ThumbnailWidget(memories[index].file),
           ),
         ),
       ),
