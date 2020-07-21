@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +15,7 @@ import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/ui/remote_folder_gallery_widget.dart';
 import 'package:photos/ui/search_page.dart';
 import 'package:photos/utils/logging_util.dart';
@@ -114,6 +114,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             onRefresh: PhotoSyncManager.instance.sync,
             tagPrefix: "home_gallery",
             selectedFiles: _selectedFiles,
+            headerWidget: MemoriesWidget(),
           );
         } else if (snapshot.hasError) {
           return Center(child: Text(snapshot.error.toString()));

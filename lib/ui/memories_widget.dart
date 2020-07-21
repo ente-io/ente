@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:photos/memory_service.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
+import 'package:photos/ui/video_widget.dart';
+import 'package:photos/ui/zoomable_image.dart';
+import 'package:photos/utils/date_time_util.dart';
 
-class MemoriesWidget extends StatefulWidget {
-  MemoriesWidget({Key key}) : super(key: key);
-
-  @override
-  _MemoriesWidgetState createState() => _MemoriesWidgetState();
-}
-
-class _MemoriesWidgetState extends State<MemoriesWidget> {
+class MemoriesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Memory>>(
@@ -75,23 +73,37 @@ class MemoryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 100,
-      height: 120,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            ClipOval(
-              child: Container(
-                width: 76,
-                height: 76,
-                child: ThumbnailWidget(memories[0].file),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return FullScreenMemory(memories);
+            },
+          ),
+        );
+      },
+      child: Container(
+        width: 100,
+        height: 120,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              ClipOval(
+                child: Container(
+                  width: 76,
+                  height: 76,
+                  child: Hero(
+                    tag: "memories" + memories[0].file.tag(),
+                    child: ThumbnailWidget(memories[0].file),
+                  ),
+                ),
               ),
-            ),
-            Padding(padding: EdgeInsets.all(2)),
-            _getTitle(memories[0]),
-          ],
+              Padding(padding: EdgeInsets.all(2)),
+              _getTitle(memories[0]),
+            ],
+          ),
         ),
       ),
     );
@@ -106,5 +118,58 @@ class MemoryWidget extends StatelessWidget {
     } else {
       return Text(diffInYears.toString() + " years ago");
     }
+  }
+}
+
+class FullScreenMemory extends StatefulWidget {
+  final List<Memory> memories;
+
+  FullScreenMemory(this.memories, {Key key}) : super(key: key);
+
+  @override
+  _FullScreenMemoryState createState() => _FullScreenMemoryState();
+}
+
+class _FullScreenMemoryState extends State<FullScreenMemory> {
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        child: new Swiper(
+          itemBuilder: (BuildContext context, int index) {
+            final file = widget.memories[index].file;
+            return Stack(children: [
+              file.fileType == FileType.image
+                  ? ZoomableImage(
+                      file,
+                      tagPrefix: "memories",
+                    )
+                  : VideoWidget(file, tagPrefix: "memories"),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+                child: Text(
+                  getFormattedDate(
+                      DateTime.fromMicrosecondsSinceEpoch(file.creationTime)),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            ]);
+          },
+          itemCount: widget.memories.length,
+          pagination: new SwiperPagination(
+              builder: DotSwiperPaginationBuilder(activeColor: Colors.white)),
+          control: new SwiperControl(),
+          loop: false,
+          autoplay: true,
+          autoplayDelay: 5000,
+          autoplayDisableOnInteraction: true,
+          layout: SwiperLayout.DEFAULT,
+        ),
+      ),
+    );
   }
 }

@@ -18,7 +18,7 @@ class ZoomableImage extends StatefulWidget {
     this.photo, {
     Key key,
     this.shouldDisableScroll,
-    this.tagPrefix,
+    @required this.tagPrefix,
   }) : super(key: key);
 
   @override

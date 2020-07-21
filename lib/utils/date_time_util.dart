@@ -65,6 +65,16 @@ String getFormattedTime(DateTime dateTime) {
       getTime(dateTime);
 }
 
+String getFormattedDate(DateTime dateTime) {
+  return getDay(dateTime) +
+      ", " +
+      getMonth(dateTime) +
+      " " +
+      dateTime.day.toString() +
+      ", " +
+      dateTime.year.toString();
+}
+
 String formatDuration(Duration position) {
   final ms = position.inMilliseconds;
 
@@ -86,4 +96,21 @@ String formatDuration(Duration position) {
       '${hoursString == '00' ? '' : hoursString + ':'}$minutesString:$secondsString';
 
   return formattedTime;
+}
+
+bool isLeapYear(DateTime dateTime) {
+  final year = dateTime.year;
+  if (year % 4 == 0) {
+    if (year % 100 == 0) {
+      if (year % 400 == 0) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return true;
+    }
+  } else {
+    return false;
+  }
 }

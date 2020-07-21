@@ -54,6 +54,7 @@ dependencies:
   chewie: ^0.9.10
   cached_network_image: ^2.3.0-beta
   progress_dialog: ^1.2.4
+  flutter_swiper: ^1.1.6
 
 dev_dependencies:
   flutter_test:
