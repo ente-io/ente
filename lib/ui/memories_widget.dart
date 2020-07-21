@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
@@ -10,6 +8,7 @@ import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/ui/video_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/share_util.dart';
 
 class MemoriesWidget extends StatelessWidget {
   @override
@@ -150,13 +149,24 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   : VideoWidget(file, tagPrefix: "memories"),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
-                child: Text(
-                  getFormattedDate(
-                      DateTime.fromMicrosecondsSinceEpoch(file.creationTime)),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      getFormattedDate(DateTime.fromMicrosecondsSinceEpoch(
+                          file.creationTime)),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.share),
+                      onPressed: () {
+                        share(context, file);
+                      },
+                    ),
+                  ],
                 ),
               )
             ]);
