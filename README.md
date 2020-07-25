@@ -1,1 +1,1 @@
-Android and iOS apps for [Orma](https://orma.in) built with [Flutter](https://flutter.dev).
+Android and iOS apps for [ente](https://ente.io) built with [Flutter](https://flutter.dev).
