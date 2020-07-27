@@ -89,10 +89,10 @@ class PhotoSyncManager {
     if (recents != null) {
       await _addToPhotos(recents, lastDBUpdationTime, files);
     }
+    files.sort(
+        (first, second) => first.creationTime.compareTo(second.creationTime));
 
     if (files.isNotEmpty) {
-      files.sort(
-          (first, second) => first.creationTime.compareTo(second.creationTime));
       await _updateDatabase(files, lastDBUpdationTime, syncStartTime);
       await FileRepository.instance.reloadFiles();
     }
