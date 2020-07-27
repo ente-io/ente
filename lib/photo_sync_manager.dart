@@ -101,7 +101,7 @@ class PhotoSyncManager {
 
   Future<List<AssetPathEntity>> _getGalleryList(
       final int fromTimestamp, final int toTimestamp) async {
-    var result = await PhotoManager.requestPermission();
+    final result = await PhotoManager.requestPermission();
     if (!result) {
       print("Did not get permission");
     }
@@ -112,7 +112,7 @@ class PhotoSyncManager {
       min: DateTime.fromMicrosecondsSinceEpoch(fromTimestamp),
       max: DateTime.fromMicrosecondsSinceEpoch(toTimestamp),
     );
-    var galleryList = await PhotoManager.getAssetPathList(
+    final galleryList = await PhotoManager.getAssetPathList(
       hasAll: true,
       type: RequestType.common,
       filterOption: filterOptionGroup,
@@ -157,7 +157,7 @@ class PhotoSyncManager {
 
   Future<bool> _updateDatabase(final List<File> files, int lastDBUpdationTime,
       int syncStartTimestamp) async {
-    var filesToBeAdded = List<File>();
+    final filesToBeAdded = List<File>();
     for (File file in files) {
       if (file.creationTime > lastDBUpdationTime) {
         filesToBeAdded.add(file);
@@ -167,7 +167,7 @@ class PhotoSyncManager {
   }
 
   Future<void> _downloadDiff() async {
-    var diff = await _getDiff(_getLastSyncTimestamp(), _diffLimit);
+    final diff = await _getDiff(_getLastSyncTimestamp(), _diffLimit);
     if (diff != null && diff.isNotEmpty) {
       await _storeDiff(diff);
       FileRepository.instance.reloadFiles();
@@ -194,7 +194,7 @@ class PhotoSyncManager {
       }
       _logger.info("Uploading " + file.toString());
       try {
-        var uploadedFile = await _uploadFile(file);
+        final uploadedFile = await _uploadFile(file);
         await _db.update(file.generatedId, uploadedFile.uploadedFileId,
             uploadedFile.updationTime);
         _prefs.setInt(_lastSyncTimeKey, uploadedFile.updationTime);
@@ -211,8 +211,12 @@ class PhotoSyncManager {
   Future _storeDiff(List<File> diff) async {
     for (File file in diff) {
       try {
-        var existingPhoto = await _db.getMatchingFile(file.localId, file.title,
-            file.deviceFolder, file.creationTime, file.modificationTime,
+        final existingPhoto = await _db.getMatchingFile(
+            file.localId,
+            file.title,
+            file.deviceFolder,
+            file.creationTime,
+            file.modificationTime,
             alternateTitle: getHEICFileNameForJPG(file));
         await _db.update(
             existingPhoto.generatedId, file.uploadedFileId, file.updationTime);
@@ -290,7 +294,7 @@ class PhotoSyncManager {
   }
 
   Future _initializeDirectories() async {
-    var externalPath = (await getApplicationDocumentsDirectory()).path;
+    final externalPath = (await getApplicationDocumentsDirectory()).path;
     new Directory(externalPath + "/photos/thumbnails")
         .createSync(recursive: true);
   }
