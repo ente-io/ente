@@ -68,6 +68,10 @@ class PhotoSyncManager {
   }
 
   Future<void> _doSync() async {
+    final result = await PhotoManager.requestPermission();
+    if (!result) {
+      _logger.severe("Did not get permission");
+    }
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     var lastDBUpdationTime = _prefs.getInt(_lastDBUpdationTimeKey);
     if (lastDBUpdationTime == null) {
@@ -101,10 +105,6 @@ class PhotoSyncManager {
 
   Future<List<AssetPathEntity>> _getGalleryList(
       final int fromTimestamp, final int toTimestamp) async {
-    final result = await PhotoManager.requestPermission();
-    if (!result) {
-      print("Did not get permission");
-    }
     final filterOptionGroup = FilterOptionGroup();
     filterOptionGroup.setOption(AssetType.image, FilterOption(needTitle: true));
     filterOptionGroup.setOption(AssetType.video, FilterOption(needTitle: true));
