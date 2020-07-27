@@ -25,8 +25,6 @@ void main() async {
 }
 
 void _main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   await Configuration.instance.init();
   await PhotoSyncManager.instance.init();
   await MemoriesService.instance.init();
