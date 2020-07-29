@@ -323,7 +323,7 @@ class _DetailPageState extends State<DetailPage> {
       Navigator.of(context, rootNavigator: true).pop(); // Close gallery
     }
 
-    await deleteWithIds([file], deleteEveryWhere: deleteEveryWhere);
+    await deleteFiles([file], deleteEveryWhere: deleteEveryWhere);
     FileRepository.instance.reloadFiles();
   }
 }
