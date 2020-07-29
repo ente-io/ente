@@ -1,4 +1,3 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/ui/video_controls.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:video_player/video_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import 'loading_widget.dart';
 
@@ -78,9 +78,17 @@ class _VideoWidgetState extends State<VideoWidget> {
             _videoPlayerController.value.initialized
         ? _getVideoPlayer()
         : _getLoadingWidget();
-    return Hero(
-      tag: widget.tagPrefix + widget.file.tag(),
-      child: content,
+    return VisibilityDetector(
+      key: Key(widget.file.tag()),
+      onVisibilityChanged: (info) {
+        if (info.visibleFraction < 1) {
+          _chewieController.pause();
+        }
+      },
+      child: Hero(
+        tag: widget.tagPrefix + widget.file.tag(),
+        child: content,
+      ),
     );
   }
 
