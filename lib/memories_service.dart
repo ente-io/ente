@@ -53,11 +53,12 @@ class MemoriesService extends ChangeNotifier {
                 DateTime.fromMicrosecondsSinceEpoch(endCreationTime)));
       files.addAll(filesInYear);
     }
-    final seenFileIDs = await _memoriesDB.getSeenFileIDs();
+    final seenTimes = await _memoriesDB.getSeenTimes();
     final memories = List<Memory>();
     for (final file in files) {
       if (filter.shouldInclude(file)) {
-        memories.add(Memory(file, seenFileIDs.contains(file.generatedId)));
+        final seenTime = seenTimes[file.generatedId] ?? -1;
+        memories.add(Memory(file, seenTime));
       }
     }
     _logger.info("Number of memories: " + memories.length.toString());
@@ -76,6 +77,7 @@ class MemoriesService extends ChangeNotifier {
   }
 
   Future markMemoryAsSeen(Memory memory) async {
+    _logger.info("Marking memory " + memory.file.title + " as seen");
     await _memoriesDB.markMemoryAsSeen(
         memory, DateTime.now().microsecondsSinceEpoch);
     notifyListeners();

@@ -59,9 +59,9 @@ class MemoriesDB {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Future<Set<int>> getSeenFileIDs() async {
+  Future<Map<int, int>> getSeenTimes() async {
     final db = await instance.database;
-    return _convertToFileIDs(await db.query(table));
+    return _convertToSeenTimes(await db.query(table));
   }
 
   Map<String, dynamic> _getRowForSeenMemory(Memory memory, int timestamp) {
@@ -71,11 +71,11 @@ class MemoriesDB {
     return row;
   }
 
-  Set<int> _convertToFileIDs(List<Map<String, dynamic>> rows) {
-    final fileIDs = Set<int>();
+  Map<int, int> _convertToSeenTimes(List<Map<String, dynamic>> rows) {
+    final seenTimes = Map<int, int>();
     for (final row in rows) {
-      fileIDs.add(row[columnFileID]);
+      seenTimes[row[columnFileID]] = int.parse(row[columnSeenTime]);
     }
-    return fileIDs;
+    return seenTimes;
   }
 }

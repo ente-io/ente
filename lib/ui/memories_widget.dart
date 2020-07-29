@@ -152,6 +152,10 @@ class MemoryWidget extends StatelessWidget {
       if (!memories[index].isSeen()) {
         return index;
       }
+      if (index > 0 &&
+          memories[index - 1].seenTime() > memories[index].seenTime()) {
+        return index;
+      }
     }
     return 0;
   }
@@ -273,6 +277,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       control: SwiperControl(
         color: _opacity == 1 ? Colors.white54 : Colors.transparent,
       ),
+      index: _index,
       onIndexChanged: (index) async {
         await MemoriesService.instance.markMemoryAsSeen(widget.memories[index]);
         setState(() {
