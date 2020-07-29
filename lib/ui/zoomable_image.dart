@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/image_cache.dart';
@@ -13,12 +14,14 @@ class ZoomableImage extends StatefulWidget {
   final File photo;
   final Function(bool) shouldDisableScroll;
   final String tagPrefix;
+  final Decoration backgroundDecoration;
 
   ZoomableImage(
     this.photo, {
     Key key,
     this.shouldDisableScroll,
     @required this.tagPrefix,
+    this.backgroundDecoration,
   }) : super(key: key);
 
   @override
@@ -63,6 +66,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         heroAttributes: PhotoViewHeroAttributes(
           tag: widget.tagPrefix + widget.photo.tag(),
         ),
+        backgroundDecoration: widget.backgroundDecoration,
       );
     } else {
       return loadWidget;
