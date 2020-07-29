@@ -3,15 +3,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/setup_page.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/ui/share_folder_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 enum GalleryAppBarType {
@@ -166,18 +164,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     showCupertinoModalPopup(context: context, builder: (_) => action);
   }
 
-  _deleteSelected(BuildContext context, bool deleteEverywhere) async {
+  _deleteSelected(BuildContext context, bool deleteEveryWhere) async {
     Navigator.of(context, rootNavigator: true).pop();
     final dialog = createProgressDialog(context, "Deleting...");
     await dialog.show();
-    await PhotoManager.editor.deleteWithIds(
-        widget.selectedFiles.files.map((p) => p.localId).toList());
-
-    for (File file in widget.selectedFiles.files) {
-      deleteEverywhere
-          ? await FilesDB.instance.markForDeletion(file)
-          : await FilesDB.instance.delete(file);
-    }
+    await deleteWithIds(widget.selectedFiles.files.toList(),
+        deleteEveryWhere: deleteEveryWhere);
     await FileRepository.instance.reloadFiles();
     _clearSelectedFiles();
     await dialog.hide();

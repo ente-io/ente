@@ -1,9 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/image_cache.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/favorite_files_repository.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/file_type.dart';
@@ -11,6 +9,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/ui/video_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:logging/logging.dart';
 
@@ -300,7 +299,7 @@ class _DetailPageState extends State<DetailPage> {
     showCupertinoModalPopup(context: context, builder: (_) => action);
   }
 
-  Future _delete(bool deleteEverywhere) async {
+  Future _delete(bool deleteEveryWhere) async {
     final file = _files[_selectedIndex];
     final totalFiles = _files.length;
     if (_selectedIndex == totalFiles - 1) {
@@ -324,11 +323,7 @@ class _DetailPageState extends State<DetailPage> {
       Navigator.of(context, rootNavigator: true).pop(); // Close gallery
     }
 
-    await PhotoManager.editor.deleteWithIds([file.localId]);
-    deleteEverywhere
-        ? await FilesDB.instance.markForDeletion(file)
-        : await FilesDB.instance.delete(file);
-
+    await deleteWithIds([file], deleteEveryWhere: deleteEveryWhere);
     FileRepository.instance.reloadFiles();
   }
 }
