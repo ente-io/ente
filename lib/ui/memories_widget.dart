@@ -87,7 +87,7 @@ class MemoryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final index = _getUnseenMemoryIndex();
+    final index = _getNextMemoryIndex();
     final title = _getTitle(memories[index]);
     return GestureDetector(
       onTap: () {
@@ -147,7 +147,7 @@ class MemoryWidget extends StatelessWidget {
     );
   }
 
-  int _getUnseenMemoryIndex() {
+  int _getNextMemoryIndex() {
     for (var index = 0; index < memories.length; index++) {
       if (!memories[index].isSeen()) {
         return index;
@@ -261,7 +261,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 autoPlay: true,
               );
       },
-      index: _index,
       itemCount: widget.memories.length,
       pagination: SwiperPagination(
           alignment: Alignment.bottomCenter,
@@ -279,6 +278,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         setState(() {
           _index = index;
         });
+        return index;
       },
     );
   }
