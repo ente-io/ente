@@ -1,11 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/file_repository.dart';
 import 'package:photos/models/file.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/utils/file_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
   final File file;
@@ -76,7 +78,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
       } else {
-        widget.file.getAsset().then((asset) {
+        widget.file.getAsset().then((asset) async {
+          if (asset == null) {
+            await deleteFiles([widget.file]);
+            await FileRepository.instance.reloadFiles();
+            return;
+          }
           asset
               .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
               .then((data) {
