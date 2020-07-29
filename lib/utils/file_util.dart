@@ -1,5 +1,7 @@
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/image_cache.dart';
+import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -34,4 +36,18 @@ void preloadFile(File file) {
       });
     }
   }
+}
+
+void preloadLocalFileThumbnail(File file) {
+  if (file.localId == null ||
+      ThumbnailLruCache.get(file, THUMBNAIL_SMALL_SIZE) != null) {
+    return;
+  }
+  file.getAsset().then((asset) {
+    asset
+        .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
+        .then((data) {
+      ThumbnailLruCache.put(file, THUMBNAIL_SMALL_SIZE, data);
+    });
+  });
 }
