@@ -8,6 +8,7 @@ import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/ui/video_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 class MemoriesWidget extends StatefulWidget {
@@ -283,6 +284,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         setState(() {
           _index = index;
         });
+        if (index < widget.memories.length - 1) {
+          preloadFile(widget.memories[index + 1].file);
+        }
         return index;
       },
     );

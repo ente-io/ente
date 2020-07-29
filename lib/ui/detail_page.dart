@@ -106,30 +106,10 @@ class _DetailPageState extends State<DetailPage> {
 
   void _preloadFiles(int index) {
     if (index > 0) {
-      _preloadFile(_files[index - 1]);
+      preloadFile(_files[index - 1]);
     }
     if (index < _files.length - 1) {
-      _preloadFile(_files[index + 1]);
-    }
-  }
-
-  void _preloadFile(File file) {
-    if (file.fileType == FileType.video) {
-      return;
-    }
-    if (file.localId == null) {
-      file.getBytes().then((data) {
-        BytesLruCache.put(file, data);
-      });
-    } else {
-      final cachedFile = FileLruCache.get(file);
-      if (cachedFile == null) {
-        file.getAsset().then((asset) {
-          asset.file.then((assetFile) {
-            FileLruCache.put(file, assetFile);
-          });
-        });
-      }
+      preloadFile(_files[index + 1]);
     }
   }
 
