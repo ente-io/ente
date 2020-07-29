@@ -4,6 +4,7 @@ import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:photos/memories_service.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/memory.dart';
+import 'package:photos/ui/blurred_file_backdrop.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/ui/video_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
@@ -255,16 +256,23 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     return Swiper(
       itemBuilder: (BuildContext context, int index) {
         final file = widget.memories[index].file;
-        return file.fileType == FileType.image
+        final view = file.fileType == FileType.image
             ? ZoomableImage(
                 file,
                 tagPrefix: "memories",
+                backgroundDecoration: BoxDecoration(
+                  color: Colors.transparent,
+                ),
               )
             : VideoWidget(
                 file,
                 tagPrefix: "memories",
                 autoPlay: true,
               );
+        return Stack(children: [
+          BlurredFileBackdrop(file),
+          view,
+        ]);
       },
       itemCount: widget.memories.length,
       pagination: SwiperPagination(
