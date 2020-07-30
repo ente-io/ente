@@ -15,10 +15,13 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           loadWidget,
-          Padding(padding: EdgeInsets.all(16)),
-          Center(
-            child: Text(
-              "Hang on tight, your photos will appear in a jiffy! 🐣",
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: Text(
+                "Hang on tight, your photos will appear in a jiffy! 🐣",
+                textAlign: TextAlign.center,
+              ),
             ),
           )
         ],
