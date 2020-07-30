@@ -115,7 +115,12 @@ class MemoryWidget extends StatelessWidget {
                 tag: title,
                 child: Material(
                   type: MaterialType.transparency,
-                  child: Text(title),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
               ),
             ],
