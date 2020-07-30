@@ -34,7 +34,7 @@ class FaceSearchManager {
     final result = await _dio
         .get(
       Configuration.instance.getHttpEndpoint() +
-          "/photos/search/face/" +
+          "/search/face/" +
           face.faceID.toString(),
       queryParameters: {
         "limit": limit,
