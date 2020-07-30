@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/location_search_results_page.dart';
@@ -40,12 +41,16 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
           return null;
         }
         _searchString = pattern;
-        return Dio().get(
-            "https://maps.googleapis.com/maps/api/place/textsearch/json",
-            queryParameters: {
-              "query": pattern,
-              "key": "AIzaSyC9lAYIERrNFsCkdLxX6DmZfPhybTKod8U",
-            }).then((response) {
+        return Dio()
+            .get(
+          Configuration.instance.getHttpEndpoint() + "/search/location",
+          queryParameters: {
+            "query": pattern,
+          },
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        )
+            .then((response) {
           if (_searchString == pattern) {
             // Query has not changed
             return response.data["results"];
