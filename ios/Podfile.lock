@@ -2,6 +2,8 @@ PODS:
   - connectivity (0.0.1):
     - Flutter
     - Reachability
+  - connectivity_for_web (0.1.0):
+    - Flutter
   - connectivity_macos (0.0.1):
     - Flutter
   - device_info (0.0.1):
@@ -15,7 +17,7 @@ PODS:
     - Flutter
     - Mantle
     - SDWebImageWebPCoder
-  - flutter_keyboard_visibility (0.7.0):
+  - flutter_keyboard_visibility (0.0.1):
     - Flutter
   - fluttertoast (0.0.2):
     - Flutter
@@ -42,6 +44,8 @@ PODS:
     - Flutter
   - path_provider (0.0.1):
     - Flutter
+  - path_provider_linux (0.0.1):
+    - Flutter
   - path_provider_macos (0.0.1):
     - Flutter
   - photo_manager (0.0.1):
@@ -54,6 +58,8 @@ PODS:
   - sensors (0.0.1):
     - Flutter
   - shared_preferences (0.0.1):
+    - Flutter
+  - shared_preferences_linux (0.0.1):
     - Flutter
   - shared_preferences_macos (0.0.1):
     - Flutter
@@ -71,6 +77,7 @@ PODS:
 
 DEPENDENCIES:
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
+  - connectivity_for_web (from `.symlinks/plugins/connectivity_for_web/ios`)
   - connectivity_macos (from `.symlinks/plugins/connectivity_macos/ios`)
   - device_info (from `.symlinks/plugins/device_info/ios`)
   - esys_flutter_share (from `.symlinks/plugins/esys_flutter_share/ios`)
@@ -83,10 +90,12 @@ DEPENDENCIES:
   - local_image_provider (from `.symlinks/plugins/local_image_provider/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - path_provider_linux (from `.symlinks/plugins/path_provider_linux/ios`)
   - path_provider_macos (from `.symlinks/plugins/path_provider_macos/ios`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - sensors (from `.symlinks/plugins/sensors/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
+  - shared_preferences_linux (from `.symlinks/plugins/shared_preferences_linux/ios`)
   - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
   - shared_preferences_web (from `.symlinks/plugins/shared_preferences_web/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
@@ -106,6 +115,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   connectivity:
     :path: ".symlinks/plugins/connectivity/ios"
+  connectivity_for_web:
+    :path: ".symlinks/plugins/connectivity_for_web/ios"
   connectivity_macos:
     :path: ".symlinks/plugins/connectivity_macos/ios"
   device_info:
@@ -130,6 +141,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
+  path_provider_linux:
+    :path: ".symlinks/plugins/path_provider_linux/ios"
   path_provider_macos:
     :path: ".symlinks/plugins/path_provider_macos/ios"
   photo_manager:
@@ -138,6 +151,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sensors/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
+  shared_preferences_linux:
+    :path: ".symlinks/plugins/shared_preferences_linux/ios"
   shared_preferences_macos:
     :path: ".symlinks/plugins/shared_preferences_macos/ios"
   shared_preferences_web:
@@ -152,14 +167,15 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock/ios"
 
 SPEC CHECKSUMS:
-  connectivity: 6e94255659cc86dcbef1d452ad3e0491bb1b3e75
+  connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
+  connectivity_for_web: 2b8584556930d4bd490d82b836bcf45067ce345b
   connectivity_macos: e2e9731b6b22dda39eb1b128f6969d574460e191
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   esys_flutter_share: 403498dab005b36ce1f8d7aff377e81f0621b0b4
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_email_sender: f787522d0e82f50e5766c1213dbffff22fdcf009
   flutter_image_compress: 082f8daaf6c1b0c9fe798251c750ef0ecd98d7ae
-  flutter_keyboard_visibility: 6195387fb6d8f46e5cd6dda4a4154e41f800f545
+  flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
   fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   get_ip: c063133e0a399ae4089048c90d6a232cb2344846
@@ -167,14 +183,16 @@ SPEC CHECKSUMS:
   local_image_provider: cf979b81bc1cacc81867d3511a1b6b7216411e93
   Mantle: 35238ae6f2e2b2d474fa7b67fee82a59fea71915
   package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
-  path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
+  path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
+  path_provider_linux: 4d630dc393e1f20364f3e3b4a2ff41d9674a84e4
   path_provider_macos: f760a3c5b04357c380e2fddb6f9db6f3015897e0
   photo_manager: f7c619c2cc8c2adb8d85c63363babac477de9c67
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   SDWebImage: 97351f6582ceca541ea294ba66a1fcb342a331c2
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21
   sensors: 84eb7a30e47a649e4172b71d6e81be614c280336
-  shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
+  shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
+  shared_preferences_linux: afefbfe8d921e207f01ede8b60373d9e3b566b78
   shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087
   shared_preferences_web: 141cce0c3ed1a1c5bf2a0e44f52d31eeb66e5ea9
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
@@ -184,4 +202,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: dc81df99923cb3d9115f3b6c3d7e730abfec780b
 
-COCOAPODS: 1.9.1
+COCOAPODS: 1.9.3
