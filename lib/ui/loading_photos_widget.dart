@@ -17,13 +17,11 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
           loadWidget,
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: Text(
-                "Hang on tight, your photos will appear in a jiffy! 🐣",
-                textAlign: TextAlign.center,
-              ),
+            child: Text(
+              "Hang on tight, your photos will appear in a jiffy! 🐣",
+              textAlign: TextAlign.center,
             ),
-          )
+          ),
         ],
       ),
     );
