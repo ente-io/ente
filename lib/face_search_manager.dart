@@ -35,7 +35,7 @@ class FaceSearchManager {
         .get(
       Configuration.instance.getHttpEndpoint() +
           "/search/face/" +
-          face.faceID.toString(),
+          face.id.toString(),
       queryParameters: {
         "limit": limit,
         "beforeCreationTime": beforeCreationTime,

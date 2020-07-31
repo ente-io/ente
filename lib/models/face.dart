@@ -1,14 +1,14 @@
 import 'package:photos/core/configuration.dart';
 
 class Face {
-  final int faceID;
+  final int id;
 
-  Face.fromJson(Map<String, dynamic> json) : faceID = json["faceID"];
+  Face.fromJson(Map<String, dynamic> json) : id = json["id"];
 
   String getThumbnailUrl() {
     return Configuration.instance.getHttpEndpoint() +
         "/photos/face/thumbnail/" +
-        faceID.toString() +
+        id.toString() +
         "?token=" +
         Configuration.instance.getToken();
   }
