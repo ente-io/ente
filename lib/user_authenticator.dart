@@ -22,10 +22,7 @@ class UserAuthenticator {
           "password": password,
         }).then((response) {
       if (response.statusCode == 200 && response.data != null) {
-        Configuration.instance.setUsername(username);
-        Configuration.instance.setPassword(password);
-        Configuration.instance.setUserID(response.data["id"]);
-        Configuration.instance.setToken(response.data["token"]);
+        _saveConfiguration(username, password, response);
         Bus.instance.fire(UserAuthenticatedEvent());
         return true;
       } else {
@@ -44,9 +41,7 @@ class UserAuthenticator {
       "password": password,
     }).then((response) {
       if (response.statusCode == 200 && response.data != null) {
-        Configuration.instance.setUsername(username);
-        Configuration.instance.setPassword(password);
-        Configuration.instance.setToken(response.data["token"]);
+        _saveConfiguration(username, password, response);
         Bus.instance.fire(UserAuthenticatedEvent());
         return true;
       } else {
@@ -60,5 +55,12 @@ class UserAuthenticator {
       _logger.severe(e.toString());
       throw e;
     });
+  }
+
+  void _saveConfiguration(String username, String password, Response response) {
+    Configuration.instance.setUsername(username);
+    Configuration.instance.setPassword(password);
+    Configuration.instance.setUserID(response.data["id"]);
+    Configuration.instance.setToken(response.data["token"]);
   }
 }
