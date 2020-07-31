@@ -99,9 +99,7 @@ class FoldersDB {
       row[columnName],
       row[columnOwnerID],
       row[columnDeviceFolder],
-      (jsonDecode(row[columnSharedWith]) as List<dynamic>)
-          .cast<String>()
-          .toSet(),
+      (jsonDecode(row[columnSharedWith]) as List<dynamic>).cast<int>().toSet(),
       row[columnUpdationTime],
     );
   }

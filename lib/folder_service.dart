@@ -133,18 +133,23 @@ class FolderSharingService {
         .then((response) {
       return Folder.fromMap(response.data);
     }).catchError((e) {
-      return Folder(
-        null,
-        Configuration.instance.getUsername() + "s " + deviceFolder,
-        Configuration.instance.getUserID(),
-        deviceFolder,
-        Set<String>(),
-        null,
-      );
+      try {
+        return Folder(
+          null,
+          Configuration.instance.getUsername() + "s " + deviceFolder,
+          Configuration.instance.getUserID(),
+          deviceFolder,
+          Set<int>(),
+          null,
+        );
+      } catch (e) {
+        _logger.severe(e);
+        return null;
+      }
     });
   }
 
-  Future<Map<String, bool>> getSharingStatus(Folder folder) async {
+  Future<Map<int, bool>> getSharingStatus(Folder folder) async {
     return _dio
         .get(
       Configuration.instance.getHttpEndpoint() + "/users",
@@ -153,7 +158,7 @@ class FolderSharingService {
     )
         .then((response) {
       final users = (response.data["users"] as List).toList();
-      final result = Map<String, bool>();
+      final result = Map<int, bool>();
       for (final user in users) {
         if (user != Configuration.instance.getUsername()) {
           result[user] = folder.sharedWith.contains(user);

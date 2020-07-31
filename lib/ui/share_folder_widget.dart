@@ -24,7 +24,7 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, bool>>(
+    return FutureBuilder<Map<int, bool>>(
       future:
           FolderSharingService.instance.getFolder(widget.path).then((folder) {
         _folder = folder;
@@ -42,7 +42,7 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
     );
   }
 
-  Widget _getSharingDialog(Map<String, bool> sharingStatus) {
+  Widget _getSharingDialog(Map<int, bool> sharingStatus) {
     return AlertDialog(
       title: Text('Share "' + widget.title + '" with'),
       content: SingleChildScrollView(
@@ -56,7 +56,7 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
         FlatButton(
           child: Text("Share"),
           onPressed: () async {
-            var sharedWith = Set<String>();
+            var sharedWith = Set<int>();
             for (var user in sharingStatus.keys) {
               if (sharingStatus[user]) {
                 sharedWith.add(user);
@@ -75,7 +75,7 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
 }
 
 class SharingCheckboxWidget extends StatefulWidget {
-  final Map<String, bool> sharingStatus;
+  final Map<int, bool> sharingStatus;
 
   const SharingCheckboxWidget(
     this.sharingStatus, {
@@ -87,7 +87,7 @@ class SharingCheckboxWidget extends StatefulWidget {
 }
 
 class _SharingCheckboxWidgetState extends State<SharingCheckboxWidget> {
-  Map<String, bool> _sharingStatus;
+  Map<int, bool> _sharingStatus;
 
   @override
   void initState() {
@@ -109,7 +109,7 @@ class _SharingCheckboxWidgetState extends State<SharingCheckboxWidget> {
                   _sharingStatus[user] = value;
                 });
               }),
-          Text(user),
+          Text(user.toString()),
         ],
       ));
     }

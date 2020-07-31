@@ -7,7 +7,7 @@ class Folder {
   final String name;
   final int ownerID;
   final String deviceFolder;
-  final Set<String> sharedWith;
+  final Set<int> sharedWith;
   final int updationTime;
   File thumbnailPhoto;
 
@@ -28,7 +28,7 @@ class Folder {
       map['name'],
       map['ownerID'],
       map['deviceFolder'],
-      Set<String>.from(map['sharedWith']),
+      Set<int>.from(map['sharedWith']),
       map['updationTime'],
     );
   }
