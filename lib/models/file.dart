@@ -24,7 +24,7 @@ class File {
 
   File();
   File.fromJson(Map<String, dynamic> json) {
-    uploadedFileId = json["fileID"];
+    uploadedFileId = json["id"];
     localId = json["deviceFileID"];
     deviceFolder = json["deviceFolder"];
     title = json["title"];

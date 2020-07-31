@@ -78,7 +78,7 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
     final folders = await FoldersDB.instance.getFolders();
     final filteredFolders = List<Folder>();
     for (final folder in folders) {
-      if (folder.owner == Configuration.instance.getUsername()) {
+      if (folder.ownerID == Configuration.instance.getUserID()) {
         continue;
       }
       try {

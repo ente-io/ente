@@ -45,7 +45,7 @@ class FolderSharingService {
         }
       }
       for (final folder in folders) {
-        if (folder.owner != Configuration.instance.getUsername()) {
+        if (folder.ownerID != Configuration.instance.getUserID()) {
           await syncDiff(folder);
           await FoldersDB.instance.putFolder(folder);
         }
@@ -136,7 +136,7 @@ class FolderSharingService {
       return Folder(
         null,
         Configuration.instance.getUsername() + "s " + deviceFolder,
-        Configuration.instance.getUsername(),
+        Configuration.instance.getUserID(),
         deviceFolder,
         Set<String>(),
         null,

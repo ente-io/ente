@@ -5,7 +5,7 @@ import 'package:photos/models/file.dart';
 class Folder {
   final int id;
   final String name;
-  final String owner;
+  final int ownerID;
   final String deviceFolder;
   final Set<String> sharedWith;
   final int updationTime;
@@ -14,7 +14,7 @@ class Folder {
   Folder(
     this.id,
     this.name,
-    this.owner,
+    this.ownerID,
     this.deviceFolder,
     this.sharedWith,
     this.updationTime,
@@ -25,8 +25,8 @@ class Folder {
 
     return Folder(
       map['id'],
-      map['owner'] + "'s " + map['deviceFolder'],
-      map['owner'],
+      map['name'],
+      map['ownerID'],
       map['deviceFolder'],
       Set<String>.from(map['sharedWith']),
       map['updationTime'],
@@ -35,14 +35,14 @@ class Folder {
 
   @override
   String toString() {
-    return 'Folder(id: $id, name: $name, owner: $owner, deviceFolder: $deviceFolder, sharedWith: $sharedWith, updationTime: $updationTime)';
+    return 'Folder(id: $id, name: $name, ownerID: $ownerID, deviceFolder: $deviceFolder, sharedWith: $sharedWith, updationTime: $updationTime)';
   }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,
-      'owner': owner,
+      'ownerID': ownerID,
       'deviceFolder': deviceFolder,
       'sharedWith': sharedWith.toList(),
       'updationTime': updationTime,

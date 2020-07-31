@@ -24,6 +24,7 @@ class UserAuthenticator {
       if (response.statusCode == 200 && response.data != null) {
         Configuration.instance.setUsername(username);
         Configuration.instance.setPassword(password);
+        Configuration.instance.setUserID(response.data["id"]);
         Configuration.instance.setToken(response.data["token"]);
         Bus.instance.fire(UserAuthenticatedEvent());
         return true;

@@ -14,7 +14,7 @@ class FoldersDB {
 
   static final columnId = 'id';
   static final columnName = 'name';
-  static final columnOwner = 'owner';
+  static final columnOwnerID = 'owner_id';
   static final columnDeviceFolder = 'device_folder';
   static final columnSharedWith = 'shared_with';
   static final columnUpdationTime = 'updation_time';
@@ -41,11 +41,11 @@ class FoldersDB {
           CREATE TABLE $table (
             $columnId INTEGER PRIMARY KEY NOT NULL,
             $columnName TEXT NOT NULL,
-            $columnOwner TEXT NOT NULL,
+            $columnOwnerID INTEGER NOT NULL,
             $columnDeviceFolder TEXT NOT NULL,
             $columnSharedWith TEXT NOT NULL,
             $columnUpdationTime INTEGER NOT NULL,
-            UNIQUE($columnOwner, $columnDeviceFolder)
+            UNIQUE($columnOwnerID, $columnDeviceFolder)
           )
           ''');
   }
@@ -86,7 +86,7 @@ class FoldersDB {
     final row = new Map<String, dynamic>();
     row[columnId] = folder.id;
     row[columnName] = folder.name;
-    row[columnOwner] = folder.owner;
+    row[columnOwnerID] = folder.ownerID;
     row[columnDeviceFolder] = folder.deviceFolder;
     row[columnSharedWith] = jsonEncode(folder.sharedWith.toList());
     row[columnUpdationTime] = folder.updationTime;
@@ -97,7 +97,7 @@ class FoldersDB {
     return Folder(
       row[columnId],
       row[columnName],
-      row[columnOwner],
+      row[columnOwnerID],
       row[columnDeviceFolder],
       (jsonDecode(row[columnSharedWith]) as List<dynamic>)
           .cast<String>()

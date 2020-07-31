@@ -7,6 +7,7 @@ class Configuration {
   static const _endpointKey = "endpoint_7";
   static const _tokenKey = "token";
   static const _usernameKey = "username";
+  static const _userIDKey = "user_id";
   static const _passwordKey = "password";
 
   SharedPreferences _preferences;
@@ -44,6 +45,14 @@ class Configuration {
 
   void setUsername(String username) async {
     await _preferences.setString(_usernameKey, username);
+  }
+
+  int getUserID() {
+    return _preferences.getInt(_userIDKey);
+  }
+
+  void setUserID(int userID) async {
+    await _preferences.setInt(_userIDKey, userID);
   }
 
   String getPassword() {
