@@ -27,7 +27,10 @@ class CircularNetworkImageWidget extends StatelessWidget {
           ),
         ),
       ),
-      placeholder: (context, url) => loadWidget,
+      placeholder: (context, url) => Container(
+        width: _size,
+        child: loadWidget,
+      ),
     );
   }
 }
