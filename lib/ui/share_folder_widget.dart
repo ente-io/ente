@@ -112,6 +112,7 @@ class _SharingWidgetState extends State<SharingWidget> {
           progressDialog.show();
           Future.delayed(Duration(milliseconds: 1000), () {
             progressDialog.hide();
+            showToast("Shared with " + s + " successfully.");
             setState(() {
               _emails.add(s);
               _showEntryField = false;
