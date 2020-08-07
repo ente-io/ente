@@ -69,7 +69,7 @@ void _sendErrorToSentry(SentryClient sentry, Object error, StackTrace stack) {
 }
 
 class MyApp extends StatelessWidget with WidgetsBindingObserver {
-  final _title = 'Photos';
+  final _title = 'ente';
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addObserver(this);
