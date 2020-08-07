@@ -160,8 +160,8 @@ class FolderSharingService {
       final users = (response.data["users"] as List).toList();
       final result = Map<int, bool>();
       for (final user in users) {
-        if (user != Configuration.instance.getUsername()) {
-          result[user] = folder.sharedWith.contains(user);
+        if (user["id"] != Configuration.instance.getUserID()) {
+          result[user["id"]] = folder.sharedWith.contains(user["id"]);
         }
       }
       return result;
@@ -169,7 +169,6 @@ class FolderSharingService {
   }
 
   Future<void> updateFolder(Folder folder) {
-    log("Updating folder: " + folder.toString());
     return _dio
         .put(Configuration.instance.getHttpEndpoint() + "/folders/",
             options: Options(
