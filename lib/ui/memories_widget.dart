@@ -18,7 +18,8 @@ class MemoriesWidget extends StatefulWidget {
   _MemoriesWidgetState createState() => _MemoriesWidgetState();
 }
 
-class _MemoriesWidgetState extends State<MemoriesWidget> {
+class _MemoriesWidgetState extends State<MemoriesWidget>
+    with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     MemoriesService.instance.addListener(() {
@@ -28,7 +29,11 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return FutureBuilder<List<Memory>>(
       future: MemoriesService.instance.getMemories(),
       builder: (context, snapshot) {
@@ -294,7 +299,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       },
       itemCount: widget.memories.length,
       controller: _pageController,
-      extents: 2,
+      extents: 1,
       onPageChanged: (index) async {
         await MemoriesService.instance.markMemoryAsSeen(widget.memories[index]);
         setState(() {

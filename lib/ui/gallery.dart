@@ -76,6 +76,7 @@ class _GalleryState extends State<Gallery> {
 
   @override
   Widget build(BuildContext context) {
+    _logger.info("Building");
     if (!_requiresLoad) {
       return _onDataLoaded();
     }
@@ -114,7 +115,8 @@ class _GalleryState extends State<Gallery> {
           _collatedFiles.length + (widget.headerWidget == null ? 1 : 2), // h4ck
       itemBuilder: _buildListItem,
       controller: _scrollController,
-      cacheExtent: 1000,
+      cacheExtent: 1500,
+      addAutomaticKeepAlives: true,
     );
     if (widget.onRefresh != null) {
       return SmartRefresher(
