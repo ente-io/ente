@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
-import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/favorite_files_repository.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/file_type.dart';
@@ -117,7 +116,6 @@ class _DetailPageState extends State<DetailPage> {
     final actions = List<Widget>();
     if (_files[_selectedIndex].localId != null) {
       actions.add(_getFavoriteButton());
-      actions.add(_getDeleteButton());
     }
     actions.add(PopupMenuButton(
       itemBuilder: (context) {
@@ -145,6 +143,18 @@ class _DetailPageState extends State<DetailPage> {
                 Text("Info"),
               ],
             ),
+          ),
+          PopupMenuItem(
+            value: 3,
+            child: Row(
+              children: [
+                Icon(Icons.delete),
+                Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text("Delete"),
+              ],
+            ),
           )
         ];
       },
@@ -153,6 +163,8 @@ class _DetailPageState extends State<DetailPage> {
           share(context, _files[_selectedIndex]);
         } else if (value == 2) {
           _displayInfo(_files[_selectedIndex]);
+        } else if (value == 3) {
+          _showDeleteSheet();
         }
       },
     ));
@@ -176,16 +188,6 @@ class _DetailPageState extends State<DetailPage> {
           color: isLiked ? Colors.pinkAccent : Colors.white,
           size: 30,
         );
-      },
-    );
-  }
-
-  Widget _getDeleteButton() {
-    return IconButton(
-      icon: Icon(Icons.delete_outline),
-      iconSize: 30,
-      onPressed: () {
-        _showDeleteSheet();
       },
     );
   }
