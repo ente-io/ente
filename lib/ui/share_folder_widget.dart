@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -112,7 +110,7 @@ class _SharingWidgetState extends State<SharingWidget> {
           progressDialog.show();
           Future.delayed(Duration(milliseconds: 1000), () {
             progressDialog.hide();
-            showToast("Shared with " + s + " successfully.");
+            showToast("Shared with " + s + ".");
             setState(() {
               _emails.add(s);
               _showEntryField = false;
