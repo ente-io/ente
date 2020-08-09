@@ -51,7 +51,7 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.photo.localId == null) {
+    if (widget.photo.localID == null) {
       _loadNetworkImage();
     } else {
       _loadLocalImage(context);

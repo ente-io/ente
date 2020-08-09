@@ -86,7 +86,7 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
           .compareTo(first.thumbnail.creationTime);
     });
     if (FavoriteFilesRepository.instance.hasFavorites()) {
-      final file = await FilesDB.instance.getLatestFileAmongGeneratedIds(
+      final file = await FilesDB.instance.getLatestFileAmongGeneratedIDs(
           FavoriteFilesRepository.instance.getLiked().toList());
       folders.insert(0,
           DeviceFolder("Favorites", "/Favorites", file, FavoriteItemsFilter()));

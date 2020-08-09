@@ -16,7 +16,7 @@ class FavoriteFilesRepository {
   }
 
   bool isLiked(File photo) {
-    return getLiked().contains(photo.generatedId.toString());
+    return getLiked().contains(photo.generatedID.toString());
   }
 
   bool hasFavorites() {
@@ -26,9 +26,9 @@ class FavoriteFilesRepository {
   Future<bool> setLiked(File photo, bool isLiked) {
     final liked = getLiked();
     if (isLiked) {
-      liked.add(photo.generatedId.toString());
+      liked.add(photo.generatedID.toString());
     } else {
-      liked.remove(photo.generatedId.toString());
+      liked.remove(photo.generatedID.toString());
     }
     Bus.instance.fire(LocalPhotosUpdatedEvent());
     return _preferences

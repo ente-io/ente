@@ -69,9 +69,9 @@ class FolderSharingService {
     for (File file in diff) {
       try {
         var existingPhoto =
-            await FilesDB.instance.getMatchingRemoteFile(file.uploadedFileId);
+            await FilesDB.instance.getMatchingRemoteFile(file.uploadedFileID);
         await FilesDB.instance.update(
-            existingPhoto.generatedId, file.uploadedFileId, file.updationTime);
+            existingPhoto.generatedID, file.uploadedFileID, file.updationTime);
       } catch (e) {
         await FilesDB.instance.insert(file);
       }
@@ -97,8 +97,8 @@ class FolderSharingService {
     if (response != null) {
       return (response.data["diff"] as List).map((p) {
         File file = new File.fromJson(p);
-        file.localId = null;
-        file.remoteFolderId = folderId;
+        file.localID = null;
+        file.remoteFolderID = folderId;
         return file;
       }).toList();
     } else {

@@ -57,7 +57,7 @@ class MemoriesService extends ChangeNotifier {
     final memories = List<Memory>();
     for (final file in files) {
       if (filter.shouldInclude(file)) {
-        final seenTime = seenTimes[file.generatedId] ?? -1;
+        final seenTime = seenTimes[file.generatedID] ?? -1;
         memories.add(Memory(file, seenTime));
       }
     }

@@ -55,7 +55,7 @@ class FaceSearchManager {
     for (File file in result) {
       try {
         files.add(await FilesDB.instance.getMatchingFile(
-            file.localId,
+            file.localID,
             file.title,
             file.deviceFolder,
             file.creationTime,

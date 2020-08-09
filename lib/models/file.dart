@@ -10,12 +10,13 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 
 class File {
-  int generatedId;
-  int uploadedFileId;
-  String localId;
+  int generatedID;
+  int uploadedFileID;
+  int ownerID;
+  String localID;
   String title;
   String deviceFolder;
-  int remoteFolderId;
+  int remoteFolderID;
   int creationTime;
   int modificationTime;
   int updationTime;
@@ -24,8 +25,9 @@ class File {
 
   File();
   File.fromJson(Map<String, dynamic> json) {
-    uploadedFileId = json["id"];
-    localId = json["deviceFileID"];
+    uploadedFileID = json["id"];
+    ownerID = json["ownerID"];
+    localID = json["deviceFileID"];
     deviceFolder = json["deviceFolder"];
     title = json["title"];
     fileType = getFileType(json["fileType"]);
@@ -37,7 +39,7 @@ class File {
   static Future<File> fromAsset(
       AssetPathEntity pathEntity, AssetEntity asset) async {
     File file = File();
-    file.localId = asset.id;
+    file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = pathEntity.name;
     file.location = Location(asset.latitude, asset.longitude);
@@ -70,11 +72,11 @@ class File {
   }
 
   Future<AssetEntity> getAsset() {
-    return AssetEntity.fromId(localId);
+    return AssetEntity.fromId(localID);
   }
 
   Future<Uint8List> getBytes({int quality = 100}) async {
-    if (localId == null) {
+    if (localID == null) {
       return HttpClient().getUrl(Uri.parse(getDownloadUrl())).then((request) {
         return request.close().then((response) {
           return consolidateHttpClientResponseBytes(response);
@@ -98,7 +100,7 @@ class File {
   String getDownloadUrl() {
     return Configuration.instance.getHttpEndpoint() +
         "/files/download/" +
-        uploadedFileId.toString() +
+        uploadedFileID.toString() +
         "?token=" +
         Configuration.instance.getToken();
   }
@@ -109,22 +111,22 @@ class File {
         "/streams/" +
         Configuration.instance.getToken() +
         "/" +
-        uploadedFileId.toString() +
+        uploadedFileID.toString() +
         "/index.m3u8";
   }
 
   String getThumbnailUrl() {
     return Configuration.instance.getHttpEndpoint() +
         "/files/preview/" +
-        uploadedFileId.toString() +
+        uploadedFileID.toString() +
         "?token=" +
         Configuration.instance.getToken();
   }
 
   @override
   String toString() {
-    return '''File(generatedId: $generatedId, uploadedFileId: $uploadedFileId, 
-      localId: $localId, title: $title, deviceFolder: $deviceFolder, 
+    return '''File(generatedId: $generatedID, uploadedFileId: $uploadedFileID, 
+      localId: $localID, title: $title, deviceFolder: $deviceFolder, 
       location: $location, fileType: $fileType, creationTime: $creationTime, 
       modificationTime: $modificationTime, updationTime: $updationTime)''';
   }
@@ -134,22 +136,22 @@ class File {
     if (identical(this, o)) return true;
 
     return o is File &&
-        o.generatedId == generatedId &&
-        o.uploadedFileId == uploadedFileId &&
-        o.localId == localId;
+        o.generatedID == generatedID &&
+        o.uploadedFileID == uploadedFileID &&
+        o.localID == localID;
   }
 
   @override
   int get hashCode {
-    return generatedId.hashCode ^ uploadedFileId.hashCode ^ localId.hashCode;
+    return generatedID.hashCode ^ uploadedFileID.hashCode ^ localID.hashCode;
   }
 
   String tag() {
     return "local_" +
-        localId.toString() +
+        localID.toString() +
         ":remote_" +
-        uploadedFileId.toString() +
+        uploadedFileID.toString() +
         ":generated_" +
-        generatedId.toString();
+        generatedID.toString();
   }
 }

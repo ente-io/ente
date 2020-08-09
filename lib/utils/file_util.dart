@@ -9,7 +9,7 @@ import 'package:photos/models/file_type.dart';
 Future<void> deleteFiles(List<File> files,
     {bool deleteEveryWhere = false}) async {
   await PhotoManager.editor
-      .deleteWithIds(files.map((file) => file.localId).toList());
+      .deleteWithIds(files.map((file) => file.localID).toList());
   for (File file in files) {
     deleteEveryWhere
         ? await FilesDB.instance.markForDeletion(file)
@@ -21,7 +21,7 @@ void preloadFile(File file) {
   if (file.fileType == FileType.video) {
     return;
   }
-  if (file.localId == null) {
+  if (file.localID == null) {
     if (BytesLruCache.get(file) == null) {
       file.getBytes().then((data) {
         BytesLruCache.put(file, data);
@@ -39,7 +39,7 @@ void preloadFile(File file) {
 }
 
 void preloadLocalFileThumbnail(File file) {
-  if (file.localId == null ||
+  if (file.localID == null ||
       ThumbnailLruCache.get(file, THUMBNAIL_SMALL_SIZE) != null) {
     return;
   }

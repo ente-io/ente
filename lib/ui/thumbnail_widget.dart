@@ -34,7 +34,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.file.localId == null) {
+    if (widget.file.localID == null) {
       return _getNetworkImage();
     }
 
@@ -120,7 +120,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   @override
   void didUpdateWidget(ThumbnailWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.file.generatedId != oldWidget.file.generatedId) {
+    if (widget.file.generatedID != oldWidget.file.generatedID) {
       setState(() {
         _hasLoadedThumbnail = false;
         _imageProvider = null;

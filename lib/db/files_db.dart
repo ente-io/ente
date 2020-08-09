@@ -16,15 +16,16 @@ class FilesDB {
 
   static final table = 'files';
 
-  static final columnGeneratedId = '_id';
-  static final columnUploadedFileId = 'uploaded_file_id';
-  static final columnLocalId = 'local_id';
+  static final columnGeneratedID = '_id';
+  static final columnUploadedFileID = 'uploaded_file_id';
+  static final columnOwnerID = 'owner_id';
+  static final columnLocalID = 'local_id';
   static final columnTitle = 'title';
   static final columnDeviceFolder = 'device_folder';
   static final columnLatitude = 'latitude';
   static final columnLongitude = 'longitude';
   static final columnFileType = 'file_type';
-  static final columnRemoteFolderId = 'remote_folder_id';
+  static final columnRemoteFolderID = 'remote_folder_id';
   static final columnIsDeleted = 'is_deleted';
   static final columnCreationTime = 'creation_time';
   static final columnModificationTime = 'modification_time';
@@ -55,15 +56,16 @@ class FilesDB {
   Future _onCreate(Database db, int version) async {
     await db.execute('''
           CREATE TABLE $table (
-            $columnGeneratedId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-            $columnLocalId TEXT,
-            $columnUploadedFileId INTEGER,
+            $columnGeneratedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            $columnLocalID TEXT,
+            $columnUploadedFileID INTEGER,
+            $columnOwnerID INTEGER,
             $columnTitle TEXT NOT NULL,
             $columnDeviceFolder TEXT NOT NULL,
             $columnLatitude REAL,
             $columnLongitude REAL,
             $columnFileType INTEGER,
-            $columnRemoteFolderId INTEGER,
+            $columnRemoteFolderID INTEGER,
             $columnIsDeleted INTEGER DEFAULT 0,
             $columnCreationTime TEXT NOT NULL,
             $columnModificationTime TEXT NOT NULL,
@@ -92,11 +94,17 @@ class FilesDB {
     return await batch.commit();
   }
 
-  Future<List<File>> getAllLocalFiles() async {
+  Future<List<File>> getOwnedFiles(int ownerID) async {
     final db = await instance.database;
+    final whereArgs = List<dynamic>();
+    if (ownerID != null) {
+      whereArgs.add(ownerID);
+    }
     final results = await db.query(
       table,
-      where: '$columnLocalId IS NOT NULL AND $columnIsDeleted = 0',
+      // where: '$columnIsDeleted = 0' +
+      //     (ownerID == null ? '' : ' AND $columnOwnerID = ?'),
+      // whereArgs: whereArgs,
       orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
@@ -107,20 +115,20 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnLocalId IS NOT NULL AND $columnFileType = 1 AND $columnIsDeleted = 0',
+          '$columnLocalID IS NOT NULL AND $columnFileType = 1 AND $columnIsDeleted = 0',
       orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
   }
 
   Future<List<File>> getAllInFolder(
-      int folderId, int beforeCreationTime, int limit) async {
+      int folderID, int beforeCreationTime, int limit) async {
     final db = await instance.database;
     final results = await db.query(
       table,
       where:
-          '$columnRemoteFolderId = ? AND $columnIsDeleted = 0 AND $columnCreationTime < ?',
-      whereArgs: [folderId, beforeCreationTime],
+          '$columnRemoteFolderID = ? AND $columnIsDeleted = 0 AND $columnCreationTime < ?',
+      whereArgs: [folderID, beforeCreationTime],
       orderBy: '$columnCreationTime DESC',
       limit: limit,
     );
@@ -154,22 +162,22 @@ class FilesDB {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where: '$columnUploadedFileId IS NULL',
+      where: '$columnUploadedFileID IS NULL',
       orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
   }
 
-  Future<File> getMatchingFile(String localId, String title,
+  Future<File> getMatchingFile(String localID, String title,
       String deviceFolder, int creationTime, int modificationTime,
       {String alternateTitle}) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '''$columnLocalId=? AND ($columnTitle=? OR $columnTitle=?) AND 
+      where: '''$columnLocalID=? AND ($columnTitle=? OR $columnTitle=?) AND 
           $columnDeviceFolder=? AND $columnCreationTime=? AND $columnModificationTime=?''',
       whereArgs: [
-        localId,
+        localID,
         title,
         alternateTitle,
         deviceFolder,
@@ -184,12 +192,12 @@ class FilesDB {
     }
   }
 
-  Future<File> getMatchingRemoteFile(int uploadedFileId) async {
+  Future<File> getMatchingRemoteFile(int uploadedFileID) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '$columnUploadedFileId=?',
-      whereArgs: [uploadedFileId],
+      where: '$columnUploadedFileID=?',
+      whereArgs: [uploadedFileID],
     );
     if (rows.isNotEmpty) {
       return _getFileFromRow(rows[0]);
@@ -198,16 +206,16 @@ class FilesDB {
     }
   }
 
-  Future<int> update(int generatedId, int uploadedId, int updationTime) async {
+  Future<int> update(int generatedID, int uploadedID, int updationTime) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
-    values[columnUploadedFileId] = uploadedId;
+    values[columnUploadedFileID] = uploadedID;
     values[columnUpdationTime] = updationTime;
     return await db.update(
       table,
       values,
-      where: '$columnGeneratedId = ?',
-      whereArgs: [generatedId],
+      where: '$columnGeneratedID = ?',
+      whereArgs: [generatedID],
     );
   }
 
@@ -219,8 +227,8 @@ class FilesDB {
     return db.update(
       table,
       values,
-      where: '$columnGeneratedId =?',
-      whereArgs: [file.generatedId],
+      where: '$columnGeneratedID =?',
+      whereArgs: [file.generatedID],
     );
   }
 
@@ -228,17 +236,17 @@ class FilesDB {
     final db = await instance.database;
     return db.delete(
       table,
-      where: '$columnGeneratedId =?',
-      whereArgs: [file.generatedId],
+      where: '$columnGeneratedID =?',
+      whereArgs: [file.generatedID],
     );
   }
 
-  Future<int> deleteFilesInRemoteFolder(int folderId) async {
+  Future<int> deleteFilesInRemoteFolder(int folderID) async {
     final db = await instance.database;
     return db.delete(
       table,
-      where: '$columnRemoteFolderId =?',
-      whereArgs: [folderId],
+      where: '$columnRemoteFolderID =?',
+      whereArgs: [folderID],
     );
   }
 
@@ -248,7 +256,7 @@ class FilesDB {
       table,
       columns: [columnDeviceFolder],
       distinct: true,
-      where: '$columnRemoteFolderId IS NULL',
+      where: '$columnRemoteFolderID IS NULL',
     );
     List<String> result = List<String>();
     for (final row in rows) {
@@ -273,50 +281,50 @@ class FilesDB {
     }
   }
 
-  Future<File> getLatestFileInRemoteFolder(int folderId) async {
+  Future<File> getLatestFileInRemoteFolder(int folderID) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '$columnRemoteFolderId =?',
-      whereArgs: [folderId],
+      where: '$columnRemoteFolderID =?',
+      whereArgs: [folderID],
       orderBy: '$columnCreationTime DESC',
       limit: 1,
     );
     if (rows.isNotEmpty) {
       return _getFileFromRow(rows[0]);
     } else {
-      throw ("No file found in remote folder " + folderId.toString());
+      throw ("No file found in remote folder " + folderID.toString());
     }
   }
 
-  Future<File> getLastSyncedFileInRemoteFolder(int folderId) async {
+  Future<File> getLastSyncedFileInRemoteFolder(int folderID) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '$columnRemoteFolderId =?',
-      whereArgs: [folderId],
+      where: '$columnRemoteFolderID =?',
+      whereArgs: [folderID],
       orderBy: '$columnUpdationTime DESC',
       limit: 1,
     );
     if (rows.isNotEmpty) {
       return _getFileFromRow(rows[0]);
     } else {
-      throw ("No file found in remote folder " + folderId.toString());
+      throw ("No file found in remote folder " + folderID.toString());
     }
   }
 
-  Future<File> getLatestFileAmongGeneratedIds(List<String> generatedIds) async {
+  Future<File> getLatestFileAmongGeneratedIDs(List<String> generatedIDs) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '$columnGeneratedId IN (${generatedIds.join(",")})',
+      where: '$columnGeneratedID IN (${generatedIDs.join(",")})',
       orderBy: '$columnCreationTime DESC',
       limit: 1,
     );
     if (rows.isNotEmpty) {
       return _getFileFromRow(rows[0]);
     } else {
-      throw ("No file found with ids " + generatedIds.join(", ").toString());
+      throw ("No file found with ids " + generatedIDs.join(", ").toString());
     }
   }
 
@@ -330,8 +338,9 @@ class FilesDB {
 
   Map<String, dynamic> _getRowForFile(File file) {
     final row = new Map<String, dynamic>();
-    row[columnLocalId] = file.localId;
-    row[columnUploadedFileId] = file.uploadedFileId;
+    row[columnLocalID] = file.localID;
+    row[columnUploadedFileID] = file.uploadedFileID;
+    row[columnOwnerID] = file.ownerID;
     row[columnTitle] = file.title;
     row[columnDeviceFolder] = file.deviceFolder;
     if (file.location != null) {
@@ -348,7 +357,7 @@ class FilesDB {
       default:
         row[columnFileType] = -1;
     }
-    row[columnRemoteFolderId] = file.remoteFolderId;
+    row[columnRemoteFolderID] = file.remoteFolderID;
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
@@ -357,16 +366,17 @@ class FilesDB {
 
   File _getFileFromRow(Map<String, dynamic> row) {
     final file = File();
-    file.generatedId = row[columnGeneratedId];
-    file.localId = row[columnLocalId];
-    file.uploadedFileId = row[columnUploadedFileId];
+    file.generatedID = row[columnGeneratedID];
+    file.localID = row[columnLocalID];
+    file.uploadedFileID = row[columnUploadedFileID];
+    file.ownerID = row[columnUploadedFileID];
     file.title = row[columnTitle];
     file.deviceFolder = row[columnDeviceFolder];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {
       file.location = Location(row[columnLatitude], row[columnLongitude]);
     }
     file.fileType = getFileType(row[columnFileType]);
-    file.remoteFolderId = row[columnRemoteFolderId];
+    file.remoteFolderID = row[columnRemoteFolderID];
     file.creationTime = int.parse(row[columnCreationTime]);
     file.modificationTime = int.parse(row[columnModificationTime]);
     file.updationTime = row[columnUpdationTime] == null

@@ -182,7 +182,7 @@ class PhotoSyncManager {
       _logger.info("Uploading " + file.toString());
       try {
         final uploadedFile = await _uploadFile(file);
-        await _db.update(file.generatedId, uploadedFile.uploadedFileId,
+        await _db.update(file.generatedID, uploadedFile.uploadedFileID,
             uploadedFile.updationTime);
         _prefs.setInt(_lastSyncTimeKey, uploadedFile.updationTime);
 
@@ -199,15 +199,16 @@ class PhotoSyncManager {
     for (File file in diff) {
       try {
         final existingPhoto = await _db.getMatchingFile(
-            file.localId,
+            file.localID,
             file.title,
             file.deviceFolder,
             file.creationTime,
             file.modificationTime,
             alternateTitle: getHEICFileNameForJPG(file));
         await _db.update(
-            existingPhoto.generatedId, file.uploadedFileId, file.updationTime);
+            existingPhoto.generatedID, file.uploadedFileID, file.updationTime);
       } catch (e) {
+        file.localID = null; // File uploaded from a different device
         await _db.insert(file);
       }
       await _prefs.setInt(_lastSyncTimeKey, file.updationTime);
@@ -241,7 +242,7 @@ class PhotoSyncManager {
       "file": MultipartFile.fromFileSync(
           (await (await localPhoto.getAsset()).originFile).path,
           filename: title),
-      "deviceFileID": localPhoto.localId,
+      "deviceFileID": localPhoto.localID,
       "deviceFolder": localPhoto.deviceFolder,
       "title": title,
       "creationTime": localPhoto.creationTime,
@@ -273,7 +274,7 @@ class PhotoSyncManager {
         .delete(
           Configuration.instance.getHttpEndpoint() +
               "/files/" +
-              file.uploadedFileId.toString(),
+              file.uploadedFileID.toString(),
           options: Options(
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         )

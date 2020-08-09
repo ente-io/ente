@@ -36,7 +36,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.file.localId == null) {
+    if (widget.file.localID == null) {
       _setVideoPlayerController(widget.file.getStreamUrl());
       _videoPlayerController.addListener(() {
         if (_videoPlayerController.value.hasError) {
@@ -104,7 +104,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   Widget _getThumbnail() {
-    final thumbnail = widget.file.localId == null
+    final thumbnail = widget.file.localID == null
         ? CachedNetworkImage(
             imageUrl: widget.file.getThumbnailUrl(),
             fit: BoxFit.contain,

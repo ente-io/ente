@@ -66,7 +66,7 @@ class MemoriesDB {
 
   Map<String, dynamic> _getRowForSeenMemory(Memory memory, int timestamp) {
     var row = new Map<String, dynamic>();
-    row[columnFileID] = memory.file.generatedId;
+    row[columnFileID] = memory.file.generatedID;
     row[columnSeenTime] = timestamp;
     return row;
   }
