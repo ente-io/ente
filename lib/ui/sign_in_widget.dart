@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/user_authenticator.dart';
 
 class SignInWidget extends StatefulWidget {
@@ -80,6 +82,7 @@ class _SignInWidgetState extends State<SignInWidget> {
                       _usernameController.text, _passwordController.text);
                   if (userCreated) {
                     Navigator.of(context).pop();
+                    _showSelectEncryptionLevelDialog();
                   } else {
                     _showGenericErrorDialog();
                   }
@@ -233,6 +236,113 @@ class _SignInWidgetState extends State<SignInWidget> {
           ],
         );
       },
+    );
+  }
+
+  void _showSelectEncryptionLevelDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return SelectEncryptionLevelWidget();
+      },
+    );
+  }
+}
+
+class SelectEncryptionLevelWidget extends StatelessWidget {
+  const SelectEncryptionLevelWidget({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoAlertDialog(
+      title: Text('Choose encryption level'),
+      content: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+        child: Column(
+          children: [
+            Text('Would you like to enable end-to-end encryption?'),
+            Padding(padding: EdgeInsets.all(8)),
+            Text(
+                'This will mean you will not be able to use features like search and sharing.'),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        CupertinoDialogAction(
+          child: Text('Use E2E encryption'),
+          onPressed: () {
+            Navigator.of(context).pop();
+            _showEnterPassphraseDialog(context);
+          },
+        ),
+        CupertinoDialogAction(
+          child: Text("Use encryption at rest"),
+          onPressed: () {
+            Navigator.of(context).pop();
+            Bus.instance.fire(UserAuthenticatedEvent());
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showEnterPassphraseDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return PassphraseWidget();
+      },
+    );
+  }
+}
+
+class PassphraseWidget extends StatefulWidget {
+  const PassphraseWidget({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  _PassphraseWidgetState createState() => _PassphraseWidgetState();
+}
+
+class _PassphraseWidgetState extends State<PassphraseWidget> {
+  String _passphrase = "";
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoAlertDialog(
+      title: Text('Enter passphrase'),
+      content: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+        child: Column(
+          children: [
+            Text("Do not forget this passphrase!"),
+            Padding(padding: EdgeInsets.all(8)),
+            CupertinoTextField(
+              autofocus: true,
+              style: Theme.of(context).textTheme.subtitle1,
+              keyboardType: TextInputType.visiblePassword,
+              onChanged: (value) {
+                _passphrase = value;
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        CupertinoDialogAction(
+          child: Text('Save'),
+          onPressed: () {
+            Navigator.of(context).pop();
+            Configuration.instance.generateAndSaveKey(_passphrase);
+            Bus.instance.fire(UserAuthenticatedEvent());
+          },
+        )
+      ],
     );
   }
 }

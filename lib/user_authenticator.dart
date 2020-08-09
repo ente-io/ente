@@ -42,7 +42,6 @@ class UserAuthenticator {
     }).then((response) {
       if (response.statusCode == 200 && response.data != null) {
         _saveConfiguration(username, password, response);
-        Bus.instance.fire(UserAuthenticatedEvent());
         return true;
       } else {
         if (response.data != null && response.data["message"] != null) {
