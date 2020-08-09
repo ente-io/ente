@@ -103,8 +103,8 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
             child: Hero(
                 tag: "device_folder:" + folder.path + folder.thumbnail.tag(),
                 child: ThumbnailWidget(folder.thumbnail)),
-            height: 150,
-            width: 150,
+            height: 140,
+            width: 140,
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
