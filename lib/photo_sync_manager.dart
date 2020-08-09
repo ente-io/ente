@@ -96,10 +96,8 @@ class PhotoSyncManager {
     files.sort(
         (first, second) => first.creationTime.compareTo(second.creationTime));
 
-    if (files.isNotEmpty) {
-      await _updateDatabase(files, lastDBUpdationTime, syncStartTime);
-      await FileRepository.instance.reloadFiles();
-    }
+    await _insertFilesToDB(files, syncStartTime);
+    await FileRepository.instance.reloadFiles();
     await _syncWithRemote();
   }
 
@@ -153,17 +151,6 @@ class PhotoSyncManager {
     await _downloadDiff();
     await _uploadDiff();
     await _deletePhotosOnServer();
-  }
-
-  Future<bool> _updateDatabase(final List<File> files, int lastDBUpdationTime,
-      int syncStartTimestamp) async {
-    final filesToBeAdded = List<File>();
-    for (File file in files) {
-      if (file.creationTime > lastDBUpdationTime) {
-        filesToBeAdded.add(file);
-      }
-    }
-    return await _insertFilesToDB(filesToBeAdded, syncStartTimestamp);
   }
 
   Future<void> _downloadDiff() async {
