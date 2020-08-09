@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/sync_indicator.dart';
@@ -104,7 +105,7 @@ class _GalleryState extends State<Gallery> {
   Widget _onDataLoaded() {
     _logger.info("Loaded " + _files.length.toString());
     if (_files.isEmpty) {
-      return Center(child: Text("Nothing to see here! 👀"));
+      return nothingToSeeHere;
     }
     _collateFiles();
     _scrollController = ScrollController(
@@ -157,6 +158,9 @@ class _GalleryState extends State<Gallery> {
         return widget.headerWidget;
       }
       fileIndex--;
+    }
+    if (fileIndex < 0 || fileIndex >= _collatedFiles.length) {
+      return Container();
     }
     var files = _collatedFiles[fileIndex];
     return Column(

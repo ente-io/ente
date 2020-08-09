@@ -9,6 +9,7 @@ import 'package:photos/db/folders_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/folder.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/remote_folder_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -42,7 +43,7 @@ class _RemoteFolderGalleryWidgetState extends State<RemoteFolderGalleryWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data.isEmpty) {
-            return Center(child: Text("Nothing to see here! 👀"));
+            return nothingToSeeHere;
           } else {
             return _getRemoteFolderGalleryWidget(snapshot.data);
           }

@@ -10,6 +10,7 @@ import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/filters/favorite_items_filter.dart';
 import 'package:photos/models/filters/folder_name_filter.dart';
 import 'package:photos/models/filters/video_file_filter.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/device_folder_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -36,10 +37,13 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<List<DeviceFolder>>(
       future: _getDeviceFolders(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          if (snapshot.data.length == 0) {
+            return nothingToSeeHere;
+          }
           return _getDeviceFolderGalleryWidget(snapshot.data);
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
