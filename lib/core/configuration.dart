@@ -5,12 +5,12 @@ class Configuration {
   Configuration._privateConstructor();
   static final Configuration instance = Configuration._privateConstructor();
 
-  static const _endpointKey = "endpoint_7";
-  static const _tokenKey = "token";
-  static const _usernameKey = "username";
-  static const _userIDKey = "user_id";
-  static const _passwordKey = "password";
-  static const _keyKey = "key";
+  static const endpointKey = "endpoint";
+  static const tokenKey = "token";
+  static const usernameKey = "username";
+  static const userIDKey = "user_id";
+  static const passwordKey = "password";
+  static const keyKey = "key";
 
   SharedPreferences _preferences;
 
@@ -19,7 +19,7 @@ class Configuration {
   }
 
   String getEndpoint() {
-    return _preferences.getString(_endpointKey);
+    return _preferences.getString(endpointKey);
   }
 
   String getHttpEndpoint() {
@@ -30,48 +30,48 @@ class Configuration {
   }
 
   void setEndpoint(String endpoint) async {
-    await _preferences.setString(_endpointKey, endpoint);
+    await _preferences.setString(endpointKey, endpoint);
   }
 
   String getToken() {
-    return _preferences.getString(_tokenKey);
+    return _preferences.getString(tokenKey);
   }
 
   void setToken(String token) async {
-    await _preferences.setString(_tokenKey, token);
+    await _preferences.setString(tokenKey, token);
   }
 
   String getUsername() {
-    return _preferences.getString(_usernameKey);
+    return _preferences.getString(usernameKey);
   }
 
   void setUsername(String username) async {
-    await _preferences.setString(_usernameKey, username);
+    await _preferences.setString(usernameKey, username);
   }
 
   int getUserID() {
-    return _preferences.getInt(_userIDKey);
+    return _preferences.getInt(userIDKey);
   }
 
   void setUserID(int userID) async {
-    await _preferences.setInt(_userIDKey, userID);
+    await _preferences.setInt(userIDKey, userID);
   }
 
   String getPassword() {
-    return _preferences.getString(_passwordKey);
+    return _preferences.getString(passwordKey);
   }
 
   void setPassword(String password) async {
-    await _preferences.setString(_passwordKey, password);
+    await _preferences.setString(passwordKey, password);
   }
 
   void generateAndSaveKey(String passphrase) async {
     final key = CryptoUtil.createCryptoRandomString();
-    await _preferences.setString(_keyKey, CryptoUtil.encrypt(key, passphrase));
+    await _preferences.setString(keyKey, CryptoUtil.encrypt(key, passphrase));
   }
 
   String getKey(String passphrase) {
-    return CryptoUtil.decrypt(_preferences.getString(_keyKey), passphrase);
+    return CryptoUtil.decrypt(_preferences.getString(keyKey), passphrase);
   }
 
   bool hasConfiguredAccount() {
