@@ -1,3 +1,4 @@
+import 'package:photos/utils/crypto_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Configuration {
@@ -9,6 +10,7 @@ class Configuration {
   static const _usernameKey = "username";
   static const _userIDKey = "user_id";
   static const _passwordKey = "password";
+  static const _keyKey = "key";
 
   SharedPreferences _preferences;
 
@@ -61,6 +63,15 @@ class Configuration {
 
   void setPassword(String password) async {
     await _preferences.setString(_passwordKey, password);
+  }
+
+  void generateAndSaveKey(String passphrase) async {
+    final key = CryptoUtil.createCryptoRandomString();
+    await _preferences.setString(_keyKey, CryptoUtil.encrypt(key, passphrase));
+  }
+
+  String getKey(String passphrase) {
+    return CryptoUtil.decrypt(_preferences.getString(_keyKey), passphrase);
   }
 
   bool hasConfiguredAccount() {
