@@ -338,9 +338,9 @@ class _PassphraseWidgetState extends State<PassphraseWidget> {
       actions: <Widget>[
         CupertinoDialogAction(
           child: Text('Save'),
-          onPressed: () {
+          onPressed: () async {
             Navigator.of(context).pop();
-            Configuration.instance.generateAndSaveKey(_passphrase);
+            await Configuration.instance.generateAndSaveKey(_passphrase);
             Bus.instance.fire(UserAuthenticatedEvent());
           },
         )

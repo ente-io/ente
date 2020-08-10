@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:convert';
+import 'dart:io' as io;
 import 'dart:math';
 
 import 'package:logging/logging.dart';
@@ -11,6 +12,7 @@ import 'package:photos/file_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_name_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
@@ -26,6 +28,7 @@ class PhotoSyncManager {
   bool _isSyncInProgress = false;
   Future<void> _existingSync;
   SharedPreferences _prefs;
+  String _encryptedFilesDirectory;
 
   static final _lastSyncTimeKey = "last_sync_time";
   static final _lastDBUpdationTimeKey = "last_db_updation_time";
@@ -76,8 +79,8 @@ class PhotoSyncManager {
     var lastDBUpdationTime = _prefs.getInt(_lastDBUpdationTimeKey);
     if (lastDBUpdationTime == null) {
       lastDBUpdationTime = 0;
-      await _initializeDirectories();
     }
+    await _initializeDirectories();
 
     final pathEntities =
         await _getGalleryList(lastDBUpdationTime, syncStartTime);
@@ -181,7 +184,12 @@ class PhotoSyncManager {
       }
       _logger.info("Uploading " + file.toString());
       try {
-        final uploadedFile = await _uploadFile(file);
+        var uploadedFile;
+        if (Configuration.instance.hasOptedForE2E()) {
+          uploadedFile = await _uploadEncryptedFile(file);
+        } else {
+          uploadedFile = await _uploadFile(file);
+        }
         await _db.update(file.generatedID, uploadedFile.uploadedFileID,
             uploadedFile.updationTime);
         _prefs.setInt(_lastSyncTimeKey, uploadedFile.updationTime);
@@ -236,6 +244,42 @@ class PhotoSyncManager {
     }
   }
 
+  Future<File> _uploadEncryptedFile(File file) async {
+    final filePath = (await (await file.getAsset()).originFile).path;
+    final encryptedFileName = file.generatedID.toString() + ".aes";
+    final encryptedFilePath = _encryptedFilesDirectory + encryptedFileName;
+    final fileIV = CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
+    final key = Configuration.instance.getKey("hello");
+    await CryptoUtil.encryptFile(filePath, encryptedFilePath, key, fileIV);
+
+    final metadata = jsonEncode(file.getMetadata());
+    final metadataIV =
+        CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
+    final encryptedMetadata = CryptoUtil.encrypt(metadata, key, metadataIV);
+    final formData = FormData.fromMap({
+      "file": MultipartFile.fromFileSync(encryptedFilePath,
+          filename: encryptedFileName),
+      "fileIV": fileIV,
+      "metadata": encryptedMetadata,
+      "metadataIV": metadataIV,
+    });
+    return _dio
+        .post(
+      Configuration.instance.getHttpEndpoint() + "/encrypted-files",
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      data: formData,
+    )
+        .then((response) {
+      io.File(encryptedFilePath).deleteSync();
+      final data = response.data;
+      file.uploadedFileID = data["id"];
+      file.updationTime = data["updationTime"];
+      file.ownerID = data["ownerID"];
+      return file;
+    });
+  }
+
   Future<File> _uploadFile(File localPhoto) async {
     final title = getJPGFileNameForHEIC(localPhoto);
     final formData = FormData.fromMap({
@@ -283,8 +327,8 @@ class PhotoSyncManager {
 
   Future _initializeDirectories() async {
     final externalPath = (await getApplicationDocumentsDirectory()).path;
-    new Directory(externalPath + "/photos/thumbnails")
-        .createSync(recursive: true);
+    _encryptedFilesDirectory = externalPath + "/encrypted/files/";
+    new io.Directory(_encryptedFilesDirectory).createSync(recursive: true);
   }
 
   Future<bool> _insertFilesToDB(List<File> files, int timestamp) async {

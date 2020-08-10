@@ -1,4 +1,3 @@
-import 'package:encrypt/encrypt.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -75,13 +74,13 @@ class Configuration {
     return _preferences.getBool(hasOptedForE2EKey);
   }
 
-  void generateAndSaveKey(String passphrase) async {
-    final key = SecureRandom(32).base64;
-    await _preferences.setString(keyKey, CryptoUtil.encrypt(key, passphrase));
+  Future<void> generateAndSaveKey(String passphrase) async {
+    final key = CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
+    await _preferences.setString(keyKey, key);
   }
 
   String getKey(String passphrase) {
-    return CryptoUtil.decrypt(_preferences.getString(keyKey), passphrase);
+    return _preferences.getString(keyKey);
   }
 
   bool hasConfiguredAccount() {

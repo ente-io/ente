@@ -97,6 +97,19 @@ class File {
     }
   }
 
+  Map<String, dynamic> getMetadata() {
+    final metadata = Map<String, dynamic>();
+    metadata["localID"] = localID;
+    metadata["title"] = title;
+    metadata["deviceFolder"] = deviceFolder;
+    metadata["creationTime"] = creationTime;
+    metadata["modificationTime"] = modificationTime;
+    metadata["latitude"] = location.latitude;
+    metadata["longitude"] = location.longitude;
+    metadata["fileType"] = fileType.index;
+    return metadata;
+  }
+
   String getDownloadUrl() {
     return Configuration.instance.getHttpEndpoint() +
         "/files/download/" +
