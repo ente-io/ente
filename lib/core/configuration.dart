@@ -1,3 +1,4 @@
+import 'package:encrypt/encrypt.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -75,7 +76,7 @@ class Configuration {
   }
 
   void generateAndSaveKey(String passphrase) async {
-    final key = CryptoUtil.createCryptoRandomString();
+    final key = SecureRandom(32).base64;
     await _preferences.setString(keyKey, CryptoUtil.encrypt(key, passphrase));
   }
 
