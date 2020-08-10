@@ -275,6 +275,7 @@ class SelectEncryptionLevelWidget extends StatelessWidget {
           child: Text('Use E2E encryption'),
           onPressed: () {
             Navigator.of(context).pop();
+            Configuration.instance.setOptInForE2E(true);
             _showEnterPassphraseDialog(context);
           },
         ),
@@ -282,6 +283,7 @@ class SelectEncryptionLevelWidget extends StatelessWidget {
           child: Text("Use encryption at rest"),
           onPressed: () {
             Navigator.of(context).pop();
+            Configuration.instance.setOptInForE2E(false);
             Bus.instance.fire(UserAuthenticatedEvent());
           },
         ),

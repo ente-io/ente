@@ -10,6 +10,7 @@ class Configuration {
   static const usernameKey = "username";
   static const userIDKey = "user_id";
   static const passwordKey = "password";
+  static const hasOptedForE2EKey = "has_opted_for_e2e_encryption";
   static const keyKey = "key";
 
   SharedPreferences _preferences;
@@ -63,6 +64,14 @@ class Configuration {
 
   void setPassword(String password) async {
     await _preferences.setString(passwordKey, password);
+  }
+
+  void setOptInForE2E(bool hasOptedForE2E) async {
+    await _preferences.setBool(hasOptedForE2EKey, hasOptedForE2E);
+  }
+
+  bool hasOptedForE2E() {
+    return _preferences.getBool(hasOptedForE2EKey);
   }
 
   void generateAndSaveKey(String passphrase) async {
