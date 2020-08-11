@@ -31,8 +31,9 @@ class PhotoSyncManager {
   SharedPreferences _prefs;
   String _encryptedFilesDirectory;
 
-  static final _lastSyncTimeKey = "last_sync_time";
-  static final _lastDBUpdationTimeKey = "last_db_updation_time";
+  static final _syncTimeKey = "sync_time";
+  static final _encryptedFilesSyncTimeKey = "encrypted_files_sync_time";
+  static final _dbUpdationTimeKey = "db_updation_time";
   static final _diffLimit = 100;
 
   PhotoSyncManager._privateConstructor() {
@@ -68,7 +69,7 @@ class PhotoSyncManager {
   }
 
   bool hasScannedDisk() {
-    return _prefs.containsKey(_lastDBUpdationTimeKey);
+    return _prefs.containsKey(_dbUpdationTimeKey);
   }
 
   Future<void> _doSync() async {
@@ -77,7 +78,7 @@ class PhotoSyncManager {
       _logger.severe("Did not get permission");
     }
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
-    var lastDBUpdationTime = _prefs.getInt(_lastDBUpdationTimeKey);
+    var lastDBUpdationTime = _prefs.getInt(_dbUpdationTimeKey);
     if (lastDBUpdationTime == null) {
       lastDBUpdationTime = 0;
     }
@@ -153,14 +154,15 @@ class PhotoSyncManager {
       return Future.error("Account not configured yet");
     }
     await _downloadDiff();
+    await _downloadEncryptedFilesDiff();
     await _uploadDiff();
     await _deletePhotosOnServer();
   }
 
   Future<void> _downloadDiff() async {
-    final diff = await _getDiff(_getLastSyncTimestamp(), _diffLimit);
+    final diff = await _getDiff(_getSyncTime(), _diffLimit);
     if (diff != null && diff.isNotEmpty) {
-      await _storeDiff(diff);
+      await _storeDiff(diff, _syncTimeKey);
       FileRepository.instance.reloadFiles();
       if (diff.length == _diffLimit) {
         return await _downloadDiff();
@@ -168,12 +170,32 @@ class PhotoSyncManager {
     }
   }
 
-  int _getLastSyncTimestamp() {
-    var lastSyncTimestamp = _prefs.getInt(_lastSyncTimeKey);
-    if (lastSyncTimestamp == null) {
-      lastSyncTimestamp = 0;
+  int _getSyncTime() {
+    var syncTime = _prefs.getInt(_syncTimeKey);
+    if (syncTime == null) {
+      syncTime = 0;
     }
-    return lastSyncTimestamp;
+    return syncTime;
+  }
+
+  Future<void> _downloadEncryptedFilesDiff() async {
+    final diff =
+        await _getEncryptedFilesDiff(_getEncryptedFilesSyncTime(), _diffLimit);
+    if (diff != null && diff.isNotEmpty) {
+      await _storeDiff(diff, _encryptedFilesSyncTimeKey);
+      FileRepository.instance.reloadFiles();
+      if (diff.length == _diffLimit) {
+        return await _downloadEncryptedFilesDiff();
+      }
+    }
+  }
+
+  int _getEncryptedFilesSyncTime() {
+    var syncTime = _prefs.getInt(_encryptedFilesSyncTimeKey);
+    if (syncTime == null) {
+      syncTime = 0;
+    }
+    return syncTime;
   }
 
   Future<void> _uploadDiff() async {
@@ -193,7 +215,7 @@ class PhotoSyncManager {
         }
         await _db.update(file.generatedID, uploadedFile.uploadedFileID,
             uploadedFile.updationTime);
-        _prefs.setInt(_lastSyncTimeKey, uploadedFile.updationTime);
+        _prefs.setInt(_syncTimeKey, uploadedFile.updationTime);
 
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: photosToBeUploaded.length));
@@ -204,7 +226,7 @@ class PhotoSyncManager {
     }
   }
 
-  Future _storeDiff(List<File> diff) async {
+  Future _storeDiff(List<File> diff, String prefKey) async {
     for (File file in diff) {
       try {
         final existingPhoto = await _db.getMatchingFile(
@@ -220,7 +242,7 @@ class PhotoSyncManager {
         file.localID = null; // File uploaded from a different device
         await _db.insert(file);
       }
-      await _prefs.setInt(_lastSyncTimeKey, file.updationTime);
+      await _prefs.setInt(prefKey, file.updationTime);
     }
   }
 
@@ -245,14 +267,43 @@ class PhotoSyncManager {
     }
   }
 
+  Future<List<File>> _getEncryptedFilesDiff(int lastSyncTime, int limit) async {
+    Response response = await _dio.get(
+      Configuration.instance.getHttpEndpoint() + "/encrypted-files/diff",
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      queryParameters: {
+        "sinceTimestamp": lastSyncTime,
+        "limit": limit,
+      },
+    ).catchError((e) => _logger.severe(e));
+    if (response != null) {
+      Bus.instance.fire(RemoteSyncEvent(true));
+      return (response.data["diff"] as List).map((json) {
+        final file = File();
+        file.uploadedFileID = json["id"];
+        file.ownerID = json["ownerID"];
+        file.updationTime = json["updationTime"];
+        Map<String, dynamic> metadata = jsonDecode(CryptoUtil.decryptFromBase64(
+            json["metadata"],
+            Configuration.instance.getKey(),
+            json["metadataIV"]));
+        file.applyMetadata(metadata);
+        return file;
+      }).toList();
+    } else {
+      Bus.instance.fire(RemoteSyncEvent(false));
+      return null;
+    }
+  }
+
   Future<File> _uploadEncryptedFile(File file) async {
-    final key = Configuration.instance.getKey("hello");
+    final key = Configuration.instance.getKey();
 
     final filePath = (await (await file.getAsset()).originFile).path;
     final encryptedFileName = file.generatedID.toString() + ".aes";
     final encryptedFilePath = _encryptedFilesDirectory + encryptedFileName;
-    final fileIV = CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
-    await CryptoUtil.encryptFile(filePath, encryptedFilePath, key, fileIV);
+    await CryptoUtil.encryptFileToFile(filePath, encryptedFilePath, key);
 
     final thumbnailData = (await (await file.getAsset())
         .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE));
@@ -260,25 +311,23 @@ class PhotoSyncManager {
         file.generatedID.toString() + "_thumbnail.aes";
     final encryptedThumbnailPath =
         _encryptedFilesDirectory + encryptedThumbnailName;
-    final thumbnailIV =
-        CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
-    await CryptoUtil.encryptData(
-        thumbnailData, encryptedThumbnailPath, key, thumbnailIV);
+    await CryptoUtil.encryptDataToFile(
+        thumbnailData, encryptedThumbnailPath, key);
 
     final metadata = jsonEncode(file.getMetadata());
     final metadataIV =
         CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
-    final encryptedMetadata = CryptoUtil.encrypt(metadata, key, metadataIV);
+    final encryptedMetadata =
+        CryptoUtil.encryptToBase64(metadata, key, metadataIV);
     final formData = FormData.fromMap({
       "file": MultipartFile.fromFileSync(encryptedFilePath,
           filename: encryptedFileName),
-      "fileIV": fileIV,
       "thumbnail": MultipartFile.fromFileSync(encryptedThumbnailPath,
           filename: encryptedThumbnailName),
-      "thumbnailIV": thumbnailIV,
       "metadata": encryptedMetadata,
       "metadataIV": metadataIV,
     });
+
     return _dio
         .post(
       Configuration.instance.getHttpEndpoint() + "/encrypted-files",
@@ -288,6 +337,7 @@ class PhotoSyncManager {
     )
         .then((response) {
       io.File(encryptedFilePath).deleteSync();
+      io.File(encryptedThumbnailPath).deleteSync();
       final data = response.data;
       file.uploadedFileID = data["id"];
       file.updationTime = data["updationTime"];
@@ -350,6 +400,6 @@ class PhotoSyncManager {
   Future<bool> _insertFilesToDB(List<File> files, int timestamp) async {
     await _db.insertMultiple(files);
     _logger.info("Inserted " + files.length.toString() + " files.");
-    return await _prefs.setInt(_lastDBUpdationTimeKey, timestamp);
+    return await _prefs.setInt(_dbUpdationTimeKey, timestamp);
   }
 }

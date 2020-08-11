@@ -79,7 +79,9 @@ class Configuration {
     await _preferences.setString(keyKey, key);
   }
 
-  String getKey(String passphrase) {
+  // TODO: Encrypt with a passphrase and store in secure storage
+  String getKey() {
+    // return "hello";
     return _preferences.getString(keyKey);
   }
 

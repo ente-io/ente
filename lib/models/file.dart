@@ -8,6 +8,7 @@ import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
+import 'package:photos/utils/crypto_util.dart';
 
 class File {
   int generatedID;
@@ -24,6 +25,7 @@ class File {
   FileType fileType;
 
   File();
+
   File.fromJson(Map<String, dynamic> json) {
     uploadedFileID = json["id"];
     ownerID = json["ownerID"];
@@ -95,6 +97,18 @@ class File {
         return originalBytes;
       }
     }
+  }
+
+  void applyMetadata(Map<String, dynamic> metadata) {
+    localID = metadata["localID"];
+    title = metadata["title"];
+    deviceFolder = metadata["deviceFolder"];
+    creationTime = metadata["creationTime"];
+    modificationTime = metadata["modificationTime"];
+    final latitude = metadata["latitude"];
+    final longitude = metadata["longitude"];
+    location = Location(latitude, longitude);
+    fileType = getFileType(metadata["fileType"]);
   }
 
   Map<String, dynamic> getMetadata() {
