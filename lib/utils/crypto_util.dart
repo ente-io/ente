@@ -19,7 +19,6 @@ class CryptoUtil {
     return encrypter.decrypt(Encrypted.fromBase64(cipherText));
   }
 
-  // Encrypts a file and returns the IV that was used
   static Future<void> encryptFile(String sourcePath, String destinationPath,
       String base64Key, String base64IV) async {
     final encrypter = AesCrypt("hello");
@@ -27,5 +26,14 @@ class CryptoUtil {
         IV.fromBase64(base64IV).bytes, AesMode.cbc);
     encrypter.setOverwriteMode(AesCryptOwMode.on);
     await encrypter.encryptFile(sourcePath, destinationPath);
+  }
+
+  static Future<void> encryptData(Uint8List source, String destinationPath,
+      String base64Key, String base64IV) async {
+    final encrypter = AesCrypt("hello");
+    encrypter.aesSetParams(Key.fromBase64(base64Key).bytes,
+        IV.fromBase64(base64IV).bytes, AesMode.cbc);
+    encrypter.setOverwriteMode(AesCryptOwMode.on);
+    await encrypter.encryptDataToFile(source, destinationPath);
   }
 }

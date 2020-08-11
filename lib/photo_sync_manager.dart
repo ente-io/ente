@@ -4,6 +4,7 @@ import 'dart:io' as io;
 import 'dart:math';
 
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/photo_upload_event.dart';
@@ -245,12 +246,24 @@ class PhotoSyncManager {
   }
 
   Future<File> _uploadEncryptedFile(File file) async {
+    final key = Configuration.instance.getKey("hello");
+
     final filePath = (await (await file.getAsset()).originFile).path;
     final encryptedFileName = file.generatedID.toString() + ".aes";
     final encryptedFilePath = _encryptedFilesDirectory + encryptedFileName;
     final fileIV = CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
-    final key = Configuration.instance.getKey("hello");
     await CryptoUtil.encryptFile(filePath, encryptedFilePath, key, fileIV);
+
+    final thumbnailData = (await (await file.getAsset())
+        .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE));
+    final encryptedThumbnailName =
+        file.generatedID.toString() + "_thumbnail.aes";
+    final encryptedThumbnailPath =
+        _encryptedFilesDirectory + encryptedThumbnailName;
+    final thumbnailIV =
+        CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
+    await CryptoUtil.encryptData(
+        thumbnailData, encryptedThumbnailPath, key, thumbnailIV);
 
     final metadata = jsonEncode(file.getMetadata());
     final metadataIV =
@@ -260,6 +273,9 @@ class PhotoSyncManager {
       "file": MultipartFile.fromFileSync(encryptedFilePath,
           filename: encryptedFileName),
       "fileIV": fileIV,
+      "thumbnail": MultipartFile.fromFileSync(encryptedThumbnailPath,
+          filename: encryptedThumbnailName),
+      "thumbnailIV": thumbnailIV,
       "metadata": encryptedMetadata,
       "metadataIV": metadataIV,
     });
