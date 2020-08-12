@@ -38,17 +38,20 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var image;
     if (widget.file.localID == null) {
-      return _getNetworkImage();
+      image = _getNetworkImage();
+    } else {
+      _loadLocalImage(context);
+      if (_imageProvider != null) {
+        image = Image(
+          image: _imageProvider,
+          fit: widget.fit,
+        );
+      }
     }
-
-    _loadLocalImage(context);
     var content;
-    if (_imageProvider != null) {
-      final image = Image(
-        image: _imageProvider,
-        fit: widget.fit,
-      );
+    if (image != null) {
       if (widget.file.fileType == FileType.video) {
         content = Stack(
           children: [
