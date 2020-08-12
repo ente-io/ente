@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/cache/image_cache.dart';
 import 'dart:io' as io;
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/configuration.dart';
@@ -124,11 +125,18 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         fit: BoxFit.cover,
       );
     } else {
+      if (FileLruCache.get(widget.file) != null) {
+        return Image.file(
+          FileLruCache.get(widget.file),
+          fit: widget.fit,
+        );
+      }
       final thumbnailPath = Configuration.instance.getThumbnailsDirectory() +
           widget.file.generatedID.toString() +
           ".jpg";
       final thumbnailFile = io.File(thumbnailPath);
       if (thumbnailFile.existsSync()) {
+        FileLruCache.put(widget.file, thumbnailFile);
         return Image.file(
           thumbnailFile,
           fit: widget.fit,
@@ -149,7 +157,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           future: decryptedFileFuture,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              // TODO: Cache data
+              FileLruCache.put(widget.file, snapshot.data);
               return Image.file(
                 snapshot.data,
                 fit: widget.fit,
