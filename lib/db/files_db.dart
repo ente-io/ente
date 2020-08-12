@@ -26,6 +26,7 @@ class FilesDB {
   static final columnLongitude = 'longitude';
   static final columnFileType = 'file_type';
   static final columnRemoteFolderID = 'remote_folder_id';
+  static final columnIsEncrypted = 'is_encrypted';
   static final columnIsDeleted = 'is_deleted';
   static final columnCreationTime = 'creation_time';
   static final columnModificationTime = 'modification_time';
@@ -66,6 +67,7 @@ class FilesDB {
             $columnLongitude REAL,
             $columnFileType INTEGER,
             $columnRemoteFolderID INTEGER,
+            $columnIsEncrypted INTEGER DEFAULT 0,
             $columnIsDeleted INTEGER DEFAULT 0,
             $columnCreationTime TEXT NOT NULL,
             $columnModificationTime TEXT NOT NULL,
@@ -357,6 +359,7 @@ class FilesDB {
       default:
         row[columnFileType] = -1;
     }
+    row[columnIsEncrypted] = file.isEncrypted ? 1 : 0;
     row[columnRemoteFolderID] = file.remoteFolderID;
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
@@ -377,6 +380,7 @@ class FilesDB {
     }
     file.fileType = getFileType(row[columnFileType]);
     file.remoteFolderID = row[columnRemoteFolderID];
+    file.isEncrypted = int.parse(row[columnIsEncrypted]) == 1;
     file.creationTime = int.parse(row[columnCreationTime]);
     file.modificationTime = int.parse(row[columnModificationTime]);
     file.updationTime = row[columnUpdationTime] == null

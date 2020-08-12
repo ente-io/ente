@@ -8,7 +8,6 @@ import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
-import 'package:photos/utils/crypto_util.dart';
 
 class File {
   int generatedID;
@@ -18,6 +17,7 @@ class File {
   String title;
   String deviceFolder;
   int remoteFolderID;
+  bool isEncrypted;
   int creationTime;
   int modificationTime;
   int updationTime;

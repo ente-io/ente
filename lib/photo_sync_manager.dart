@@ -284,6 +284,7 @@ class PhotoSyncManager {
         file.uploadedFileID = json["id"];
         file.ownerID = json["ownerID"];
         file.updationTime = json["updationTime"];
+        file.isEncrypted = true;
         Map<String, dynamic> metadata = jsonDecode(CryptoUtil.decryptFromBase64(
             json["metadata"],
             Configuration.instance.getKey(),
