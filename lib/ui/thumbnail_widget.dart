@@ -1,12 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'dart:io' as io;
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/file.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -109,12 +113,54 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   Widget _getNetworkImage() {
-    return CachedNetworkImage(
-      imageUrl: widget.file.getThumbnailUrl(),
-      placeholder: (context, url) => loadWidget,
-      errorWidget: (context, url, error) => Icon(Icons.error),
-      fit: BoxFit.cover,
-    );
+    if (!widget.file.isEncrypted) {
+      return CachedNetworkImage(
+        imageUrl: widget.file.getThumbnailUrl(),
+        placeholder: (context, url) => loadWidget,
+        errorWidget: (context, url, error) => Icon(Icons.error),
+        fit: BoxFit.cover,
+      );
+    } else {
+      final thumbnailPath = Configuration.instance.getThumbnailsDirectory() +
+          widget.file.generatedID.toString() +
+          ".jpg";
+      final thumbnailFile = io.File(thumbnailPath);
+      if (thumbnailFile.existsSync()) {
+        return Image.file(
+          thumbnailFile,
+          fit: widget.fit,
+        );
+      } else {
+        final temporaryPath = Configuration.instance.getTempDirectory() +
+            widget.file.generatedID.toString() +
+            "_thumbnail.aes";
+        final decryptedFileFuture = Dio()
+            .download(widget.file.getThumbnailUrl(), temporaryPath)
+            .then((_) async {
+          await CryptoUtil.decryptFileToFile(
+              temporaryPath, thumbnailPath, Configuration.instance.getKey());
+          io.File(temporaryPath).deleteSync();
+          return io.File(thumbnailPath);
+        });
+        return FutureBuilder<io.File>(
+          future: decryptedFileFuture,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              // TODO: Cache data
+              return Image.file(
+                snapshot.data,
+                fit: widget.fit,
+              );
+            } else if (snapshot.hasError) {
+              _logger.warning(snapshot.error);
+              return Text(snapshot.error.toString());
+            } else {
+              return loadingWidget;
+            }
+          },
+        );
+      }
+    }
   }
 
   @override

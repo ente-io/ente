@@ -10,7 +10,6 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/file_repository.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -29,7 +28,6 @@ class PhotoSyncManager {
   bool _isSyncInProgress = false;
   Future<void> _existingSync;
   SharedPreferences _prefs;
-  String _encryptedFilesDirectory;
 
   static final _syncTimeKey = "sync_time";
   static final _encryptedFilesSyncTimeKey = "encrypted_files_sync_time";
@@ -82,7 +80,6 @@ class PhotoSyncManager {
     if (lastDBUpdationTime == null) {
       lastDBUpdationTime = 0;
     }
-    await _initializeDirectories();
 
     final pathEntities =
         await _getGalleryList(lastDBUpdationTime, syncStartTime);
@@ -303,15 +300,15 @@ class PhotoSyncManager {
 
     final filePath = (await (await file.getAsset()).originFile).path;
     final encryptedFileName = file.generatedID.toString() + ".aes";
-    final encryptedFilePath = _encryptedFilesDirectory + encryptedFileName;
+    final tempDirectory = Configuration.instance.getTempDirectory();
+    final encryptedFilePath = tempDirectory + encryptedFileName;
     await CryptoUtil.encryptFileToFile(filePath, encryptedFilePath, key);
 
     final thumbnailData = (await (await file.getAsset())
         .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE));
     final encryptedThumbnailName =
         file.generatedID.toString() + "_thumbnail.aes";
-    final encryptedThumbnailPath =
-        _encryptedFilesDirectory + encryptedThumbnailName;
+    final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
     await CryptoUtil.encryptDataToFile(
         thumbnailData, encryptedThumbnailPath, key);
 
@@ -390,12 +387,6 @@ class PhotoSyncManager {
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         )
         .catchError((e) => _logger.severe(e));
-  }
-
-  Future _initializeDirectories() async {
-    final externalPath = (await getApplicationDocumentsDirectory()).path;
-    _encryptedFilesDirectory = externalPath + "/encrypted/files/";
-    new io.Directory(_encryptedFilesDirectory).createSync(recursive: true);
   }
 
   Future<bool> _insertFilesToDB(List<File> files, int timestamp) async {

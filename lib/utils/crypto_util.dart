@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:aes_crypt/aes_crypt.dart';
@@ -33,23 +34,28 @@ class CryptoUtil {
 
   static Future<void> encryptFileToFile(
       String sourcePath, String destinationPath, String key) async {
-    final encrypter = _getEncrypter(key);
+    final encrypter = getEncrypter(key);
     await encrypter.encryptFile(sourcePath, destinationPath);
   }
 
   static Future<void> encryptDataToFile(
       Uint8List source, String destinationPath, String key) async {
-    final encrypter = _getEncrypter(key);
+    final encrypter = getEncrypter(key);
     await encrypter.encryptDataToFile(source, destinationPath);
   }
 
   static Future<void> decryptFileToFile(
       String sourcePath, String destinationPath, String key) async {
-    final encrypter = _getEncrypter(key);
+    final encrypter = getEncrypter(key);
     await encrypter.decryptFile(sourcePath, destinationPath);
   }
 
-  static AesCrypt _getEncrypter(String key) {
+  static Future<Uint8List> decryptFileToData(String sourcePath, String key) {
+    final encrypter = getEncrypter(key);
+    return encrypter.decryptDataFromFile(sourcePath);
+  }
+
+  static AesCrypt getEncrypter(String key) {
     final encrypter = AesCrypt(key);
     encrypter.aesSetMode(AesMode.cbc);
     encrypter.setOverwriteMode(AesCryptOwMode.on);

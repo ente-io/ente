@@ -1,3 +1,5 @@
+import 'dart:io' as io;
+import 'package:path_provider/path_provider.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,9 +16,17 @@ class Configuration {
   static const keyKey = "key";
 
   SharedPreferences _preferences;
+  String _documentsDirectory;
+  String _tempDirectory;
+  String _thumbnailsDirectory;
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
+    _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
+    _tempDirectory = _documentsDirectory + "/temp/";
+    _thumbnailsDirectory = _documentsDirectory + "/thumbnails/";
+    new io.Directory(_tempDirectory).createSync(recursive: true);
+    new io.Directory(_thumbnailsDirectory).createSync(recursive: true);
   }
 
   String getEndpoint() {
@@ -71,7 +81,8 @@ class Configuration {
   }
 
   bool hasOptedForE2E() {
-    return _preferences.getBool(hasOptedForE2EKey);
+    return true;
+    // return _preferences.getBool(hasOptedForE2EKey);
   }
 
   Future<void> generateAndSaveKey(String passphrase) async {
@@ -81,8 +92,20 @@ class Configuration {
 
   // TODO: Encrypt with a passphrase and store in secure storage
   String getKey() {
-    // return "hello";
-    return _preferences.getString(keyKey);
+    return "8qD++K3xkgjIl3dIsGiTze5PhYtxiS5AtOeZw+Bl1z0=";
+    // return _preferences.getString(keyKey);
+  }
+
+  String getDocumentsDirectory() {
+    return _documentsDirectory;
+  }
+
+  String getThumbnailsDirectory() {
+    return _thumbnailsDirectory;
+  }
+
+  String getTempDirectory() {
+    return _tempDirectory;
   }
 
   bool hasConfiguredAccount() {
