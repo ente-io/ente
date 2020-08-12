@@ -380,7 +380,7 @@ class FilesDB {
     }
     file.fileType = getFileType(row[columnFileType]);
     file.remoteFolderID = row[columnRemoteFolderID];
-    file.isEncrypted = int.parse(row[columnIsEncrypted]) == 1;
+    file.isEncrypted = row[columnIsEncrypted] == 1;
     file.creationTime = int.parse(row[columnCreationTime]);
     file.modificationTime = int.parse(row[columnModificationTime]);
     file.updationTime = row[columnUpdationTime] == null
