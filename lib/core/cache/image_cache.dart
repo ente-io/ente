@@ -16,6 +16,18 @@ class FileLruCache {
   }
 }
 
+class ThumbnailFileLruCache {
+  static LRUMap<String, dart.File> _map = LRUMap(500);
+
+  static dart.File get(File file) {
+    return _map.get(file.tag());
+  }
+
+  static void put(File file, dart.File imageData) {
+    _map.put(file.tag(), imageData);
+  }
+}
+
 class BytesLruCache {
   static LRUMap<String, Uint8List> _map = LRUMap(25);
 
