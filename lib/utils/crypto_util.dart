@@ -1,9 +1,10 @@
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:aes_crypt/aes_crypt.dart';
 import 'package:encrypt/encrypt.dart';
 import 'dart:convert';
+
+import 'package:flutter/foundation.dart' as foundation;
 
 class CryptoUtil {
   static String getBase64EncodedSecureRandomString({int length = 32}) {
@@ -32,33 +33,64 @@ class CryptoUtil {
         .toList());
   }
 
-  static Future<void> encryptFileToFile(
+  static Future<String> encryptFileToFile(
       String sourcePath, String destinationPath, String key) async {
-    final encrypter = getEncrypter(key);
-    await encrypter.encryptFile(sourcePath, destinationPath);
+    final args = Map<String, String>();
+    args["key"] = key;
+    args["source"] = sourcePath;
+    args["destination"] = destinationPath;
+    return foundation.compute(runEncryptFileToFile, args);
   }
 
-  static Future<void> encryptDataToFile(
+  static Future<String> encryptDataToFile(
       Uint8List source, String destinationPath, String key) async {
-    final encrypter = getEncrypter(key);
-    await encrypter.encryptDataToFile(source, destinationPath);
+    final args = Map<String, dynamic>();
+    args["key"] = key;
+    args["source"] = source;
+    args["destination"] = destinationPath;
+    return foundation.compute(runEncryptDataToFile, args);
   }
 
   static Future<void> decryptFileToFile(
       String sourcePath, String destinationPath, String key) async {
-    final encrypter = getEncrypter(key);
-    await encrypter.decryptFile(sourcePath, destinationPath);
+    final args = Map<String, String>();
+    args["key"] = key;
+    args["source"] = sourcePath;
+    args["destination"] = destinationPath;
+    return foundation.compute(runDecryptFileToFile, args);
   }
 
   static Future<Uint8List> decryptFileToData(String sourcePath, String key) {
-    final encrypter = getEncrypter(key);
-    return encrypter.decryptDataFromFile(sourcePath);
+    final args = Map<String, String>();
+    args["key"] = key;
+    args["source"] = sourcePath;
+    return foundation.compute(runDecryptFileToData, args);
   }
+}
 
-  static AesCrypt getEncrypter(String key) {
-    final encrypter = AesCrypt(key);
-    encrypter.aesSetMode(AesMode.cbc);
-    encrypter.setOverwriteMode(AesCryptOwMode.on);
-    return encrypter;
-  }
+Future<String> runEncryptFileToFile(Map<String, String> args) {
+  final encrypter = getEncrypter(args["key"]);
+  return encrypter.encryptFile(args["source"], args["destination"]);
+}
+
+Future<String> runEncryptDataToFile(Map<String, dynamic> args) {
+  final encrypter = getEncrypter(args["key"]);
+  return encrypter.encryptDataToFile(args["source"], args["destination"]);
+}
+
+Future<String> runDecryptFileToFile(Map<String, dynamic> args) async {
+  final encrypter = getEncrypter(args["key"]);
+  return encrypter.decryptFile(args["source"], args["destination"]);
+}
+
+Future<Uint8List> runDecryptFileToData(Map<String, dynamic> args) async {
+  final encrypter = getEncrypter(args["key"]);
+  return encrypter.decryptDataFromFile(args["source"]);
+}
+
+AesCrypt getEncrypter(String key) {
+  final encrypter = AesCrypt(key);
+  encrypter.aesSetMode(AesMode.cbc);
+  encrypter.setOverwriteMode(AesCryptOwMode.on);
+  return encrypter;
 }
