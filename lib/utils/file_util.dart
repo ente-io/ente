@@ -8,6 +8,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/cache/thumbnail_cache_manager.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -98,6 +99,22 @@ Future<io.File> getFileFromServer(File file) async {
   }
 }
 
+Future<io.File> getThumbnailFromServer(File file) async {
+  if (!file.isEncrypted) {
+    return ThumbnailCacheManager().getSingleFile(file.getThumbnailUrl());
+  } else {
+    return ThumbnailCacheManager()
+        .getFileFromCache(file.getThumbnailUrl())
+        .then((info) {
+      if (info == null) {
+        return _downloadAndDecryptThumbnail(file);
+      } else {
+        return info.file;
+      }
+    });
+  }
+}
+
 Future<io.File> _downloadAndDecrypt(
     File file, BaseCacheManager cacheManager) async {
   final temporaryPath = Configuration.instance.getTempDirectory() +
@@ -108,5 +125,18 @@ Future<io.File> _downloadAndDecrypt(
         temporaryPath, Configuration.instance.getKey());
     io.File(temporaryPath).deleteSync();
     return cacheManager.putFile(file.getDownloadUrl(), data);
+  });
+}
+
+Future<io.File> _downloadAndDecryptThumbnail(File file) async {
+  final temporaryPath = Configuration.instance.getTempDirectory() +
+      file.generatedID.toString() +
+      "_thumbnail.aes";
+  Dio dio = Dio();
+  return dio.download(file.getThumbnailUrl(), temporaryPath).then((_) async {
+    final data = await CryptoUtil.decryptFileToData(
+        temporaryPath, Configuration.instance.getKey());
+    io.File(temporaryPath).deleteSync();
+    return ThumbnailCacheManager().putFile(file.getThumbnailUrl(), data);
   });
 }

@@ -78,10 +78,12 @@ class _ZoomableImageState extends State<ZoomableImage>
   }
 
   void _loadNetworkImage() {
-    if (!_photo.isEncrypted) {
-      _loadUnencryptedThumbnail();
-    } else {
-      _loadEncryptedThumbnail();
+    if (!_loadedSmallThumbnail && !_loadedFinalImage) {
+      _imageProvider = CachedNetworkImageProvider(
+        _photo.getThumbnailUrl(),
+        cacheManager: ThumbnailCacheManager(),
+      );
+      _loadedSmallThumbnail = true;
     }
     if (!_loadedFinalImage) {
       getFileFromServer(_photo).then((file) {
@@ -92,27 +94,6 @@ class _ZoomableImageState extends State<ZoomableImage>
             ).image,
             context);
       });
-    }
-  }
-
-  void _loadUnencryptedThumbnail() {
-    if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      _imageProvider = CachedNetworkImageProvider(
-        _photo.getThumbnailUrl(),
-        cacheManager: ThumbnailCacheManager(),
-      );
-      _loadedSmallThumbnail = true;
-    }
-  }
-
-  void _loadEncryptedThumbnail() {
-    if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      if (ThumbnailFileLruCache.get(_photo) != null) {
-        _imageProvider = Image.file(
-          ThumbnailFileLruCache.get(_photo),
-        ).image;
-        _loadedSmallThumbnail = true;
-      }
     }
   }
 

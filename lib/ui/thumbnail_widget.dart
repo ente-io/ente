@@ -1,19 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:photos/core/cache/image_cache.dart';
-import 'dart:io' as io;
 import 'package:photos/core/cache/thumbnail_cache.dart';
-import 'package:photos/core/cache/thumbnail_cache_manager.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/file.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -36,23 +27,25 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   );
 
   bool _hasLoadedThumbnail = false;
+  bool _isLoadingThumbnail = false;
   bool _encounteredErrorLoadingThumbnail = false;
   ImageProvider _imageProvider;
 
   @override
   Widget build(BuildContext context) {
-    var image;
     if (widget.file.localID == null) {
-      image = _getNetworkImage();
+      _loadNetworkImage();
     } else {
       _loadLocalImage(context);
-      if (_imageProvider != null) {
-        image = Image(
-          image: _imageProvider,
-          fit: widget.fit,
-        );
-      }
     }
+    var image;
+    if (_imageProvider != null) {
+      image = Image(
+        image: _imageProvider,
+        fit: widget.fit,
+      );
+    }
+
     var content;
     if (image != null) {
       if (widget.file.fileType == FileType.video) {
@@ -81,7 +74,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   void _loadLocalImage(BuildContext context) {
-    if (!_hasLoadedThumbnail && !_encounteredErrorLoadingThumbnail) {
+    if (!_hasLoadedThumbnail &&
+        !_encounteredErrorLoadingThumbnail &&
+        !_isLoadingThumbnail) {
+      _isLoadingThumbnail = true;
       final cachedSmallThumbnail =
           ThumbnailLruCache.get(widget.file, THUMBNAIL_SMALL_SIZE);
       if (cachedSmallThumbnail != null) {
@@ -118,62 +114,22 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
   }
 
-  Widget _getNetworkImage() {
-    if (!widget.file.isEncrypted) {
-      return CachedNetworkImage(
-        imageUrl: widget.file.getThumbnailUrl(),
-        placeholder: (context, url) => loadWidget,
-        errorWidget: (context, url, error) => Icon(Icons.error),
-        fit: BoxFit.cover,
-        cacheManager: ThumbnailCacheManager(),
-      );
-    } else {
-      if (ThumbnailFileLruCache.get(widget.file) != null) {
-        return Image.file(
-          ThumbnailFileLruCache.get(widget.file),
-          fit: widget.fit,
-        );
-      }
-      final thumbnailPath = Configuration.instance.getThumbnailsDirectory() +
-          widget.file.generatedID.toString() +
-          ".jpg";
-      final thumbnailFile = io.File(thumbnailPath);
-      if (thumbnailFile.existsSync()) {
-        ThumbnailFileLruCache.put(widget.file, thumbnailFile);
-        return Image.file(
-          thumbnailFile,
-          fit: widget.fit,
-        );
-      } else {
-        final temporaryPath = Configuration.instance.getTempDirectory() +
-            widget.file.generatedID.toString() +
-            "_thumbnail.aes";
-        final decryptedFileFuture = Dio()
-            .download(widget.file.getThumbnailUrl(), temporaryPath)
-            .then((_) async {
-          await CryptoUtil.decryptFileToFile(
-              temporaryPath, thumbnailPath, Configuration.instance.getKey());
-          io.File(temporaryPath).deleteSync();
-          return io.File(thumbnailPath);
+  void _loadNetworkImage() {
+    if (!_hasLoadedThumbnail &&
+        !_encounteredErrorLoadingThumbnail &&
+        !_isLoadingThumbnail) {
+      _isLoadingThumbnail = true;
+      getThumbnailFromServer(widget.file).then((file) {
+        final imageProvider = Image.file(file).image;
+        precacheImage(imageProvider, context).then((value) {
+          if (mounted) {
+            setState(() {
+              _imageProvider = imageProvider;
+              _hasLoadedThumbnail = true;
+            });
+          }
         });
-        return FutureBuilder<io.File>(
-          future: decryptedFileFuture,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              ThumbnailFileLruCache.put(widget.file, snapshot.data);
-              return Image.file(
-                snapshot.data,
-                fit: widget.fit,
-              );
-            } else if (snapshot.hasError) {
-              _logger.warning(snapshot.error);
-              return Text(snapshot.error.toString());
-            } else {
-              return loadingWidget;
-            }
-          },
-        );
-      }
+      });
     }
   }
 
@@ -183,6 +139,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     if (widget.file.generatedID != oldWidget.file.generatedID) {
       setState(() {
         _hasLoadedThumbnail = false;
+        _isLoadingThumbnail = false;
         _imageProvider = null;
       });
     }
