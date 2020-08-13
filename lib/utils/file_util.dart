@@ -32,7 +32,7 @@ void preloadFile(File file) {
     return;
   }
   if (file.localID == null) {
-    _getBytesFromServer(file);
+    getFileFromServer(file);
   } else {
     if (FileLruCache.get(file) == null) {
       file.getAsset().then((asset) {
@@ -60,13 +60,13 @@ void preloadLocalFileThumbnail(File file) {
 
 Future<Uint8List> getBytes(File file, {int quality = 100}) async {
   if (file.localID == null) {
-    return _getBytesFromServer(file);
+    return getFileFromServer(file).then((file) => file.readAsBytesSync());
   } else {
-    return await _getBytesFromDisk(file, quality);
+    return await getBytesFromDisk(file, quality);
   }
 }
 
-Future<Uint8List> _getBytesFromDisk(File file, int quality) async {
+Future<Uint8List> getBytesFromDisk(File file, int quality) async {
   final originalBytes = (await file.getAsset()).originBytes;
   if (extension(file.title) == ".HEIC" || quality != 100) {
     return originalBytes.then((bytes) {
@@ -80,11 +80,9 @@ Future<Uint8List> _getBytesFromDisk(File file, int quality) async {
   }
 }
 
-Future<Uint8List> _getBytesFromServer(File file) async {
+Future<io.File> getFileFromServer(File file) async {
   if (!file.isEncrypted) {
-    return DefaultCacheManager()
-        .getSingleFile(file.getDownloadUrl())
-        .then((file) => file.readAsBytesSync());
+    return DefaultCacheManager().getSingleFile(file.getDownloadUrl());
   } else {
     return DefaultCacheManager()
         .getFileFromCache(file.getDownloadUrl())
@@ -92,13 +90,13 @@ Future<Uint8List> _getBytesFromServer(File file) async {
       if (info == null) {
         return _downloadAndDecrypt(file);
       } else {
-        return info.file.readAsBytesSync();
+        return info.file;
       }
     });
   }
 }
 
-Future<Uint8List> _downloadAndDecrypt(File file) async {
+Future<io.File> _downloadAndDecrypt(File file) async {
   final temporaryPath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       ".aes";
@@ -106,7 +104,6 @@ Future<Uint8List> _downloadAndDecrypt(File file) async {
     final data = await CryptoUtil.decryptFileToData(
         temporaryPath, Configuration.instance.getKey());
     io.File(temporaryPath).deleteSync();
-    DefaultCacheManager().putFile(file.getDownloadUrl(), data);
-    return data;
+    return DefaultCacheManager().putFile(file.getDownloadUrl(), data);
   });
 }

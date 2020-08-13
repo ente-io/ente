@@ -1,19 +1,15 @@
-import 'dart:io' as io;
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/file_util.dart';
 
 class ZoomableImage extends StatefulWidget {
   final File photo;
@@ -82,19 +78,12 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _loadNetworkImage() {
     if (!_photo.isEncrypted) {
-      _loadUnencryptedImage();
+      _loadUnencryptedThumbnail();
     } else {
-      _loadEncryptedImage();
-    }
-  }
-
-  void _loadUnencryptedImage() {
-    if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      _imageProvider = CachedNetworkImageProvider(_photo.getThumbnailUrl());
-      _loadedSmallThumbnail = true;
+      _loadEncryptedThumbnail();
     }
     if (!_loadedFinalImage) {
-      DefaultCacheManager().getSingleFile(_photo.getDownloadUrl()).then((file) {
+      getFileFromServer(_photo).then((file) {
         _onFinalImageLoaded(
             Image.file(
               file,
@@ -105,7 +94,14 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
   }
 
-  void _loadEncryptedImage() {
+  void _loadUnencryptedThumbnail() {
+    if (!_loadedSmallThumbnail && !_loadedFinalImage) {
+      _imageProvider = CachedNetworkImageProvider(_photo.getThumbnailUrl());
+      _loadedSmallThumbnail = true;
+    }
+  }
+
+  void _loadEncryptedThumbnail() {
     if (!_loadedSmallThumbnail && !_loadedFinalImage) {
       if (ThumbnailFileLruCache.get(_photo) != null) {
         _imageProvider = Image.file(
@@ -113,35 +109,6 @@ class _ZoomableImageState extends State<ZoomableImage>
         ).image;
         _loadedSmallThumbnail = true;
       }
-    }
-    if (!_loadedFinalImage) {
-      final url = _photo.getDownloadUrl();
-      DefaultCacheManager().getFileFromCache(url).then((info) {
-        if (info == null) {
-          final temporaryPath = Configuration.instance.getTempDirectory() +
-              _photo.generatedID.toString() +
-              ".aes";
-          Dio().download(url, temporaryPath).then((_) async {
-            final data = await CryptoUtil.decryptFileToData(
-                temporaryPath, Configuration.instance.getKey());
-            io.File(temporaryPath).deleteSync();
-            DefaultCacheManager().putFile(url, data);
-            _onFinalImageLoaded(
-                Image.memory(
-                  data,
-                  gaplessPlayback: true,
-                ).image,
-                context);
-          });
-        } else {
-          _onFinalImageLoaded(
-              Image.memory(
-                info.file.readAsBytesSync(),
-                gaplessPlayback: true,
-              ).image,
-              context);
-        }
-      });
     }
   }
 
