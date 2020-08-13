@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -7,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/ui/video_controls.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -37,16 +37,24 @@ class _VideoWidgetState extends State<VideoWidget> {
   void initState() {
     super.initState();
     if (widget.file.localID == null) {
-      _setVideoPlayerController(widget.file.getStreamUrl());
-      _videoPlayerController.addListener(() {
-        if (_videoPlayerController.value.hasError) {
-          _logger.warning(_videoPlayerController.value.errorDescription);
-          showToast(
-              "The video has not been processed yet. Downloading the original one...",
-              toastLength: Toast.LENGTH_SHORT);
-          _setVideoPlayerController(widget.file.getDownloadUrl());
-        }
-      });
+      if (!widget.file.isEncrypted) {
+        _setVideoPlayerController(widget.file.getStreamUrl());
+        _videoPlayerController.addListener(() {
+          if (_videoPlayerController.value.hasError) {
+            _logger.warning(_videoPlayerController.value.errorDescription);
+            showToast(
+                "The video has not been processed yet. Downloading the original one...",
+                toastLength: Toast.LENGTH_SHORT);
+            _setVideoPlayerController(widget.file.getDownloadUrl());
+          }
+        });
+      } else {
+        showToast("Downloading and decrypting video...",
+            toastLength: Toast.LENGTH_SHORT);
+        getFileFromServer(widget.file).then((file) {
+          _setVideoPlayerController(file.path);
+        });
+      }
     } else {
       widget.file.getAsset().then((asset) {
         asset.getMediaUrl().then((url) {
@@ -104,17 +112,11 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   Widget _getThumbnail() {
-    final thumbnail = widget.file.localID == null
-        ? CachedNetworkImage(
-            imageUrl: widget.file.getThumbnailUrl(),
-            fit: BoxFit.contain,
-          )
-        : ThumbnailWidget(
-            widget.file,
-            fit: BoxFit.contain,
-          );
     return Container(
-      child: thumbnail,
+      child: ThumbnailWidget(
+        widget.file,
+        fit: BoxFit.contain,
+      ),
       constraints: BoxConstraints.expand(),
     );
   }

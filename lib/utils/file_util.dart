@@ -8,6 +8,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/db/files_db.dart';
@@ -81,14 +82,15 @@ Future<Uint8List> getBytesFromDisk(File file, int quality) async {
 }
 
 Future<io.File> getFileFromServer(File file) async {
+  final cacheManager = file.fileType == FileType.video
+      ? VideoCacheManager()
+      : DefaultCacheManager();
   if (!file.isEncrypted) {
-    return DefaultCacheManager().getSingleFile(file.getDownloadUrl());
+    return cacheManager.getSingleFile(file.getDownloadUrl());
   } else {
-    return DefaultCacheManager()
-        .getFileFromCache(file.getDownloadUrl())
-        .then((info) {
+    return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
       if (info == null) {
-        return _downloadAndDecrypt(file);
+        return _downloadAndDecrypt(file, cacheManager);
       } else {
         return info.file;
       }
@@ -96,7 +98,8 @@ Future<io.File> getFileFromServer(File file) async {
   }
 }
 
-Future<io.File> _downloadAndDecrypt(File file) async {
+Future<io.File> _downloadAndDecrypt(
+    File file, BaseCacheManager cacheManager) async {
   final temporaryPath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       ".aes";
@@ -104,6 +107,6 @@ Future<io.File> _downloadAndDecrypt(File file) async {
     final data = await CryptoUtil.decryptFileToData(
         temporaryPath, Configuration.instance.getKey());
     io.File(temporaryPath).deleteSync();
-    return DefaultCacheManager().putFile(file.getDownloadUrl(), data);
+    return cacheManager.putFile(file.getDownloadUrl(), data);
   });
 }
