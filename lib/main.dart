@@ -12,6 +12,7 @@ import 'package:photos/ui/home_widget.dart';
 import 'package:sentry/sentry.dart';
 import 'package:super_logging/super_logging.dart';
 import 'package:logging/logging.dart';
+import 'package:worker_manager/worker_manager.dart';
 
 final logger = Logger("main");
 
@@ -25,6 +26,7 @@ void main() async {
 }
 
 void _main() async {
+  await Executor().warmUp();
   await Configuration.instance.init();
   await PhotoSyncManager.instance.init();
   await MemoriesService.instance.init();

@@ -4,7 +4,7 @@ import 'package:aes_crypt/aes_crypt.dart';
 import 'package:encrypt/encrypt.dart';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' as foundation;
+import 'package:worker_manager/worker_manager.dart';
 
 class CryptoUtil {
   static String getBase64EncodedSecureRandomString({int length = 32}) {
@@ -39,7 +39,8 @@ class CryptoUtil {
     args["key"] = key;
     args["source"] = sourcePath;
     args["destination"] = destinationPath;
-    return foundation.compute(runEncryptFileToFile, args);
+
+    return Executor().execute(arg1: args, fun1: runEncryptFileToFile);
   }
 
   static Future<String> encryptDataToFile(
@@ -48,7 +49,7 @@ class CryptoUtil {
     args["key"] = key;
     args["source"] = source;
     args["destination"] = destinationPath;
-    return foundation.compute(runEncryptDataToFile, args);
+    return Executor().execute(arg1: args, fun1: runEncryptDataToFile);
   }
 
   static Future<void> decryptFileToFile(
@@ -57,14 +58,14 @@ class CryptoUtil {
     args["key"] = key;
     args["source"] = sourcePath;
     args["destination"] = destinationPath;
-    return foundation.compute(runDecryptFileToFile, args);
+    return Executor().execute(arg1: args, fun1: runDecryptFileToFile);
   }
 
   static Future<Uint8List> decryptFileToData(String sourcePath, String key) {
     final args = Map<String, String>();
     args["key"] = key;
     args["source"] = sourcePath;
-    return foundation.compute(runDecryptFileToData, args);
+    return Executor().execute(arg1: args, fun1: runDecryptFileToData);
   }
 }
 

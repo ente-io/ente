@@ -58,6 +58,7 @@ dependencies:
   progress_dialog: ^1.2.4
   animate_do: ^1.7.2
   flutter_cache_manager: ^1.4.1
+  worker_manager: ^3.0.0
 
 dev_dependencies:
   flutter_test:
