@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/file.dart';
@@ -119,6 +120,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_encounteredErrorLoadingThumbnail &&
         !_isLoadingThumbnail) {
       _isLoadingThumbnail = true;
+      final cachedThumbnail = ThumbnailFileLruCache.get(widget.file);
+      if (cachedThumbnail != null) {
+        _imageProvider = Image.file(cachedThumbnail).image;
+        _hasLoadedThumbnail = true;
+        return;
+      }
       getThumbnailFromServer(widget.file).then((file) {
         final imageProvider = Image.file(file).image;
         if (mounted) {

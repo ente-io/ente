@@ -101,14 +101,23 @@ Future<io.File> getFileFromServer(File file) async {
 
 Future<io.File> getThumbnailFromServer(File file) async {
   if (!file.isEncrypted) {
-    return ThumbnailCacheManager().getSingleFile(file.getThumbnailUrl());
+    return ThumbnailCacheManager()
+        .getSingleFile(file.getThumbnailUrl())
+        .then((data) {
+      ThumbnailFileLruCache.put(file, data);
+      return data;
+    });
   } else {
     return ThumbnailCacheManager()
         .getFileFromCache(file.getThumbnailUrl())
         .then((info) {
       if (info == null) {
-        return _downloadAndDecryptThumbnail(file);
+        return _downloadAndDecryptThumbnail(file).then((data) {
+          ThumbnailFileLruCache.put(file, data);
+          return data;
+        });
       } else {
+        ThumbnailFileLruCache.put(file, info.file);
         return info.file;
       }
     });
