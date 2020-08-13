@@ -5,11 +5,12 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/models/file.dart';
 import 'package:path/path.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/file_util.dart';
 
 Future<void> share(BuildContext context, File file) async {
   final dialog = createProgressDialog(context, "Preparing...");
   await dialog.show();
-  final bytes = await file.getBytes();
+  final bytes = await getBytes(file);
   final filename = _getFilename(file.title);
   final ext = extension(file.title);
   final shareExt = file.title.endsWith(".HEIC")
@@ -24,7 +25,7 @@ Future<void> shareMultiple(BuildContext context, List<File> files) async {
   await dialog.show();
   final shareContent = Map<String, Uint8List>();
   for (File file in files) {
-    shareContent[_getFilename(file.title)] = await file.getBytes();
+    shareContent[_getFilename(file.title)] = await getBytes(file);
   }
   await dialog.hide();
   return Share.files("images", shareContent, "*/*");

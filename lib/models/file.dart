@@ -1,8 +1,3 @@
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
@@ -75,28 +70,6 @@ class File {
 
   Future<AssetEntity> getAsset() {
     return AssetEntity.fromId(localID);
-  }
-
-  Future<Uint8List> getBytes({int quality = 100}) async {
-    if (localID == null) {
-      return HttpClient().getUrl(Uri.parse(getDownloadUrl())).then((request) {
-        return request.close().then((response) {
-          return consolidateHttpClientResponseBytes(response);
-        });
-      });
-    } else {
-      final originalBytes = (await getAsset()).originBytes;
-      if (extension(title) == ".HEIC" || quality != 100) {
-        return originalBytes.then((bytes) {
-          return FlutterImageCompress.compressWithList(bytes, quality: quality)
-              .then((converted) {
-            return Uint8List.fromList(converted);
-          });
-        });
-      } else {
-        return originalBytes;
-      }
-    }
   }
 
   void applyMetadata(Map<String, dynamic> metadata) {
