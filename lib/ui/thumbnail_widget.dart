@@ -128,6 +128,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
               _hasLoadedThumbnail = true;
             });
           }
+        }).catchError((e) {
+          _logger.severe("Could not load image " + widget.file.toString());
+          _encounteredErrorLoadingThumbnail = true;
         });
       });
     }
