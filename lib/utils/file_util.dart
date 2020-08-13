@@ -64,11 +64,11 @@ Future<Uint8List> getBytes(File file, {int quality = 100}) async {
   if (file.localID == null) {
     return getFileFromServer(file).then((file) => file.readAsBytesSync());
   } else {
-    return await getBytesFromDisk(file, quality);
+    return await getBytesFromDisk(file, quality: quality);
   }
 }
 
-Future<Uint8List> getBytesFromDisk(File file, int quality) async {
+Future<Uint8List> getBytesFromDisk(File file, {int quality = 100}) async {
   final originalBytes = (await file.getAsset()).originBytes;
   if (extension(file.title) == ".HEIC" || quality != 100) {
     return originalBytes.then((bytes) {
