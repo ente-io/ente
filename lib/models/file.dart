@@ -51,6 +51,7 @@ class File {
         file.fileType = FileType.other;
         break;
     }
+    file.isEncrypted = false;
     file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
     if (file.creationTime == 0) {
       try {
