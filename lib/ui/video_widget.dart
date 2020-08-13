@@ -76,7 +76,9 @@ class _VideoWidgetState extends State<VideoWidget> {
   VideoPlayerController _setVideoPlayerController(String url) {
     return _videoPlayerController = VideoPlayerController.network(url)
       ..initialize().whenComplete(() {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       });
   }
 
