@@ -1,14 +1,19 @@
+import 'dart:io' as io;
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/utils/crypto_util.dart';
 
 class ZoomableImage extends StatefulWidget {
   final File photo;
@@ -31,6 +36,7 @@ class ZoomableImage extends StatefulWidget {
 class _ZoomableImageState extends State<ZoomableImage>
     with SingleTickerProviderStateMixin {
   final Logger _logger = Logger("ZoomableImage");
+  File _photo;
   ImageProvider _imageProvider;
   bool _loadedSmallThumbnail = false;
   bool _loadingLargeThumbnail = false;
@@ -51,7 +57,8 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.photo.localID == null) {
+    _photo = widget.photo;
+    if (_photo.localID == null) {
       _loadNetworkImage();
     } else {
       _loadLocalImage(context);
@@ -64,7 +71,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         minScale: PhotoViewComputedScale.contained,
         gaplessPlayback: true,
         heroAttributes: PhotoViewHeroAttributes(
-          tag: widget.tagPrefix + widget.photo.tag(),
+          tag: widget.tagPrefix + _photo.tag(),
         ),
         backgroundDecoration: widget.backgroundDecoration,
       );
@@ -74,30 +81,77 @@ class _ZoomableImageState extends State<ZoomableImage>
   }
 
   void _loadNetworkImage() {
+    if (!_photo.isEncrypted) {
+      _loadUnencryptedImage();
+    } else {
+      _loadEncryptedImage();
+    }
+  }
+
+  void _loadUnencryptedImage() {
     if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      _imageProvider =
-          CachedNetworkImageProvider(widget.photo.getThumbnailUrl());
+      _imageProvider = CachedNetworkImageProvider(_photo.getThumbnailUrl());
       _loadedSmallThumbnail = true;
     }
     if (!_loadedFinalImage) {
-      if (BytesLruCache.get(widget.photo) != null) {
+      if (BytesLruCache.get(_photo) != null) {
         _onFinalImageLoaded(
             Image.memory(
-              BytesLruCache.get(widget.photo),
+              BytesLruCache.get(_photo),
               gaplessPlayback: true,
             ).image,
             context);
       } else {
-        widget.photo.getBytes().then((data) {
+        _photo.getBytes().then((data) {
           _onFinalImageLoaded(
               Image.memory(
                 data,
                 gaplessPlayback: true,
               ).image,
               context);
-          BytesLruCache.put(widget.photo, data);
+          BytesLruCache.put(_photo, data);
         });
       }
+    }
+  }
+
+  void _loadEncryptedImage() {
+    if (!_loadedSmallThumbnail && !_loadedFinalImage) {
+      if (ThumbnailFileLruCache.get(_photo) != null) {
+        _imageProvider = Image.file(
+          ThumbnailFileLruCache.get(_photo),
+        ).image;
+        _loadedSmallThumbnail = true;
+      }
+    }
+    if (!_loadedFinalImage) {
+      final url = _photo.getDownloadUrl();
+      DefaultCacheManager().getFileFromCache(url).then((info) {
+        if (info == null) {
+          final temporaryPath = Configuration.instance.getTempDirectory() +
+              _photo.generatedID.toString() +
+              ".aes";
+          Dio().download(url, temporaryPath).then((_) async {
+            final data = await CryptoUtil.decryptFileToData(
+                temporaryPath, Configuration.instance.getKey());
+            io.File(temporaryPath).deleteSync();
+            DefaultCacheManager().putFile(url, data);
+            _onFinalImageLoaded(
+                Image.memory(
+                  data,
+                  gaplessPlayback: true,
+                ).image,
+                context);
+          });
+        } else {
+          _onFinalImageLoaded(
+              Image.memory(
+                info.file.readAsBytesSync(),
+                gaplessPlayback: true,
+              ).image,
+              context);
+        }
+      });
     }
   }
 
@@ -106,7 +160,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         !_loadedLargeThumbnail &&
         !_loadedFinalImage) {
       final cachedThumbnail =
-          ThumbnailLruCache.get(widget.photo, THUMBNAIL_SMALL_SIZE);
+          ThumbnailLruCache.get(_photo, THUMBNAIL_SMALL_SIZE);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
@@ -118,16 +172,16 @@ class _ZoomableImageState extends State<ZoomableImage>
         !_loadedFinalImage) {
       _loadingLargeThumbnail = true;
       final cachedThumbnail =
-          ThumbnailLruCache.get(widget.photo, THUMBNAIL_LARGE_SIZE);
+          ThumbnailLruCache.get(_photo, THUMBNAIL_LARGE_SIZE);
       if (cachedThumbnail != null) {
         _onLargeThumbnailLoaded(Image.memory(cachedThumbnail).image, context);
       } else {
-        widget.photo.getAsset().then((asset) {
+        _photo.getAsset().then((asset) {
           asset
               .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE)
               .then((data) {
             _onLargeThumbnailLoaded(Image.memory(data).image, context);
-            ThumbnailLruCache.put(widget.photo, THUMBNAIL_LARGE_SIZE, data);
+            ThumbnailLruCache.put(_photo, THUMBNAIL_LARGE_SIZE, data);
           });
         });
       }
@@ -135,15 +189,15 @@ class _ZoomableImageState extends State<ZoomableImage>
 
     if (!_loadingFinalImage && !_loadedFinalImage) {
       _loadingFinalImage = true;
-      final cachedFile = FileLruCache.get(widget.photo);
+      final cachedFile = FileLruCache.get(_photo);
       if (cachedFile != null) {
         _onFinalImageLoaded(Image.file(cachedFile).image, context);
       } else {
-        widget.photo.getAsset().then((asset) {
+        _photo.getAsset().then((asset) {
           asset.file.then((file) {
             if (mounted) {
               _onFinalImageLoaded(Image.file(file).image, context);
-              FileLruCache.put(widget.photo, file);
+              FileLruCache.put(_photo, file);
             }
           });
         });
