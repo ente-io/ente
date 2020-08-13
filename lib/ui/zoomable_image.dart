@@ -94,24 +94,14 @@ class _ZoomableImageState extends State<ZoomableImage>
       _loadedSmallThumbnail = true;
     }
     if (!_loadedFinalImage) {
-      if (BytesLruCache.get(_photo) != null) {
+      DefaultCacheManager().getSingleFile(_photo.getDownloadUrl()).then((file) {
         _onFinalImageLoaded(
-            Image.memory(
-              BytesLruCache.get(_photo),
+            Image.file(
+              file,
               gaplessPlayback: true,
             ).image,
             context);
-      } else {
-        _photo.getBytes().then((data) {
-          _onFinalImageLoaded(
-              Image.memory(
-                data,
-                gaplessPlayback: true,
-              ).image,
-              context);
-          BytesLruCache.put(_photo, data);
-        });
-      }
+      });
     }
   }
 
