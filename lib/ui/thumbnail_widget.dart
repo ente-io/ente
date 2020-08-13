@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'dart:io' as io;
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/cache/thumbnail_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/file.dart';
@@ -123,6 +125,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         placeholder: (context, url) => loadWidget,
         errorWidget: (context, url, error) => Icon(Icons.error),
         fit: BoxFit.cover,
+        cacheManager: ThumbnailCacheManager(),
       );
     } else {
       if (ThumbnailFileLruCache.get(widget.file) != null) {

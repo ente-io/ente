@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/cache/thumbnail_cache_manager.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';
@@ -96,7 +97,10 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _loadUnencryptedThumbnail() {
     if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      _imageProvider = CachedNetworkImageProvider(_photo.getThumbnailUrl());
+      _imageProvider = CachedNetworkImageProvider(
+        _photo.getThumbnailUrl(),
+        cacheManager: ThumbnailCacheManager(),
+      );
       _loadedSmallThumbnail = true;
     }
   }
