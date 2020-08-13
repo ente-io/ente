@@ -92,6 +92,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.15.0-nullsafety"
+  computer:
+    dependency: "direct main"
+    description:
+      name: computer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.2"
   connectivity:
     dependency: "direct main"
     description:
