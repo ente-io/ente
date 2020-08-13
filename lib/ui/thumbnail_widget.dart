@@ -121,17 +121,19 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       _isLoadingThumbnail = true;
       getThumbnailFromServer(widget.file).then((file) {
         final imageProvider = Image.file(file).image;
-        precacheImage(imageProvider, context).then((value) {
-          if (mounted) {
-            setState(() {
-              _imageProvider = imageProvider;
-              _hasLoadedThumbnail = true;
-            });
-          }
-        }).catchError((e) {
-          _logger.severe("Could not load image " + widget.file.toString());
-          _encounteredErrorLoadingThumbnail = true;
-        });
+        if (mounted) {
+          precacheImage(imageProvider, context).then((value) {
+            if (mounted) {
+              setState(() {
+                _imageProvider = imageProvider;
+                _hasLoadedThumbnail = true;
+              });
+            }
+          }).catchError((e) {
+            _logger.severe("Could not load image " + widget.file.toString());
+            _encounteredErrorLoadingThumbnail = true;
+          });
+        }
       });
     }
   }
