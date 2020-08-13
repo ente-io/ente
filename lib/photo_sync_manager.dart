@@ -11,9 +11,9 @@ import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/models/file_type.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_name_util.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:photos/models/file.dart';
@@ -199,9 +199,6 @@ class PhotoSyncManager {
     List<File> photosToBeUploaded = await _db.getFilesToBeUploaded();
     for (int i = 0; i < photosToBeUploaded.length; i++) {
       File file = photosToBeUploaded[i];
-      if (file.fileType == FileType.video) {
-        continue;
-      }
       _logger.info("Uploading " + file.toString());
       try {
         var uploadedFile;
@@ -298,11 +295,11 @@ class PhotoSyncManager {
   Future<File> _uploadEncryptedFile(File file) async {
     final key = Configuration.instance.getKey();
 
-    final filePath = (await (await file.getAsset()).originFile).path;
     final encryptedFileName = file.generatedID.toString() + ".aes";
     final tempDirectory = Configuration.instance.getTempDirectory();
     final encryptedFilePath = tempDirectory + encryptedFileName;
-    await CryptoUtil.encryptFileToFile(filePath, encryptedFilePath, key);
+    await CryptoUtil.encryptDataToFile(
+        await getBytesFromDisk(file), encryptedFilePath, key);
 
     final thumbnailData = (await (await file.getAsset())
         .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE));
@@ -347,8 +344,7 @@ class PhotoSyncManager {
   Future<File> _uploadFile(File localPhoto) async {
     final title = getJPGFileNameForHEIC(localPhoto);
     final formData = FormData.fromMap({
-      "file": MultipartFile.fromFileSync(
-          (await (await localPhoto.getAsset()).originFile).path,
+      "file": MultipartFile.fromBytes(await getBytesFromDisk(localPhoto),
           filename: title),
       "deviceFileID": localPhoto.localID,
       "deviceFolder": localPhoto.deviceFolder,
