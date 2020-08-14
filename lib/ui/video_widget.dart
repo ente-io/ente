@@ -1,4 +1,5 @@
 import 'package:chewie/chewie.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -10,8 +11,6 @@ import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-
-import 'loading_widget.dart';
 
 class VideoWidget extends StatefulWidget {
   final File file;
@@ -32,6 +31,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   Logger _logger = Logger("VideoWidget");
   VideoPlayerController _videoPlayerController;
   ChewieController _chewieController;
+  double _progress;
 
   @override
   void initState() {
@@ -49,9 +49,19 @@ class _VideoWidgetState extends State<VideoWidget> {
           }
         });
       } else {
-        showToast("Downloading and decrypting video...",
-            toastLength: Toast.LENGTH_SHORT);
-        getFileFromServer(widget.file).then((file) {
+        showToast("Downloading video...", toastLength: Toast.LENGTH_SHORT);
+        getFileFromServer(
+          widget.file,
+          progressCallback: (count, total) {
+            setState(() {
+              _progress = count / total;
+              if (_progress == 1) {
+                showToast("Decrypting video...",
+                    toastLength: Toast.LENGTH_SHORT);
+              }
+            });
+          },
+        ).then((file) {
           _setVideoPlayerController(file.path);
         });
       }
@@ -109,7 +119,15 @@ class _VideoWidgetState extends State<VideoWidget> {
         color: Colors.black12,
         constraints: BoxConstraints.expand(),
       ),
-      loadWidget,
+      Center(
+        child: SizedBox.fromSize(
+          size: Size.square(30),
+          child: _progress == null || _progress == 1
+              ? CupertinoActivityIndicator()
+              : CupertinoActivityIndicator.partiallyRevealed(
+                  progress: _progress),
+        ),
+      ),
     ]);
   }
 

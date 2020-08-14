@@ -82,7 +82,8 @@ Future<Uint8List> getBytesFromDisk(File file, {int quality = 100}) async {
   }
 }
 
-Future<io.File> getFileFromServer(File file) async {
+Future<io.File> getFileFromServer(File file,
+    {ProgressCallback progressCallback}) async {
   final cacheManager = file.fileType == FileType.video
       ? VideoCacheManager()
       : DefaultCacheManager();
@@ -91,7 +92,11 @@ Future<io.File> getFileFromServer(File file) async {
   } else {
     return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
       if (info == null) {
-        return _downloadAndDecrypt(file, cacheManager);
+        return _downloadAndDecrypt(
+          file,
+          cacheManager,
+          progressCallback: progressCallback,
+        );
       } else {
         return info.file;
       }
@@ -124,12 +129,18 @@ Future<io.File> getThumbnailFromServer(File file) async {
   }
 }
 
-Future<io.File> _downloadAndDecrypt(
-    File file, BaseCacheManager cacheManager) async {
+Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
+    {ProgressCallback progressCallback}) async {
   final temporaryPath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       ".aes";
-  return Dio().download(file.getDownloadUrl(), temporaryPath).then((_) async {
+  return Dio()
+      .download(
+    file.getDownloadUrl(),
+    temporaryPath,
+    onReceiveProgress: progressCallback,
+  )
+      .then((_) async {
     final data = await CryptoUtil.decryptFileToData(
         temporaryPath, Configuration.instance.getKey());
     io.File(temporaryPath).deleteSync();
