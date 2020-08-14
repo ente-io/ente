@@ -49,7 +49,6 @@ class _VideoWidgetState extends State<VideoWidget> {
           }
         });
       } else {
-        showToast("Downloading video...", toastLength: Toast.LENGTH_SHORT);
         getFileFromServer(
           widget.file,
           progressCallback: (count, total) {
@@ -102,7 +101,9 @@ class _VideoWidgetState extends State<VideoWidget> {
       key: Key(widget.file.tag()),
       onVisibilityChanged: (info) {
         if (info.visibleFraction < 1) {
-          _chewieController.pause();
+          if (mounted) {
+            _chewieController.pause();
+          }
         }
       },
       child: Hero(
