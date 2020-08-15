@@ -15,7 +15,7 @@ class CryptoUtil {
     final encrypter = AES(Key.fromBase64(base64Key));
     return encrypter
         .encrypt(
-          Uint8List.fromList(utf8.encode(plainText)),
+          utf8.encode(plainText),
           iv: IV.fromBase64(base64IV),
         )
         .base64;
@@ -24,12 +24,10 @@ class CryptoUtil {
   static String decryptFromBase64(
       String base64CipherText, String base64Key, String base64IV) {
     final encrypter = AES(Key.fromBase64(base64Key));
-    return utf8.decode(encrypter
-        .decrypt(
-          Encrypted.fromBase64(base64CipherText),
-          iv: IV.fromBase64(base64IV),
-        )
-        .toList());
+    return utf8.decode(encrypter.decrypt(
+      Encrypted.fromBase64(base64CipherText),
+      iv: IV.fromBase64(base64IV),
+    ));
   }
 
   static Future<String> encryptFileToFile(

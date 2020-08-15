@@ -56,10 +56,26 @@ class UserAuthenticator {
     });
   }
 
+  Future<void> setEncryptedKeyOnServer() {
+    return _dio.put(
+      Configuration.instance.getHttpEndpoint() + "/users/encrypted-key",
+      data: {
+        "encryptedKey": Configuration.instance.getEncryptedKey(),
+      },
+      options: Options(headers: {
+        "X-Auth-Token": Configuration.instance.getToken(),
+      }),
+    );
+  }
+
   void _saveConfiguration(String username, String password, Response response) {
     Configuration.instance.setUsername(username);
     Configuration.instance.setPassword(password);
     Configuration.instance.setUserID(response.data["id"]);
     Configuration.instance.setToken(response.data["token"]);
+    final String encryptedKey = response.data["encryptedKey"];
+    if (encryptedKey != null && encryptedKey.isNotEmpty) {
+      Configuration.instance.setEncryptedKey(encryptedKey);
+    }
   }
 }

@@ -11,6 +11,7 @@ import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_name_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -201,6 +202,9 @@ class PhotoSyncManager {
       File file = photosToBeUploaded[i];
       _logger.info("Uploading " + file.toString());
       try {
+        if (file.fileType == FileType.video) {
+          continue;
+        }
         var uploadedFile;
         if (Configuration.instance.hasOptedForE2E()) {
           uploadedFile = await _uploadEncryptedFile(file);
@@ -279,10 +283,9 @@ class PhotoSyncManager {
         file.ownerID = json["ownerID"];
         file.updationTime = json["updationTime"];
         file.isEncrypted = true;
+        final String metadataIV = json["metadataIV"];
         Map<String, dynamic> metadata = jsonDecode(CryptoUtil.decryptFromBase64(
-            json["metadata"],
-            Configuration.instance.getKey(),
-            json["metadataIV"]));
+            json["metadata"], Configuration.instance.getKey(), metadataIV));
         file.applyMetadata(metadata);
         return file;
       }).toList();
@@ -312,8 +315,12 @@ class PhotoSyncManager {
     final metadata = jsonEncode(file.getMetadata());
     final metadataIV =
         CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
-    final encryptedMetadata =
-        CryptoUtil.encryptToBase64(metadata, key, metadataIV);
+    var encryptedMetadata;
+    try {
+      encryptedMetadata = CryptoUtil.encryptToBase64(metadata, key, metadataIV);
+    } catch (e, stacktrace) {
+      _logger.severe(e, stacktrace);
+    }
     final formData = FormData.fromMap({
       "file": MultipartFile.fromFileSync(encryptedFilePath,
           filename: encryptedFileName),

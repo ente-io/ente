@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'dart:io' as io;
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -14,6 +17,9 @@ class Configuration {
   static const passwordKey = "password";
   static const hasOptedForE2EKey = "has_opted_for_e2e_encryption";
   static const keyKey = "key";
+  static const keyEncryptedKey = "encrypted_key";
+
+  static final String iv = base64.encode(List.filled(16, 0));
 
   SharedPreferences _preferences;
   String _documentsDirectory;
@@ -27,6 +33,15 @@ class Configuration {
     _thumbnailsDirectory = _documentsDirectory + "/thumbnails/";
     new io.Directory(_tempDirectory).createSync(recursive: true);
     new io.Directory(_thumbnailsDirectory).createSync(recursive: true);
+  }
+
+  Future<void> generateAndSaveKey(String passphrase) async {
+    final key = CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
+    await setKey(key);
+    final hashedPassphrase = sha256.convert(passphrase.codeUnits);
+    final encryptedKey = CryptoUtil.encryptToBase64(
+        key, base64.encode(hashedPassphrase.bytes), iv);
+    await setEncryptedKey(encryptedKey);
   }
 
   String getEndpoint() {
@@ -85,15 +100,30 @@ class Configuration {
     // return _preferences.getBool(hasOptedForE2EKey);
   }
 
-  Future<void> generateAndSaveKey(String passphrase) async {
-    final key = CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
+  Future<void> setEncryptedKey(String encryptedKey) async {
+    await _preferences.setString(keyEncryptedKey, encryptedKey);
+  }
+
+  String getEncryptedKey() {
+    return _preferences.getString(keyEncryptedKey);
+  }
+
+  Future<void> setKey(String key) async {
     await _preferences.setString(keyKey, key);
   }
 
-  // TODO: Encrypt with a passphrase and store in secure storage
+  Future<void> decryptEncryptedKey(String passphrase) async {
+    final hashedPassphrase = sha256.convert(passphrase.codeUnits);
+    final encryptedKey = getEncryptedKey();
+    final key = CryptoUtil.decryptFromBase64(
+        encryptedKey, base64.encode(hashedPassphrase.bytes), iv);
+    await setKey(key);
+  }
+
+  // TODO: Store in secure storage
   String getKey() {
-    return "8qD++K3xkgjIl3dIsGiTze5PhYtxiS5AtOeZw+Bl1z0=";
-    // return _preferences.getString(keyKey);
+    // return "8qD++K3xkgjIl3dIsGiTze5PhYtxiS5AtOeZw+Bl1z0=";
+    return _preferences.getString(keyKey);
   }
 
   String getDocumentsDirectory() {

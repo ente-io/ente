@@ -138,6 +138,15 @@ class _SignInWidgetState extends State<SignInWidget> {
                   .login(_usernameController.text, _passwordController.text);
               if (loggedIn) {
                 Navigator.of(context).pop();
+                if (Configuration.instance.getEncryptedKey() != null) {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return PassphraseDialog(false);
+                    },
+                  );
+                }
               } else {
                 _showAuthenticationFailedErrorDialog();
               }
@@ -276,7 +285,13 @@ class SelectEncryptionLevelWidget extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
             Configuration.instance.setOptInForE2E(true);
-            _showEnterPassphraseDialog(context);
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return PassphraseDialog(true);
+              },
+            );
           },
         ),
         CupertinoDialogAction(
@@ -290,28 +305,21 @@ class SelectEncryptionLevelWidget extends StatelessWidget {
       ],
     );
   }
-
-  void _showEnterPassphraseDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return PassphraseWidget();
-      },
-    );
-  }
 }
 
-class PassphraseWidget extends StatefulWidget {
-  const PassphraseWidget({
+class PassphraseDialog extends StatefulWidget {
+  final bool isFreshRegistration;
+
+  const PassphraseDialog(
+    this.isFreshRegistration, {
     Key key,
   }) : super(key: key);
 
   @override
-  _PassphraseWidgetState createState() => _PassphraseWidgetState();
+  _PassphraseDialogState createState() => _PassphraseDialogState();
 }
 
-class _PassphraseWidgetState extends State<PassphraseWidget> {
+class _PassphraseDialogState extends State<PassphraseDialog> {
   String _passphrase = "";
 
   @override
@@ -322,8 +330,6 @@ class _PassphraseWidgetState extends State<PassphraseWidget> {
         padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
         child: Column(
           children: [
-            Text("Do not forget this passphrase!"),
-            Padding(padding: EdgeInsets.all(8)),
             CupertinoTextField(
               autofocus: true,
               style: Theme.of(context).textTheme.subtitle1,
@@ -340,7 +346,12 @@ class _PassphraseWidgetState extends State<PassphraseWidget> {
           child: Text('Save'),
           onPressed: () async {
             Navigator.of(context).pop();
-            await Configuration.instance.generateAndSaveKey(_passphrase);
+            if (widget.isFreshRegistration) {
+              await Configuration.instance.generateAndSaveKey(_passphrase);
+              await UserAuthenticator.instance.setEncryptedKeyOnServer();
+            } else {
+              await Configuration.instance.decryptEncryptedKey(_passphrase);
+            }
             Bus.instance.fire(UserAuthenticatedEvent());
           },
         )
