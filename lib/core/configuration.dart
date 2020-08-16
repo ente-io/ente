@@ -122,7 +122,6 @@ class Configuration {
 
   // TODO: Store in secure storage
   String getKey() {
-    // return "8qD++K3xkgjIl3dIsGiTze5PhYtxiS5AtOeZw+Bl1z0=";
     return _preferences.getString(keyKey);
   }
 
