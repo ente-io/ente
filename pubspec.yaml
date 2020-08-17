@@ -59,6 +59,7 @@ dependencies:
   animate_do: ^1.7.2
   flutter_cache_manager: ^1.4.1
   computer: ^1.0.2
+  flutter_secure_storage: ^3.3.3
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io' as io;
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -22,17 +23,21 @@ class Configuration {
   static final String iv = base64.encode(List.filled(16, 0));
 
   SharedPreferences _preferences;
+  FlutterSecureStorage _secureStorage;
+  String _key;
   String _documentsDirectory;
   String _tempDirectory;
   String _thumbnailsDirectory;
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
+    _secureStorage = FlutterSecureStorage();
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
     _tempDirectory = _documentsDirectory + "/temp/";
     _thumbnailsDirectory = _documentsDirectory + "/thumbnails/";
     new io.Directory(_tempDirectory).createSync(recursive: true);
     new io.Directory(_thumbnailsDirectory).createSync(recursive: true);
+    _key = await _secureStorage.read(key: keyKey);
   }
 
   Future<void> generateAndSaveKey(String passphrase) async {
@@ -109,7 +114,8 @@ class Configuration {
   }
 
   Future<void> setKey(String key) async {
-    await _preferences.setString(keyKey, key);
+    await _secureStorage.write(key: keyKey, value: key);
+    _key = key;
   }
 
   Future<void> decryptEncryptedKey(String passphrase) async {
@@ -120,9 +126,8 @@ class Configuration {
     await setKey(key);
   }
 
-  // TODO: Store in secure storage
   String getKey() {
-    return _preferences.getString(keyKey);
+    return _key;
   }
 
   String getDocumentsDirectory() {
