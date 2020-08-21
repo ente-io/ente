@@ -315,12 +315,8 @@ class PhotoSyncManager {
     final metadata = jsonEncode(file.getMetadata());
     final metadataIV =
         CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
-    var encryptedMetadata;
-    try {
-      encryptedMetadata = CryptoUtil.encryptToBase64(metadata, key, metadataIV);
-    } catch (e, stacktrace) {
-      _logger.severe(e, stacktrace);
-    }
+    final encryptedMetadata =
+        CryptoUtil.encryptToBase64(metadata, key, metadataIV);
     final formData = FormData.fromMap({
       "file": MultipartFile.fromFileSync(encryptedFilePath,
           filename: encryptedFileName),
