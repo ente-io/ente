@@ -16,7 +16,7 @@ import 'package:super_logging/super_logging.dart';
 import 'package:logging/logging.dart';
 import 'package:uni_links/uni_links.dart';
 
-final logger = Logger("main");
+final _logger = Logger("main");
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,15 +55,15 @@ void _main() async {
 
 void _sync() async {
   FolderSharingService.instance.sync().catchError((e) {
-    logger.warning(e);
+    _logger.warning(e);
   });
   PhotoSyncManager.instance.sync().catchError((e) {
-    logger.warning(e);
+    _logger.warning(e);
   });
 }
 
 void _sendErrorToSentry(SentryClient sentry, Object error, StackTrace stack) {
-  logger.shout("Uncaught error", error, stack);
+  _logger.shout("Uncaught error", error, stack);
   try {
     sentry.captureException(
       exception: error,
@@ -83,21 +83,21 @@ Future<void> initDeepLinks() async {
     // Parse the link and warn the user, if it is not correct,
     // but keep in mind it could be `null`.
     if (initialLink != null) {
-      logger.info("Initial link received: " + initialLink);
+      _logger.info("Initial link received: " + initialLink);
     } else {
-      logger.info("No initial link received.");
+      _logger.info("No initial link received.");
     }
   } on PlatformException {
     // Handle exception by warning the user their action did not succeed
     // return?
-    logger.severe("PlatformException thrown while getting initial link");
+    _logger.severe("PlatformException thrown while getting initial link");
   }
 
   // Attach a listener to the stream
   getLinksStream().listen((String link) {
-    logger.info("Link received: " + link);
+    _logger.info("Link received: " + link);
   }, onError: (err) {
-    logger.severe(err);
+    _logger.severe(err);
   });
 }
 
