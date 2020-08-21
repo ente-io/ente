@@ -60,6 +60,7 @@ dependencies:
   flutter_cache_manager: ^1.4.1
   computer: ^1.0.2
   flutter_secure_storage: ^3.3.3
+  uni_links: ^0.4.0
 
 dev_dependencies:
   flutter_test:
