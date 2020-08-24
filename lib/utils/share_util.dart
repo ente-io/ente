@@ -1,14 +1,44 @@
-import 'dart:typed_data';
-
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/file.dart';
 import 'package:path/path.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:progress_dialog/progress_dialog.dart';
+import 'package:share_extend/share_extend.dart';
 
 Future<void> share(BuildContext context, File file) async {
   final dialog = createProgressDialog(context, "Preparing...");
+  if (file.fileType == FileType.image) {
+    return _shareImage(dialog, file);
+  } else {
+    return _shareVideo(dialog, file);
+  }
+}
+
+Future<void> shareMultiple(BuildContext context, List<File> files) async {
+  if (files.length == 1) {
+    return share(context, files[0]);
+  }
+  final dialog = createProgressDialog(context, "Preparing...");
+  await dialog.show();
+  final pathList = List<String>();
+  for (File file in files) {
+    pathList.add((await getNativeFile(file)).path);
+  }
+  await dialog.hide();
+  return ShareExtend.shareMultiple(pathList, "image");
+}
+
+Future<void> _shareVideo(ProgressDialog dialog, File file) async {
+  await dialog.show();
+  final path = (await getNativeFile(file)).path;
+  await dialog.hide();
+  return ShareExtend.share(path, "image");
+}
+
+Future<void> _shareImage(ProgressDialog dialog, File file) async {
   await dialog.show();
   final bytes = await getBytes(file);
   final filename = _getFilename(file.title);
@@ -18,17 +48,6 @@ Future<void> share(BuildContext context, File file) async {
       : ext.substring(1, ext.length).toLowerCase();
   await dialog.hide();
   return Share.file(filename, filename, bytes, "image/" + shareExt);
-}
-
-Future<void> shareMultiple(BuildContext context, List<File> files) async {
-  final dialog = createProgressDialog(context, "Preparing...");
-  await dialog.show();
-  final shareContent = Map<String, Uint8List>();
-  for (File file in files) {
-    shareContent[_getFilename(file.title)] = await getBytes(file);
-  }
-  await dialog.hide();
-  return Share.files("images", shareContent, "*/*");
 }
 
 String _getFilename(String name) {

@@ -60,6 +60,14 @@ void preloadLocalFileThumbnail(File file) {
   });
 }
 
+Future<io.File> getNativeFile(File file) async {
+  if (file.localID == null) {
+    return getFileFromServer(file);
+  } else {
+    return file.getAsset().then((asset) => asset.file);
+  }
+}
+
 Future<Uint8List> getBytes(File file, {int quality = 100}) async {
   if (file.localID == null) {
     return getFileFromServer(file).then((file) => file.readAsBytesSync());
