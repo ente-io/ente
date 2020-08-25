@@ -36,7 +36,7 @@ class UserAuthenticator {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return OTTVerificationPage(email);
+              return OTTVerificationPage();
             },
           ),
         );
@@ -46,14 +46,13 @@ class UserAuthenticator {
     });
   }
 
-  Future<void> getCredentials(
-      BuildContext context, String email, String ott) async {
+  Future<void> getCredentials(BuildContext context, String ott) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     await Dio().get(
       Configuration.instance.getHttpEndpoint() + "/users/credentials",
       queryParameters: {
-        "email": email,
+        "email": Configuration.instance.getEmail(),
         "ott": ott,
       },
     ).catchError((e) async {
@@ -63,7 +62,7 @@ class UserAuthenticator {
     }).then((response) async {
       await dialog.hide();
       if (response.statusCode == 200) {
-        _saveConfiguration(email, response);
+        _saveConfiguration(response);
         Navigator.of(context).pop();
       } else {
         showErrorDialog(
@@ -80,7 +79,7 @@ class UserAuthenticator {
           "password": password,
         }).then((response) {
       if (response.statusCode == 200 && response.data != null) {
-        _saveConfiguration(username, response);
+        _saveConfiguration(response);
         Bus.instance.fire(UserAuthenticatedEvent());
         return true;
       } else {
@@ -99,7 +98,7 @@ class UserAuthenticator {
       "password": password,
     }).then((response) {
       if (response.statusCode == 200 && response.data != null) {
-        _saveConfiguration(username, response);
+        _saveConfiguration(response);
         return true;
       } else {
         if (response.data != null && response.data["message"] != null) {
@@ -126,8 +125,7 @@ class UserAuthenticator {
     );
   }
 
-  void _saveConfiguration(String email, Response response) {
-    Configuration.instance.setEmail(email);
+  void _saveConfiguration(Response response) {
     Configuration.instance.setUserID(response.data["id"]);
     Configuration.instance.setToken(response.data["token"]);
     final String encryptedKey = response.data["encryptedKey"];

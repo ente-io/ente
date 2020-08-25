@@ -11,6 +11,7 @@ import 'package:photos/folder_service.dart';
 import 'package:photos/memories_service.dart';
 import 'package:photos/photo_sync_manager.dart';
 import 'package:photos/ui/home_widget.dart';
+import 'package:photos/user_authenticator.dart';
 import 'package:sentry/sentry.dart';
 import 'package:super_logging/super_logging.dart';
 import 'package:logging/logging.dart';
@@ -96,6 +97,9 @@ Future<void> initDeepLinks() async {
   // Attach a listener to the stream
   getLinksStream().listen((String link) {
     _logger.info("Link received: " + link);
+    final ott = Uri.parse(link).queryParameters["ott"];
+    _logger.info("Ott: " + ott);
+    // UserAuthenticator.instance.getCredentials(context, ott);
   }, onError: (err) {
     _logger.severe(err);
   });

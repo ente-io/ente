@@ -3,12 +3,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/user_authenticator.dart';
 
 class OTTVerificationPage extends StatefulWidget {
-  final String email;
-  OTTVerificationPage(this.email, {Key key}) : super(key: key);
+  OTTVerificationPage({Key key}) : super(key: key);
 
   @override
   _OTTVerificationPageState createState() => _OTTVerificationPageState();
@@ -48,7 +48,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 children: <TextSpan>[
                   TextSpan(text: "We've sent a mail to "),
                   TextSpan(
-                      text: widget.email,
+                      text: Configuration.instance.getEmail(),
                       style: TextStyle(
                         color: Theme.of(context).accentColor,
                       )),
@@ -85,8 +85,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                           _verificationCodeController.text.isEmpty
                       ? null
                       : () {
-                          UserAuthenticator.instance.getCredentials(context,
-                              widget.email, _verificationCodeController.text);
+                          UserAuthenticator.instance.getCredentials(
+                              context, _verificationCodeController.text);
                         },
                   padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
                   child: Text(
@@ -103,7 +103,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (BuildContext context) {
-                        return EmailEntryPage(email: widget.email);
+                        return EmailEntryPage();
                       },
                     ),
                   );
