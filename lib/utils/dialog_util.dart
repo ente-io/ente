@@ -20,3 +20,30 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
   );
   return dialog;
 }
+
+void showErrorDialog(BuildContext context, String title, String content) {
+  AlertDialog alert = AlertDialog(
+    title: Text(title),
+    content: Text(content),
+    actions: [
+      FlatButton(
+        child: Text("OK"),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    ],
+  );
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
+
+void showGenericErrorDialog(BuildContext context) {
+  showErrorDialog(
+      context, "Oops.", "Sorry, something went wrong. Please try again.");
+}

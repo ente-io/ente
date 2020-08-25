@@ -109,8 +109,11 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
 
     return MaterialApp(
       title: _title,
-      theme: ThemeData.dark()
-          .copyWith(hintColor: Colors.grey, accentColor: Colors.pink[400]),
+      theme: ThemeData.dark().copyWith(
+        hintColor: Colors.grey,
+        accentColor: Colors.pink[400],
+        buttonColor: Colors.pink,
+      ),
       home: HomeWidget(_title),
     );
   }

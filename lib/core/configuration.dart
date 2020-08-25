@@ -12,10 +12,9 @@ class Configuration {
   static final Configuration instance = Configuration._privateConstructor();
 
   static const endpointKey = "endpoint";
-  static const tokenKey = "token";
-  static const usernameKey = "username";
   static const userIDKey = "user_id";
-  static const passwordKey = "password";
+  static const emailKey = "email";
+  static const tokenKey = "token";
   static const hasOptedForE2EKey = "has_opted_for_e2e_encryption";
   static const keyKey = "key";
   static const keyEncryptedKey = "encrypted_key";
@@ -50,7 +49,7 @@ class Configuration {
   }
 
   String getEndpoint() {
-    return _preferences.getString(endpointKey);
+    return "192.168.0.106";
   }
 
   String getHttpEndpoint() {
@@ -72,12 +71,12 @@ class Configuration {
     await _preferences.setString(tokenKey, token);
   }
 
-  String getUsername() {
-    return _preferences.getString(usernameKey);
+  String getEmail() {
+    return _preferences.getString(emailKey);
   }
 
-  void setUsername(String username) async {
-    await _preferences.setString(usernameKey, username);
+  void setEmail(String email) async {
+    await _preferences.setString(emailKey, email);
   }
 
   int getUserID() {
@@ -86,14 +85,6 @@ class Configuration {
 
   void setUserID(int userID) async {
     await _preferences.setInt(userIDKey, userID);
-  }
-
-  String getPassword() {
-    return _preferences.getString(passwordKey);
-  }
-
-  void setPassword(String password) async {
-    await _preferences.setString(passwordKey, password);
   }
 
   void setOptInForE2E(bool hasOptedForE2E) async {

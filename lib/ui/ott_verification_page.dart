@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:photos/user_authenticator.dart';
 
 class OTTVerificationPage extends StatefulWidget {
   final String email;
@@ -29,6 +32,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         padding: EdgeInsets.fromLTRB(8, 64, 8, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             SvgPicture.asset(
               "assets/email_sent.svg",
@@ -38,22 +43,22 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             Padding(padding: EdgeInsets.all(12)),
             Text.rich(
               TextSpan(
-                text: "We've sent a mail to ",
                 style: TextStyle(fontSize: 18),
                 children: <TextSpan>[
+                  TextSpan(text: "We've sent a mail to "),
                   TextSpan(
                       text: widget.email,
                       style: TextStyle(
-                        decoration: TextDecoration.underline,
+                        color: Theme.of(context).accentColor,
                       )),
-                  // can add more TextSpans here...
+                  TextSpan(text: "."),
                 ],
               ),
               textAlign: TextAlign.center,
             ),
             Padding(padding: EdgeInsets.all(12)),
             Text(
-              "Please check your inbox (and spam folders) to complete the verification.",
+              "Please check your inbox (and spam) to complete verification.",
               textAlign: TextAlign.center,
             ),
             Padding(padding: EdgeInsets.all(12)),
@@ -63,11 +68,45 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 contentPadding: EdgeInsets.all(20),
               ),
               controller: _verificationCodeController,
-              autofocus: true,
+              autofocus: false,
               autocorrect: false,
               keyboardType: TextInputType.visiblePassword,
               textAlign: TextAlign.center,
+              onChanged: (_) {
+                setState(() {});
+              },
             ),
+            Padding(padding: EdgeInsets.all(8)),
+            SizedBox(
+                width: double.infinity,
+                child: RaisedButton(
+                  onPressed: _verificationCodeController.text == null ||
+                          _verificationCodeController.text.isEmpty
+                      ? null
+                      : () {
+                          UserAuthenticator.instance.getCredentials(context,
+                              widget.email, _verificationCodeController.text);
+                        },
+                  padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
+                  child: Text(
+                    "Sign In",
+                  ),
+                  color: Colors.pink,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                  ),
+                )),
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  "Did not get email?",
+                  style: TextStyle(
+                    decoration: TextDecoration.underline,
+                    fontSize: 12,
+                  ),
+                ))
           ],
         ),
       ),
