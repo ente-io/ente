@@ -30,7 +30,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   Widget _getBody() {
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.fromLTRB(8, 64, 8, 8),
+        padding: EdgeInsets.fromLTRB(8, 40, 8, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,

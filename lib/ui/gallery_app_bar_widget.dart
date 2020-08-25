@@ -174,7 +174,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          // return OTTVerificationPage("hello@ente.io");
           return EmailEntryPage();
         },
       ),

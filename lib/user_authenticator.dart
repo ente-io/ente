@@ -127,7 +127,6 @@ class UserAuthenticator {
   }
 
   void _saveConfiguration(String email, Response response) {
-    _logger.info("Saving configuration " + response.data.toString());
     Configuration.instance.setEmail(email);
     Configuration.instance.setUserID(response.data["id"]);
     Configuration.instance.setToken(response.data["token"]);

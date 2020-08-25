@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -55,7 +53,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
               onChanged: (email) {
-                log(email);
                 setState(() {
                   _email = email;
                 });
