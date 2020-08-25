@@ -95,7 +95,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
         elevation: 1,
         backgroundColor: Colors.black38,
-        foregroundColor: Colors.amber,
+        foregroundColor: Theme.of(context).accentColor,
       ),
     );
   }
@@ -143,7 +143,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
       ],
       currentIndex: _selectedNavBarItem,
-      selectedItemColor: Colors.yellow[800],
+      selectedItemColor: Theme.of(context).accentColor,
       onTap: (index) {
         setState(() {
           _selectedNavBarItem = index;

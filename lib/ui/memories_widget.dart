@@ -114,7 +114,7 @@ class MemoryWidget extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              _buildMemoryItem(index),
+              _buildMemoryItem(context, index),
               Padding(padding: EdgeInsets.all(2)),
               Hero(
                 tag: title,
@@ -135,14 +135,14 @@ class MemoryWidget extends StatelessWidget {
     );
   }
 
-  Container _buildMemoryItem(int index) {
+  Container _buildMemoryItem(BuildContext context, int index) {
     final isSeen = memories[index].isSeen();
     return Container(
       decoration: BoxDecoration(
         border: isSeen
             ? Border()
             : Border.all(
-                color: Colors.amber,
+                color: Theme.of(context).accentColor,
                 width: isSeen ? 0 : 2,
               ),
         borderRadius: BorderRadius.circular(40),
