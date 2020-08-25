@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -5,14 +7,22 @@ import 'package:flutter_svg/svg.dart';
 import 'package:photos/user_authenticator.dart';
 
 class EmailEntryPage extends StatefulWidget {
-  EmailEntryPage({Key key}) : super(key: key);
+  final String email;
+
+  EmailEntryPage({this.email, Key key}) : super(key: key);
 
   @override
   _EmailEntryPageState createState() => _EmailEntryPageState();
 }
 
 class _EmailEntryPageState extends State<EmailEntryPage> {
-  final _emailController = TextEditingController();
+  String _email;
+
+  @override
+  void initState() {
+    _email = widget.email;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,18 +50,23 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 hintText: 'email@domain.com',
                 contentPadding: EdgeInsets.all(20),
               ),
-              controller: _emailController,
+              initialValue: widget.email == null ? "" : widget.email,
               autofocus: true,
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
+              onChanged: (email) {
+                log(email);
+                setState(() {
+                  _email = email;
+                });
+              },
             ),
             Padding(padding: EdgeInsets.all(8)),
             SizedBox(
                 width: double.infinity,
                 child: RaisedButton(
                   onPressed: () {
-                    UserAuthenticator.instance
-                        .getOtt(context, _emailController.text);
+                    UserAuthenticator.instance.getOtt(context, _email);
                   },
                   padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
                   child: Text("Sign In"),

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/user_authenticator.dart';
 
 class OTTVerificationPage extends StatefulWidget {
@@ -89,16 +90,23 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                         },
                   padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
                   child: Text(
-                    "Sign In",
+                    "Verify",
                   ),
                   color: Colors.pink,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18.0),
                   ),
                 )),
+            Padding(padding: EdgeInsets.all(8)),
             TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return EmailEntryPage(email: widget.email);
+                      },
+                    ),
+                  );
                 },
                 child: Text(
                   "Did not get email?",
@@ -106,7 +114,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                     decoration: TextDecoration.underline,
                     fontSize: 12,
                   ),
-                ))
+                )),
           ],
         ),
       ),
