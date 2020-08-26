@@ -7,6 +7,7 @@ import 'package:photos/core/event_bus.dart';
 
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/ui/ott_verification_page.dart';
+import 'package:photos/ui/passphrase_entry_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class UserAuthenticator {
@@ -63,10 +64,57 @@ class UserAuthenticator {
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
         _saveConfiguration(response);
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        if (Configuration.instance.getEncryptedKey() != null) {
+          // TODO: Passphrase re-enter to decrypt
+          Bus.instance.fire(UserAuthenticatedEvent());
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        } else {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return PassphraseEntryPage();
+              },
+            ),
+          );
+        }
       } else {
         showErrorDialog(
             context, "Oops.", "Verification failed, please try again.");
+      }
+    });
+  }
+
+  Future<void> setPassphrase(BuildContext context, String passphrase) async {
+    final dialog = createProgressDialog(context, "Please wait...");
+    await dialog.show();
+    await Configuration.instance.generateAndSaveKey(passphrase);
+    await _dio
+        .put(
+      Configuration.instance.getHttpEndpoint() + "/users/encrypted-key",
+      data: {
+        "encryptedKey": Configuration.instance.getEncryptedKey(),
+      },
+      options: Options(
+        headers: {
+          "X-Auth-Token": Configuration.instance.getToken(),
+        },
+      ),
+    )
+        .catchError((e) async {
+      await dialog.hide();
+      Configuration.instance.setKey(null);
+      Configuration.instance.setEncryptedKey(null);
+      _logger.severe(e);
+      showGenericErrorDialog(context);
+    }).then((response) async {
+      await dialog.hide();
+      if (response != null && response.statusCode == 200) {
+        Bus.instance.fire(UserAuthenticatedEvent());
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      } else {
+        Configuration.instance.setKey(null);
+        Configuration.instance.setEncryptedKey(null);
+        showGenericErrorDialog(context);
       }
     });
   }
