@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/user_authenticator.dart';
 
@@ -38,11 +37,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         padding: EdgeInsets.all(8),
         child: Column(
           children: [
-            SvgPicture.asset(
-              "assets/around_the_world.svg",
-              width: 256,
-              height: 256,
-            ),
             TextFormField(
               decoration: InputDecoration(
                 hintText: 'email@domain.com',
