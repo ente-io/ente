@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
@@ -18,9 +20,11 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/ui/remote_folder_gallery_widget.dart';
 import 'package:photos/ui/search_page.dart';
+import 'package:photos/user_authenticator.dart';
 import 'package:photos/utils/logging_util.dart';
 import 'package:shake/shake.dart';
 import 'package:logging/logging.dart';
+import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
   final String title;
@@ -56,6 +60,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       setState(() {});
     });
+    _initDeepLinks();
     super.initState();
   }
 
@@ -98,6 +103,44 @@ class _HomeWidgetState extends State<HomeWidget> {
         foregroundColor: Theme.of(context).accentColor,
       ),
     );
+  }
+
+  Future<bool> _initDeepLinks() async {
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      String initialLink = await getInitialLink();
+      // Parse the link and warn the user, if it is not correct,
+      // but keep in mind it could be `null`.
+      if (initialLink != null) {
+        _logger.info("Initial link received: " + initialLink);
+        _getCredentials(context, initialLink);
+        return true;
+      } else {
+        _logger.info("No initial link received.");
+      }
+    } on PlatformException {
+      // Handle exception by warning the user their action did not succeed
+      // return?
+      _logger.severe("PlatformException thrown while getting initial link");
+    }
+
+    // Attach a listener to the stream
+    getLinksStream().listen((String link) {
+      _logger.info("Link received: " + link);
+      _getCredentials(context, link);
+    }, onError: (err) {
+      _logger.severe(err);
+    });
+    return false;
+  }
+
+  void _getCredentials(BuildContext context, String link) {
+    if (Configuration.instance.hasConfiguredAccount()) {
+      return;
+    }
+    final ott = Uri.parse(link).queryParameters["ott"];
+    _logger.info("Ott: " + ott);
+    UserAuthenticator.instance.getCredentials(context, ott);
   }
 
   Widget _getMainGalleryWidget() {

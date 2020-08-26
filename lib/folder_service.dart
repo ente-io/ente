@@ -136,7 +136,7 @@ class FolderSharingService {
       try {
         return Folder(
           null,
-          Configuration.instance.getUsername() + "s " + deviceFolder,
+          Configuration.instance.getEmail() + "s " + deviceFolder,
           Configuration.instance.getUserID(),
           deviceFolder,
           Set<int>(),
