@@ -134,6 +134,6 @@ class Configuration {
   }
 
   bool hasConfiguredAccount() {
-    return getEndpoint() != null && getToken() != null;
+    return getToken() != null && getKey() != null;
   }
 }

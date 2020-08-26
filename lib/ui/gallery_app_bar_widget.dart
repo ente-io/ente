@@ -2,10 +2,14 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/ott_verification_page.dart';
+import 'package:photos/ui/passphrase_entry_page.dart';
+import 'package:photos/ui/passphrase_reentry_page.dart';
 import 'package:photos/ui/share_folder_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -40,12 +44,23 @@ class GalleryAppBarWidget extends StatefulWidget
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
+  StreamSubscription _userAuthEventSubscription;
   @override
   void initState() {
     widget.selectedFiles.addListener(() {
       setState(() {});
     });
+    _userAuthEventSubscription =
+        Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
+      setState(() {});
+    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _userAuthEventSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -73,11 +88,28 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     List<Widget> actions = List<Widget>();
     if (!Configuration.instance.hasConfiguredAccount()) {
       actions.add(IconButton(
-        icon: Icon(Configuration.instance.hasConfiguredAccount()
-            ? Icons.sync_problem
-            : Icons.sync_disabled),
+        icon: Icon(Icons.sync_disabled),
         onPressed: () {
-          _navigateToSignInPage(context);
+          var page;
+          if (Configuration.instance.getToken() == null) {
+            page = EmailEntryPage();
+          } else {
+            // No key
+            if (Configuration.instance.getEncryptedKey() != null) {
+              // Yet to decrypt the key
+              page = PassphraseReentryPage();
+            } else {
+              // Never had a key
+              page = PassphraseEntryPage();
+            }
+          }
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return page;
+              },
+            ),
+          );
         },
       ));
     } else if (widget.type == GalleryAppBarType.local_folder &&
@@ -168,15 +200,5 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   void _clearSelectedFiles() {
     widget.selectedFiles.clearAll();
-  }
-
-  void _navigateToSignInPage(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return EmailEntryPage();
-        },
-      ),
-    );
   }
 }

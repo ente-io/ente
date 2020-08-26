@@ -19,6 +19,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Icon(Icons.lock),
         title: Text("Encryption Passphrase"),
       ),
       body: _getBody(),

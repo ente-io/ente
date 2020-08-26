@@ -8,7 +8,9 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/ui/ott_verification_page.dart';
 import 'package:photos/ui/passphrase_entry_page.dart';
+import 'package:photos/ui/passphrase_reentry_page.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class UserAuthenticator {
   final _dio = Dio();
@@ -29,11 +31,9 @@ class UserAuthenticator {
       },
     ).catchError((e) async {
       _logger.severe(e);
-      await dialog.hide();
-      showGenericErrorDialog(context);
     }).then((response) async {
       await dialog.hide();
-      if (response.statusCode == 200) {
+      if (response != null && response.statusCode == 200) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -58,25 +58,25 @@ class UserAuthenticator {
       },
     ).catchError((e) async {
       _logger.severe(e);
-      await dialog.hide();
-      showGenericErrorDialog(context);
     }).then((response) async {
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
         _saveConfiguration(response);
+        showToast("Email verification successful!");
+        var page;
         if (Configuration.instance.getEncryptedKey() != null) {
-          // TODO: Passphrase re-enter to decrypt
-          Bus.instance.fire(UserAuthenticatedEvent());
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          page = PassphraseReentryPage();
         } else {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return PassphraseEntryPage();
-              },
-            ),
-          );
+          page = PassphraseEntryPage();
         }
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page;
+            },
+          ),
+          (route) => route.isFirst,
+        );
       } else {
         showErrorDialog(
             context, "Oops.", "Verification failed, please try again.");
