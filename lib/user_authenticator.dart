@@ -61,9 +61,9 @@ class UserAuthenticator {
       showGenericErrorDialog(context);
     }).then((response) async {
       await dialog.hide();
-      if (response.statusCode == 200) {
+      if (response != null && response.statusCode == 200) {
         _saveConfiguration(response);
-        Navigator.of(context).pop();
+        Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         showErrorDialog(
             context, "Oops.", "Verification failed, please try again.");
@@ -71,6 +71,7 @@ class UserAuthenticator {
     });
   }
 
+  @deprecated
   Future<bool> login(String username, String password) {
     return _dio.post(
         Configuration.instance.getHttpEndpoint() + "/users/authenticate",
@@ -91,6 +92,7 @@ class UserAuthenticator {
     });
   }
 
+  @deprecated
   Future<bool> create(String username, String password) {
     return _dio
         .post(Configuration.instance.getHttpEndpoint() + "/users", data: {
