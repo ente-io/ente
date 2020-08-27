@@ -1,20 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 import 'dart:math';
 
 import 'package:logging/logging.dart';
-import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/file_upload_manager.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_name_util.dart';
-import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:photos/models/file.dart';
@@ -26,6 +24,7 @@ class PhotoSyncManager {
   final _logger = Logger("PhotoSyncManager");
   final _dio = Dio();
   final _db = FilesDB.instance;
+  final _uploadManager = FileUploadManager();
   bool _isSyncInProgress = false;
   Future<void> _existingSync;
   SharedPreferences _prefs;
@@ -207,9 +206,9 @@ class PhotoSyncManager {
         }
         var uploadedFile;
         if (Configuration.instance.hasOptedForE2E()) {
-          uploadedFile = await _uploadEncryptedFile(file);
+          uploadedFile = await _uploadManager.encryptAndUploadFile(file);
         } else {
-          uploadedFile = await _uploadFile(file);
+          uploadedFile = await _uploadManager.uploadFile(file);
         }
         await _db.update(file.generatedID, uploadedFile.uploadedFileID,
             uploadedFile.updationTime);
@@ -293,78 +292,6 @@ class PhotoSyncManager {
       Bus.instance.fire(RemoteSyncEvent(false));
       return null;
     }
-  }
-
-  Future<File> _uploadEncryptedFile(File file) async {
-    final key = Configuration.instance.getKey();
-
-    final encryptedFileName = file.generatedID.toString() + ".aes";
-    final tempDirectory = Configuration.instance.getTempDirectory();
-    final encryptedFilePath = tempDirectory + encryptedFileName;
-    await CryptoUtil.encryptDataToFile(
-        await getBytesFromDisk(file), encryptedFilePath, key);
-
-    final thumbnailData = (await (await file.getAsset())
-        .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE));
-    final encryptedThumbnailName =
-        file.generatedID.toString() + "_thumbnail.aes";
-    final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
-    await CryptoUtil.encryptDataToFile(
-        thumbnailData, encryptedThumbnailPath, key);
-
-    final metadata = jsonEncode(file.getMetadata());
-    final metadataIV =
-        CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
-    final encryptedMetadata =
-        CryptoUtil.encryptToBase64(metadata, key, metadataIV);
-    final formData = FormData.fromMap({
-      "file": MultipartFile.fromFileSync(encryptedFilePath,
-          filename: encryptedFileName),
-      "thumbnail": MultipartFile.fromFileSync(encryptedThumbnailPath,
-          filename: encryptedThumbnailName),
-      "metadata": encryptedMetadata,
-      "metadataIV": metadataIV,
-    });
-
-    return _dio
-        .post(
-      Configuration.instance.getHttpEndpoint() + "/encrypted-files",
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      data: formData,
-    )
-        .then((response) {
-      io.File(encryptedFilePath).deleteSync();
-      io.File(encryptedThumbnailPath).deleteSync();
-      final data = response.data;
-      file.uploadedFileID = data["id"];
-      file.updationTime = data["updationTime"];
-      file.ownerID = data["ownerID"];
-      return file;
-    });
-  }
-
-  Future<File> _uploadFile(File localPhoto) async {
-    final title = getJPGFileNameForHEIC(localPhoto);
-    final formData = FormData.fromMap({
-      "file": MultipartFile.fromBytes(await getBytesFromDisk(localPhoto),
-          filename: title),
-      "deviceFileID": localPhoto.localID,
-      "deviceFolder": localPhoto.deviceFolder,
-      "title": title,
-      "creationTime": localPhoto.creationTime,
-      "modificationTime": localPhoto.modificationTime,
-    });
-    return _dio
-        .post(
-      Configuration.instance.getHttpEndpoint() + "/files",
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      data: formData,
-    )
-        .then((response) {
-      return File.fromJson(response.data);
-    });
   }
 
   Future<void> _deletePhotosOnServer() async {
