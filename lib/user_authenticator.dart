@@ -24,7 +24,7 @@ class UserAuthenticator {
   Future<void> getOtt(BuildContext context, String email) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
-    await Dio().get(
+    await _dio.get(
       Configuration.instance.getHttpEndpoint() + "/users/ott",
       queryParameters: {
         "email": email,
@@ -50,7 +50,7 @@ class UserAuthenticator {
   Future<void> getCredentials(BuildContext context, String ott) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
-    await Dio().get(
+    await _dio.get(
       Configuration.instance.getHttpEndpoint() + "/users/credentials",
       queryParameters: {
         "email": Configuration.instance.getEmail(),
