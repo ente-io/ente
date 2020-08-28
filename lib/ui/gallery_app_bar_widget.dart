@@ -7,9 +7,9 @@ import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/email_entry_page.dart';
-import 'package:photos/ui/ott_verification_page.dart';
 import 'package:photos/ui/passphrase_entry_page.dart';
 import 'package:photos/ui/passphrase_reentry_page.dart';
+import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/share_folder_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -86,7 +86,20 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getDefaultActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
-    if (!Configuration.instance.hasConfiguredAccount()) {
+    if (Configuration.instance.hasConfiguredAccount()) {
+      actions.add(IconButton(
+        icon: Icon(Icons.settings),
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return SettingsPage();
+              },
+            ),
+          );
+        },
+      ));
+    } else {
       actions.add(IconButton(
         icon: Icon(Icons.sync_disabled),
         onPressed: () {
@@ -110,14 +123,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               },
             ),
           );
-        },
-      ));
-    } else if (widget.type == GalleryAppBarType.local_folder &&
-        widget.title != "Favorites") {
-      actions.add(IconButton(
-        icon: Icon(Icons.person_add),
-        onPressed: () {
-          _showShareCollectionDialog();
         },
       ));
     }
