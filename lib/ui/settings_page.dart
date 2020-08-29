@@ -1,3 +1,4 @@
+import 'package:crisp/crisp.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -144,36 +145,92 @@ class SupportSectionWidget extends StatelessWidget {
       child: Column(children: [
         Padding(padding: EdgeInsets.all(12)),
         SettingsSectionTitle("SUPPORT"),
-        Padding(padding: EdgeInsets.all(4)),
         GestureDetector(
+          behavior: HitTestBehavior.translucent,
           onTap: () async {
             final Email email = Email(
               recipients: ['support@ente.io'],
               isHTML: false,
             );
-
             await FlutterEmailSender.send(email);
           },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
             children: [
-              Align(alignment: Alignment.centerLeft, child: Text("Email")),
-              Icon(Icons.navigate_next),
+              Padding(padding: EdgeInsets.all(4)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Align(alignment: Alignment.centerLeft, child: Text("Email")),
+                  Icon(Icons.navigate_next),
+                ],
+              ),
+              Padding(padding: EdgeInsets.all(4)),
             ],
           ),
         ),
-        Padding(padding: EdgeInsets.all(4)),
         Divider(height: 4),
-        Padding(padding: EdgeInsets.all(4)),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Align(alignment: Alignment.centerLeft, child: Text("Chat")),
-            Icon(Icons.navigate_next),
-          ],
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return CrispChatPage();
+                },
+              ),
+            );
+          },
+          child: Column(
+            children: [
+              Padding(padding: EdgeInsets.all(4)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Align(alignment: Alignment.centerLeft, child: Text("Chat")),
+                  Icon(Icons.navigate_next),
+                ],
+              ),
+              Padding(padding: EdgeInsets.all(4)),
+            ],
+          ),
         ),
-        Padding(padding: EdgeInsets.all(4)),
       ]),
+    );
+  }
+}
+
+class CrispChatPage extends StatefulWidget {
+  CrispChatPage({Key key}) : super(key: key);
+
+  @override
+  _CrispChatPageState createState() => _CrispChatPageState();
+}
+
+class _CrispChatPageState extends State<CrispChatPage> {
+  static const websiteID = "86d56ea2-68a2-43f9-8acb-95e06dee42e8";
+
+  @override
+  void initState() {
+    crisp.initialize(
+      websiteId: websiteID,
+    );
+    crisp.register(
+      CrispUser(
+        email: Configuration.instance.getEmail(),
+      ),
+    );
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Support"),
+      ),
+      body: CrispView(
+        loadingWidget: loadWidget,
+      ),
     );
   }
 }
