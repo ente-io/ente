@@ -13,6 +13,21 @@ Map<int, String> _months = {
   12: "Dec",
 };
 
+Map<int, String> _fullMonths = {
+  1: "January",
+  2: "February",
+  3: "March",
+  4: "April",
+  5: "May",
+  6: "June",
+  7: "July",
+  8: "August",
+  9: "September",
+  10: "October",
+  11: "November",
+  12: "December",
+};
+
 Map<int, String> _days = {
   1: "Mon",
   2: "Tue",
@@ -41,6 +56,10 @@ String getDay(DateTime dateTime) {
 
 String getMonth(DateTime dateTime) {
   return _months[dateTime.month];
+}
+
+String getFullMonth(DateTime dateTime) {
+  return _fullMonths[dateTime.month];
 }
 
 String getTime(DateTime dateTime) {

@@ -75,7 +75,7 @@ class UsageWidgetState extends State<UsageWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Tentative bill for " + getMonth(DateTime.now())),
+              Text("Tentative bill for " + getFullMonth(DateTime.now())),
               _usageInGBs == null ? loadWidget : _getCost(_usageInGBs),
             ],
           )
