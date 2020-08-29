@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -21,11 +22,12 @@ class SettingsPage extends StatelessWidget {
 
   Widget _getBody() {
     return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.all(8),
-        child: Row(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
           children: [
             UsageWidget(),
+            SupportSectionWidget(),
           ],
         ),
       ),
@@ -51,44 +53,32 @@ class UsageWidgetState extends State<UsageWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Expanded(
-        child: Column(
-          children: [
-            Padding(padding: EdgeInsets.all(4)),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "BILLING",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).accentColor,
-                ),
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Total data backed up"),
-                _usageInGBs == null
-                    ? loadWidget
-                    : Text(
-                        _usageInGBs.toString() + " GB",
-                      ),
-              ],
-            ),
-            Padding(padding: EdgeInsets.all(4)),
-            Divider(height: 10),
-            Padding(padding: EdgeInsets.all(4)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Tentative bill for " + getMonth(DateTime.now())),
-                _usageInGBs == null ? loadWidget : _getCost(_usageInGBs),
-              ],
-            )
-          ],
-        ),
+      child: Column(
+        children: [
+          SettingsSectionTitle("BILLING"),
+          Padding(padding: EdgeInsets.all(4)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Total data backed up"),
+              _usageInGBs == null
+                  ? loadWidget
+                  : Text(
+                      _usageInGBs.toString() + " GB",
+                    ),
+            ],
+          ),
+          Padding(padding: EdgeInsets.all(4)),
+          Divider(height: 4),
+          Padding(padding: EdgeInsets.all(4)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Tentative bill for " + getMonth(DateTime.now())),
+              _usageInGBs == null ? loadWidget : _getCost(_usageInGBs),
+            ],
+          )
+        ],
       ),
     );
   }
@@ -118,5 +108,72 @@ class UsageWidgetState extends State<UsageWidget> {
         }
       }
     });
+  }
+}
+
+class SettingsSectionTitle extends StatelessWidget {
+  final String title;
+  const SettingsSectionTitle(this.title, {Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Column(children: [
+      Padding(padding: EdgeInsets.all(4)),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).accentColor,
+          ),
+        ),
+      ),
+      Padding(padding: EdgeInsets.all(4)),
+    ]));
+  }
+}
+
+class SupportSectionWidget extends StatelessWidget {
+  const SupportSectionWidget({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(children: [
+        Padding(padding: EdgeInsets.all(12)),
+        SettingsSectionTitle("SUPPORT"),
+        Padding(padding: EdgeInsets.all(4)),
+        GestureDetector(
+          onTap: () async {
+            final Email email = Email(
+              recipients: ['support@ente.io'],
+              isHTML: false,
+            );
+
+            await FlutterEmailSender.send(email);
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Align(alignment: Alignment.centerLeft, child: Text("Email")),
+              Icon(Icons.navigate_next),
+            ],
+          ),
+        ),
+        Padding(padding: EdgeInsets.all(4)),
+        Divider(height: 4),
+        Padding(padding: EdgeInsets.all(4)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Align(alignment: Alignment.centerLeft, child: Text("Chat")),
+            Icon(Icons.navigate_next),
+          ],
+        ),
+        Padding(padding: EdgeInsets.all(4)),
+      ]),
+    );
   }
 }
