@@ -1,9 +1,13 @@
 import 'dart:typed_data';
 
+import 'dart:io' as io;
 import 'package:aes_crypt/aes_crypt.dart';
 import 'package:computer/computer.dart';
 import 'package:encrypt/encrypt.dart';
 import 'dart:convert';
+
+import 'package:photos/core/configuration.dart';
+import 'package:uuid/uuid.dart';
 
 class CryptoUtil {
   static String getBase64EncodedSecureRandomString({int length = 32}) {
@@ -48,6 +52,17 @@ class CryptoUtil {
     return Computer().compute(runEncryptDataToFile, param: args);
   }
 
+  static Future<String> encryptDataToData(Uint8List source, String key) async {
+    final destinationPath =
+        Configuration.instance.getTempDirectory() + Uuid().v4();
+    return encryptDataToFile(source, destinationPath, key).then((value) {
+      final file = io.File(destinationPath);
+      final data = file.readAsStringSync(encoding: utf8);
+      file.deleteSync();
+      return data;
+    });
+  }
+
   static Future<void> decryptFileToFile(
       String sourcePath, String destinationPath, String key) async {
     final args = Map<String, String>();
@@ -62,6 +77,16 @@ class CryptoUtil {
     args["key"] = key;
     args["source"] = sourcePath;
     return Computer().compute(runDecryptFileToData, param: args);
+  }
+
+  static Future<String> decryptDataToData(String source, String key) {
+    final sourcePath = Configuration.instance.getTempDirectory() + Uuid().v4();
+    final file = io.File(sourcePath);
+    file.writeAsStringSync(source);
+    return decryptFileToData(sourcePath, key).then((value) {
+      file.deleteSync();
+      return utf8.decode(value);
+    });
   }
 }
 
