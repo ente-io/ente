@@ -31,6 +31,8 @@ class FilesDB {
   static final columnCreationTime = 'creation_time';
   static final columnModificationTime = 'modification_time';
   static final columnUpdationTime = 'updation_time';
+  static final columnEncryptedKey = 'encrypted_key';
+  static final columnIV = 'iv';
 
   // make this a singleton class
   FilesDB._privateConstructor();
@@ -72,6 +74,8 @@ class FilesDB {
             $columnCreationTime TEXT NOT NULL,
             $columnModificationTime TEXT NOT NULL,
             $columnUpdationTime TEXT
+            $columnEncryptedKey TEXT
+            $columnIV TEXT
           )
           ''');
   }
@@ -170,21 +174,30 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
-  Future<File> getMatchingFile(String localID, String title,
-      String deviceFolder, int creationTime, int modificationTime,
+  Future<File> getMatchingFile(
+      String localID,
+      String title,
+      String deviceFolder,
+      int creationTime,
+      int modificationTime,
+      String encryptedKey,
+      String iv,
       {String alternateTitle}) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
       where: '''$columnLocalID=? AND ($columnTitle=? OR $columnTitle=?) AND 
-          $columnDeviceFolder=? AND $columnCreationTime=? AND $columnModificationTime=?''',
+          $columnDeviceFolder=? AND $columnCreationTime=? AND 
+          $columnModificationTime=? AND $columnEncryptedKey AND $columnIV''',
       whereArgs: [
         localID,
         title,
         alternateTitle,
         deviceFolder,
         creationTime,
-        modificationTime
+        modificationTime,
+        encryptedKey,
+        iv,
       ],
     );
     if (rows.isNotEmpty) {
@@ -208,11 +221,19 @@ class FilesDB {
     }
   }
 
-  Future<int> update(int generatedID, int uploadedID, int updationTime) async {
+  Future<int> update(
+    int generatedID,
+    int uploadedID,
+    int updationTime,
+    String encryptedKey,
+    String iv,
+  ) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
     values[columnUploadedFileID] = uploadedID;
     values[columnUpdationTime] = updationTime;
+    values[columnEncryptedKey] = encryptedKey;
+    values[columnIV] = iv;
     return await db.update(
       table,
       values,
@@ -364,6 +385,8 @@ class FilesDB {
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
+    row[columnEncryptedKey] = file.encryptedKey;
+    row[columnIV] = file.iv;
     return row;
   }
 
@@ -386,6 +409,8 @@ class FilesDB {
     file.updationTime = row[columnUpdationTime] == null
         ? -1
         : int.parse(row[columnUpdationTime]);
+    file.encryptedKey = row[columnEncryptedKey];
+    file.iv = row[columnIV];
     return file;
   }
 }

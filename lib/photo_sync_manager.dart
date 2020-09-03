@@ -178,7 +178,7 @@ class PhotoSyncManager {
   Future<void> _downloadEncryptedFilesDiff() async {
     final diff =
         await _getEncryptedFilesDiff(_getEncryptedFilesSyncTime(), _diffLimit);
-    if (diff != null && diff.isNotEmpty) {
+    if (diff.isNotEmpty) {
       await _storeDiff(diff, _encryptedFilesSyncTimeKey);
       FileRepository.instance.reloadFiles();
       if (diff.length == _diffLimit) {
@@ -211,9 +211,8 @@ class PhotoSyncManager {
           uploadedFile = await _uploadManager.uploadFile(file);
         }
         await _db.update(file.generatedID, uploadedFile.uploadedFileID,
-            uploadedFile.updationTime);
+            uploadedFile.updationTime, file.encryptedKey, file.iv);
         _prefs.setInt(_syncTimeKey, uploadedFile.updationTime);
-
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: photosToBeUploaded.length));
       } catch (e) {
@@ -232,9 +231,11 @@ class PhotoSyncManager {
             file.deviceFolder,
             file.creationTime,
             file.modificationTime,
+            file.encryptedKey,
+            file.iv,
             alternateTitle: getHEICFileNameForJPG(file));
-        await _db.update(
-            existingPhoto.generatedID, file.uploadedFileID, file.updationTime);
+        await _db.update(existingPhoto.generatedID, file.uploadedFileID,
+            file.updationTime, file.encryptedKey, file.iv);
       } catch (e) {
         file.localID = null; // File uploaded from a different device
         await _db.insert(file);
@@ -265,33 +266,41 @@ class PhotoSyncManager {
   }
 
   Future<List<File>> _getEncryptedFilesDiff(int lastSyncTime, int limit) async {
-    Response response = await _dio.get(
-      Configuration.instance.getHttpEndpoint() + "/encrypted-files/diff",
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      queryParameters: {
-        "sinceTimestamp": lastSyncTime,
-        "limit": limit,
-      },
-    ).catchError((e) => _logger.severe(e));
-    if (response != null) {
-      Bus.instance.fire(RemoteSyncEvent(true));
-      return (response.data["diff"] as List).map((json) {
-        final file = File();
-        file.uploadedFileID = json["id"];
-        file.ownerID = json["ownerID"];
-        file.updationTime = json["updationTime"];
-        file.isEncrypted = true;
-        final String metadataIV = json["metadataIV"];
-        Map<String, dynamic> metadata = jsonDecode(CryptoUtil.decryptFromBase64(
-            json["metadata"], Configuration.instance.getKey(), metadataIV));
-        file.applyMetadata(metadata);
-        return file;
-      }).toList();
-    } else {
-      Bus.instance.fire(RemoteSyncEvent(false));
-      return null;
-    }
+    return _dio
+        .get(
+          Configuration.instance.getHttpEndpoint() + "/encrypted-files/diff",
+          queryParameters: {
+            "token": Configuration.instance.getToken(),
+            "sinceTimestamp": lastSyncTime,
+            "limit": limit,
+          },
+        )
+        .catchError((e) => _logger.severe(e))
+        .then((response) async {
+          final files = List<File>();
+          if (response != null) {
+            Bus.instance.fire(RemoteSyncEvent(true));
+            final diff = response.data["diff"] as List;
+            for (final json in diff) {
+              final file = File();
+              file.uploadedFileID = json["id"];
+              file.ownerID = json["ownerID"];
+              file.updationTime = json["updationTime"];
+              file.isEncrypted = true;
+              file.encryptedKey = json["encryptedKey"];
+              file.iv = json["iv"];
+              final key = CryptoUtil.decryptFromBase64(
+                  file.encryptedKey, Configuration.instance.getKey(), file.iv);
+              Map<String, dynamic> metadata = jsonDecode(
+                  await CryptoUtil.decryptDataToData(json["metadata"], key));
+              file.applyMetadata(metadata);
+              files.add(file);
+            }
+          } else {
+            Bus.instance.fire(RemoteSyncEvent(false));
+          }
+          return files;
+        });
   }
 
   Future<void> _deletePhotosOnServer() async {

@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
+import 'package:photos/utils/crypto_util.dart';
 
 class File {
   int generatedID;
@@ -18,6 +19,8 @@ class File {
   int updationTime;
   Location location;
   FileType fileType;
+  String encryptedKey;
+  String iv;
 
   File();
 
@@ -128,6 +131,14 @@ class File {
         uploadedFileID.toString() +
         "?token=" +
         Configuration.instance.getToken();
+  }
+
+  String getKey() {
+    if (encryptedKey == null) {
+      return null;
+    }
+    return CryptoUtil.decryptFromBase64(
+        encryptedKey, Configuration.instance.getKey(), iv);
   }
 
   @override

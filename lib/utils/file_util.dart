@@ -149,8 +149,8 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     onReceiveProgress: progressCallback,
   )
       .then((_) async {
-    final data = await CryptoUtil.decryptFileToData(
-        temporaryPath, Configuration.instance.getKey());
+    final data =
+        await CryptoUtil.decryptFileToData(temporaryPath, file.getKey());
     io.File(temporaryPath).deleteSync();
     return cacheManager.putFile(file.getDownloadUrl(), data);
   });
@@ -162,8 +162,8 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
       "_thumbnail.aes";
   Dio dio = Dio();
   return dio.download(file.getThumbnailUrl(), temporaryPath).then((_) async {
-    final data = await CryptoUtil.decryptFileToData(
-        temporaryPath, Configuration.instance.getKey());
+    final data =
+        await CryptoUtil.decryptFileToData(temporaryPath, file.getKey());
     io.File(temporaryPath).deleteSync();
     return ThumbnailCacheManager().putFile(file.getThumbnailUrl(), data);
   });

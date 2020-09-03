@@ -41,7 +41,10 @@ class FileUploadManager {
   }
 
   Future<File> encryptAndUploadFile(File file) async {
-    final key = Configuration.instance.getKey();
+    final key = CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
+    final iv = CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
+    final encryptedKey =
+        CryptoUtil.encryptToBase64(key, Configuration.instance.getKey(), iv);
 
     final encryptedFileName = file.generatedID.toString() + ".aes";
     final tempDirectory = Configuration.instance.getTempDirectory();
@@ -66,15 +69,14 @@ class FileUploadManager {
         await putFile(thumbnailUploadURL, io.File(encryptedThumbnailPath));
 
     final metadata = jsonEncode(file.getMetadata());
-    final metadataIV =
-        CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
     final encryptedMetadata =
-        CryptoUtil.encryptToBase64(metadata, key, metadataIV);
+        CryptoUtil.encryptDataToData(utf8.encode(metadata), key);
     final data = {
       "fileObjectKey": fileObjectKey,
       "thumbnailObjectKey": thumbnailObjectKey,
       "metadata": encryptedMetadata,
-      "metadataIV": metadataIV,
+      "encryptedKey": encryptedKey,
+      "iv": iv,
     };
     return _dio
         .post(
@@ -90,6 +92,8 @@ class FileUploadManager {
       file.uploadedFileID = data["id"];
       file.updationTime = data["updationTime"];
       file.ownerID = data["ownerID"];
+      file.encryptedKey = encryptedKey;
+      file.iv = iv;
       return file;
     });
   }
