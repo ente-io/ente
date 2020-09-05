@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 
 import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/models/key_attributes.dart';
 import 'package:photos/ui/ott_verification_page.dart';
 import 'package:photos/ui/passphrase_entry_page.dart';
 import 'package:photos/ui/passphrase_reentry_page.dart';
@@ -103,7 +104,7 @@ class UserAuthenticator {
         .catchError((e) async {
       await dialog.hide();
       Configuration.instance.setKey(null);
-      Configuration.instance.setEncryptedKey(null);
+      Configuration.instance.setKeyAttributes(null);
       _logger.severe(e);
       showGenericErrorDialog(context);
     }).then((response) async {
@@ -113,7 +114,7 @@ class UserAuthenticator {
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         Configuration.instance.setKey(null);
-        Configuration.instance.setEncryptedKey(null);
+        Configuration.instance.setKeyAttributes(null);
         showGenericErrorDialog(context);
       }
     });
@@ -178,9 +179,10 @@ class UserAuthenticator {
   void _saveConfiguration(Response response) {
     Configuration.instance.setUserID(response.data["id"]);
     Configuration.instance.setToken(response.data["token"]);
-    final String encryptedKey = response.data["encryptedKey"];
-    if (encryptedKey != null && encryptedKey.isNotEmpty) {
-      Configuration.instance.setEncryptedKey(encryptedKey);
+    final keyAttributes = response.data["encryptedKey"];
+    if (keyAttributes != null) {
+      Configuration.instance
+          .setKeyAttributes(KeyAttributes.fromMap(keyAttributes));
     }
   }
 }

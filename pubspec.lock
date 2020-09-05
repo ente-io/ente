@@ -471,6 +471,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
+  pc_steelcrypt:
+    dependency: transitive
+    description:
+      name: pc_steelcrypt
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.1"
   pedantic:
     dependency: transitive
     description:
@@ -665,6 +672,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.9.5"
+  steel_crypt:
+    dependency: "direct main"
+    description:
+      name: steel_crypt
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.2+1"
   stream_channel:
     dependency: transitive
     description:

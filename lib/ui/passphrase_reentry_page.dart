@@ -71,8 +71,16 @@ class _PassphraseReentryPageState extends State<PassphraseReentryPage> {
                           final dialog =
                               createProgressDialog(context, "Please wait...");
                           await dialog.show();
-                          await Configuration.instance
-                              .decryptEncryptedKey(_passphraseController.text);
+                          try {
+                            await Configuration.instance.decryptAndSaveKey(
+                                _passphraseController.text,
+                                Configuration.instance.getKeyAttributes());
+                          } catch (e) {
+                            await dialog.hide();
+                            showErrorDialog(context, "Incorrect passphrase",
+                                "Please try again.");
+                            return;
+                          }
                           await dialog.hide();
                           Bus.instance.fire(UserAuthenticatedEvent());
                           Navigator.of(context)

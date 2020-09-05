@@ -350,7 +350,7 @@ class _PassphraseDialogState extends State<PassphraseDialog> {
               await Configuration.instance.generateAndSaveKey(_passphrase);
               await UserAuthenticator.instance.setEncryptedKeyOnServer();
             } else {
-              await Configuration.instance.decryptEncryptedKey(_passphrase);
+              await Configuration.instance.decryptAndSaveKey(_passphrase, null);
             }
             Bus.instance.fire(UserAuthenticatedEvent());
           },

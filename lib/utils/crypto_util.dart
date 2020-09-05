@@ -7,11 +7,22 @@ import 'package:encrypt/encrypt.dart';
 import 'dart:convert';
 
 import 'package:photos/core/configuration.dart';
+import 'package:steel_crypt/steel_crypt.dart' as steel;
 import 'package:uuid/uuid.dart';
 
 class CryptoUtil {
   static String getBase64EncodedSecureRandomString({int length = 32}) {
     return SecureRandom(length).base64;
+  }
+
+  static String scrypt(String passphrase, String salt, int length) {
+    return steel.PassCrypt.scrypt()
+        .hash(salt: salt, inp: passphrase, len: length);
+  }
+
+  static bool compareHash(String plainText, String hash, String salt) {
+    return steel.PassCrypt.scrypt()
+        .check(plain: plainText, hashed: hash, salt: salt);
   }
 
   static String encryptToBase64(

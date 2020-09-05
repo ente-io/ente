@@ -34,6 +34,8 @@ class File {
     creationTime = json["creationTime"];
     modificationTime = json["modificationTime"];
     updationTime = json["updationTime"];
+    encryptedKey = json["encryptedKey"];
+    iv = json["iv"];
   }
 
   static Future<File> fromAsset(

@@ -70,8 +70,8 @@ class FolderSharingService {
       try {
         var existingPhoto =
             await FilesDB.instance.getMatchingRemoteFile(file.uploadedFileID);
-        await FilesDB.instance.update(
-            existingPhoto.generatedID, file.uploadedFileID, file.updationTime);
+        await FilesDB.instance.update(existingPhoto.generatedID,
+            file.uploadedFileID, file.updationTime, file.encryptedKey, file.iv);
       } catch (e) {
         await FilesDB.instance.insert(file);
       }
