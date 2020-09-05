@@ -122,14 +122,22 @@ class Configuration {
   }
 
   Future<void> setKeyAttributes(KeyAttributes attributes) async {
-    await _preferences.setString(keyKekSalt, attributes.kekSalt);
-    await _preferences.setString(keyKekHash, attributes.kekHash);
-    await _preferences.setString(keyKekHashSalt, attributes.kekHashSalt);
-    await _preferences.setString(keyEncryptedKey, attributes.encryptedKey);
-    await _preferences.setString(keyEncryptedKeyIV, attributes.encryptedKeyIV);
+    await _preferences.setString(
+        keyKekSalt, attributes == null ? null : attributes.kekSalt);
+    await _preferences.setString(
+        keyKekHash, attributes == null ? null : attributes.kekHash);
+    await _preferences.setString(
+        keyKekHashSalt, attributes == null ? null : attributes.kekHashSalt);
+    await _preferences.setString(
+        keyEncryptedKey, attributes == null ? null : attributes.encryptedKey);
+    await _preferences.setString(keyEncryptedKeyIV,
+        attributes == null ? null : attributes.encryptedKeyIV);
   }
 
   KeyAttributes getKeyAttributes() {
+    if (_preferences.getString(keyEncryptedKey) == null) {
+      return null;
+    }
     return KeyAttributes(
         _preferences.getString(keyKekSalt),
         _preferences.getString(keyKekHash),

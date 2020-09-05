@@ -144,7 +144,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
           onPressed: () {
             Navigator.of(context).pop();
             UserAuthenticator.instance
-                .setPassphrase(context, _passphraseController1.text);
+                .setupKey(context, _passphraseController1.text);
           },
         ),
       ],

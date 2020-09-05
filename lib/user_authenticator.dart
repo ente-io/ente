@@ -85,16 +85,15 @@ class UserAuthenticator {
     });
   }
 
-  Future<void> setPassphrase(BuildContext context, String passphrase) async {
+  Future<void> setupKey(BuildContext context, String passphrase) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
-    await Configuration.instance.generateAndSaveKey(passphrase);
+    final keyAttributes =
+        await Configuration.instance.generateAndSaveKey(passphrase);
     await _dio
         .put(
-      Configuration.instance.getHttpEndpoint() + "/users/encrypted-key",
-      data: {
-        "encryptedKey": Configuration.instance.getEncryptedKey(),
-      },
+      Configuration.instance.getHttpEndpoint() + "/users/key-attributes",
+      data: keyAttributes.toMap(),
       options: Options(
         headers: {
           "X-Auth-Token": Configuration.instance.getToken(),
@@ -120,66 +119,10 @@ class UserAuthenticator {
     });
   }
 
-  @deprecated
-  Future<bool> login(String username, String password) {
-    return _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/users/authenticate",
-        data: {
-          "username": username,
-          "password": password,
-        }).then((response) {
-      if (response.statusCode == 200 && response.data != null) {
-        _saveConfiguration(response);
-        Bus.instance.fire(UserAuthenticatedEvent());
-        return true;
-      } else {
-        return false;
-      }
-    }).catchError((e) {
-      _logger.severe(e.toString());
-      return false;
-    });
-  }
-
-  @deprecated
-  Future<bool> create(String username, String password) {
-    return _dio
-        .post(Configuration.instance.getHttpEndpoint() + "/users", data: {
-      "username": username,
-      "password": password,
-    }).then((response) {
-      if (response.statusCode == 200 && response.data != null) {
-        _saveConfiguration(response);
-        return true;
-      } else {
-        if (response.data != null && response.data["message"] != null) {
-          throw Exception(response.data["message"]);
-        } else {
-          throw Exception("Something went wrong");
-        }
-      }
-    }).catchError((e) {
-      _logger.severe(e.toString());
-      throw e;
-    });
-  }
-
-  Future<void> setEncryptedKeyOnServer() {
-    return _dio.put(
-      Configuration.instance.getHttpEndpoint() + "/users/encrypted-key",
-      data: {
-        "encryptedKey": Configuration.instance.getEncryptedKey(),
-      },
-      options: Options(headers: {
-        "X-Auth-Token": Configuration.instance.getToken(),
-      }),
-    );
-  }
-
   void _saveConfiguration(Response response) {
     Configuration.instance.setUserID(response.data["id"]);
     Configuration.instance.setToken(response.data["token"]);
-    final keyAttributes = response.data["encryptedKey"];
+    final keyAttributes = response.data["keyAttributes"];
     if (keyAttributes != null) {
       Configuration.instance
           .setKeyAttributes(KeyAttributes.fromMap(keyAttributes));
