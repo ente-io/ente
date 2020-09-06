@@ -70,15 +70,8 @@ class Configuration {
     await setKey(key);
   }
 
-  String getEndpoint() {
-    return "192.168.0.100";
-  }
-
   String getHttpEndpoint() {
-    if (getEndpoint() == null) {
-      return "";
-    }
-    return "http://" + getEndpoint();
+    return "http://api.staging.ente.io";
   }
 
   Future<void> setEndpoint(String endpoint) async {
