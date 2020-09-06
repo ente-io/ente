@@ -70,13 +70,13 @@ class FileUploadManager {
 
     final metadata = jsonEncode(file.getMetadata());
     final encryptedMetadata =
-        CryptoUtil.encryptDataToData(utf8.encode(metadata), key);
+        await CryptoUtil.encryptDataToData(utf8.encode(metadata), key);
     final data = {
       "fileObjectKey": fileObjectKey,
       "thumbnailObjectKey": thumbnailObjectKey,
       "metadata": encryptedMetadata,
       "encryptedKey": encryptedKey,
-      "iv": iv,
+      "encryptedKeyIV": iv,
     };
     return _dio
         .post(
@@ -93,7 +93,7 @@ class FileUploadManager {
       file.updationTime = data["updationTime"];
       file.ownerID = data["ownerID"];
       file.encryptedKey = encryptedKey;
-      file.iv = iv;
+      file.encryptedKeyIV = iv;
       return file;
     });
   }

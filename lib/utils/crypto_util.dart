@@ -68,9 +68,9 @@ class CryptoUtil {
         Configuration.instance.getTempDirectory() + Uuid().v4();
     return encryptDataToFile(source, destinationPath, key).then((value) {
       final file = io.File(destinationPath);
-      final data = file.readAsStringSync(encoding: utf8);
+      final data = file.readAsBytesSync();
       file.deleteSync();
-      return data;
+      return base64.encode(data);
     });
   }
 
@@ -90,13 +90,13 @@ class CryptoUtil {
     return Computer().compute(runDecryptFileToData, param: args);
   }
 
-  static Future<String> decryptDataToData(String source, String key) {
+  static Future<Uint8List> decryptDataToData(String source, String key) {
     final sourcePath = Configuration.instance.getTempDirectory() + Uuid().v4();
     final file = io.File(sourcePath);
-    file.writeAsStringSync(source);
+    file.writeAsBytesSync(base64.decode(source));
     return decryptFileToData(sourcePath, key).then((value) {
       file.deleteSync();
-      return utf8.decode(value);
+      return value;
     });
   }
 }
