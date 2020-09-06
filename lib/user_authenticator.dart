@@ -62,7 +62,7 @@ class UserAuthenticator {
     }).then((response) async {
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
-        _saveConfiguration(response);
+        await _saveConfiguration(response);
         showToast("Email verification successful!");
         var page;
         if (Configuration.instance.getEncryptedKey() != null) {
@@ -119,12 +119,12 @@ class UserAuthenticator {
     });
   }
 
-  void _saveConfiguration(Response response) {
-    Configuration.instance.setUserID(response.data["id"]);
-    Configuration.instance.setToken(response.data["token"]);
+  Future<void> _saveConfiguration(Response response) async {
+    await Configuration.instance.setUserID(response.data["id"]);
+    await Configuration.instance.setToken(response.data["token"]);
     final keyAttributes = response.data["keyAttributes"];
     if (keyAttributes != null) {
-      Configuration.instance
+      await Configuration.instance
           .setKeyAttributes(KeyAttributes.fromMap(keyAttributes));
     }
   }
