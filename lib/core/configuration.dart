@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -45,12 +44,11 @@ class Configuration {
   Future<KeyAttributes> generateAndSaveKey(String passphrase) async {
     final key = CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
     final kekSalt = CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
-    final kek =
-        base64.encode(CryptoUtil.scrypt(passphrase, kekSalt, 32).codeUnits);
+    final kek = CryptoUtil.scrypt(passphrase, kekSalt, 32);
     final kekHashSalt =
         CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
     final kekHash = CryptoUtil.scrypt(kek, kekHashSalt, 32);
-    final iv = CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
+    final iv = CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
     final encryptedKey = CryptoUtil.encryptToBase64(key, kek, iv);
     final attributes =
         KeyAttributes(kekSalt, kekHash, kekHashSalt, encryptedKey, iv);
@@ -61,8 +59,7 @@ class Configuration {
 
   Future<void> decryptAndSaveKey(
       String passphrase, KeyAttributes attributes) async {
-    final kek = base64.encode(
-        CryptoUtil.scrypt(passphrase, attributes.kekSalt, 32).codeUnits);
+    final kek = CryptoUtil.scrypt(passphrase, attributes.kekSalt, 32);
     bool correctPassphrase =
         CryptoUtil.compareHash(kek, attributes.kekHash, attributes.kekHashSalt);
     if (!correctPassphrase) {
@@ -74,17 +71,17 @@ class Configuration {
   }
 
   String getEndpoint() {
-    return "192.168.0.106";
+    return "192.168.0.100";
   }
 
   String getHttpEndpoint() {
     if (getEndpoint() == null) {
       return "";
     }
-    return "http://" + getEndpoint() + ":8080";
+    return "http://" + getEndpoint();
   }
 
-  void setEndpoint(String endpoint) async {
+  Future<void> setEndpoint(String endpoint) async {
     await _preferences.setString(endpointKey, endpoint);
   }
 
@@ -92,7 +89,7 @@ class Configuration {
     return _preferences.getString(tokenKey);
   }
 
-  void setToken(String token) async {
+  Future<void> setToken(String token) async {
     await _preferences.setString(tokenKey, token);
   }
 
@@ -100,7 +97,7 @@ class Configuration {
     return _preferences.getString(emailKey);
   }
 
-  void setEmail(String email) async {
+  Future<void> setEmail(String email) async {
     await _preferences.setString(emailKey, email);
   }
 
@@ -108,11 +105,11 @@ class Configuration {
     return _preferences.getInt(userIDKey);
   }
 
-  void setUserID(int userID) async {
+  Future<void> setUserID(int userID) async {
     await _preferences.setInt(userIDKey, userID);
   }
 
-  void setOptInForE2E(bool hasOptedForE2E) async {
+  Future<void> setOptInForE2E(bool hasOptedForE2E) async {
     await _preferences.setBool(hasOptedForE2EKey, hasOptedForE2E);
   }
 
