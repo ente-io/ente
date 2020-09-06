@@ -32,7 +32,7 @@ class FilesDB {
   static final columnModificationTime = 'modification_time';
   static final columnUpdationTime = 'updation_time';
   static final columnEncryptedKey = 'encrypted_key';
-  static final columnIV = 'iv';
+  static final columnEncryptedKeyIV = 'encrypted_key_iv';
 
   // make this a singleton class
   FilesDB._privateConstructor();
@@ -73,9 +73,9 @@ class FilesDB {
             $columnIsDeleted INTEGER DEFAULT 0,
             $columnCreationTime TEXT NOT NULL,
             $columnModificationTime TEXT NOT NULL,
-            $columnUpdationTime TEXT
-            $columnEncryptedKey TEXT
-            $columnIV TEXT
+            $columnUpdationTime TEXT,
+            $columnEncryptedKey TEXT,
+            $columnEncryptedKeyIV TEXT
           )
           ''');
   }
@@ -188,7 +188,7 @@ class FilesDB {
       table,
       where: '''$columnLocalID=? AND ($columnTitle=? OR $columnTitle=?) AND 
           $columnDeviceFolder=? AND $columnCreationTime=? AND 
-          $columnModificationTime=? AND $columnEncryptedKey AND $columnIV''',
+          $columnModificationTime=? AND $columnEncryptedKey AND $columnEncryptedKeyIV''',
       whereArgs: [
         localID,
         title,
@@ -233,7 +233,7 @@ class FilesDB {
     values[columnUploadedFileID] = uploadedID;
     values[columnUpdationTime] = updationTime;
     values[columnEncryptedKey] = encryptedKey;
-    values[columnIV] = iv;
+    values[columnEncryptedKeyIV] = iv;
     return await db.update(
       table,
       values,
@@ -386,7 +386,7 @@ class FilesDB {
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
     row[columnEncryptedKey] = file.encryptedKey;
-    row[columnIV] = file.iv;
+    row[columnEncryptedKeyIV] = file.encryptedKeyIV;
     return row;
   }
 
@@ -410,7 +410,7 @@ class FilesDB {
         ? -1
         : int.parse(row[columnUpdationTime]);
     file.encryptedKey = row[columnEncryptedKey];
-    file.iv = row[columnIV];
+    file.encryptedKeyIV = row[columnEncryptedKeyIV];
     return file;
   }
 }

@@ -20,7 +20,7 @@ class File {
   Location location;
   FileType fileType;
   String encryptedKey;
-  String iv;
+  String encryptedKeyIV;
 
   File();
 
@@ -35,7 +35,7 @@ class File {
     modificationTime = json["modificationTime"];
     updationTime = json["updationTime"];
     encryptedKey = json["encryptedKey"];
-    iv = json["iv"];
+    encryptedKeyIV = json["encryptedKeyIV"];
   }
 
   static Future<File> fromAsset(
@@ -140,7 +140,7 @@ class File {
       return null;
     }
     return CryptoUtil.decryptFromBase64(
-        encryptedKey, Configuration.instance.getKey(), iv);
+        encryptedKey, Configuration.instance.getKey(), encryptedKeyIV);
   }
 
   @override
