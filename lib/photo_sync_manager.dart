@@ -211,7 +211,7 @@ class PhotoSyncManager {
           uploadedFile = await _uploadManager.uploadFile(file);
         }
         await _db.update(file.generatedID, uploadedFile.uploadedFileID,
-            uploadedFile.updationTime, file.encryptedKey, file.iv);
+            uploadedFile.updationTime, file.encryptedKey, file.encryptedKeyIV);
         _prefs.setInt(_syncTimeKey, uploadedFile.updationTime);
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: photosToBeUploaded.length));
@@ -232,10 +232,10 @@ class PhotoSyncManager {
             file.creationTime,
             file.modificationTime,
             file.encryptedKey,
-            file.iv,
+            file.encryptedKeyIV,
             alternateTitle: getHEICFileNameForJPG(file));
         await _db.update(existingPhoto.generatedID, file.uploadedFileID,
-            file.updationTime, file.encryptedKey, file.iv);
+            file.updationTime, file.encryptedKey, file.encryptedKeyIV);
       } catch (e) {
         file.localID = null; // File uploaded from a different device
         await _db.insert(file);
@@ -288,11 +288,11 @@ class PhotoSyncManager {
               file.updationTime = json["updationTime"];
               file.isEncrypted = true;
               file.encryptedKey = json["encryptedKey"];
-              file.iv = json["iv"];
-              final key = CryptoUtil.decryptFromBase64(
-                  file.encryptedKey, Configuration.instance.getKey(), file.iv);
-              Map<String, dynamic> metadata = jsonDecode(
-                  await CryptoUtil.decryptDataToData(json["metadata"], key));
+              file.encryptedKeyIV = json["encryptedKeyIV"];
+              final key = CryptoUtil.decryptFromBase64(file.encryptedKey,
+                  Configuration.instance.getKey(), file.encryptedKeyIV);
+              Map<String, dynamic> metadata = jsonDecode(utf8.decode(
+                  await CryptoUtil.decryptDataToData(json["metadata"], key)));
               file.applyMetadata(metadata);
               files.add(file);
             }
