@@ -34,15 +34,12 @@ class DiffFetcher {
               file.ownerID = fileItem["ownerID"];
               file.updationTime = fileItem["updationTime"];
               file.isEncrypted = true;
-              file.encryptedKey = fileItem["encryptedKey"];
-              file.encryptedKeyIV = fileItem["encryptedKeyIV"];
-              final key = CryptoUtil.aesDecrypt(
-                  base64.decode(file.encryptedKey),
-                  Configuration.instance.getKey(),
-                  base64.decode(file.encryptedKeyIV));
+              file.encryptedPassword = fileItem["encryptedPassword"];
+              file.encryptedPasswordIV = fileItem["encryptedPasswordIV"];
               Map<String, dynamic> metadata = jsonDecode(utf8.decode(
                   await CryptoUtil.decryptDataToData(
-                      fileItem["metadata"], key)));
+                      base64.decode(fileItem["encryptedMetadata"]),
+                      file.getPassword())));
               file.applyMetadata(metadata);
               files.add(file);
             }

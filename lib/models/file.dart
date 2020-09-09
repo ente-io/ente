@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
@@ -22,8 +21,8 @@ class File {
   int updationTime;
   Location location;
   FileType fileType;
-  String encryptedKey;
-  String encryptedKeyIV;
+  String encryptedPassword;
+  String encryptedPasswordIV;
 
   File();
 
@@ -37,8 +36,8 @@ class File {
     creationTime = json["creationTime"];
     modificationTime = json["modificationTime"];
     updationTime = json["updationTime"];
-    encryptedKey = json["encryptedKey"];
-    encryptedKeyIV = json["encryptedKeyIV"];
+    encryptedPassword = json["encryptedPassword"];
+    encryptedPasswordIV = json["encryptedPasswordIV"];
   }
 
   static Future<File> fromAsset(
@@ -138,12 +137,12 @@ class File {
         Configuration.instance.getToken();
   }
 
-  Uint8List getKey() {
-    if (encryptedKey == null) {
+  String getPassword() {
+    if (encryptedPassword == null) {
       return null;
     }
-    return CryptoUtil.aesDecrypt(base64.decode(encryptedKey),
-        Configuration.instance.getKey(), base64.decode(encryptedKeyIV));
+    return utf8.decode(CryptoUtil.aesDecrypt(base64.decode(encryptedPassword),
+        Configuration.instance.getKey(), base64.decode(encryptedPasswordIV)));
   }
 
   @override

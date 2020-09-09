@@ -41,19 +41,18 @@ class FileUploader {
   }
 
   Future<File> encryptAndUploadFile(File file) async {
-    final key = CryptoUtil.getSecureRandomBytes(length: 32);
-    final base64EncodedKey = base64.encode(key);
+    final password = CryptoUtil.getSecureRandomString(length: 32);
     final iv = CryptoUtil.getSecureRandomBytes(length: 16);
     final base64EncodedIV = base64.encode(iv);
-    final encryptedKey =
-        CryptoUtil.aesEncrypt(key, Configuration.instance.getKey(), iv);
+    final encryptedKey = CryptoUtil.aesEncrypt(
+        utf8.encode(password), Configuration.instance.getKey(), iv);
     final base64EncodedEncryptedKey = base64.encode(encryptedKey);
 
     final encryptedFileName = file.generatedID.toString() + ".aes";
     final tempDirectory = Configuration.instance.getTempDirectory();
     final encryptedFilePath = tempDirectory + encryptedFileName;
     await CryptoUtil.encryptDataToFile(
-        await getBytesFromDisk(file), encryptedFilePath, key);
+        await getBytesFromDisk(file), encryptedFilePath, password);
 
     final fileUploadURL = await getUploadURL();
     String fileObjectKey =
@@ -65,7 +64,7 @@ class FileUploader {
         file.generatedID.toString() + "_thumbnail.aes";
     final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
     await CryptoUtil.encryptDataToFile(
-        thumbnailData, encryptedThumbnailPath, key);
+        thumbnailData, encryptedThumbnailPath, password);
 
     final thumbnailUploadURL = await getUploadURL();
     String thumbnailObjectKey =
@@ -73,13 +72,13 @@ class FileUploader {
 
     final metadata = jsonEncode(file.getMetadata());
     final encryptedMetadata =
-        await CryptoUtil.encryptDataToData(utf8.encode(metadata), key);
+        await CryptoUtil.encryptDataToData(utf8.encode(metadata), password);
     final data = {
       "fileObjectKey": fileObjectKey,
       "thumbnailObjectKey": thumbnailObjectKey,
-      "metadata": encryptedMetadata,
-      "encryptedKey": base64EncodedEncryptedKey,
-      "encryptedKeyIV": base64EncodedIV,
+      "encryptedMetadata": base64.encode(encryptedMetadata),
+      "encryptedPassword": base64EncodedEncryptedKey,
+      "encryptedPasswordIV": base64EncodedIV,
     };
     return _dio
         .post(
@@ -95,8 +94,8 @@ class FileUploader {
       file.uploadedFileID = data["id"];
       file.updationTime = data["updationTime"];
       file.ownerID = data["ownerID"];
-      file.encryptedKey = base64EncodedEncryptedKey;
-      file.encryptedKeyIV = base64EncodedIV;
+      file.encryptedPassword = base64EncodedEncryptedKey;
+      file.encryptedPasswordIV = base64EncodedIV;
       return file;
     });
   }

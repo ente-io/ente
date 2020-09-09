@@ -31,8 +31,8 @@ class FilesDB {
   static final columnCreationTime = 'creation_time';
   static final columnModificationTime = 'modification_time';
   static final columnUpdationTime = 'updation_time';
-  static final columnEncryptedKey = 'encrypted_key';
-  static final columnEncryptedKeyIV = 'encrypted_key_iv';
+  static final columnEncryptedPassword = 'encrypted_password';
+  static final columnEncryptedPasswordIV = 'encrypted_password_iv';
 
   // make this a singleton class
   FilesDB._privateConstructor();
@@ -74,8 +74,8 @@ class FilesDB {
             $columnCreationTime TEXT NOT NULL,
             $columnModificationTime TEXT NOT NULL,
             $columnUpdationTime TEXT,
-            $columnEncryptedKey TEXT,
-            $columnEncryptedKeyIV TEXT
+            $columnEncryptedPassword TEXT,
+            $columnEncryptedPasswordIV TEXT
           )
           ''');
   }
@@ -188,7 +188,7 @@ class FilesDB {
       table,
       where: '''$columnLocalID=? AND ($columnTitle=? OR $columnTitle=?) AND 
           $columnDeviceFolder=? AND $columnCreationTime=? AND 
-          $columnModificationTime=? AND $columnEncryptedKey AND $columnEncryptedKeyIV''',
+          $columnModificationTime=? AND $columnEncryptedPassword AND $columnEncryptedPasswordIV''',
       whereArgs: [
         localID,
         title,
@@ -232,8 +232,8 @@ class FilesDB {
     final values = new Map<String, dynamic>();
     values[columnUploadedFileID] = uploadedID;
     values[columnUpdationTime] = updationTime;
-    values[columnEncryptedKey] = encryptedKey;
-    values[columnEncryptedKeyIV] = iv;
+    values[columnEncryptedPassword] = encryptedKey;
+    values[columnEncryptedPasswordIV] = iv;
     return await db.update(
       table,
       values,
@@ -385,8 +385,8 @@ class FilesDB {
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
-    row[columnEncryptedKey] = file.encryptedKey;
-    row[columnEncryptedKeyIV] = file.encryptedKeyIV;
+    row[columnEncryptedPassword] = file.encryptedPassword;
+    row[columnEncryptedPasswordIV] = file.encryptedPasswordIV;
     return row;
   }
 
@@ -409,8 +409,8 @@ class FilesDB {
     file.updationTime = row[columnUpdationTime] == null
         ? -1
         : int.parse(row[columnUpdationTime]);
-    file.encryptedKey = row[columnEncryptedKey];
-    file.encryptedKeyIV = row[columnEncryptedKeyIV];
+    file.encryptedPassword = row[columnEncryptedPassword];
+    file.encryptedPasswordIV = row[columnEncryptedPasswordIV];
     return file;
   }
 }

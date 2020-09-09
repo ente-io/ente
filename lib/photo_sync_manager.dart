@@ -210,7 +210,7 @@ class PhotoSyncManager {
           uploadedFile = await _uploader.uploadFile(file);
         }
         await _db.update(file.generatedID, uploadedFile.uploadedFileID,
-            uploadedFile.updationTime, file.encryptedKey, file.encryptedKeyIV);
+            uploadedFile.updationTime, file.encryptedPassword, file.encryptedPasswordIV);
         _prefs.setInt(_syncTimeKey, uploadedFile.updationTime);
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: photosToBeUploaded.length));
@@ -230,11 +230,11 @@ class PhotoSyncManager {
             file.deviceFolder,
             file.creationTime,
             file.modificationTime,
-            file.encryptedKey,
-            file.encryptedKeyIV,
+            file.encryptedPassword,
+            file.encryptedPasswordIV,
             alternateTitle: getHEICFileNameForJPG(file));
         await _db.update(existingPhoto.generatedID, file.uploadedFileID,
-            file.updationTime, file.encryptedKey, file.encryptedKeyIV);
+            file.updationTime, file.encryptedPassword, file.encryptedPasswordIV);
       } catch (e) {
         file.localID = null; // File uploaded from a different device
         await _db.insert(file);

@@ -60,8 +60,8 @@ class FaceSearchManager {
             file.deviceFolder,
             file.creationTime,
             file.modificationTime,
-            file.encryptedKey,
-            file.encryptedKeyIV,
+            file.encryptedPassword,
+            file.encryptedPasswordIV,
             alternateTitle: getHEICFileNameForJPG(file)));
       } catch (e) {
         // Not available locally
