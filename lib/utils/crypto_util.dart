@@ -20,10 +20,6 @@ class CryptoUtil {
         .hashBytes(salt: salt, input: plainText, len: 32);
   }
 
-  static bool compareHash(Uint8List plainText, Uint8List hash, Uint8List salt) {
-    return base64.encode(scrypt(plainText, salt)) == base64.encode(hash);
-  }
-
   static Uint8List aesEncrypt(
       Uint8List plainText, Uint8List key, Uint8List iv) {
     final encrypter = AES(Key(key), mode: AESMode.cbc);

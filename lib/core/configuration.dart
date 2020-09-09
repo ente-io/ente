@@ -66,10 +66,10 @@ class Configuration {
       String passphrase, KeyAttributes attributes) async {
     final kek = CryptoUtil.scrypt(
         utf8.encode(passphrase), base64.decode(attributes.kekSalt));
-    bool correctPassphrase = CryptoUtil.compareHash(
-        kek,
-        base64.decode(attributes.kekHash),
-        base64.decode(attributes.kekHashSalt));
+    final calculatedKekHash =
+        CryptoUtil.scrypt(kek, base64.decode(attributes.kekHashSalt));
+    bool correctPassphrase =
+        base64.encode(calculatedKekHash) == attributes.kekHash;
     if (!correctPassphrase) {
       throw Exception("Incorrect passphrase");
     }
