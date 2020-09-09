@@ -140,7 +140,7 @@ class File {
       return null;
     }
     return CryptoUtil.decryptFromBase64(
-        encryptedKey, Configuration.instance.getKey(), encryptedKeyIV);
+        encryptedKey, Configuration.instance.getBase64EncodedKey(), encryptedKeyIV);
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
@@ -43,17 +44,20 @@ class Configuration {
   }
 
   Future<KeyAttributes> generateAndSaveKey(String passphrase) async {
-    final key = CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
+    final key = CryptoUtil.getSecureRandomBytes(length: 32);
     final kekSalt = CryptoUtil.getSecureRandomBytes(length: 32);
     final kek = CryptoUtil.scrypt(utf8.encode(passphrase), kekSalt);
     final kekHashSalt = CryptoUtil.getSecureRandomBytes(length: 32);
     final kekHash = CryptoUtil.scrypt(kek, kekHashSalt);
-    final iv = CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
-    final encryptedKey =
-        CryptoUtil.encryptToBase64(key, base64.encode(kek), iv);
-    final attributes = KeyAttributes(base64.encode(kekSalt),
-        base64.encode(kekHash), base64.encode(kekHashSalt), encryptedKey, iv);
-    await setKey(key);
+    final iv = CryptoUtil.getSecureRandomBytes(length: 16);
+    final encryptedKey = CryptoUtil.aesEncrypt(key, kek, iv);
+    final attributes = KeyAttributes(
+        base64.encode(kekSalt),
+        base64.encode(kekHash),
+        base64.encode(kekHashSalt),
+        base64.encode(encryptedKey),
+        base64.encode(iv));
+    await setKey(base64.encode(key));
     await setKeyAttributes(attributes);
     return attributes;
   }
@@ -149,7 +153,11 @@ class Configuration {
     _key = key;
   }
 
-  String getKey() {
+  Uint8List getKey() {
+    return base64.decode(_key);
+  }
+
+  String getBase64EncodedKey() {
     return _key;
   }
 
@@ -166,6 +174,6 @@ class Configuration {
   }
 
   bool hasConfiguredAccount() {
-    return getToken() != null && getKey() != null;
+    return getToken() != null && getBase64EncodedKey() != null;
   }
 }

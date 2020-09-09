@@ -208,7 +208,7 @@ class DebugWidget extends StatelessWidget {
       content: SingleChildScrollView(
         child: Column(children: [
           Text("Key", style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(Configuration.instance.getKey()),
+          Text(Configuration.instance.getBase64EncodedKey()),
           Padding(padding: EdgeInsets.all(12)),
           Text("Encrypted Key", style: TextStyle(fontWeight: FontWeight.bold)),
           Text(keyAttributes.encryptedKey),

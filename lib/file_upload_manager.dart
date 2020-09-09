@@ -41,16 +41,19 @@ class FileUploadManager {
   }
 
   Future<File> encryptAndUploadFile(File file) async {
-    final key = CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
-    final iv = CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
+    final key = CryptoUtil.getSecureRandomBytes(length: 32);
+    final base64EncodedKey = base64.encode(key);
+    final iv = CryptoUtil.getSecureRandomBytes(length: 16);
+    final base64EncodedIV = base64.encode(iv);
     final encryptedKey =
-        CryptoUtil.encryptToBase64(key, Configuration.instance.getKey(), iv);
+        CryptoUtil.aesEncrypt(key, Configuration.instance.getKey(), iv);
+    final base64EncodedEncryptedKey = base64.encode(encryptedKey);
 
     final encryptedFileName = file.generatedID.toString() + ".aes";
     final tempDirectory = Configuration.instance.getTempDirectory();
     final encryptedFilePath = tempDirectory + encryptedFileName;
     await CryptoUtil.encryptDataToFile(
-        await getBytesFromDisk(file), encryptedFilePath, key);
+        await getBytesFromDisk(file), encryptedFilePath, base64EncodedKey);
 
     final fileUploadURL = await getUploadURL();
     String fileObjectKey =
@@ -62,21 +65,21 @@ class FileUploadManager {
         file.generatedID.toString() + "_thumbnail.aes";
     final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
     await CryptoUtil.encryptDataToFile(
-        thumbnailData, encryptedThumbnailPath, key);
+        thumbnailData, encryptedThumbnailPath, base64EncodedKey);
 
     final thumbnailUploadURL = await getUploadURL();
     String thumbnailObjectKey =
         await putFile(thumbnailUploadURL, io.File(encryptedThumbnailPath));
 
     final metadata = jsonEncode(file.getMetadata());
-    final encryptedMetadata =
-        await CryptoUtil.encryptDataToData(utf8.encode(metadata), key);
+    final encryptedMetadata = await CryptoUtil.encryptDataToData(
+        utf8.encode(metadata), base64EncodedKey);
     final data = {
       "fileObjectKey": fileObjectKey,
       "thumbnailObjectKey": thumbnailObjectKey,
       "metadata": encryptedMetadata,
-      "encryptedKey": encryptedKey,
-      "encryptedKeyIV": iv,
+      "encryptedKey": base64EncodedEncryptedKey,
+      "encryptedKeyIV": base64EncodedIV,
     };
     return _dio
         .post(
@@ -92,8 +95,8 @@ class FileUploadManager {
       file.uploadedFileID = data["id"];
       file.updationTime = data["updationTime"];
       file.ownerID = data["ownerID"];
-      file.encryptedKey = encryptedKey;
-      file.encryptedKeyIV = iv;
+      file.encryptedKey = base64EncodedEncryptedKey;
+      file.encryptedKeyIV = base64EncodedIV;
       return file;
     });
   }

@@ -11,10 +11,6 @@ import 'package:steel_crypt/steel_crypt.dart' as steel;
 import 'package:uuid/uuid.dart';
 
 class CryptoUtil {
-  static String getBase64EncodedSecureRandomString({int length = 32}) {
-    return SecureRandom(length).base64;
-  }
-
   static Uint8List getSecureRandomBytes({int length = 32}) {
     return SecureRandom(length).bytes;
   }
@@ -28,15 +24,15 @@ class CryptoUtil {
     return base64.encode(scrypt(plainText, salt)) == base64.encode(hash);
   }
 
-  static String encryptToBase64(
-      String plainText, String base64Key, String base64IV) {
-    final encrypter = AES(Key.fromBase64(base64Key));
+  static Uint8List aesEncrypt(
+      Uint8List plainText, Uint8List key, Uint8List iv) {
+    final encrypter = AES(Key(key));
     return encrypter
         .encrypt(
-          utf8.encode(plainText),
-          iv: IV.fromBase64(base64IV),
+          plainText,
+          iv: IV(iv),
         )
-        .base64;
+        .bytes;
   }
 
   static String decryptFromBase64(
@@ -58,18 +54,20 @@ class CryptoUtil {
   }
 
   static Future<String> encryptDataToFile(
-      Uint8List source, String destinationPath, String key) async {
+      Uint8List source, String destinationPath, String base64EncodedKey) async {
     final args = Map<String, dynamic>();
-    args["key"] = key;
+    args["key"] = base64EncodedKey;
     args["source"] = source;
     args["destination"] = destinationPath;
     return Computer().compute(runEncryptDataToFile, param: args);
   }
 
-  static Future<String> encryptDataToData(Uint8List source, String key) async {
+  static Future<String> encryptDataToData(
+      Uint8List source, String base64EncodedKey) async {
     final destinationPath =
         Configuration.instance.getTempDirectory() + Uuid().v4();
-    return encryptDataToFile(source, destinationPath, key).then((value) {
+    return encryptDataToFile(source, destinationPath, base64EncodedKey)
+        .then((value) {
       final file = io.File(destinationPath);
       final data = file.readAsBytesSync();
       file.deleteSync();
@@ -77,27 +75,29 @@ class CryptoUtil {
     });
   }
 
-  static Future<void> decryptFileToFile(
-      String sourcePath, String destinationPath, String key) async {
+  static Future<void> decryptFileToFile(String sourcePath,
+      String destinationPath, String base64EncodedKey) async {
     final args = Map<String, String>();
-    args["key"] = key;
+    args["key"] = base64EncodedKey;
     args["source"] = sourcePath;
     args["destination"] = destinationPath;
     return Computer().compute(runDecryptFileToFile, param: args);
   }
 
-  static Future<Uint8List> decryptFileToData(String sourcePath, String key) {
+  static Future<Uint8List> decryptFileToData(
+      String sourcePath, String base64EncodedKey) {
     final args = Map<String, String>();
-    args["key"] = key;
+    args["key"] = base64EncodedKey;
     args["source"] = sourcePath;
     return Computer().compute(runDecryptFileToData, param: args);
   }
 
-  static Future<Uint8List> decryptDataToData(String source, String key) {
+  static Future<Uint8List> decryptDataToData(
+      Uint8List source, String base64EncodedKey) {
     final sourcePath = Configuration.instance.getTempDirectory() + Uuid().v4();
     final file = io.File(sourcePath);
-    file.writeAsBytesSync(base64.decode(source));
-    return decryptFileToData(sourcePath, key).then((value) {
+    file.writeAsBytesSync(source);
+    return decryptFileToData(sourcePath, base64EncodedKey).then((value) {
       file.deleteSync();
       return value;
     });

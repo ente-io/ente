@@ -290,7 +290,7 @@ class PhotoSyncManager {
               file.encryptedKey = json["encryptedKey"];
               file.encryptedKeyIV = json["encryptedKeyIV"];
               final key = CryptoUtil.decryptFromBase64(file.encryptedKey,
-                  Configuration.instance.getKey(), file.encryptedKeyIV);
+                  Configuration.instance.getBase64EncodedKey(), file.encryptedKeyIV);
               Map<String, dynamic> metadata = jsonDecode(utf8.decode(
                   await CryptoUtil.decryptDataToData(json["metadata"], key)));
               file.applyMetadata(metadata);
