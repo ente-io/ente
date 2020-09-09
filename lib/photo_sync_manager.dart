@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:logging/logging.dart';
@@ -7,24 +6,24 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/file_downloader.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/file_uploader.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_name_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:photos/models/file.dart';
 
 import 'package:photos/core/configuration.dart';
-import 'package:photos/events/remote_sync_event.dart';
 
 class PhotoSyncManager {
   final _logger = Logger("PhotoSyncManager");
   final _dio = Dio();
   final _db = FilesDB.instance;
-  final _uploadManager = FileUploadManager();
+  final _uploader = FileUploader();
+  final _downloader = DiffFetcher();
   bool _isSyncInProgress = false;
   Future<void> _existingSync;
   SharedPreferences _prefs;
@@ -150,19 +149,19 @@ class PhotoSyncManager {
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }
-    await _downloadDiff();
-    await _downloadEncryptedFilesDiff();
+    await _persistFilesDiff();
+    await _persistEncryptedFilesDiff();
     await _uploadDiff();
     await _deletePhotosOnServer();
   }
 
-  Future<void> _downloadDiff() async {
-    final diff = await _getDiff(_getSyncTime(), _diffLimit);
+  Future<void> _persistFilesDiff() async {
+    final diff = await _downloader.getFilesDiff(_getSyncTime(), _diffLimit);
     if (diff != null && diff.isNotEmpty) {
       await _storeDiff(diff, _syncTimeKey);
       FileRepository.instance.reloadFiles();
       if (diff.length == _diffLimit) {
-        return await _downloadDiff();
+        return await _persistFilesDiff();
       }
     }
   }
@@ -175,14 +174,14 @@ class PhotoSyncManager {
     return syncTime;
   }
 
-  Future<void> _downloadEncryptedFilesDiff() async {
-    final diff =
-        await _getEncryptedFilesDiff(_getEncryptedFilesSyncTime(), _diffLimit);
+  Future<void> _persistEncryptedFilesDiff() async {
+    final diff = await _downloader.getEncryptedFilesDiff(
+        _getEncryptedFilesSyncTime(), _diffLimit);
     if (diff.isNotEmpty) {
       await _storeDiff(diff, _encryptedFilesSyncTimeKey);
       FileRepository.instance.reloadFiles();
       if (diff.length == _diffLimit) {
-        return await _downloadEncryptedFilesDiff();
+        return await _persistEncryptedFilesDiff();
       }
     }
   }
@@ -206,9 +205,9 @@ class PhotoSyncManager {
         }
         var uploadedFile;
         if (Configuration.instance.hasOptedForE2E()) {
-          uploadedFile = await _uploadManager.encryptAndUploadFile(file);
+          uploadedFile = await _uploader.encryptAndUploadFile(file);
         } else {
-          uploadedFile = await _uploadManager.uploadFile(file);
+          uploadedFile = await _uploader.uploadFile(file);
         }
         await _db.update(file.generatedID, uploadedFile.uploadedFileID,
             uploadedFile.updationTime, file.encryptedKey, file.encryptedKeyIV);
@@ -242,68 +241,6 @@ class PhotoSyncManager {
       }
       await _prefs.setInt(prefKey, file.updationTime);
     }
-  }
-
-  Future<List<File>> _getDiff(int lastSyncTime, int limit) async {
-    Response response = await _dio.get(
-      Configuration.instance.getHttpEndpoint() + "/files/diff",
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      queryParameters: {
-        "sinceTimestamp": lastSyncTime,
-        "limit": limit,
-      },
-    ).catchError((e) => _logger.severe(e));
-    if (response != null) {
-      Bus.instance.fire(RemoteSyncEvent(true));
-      return (response.data["diff"] as List)
-          .map((file) => new File.fromJson(file))
-          .toList();
-    } else {
-      Bus.instance.fire(RemoteSyncEvent(false));
-      return null;
-    }
-  }
-
-  Future<List<File>> _getEncryptedFilesDiff(int lastSyncTime, int limit) async {
-    return _dio
-        .get(
-          Configuration.instance.getHttpEndpoint() + "/encrypted-files/diff",
-          queryParameters: {
-            "token": Configuration.instance.getToken(),
-            "sinceTimestamp": lastSyncTime,
-            "limit": limit,
-          },
-        )
-        .catchError((e) => _logger.severe(e))
-        .then((response) async {
-          final files = List<File>();
-          if (response != null) {
-            Bus.instance.fire(RemoteSyncEvent(true));
-            final diff = response.data["diff"] as List;
-            for (final fileItem in diff) {
-              final file = File();
-              file.uploadedFileID = fileItem["id"];
-              file.ownerID = fileItem["ownerID"];
-              file.updationTime = fileItem["updationTime"];
-              file.isEncrypted = true;
-              file.encryptedKey = fileItem["encryptedKey"];
-              file.encryptedKeyIV = fileItem["encryptedKeyIV"];
-              final key = CryptoUtil.aesDecrypt(
-                  base64.decode(file.encryptedKey),
-                  Configuration.instance.getKey(),
-                  base64.decode(file.encryptedKeyIV));
-              Map<String, dynamic> metadata = jsonDecode(utf8.decode(
-                  await CryptoUtil.decryptDataToData(
-                      fileItem["metadata"], key)));
-              file.applyMetadata(metadata);
-              files.add(file);
-            }
-          } else {
-            Bus.instance.fire(RemoteSyncEvent(false));
-          }
-          return files;
-        });
   }
 
   Future<void> _deletePhotosOnServer() async {

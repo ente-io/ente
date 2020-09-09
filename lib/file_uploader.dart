@@ -10,8 +10,8 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_name_util.dart';
 import 'package:photos/utils/file_util.dart';
 
-class FileUploadManager {
-  final _logger = Logger("FileUploadManager");
+class FileUploader {
+  final _logger = Logger("FileUploader");
   final _dio = Dio();
 
   Future<UploadURL> getUploadURL() {
@@ -72,8 +72,8 @@ class FileUploadManager {
         await putFile(thumbnailUploadURL, io.File(encryptedThumbnailPath));
 
     final metadata = jsonEncode(file.getMetadata());
-    final encryptedMetadata = await CryptoUtil.encryptDataToData(
-        utf8.encode(metadata), key);
+    final encryptedMetadata =
+        await CryptoUtil.encryptDataToData(utf8.encode(metadata), key);
     final data = {
       "fileObjectKey": fileObjectKey,
       "thumbnailObjectKey": thumbnailObjectKey,
