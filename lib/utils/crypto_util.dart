@@ -26,7 +26,7 @@ class CryptoUtil {
 
   static Uint8List aesEncrypt(
       Uint8List plainText, Uint8List key, Uint8List iv) {
-    final encrypter = AES(Key(key));
+    final encrypter = AES(Key(key), mode: AESMode.cbc);
     return encrypter
         .encrypt(
           plainText,
@@ -37,7 +37,7 @@ class CryptoUtil {
 
   static String decryptFromBase64(
       String base64CipherText, String base64Key, String base64IV) {
-    final encrypter = AES(Key.fromBase64(base64Key));
+    final encrypter = AES(Key.fromBase64(base64Key), mode: AESMode.cbc);
     return utf8.decode(encrypter.decrypt(
       Encrypted.fromBase64(base64CipherText),
       iv: IV.fromBase64(base64IV),
