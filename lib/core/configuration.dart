@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -43,15 +44,15 @@ class Configuration {
 
   Future<KeyAttributes> generateAndSaveKey(String passphrase) async {
     final key = CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
-    final kekSalt = CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
-    final kek = CryptoUtil.scrypt(passphrase, kekSalt, 32);
-    final kekHashSalt =
-        CryptoUtil.getBase64EncodedSecureRandomString(length: 32);
-    final kekHash = CryptoUtil.scrypt(kek, kekHashSalt, 32);
+    final kekSalt = CryptoUtil.getSecureRandomBytes(length: 32);
+    final kek = CryptoUtil.scrypt(utf8.encode(passphrase), kekSalt);
+    final kekHashSalt = CryptoUtil.getSecureRandomBytes(length: 32);
+    final kekHash = CryptoUtil.scrypt(kek, kekHashSalt);
     final iv = CryptoUtil.getBase64EncodedSecureRandomString(length: 16);
-    final encryptedKey = CryptoUtil.encryptToBase64(key, kek, iv);
-    final attributes =
-        KeyAttributes(kekSalt, kekHash, kekHashSalt, encryptedKey, iv);
+    final encryptedKey =
+        CryptoUtil.encryptToBase64(key, base64.encode(kek), iv);
+    final attributes = KeyAttributes(base64.encode(kekSalt),
+        base64.encode(kekHash), base64.encode(kekHashSalt), encryptedKey, iv);
     await setKey(key);
     await setKeyAttributes(attributes);
     return attributes;
@@ -59,14 +60,17 @@ class Configuration {
 
   Future<void> decryptAndSaveKey(
       String passphrase, KeyAttributes attributes) async {
-    final kek = CryptoUtil.scrypt(passphrase, attributes.kekSalt, 32);
-    bool correctPassphrase =
-        CryptoUtil.compareHash(kek, attributes.kekHash, attributes.kekHashSalt);
+    final kek = CryptoUtil.scrypt(
+        utf8.encode(passphrase), base64.decode(attributes.kekSalt));
+    bool correctPassphrase = CryptoUtil.compareHash(
+        kek,
+        base64.decode(attributes.kekHash),
+        base64.decode(attributes.kekHashSalt));
     if (!correctPassphrase) {
       throw Exception("Incorrect passphrase");
     }
     final key = CryptoUtil.decryptFromBase64(
-        attributes.encryptedKey, kek, attributes.encryptedKeyIV);
+        attributes.encryptedKey, base64.encode(kek), attributes.encryptedKeyIV);
     await setKey(key);
   }
 

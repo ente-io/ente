@@ -15,14 +15,17 @@ class CryptoUtil {
     return SecureRandom(length).base64;
   }
 
-  static String scrypt(String passphrase, String salt, int length) {
-    return steel.PassCrypt.scrypt()
-        .hash(salt: salt, inp: passphrase, len: length);
+  static Uint8List getSecureRandomBytes({int length = 32}) {
+    return SecureRandom(length).bytes;
   }
 
-  static bool compareHash(String plainText, String hash, String salt) {
+  static Uint8List scrypt(Uint8List plainText, Uint8List salt) {
     return steel.PassCrypt.scrypt()
-        .check(plain: plainText, hashed: hash, salt: salt);
+        .hashBytes(salt: salt, input: plainText, len: 32);
+  }
+
+  static bool compareHash(Uint8List plainText, Uint8List hash, Uint8List salt) {
+    return base64.encode(scrypt(plainText, salt)) == base64.encode(hash);
   }
 
   static String encryptToBase64(

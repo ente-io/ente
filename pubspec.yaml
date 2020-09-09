@@ -65,7 +65,8 @@ dependencies:
   flutter_svg: ^0.18.1
   crisp: ^0.1.3
   uuid: 2.2.2
-  steel_crypt: ^2.2.2+1
+  steel_crypt:
+    path: thirdparty/steel_crypt
 
 dev_dependencies:
   flutter_test:
