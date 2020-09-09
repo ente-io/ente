@@ -1,5 +1,6 @@
 import 'package:crisp/crisp.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
@@ -22,14 +23,18 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _getBody() {
+    final contents = [
+      UsageWidget(),
+      SupportSectionWidget(),
+    ];
+    if (kDebugMode) {
+      contents.add(DebugWidget());
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          children: [
-            UsageWidget(),
-            SupportSectionWidget(),
-          ],
+          children: contents,
         ),
       ),
     );
@@ -154,19 +159,7 @@ class SupportSectionWidget extends StatelessWidget {
             );
             await FlutterEmailSender.send(email);
           },
-          child: Column(
-            children: [
-              Padding(padding: EdgeInsets.all(4)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Align(alignment: Alignment.centerLeft, child: Text("Email")),
-                  Icon(Icons.navigate_next),
-                ],
-              ),
-              Padding(padding: EdgeInsets.all(4)),
-            ],
-          ),
+          child: SettingsTextItem(text: "Email", icon: Icons.navigate_next),
         ),
         Divider(height: 4),
         GestureDetector(
@@ -180,21 +173,102 @@ class SupportSectionWidget extends StatelessWidget {
               ),
             );
           },
-          child: Column(
-            children: [
-              Padding(padding: EdgeInsets.all(4)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Align(alignment: Alignment.centerLeft, child: Text("Chat")),
-                  Icon(Icons.navigate_next),
-                ],
-              ),
-              Padding(padding: EdgeInsets.all(4)),
-            ],
-          ),
+          child: SettingsTextItem(text: "Chat", icon: Icons.navigate_next),
         ),
       ]),
+    );
+  }
+}
+
+class DebugWidget extends StatelessWidget {
+  const DebugWidget({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(children: [
+        Padding(padding: EdgeInsets.all(12)),
+        SettingsSectionTitle("DEBUG"),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            _showKeyAttributesDialog(context);
+          },
+          child: SettingsTextItem(
+              text: "Key Attributes", icon: Icons.navigate_next),
+        ),
+      ]),
+    );
+  }
+
+  void _showKeyAttributesDialog(BuildContext context) {
+    final keyAttributes = Configuration.instance.getKeyAttributes();
+    AlertDialog alert = AlertDialog(
+      title: Text("Key Attributes"),
+      content: SingleChildScrollView(
+        child: Column(children: [
+          Text("Key", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(Configuration.instance.getKey()),
+          Padding(padding: EdgeInsets.all(12)),
+          Text("Encrypted Key", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(keyAttributes.encryptedKey),
+          Padding(padding: EdgeInsets.all(12)),
+          Text("Encrypted Key IV",
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(keyAttributes.encryptedKeyIV),
+          Padding(padding: EdgeInsets.all(12)),
+          Text("KEK Salt", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(keyAttributes.kekSalt),
+          Padding(padding: EdgeInsets.all(12)),
+          Text("KEK Hash", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(keyAttributes.kekHash),
+          Padding(padding: EdgeInsets.all(12)),
+          Text("KEK Hash Salt", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(keyAttributes.kekHashSalt),
+        ]),
+      ),
+      actions: [
+        FlatButton(
+          child: Text("OK"),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+}
+
+class SettingsTextItem extends StatelessWidget {
+  final String text;
+  final IconData icon;
+  const SettingsTextItem({
+    Key key,
+    @required this.text,
+    @required this.icon,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(padding: EdgeInsets.all(4)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Align(alignment: Alignment.centerLeft, child: Text(text)),
+            Icon(icon),
+          ],
+        ),
+        Padding(padding: EdgeInsets.all(4)),
+      ],
     );
   }
 }
