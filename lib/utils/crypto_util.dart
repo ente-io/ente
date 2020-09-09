@@ -31,18 +31,18 @@ class CryptoUtil {
         .bytes;
   }
 
-  static String decryptFromBase64(
-      String base64CipherText, String base64Key, String base64IV) {
-    final encrypter = AES(Key.fromBase64(base64Key), mode: AESMode.cbc);
-    return utf8.decode(encrypter.decrypt(
-      Encrypted.fromBase64(base64CipherText),
-      iv: IV.fromBase64(base64IV),
-    ));
+  static Uint8List aesDecrypt(
+      Uint8List cipherText, Uint8List key, Uint8List iv) {
+    final encrypter = AES(Key(key), mode: AESMode.cbc);
+    return encrypter.decrypt(
+      Encrypted(cipherText),
+      iv: IV(iv),
+    );
   }
 
   static Future<String> encryptFileToFile(
-      String sourcePath, String destinationPath, String key) async {
-    final args = Map<String, String>();
+      String sourcePath, String destinationPath, Uint8List key) async {
+    final args = Map<String, dynamic>();
     args["key"] = key;
     args["source"] = sourcePath;
     args["destination"] = destinationPath;
@@ -50,20 +50,19 @@ class CryptoUtil {
   }
 
   static Future<String> encryptDataToFile(
-      Uint8List source, String destinationPath, String base64EncodedKey) async {
+      Uint8List source, String destinationPath, Uint8List key) async {
     final args = Map<String, dynamic>();
-    args["key"] = base64EncodedKey;
+    args["key"] = key;
     args["source"] = source;
     args["destination"] = destinationPath;
     return Computer().compute(runEncryptDataToFile, param: args);
   }
 
   static Future<String> encryptDataToData(
-      Uint8List source, String base64EncodedKey) async {
+      Uint8List source, Uint8List key) async {
     final destinationPath =
         Configuration.instance.getTempDirectory() + Uuid().v4();
-    return encryptDataToFile(source, destinationPath, base64EncodedKey)
-        .then((value) {
+    return encryptDataToFile(source, destinationPath, key).then((value) {
       final file = io.File(destinationPath);
       final data = file.readAsBytesSync();
       file.deleteSync();
@@ -71,52 +70,50 @@ class CryptoUtil {
     });
   }
 
-  static Future<void> decryptFileToFile(String sourcePath,
-      String destinationPath, String base64EncodedKey) async {
-    final args = Map<String, String>();
-    args["key"] = base64EncodedKey;
+  static Future<void> decryptFileToFile(
+      String sourcePath, String destinationPath, Uint8List key) async {
+    final args = Map<String, dynamic>();
+    args["key"] = key;
     args["source"] = sourcePath;
     args["destination"] = destinationPath;
     return Computer().compute(runDecryptFileToFile, param: args);
   }
 
-  static Future<Uint8List> decryptFileToData(
-      String sourcePath, String base64EncodedKey) {
-    final args = Map<String, String>();
-    args["key"] = base64EncodedKey;
+  static Future<Uint8List> decryptFileToData(String sourcePath, Uint8List key) {
+    final args = Map<String, dynamic>();
+    args["key"] = key;
     args["source"] = sourcePath;
     return Computer().compute(runDecryptFileToData, param: args);
   }
 
-  static Future<Uint8List> decryptDataToData(
-      Uint8List source, String base64EncodedKey) {
+  static Future<Uint8List> decryptDataToData(Uint8List source, Uint8List key) {
     final sourcePath = Configuration.instance.getTempDirectory() + Uuid().v4();
     final file = io.File(sourcePath);
     file.writeAsBytesSync(source);
-    return decryptFileToData(sourcePath, base64EncodedKey).then((value) {
+    return decryptFileToData(sourcePath, key).then((value) {
       file.deleteSync();
       return value;
     });
   }
 }
 
-Future<String> runEncryptFileToFile(Map<String, String> args) {
-  final encrypter = getEncrypter(args["key"]);
+Future<String> runEncryptFileToFile(Map<String, dynamic> args) {
+  final encrypter = getEncrypter(base64.encode(args["key"] as Uint8List));
   return encrypter.encryptFile(args["source"], args["destination"]);
 }
 
 Future<String> runEncryptDataToFile(Map<String, dynamic> args) {
-  final encrypter = getEncrypter(args["key"]);
+  final encrypter = getEncrypter(base64.encode(args["key"] as Uint8List));
   return encrypter.encryptDataToFile(args["source"], args["destination"]);
 }
 
 Future<String> runDecryptFileToFile(Map<String, dynamic> args) async {
-  final encrypter = getEncrypter(args["key"]);
+  final encrypter = getEncrypter(base64.encode(args["key"] as Uint8List));
   return encrypter.decryptFile(args["source"], args["destination"]);
 }
 
 Future<Uint8List> runDecryptFileToData(Map<String, dynamic> args) async {
-  final encrypter = getEncrypter(args["key"]);
+  final encrypter = getEncrypter(base64.encode(args["key"] as Uint8List));
   return encrypter.decryptDataFromFile(args["source"]);
 }
 

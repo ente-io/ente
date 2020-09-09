@@ -281,18 +281,20 @@ class PhotoSyncManager {
           if (response != null) {
             Bus.instance.fire(RemoteSyncEvent(true));
             final diff = response.data["diff"] as List;
-            for (final json in diff) {
+            for (final fileItem in diff) {
               final file = File();
-              file.uploadedFileID = json["id"];
-              file.ownerID = json["ownerID"];
-              file.updationTime = json["updationTime"];
+              file.uploadedFileID = fileItem["id"];
+              file.ownerID = fileItem["ownerID"];
+              file.updationTime = fileItem["updationTime"];
               file.isEncrypted = true;
-              file.encryptedKey = json["encryptedKey"];
-              file.encryptedKeyIV = json["encryptedKeyIV"];
-              final key = CryptoUtil.decryptFromBase64(file.encryptedKey,
-                  Configuration.instance.getBase64EncodedKey(), file.encryptedKeyIV);
+              file.encryptedKey = fileItem["encryptedKey"];
+              file.encryptedKeyIV = fileItem["encryptedKeyIV"];
+              final key = CryptoUtil.aesDecrypt(
+                  base64.decode(file.encryptedKey),
+                  Configuration.instance.getKey(),
+                  base64.decode(file.encryptedKeyIV));
               Map<String, dynamic> metadata = jsonDecode(utf8.decode(
-                  await CryptoUtil.decryptDataToData(json["metadata"], key)));
+                  await CryptoUtil.decryptDataToData(fileItem["metadata"], key)));
               file.applyMetadata(metadata);
               files.add(file);
             }

@@ -53,7 +53,7 @@ class FileUploadManager {
     final tempDirectory = Configuration.instance.getTempDirectory();
     final encryptedFilePath = tempDirectory + encryptedFileName;
     await CryptoUtil.encryptDataToFile(
-        await getBytesFromDisk(file), encryptedFilePath, base64EncodedKey);
+        await getBytesFromDisk(file), encryptedFilePath, key);
 
     final fileUploadURL = await getUploadURL();
     String fileObjectKey =
@@ -65,7 +65,7 @@ class FileUploadManager {
         file.generatedID.toString() + "_thumbnail.aes";
     final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
     await CryptoUtil.encryptDataToFile(
-        thumbnailData, encryptedThumbnailPath, base64EncodedKey);
+        thumbnailData, encryptedThumbnailPath, key);
 
     final thumbnailUploadURL = await getUploadURL();
     String thumbnailObjectKey =
@@ -73,7 +73,7 @@ class FileUploadManager {
 
     final metadata = jsonEncode(file.getMetadata());
     final encryptedMetadata = await CryptoUtil.encryptDataToData(
-        utf8.encode(metadata), base64EncodedKey);
+        utf8.encode(metadata), key);
     final data = {
       "fileObjectKey": fileObjectKey,
       "thumbnailObjectKey": thumbnailObjectKey,

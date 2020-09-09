@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
@@ -135,12 +138,12 @@ class File {
         Configuration.instance.getToken();
   }
 
-  String getKey() {
+  Uint8List getKey() {
     if (encryptedKey == null) {
       return null;
     }
-    return CryptoUtil.decryptFromBase64(
-        encryptedKey, Configuration.instance.getBase64EncodedKey(), encryptedKeyIV);
+    return CryptoUtil.aesDecrypt(base64.decode(encryptedKey),
+        Configuration.instance.getKey(), base64.decode(encryptedKeyIV));
   }
 
   @override

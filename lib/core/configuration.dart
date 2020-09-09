@@ -73,9 +73,9 @@ class Configuration {
     if (!correctPassphrase) {
       throw Exception("Incorrect passphrase");
     }
-    final key = CryptoUtil.decryptFromBase64(
-        attributes.encryptedKey, base64.encode(kek), attributes.encryptedKeyIV);
-    await setKey(key);
+    final key = CryptoUtil.aesDecrypt(base64.decode(attributes.encryptedKey),
+        kek, base64.decode(attributes.encryptedKeyIV));
+    await setKey(base64.encode(key));
   }
 
   String getHttpEndpoint() {
