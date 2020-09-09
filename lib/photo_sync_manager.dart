@@ -294,7 +294,8 @@ class PhotoSyncManager {
                   Configuration.instance.getKey(),
                   base64.decode(file.encryptedKeyIV));
               Map<String, dynamic> metadata = jsonDecode(utf8.decode(
-                  await CryptoUtil.decryptDataToData(fileItem["metadata"], key)));
+                  await CryptoUtil.decryptDataToData(
+                      fileItem["metadata"], key)));
               file.applyMetadata(metadata);
               files.add(file);
             }
