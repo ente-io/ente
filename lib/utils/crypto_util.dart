@@ -15,7 +15,7 @@ class CryptoUtil {
   }
 
   static String getSecureRandomString({int length = 32}) {
-    return SecureRandom(length).utf8;
+    return SecureRandom(length).base64;
   }
 
   static Uint8List scrypt(Uint8List plainText, Uint8List salt) {
