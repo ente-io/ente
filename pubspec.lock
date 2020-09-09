@@ -675,10 +675,10 @@ packages:
   steel_crypt:
     dependency: "direct main"
     description:
-      path: "thirdparty/steel_crypt"
-      relative: true
-    source: path
-    version: "2.2.2"
+      name: steel_crypt
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.2+1"
   stream_channel:
     dependency: transitive
     description:

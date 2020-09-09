@@ -16,8 +16,8 @@ class CryptoUtil {
   }
 
   static Uint8List scrypt(Uint8List plainText, Uint8List salt) {
-    return steel.PassCrypt.scrypt()
-        .hashBytes(salt: salt, input: plainText, len: 32);
+    return steel.PassCryptRaw.scrypt()
+        .hash(salt: salt, plain: plainText, len: 32);
   }
 
   static Uint8List aesEncrypt(
