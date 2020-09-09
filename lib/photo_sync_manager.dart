@@ -9,7 +9,7 @@ import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/file_upload_manager.dart';
+import 'package:photos/file_uploader.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_name_util.dart';
