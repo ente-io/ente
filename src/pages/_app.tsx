@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, createContext } from 'react';
 import styled, {createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
+import constants from 'utils/strings/constants';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const GlobalStyles = createGlobalStyle`
     html, body {
@@ -35,15 +37,23 @@ const Image = styled.img`
     margin-right: 5px;
 `;
 
+export interface IAppContext {
+    key: string;
+    setKey: (key: string) => void
+}
+
+export const AppContext = createContext<IAppContext>(null);
+
 export default function App({ Component, pageProps }) {
+    const [key, setKey] = useState<string>();
     return (
-        <>
+        <AppContext.Provider value={{ key, setKey }}>
             <GlobalStyles />
             <Navbar>
                 <Image src="/icon.png" />
-                ente
+                {constants.COMPANY_NAME}
             </Navbar>
             <Component />
-        </>
+        </AppContext.Provider>
     );
 }

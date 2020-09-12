@@ -11,6 +11,8 @@ const Navbar = styled.div`
     align-items: center;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
     margin-bottom: 10px;
+    position: sticky;
+    top: 0;
 `;
 
 export default Navbar;

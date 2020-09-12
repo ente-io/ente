@@ -1,3 +1,5 @@
+import englishConstants from './englishConstants';
+
 /** Enums of supported locale */
 export enum locale {
     en='en',
@@ -49,13 +51,6 @@ export const getLocale = (lang: string) => {
 };
 
 /**
- * Global English constants.
- */
-const englishConstants = {
-    ENTE: 'Ente',
-};
-
-/**
  * Global constants
  */
 const globalConstants: VernacularConstants<typeof englishConstants> = {
@@ -66,7 +61,7 @@ const globalConstants: VernacularConstants<typeof englishConstants> = {
  * Function to extend global constants with local constants
  * @param localConstants
  */
-export function getConstantValue<T>(localConstants: VernacularConstants<T>) {
+export function getConstantValue<T>(localConstants?: VernacularConstants<T>) {
     const searchParam = typeof window !== 'undefined' ? window.location.search : '';
     const query = new URLSearchParams(searchParam);
     const currLocale = getLocale(query.get('lang'));
@@ -74,14 +69,14 @@ export function getConstantValue<T>(localConstants: VernacularConstants<T>) {
     if (currLocale !== 'en') {
         return {
             ...globalConstants.en,
-            ...localConstants.en,
+            ...localConstants?.en,
             ...globalConstants[currLocale],
-            ...localConstants[currLocale],
+            ...localConstants?.[currLocale],
         };
     }
 
     return {
         ...globalConstants[currLocale],
-        ...localConstants[currLocale],
+        ...localConstants?.[currLocale],
     };
 }
