@@ -25,6 +25,7 @@ const englishConstants = {
     ENTER_PASSPHRASE: 'Please enter your passphrase.',
     RETURN_PASSPHRASE_HINT: 'That thing you promised to never forget.',
     SET_PASSPHRASE: 'Set Passphrase',
+    VERIFY_PASSPHRASE: 'Verify Passphrase',
     INCORRECT_PASSPHRASE: 'Incorrect Passphrase',
     ENTER_ENC_PASSPHRASE: 'Please enter a passphrase that we can use to encrypt your data.',
     PASSPHRASE_DISCLAIMER: () => (
@@ -36,6 +37,8 @@ const englishConstants = {
     PASSPHRASE_HINT: 'Something you will never forget',
     PASSPHRASE_CONFIRM: 'Please repeat it once more',
     PASSPHRASE_MATCH_ERROR: `Passphrase didn't match`,
+    CONSOLE_WARNING_STOP: 'STOP!',
+    CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. If someone told you to copy-paste something here to enable a feature or "hack" someone's account, it is a scam and will give them access to your account.`
 };
 
 export default englishConstants;

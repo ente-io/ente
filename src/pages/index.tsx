@@ -9,7 +9,7 @@ import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import { getOtt } from 'services/userService';
 import Container from 'components/Container';
-import { setData, SESSION_KEYS, getData } from 'utils/sessionStorage';
+import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 
 interface formValues {
     email: string;
@@ -20,7 +20,7 @@ export default function Home() {
     const router = useRouter();
 
     useEffect(() => {
-        const user = getData(SESSION_KEYS.USER);
+        const user = getData(LS_KEYS.USER);
         if (user?.email) {
             router.push('/verify');
         }
@@ -30,7 +30,7 @@ export default function Home() {
         try {
             setLoading(true);
             await getOtt(email);
-            setData(SESSION_KEYS.USER, { email });
+            setData(LS_KEYS.USER, { email });
             router.push('/verify');
         } catch (e) {
             setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);

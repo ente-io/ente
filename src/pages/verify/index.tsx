@@ -5,7 +5,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
-import { SESSION_KEYS, getData, setData } from 'utils/sessionStorage';
+import { LS_KEYS, getData, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
@@ -28,7 +28,7 @@ export default function Verify() {
     const router = useRouter();
 
     useEffect(() => {
-        const user = getData(SESSION_KEYS.USER);
+        const user = getData(LS_KEYS.USER);
         if (!user?.email) {
             router.push("/");
         } else if (user.token) { 
@@ -42,11 +42,11 @@ export default function Verify() {
         try {
             setLoading(true);
             const resp = await verifyOtt(email, ott);
-            setData(SESSION_KEYS.USER, {
+            setData(LS_KEYS.USER, {
                 email,
                 token: resp.data.token,
             });
-            setData(SESSION_KEYS.KEY_ATTRIBUTES, resp.data.keyAttributes);
+            setData(LS_KEYS.KEY_ATTRIBUTES, resp.data.keyAttributes);
             if (resp.data.keyAttributes?.encryptedKey) {
                 router.push("/credentials");
             } else {

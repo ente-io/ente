@@ -6,14 +6,14 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
-import { getData, SESSION_KEYS } from 'utils/sessionStorage';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import { hash } from 'utils/crypto/scrypt';
-import { strToUint8, base64ToUint8 } from 'utils/crypto/common';
-import { AppContext } from 'pages/_app';
-import { decrypt } from 'utils/crypto/aes';
+import { strToUint8, base64ToUint8, secureRandomString } from 'utils/crypto/common';
+import { decrypt, encrypt } from 'utils/crypto/aes';
 import { keyAttributes } from 'types';
+import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 
 const Image = styled.img`
     width: 200px;
@@ -29,16 +29,16 @@ export default function Credentials() {
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<keyAttributes>();
     const [loading, setLoading] = useState(false);
-    const context = useContext(AppContext);
 
     useEffect(() => {
-        const user = getData(SESSION_KEYS.USER);
-        const keyAttributes = getData(SESSION_KEYS.KEY_ATTRIBUTES);
+        const user = getData(LS_KEYS.USER);
+        const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!user?.token) {
             router.push('/');
         } else if (!keyAttributes) {
             router.push('/generate');
-        } else if (context.key) {
+        } else if (key) {
             router.push('/gallery')
         } else {
             setKeyAttributes(keyAttributes);
@@ -54,7 +54,11 @@ export default function Credentials() {
     
             if (kekHash === keyAttributes.kekHash) {
                 const key = await decrypt(keyAttributes.encryptedKey, kek, keyAttributes.encryptedKeyIV);
-                context.setKey(key);
+                const sessionKey = secureRandomString(32);
+                const sessionIV = secureRandomString(16);
+                const encryptionKey = await encrypt(key, sessionKey, sessionIV);
+                setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
+                setData(LS_KEYS.SESSION, { sessionKey, sessionIV });
                 router.push('/gallery');
             } else {
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
@@ -93,7 +97,7 @@ export default function Credentials() {
                                     {errors.passphrase}
                                 </Form.Control.Feedback>
                             </Form.Group>
-                            <Button block type='submit' disabled={loading}>{constants.SET_PASSPHRASE}</Button>
+                            <Button block type='submit' disabled={loading}>{constants.VERIFY_PASSPHRASE}</Button>
                         </Form>
                     )}
                 </Formik>

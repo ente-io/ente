@@ -1,24 +1,23 @@
 import React, { useContext, useEffect } from 'react';
-import Link from 'next/link';
-import { AppContext } from 'pages/_app';
 import { useRouter } from 'next/router';
 import Container from 'components/Container';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
-import { clearData } from 'utils/sessionStorage';
+import { clearData } from 'utils/storage/localStorage';
+import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 
 export default function Gallery() {
-    const context = useContext(AppContext);
     const router = useRouter();
 
     useEffect(() => {
-        if (!context.key) {
+        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        if (!key) {
             router.push("/");
         }
     }, []);
 
     const logout = () => {
-        context.setKey(null);
+        clearKeys();
         clearData();
         router.push('/');
     }

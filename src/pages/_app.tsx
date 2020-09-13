@@ -1,8 +1,12 @@
-import React, { useState, createContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled, {createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Button from 'react-bootstrap/Button';
+import { clearKeys } from 'utils/storage/sessionStorage';
+import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
+import { useRouter } from 'next/router';
 
 const GlobalStyles = createGlobalStyle`
     html, body {
@@ -37,23 +41,45 @@ const Image = styled.img`
     margin-right: 5px;
 `;
 
-export interface IAppContext {
-    key: string;
-    setKey: (key: string) => void
-}
-
-export const AppContext = createContext<IAppContext>(null);
+const FlexContainer = styled.div`
+    flex: 1;
+`;
 
 export default function App({ Component, pageProps }) {
-    const [key, setKey] = useState<string>();
+    const router = useRouter();
+    const [user, setUser] = useState();
+
+    useEffect(() => {
+        const user = getData(LS_KEYS.USER);
+        setUser(user);
+        console.log(`%c${constants.CONSOLE_WARNING_STOP}`, 'color: red; font-size: 52px;');
+        console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
+
+        router.events.on('routeChangeComplete', () => {
+            const user = getData(LS_KEYS.USER);
+            setUser(user);
+        });
+    }, []);
+
+    const logout = () => {
+        clearKeys();
+        clearData();
+        router.push("/");
+    }
+
     return (
-        <AppContext.Provider value={{ key, setKey }}>
+        <>
             <GlobalStyles />
             <Navbar>
-                <Image src="/icon.png" />
-                {constants.COMPANY_NAME}
+                <FlexContainer>
+                    <Image src="/icon.png" />
+                    {constants.COMPANY_NAME}
+                </FlexContainer>
+                {user && <Button variant='link' onClick={logout}>
+                    <span className="material-icons">power_settings_new</span>
+                </Button>}
             </Navbar>
             <Component />
-        </AppContext.Provider>
+        </>
     );
 }

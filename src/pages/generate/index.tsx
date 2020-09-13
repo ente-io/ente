@@ -11,9 +11,9 @@ import { secureRandomString, strToUint8, base64ToUint8, binToBase64 } from 'util
 import { hash } from 'utils/crypto/scrypt';
 import { encrypt } from 'utils/crypto/aes';
 import { putKeyAttributes } from 'services/userService';
-import { getData, SESSION_KEYS } from 'utils/sessionStorage';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { AppContext } from 'pages/_app';
+import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 
 const Image = styled.img`
     width: 200px;
@@ -30,13 +30,13 @@ export default function Generate() {
     const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<string>();
     const router = useRouter();
-    const context = useContext(AppContext);
+    const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
 
     useEffect(() => {
-        const user = getData(SESSION_KEYS.USER);
+        const user = getData(LS_KEYS.USER);
         if (!user?.token) {
             router.push("/");
-        } else if (context.key) {
+        } else if (key) {
             router.push('/gallery');
         } else {
             setToken(user.token);
@@ -55,11 +55,17 @@ export default function Generate() {
                 const kekHash = await hash(base64ToUint8(kek), base64ToUint8(kekHashSalt));
                 const encryptedKeyIV = secureRandomString(16);
                 const encryptedKey = await encrypt(key, kek, encryptedKeyIV);
-                await putKeyAttributes(token, {
+                const keyAttributes = {
                     kekSalt, kekHashSalt, kekHash,
                     encryptedKeyIV, encryptedKey,
-                });
-                context.setKey(key);
+                };
+                await putKeyAttributes(token, keyAttributes);
+                setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                const sessionKey = secureRandomString(32);
+                const sessionIV = secureRandomString(16);
+                const encryptionKey = await encrypt(key, sessionKey, sessionIV);
+                setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
+                setData(LS_KEYS.SESSION, { sessionKey, sessionIV });
                 router.push('/gallery');
             } else {
                 setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
