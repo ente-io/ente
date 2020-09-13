@@ -85,7 +85,7 @@ export default function App({ Component, pageProps }) {
             <GlobalStyles />
             <Navbar>
                 <FlexContainer>
-                    <Image src="/icon.png" />
+                    <Image alt='logo' src="/icon.png" />
                     {constants.COMPANY_NAME}
                 </FlexContainer>
                 {user && <Button variant='link' onClick={logout}>

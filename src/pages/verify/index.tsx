@@ -74,7 +74,7 @@ export default function Verify() {
     }
 
     return (<Container>
-        <Image src='/email_sent.svg' />
+        <Image alt='Email Sent' src='/email_sent.svg' />
         <Card style={{ minWidth: '300px' }} className="text-center">
             <Card.Body>
                 <Card.Title>{constants.VERIFY_EMAIL}</Card.Title>

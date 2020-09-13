@@ -77,7 +77,7 @@ export default function Generate() {
     }
     
     return (<Container>
-        <Image src='/vault.svg' />
+        <Image alt='vault' src='/vault.svg' />
         <Card>
             <Card.Body>
                 <div className="text-center">
