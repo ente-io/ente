@@ -4,9 +4,12 @@ import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Button from 'react-bootstrap/Button';
+import Spinner from 'react-bootstrap/Spinner';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
+import Container from 'components/Container';
+import PowerSettings from 'components/power_settings';
 
 const GlobalStyles = createGlobalStyle`
     html, body {
@@ -34,6 +37,10 @@ const GlobalStyles = createGlobalStyle`
     :root {
         --primary: #e26f99,
     };
+
+    svg {
+        fill: currentColor;
+    }
 `;
 
 const Image = styled.img`
@@ -48,6 +55,7 @@ const FlexContainer = styled.div`
 export default function App({ Component, pageProps }) {
     const router = useRouter();
     const [user, setUser] = useState();
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
@@ -55,9 +63,14 @@ export default function App({ Component, pageProps }) {
         console.log(`%c${constants.CONSOLE_WARNING_STOP}`, 'color: red; font-size: 52px;');
         console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
 
+        router.events.on('routeChangeStart', () => {
+            setLoading(true);
+        });
+
         router.events.on('routeChangeComplete', () => {
             const user = getData(LS_KEYS.USER);
             setUser(user);
+            setLoading(false);
         });
     }, []);
 
@@ -76,10 +89,17 @@ export default function App({ Component, pageProps }) {
                     {constants.COMPANY_NAME}
                 </FlexContainer>
                 {user && <Button variant='link' onClick={logout}>
-                    <span className="material-icons">power_settings_new</span>
+                    <PowerSettings />
                 </Button>}
             </Navbar>
-            <Component />
+            {loading
+                ? <Container>
+                    <Spinner animation="border" role="status" variant="primary">
+                        <span className="sr-only">Loading...</span>
+                    </Spinner>
+                </Container>
+                : <Component />
+            }
         </>
     );
 }

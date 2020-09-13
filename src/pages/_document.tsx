@@ -35,7 +35,6 @@ export default class MyDocument extends Document {
             <Html>
                 <Head>
                     <title>ente.io | Privacy friendly alternative to Google Photos</title>
-                    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
                     <link rel="icon" href="/icon.png" type="image/png"/>
                 </Head>
                 <body>
