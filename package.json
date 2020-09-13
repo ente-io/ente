@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "next-on-netlify",
     "start": "next start"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
     "@types/styled-components": "^5.1.3",
     "@types/yup": "^0.29.7",
     "babel-plugin-styled-components": "^1.11.1",
+    "next-on-netlify": "^2.4.0",
     "typescript": "^4.0.2"
   }
 }

@@ -32,3 +32,6 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+out_functions
+out_publish
