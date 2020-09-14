@@ -34,7 +34,6 @@ export default class MyDocument extends Document {
         return (
             <Html lang='en'>
                 <Head>
-                    <title>ente.io | Privacy friendly alternative to Google Photos</title>
                     <meta
                         name="description"
                         content="ente is a privacy friendly alternative to Google Photos that supports end-to-end encryption. Because memories are precious."

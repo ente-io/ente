@@ -10,6 +10,7 @@ import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import Container from 'components/Container';
 import PowerSettings from 'components/power_settings';
+import Head from 'next/head';
 
 const GlobalStyles = createGlobalStyle`
     html, body {
@@ -82,6 +83,9 @@ export default function App({ Component, pageProps }) {
 
     return (
         <>
+            <Head>
+                <title>ente.io | Privacy friendly alternative to Google Photos</title>
+            </Head>
             <GlobalStyles />
             <Navbar>
                 <FlexContainer>

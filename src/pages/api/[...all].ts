@@ -6,8 +6,10 @@ export const config = {
     },
 };
 
+const API_ENDPOINT = process.env.NEXT_PUBLIC_ENTE_ENDPOINT || "http://api.staging.ente.io";
+
 export default createProxyMiddleware({
-    target: "http://api.staging.ente.io",
+    target: API_ENDPOINT,
     changeOrigin: true,
     pathRewrite: { '^/api': '/' },
 });

@@ -18,8 +18,9 @@ interface formValues {
 export default function Home() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-
+    
     useEffect(() => {
+        router.prefetch('/verify');
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
             router.push('/verify');

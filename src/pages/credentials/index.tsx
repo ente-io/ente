@@ -29,8 +29,9 @@ export default function Credentials() {
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<keyAttributes>();
     const [loading, setLoading] = useState(false);
-
+    
     useEffect(() => {
+        router.prefetch('/gallery');
         const user = getData(LS_KEYS.USER);
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);

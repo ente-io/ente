@@ -26,8 +26,10 @@ export default function Verify() {
     const [loading, setLoading] = useState(false);
     const [resend, setResend] = useState(0);
     const router = useRouter();
-
+    
     useEffect(() => {
+        router.prefetch('/credentials');
+        router.prefetch('/generate');
         const user = getData(LS_KEYS.USER);
         if (!user?.email) {
             router.push("/");

@@ -31,8 +31,9 @@ export default function Generate() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
     const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-
+    
     useEffect(() => {
+        router.prefetch('/gallery');
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
             router.push("/");
