@@ -174,21 +174,15 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
-  Future<File> getMatchingFile(
-      String localID,
-      String title,
-      String deviceFolder,
-      int creationTime,
-      int modificationTime,
-      String encryptedKey,
-      String iv,
+  Future<File> getMatchingFile(String localID, String title,
+      String deviceFolder, int creationTime, int modificationTime,
       {String alternateTitle}) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
       where: '''$columnLocalID=? AND ($columnTitle=? OR $columnTitle=?) AND 
           $columnDeviceFolder=? AND $columnCreationTime=? AND 
-          $columnModificationTime=? AND $columnEncryptedPassword AND $columnEncryptedPasswordIV''',
+          $columnModificationTime=?''',
       whereArgs: [
         localID,
         title,
@@ -196,8 +190,6 @@ class FilesDB {
         deviceFolder,
         creationTime,
         modificationTime,
-        encryptedKey,
-        iv,
       ],
     );
     if (rows.isNotEmpty) {
