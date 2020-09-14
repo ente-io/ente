@@ -57,4 +57,9 @@ class KeyAttributes {
 
   factory KeyAttributes.fromJson(String source) =>
       KeyAttributes.fromMap(json.decode(source));
+
+  @override
+  String toString() {
+    return 'KeyAttributes(kekSalt: $kekSalt, kekHash: $kekHash, kekHashSalt: $kekHashSalt, encryptedKey: $encryptedKey, encryptedKeyIV: $encryptedKeyIV)';
+  }
 }
