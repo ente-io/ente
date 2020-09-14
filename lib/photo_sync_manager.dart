@@ -215,7 +215,6 @@ class PhotoSyncManager {
             uploadedFile.updationTime,
             file.encryptedPassword,
             file.encryptedPasswordIV);
-        _prefs.setInt(_syncTimeKey, uploadedFile.updationTime);
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: photosToBeUploaded.length));
       } catch (e) {
