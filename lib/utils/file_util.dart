@@ -153,8 +153,13 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
         await CryptoUtil.decryptFileToData(temporaryPath, file.getPassword());
     io.File(temporaryPath).deleteSync();
     final fileExtension = extension(file.title).substring(1).toLowerCase();
-    return cacheManager.putFile(file.getDownloadUrl(), data,
-        fileExtension: fileExtension);
+    return cacheManager.putFile(
+      file.getDownloadUrl(),
+      data,
+      eTag: file.getDownloadUrl(),
+      maxAge: Duration(days: 365),
+      fileExtension: fileExtension,
+    );
   });
 }
 
@@ -162,11 +167,15 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
   final temporaryPath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       "_thumbnail.aes";
-  Dio dio = Dio();
-  return dio.download(file.getThumbnailUrl(), temporaryPath).then((_) async {
+  return Dio().download(file.getThumbnailUrl(), temporaryPath).then((_) async {
     final data =
         await CryptoUtil.decryptFileToData(temporaryPath, file.getPassword());
     io.File(temporaryPath).deleteSync();
-    return ThumbnailCacheManager().putFile(file.getThumbnailUrl(), data);
+    return ThumbnailCacheManager().putFile(
+      file.getThumbnailUrl(),
+      data,
+      eTag: file.getThumbnailUrl(),
+      maxAge: Duration(days: 365),
+    );
   });
 }
