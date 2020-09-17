@@ -37,7 +37,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
       },
       debounceDuration: Duration(milliseconds: 0),
       suggestionsCallback: (pattern) async {
-        if (pattern.isEmpty) {
+        if (pattern.isEmpty || pattern.length < 2) {
           return null;
         }
         _searchString = pattern;
