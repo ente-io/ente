@@ -152,7 +152,9 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     final data =
         await CryptoUtil.decryptFileToData(temporaryPath, file.getPassword());
     io.File(temporaryPath).deleteSync();
-    return cacheManager.putFile(file.getDownloadUrl(), data);
+    final fileExtension = extension(file.title).substring(1).toLowerCase();
+    return cacheManager.putFile(file.getDownloadUrl(), data,
+        fileExtension: fileExtension);
   });
 }
 
