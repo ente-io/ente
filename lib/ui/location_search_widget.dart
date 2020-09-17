@@ -26,7 +26,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
         autofocus: true,
         decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: 'Search your photos',
+          hintText: 'Eg: Rome, Paris, New York',
           contentPadding: const EdgeInsets.all(0.0),
         ),
       ),
