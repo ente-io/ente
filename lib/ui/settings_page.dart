@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 
@@ -61,7 +62,16 @@ class UsageWidgetState extends State<UsageWidget> {
     return Container(
       child: Column(
         children: [
-          SettingsSectionTitle("BILLING"),
+          SettingsSectionTitle("BACKUP"),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () async {
+              _showFoldersDialog(context);
+            },
+            child: SettingsTextItem(
+                text: "Backed up Folders", icon: Icons.navigate_next),
+          ),
+          Divider(height: 4),
           Padding(padding: EdgeInsets.all(4)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -86,6 +96,28 @@ class UsageWidgetState extends State<UsageWidget> {
           )
         ],
       ),
+    );
+  }
+
+  void _showFoldersDialog(BuildContext context) async {
+    AlertDialog alert = AlertDialog(
+      title: Text("Select folders to back up"),
+      content: BackedUpFoldersWidget(),
+      actions: [
+        FlatButton(
+          child: Text("OK"),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
     );
   }
 
@@ -114,6 +146,55 @@ class UsageWidgetState extends State<UsageWidget> {
         }
       }
     });
+  }
+}
+
+class BackedUpFoldersWidget extends StatefulWidget {
+  const BackedUpFoldersWidget({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  _BackedUpFoldersWidgetState createState() => _BackedUpFoldersWidgetState();
+}
+
+class _BackedUpFoldersWidgetState extends State<BackedUpFoldersWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<String>>(
+      future: FilesDB.instance.getLocalPaths(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          snapshot.data.sort((first, second) {
+            return first.toLowerCase().compareTo(second.toLowerCase());
+          });
+          final backedUpFolders = Configuration.instance.getFoldersToBackUp();
+          final foldersWidget = List<Row>();
+          for (final folder in snapshot.data) {
+            foldersWidget.add(Row(children: [
+              Checkbox(
+                value: backedUpFolders.contains(folder),
+                onChanged: (value) async {
+                  if (value) {
+                    backedUpFolders.add(folder);
+                  } else {
+                    backedUpFolders.remove(folder);
+                  }
+                  await Configuration.instance
+                      .setFoldersToBackUp(backedUpFolders);
+                  setState(() {});
+                },
+              ),
+              Text(folder)
+            ]));
+          }
+          return SingleChildScrollView(
+            child: Column(children: foldersWidget),
+          );
+        }
+        return loadWidget;
+      },
+    );
   }
 }
 

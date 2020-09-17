@@ -18,6 +18,7 @@ class Configuration {
   static const emailKey = "email";
   static const tokenKey = "token";
   static const hasOptedForE2EKey = "has_opted_for_e2e_encryption";
+  static const foldersToBackUpKey = "folders_to_back_up";
   static const keyKey = "key";
   static const keyEncryptedKey = "encrypted_key";
   static const keyKekSalt = "kek_salt";
@@ -117,6 +118,24 @@ class Configuration {
   bool hasOptedForE2E() {
     return true;
     // return _preferences.getBool(hasOptedForE2EKey);
+  }
+
+  Set<String> getFoldersToBackUp() {
+    if (_preferences.containsKey(foldersToBackUpKey)) {
+      return _preferences.getStringList(foldersToBackUpKey).toSet();
+    } else {
+      final foldersToBackUp = Set<String>();
+      foldersToBackUp.add("Camera");
+      foldersToBackUp.add("Recents");
+      foldersToBackUp.add("DCIM");
+      foldersToBackUp.add("Download");
+      foldersToBackUp.add("Screenshot");
+      return foldersToBackUp;
+    }
+  }
+
+  Future<void> setFoldersToBackUp(Set<String> folders) async {
+    await _preferences.setStringList(foldersToBackUpKey, folders.toList());
   }
 
   Future<void> setKeyAttributes(KeyAttributes attributes) async {

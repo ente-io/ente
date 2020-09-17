@@ -10,7 +10,6 @@ import 'package:photos/file_downloader.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/file_uploader.dart';
-import 'package:photos/models/file_type.dart';
 import 'package:photos/utils/file_name_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
@@ -196,11 +195,12 @@ class PhotoSyncManager {
 
   Future<void> _uploadDiff() async {
     List<File> photosToBeUploaded = await _db.getFilesToBeUploaded();
+    final foldersToBackUp = Configuration.instance.getFoldersToBackUp();
     for (int i = 0; i < photosToBeUploaded.length; i++) {
       File file = photosToBeUploaded[i];
       _logger.info("Uploading " + file.toString());
       try {
-        if (file.fileType == FileType.video) {
+        if (!foldersToBackUp.contains(file.deviceFolder)) {
           continue;
         }
         var uploadedFile;
