@@ -194,10 +194,11 @@ class PhotoSyncManager {
   }
 
   Future<void> _uploadDiff() async {
-    List<File> photosToBeUploaded = await _db.getFilesToBeUploaded();
     final foldersToBackUp = Configuration.instance.getFoldersToBackUp();
-    for (int i = 0; i < photosToBeUploaded.length; i++) {
-      File file = photosToBeUploaded[i];
+    List<File> filesToBeUploaded =
+        await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
+    for (int i = 0; i < filesToBeUploaded.length; i++) {
+      File file = filesToBeUploaded[i];
       try {
         if (!foldersToBackUp.contains(file.deviceFolder)) {
           continue;
@@ -215,7 +216,7 @@ class PhotoSyncManager {
             file.encryptedPassword,
             file.encryptedPasswordIV);
         Bus.instance.fire(PhotoUploadEvent(
-            completed: i + 1, total: photosToBeUploaded.length));
+            completed: i + 1, total: filesToBeUploaded.length));
       } catch (e) {
         Bus.instance.fire(PhotoUploadEvent(hasError: true));
         throw e;

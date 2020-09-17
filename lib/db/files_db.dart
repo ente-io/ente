@@ -164,11 +164,18 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
-  Future<List<File>> getFilesToBeUploaded() async {
+  Future<List<File>> getFilesToBeUploadedWithinFolders(
+      Set<String> folders) async {
     final db = await instance.database;
+    String inParam = "";
+    for (final folder in folders) {
+      inParam += "'" + folder + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
     final results = await db.query(
       table,
-      where: '$columnUploadedFileID IS NULL',
+      where:
+          '$columnUploadedFileID IS NULL AND $columnDeviceFolder IN ($inParam)',
       orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
