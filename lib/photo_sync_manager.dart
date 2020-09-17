@@ -24,6 +24,7 @@ class PhotoSyncManager {
   final _uploader = FileUploader();
   final _downloader = DiffFetcher();
   bool _isSyncInProgress = false;
+  bool _syncStopRequested = false;
   Future<void> _existingSync;
   SharedPreferences _prefs;
 
@@ -46,6 +47,7 @@ class PhotoSyncManager {
   }
 
   Future<void> sync() async {
+    _syncStopRequested = false;
     if (_isSyncInProgress) {
       _logger.warning("Sync already in progress, skipping.");
       return _existingSync;
@@ -62,6 +64,15 @@ class PhotoSyncManager {
       }
     });
     return _existingSync;
+  }
+
+  void stopSync() {
+    _logger.info("Sync stop requested");
+    _syncStopRequested = true;
+  }
+
+  bool shouldStopSync() {
+    return _syncStopRequested;
   }
 
   bool hasScannedDisk() {
@@ -198,11 +209,13 @@ class PhotoSyncManager {
     List<File> filesToBeUploaded =
         await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
     for (int i = 0; i < filesToBeUploaded.length; i++) {
+      if (_syncStopRequested) {
+        _syncStopRequested = false;
+        Bus.instance.fire(PhotoUploadEvent(wasStopped: true));
+        return;
+      }
       File file = filesToBeUploaded[i];
       try {
-        if (!foldersToBackUp.contains(file.deviceFolder)) {
-          continue;
-        }
         var uploadedFile;
         if (Configuration.instance.hasOptedForE2E()) {
           uploadedFile = await _uploader.encryptAndUploadFile(file);
