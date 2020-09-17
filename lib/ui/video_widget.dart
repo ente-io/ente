@@ -1,3 +1,4 @@
+import 'dart:io' as io;
 import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -38,14 +39,14 @@ class _VideoWidgetState extends State<VideoWidget> {
     super.initState();
     if (widget.file.localID == null) {
       if (!widget.file.isEncrypted) {
-        _setVideoPlayerController(widget.file.getStreamUrl());
+        _setVideoPlayerController(url: widget.file.getStreamUrl());
         _videoPlayerController.addListener(() {
           if (_videoPlayerController.value.hasError) {
             _logger.warning(_videoPlayerController.value.errorDescription);
             showToast(
                 "The video has not been processed yet. Downloading the original one...",
                 toastLength: Toast.LENGTH_SHORT);
-            _setVideoPlayerController(widget.file.getDownloadUrl());
+            _setVideoPlayerController(url: widget.file.getDownloadUrl());
           }
         });
       } else {
@@ -61,13 +62,13 @@ class _VideoWidgetState extends State<VideoWidget> {
             });
           },
         ).then((file) {
-          _setVideoPlayerController(file.path);
+          _setVideoPlayerController(file: file);
         });
       }
     } else {
       widget.file.getAsset().then((asset) {
         asset.getMediaUrl().then((url) {
-          _setVideoPlayerController(url);
+          _setVideoPlayerController(url: url);
         });
       });
     }
@@ -82,8 +83,14 @@ class _VideoWidgetState extends State<VideoWidget> {
     super.dispose();
   }
 
-  VideoPlayerController _setVideoPlayerController(String url) {
-    return _videoPlayerController = VideoPlayerController.network(url)
+  VideoPlayerController _setVideoPlayerController({String url, io.File file}) {
+    var videoPlayerController;
+    if (url != null) {
+      videoPlayerController = VideoPlayerController.network(url);
+    } else {
+      videoPlayerController = VideoPlayerController.file(file);
+    }
+    return _videoPlayerController = videoPlayerController
       ..initialize().whenComplete(() {
         if (mounted) {
           setState(() {});
@@ -101,7 +108,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       key: Key(widget.file.tag()),
       onVisibilityChanged: (info) {
         if (info.visibleFraction < 1) {
-          if (mounted) {
+          if (mounted && _chewieController != null) {
             _chewieController.pause();
           }
         }
