@@ -198,7 +198,6 @@ class PhotoSyncManager {
     final foldersToBackUp = Configuration.instance.getFoldersToBackUp();
     for (int i = 0; i < photosToBeUploaded.length; i++) {
       File file = photosToBeUploaded[i];
-      _logger.info("Uploading " + file.toString());
       try {
         if (!foldersToBackUp.contains(file.deviceFolder)) {
           continue;

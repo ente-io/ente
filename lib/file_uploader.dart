@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_name_util.dart';
@@ -41,6 +42,7 @@ class FileUploader {
   }
 
   Future<File> encryptAndUploadFile(File file) async {
+    _logger.info("Uploading " + file.toString());
     final password = CryptoUtil.getSecureRandomString(length: 32);
     final iv = CryptoUtil.getSecureRandomBytes(length: 16);
     final base64EncodedIV = base64.encode(iv);
@@ -51,8 +53,15 @@ class FileUploader {
     final encryptedFileName = file.generatedID.toString() + ".aes";
     final tempDirectory = Configuration.instance.getTempDirectory();
     final encryptedFilePath = tempDirectory + encryptedFileName;
-    await CryptoUtil.encryptDataToFile(
-        await getBytesFromDisk(file), encryptedFilePath, password);
+    if (file.fileType == FileType.image) {
+      await CryptoUtil.encryptDataToFile(
+          await getBytesFromDisk(file), encryptedFilePath, password);
+    } else {
+      await CryptoUtil.encryptFileToFile(
+          (await (await file.getAsset()).originFile).path,
+          encryptedFilePath,
+          password);
+    }
 
     final fileUploadURL = await getUploadURL();
     String fileObjectKey =
