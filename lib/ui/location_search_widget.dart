@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -31,11 +33,9 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
         ),
       ),
       hideOnEmpty: true,
-      hideOnLoading: true,
       loadingBuilder: (context) {
         return loadWidget;
       },
-      debounceDuration: Duration(milliseconds: 0),
       suggestionsCallback: (pattern) async {
         if (pattern.isEmpty || pattern.length < 2) {
           return null;
