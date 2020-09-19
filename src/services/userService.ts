@@ -1,9 +1,8 @@
 import HTTPService from './HTTPService';
 import { keyAttributes } from 'types';
+import { getEndpoint } from 'utils/common/apiUtil';
 
-const dev = process.env.NODE_ENV === 'development';
-const API_ENDPOINT = process.env.NEXT_PUBLIC_ENTE_ENDPOINT || "https://api.staging.ente.io";
-const ENDPOINT = !dev ? API_ENDPOINT : '/api'
+const ENDPOINT = getEndpoint();
 
 export const getOtt = (email: string) => {
     return HTTPService.get(`${ENDPOINT}/users/ott`, { email })

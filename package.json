@@ -14,6 +14,7 @@
     "formik": "^2.1.5",
     "http-proxy-middleware": "^1.0.5",
     "next": "9.5.3",
+    "node-forge": "^0.10.0",
     "react": "16.13.1",
     "react-bootstrap": "^1.3.0",
     "react-dom": "16.13.1",
@@ -28,6 +29,7 @@
     "@types/yup": "^0.29.7",
     "babel-plugin-styled-components": "^1.11.1",
     "next-on-netlify": "^2.4.0",
-    "typescript": "^4.0.2"
+    "typescript": "^4.0.2",
+    "worker-plugin": "^5.0.0"
   }
 }

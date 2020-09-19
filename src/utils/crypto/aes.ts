@@ -13,7 +13,7 @@ export async function encrypt(data: string, key: string, iv: string) {
         false, ['encrypt', 'decrypt']
     );
 
-    const result = await window.crypto.subtle.encrypt(
+    const result = await crypto.subtle.encrypt(
         {
             name: "AES-CBC",
             iv: base64ToUint8(iv),
@@ -38,7 +38,7 @@ export async function decrypt(data: string, key: string, iv: string) {
         false, ['encrypt', 'decrypt']
     );
 
-    const result = await window.crypto.subtle.decrypt(
+    const result = await crypto.subtle.decrypt(
         {
             name: "AES-CBC",
             iv: base64ToUint8(iv),

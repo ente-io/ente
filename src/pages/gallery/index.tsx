@@ -1,34 +1,36 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Container from 'components/Container';
-import Card from 'react-bootstrap/Card';
-import Button from 'react-bootstrap/Button';
-import { clearData } from 'utils/storage/localStorage';
-import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import Spinner from 'react-bootstrap/Spinner';
+import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { fileData, getFiles } from 'services/fileService';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import PreviewCard from './components/PreviewCard';
+import { getActualKey } from 'utils/common/key';
 
 export default function Gallery() {
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState<fileData[]>();
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const token = getData(LS_KEYS.USER).token;
         if (!key) {
             router.push("/");
         }
+        const main = async () => {
+            setLoading(true);
+            const encryptionKey = await getActualKey();
+            const resp = await getFiles("0", token, "100", encryptionKey);
+            setLoading(false);
+            setData(resp);
+        };
+        main();
     }, []);
 
-    const logout = () => {
-        clearKeys();
-        clearData();
-        router.push('/');
+    if (!data || loading) {
+        return <Spinner animation="border" variant="primary"/>;
     }
 
-    return (<Container>
-        <Card className="text-center">
-            <Card.Body>
-                Imagine a very nice and secure gallery of your memories here.<br/>
-                <br/>
-                <Button block onClick={logout}>Logout</Button>
-            </Card.Body>
-        </Card>
-    </Container>);
+    return (data || []).map(item => <PreviewCard key={item.id} data={item} />);
 }
