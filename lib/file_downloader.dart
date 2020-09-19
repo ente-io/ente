@@ -18,7 +18,7 @@ class DiffFetcher {
           Configuration.instance.getHttpEndpoint() + "/encrypted-files/diff",
           queryParameters: {
             "token": Configuration.instance.getToken(),
-            "sinceTimestamp": lastSyncTime,
+            "sinceTime": lastSyncTime,
             "limit": limit,
           },
         )
@@ -56,7 +56,7 @@ class DiffFetcher {
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       queryParameters: {
-        "sinceTimestamp": lastSyncTime,
+        "sinceTime": lastSyncTime,
         "limit": limit,
       },
     ).catchError((e) => _logger.severe(e));

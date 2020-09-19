@@ -70,8 +70,12 @@ class FolderSharingService {
       try {
         var existingPhoto =
             await FilesDB.instance.getMatchingRemoteFile(file.uploadedFileID);
-        await FilesDB.instance.update(existingPhoto.generatedID,
-            file.uploadedFileID, file.updationTime, file.encryptedPassword, file.encryptedPasswordIV);
+        await FilesDB.instance.update(
+            existingPhoto.generatedID,
+            file.uploadedFileID,
+            file.updationTime,
+            file.encryptedPassword,
+            file.encryptedPasswordIV);
       } catch (e) {
         await FilesDB.instance.insert(file);
       }
@@ -81,8 +85,7 @@ class FolderSharingService {
     }
   }
 
-  Future<List<File>> getDiff(
-      int folderId, int sinceTimestamp, int limit) async {
+  Future<List<File>> getDiff(int folderId, int sinceTime, int limit) async {
     Response response = await _dio.get(
       Configuration.instance.getHttpEndpoint() +
           "/folders/diff/" +
@@ -90,7 +93,7 @@ class FolderSharingService {
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       queryParameters: {
-        "sinceTimestamp": sinceTimestamp,
+        "sinceTime": sinceTime,
         "limit": limit,
       },
     ).catchError((e) => _logger.severe(e));
