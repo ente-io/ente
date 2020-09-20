@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import styled, {createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
 import { clearKeys } from 'utils/storage/sessionStorage';
@@ -11,6 +10,8 @@ import { useRouter } from 'next/router';
 import Container from 'components/Container';
 import PowerSettings from 'components/power_settings';
 import Head from 'next/head';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'react-photoswipe/lib/photoswipe.css';
 
 const GlobalStyles = createGlobalStyle`
     html, body {

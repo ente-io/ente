@@ -1,4 +1,3 @@
-import { resolve } from 'path';
 import { aescrypt } from './aescrypt';
 
 const decrypt = (file: Uint8Array, password: String, binaryResponse: Boolean = false) => {
@@ -6,6 +5,7 @@ const decrypt = (file: Uint8Array, password: String, binaryResponse: Boolean = f
         try {
             aescrypt.decrypt(file, password, !binaryResponse, ({ data, error}) => {
                 if (error) {
+                    console.log(error);
                     reject(error);
                 }
                 resolve(data);
