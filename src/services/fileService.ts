@@ -16,6 +16,9 @@ export interface fileData {
         title: string;
         deviceFolder: string;
     };
+    src: string,
+    w: number,
+    h: number,
     encryptedPassword: string;
     encryptedPasswordIV: string;
     file?: string;
@@ -55,7 +58,7 @@ export const getPreview = async (token: string, data: fileData, key: string) => 
         `${ENDPOINT}/encrypted-files/preview/${data.id}`,
         { token }, null, { responseType: 'arraybuffer' },
     );
-    const decrypted = await getFileUsingWorker({
+    const decrypted: any = await getFileUsingWorker({
         ...data,
         file: resp.data,
     }, key);
