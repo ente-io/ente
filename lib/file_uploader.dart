@@ -67,8 +67,11 @@ class FileUploader {
     String fileObjectKey =
         await putFile(fileUploadURL, io.File(encryptedFilePath));
 
-    final thumbnailData = (await (await file.getAsset())
-        .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE));
+    final thumbnailData = (await (await file.getAsset()).thumbDataWithSize(
+      THUMBNAIL_LARGE_SIZE,
+      THUMBNAIL_LARGE_SIZE,
+      quality: 50,
+    ));
     final encryptedThumbnailName =
         file.generatedID.toString() + "_thumbnail.aes";
     final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
