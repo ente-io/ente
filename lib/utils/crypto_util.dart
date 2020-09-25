@@ -18,9 +18,9 @@ import 'package:uuid/uuid.dart';
 class CryptoUtil {
   static Logger _logger = Logger("CryptoUtil");
 
-  static int encryptionBlockSize = 4 * 1024 * 1024;
-  static int decryptionBlockSize =
-      encryptionBlockSize + Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
+  static int encryptionChunkSize = 4 * 1024 * 1024;
+  static int decryptionChunkSize =
+      encryptionChunkSize + Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
 
   static Future<EncryptedData> encrypt(Uint8List source,
       {Uint8List key}) async {
@@ -71,15 +71,15 @@ class CryptoUtil {
     var bytesRead = 0;
     var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
     while (tag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
-      var blockLength = encryptionBlockSize;
-      if (bytesRead + blockLength >= sourceFileLength) {
-        blockLength = sourceFileLength - bytesRead;
+      var chunkSize = encryptionChunkSize;
+      if (bytesRead + chunkSize >= sourceFileLength) {
+        chunkSize = sourceFileLength - bytesRead;
         tag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
       }
-      final blockData = await inputFile.read(blockLength);
-      bytesRead += blockLength;
+      final buffer = await inputFile.read(chunkSize);
+      bytesRead += chunkSize;
       final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
-          initPushResult.state, blockData, null, tag);
+          initPushResult.state, buffer, null, tag);
       outputFile.writeFromSync(encryptedData);
     }
     await inputFile.close();
@@ -112,14 +112,14 @@ class CryptoUtil {
     var bytesRead = 0;
     var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
     while (tag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
-      var blockLength = decryptionBlockSize;
-      if (bytesRead + blockLength >= sourceFileLength) {
-        blockLength = sourceFileLength - bytesRead;
+      var chunkSize = decryptionChunkSize;
+      if (bytesRead + chunkSize >= sourceFileLength) {
+        chunkSize = sourceFileLength - bytesRead;
       }
-      final blockData = await inputFile.read(blockLength);
-      bytesRead += blockLength;
+      final buffer = await inputFile.read(chunkSize);
+      bytesRead += chunkSize;
       final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
-          pullState, blockData, null);
+          pullState, buffer, null);
       outputFile.writeFromSync(pullResult.m);
       tag = pullResult.tag;
     }
