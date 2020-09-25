@@ -157,24 +157,26 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
   )
       .then((_) async {
     var attributes = ChaChaAttributes(
-        EncryptionAttribute(base64: file.fileDecryptionParams.header),
-        EncryptionAttribute(
-            bytes: await CryptoUtil.decrypt(
-          file.fileDecryptionParams.encryptedKey,
-          Configuration.instance.getBase64EncodedKey(),
-          file.fileDecryptionParams.nonce,
-        )));
+      EncryptionAttribute(
+          bytes: await CryptoUtil.decrypt(
+        file.fileDecryptionParams.encryptedKey,
+        Configuration.instance.getBase64EncodedKey(),
+        file.fileDecryptionParams.keyDecryptionNonce,
+      )),
+      EncryptionAttribute(base64: file.fileDecryptionParams.header),
+    );
     await CryptoUtil.chachaDecrypt(encryptedFile, decryptedFile, attributes);
     encryptedFile.deleteSync();
-    decryptedFile.deleteSync();
     final fileExtension = extension(file.title).substring(1).toLowerCase();
-    return cacheManager.putFile(
+    final cachedFile = await cacheManager.putFile(
       file.getDownloadUrl(),
       decryptedFile.readAsBytesSync(),
       eTag: file.getDownloadUrl(),
       maxAge: Duration(days: 365),
       fileExtension: fileExtension,
     );
+    decryptedFile.deleteSync();
+    return cachedFile;
   });
 }
 
