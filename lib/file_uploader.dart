@@ -110,11 +110,11 @@ class FileUploader {
       },
       "thumbnail": {
         "objectKey": thumbnailObjectKey,
-        "decryptionParams": thumbnailDecryptionParams,
+        "decryptionParams": thumbnailDecryptionParams.toMap(),
       },
       "metadata": {
         "encryptedData": encryptedMetadata.encryptedData.base64,
-        "decryptionParams": metadataDecryptionParams,
+        "decryptionParams": metadataDecryptionParams.toMap(),
       }
     };
     return _dio
