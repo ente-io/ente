@@ -72,17 +72,13 @@ class CryptoUtil {
     var encryptionTag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
     while (
         encryptionTag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
-      bool isLastBlock = false;
       var blockLength = encryptionBlockSize;
       if (bytesRead + blockLength >= sourceFileLength) {
         blockLength = sourceFileLength - bytesRead;
-        isLastBlock = true;
+        encryptionTag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
       }
       final blockData = await inputFile.read(blockLength);
       bytesRead += blockLength;
-      if (isLastBlock) {
-        encryptionTag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
-      }
       final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
           initPushResult.state, blockData, null, encryptionTag);
       outputFile.writeFromSync(encryptedData);
