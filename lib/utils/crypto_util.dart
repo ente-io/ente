@@ -4,12 +4,105 @@ import 'dart:io' as io;
 import 'package:aes_crypt/aes_crypt.dart';
 import 'package:computer/computer.dart';
 import 'package:encrypt/encrypt.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:logging/logging.dart';
 
 import 'package:photos/core/configuration.dart';
+import 'package:photos/models/encrypted_file_attributes.dart';
 import 'package:steel_crypt/steel_crypt.dart' as steel;
 import 'package:uuid/uuid.dart';
 
 class CryptoUtil {
+  static Logger _logger = Logger("CryptoUtil");
+
+  static int encryptionBlockSize = 4 * 1024 * 1024;
+  static int decryptionBlockSize =
+      encryptionBlockSize + Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
+
+  static Future<EncryptedFileAttributes> chachaEncrypt(
+    io.File sourceFile,
+    io.File destinationFile,
+  ) async {
+    var encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
+
+    final sourceFileLength = sourceFile.lengthSync();
+    _logger.info("Encrypting file of size " + sourceFileLength.toString());
+
+    final inputFile = await (sourceFile.open(mode: io.FileMode.read));
+    final outputFile =
+        await (destinationFile.open(mode: io.FileMode.writeOnlyAppend));
+
+    final key = Sodium.cryptoSecretstreamXchacha20poly1305Keygen();
+    final initPushResult =
+        Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
+
+    var bytesRead = 0;
+    var encryptionTag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
+    while (
+        encryptionTag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
+      bool isLastBlock = false;
+      var blockLength = encryptionBlockSize;
+      if (bytesRead + blockLength >= sourceFileLength) {
+        blockLength = sourceFileLength - bytesRead;
+        isLastBlock = true;
+      }
+      final blockData = await inputFile.read(blockLength);
+      bytesRead += blockLength;
+      if (isLastBlock) {
+        encryptionTag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
+      }
+      final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
+          initPushResult.state, blockData, null, encryptionTag);
+      outputFile.writeFromSync(encryptedData);
+    }
+    await inputFile.close();
+    await outputFile.close();
+
+    _logger.info("ChaCha20 Encryption time: " +
+        (DateTime.now().millisecondsSinceEpoch - encryptionStartTime)
+            .toString());
+
+    return EncryptedFileAttributes(key, initPushResult.header);
+  }
+
+  static Future<void> chachaDecrypt(
+    io.File sourceFile,
+    io.File destinationFile,
+    EncryptedFileAttributes attributes,
+  ) async {
+    var decryptionStartTime = DateTime.now().millisecondsSinceEpoch;
+
+    final sourceFileLength = sourceFile.lengthSync();
+    _logger.info("Decrypting file of size " + sourceFileLength.toString());
+
+    final inputFile = await (sourceFile.open(mode: io.FileMode.read));
+    final outputFile =
+        await (destinationFile.open(mode: io.FileMode.writeOnlyAppend));
+    final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
+        attributes.header, attributes.key);
+
+    var bytesRead = 0;
+    var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
+    while (tag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
+      var blockLength = decryptionBlockSize;
+      if (bytesRead + blockLength >= sourceFileLength) {
+        blockLength = sourceFileLength - bytesRead;
+      }
+      final blockData = await inputFile.read(blockLength);
+      bytesRead += blockLength;
+      final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
+          pullState, blockData, null);
+      outputFile.writeFromSync(pullResult.m);
+      tag = pullResult.tag;
+    }
+    await inputFile.close();
+    await outputFile.close();
+
+    _logger.info("ChaCha20 Decryption time: " +
+        (DateTime.now().millisecondsSinceEpoch - decryptionStartTime)
+            .toString());
+  }
+
   static Uint8List getSecureRandomBytes({int length = 32}) {
     return SecureRandom(length).bytes;
   }
