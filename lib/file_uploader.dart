@@ -41,8 +41,10 @@ class FileUploader {
     });
   }
 
+  // TODO: Remove encryption and decryption time logging
   Future<File> encryptAndUploadFile(File file) async {
     _logger.info("Uploading " + file.toString());
+
     final password = CryptoUtil.getSecureRandomString(length: 32);
     final iv = CryptoUtil.getSecureRandomBytes(length: 16);
     final base64EncodedIV = base64.encode(iv);
@@ -53,6 +55,10 @@ class FileUploader {
     final encryptedFileName = file.generatedID.toString() + ".aes";
     final tempDirectory = Configuration.instance.getTempDirectory();
     final encryptedFilePath = tempDirectory + encryptedFileName;
+
+    _logger.info("File size " +
+        (await (await file.getAsset()).file).lengthSync().toString());
+    final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
     if (file.fileType == FileType.image) {
       await CryptoUtil.encryptDataToFile(
           await getBytesFromDisk(file), encryptedFilePath, password);
@@ -62,6 +68,15 @@ class FileUploader {
           encryptedFilePath,
           password);
     }
+    final encryptionStopTime = DateTime.now().millisecondsSinceEpoch;
+    _logger.info("Encryption time: " +
+        (encryptionStopTime - encryptionStartTime).toString());
+
+    final decryptionStartTime = DateTime.now().millisecondsSinceEpoch;
+    await CryptoUtil.decryptFileToData(encryptedFilePath, password);
+    final decryptionStopTime = DateTime.now().millisecondsSinceEpoch;
+    _logger.info("Decryption time: " +
+        (decryptionStopTime - decryptionStartTime).toString());
 
     final fileUploadURL = await getUploadURL();
     String fileObjectKey =
