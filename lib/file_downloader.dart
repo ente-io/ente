@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/remote_sync_event.dart';
+import 'package:photos/models/decryption_params.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/crypto_util.dart';
 
@@ -28,18 +29,23 @@ class DiffFetcher {
           if (response != null) {
             Bus.instance.fire(RemoteSyncEvent(true));
             final diff = response.data["diff"] as List;
-            for (final fileItem in diff) {
+            for (final item in diff) {
               final file = File();
-              file.uploadedFileID = fileItem["id"];
-              file.ownerID = fileItem["ownerID"];
-              file.updationTime = fileItem["updationTime"];
+              file.uploadedFileID = item["id"];
+              file.ownerID = item["ownerID"];
+              file.updationTime = item["updationTime"];
               file.isEncrypted = true;
-              file.encryptedPassword = fileItem["encryptedPassword"];
-              file.encryptedPasswordIV = fileItem["encryptedPasswordIV"];
+              file.fileDecryptionParams =
+                  DecryptionParams.fromMap(item["file"]["decryptionParams"]);
+              file.thumbnailDecryptionParams = DecryptionParams.fromMap(
+                  item["thumbnail"]["decryptionParams"]);
+              file.metadataDecryptionParams = DecryptionParams.fromMap(
+                  item["metadata"]["decryptionParams"]);
               Map<String, dynamic> metadata = jsonDecode(utf8.decode(
-                  await CryptoUtil.decryptDataToData(
-                      base64.decode(fileItem["encryptedMetadata"]),
-                      file.getPassword())));
+                  await CryptoUtil.decryptWithDecryptionParams(
+                      base64.decode(item["metadata"]["encryptedData"]),
+                      file.metadataDecryptionParams,
+                      Configuration.instance.getBase64EncodedKey())));
               file.applyMetadata(metadata);
               files.add(file);
             }

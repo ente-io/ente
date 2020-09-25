@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/models/decryption_params.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/models/file_type.dart';
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_name_util.dart';
@@ -41,46 +41,30 @@ class FileUploader {
     });
   }
 
-  // TODO: Remove encryption and decryption time logging
   Future<File> encryptAndUploadFile(File file) async {
     _logger.info("Uploading " + file.toString());
 
-    final password = CryptoUtil.getSecureRandomString(length: 32);
-    final iv = CryptoUtil.getSecureRandomBytes(length: 16);
-    final base64EncodedIV = base64.encode(iv);
-    final encryptedKey = CryptoUtil.aesEncrypt(
-        utf8.encode(password), Configuration.instance.getKey(), iv);
-    final base64EncodedEncryptedKey = base64.encode(encryptedKey);
-
-    final encryptedFileName = file.generatedID.toString() + ".aes";
+    final encryptedFileName = file.generatedID.toString() + ".encrypted";
     final tempDirectory = Configuration.instance.getTempDirectory();
     final encryptedFilePath = tempDirectory + encryptedFileName;
 
-    _logger.info("File size " +
-        (await (await file.getAsset()).file).lengthSync().toString());
-    final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
-    if (file.fileType == FileType.image) {
-      await CryptoUtil.encryptDataToFile(
-          await getBytesFromDisk(file), encryptedFilePath, password);
-    } else {
-      await CryptoUtil.encryptFileToFile(
-          (await (await file.getAsset()).originFile).path,
-          encryptedFilePath,
-          password);
-    }
-    final encryptionStopTime = DateTime.now().millisecondsSinceEpoch;
-    _logger.info("Encryption time: " +
-        (encryptionStopTime - encryptionStartTime).toString());
-
-    final decryptionStartTime = DateTime.now().millisecondsSinceEpoch;
-    await CryptoUtil.decryptFileToData(encryptedFilePath, password);
-    final decryptionStopTime = DateTime.now().millisecondsSinceEpoch;
-    _logger.info("Decryption time: " +
-        (decryptionStopTime - decryptionStartTime).toString());
+    final sourceFile = (await (await file.getAsset()).originFile);
+    final encryptedFile = io.File(encryptedFilePath);
+    final fileAttributes =
+        await CryptoUtil.chachaEncrypt(sourceFile, encryptedFile);
 
     final fileUploadURL = await getUploadURL();
-    String fileObjectKey =
-        await putFile(fileUploadURL, io.File(encryptedFilePath));
+    String fileObjectKey = await putFile(fileUploadURL, encryptedFile);
+
+    final encryptedFileKey = await CryptoUtil.encrypt(
+      fileAttributes.key.bytes,
+      key: Configuration.instance.getKey(),
+    );
+    final fileDecryptionParams = DecryptionParams(
+      encryptedKey: encryptedFileKey.encryptedData.base64,
+      keyDecryptionNonce: encryptedFileKey.nonce.base64,
+      header: fileAttributes.header.base64,
+    );
 
     final thumbnailData = (await (await file.getAsset()).thumbDataWithSize(
       THUMBNAIL_LARGE_SIZE,
@@ -88,24 +72,50 @@ class FileUploader {
       quality: 50,
     ));
     final encryptedThumbnailName =
-        file.generatedID.toString() + "_thumbnail.aes";
+        file.generatedID.toString() + "_thumbnail.encrypted";
     final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
-    await CryptoUtil.encryptDataToFile(
-        thumbnailData, encryptedThumbnailPath, password);
+    final encryptedThumbnail = await CryptoUtil.encrypt(thumbnailData);
+    io.File(encryptedThumbnailPath)
+        .writeAsBytesSync(encryptedThumbnail.encryptedData.bytes);
 
     final thumbnailUploadURL = await getUploadURL();
     String thumbnailObjectKey =
         await putFile(thumbnailUploadURL, io.File(encryptedThumbnailPath));
 
+    final encryptedThumbnailKey = await CryptoUtil.encrypt(
+      encryptedThumbnail.key.bytes,
+      key: Configuration.instance.getKey(),
+    );
+    final thumbnailDecryptionParams = DecryptionParams(
+      encryptedKey: encryptedThumbnailKey.encryptedData.base64,
+      keyDecryptionNonce: encryptedThumbnailKey.nonce.base64,
+      nonce: encryptedThumbnail.nonce.base64,
+    );
+
     final metadata = jsonEncode(file.getMetadata());
-    final encryptedMetadata =
-        await CryptoUtil.encryptDataToData(utf8.encode(metadata), password);
+    final encryptedMetadata = await CryptoUtil.encrypt(utf8.encode(metadata));
+    final encryptedMetadataKey = await CryptoUtil.encrypt(
+      encryptedMetadata.key.bytes,
+      key: Configuration.instance.getKey(),
+    );
+    final metadataDecryptionParams = DecryptionParams(
+      encryptedKey: encryptedMetadataKey.encryptedData.base64,
+      keyDecryptionNonce: encryptedMetadataKey.nonce.base64,
+      nonce: encryptedMetadata.nonce.base64,
+    );
     final data = {
-      "fileObjectKey": fileObjectKey,
-      "thumbnailObjectKey": thumbnailObjectKey,
-      "encryptedMetadata": base64.encode(encryptedMetadata),
-      "encryptedPassword": base64EncodedEncryptedKey,
-      "encryptedPasswordIV": base64EncodedIV,
+      "file": {
+        "objectKey": fileObjectKey,
+        "decryptionParams": fileDecryptionParams.toMap(),
+      },
+      "thumbnail": {
+        "objectKey": thumbnailObjectKey,
+        "decryptionParams": thumbnailDecryptionParams,
+      },
+      "metadata": {
+        "encryptedData": encryptedMetadata.encryptedData.base64,
+        "decryptionParams": metadataDecryptionParams,
+      }
     };
     return _dio
         .post(
@@ -115,14 +125,15 @@ class FileUploader {
       data: data,
     )
         .then((response) {
-      io.File(encryptedFilePath).deleteSync();
+      encryptedFile.deleteSync();
       io.File(encryptedThumbnailPath).deleteSync();
       final data = response.data;
       file.uploadedFileID = data["id"];
       file.updationTime = data["updationTime"];
       file.ownerID = data["ownerID"];
-      file.encryptedPassword = base64EncodedEncryptedKey;
-      file.encryptedPasswordIV = base64EncodedIV;
+      file.fileDecryptionParams = fileDecryptionParams;
+      file.thumbnailDecryptionParams = thumbnailDecryptionParams;
+      file.metadataDecryptionParams = metadataDecryptionParams;
       return file;
     });
   }

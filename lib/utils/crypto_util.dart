@@ -8,7 +8,10 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 
 import 'package:photos/core/configuration.dart';
+import 'package:photos/models/decryption_params.dart';
+import 'package:photos/models/encrypted_data_attributes.dart';
 import 'package:photos/models/encrypted_file_attributes.dart';
+import 'package:photos/models/encryption_attribute.dart';
 import 'package:steel_crypt/steel_crypt.dart' as steel;
 import 'package:uuid/uuid.dart';
 
@@ -19,7 +22,36 @@ class CryptoUtil {
   static int decryptionBlockSize =
       encryptionBlockSize + Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
 
-  static Future<EncryptedFileAttributes> chachaEncrypt(
+  static Future<EncryptedData> encrypt(Uint8List source,
+      {Uint8List key}) async {
+    if (key == null) {
+      key = Sodium.cryptoSecretboxKeygen();
+    }
+    final nonce = Sodium.randombytesBuf(Sodium.cryptoSecretboxNoncebytes);
+    final encryptedData = Sodium.cryptoSecretboxEasy(source, nonce, key);
+    return EncryptedData(
+        EncryptionAttribute(bytes: key),
+        EncryptionAttribute(bytes: nonce),
+        EncryptionAttribute(bytes: encryptedData));
+  }
+
+  static Future<Uint8List> decrypt(
+      String base64Cipher, String base64Key, String base64Nonce) async {
+    return Sodium.cryptoSecretboxOpenEasy(Sodium.base642bin(base64Cipher),
+        Sodium.base642bin(base64Nonce), Sodium.base642bin(base64Key));
+  }
+
+  static Future<Uint8List> decryptWithDecryptionParams(
+      Uint8List source, DecryptionParams params, String base64Kek) async {
+    final key = Sodium.cryptoSecretboxOpenEasy(
+        Sodium.base642bin(params.encryptedKey),
+        Sodium.base642bin(params.keyDecryptionNonce),
+        Sodium.base642bin(base64Kek));
+    return Sodium.cryptoSecretboxOpenEasy(
+        source, Sodium.base642bin(params.nonce), key);
+  }
+
+  static Future<ChaChaAttributes> chachaEncrypt(
     io.File sourceFile,
     io.File destinationFile,
   ) async {
@@ -62,13 +94,14 @@ class CryptoUtil {
         (DateTime.now().millisecondsSinceEpoch - encryptionStartTime)
             .toString());
 
-    return EncryptedFileAttributes(key, initPushResult.header);
+    return ChaChaAttributes(EncryptionAttribute(bytes: key),
+        EncryptionAttribute(bytes: initPushResult.header));
   }
 
   static Future<void> chachaDecrypt(
     io.File sourceFile,
     io.File destinationFile,
-    EncryptedFileAttributes attributes,
+    ChaChaAttributes attributes,
   ) async {
     var decryptionStartTime = DateTime.now().millisecondsSinceEpoch;
 
@@ -79,7 +112,7 @@ class CryptoUtil {
     final outputFile =
         await (destinationFile.open(mode: io.FileMode.writeOnlyAppend));
     final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
-        attributes.header, attributes.key);
+        attributes.header.bytes, attributes.key.bytes);
 
     var bytesRead = 0;
     var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;

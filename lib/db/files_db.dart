@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import 'package:photos/models/decryption_params.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/file.dart';
@@ -31,8 +32,9 @@ class FilesDB {
   static final columnCreationTime = 'creation_time';
   static final columnModificationTime = 'modification_time';
   static final columnUpdationTime = 'updation_time';
-  static final columnEncryptedPassword = 'encrypted_password';
-  static final columnEncryptedPasswordIV = 'encrypted_password_iv';
+  static final columnFileDecryptionParams = 'file_decryption_params';
+  static final columnThumbnailDecryptionParams = 'thumbnail_decryption_params';
+  static final columnMetadataDecryptionParams = 'metadata_decryption_params';
 
   // make this a singleton class
   FilesDB._privateConstructor();
@@ -74,8 +76,9 @@ class FilesDB {
             $columnCreationTime TEXT NOT NULL,
             $columnModificationTime TEXT NOT NULL,
             $columnUpdationTime TEXT,
-            $columnEncryptedPassword TEXT,
-            $columnEncryptedPasswordIV TEXT
+            $columnFileDecryptionParams TEXT,
+            $columnThumbnailDecryptionParams TEXT,
+            $columnMetadataDecryptionParams TEXT
           )
           ''');
   }
@@ -224,15 +227,18 @@ class FilesDB {
     int generatedID,
     int uploadedID,
     int updationTime,
-    String encryptedKey,
-    String iv,
+    DecryptionParams fileDecryptionParams,
+    DecryptionParams thumbnailDecryptionParams,
+    DecryptionParams metadataDecryptionParams,
   ) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
     values[columnUploadedFileID] = uploadedID;
     values[columnUpdationTime] = updationTime;
-    values[columnEncryptedPassword] = encryptedKey;
-    values[columnEncryptedPasswordIV] = iv;
+    values[columnFileDecryptionParams] = fileDecryptionParams.toJson();
+    values[columnThumbnailDecryptionParams] =
+        thumbnailDecryptionParams.toJson();
+    values[columnMetadataDecryptionParams] = metadataDecryptionParams.toJson();
     return await db.update(
       table,
       values,
@@ -384,8 +390,16 @@ class FilesDB {
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
-    row[columnEncryptedPassword] = file.encryptedPassword;
-    row[columnEncryptedPasswordIV] = file.encryptedPasswordIV;
+    row[columnFileDecryptionParams] = file.fileDecryptionParams == null
+        ? null
+        : file.fileDecryptionParams.toJson();
+    row[columnThumbnailDecryptionParams] =
+        file.thumbnailDecryptionParams == null
+            ? null
+            : file.thumbnailDecryptionParams.toJson();
+    row[columnMetadataDecryptionParams] = file.metadataDecryptionParams == null
+        ? null
+        : file.metadataDecryptionParams.toJson();
     return row;
   }
 
@@ -408,8 +422,12 @@ class FilesDB {
     file.updationTime = row[columnUpdationTime] == null
         ? -1
         : int.parse(row[columnUpdationTime]);
-    file.encryptedPassword = row[columnEncryptedPassword];
-    file.encryptedPasswordIV = row[columnEncryptedPasswordIV];
+    file.fileDecryptionParams =
+        DecryptionParams.fromJson(row[columnFileDecryptionParams]);
+    file.thumbnailDecryptionParams =
+        DecryptionParams.fromJson(row[columnThumbnailDecryptionParams]);
+    file.metadataDecryptionParams =
+        DecryptionParams.fromJson(row[columnMetadataDecryptionParams]);
     return file;
   }
 }

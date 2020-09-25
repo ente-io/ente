@@ -13,6 +13,8 @@ import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/models/encrypted_file_attributes.dart';
+import 'package:photos/models/encryption_attribute.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 
@@ -139,23 +141,36 @@ Future<io.File> getThumbnailFromServer(File file) async {
 
 Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     {ProgressCallback progressCallback}) async {
-  final temporaryPath = Configuration.instance.getTempDirectory() +
+  final encryptedFilePath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
-      ".aes";
+      ".encrypted";
+  final decryptedFilePath = Configuration.instance.getTempDirectory() +
+      file.generatedID.toString() +
+      ".decrypted";
+  final encryptedFile = io.File(encryptedFilePath);
+  final decryptedFile = io.File(decryptedFilePath);
   return Dio()
       .download(
     file.getDownloadUrl(),
-    temporaryPath,
+    encryptedFilePath,
     onReceiveProgress: progressCallback,
   )
       .then((_) async {
-    final data =
-        await CryptoUtil.decryptFileToData(temporaryPath, file.getPassword());
-    io.File(temporaryPath).deleteSync();
+    var attributes = ChaChaAttributes(
+        EncryptionAttribute(base64: file.fileDecryptionParams.header),
+        EncryptionAttribute(
+            bytes: await CryptoUtil.decrypt(
+          file.fileDecryptionParams.encryptedKey,
+          Configuration.instance.getBase64EncodedKey(),
+          file.fileDecryptionParams.nonce,
+        )));
+    await CryptoUtil.chachaDecrypt(encryptedFile, decryptedFile, attributes);
+    encryptedFile.deleteSync();
+    decryptedFile.deleteSync();
     final fileExtension = extension(file.title).substring(1).toLowerCase();
     return cacheManager.putFile(
       file.getDownloadUrl(),
-      data,
+      decryptedFile.readAsBytesSync(),
       eTag: file.getDownloadUrl(),
       maxAge: Duration(days: 365),
       fileExtension: fileExtension,
@@ -166,11 +181,14 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
 Future<io.File> _downloadAndDecryptThumbnail(File file) async {
   final temporaryPath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
-      "_thumbnail.aes";
+      "_thumbnail.decrypted";
   return Dio().download(file.getThumbnailUrl(), temporaryPath).then((_) async {
-    final data =
-        await CryptoUtil.decryptFileToData(temporaryPath, file.getPassword());
-    io.File(temporaryPath).deleteSync();
+    final encryptedFile = io.File(temporaryPath);
+    final data = await CryptoUtil.decryptWithDecryptionParams(
+        encryptedFile.readAsBytesSync(),
+        file.thumbnailDecryptionParams,
+        Configuration.instance.getBase64EncodedKey());
+    encryptedFile.deleteSync();
     return ThumbnailCacheManager().putFile(
       file.getThumbnailUrl(),
       data,

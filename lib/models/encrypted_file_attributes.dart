@@ -1,8 +1,8 @@
-import 'dart:typed_data';
+import 'package:photos/models/encryption_attribute.dart';
 
-class EncryptedFileAttributes {
-  final Uint8List key;
-  final Uint8List header;
+class ChaChaAttributes {
+  final EncryptionAttribute key;
+  final EncryptionAttribute header;
 
-  EncryptedFileAttributes(this.key, this.header);
+  ChaChaAttributes(this.key, this.header);
 }

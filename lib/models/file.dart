@@ -1,11 +1,9 @@
-import 'dart:convert';
-
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/models/decryption_params.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
-import 'package:photos/utils/crypto_util.dart';
 
 class File {
   int generatedID;
@@ -21,8 +19,9 @@ class File {
   int updationTime;
   Location location;
   FileType fileType;
-  String encryptedPassword;
-  String encryptedPasswordIV;
+  DecryptionParams fileDecryptionParams;
+  DecryptionParams thumbnailDecryptionParams;
+  DecryptionParams metadataDecryptionParams;
 
   File();
 
@@ -36,8 +35,6 @@ class File {
     creationTime = json["creationTime"];
     modificationTime = json["modificationTime"];
     updationTime = json["updationTime"];
-    encryptedPassword = json["encryptedPassword"];
-    encryptedPasswordIV = json["encryptedPasswordIV"];
   }
 
   static Future<File> fromAsset(
@@ -135,14 +132,6 @@ class File {
         uploadedFileID.toString() +
         "?token=" +
         Configuration.instance.getToken();
-  }
-
-  String getPassword() {
-    if (encryptedPassword == null) {
-      return null;
-    }
-    return utf8.decode(CryptoUtil.aesDecrypt(base64.decode(encryptedPassword),
-        Configuration.instance.getKey(), base64.decode(encryptedPasswordIV)));
   }
 
   @override
