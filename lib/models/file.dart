@@ -138,6 +138,9 @@ class File {
   String toString() {
     return '''File(generatedId: $generatedID, uploadedFileId: $uploadedFileID, 
       localId: $localID, title: $title, deviceFolder: $deviceFolder, 
+      fileDecryptionParams: $fileDecryptionParams, 
+      thumbnailDecryptionParams: $thumbnailDecryptionParams,
+      metadataDecryptionParams: $metadataDecryptionParams,
       location: $location, fileType: $fileType, creationTime: $creationTime, 
       modificationTime: $modificationTime, updationTime: $updationTime)''';
   }
