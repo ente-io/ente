@@ -61,8 +61,6 @@ class CryptoUtil {
     _logger.info("Encrypting file of size " + sourceFileLength.toString());
 
     final inputFile = await (sourceFile.open(mode: io.FileMode.read));
-    final outputFile =
-        await (destinationFile.open(mode: io.FileMode.writeOnlyAppend));
 
     final key = Sodium.cryptoSecretstreamXchacha20poly1305Keygen();
     final initPushResult =
@@ -80,10 +78,9 @@ class CryptoUtil {
       bytesRead += chunkSize;
       final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
           initPushResult.state, buffer, null, tag);
-      outputFile.writeFromSync(encryptedData);
+      destinationFile.writeAsBytesSync(encryptedData, mode: io.FileMode.append);
     }
     await inputFile.close();
-    await outputFile.close();
 
     _logger.info("ChaCha20 Encryption time: " +
         (DateTime.now().millisecondsSinceEpoch - encryptionStartTime)
@@ -104,8 +101,6 @@ class CryptoUtil {
     _logger.info("Decrypting file of size " + sourceFileLength.toString());
 
     final inputFile = await (sourceFile.open(mode: io.FileMode.read));
-    final outputFile =
-        await (destinationFile.open(mode: io.FileMode.writeOnlyAppend));
     final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
         attributes.header.bytes, attributes.key.bytes);
 
@@ -120,11 +115,10 @@ class CryptoUtil {
       bytesRead += chunkSize;
       final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
           pullState, buffer, null);
-      outputFile.writeFromSync(pullResult.m);
+      destinationFile.writeAsBytesSync(pullResult.m, mode: io.FileMode.append);
       tag = pullResult.tag;
     }
     await inputFile.close();
-    await outputFile.close();
 
     _logger.info("ChaCha20 Decryption time: " +
         (DateTime.now().millisecondsSinceEpoch - decryptionStartTime)
