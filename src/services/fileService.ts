@@ -6,8 +6,21 @@ import HTTPService from "./HTTPService";
 
 const ENDPOINT = getEndpoint();
 
+export interface decryptionParams {
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    header: string;
+    nonce: string;
+};
+
 export interface fileData {
     id: number;
+    file: {
+        decryptionParams: decryptionParams;
+    },
+    thumbnail: {
+        decryptionParams: decryptionParams;
+    },
     metadata: {
         currentTime: number;
         modificationTime: number;
@@ -19,12 +32,10 @@ export interface fileData {
     src: string,
     w: number,
     h: number,
-    encryptedPassword: string;
-    encryptedPasswordIV: string;
-    file?: string;
+    data?: string;
 };
 
-const getFileDataUsingWorker = (data: any, key: string) => {
+const getFileMetaDataUsingWorker = (data: any, key: string) => {
     return new Promise((resolve) => {
         const worker = new Worker('worker/decryptMetadata.worker.js', { type: 'module' });
         const onWorkerMessage = (event) => resolve(event.data);
@@ -35,7 +46,7 @@ const getFileDataUsingWorker = (data: any, key: string) => {
 
 const getFileUsingWorker = (data: any, key: string) => {
     return new Promise((resolve) => {
-        const worker = new Worker('worker/decryptFile.worker.js', { type: 'module' });
+        const worker = new Worker('worker/decryptThumbnail.worker.js', { type: 'module' });
         const onWorkerMessage = (event) => resolve(event.data);
         worker.addEventListener('message', onWorkerMessage);
         worker.postMessage({ data, key });
@@ -47,7 +58,7 @@ export const getFiles = async (sinceTime: string, token: string, limit: string, 
         sinceTime, token, limit,
     });
 
-    const promises: Promise<fileData>[] = resp.data.diff.map((data) => getFileDataUsingWorker(data, key));
+    const promises: Promise<fileData>[] = resp.data.diff.map((data) => getFileMetaDataUsingWorker(data, key));
     const decrypted = await Promise.all(promises);
 
     return decrypted;
@@ -62,6 +73,6 @@ export const getPreview = async (token: string, data: fileData, key: string) => 
         ...data,
         file: resp.data,
     }, key);
-    const url = URL.createObjectURL(new Blob([decrypted.file]));
+    const url = URL.createObjectURL(new Blob([decrypted.data]));
     return url;
 }
