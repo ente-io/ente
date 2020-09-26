@@ -80,7 +80,7 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
-    return "http://192.168.0.100";
+    return "https://api.staging.ente.io";
   }
 
   Future<void> setEndpoint(String endpoint) async {
