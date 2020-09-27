@@ -134,8 +134,7 @@ class _VideoWidgetState extends State<VideoWidget> {
           size: Size.square(30),
           child: _progress == null || _progress == 1
               ? CupertinoActivityIndicator()
-              : CupertinoActivityIndicator.partiallyRevealed(
-                  progress: _progress),
+              : CircularProgressIndicator(value: _progress),
         ),
       ),
     ]);
