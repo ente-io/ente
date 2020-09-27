@@ -1,19 +1,23 @@
-import { decrypt } from "utils/crypto/aes";
+import * as Comlink from 'comlink';
 import { base64ToUint8 } from "utils/crypto/common";
-import aescrypt from 'utils/aescrypt';
+import sodium from 'libsodium-wrappers';
 
-function decryptFile(event) {
-    const main = async () => {
-        const data = event.data.data;
-        const key = event.data.key;
-        const password = await decrypt(data.encryptedPassword, key, data.encryptedPasswordIV);
-        const metadata = await aescrypt.decrypt(base64ToUint8(data.encryptedMetadata), atob(password));
-        self.postMessage({
-            ...data,
-            metadata: JSON.parse(metadata)
-        });
-    }
-    main();
+async function decryptMetadata(event) {
+    console.log(event);
+    const { data } = event;
+    await sodium.ready;
+    const key = sodium.crypto_secretbox_open_easy(
+        base64ToUint8(data.metadata.decryptionParams.encryptedKey),
+        base64ToUint8(data.metadata.decryptionParams.keyDecryptionNonce),
+        base64ToUint8(event.key));
+    const metadata = sodium.crypto_secretbox_open_easy(
+        base64ToUint8(data.metadata.encryptedData),
+        base64ToUint8(data.metadata.decryptionParams.nonce),
+        key);
+    return {
+        ...data,
+        metadata: JSON.parse(new TextDecoder().decode(metadata))
+    };
 }
 
-self.addEventListener('message', decryptFile);
+Comlink.expose(decryptMetadata, self);

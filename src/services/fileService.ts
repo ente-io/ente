@@ -1,13 +1,28 @@
-import aescrypt from "utils/aescrypt";
 import { getEndpoint } from "utils/common/apiUtil";
-import { decrypt } from "utils/crypto/aes";
-import { strToUint8 } from "utils/crypto/common";
 import HTTPService from "./HTTPService";
+import * as Comlink from "comlink";
+
+const decryptMetadata: any = typeof window !== 'undefined'
+    && Comlink.wrap(new Worker("worker/decryptMetadata.worker.js", { type: 'module' }));
+const decryptThumbnail: any = typeof window !== 'undefined'
+    && Comlink.wrap(new Worker("worker/decryptThumbnail.worker.js", { type: 'module' }));
 
 const ENDPOINT = getEndpoint();
 
+export interface decryptionParams {
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    header: string;
+    nonce: string;
+};
 export interface fileData {
     id: number;
+    file: {
+        decryptionParams: decryptionParams;
+    },
+    thumbnail: {
+        decryptionParams: decryptionParams;
+    },
     metadata: {
         currentTime: number;
         modificationTime: number;
@@ -19,27 +34,15 @@ export interface fileData {
     src: string,
     w: number,
     h: number,
-    encryptedPassword: string;
-    encryptedPasswordIV: string;
-    file?: string;
+    data?: string;
 };
 
-const getFileDataUsingWorker = (data: any, key: string) => {
-    return new Promise((resolve) => {
-        const worker = new Worker('worker/decryptMetadata.worker.js', { type: 'module' });
-        const onWorkerMessage = (event) => resolve(event.data);
-        worker.addEventListener('message', onWorkerMessage);
-        worker.postMessage({ data, key });
-    });
+const getFileMetaDataUsingWorker = (data: any, key: string) => {
+    return decryptMetadata({ data, key });
 }
 
 const getFileUsingWorker = (data: any, key: string) => {
-    return new Promise((resolve) => {
-        const worker = new Worker('worker/decryptFile.worker.js', { type: 'module' });
-        const onWorkerMessage = (event) => resolve(event.data);
-        worker.addEventListener('message', onWorkerMessage);
-        worker.postMessage({ data, key });
-    });
+    return decryptThumbnail({ data, key });
 }
 
 export const getFiles = async (sinceTime: string, token: string, limit: string, key: string) => {
@@ -47,7 +50,7 @@ export const getFiles = async (sinceTime: string, token: string, limit: string, 
         sinceTime, token, limit,
     });
 
-    const promises: Promise<fileData>[] = resp.data.diff.map((data) => getFileDataUsingWorker(data, key));
+    const promises: Promise<fileData>[] = resp.data.diff.map((data) => getFileMetaDataUsingWorker(data, key));
     const decrypted = await Promise.all(promises);
 
     return decrypted;
@@ -62,6 +65,6 @@ export const getPreview = async (token: string, data: fileData, key: string) => 
         ...data,
         file: resp.data,
     }, key);
-    const url = URL.createObjectURL(new Blob([decrypted.file]));
+    const url = URL.createObjectURL(new Blob([decrypted.data]));
     return url;
 }
