@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
@@ -35,8 +34,8 @@ class _PassphraseReentryPageState extends State<PassphraseReentryPage> {
         padding: EdgeInsets.fromLTRB(16, 40, 16, 16),
         child: Column(
           children: [
-            SvgPicture.asset(
-              "assets/vault.svg",
+            Image.asset(
+              "assets/vault.png",
               width: 196,
               height: 196,
             ),

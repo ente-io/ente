@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:photos/user_authenticator.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -32,8 +31,8 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
         padding: EdgeInsets.fromLTRB(16, 40, 16, 16),
         child: Column(
           children: [
-            SvgPicture.asset(
-              "assets/vault.svg",
+            Image.asset(
+              "assets/vault.png",
               width: 196,
               height: 196,
             ),

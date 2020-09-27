@@ -62,7 +62,6 @@ dependencies:
   computer: ^1.0.2
   flutter_secure_storage: ^3.3.3
   uni_links: ^0.4.0
-  flutter_svg: ^0.18.1
   crisp: ^0.1.3
   uuid: 2.2.2
   steel_crypt: ^2.2.2+1

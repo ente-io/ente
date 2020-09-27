@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/user_authenticator.dart';
@@ -36,8 +35,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            SvgPicture.asset(
-              "assets/email_sent.svg",
+            Image.asset(
+              "assets/email_sent.png",
               width: 256,
               height: 256,
             ),
