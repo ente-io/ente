@@ -1,8 +1,11 @@
-import aescrypt from "utils/aescrypt";
 import { getEndpoint } from "utils/common/apiUtil";
-import { decrypt } from "utils/crypto/aes";
-import { strToUint8 } from "utils/crypto/common";
 import HTTPService from "./HTTPService";
+import * as Comlink from "comlink";
+
+const decryptMetadata: any = typeof window !== 'undefined'
+    && Comlink.wrap(new Worker("worker/decryptMetadata.worker.js", { type: 'module' }));
+const decryptThumbnail: any = typeof window !== 'undefined'
+    && Comlink.wrap(new Worker("worker/decryptThumbnail.worker.js", { type: 'module' }));
 
 const ENDPOINT = getEndpoint();
 
@@ -12,7 +15,6 @@ export interface decryptionParams {
     header: string;
     nonce: string;
 };
-
 export interface fileData {
     id: number;
     file: {
@@ -36,21 +38,11 @@ export interface fileData {
 };
 
 const getFileMetaDataUsingWorker = (data: any, key: string) => {
-    return new Promise((resolve) => {
-        const worker = new Worker('worker/decryptMetadata.worker.js', { type: 'module' });
-        const onWorkerMessage = (event) => resolve(event.data);
-        worker.addEventListener('message', onWorkerMessage);
-        worker.postMessage({ data, key });
-    });
+    return decryptMetadata({ data, key });
 }
 
 const getFileUsingWorker = (data: any, key: string) => {
-    return new Promise((resolve) => {
-        const worker = new Worker('worker/decryptThumbnail.worker.js', { type: 'module' });
-        const onWorkerMessage = (event) => resolve(event.data);
-        worker.addEventListener('message', onWorkerMessage);
-        worker.postMessage({ data, key });
-    });
+    return decryptThumbnail({ data, key });
 }
 
 export const getFiles = async (sinceTime: string, token: string, limit: string, key: string) => {
