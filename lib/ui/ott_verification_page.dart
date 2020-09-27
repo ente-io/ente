@@ -98,7 +98,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                   ),
                 )),
             Padding(padding: EdgeInsets.all(8)),
-            TextButton(
+            FlatButton(
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
