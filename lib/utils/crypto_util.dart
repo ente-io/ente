@@ -151,11 +151,7 @@ class CryptoUtil {
   }
 
   static Uint8List getSecureRandomBytes({int length = 32}) {
-    return SecureRandom(length).bytes;
-  }
-
-  static String getSecureRandomString({int length = 32}) {
-    return SecureRandom(length).base64;
+    return Sodium.randombytesBuf(length);
   }
 
   static Uint8List scrypt(Uint8List plainText, Uint8List salt) {
