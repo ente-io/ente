@@ -107,7 +107,8 @@ class CryptoUtil {
     args["source"] = source;
     args["nonce"] = nonce;
     args["key"] = key;
-    final encryptedData = await Computer().compute(chachaDecrypt, param: args);
+    final encryptedData =
+        await Computer().compute(cryptoSecretboxEasy, param: args);
 
     return EncryptedData(
         EncryptionAttribute(bytes: key),
@@ -123,7 +124,7 @@ class CryptoUtil {
     args["nonce"] = nonce;
     args["key"] = key;
     if (background) {
-      return Computer().compute(chachaDecrypt, param: args);
+      return Computer().compute(cryptoSecretboxOpenEasy, param: args);
     } else {
       return cryptoSecretboxOpenEasy(args);
     }
@@ -136,7 +137,7 @@ class CryptoUtil {
     final args = Map<String, dynamic>();
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
-    return Computer().compute(chachaDecrypt, param: args);
+    return Computer().compute(chachaEncrypt, param: args);
   }
 
   static Future<void> decryptFile(
