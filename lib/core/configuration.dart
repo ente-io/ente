@@ -3,6 +3,7 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -173,7 +174,7 @@ class Configuration {
   }
 
   Uint8List getKey() {
-    return base64.decode(_key);
+    return Sodium.base642bin(_key);
   }
 
   String getBase64EncodedKey() {
