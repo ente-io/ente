@@ -10,6 +10,7 @@ import 'package:photos/file_downloader.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/file_uploader.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/utils/file_name_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
@@ -215,6 +216,9 @@ class PhotoSyncManager {
         return;
       }
       File file = filesToBeUploaded[i];
+      if (file.fileType == FileType.video) {
+        continue;
+      }
       try {
         var uploadedFile;
         if (Configuration.instance.hasOptedForE2E()) {

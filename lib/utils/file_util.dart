@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path/path.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -159,13 +160,14 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     var attributes = ChaChaAttributes(
       EncryptionAttribute(
           bytes: await CryptoUtil.decrypt(
-        file.fileDecryptionParams.encryptedKey,
-        Configuration.instance.getBase64EncodedKey(),
-        file.fileDecryptionParams.keyDecryptionNonce,
+        Sodium.base642bin(file.fileDecryptionParams.encryptedKey),
+        Configuration.instance.getKey(),
+        Sodium.base642bin(file.fileDecryptionParams.keyDecryptionNonce),
       )),
       EncryptionAttribute(base64: file.fileDecryptionParams.header),
     );
-    await CryptoUtil.chachaDecrypt(encryptedFile, decryptedFile, attributes);
+    await CryptoUtil.decryptFile(
+        encryptedFilePath, decryptedFilePath, attributes);
     encryptedFile.deleteSync();
     final fileExtension = extension(file.title).substring(1).toLowerCase();
     final cachedFile = await cacheManager.putFile(
@@ -186,10 +188,15 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
       "_thumbnail.decrypted";
   return Dio().download(file.getThumbnailUrl(), temporaryPath).then((_) async {
     final encryptedFile = io.File(temporaryPath);
-    final data = await CryptoUtil.decryptWithDecryptionParams(
-        encryptedFile.readAsBytesSync(),
-        file.thumbnailDecryptionParams,
-        Configuration.instance.getBase64EncodedKey());
+    final thumbnailDecryptionKey = await CryptoUtil.decrypt(
+        Sodium.base642bin(file.thumbnailDecryptionParams.encryptedKey),
+        Configuration.instance.getKey(),
+        Sodium.base642bin(file.thumbnailDecryptionParams.keyDecryptionNonce));
+    final data = await CryptoUtil.decrypt(
+      encryptedFile.readAsBytesSync(),
+      thumbnailDecryptionKey,
+      Sodium.base642bin(file.thumbnailDecryptionParams.nonce),
+    );
     encryptedFile.deleteSync();
     return ThumbnailCacheManager().putFile(
       file.getThumbnailUrl(),

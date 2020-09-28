@@ -51,7 +51,7 @@ class FileUploader {
     final sourceFile = (await (await file.getAsset()).originFile);
     final encryptedFile = io.File(encryptedFilePath);
     final fileAttributes =
-        await CryptoUtil.chachaEncrypt(sourceFile, encryptedFile);
+        await CryptoUtil.encryptFile(sourceFile.path, encryptedFilePath);
 
     final fileUploadURL = await getUploadURL();
     String fileObjectKey = await putFile(fileUploadURL, encryptedFile);

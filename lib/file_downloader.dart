@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -41,11 +42,18 @@ class DiffFetcher {
                   item["thumbnail"]["decryptionParams"]);
               file.metadataDecryptionParams = DecryptionParams.fromMap(
                   item["metadata"]["decryptionParams"]);
-              Map<String, dynamic> metadata = jsonDecode(utf8.decode(
-                  await CryptoUtil.decryptWithDecryptionParams(
-                      base64.decode(item["metadata"]["encryptedData"]),
-                      file.metadataDecryptionParams,
-                      Configuration.instance.getBase64EncodedKey())));
+              final metadataDecryptionKey = await CryptoUtil.decrypt(
+                  Sodium.base642bin(file.metadataDecryptionParams.encryptedKey),
+                  Configuration.instance.getKey(),
+                  Sodium.base642bin(
+                      file.metadataDecryptionParams.keyDecryptionNonce));
+              final encodedMetadata = await CryptoUtil.decrypt(
+                Sodium.base642bin(item["metadata"]["encryptedData"]),
+                metadataDecryptionKey,
+                Sodium.base642bin(file.metadataDecryptionParams.nonce),
+              );
+              Map<String, dynamic> metadata =
+                  jsonDecode(utf8.decode(encodedMetadata));
               file.applyMetadata(metadata);
               files.add(file);
             }
