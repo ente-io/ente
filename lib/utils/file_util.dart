@@ -2,6 +2,7 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -142,21 +143,25 @@ Future<io.File> getThumbnailFromServer(File file) async {
 
 Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     {ProgressCallback progressCallback}) async {
+  Logger("FileUtil").info("Downloading file " + file.toString());
   final encryptedFilePath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       ".encrypted";
   final decryptedFilePath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       ".decrypted";
-  final encryptedFile = io.File(encryptedFilePath);
-  final decryptedFile = io.File(decryptedFilePath);
   return Dio()
       .download(
     file.getDownloadUrl(),
     encryptedFilePath,
     onReceiveProgress: progressCallback,
   )
-      .then((_) async {
+      .then((response) async {
+    if (response.statusCode != 200) {
+      Logger("FileUtil")
+          .warning("Could not download file: ", response.toString());
+      return null;
+    }
     var attributes = ChaChaAttributes(
       EncryptionAttribute(
           bytes: await CryptoUtil.decrypt(
@@ -168,7 +173,8 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     );
     await CryptoUtil.decryptFile(
         encryptedFilePath, decryptedFilePath, attributes);
-    encryptedFile.deleteSync();
+    io.File(encryptedFilePath).deleteSync();
+    final decryptedFile = io.File(decryptedFilePath);
     final fileExtension = extension(file.title).substring(1).toLowerCase();
     final cachedFile = await cacheManager.putFile(
       file.getDownloadUrl(),
