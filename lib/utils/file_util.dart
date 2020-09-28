@@ -22,6 +22,8 @@ import 'package:photos/models/file_type.dart';
 
 import 'crypto_util.dart';
 
+final logger = Logger("FileUtil");
+
 Future<void> deleteFiles(List<File> files,
     {bool deleteEveryWhere = false}) async {
   await PhotoManager.editor
@@ -143,7 +145,7 @@ Future<io.File> getThumbnailFromServer(File file) async {
 
 Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     {ProgressCallback progressCallback}) async {
-  Logger("FileUtil").info("Downloading file " + file.toString());
+  logger.info("Downloading file " + file.uploadedFileID.toString());
   final encryptedFilePath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       ".encrypted";
@@ -158,8 +160,7 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
   )
       .then((response) async {
     if (response.statusCode != 200) {
-      Logger("FileUtil")
-          .warning("Could not download file: ", response.toString());
+      logger.warning("Could not download file: ", response.toString());
       return null;
     }
     var attributes = ChaChaAttributes(
