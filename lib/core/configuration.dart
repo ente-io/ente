@@ -51,15 +51,14 @@ class Configuration {
     final kek = CryptoUtil.scrypt(utf8.encode(passphrase), kekSalt);
     final kekHashSalt = CryptoUtil.getSecureRandomBytes(length: 32);
     final kekHash = CryptoUtil.scrypt(kek, kekHashSalt);
-    final iv = CryptoUtil.getSecureRandomBytes(length: 16);
-    final encryptedKey = CryptoUtil.aesEncrypt(key, kek, iv);
+    final encryptedKeyData = await CryptoUtil.encrypt(key, key: kek);
     final attributes = KeyAttributes(
-        base64.encode(kekSalt),
-        base64.encode(kekHash),
-        base64.encode(kekHashSalt),
-        base64.encode(encryptedKey),
-        base64.encode(iv));
-    await setKey(base64.encode(key));
+        Sodium.bin2base64(kekSalt),
+        Sodium.bin2base64(kekHash),
+        Sodium.bin2base64(kekHashSalt),
+        encryptedKeyData.encryptedData.base64,
+        encryptedKeyData.nonce.base64);
+    await setKey(Sodium.bin2base64(key));
     await setKeyAttributes(attributes);
     return attributes;
   }
@@ -71,13 +70,15 @@ class Configuration {
     final calculatedKekHash =
         CryptoUtil.scrypt(kek, base64.decode(attributes.kekHashSalt));
     bool correctPassphrase =
-        base64.encode(calculatedKekHash) == attributes.kekHash;
+        Sodium.bin2base64(calculatedKekHash) == attributes.kekHash;
     if (!correctPassphrase) {
       throw Exception("Incorrect passphrase");
     }
-    final key = CryptoUtil.aesDecrypt(base64.decode(attributes.encryptedKey),
-        kek, base64.decode(attributes.encryptedKeyIV));
-    await setKey(base64.encode(key));
+    final key = await CryptoUtil.decrypt(
+        Sodium.base642bin(attributes.encryptedKey),
+        kek,
+        Sodium.base642bin(attributes.encryptedKeyIV));
+    await setKey(Sodium.bin2base64(key));
   }
 
   String getHttpEndpoint() {

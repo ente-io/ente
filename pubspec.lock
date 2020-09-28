@@ -162,13 +162,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.0.4"
-  encrypt:
-    dependency: "direct main"
-    description:
-      name: encrypt
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.0.2"
   esys_flutter_share:
     dependency: "direct main"
     description:
@@ -503,13 +496,6 @@ packages:
     dependency: transitive
     description:
       name: plugin_platform_interface
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.2"
-  pointycastle:
-    dependency: transitive
-    description:
-      name: pointycastle
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"

@@ -2,8 +2,6 @@ import 'dart:typed_data';
 
 import 'dart:io' as io;
 import 'package:computer/computer.dart';
-import 'package:encrypt/encrypt.dart';
-import 'package:encrypt/encrypt.dart' as e;
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 
@@ -157,25 +155,5 @@ class CryptoUtil {
   static Uint8List scrypt(Uint8List plainText, Uint8List salt) {
     return steel.PassCryptRaw.scrypt()
         .hash(salt: salt, plain: plainText, len: 32);
-  }
-
-  static Uint8List aesEncrypt(
-      Uint8List plainText, Uint8List key, Uint8List iv) {
-    final encrypter = AES(e.Key(key), mode: AESMode.cbc);
-    return encrypter
-        .encrypt(
-          plainText,
-          iv: IV(iv),
-        )
-        .bytes;
-  }
-
-  static Uint8List aesDecrypt(
-      Uint8List cipherText, Uint8List key, Uint8List iv) {
-    final encrypter = AES(e.Key(key), mode: AESMode.cbc);
-    return encrypter.decrypt(
-      Encrypted(cipherText),
-      iv: IV(iv),
-    );
   }
 }
