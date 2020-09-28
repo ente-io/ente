@@ -169,11 +169,12 @@ class CryptoUtil {
         Sodium.cryptoPwhashAlgDefault);
   }
 
-  static Future<String> hash(Uint8List passphrase) async {
+  static String hash(Uint8List passphrase) {
+    Sodium.init();
     return Sodium.cryptoPwhashStr(
         passphrase,
         Sodium.cryptoPwhashOpslimitSensitive,
-        Sodium.cryptoPwhashMemlimitSensitive);
+        Sodium.cryptoPwhashMemlimitModerate);
   }
 
   static bool verifyHash(Uint8List passphrase, String hash) {

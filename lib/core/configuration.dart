@@ -55,7 +55,7 @@ class Configuration {
     final encryptedKeyData = await CryptoUtil.encrypt(key, key: kek);
 
     // Hash the passphrase so that its correctness can be compared later
-    final passphraseHash = await CryptoUtil.hash(utf8.encode(passphrase));
+    final passphraseHash = CryptoUtil.hash(utf8.encode(passphrase));
     final attributes = KeyAttributes(
       passphraseHash: passphraseHash,
       kekSalt: Sodium.bin2base64(kekSalt),
