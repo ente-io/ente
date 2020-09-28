@@ -102,8 +102,8 @@ class UserAuthenticator {
     )
         .catchError((e) async {
       await dialog.hide();
-      Configuration.instance.setKey(null);
-      Configuration.instance.setKeyAttributes(null);
+      await Configuration.instance.setKey(null);
+      await Configuration.instance.setKeyAttributes(null);
       _logger.severe(e);
       showGenericErrorDialog(context);
     }).then((response) async {
@@ -112,8 +112,8 @@ class UserAuthenticator {
         Bus.instance.fire(UserAuthenticatedEvent());
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
-        Configuration.instance.setKey(null);
-        Configuration.instance.setKeyAttributes(null);
+        await Configuration.instance.setKey(null);
+        await Configuration.instance.setKeyAttributes(null);
         showGenericErrorDialog(context);
       }
     });

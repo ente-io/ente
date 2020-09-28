@@ -63,7 +63,6 @@ class Configuration {
       keyDecryptionNonce: encryptedKeyData.nonce.base64,
     );
     await setKey(Sodium.bin2base64(key));
-    await setEncryptedKey(encryptedKeyData.encryptedData.base64);
     await setKeyAttributes(attributes);
     return attributes;
   }
@@ -147,6 +146,7 @@ class Configuration {
   Future<void> setKeyAttributes(KeyAttributes attributes) async {
     await _preferences.setString(
         keyAttributesKey, attributes == null ? null : attributes.toJson());
+    await setEncryptedKey(attributes == null ? null : attributes.encryptedKey);
   }
 
   KeyAttributes getKeyAttributes() {
