@@ -96,6 +96,9 @@ Future<Uint8List> getBytesFromDisk(File file, {int quality = 100}) async {
   }
 }
 
+final Map<int, Future<io.File>> downloadsInProgress =
+    Map<int, Future<io.File>>();
+
 Future<io.File> getFileFromServer(File file,
     {ProgressCallback progressCallback}) async {
   final cacheManager = file.fileType == FileType.video
@@ -106,11 +109,14 @@ Future<io.File> getFileFromServer(File file,
   } else {
     return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
       if (info == null) {
-        return _downloadAndDecrypt(
-          file,
-          cacheManager,
-          progressCallback: progressCallback,
-        );
+        if (!downloadsInProgress.containsKey(file.uploadedFileID)) {
+          downloadsInProgress[file.uploadedFileID] = _downloadAndDecrypt(
+            file,
+            cacheManager,
+            progressCallback: progressCallback,
+          );
+        }
+        return downloadsInProgress[file.uploadedFileID];
       } else {
         return info.file;
       }
@@ -152,6 +158,9 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
   final decryptedFilePath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       ".decrypted";
+
+  final encryptedFile = io.File(encryptedFilePath);
+  final decryptedFile = io.File(decryptedFilePath);
   return Dio()
       .download(
     file.getDownloadUrl(),
@@ -162,7 +171,11 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     if (response.statusCode != 200) {
       logger.warning("Could not download file: ", response.toString());
       return null;
+    } else if (!encryptedFile.existsSync()) {
+      logger.warning("File was not downloaded correctly.");
+      return null;
     }
+    logger.info("File downloaded: " + file.uploadedFileID.toString());
     var attributes = ChaChaAttributes(
       EncryptionAttribute(
           bytes: await CryptoUtil.decrypt(
@@ -174,8 +187,8 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     );
     await CryptoUtil.decryptFile(
         encryptedFilePath, decryptedFilePath, attributes);
+    logger.info("File decrypted: " + file.uploadedFileID.toString());
     io.File(encryptedFilePath).deleteSync();
-    final decryptedFile = io.File(decryptedFilePath);
     final fileExtension = extension(file.title).substring(1).toLowerCase();
     final cachedFile = await cacheManager.putFile(
       file.getDownloadUrl(),
@@ -185,6 +198,7 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
       fileExtension: fileExtension,
     );
     decryptedFile.deleteSync();
+    downloadsInProgress.remove(file.uploadedFileID);
     return cachedFile;
   });
 }
