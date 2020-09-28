@@ -1,19 +1,16 @@
 import 'dart:typed_data';
 
 import 'dart:io' as io;
-import 'package:aes_crypt/aes_crypt.dart';
 import 'package:computer/computer.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:encrypt/encrypt.dart' as e;
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 
-import 'package:photos/core/configuration.dart';
 import 'package:photos/models/encrypted_data_attributes.dart';
 import 'package:photos/models/encrypted_file_attributes.dart';
 import 'package:photos/models/encryption_attribute.dart';
 import 'package:steel_crypt/steel_crypt.dart' as steel;
-import 'package:uuid/uuid.dart';
 
 final int encryptionChunkSize = 4 * 1024 * 1024;
 final int decryptionChunkSize =
@@ -185,89 +182,4 @@ class CryptoUtil {
       iv: IV(iv),
     );
   }
-
-  static Future<String> encryptFileToFile(
-      String sourcePath, String destinationPath, String password) async {
-    final args = Map<String, dynamic>();
-    args["password"] = password;
-    args["source"] = sourcePath;
-    args["destination"] = destinationPath;
-    return Computer().compute(runEncryptFileToFile, param: args);
-  }
-
-  static Future<String> encryptDataToFile(
-      Uint8List source, String destinationPath, String password) async {
-    final args = Map<String, dynamic>();
-    args["password"] = password;
-    args["source"] = source;
-    args["destination"] = destinationPath;
-    return Computer().compute(runEncryptDataToFile, param: args);
-  }
-
-  static Future<Uint8List> encryptDataToData(
-      Uint8List source, String password) async {
-    final destinationPath =
-        Configuration.instance.getTempDirectory() + Uuid().v4();
-    return encryptDataToFile(source, destinationPath, password).then((value) {
-      final file = io.File(destinationPath);
-      final data = file.readAsBytesSync();
-      file.deleteSync();
-      return data;
-    });
-  }
-
-  static Future<void> decryptFileToFile(
-      String sourcePath, String destinationPath, String password) async {
-    final args = Map<String, dynamic>();
-    args["password"] = password;
-    args["source"] = sourcePath;
-    args["destination"] = destinationPath;
-    return Computer().compute(runDecryptFileToFile, param: args);
-  }
-
-  static Future<Uint8List> decryptFileToData(
-      String sourcePath, String password) {
-    final args = Map<String, dynamic>();
-    args["password"] = password;
-    args["source"] = sourcePath;
-    return Computer().compute(runDecryptFileToData, param: args);
-  }
-
-  static Future<Uint8List> decryptDataToData(
-      Uint8List source, String password) {
-    final sourcePath = Configuration.instance.getTempDirectory() + Uuid().v4();
-    final file = io.File(sourcePath);
-    file.writeAsBytesSync(source);
-    return decryptFileToData(sourcePath, password).then((value) {
-      file.deleteSync();
-      return value;
-    });
-  }
-}
-
-Future<String> runEncryptFileToFile(Map<String, dynamic> args) {
-  final encrypter = getEncrypter(args["password"]);
-  return encrypter.encryptFile(args["source"], args["destination"]);
-}
-
-Future<String> runEncryptDataToFile(Map<String, dynamic> args) {
-  final encrypter = getEncrypter(args["password"]);
-  return encrypter.encryptDataToFile(args["source"], args["destination"]);
-}
-
-Future<String> runDecryptFileToFile(Map<String, dynamic> args) async {
-  final encrypter = getEncrypter(args["password"]);
-  return encrypter.decryptFile(args["source"], args["destination"]);
-}
-
-Future<Uint8List> runDecryptFileToData(Map<String, dynamic> args) async {
-  final encrypter = getEncrypter(args["password"]);
-  return encrypter.decryptDataFromFile(args["source"]);
-}
-
-AesCrypt getEncrypter(String password) {
-  final encrypter = AesCrypt(password);
-  encrypter.aesSetMode(AesMode.cbc);
-  encrypter.setOverwriteMode(AesCryptOwMode.on);
-  return encrypter;
 }
