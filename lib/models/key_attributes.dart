@@ -1,43 +1,38 @@
 import 'dart:convert';
 
 class KeyAttributes {
+  final String passphraseHash;
   final String kekSalt;
-  final String kekHash;
-  final String kekHashSalt;
   final String encryptedKey;
-  final String encryptedKeyIV;
+  final String keyDecryptionNonce;
 
-  KeyAttributes(
+  KeyAttributes({
+    this.passphraseHash,
     this.kekSalt,
-    this.kekHash,
-    this.kekHashSalt,
     this.encryptedKey,
-    this.encryptedKeyIV,
-  );
+    this.keyDecryptionNonce,
+  });
 
   KeyAttributes copyWith({
+    String passphraseHash,
     String kekSalt,
-    String kekHash,
-    String kekHashSalt,
     String encryptedKey,
-    String encryptedKeyIV,
+    String keyDecryptionNonce,
   }) {
     return KeyAttributes(
-      kekSalt ?? this.kekSalt,
-      kekHash ?? this.kekHash,
-      kekHashSalt ?? this.kekHashSalt,
-      encryptedKey ?? this.encryptedKey,
-      encryptedKeyIV ?? this.encryptedKeyIV,
+      passphraseHash: passphraseHash ?? this.passphraseHash,
+      kekSalt: kekSalt ?? this.kekSalt,
+      encryptedKey: encryptedKey ?? this.encryptedKey,
+      keyDecryptionNonce: keyDecryptionNonce ?? this.keyDecryptionNonce,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
+      'passphraseHash': passphraseHash,
       'kekSalt': kekSalt,
-      'kekHash': kekHash,
-      'kekHashSalt': kekHashSalt,
       'encryptedKey': encryptedKey,
-      'encryptedKeyIV': encryptedKeyIV,
+      'keyDecryptionNonce': keyDecryptionNonce,
     };
   }
 
@@ -45,11 +40,10 @@ class KeyAttributes {
     if (map == null) return null;
 
     return KeyAttributes(
-      map['kekSalt'],
-      map['kekHash'],
-      map['kekHashSalt'],
-      map['encryptedKey'],
-      map['encryptedKeyIV'],
+      passphraseHash: map['passphraseHash'],
+      kekSalt: map['kekSalt'],
+      encryptedKey: map['encryptedKey'],
+      keyDecryptionNonce: map['keyDecryptionNonce'],
     );
   }
 
@@ -60,6 +54,25 @@ class KeyAttributes {
 
   @override
   String toString() {
-    return 'KeyAttributes(kekSalt: $kekSalt, kekHash: $kekHash, kekHashSalt: $kekHashSalt, encryptedKey: $encryptedKey, encryptedKeyIV: $encryptedKeyIV)';
+    return 'KeyAttributes(passphraseHash: $passphraseHash, kekSalt: $kekSalt, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce)';
+  }
+
+  @override
+  bool operator ==(Object o) {
+    if (identical(this, o)) return true;
+
+    return o is KeyAttributes &&
+        o.passphraseHash == passphraseHash &&
+        o.kekSalt == kekSalt &&
+        o.encryptedKey == encryptedKey &&
+        o.keyDecryptionNonce == keyDecryptionNonce;
+  }
+
+  @override
+  int get hashCode {
+    return passphraseHash.hashCode ^
+        kekSalt.hashCode ^
+        encryptedKey.hashCode ^
+        keyDecryptionNonce.hashCode;
   }
 }

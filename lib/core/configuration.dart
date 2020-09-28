@@ -21,11 +21,8 @@ class Configuration {
   static const hasOptedForE2EKey = "has_opted_for_e2e_encryption";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyKey = "key";
-  static const keyEncryptedKey = "encrypted_key";
-  static const keyKekSalt = "kek_salt";
-  static const keyKekHash = "kek_hash";
-  static const keyKekHashSalt = "kek_hash_salt";
-  static const keyEncryptedKeyIV = "encrypted_key_iv";
+  static const encryptedKeyKey = "encrypted_key";
+  static const keyAttributesKey = "key_attributes";
 
   SharedPreferences _preferences;
   FlutterSecureStorage _secureStorage;
@@ -46,38 +43,45 @@ class Configuration {
   }
 
   Future<KeyAttributes> generateAndSaveKey(String passphrase) async {
-    final key = CryptoUtil.getSecureRandomBytes(length: 32);
-    final kekSalt = CryptoUtil.getSecureRandomBytes(length: 32);
-    final kek = CryptoUtil.scrypt(utf8.encode(passphrase), kekSalt);
-    final kekHashSalt = CryptoUtil.getSecureRandomBytes(length: 32);
-    final kekHash = CryptoUtil.scrypt(kek, kekHashSalt);
+    // Create a master key
+    final key = CryptoUtil.generateMasterKey();
+
+    // Derive a key from the passphrase that will be used to encrypt and
+    // decrypt the master key
+    final kekSalt = CryptoUtil.getSaltToDeriveKey();
+    final kek = CryptoUtil.deriveKey(utf8.encode(passphrase), kekSalt);
+
+    // Encrypt the key with this derived key
     final encryptedKeyData = await CryptoUtil.encrypt(key, key: kek);
+
+    // Hash the passphrase so that its correctness can be compared later
+    final passphraseHash = await CryptoUtil.hash(utf8.encode(passphrase));
     final attributes = KeyAttributes(
-        Sodium.bin2base64(kekSalt),
-        Sodium.bin2base64(kekHash),
-        Sodium.bin2base64(kekHashSalt),
-        encryptedKeyData.encryptedData.base64,
-        encryptedKeyData.nonce.base64);
+      passphraseHash: passphraseHash,
+      kekSalt: Sodium.bin2base64(kekSalt),
+      encryptedKey: encryptedKeyData.encryptedData.base64,
+      keyDecryptionNonce: encryptedKeyData.nonce.base64,
+    );
     await setKey(Sodium.bin2base64(key));
+    await setEncryptedKey(encryptedKeyData.encryptedData.base64);
     await setKeyAttributes(attributes);
     return attributes;
   }
 
   Future<void> decryptAndSaveKey(
       String passphrase, KeyAttributes attributes) async {
-    final kek = CryptoUtil.scrypt(
-        utf8.encode(passphrase), base64.decode(attributes.kekSalt));
-    final calculatedKekHash =
-        CryptoUtil.scrypt(kek, base64.decode(attributes.kekHashSalt));
+    final passphraseBytes = utf8.encode(passphrase);
     bool correctPassphrase =
-        Sodium.bin2base64(calculatedKekHash) == attributes.kekHash;
+        CryptoUtil.verifyHash(passphraseBytes, attributes.passphraseHash);
     if (!correctPassphrase) {
       throw Exception("Incorrect passphrase");
     }
+    final kek = CryptoUtil.deriveKey(
+        passphraseBytes, Sodium.base642bin(attributes.kekSalt));
     final key = await CryptoUtil.decrypt(
         Sodium.base642bin(attributes.encryptedKey),
         kek,
-        Sodium.base642bin(attributes.encryptedKeyIV));
+        Sodium.base642bin(attributes.keyDecryptionNonce));
     await setKey(Sodium.bin2base64(key));
   }
 
@@ -142,31 +146,22 @@ class Configuration {
 
   Future<void> setKeyAttributes(KeyAttributes attributes) async {
     await _preferences.setString(
-        keyKekSalt, attributes == null ? null : attributes.kekSalt);
-    await _preferences.setString(
-        keyKekHash, attributes == null ? null : attributes.kekHash);
-    await _preferences.setString(
-        keyKekHashSalt, attributes == null ? null : attributes.kekHashSalt);
-    await _preferences.setString(
-        keyEncryptedKey, attributes == null ? null : attributes.encryptedKey);
-    await _preferences.setString(keyEncryptedKeyIV,
-        attributes == null ? null : attributes.encryptedKeyIV);
+        keyAttributesKey, attributes == null ? null : attributes.toJson());
   }
 
   KeyAttributes getKeyAttributes() {
-    if (_preferences.getString(keyEncryptedKey) == null) {
+    if (_preferences.getString(keyAttributesKey) == null) {
       return null;
     }
-    return KeyAttributes(
-        _preferences.getString(keyKekSalt),
-        _preferences.getString(keyKekHash),
-        _preferences.getString(keyKekHashSalt),
-        _preferences.getString(keyEncryptedKey),
-        _preferences.getString(keyEncryptedKeyIV));
+    return KeyAttributes.fromJson(_preferences.getString(keyAttributesKey));
+  }
+
+  Future<void> setEncryptedKey(String encryptedKey) async {
+    await _preferences.setString(encryptedKeyKey, encryptedKey);
   }
 
   String getEncryptedKey() {
-    return _preferences.getString(keyEncryptedKey);
+    return _preferences.getString(encryptedKeyKey);
   }
 
   Future<void> setKey(String key) async {

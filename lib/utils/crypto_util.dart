@@ -8,7 +8,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/models/encrypted_data_attributes.dart';
 import 'package:photos/models/encrypted_file_attributes.dart';
 import 'package:photos/models/encryption_attribute.dart';
-import 'package:steel_crypt/steel_crypt.dart' as steel;
 
 final int encryptionChunkSize = 4 * 1024 * 1024;
 final int decryptionChunkSize =
@@ -152,8 +151,32 @@ class CryptoUtil {
     return Sodium.randombytesBuf(length);
   }
 
-  static Uint8List scrypt(Uint8List plainText, Uint8List salt) {
-    return steel.PassCryptRaw.scrypt()
-        .hash(salt: salt, plain: plainText, len: 32);
+  static Uint8List generateMasterKey() {
+    return Sodium.cryptoKdfKeygen();
+  }
+
+  static Uint8List getSaltToDeriveKey() {
+    return Sodium.randombytesBuf(Sodium.cryptoPwhashSaltbytes);
+  }
+
+  static Uint8List deriveKey(Uint8List passphrase, Uint8List salt) {
+    return Sodium.cryptoPwhash(
+        Sodium.cryptoSecretboxKeybytes,
+        passphrase,
+        salt,
+        Sodium.cryptoPwhashOpslimitInteractive,
+        Sodium.cryptoPwhashMemlimitInteractive,
+        Sodium.cryptoPwhashAlgDefault);
+  }
+
+  static Future<String> hash(Uint8List passphrase) async {
+    return Sodium.cryptoPwhashStr(
+        passphrase,
+        Sodium.cryptoPwhashOpslimitSensitive,
+        Sodium.cryptoPwhashMemlimitSensitive);
+  }
+
+  static bool verifyHash(Uint8List passphrase, String hash) {
+    return Sodium.cryptoPwhashStrVerify(hash, passphrase) == 0;
   }
 }
