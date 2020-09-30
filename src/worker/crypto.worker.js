@@ -5,12 +5,11 @@ import sodium from 'libsodium-wrappers';
 class Crypto {
     async decryptMetadata(event) {
         const { data } = event;
-        await sodium.ready;
-        const key = sodium.crypto_secretbox_open_easy(
+        const key = await this.decrypt(
             base64ToUint8(data.metadata.decryptionParams.encryptedKey),
             base64ToUint8(data.metadata.decryptionParams.keyDecryptionNonce),
             base64ToUint8(event.key));
-        const metadata = sodium.crypto_secretbox_open_easy(
+        const metadata = await this.decrypt(
             base64ToUint8(data.metadata.encryptedData),
             base64ToUint8(data.metadata.decryptionParams.nonce),
             key);
@@ -22,12 +21,11 @@ class Crypto {
 
     async decryptThumbnail(event) {
         const { data } = event;
-        await sodium.ready;
-        const key = sodium.crypto_secretbox_open_easy(
+        const key = await this.decrypt(
             base64ToUint8(data.thumbnail.decryptionParams.encryptedKey),
             base64ToUint8(data.thumbnail.decryptionParams.keyDecryptionNonce),
             base64ToUint8(event.key));
-        const thumbnail = sodium.crypto_secretbox_open_easy(
+        const thumbnail = await this.decrypt(
             new Uint8Array(data.file),
             base64ToUint8(data.thumbnail.decryptionParams.nonce),
             key);
@@ -35,6 +33,11 @@ class Crypto {
             id: data.id,
             data: thumbnail,
         };
+    }
+
+    async decrypt(data, nonce, key) {
+        await sodium.ready;
+        return sodium.crypto_secretbox_open_easy(data, nonce, key);
     }
 }
 
