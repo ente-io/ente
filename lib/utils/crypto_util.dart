@@ -156,10 +156,6 @@ class CryptoUtil {
     return Computer().compute(chachaDecrypt, param: args);
   }
 
-  static Uint8List getSecureRandomBytes({int length = 32}) {
-    return Sodium.randombytesBuf(length);
-  }
-
   static Uint8List generateMasterKey() {
     return Sodium.cryptoKdfKeygen();
   }
