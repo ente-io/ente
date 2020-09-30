@@ -22,6 +22,11 @@ Uint8List cryptoSecretboxOpenEasy(Map<String, dynamic> args) {
       args["cipher"], args["nonce"], args["key"]);
 }
 
+String cryptoPwhashStr(Map<String, dynamic> args) {
+  return Sodium.cryptoPwhashStr(
+      args["input"], args["opsLimit"], args["memLimit"]);
+}
+
 ChaChaAttributes chachaEncrypt(Map<String, dynamic> args) {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final logger = Logger("ChaChaEncrypt");
@@ -169,12 +174,19 @@ class CryptoUtil {
         Sodium.cryptoPwhashAlgDefault);
   }
 
-  static String hash(Uint8List passphrase) {
+  static Future<String> hash(Uint8List input) async {
     Sodium.init();
-    return Sodium.cryptoPwhashStr(
-        passphrase,
-        Sodium.cryptoPwhashOpslimitSensitive,
-        Sodium.cryptoPwhashMemlimitModerate);
+    final args = Map<String, dynamic>();
+    args["input"] = input;
+    args["opsLimit"] = Sodium.cryptoPwhashOpslimitSensitive;
+    args["memLimit"] = Sodium.cryptoPwhashMemlimitSensitive;
+    try {
+      return await Computer().compute(cryptoPwhashStr, param: args);
+    } catch (e) {
+      Logger("CryptoUtil").warning("Forced to reduce memory limit", e);
+      args["memLimit"] = Sodium.cryptoPwhashMemlimitModerate;
+      return await Computer().compute(cryptoPwhashStr, param: args);
+    }
   }
 
   static bool verifyHash(Uint8List passphrase, String hash) {
