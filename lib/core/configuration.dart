@@ -21,8 +21,10 @@ class Configuration {
   static const hasOptedForE2EKey = "has_opted_for_e2e_encryption";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyKey = "key";
+  static const kekSaltKey = "kek_salt";
+  static const kekHashKey = "kek_hash";
   static const encryptedKeyKey = "encrypted_key";
-  static const keyAttributesKey = "key_attributes";
+  static const keyDecryptionNonceKey = "key_decryption_nonce";
 
   SharedPreferences _preferences;
   FlutterSecureStorage _secureStorage;
@@ -55,12 +57,12 @@ class Configuration {
     final encryptedKeyData = await CryptoUtil.encrypt(key, key: kek);
 
     // Hash the passphrase so that its correctness can be compared later
-    final passphraseHash = CryptoUtil.hash(utf8.encode(passphrase));
+    final kekHash = await CryptoUtil.hash(kek);
     final attributes = KeyAttributes(
-      passphraseHash: passphraseHash,
-      kekSalt: Sodium.bin2base64(kekSalt),
-      encryptedKey: encryptedKeyData.encryptedData.base64,
-      keyDecryptionNonce: encryptedKeyData.nonce.base64,
+      Sodium.bin2base64(kekSalt),
+      kekHash,
+      encryptedKeyData.encryptedData.base64,
+      encryptedKeyData.nonce.base64,
     );
     await setKey(Sodium.bin2base64(key));
     await setKeyAttributes(attributes);
@@ -69,14 +71,13 @@ class Configuration {
 
   Future<void> decryptAndSaveKey(
       String passphrase, KeyAttributes attributes) async {
-    final passphraseBytes = utf8.encode(passphrase);
+    final kek = CryptoUtil.deriveKey(
+        utf8.encode(passphrase), Sodium.base642bin(attributes.kekSalt));
     bool correctPassphrase =
-        CryptoUtil.verifyHash(passphraseBytes, attributes.passphraseHash);
+        await CryptoUtil.verifyHash(kek, attributes.kekHash);
     if (!correctPassphrase) {
       throw Exception("Incorrect passphrase");
     }
-    final kek = CryptoUtil.deriveKey(
-        passphraseBytes, Sodium.base642bin(attributes.kekSalt));
     final key = await CryptoUtil.decrypt(
         Sodium.base642bin(attributes.encryptedKey),
         kek,
@@ -85,7 +86,8 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
-    return "https://api.staging.ente.io";
+    return "http://192.168.0.100";
+    // return "https://api.staging.ente.io";
   }
 
   Future<void> setEndpoint(String endpoint) async {
@@ -145,19 +147,22 @@ class Configuration {
 
   Future<void> setKeyAttributes(KeyAttributes attributes) async {
     await _preferences.setString(
-        keyAttributesKey, attributes == null ? null : attributes.toJson());
-    await setEncryptedKey(attributes == null ? null : attributes.encryptedKey);
+        kekSaltKey, attributes == null ? null : attributes.kekSalt);
+    await _preferences.setString(
+        kekHashKey, attributes == null ? null : attributes.kekHash);
+    await _preferences.setString(
+        encryptedKeyKey, attributes == null ? null : attributes.encryptedKey);
+    await _preferences.setString(keyDecryptionNonceKey,
+        attributes == null ? null : attributes.keyDecryptionNonce);
   }
 
   KeyAttributes getKeyAttributes() {
-    if (_preferences.getString(keyAttributesKey) == null) {
-      return null;
-    }
-    return KeyAttributes.fromJson(_preferences.getString(keyAttributesKey));
-  }
-
-  Future<void> setEncryptedKey(String encryptedKey) async {
-    await _preferences.setString(encryptedKeyKey, encryptedKey);
+    return KeyAttributes(
+      _preferences.getString(kekSaltKey),
+      _preferences.getString(kekHashKey),
+      _preferences.getString(encryptedKeyKey),
+      _preferences.getString(keyDecryptionNonceKey),
+    );
   }
 
   String getEncryptedKey() {

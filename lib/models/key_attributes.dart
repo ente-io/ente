@@ -1,36 +1,36 @@
 import 'dart:convert';
 
 class KeyAttributes {
-  final String passphraseHash;
   final String kekSalt;
+  final String kekHash;
   final String encryptedKey;
   final String keyDecryptionNonce;
 
-  KeyAttributes({
-    this.passphraseHash,
+  KeyAttributes(
     this.kekSalt,
+    this.kekHash,
     this.encryptedKey,
     this.keyDecryptionNonce,
-  });
+  );
 
   KeyAttributes copyWith({
-    String passphraseHash,
     String kekSalt,
+    String kekHash,
     String encryptedKey,
     String keyDecryptionNonce,
   }) {
     return KeyAttributes(
-      passphraseHash: passphraseHash ?? this.passphraseHash,
-      kekSalt: kekSalt ?? this.kekSalt,
-      encryptedKey: encryptedKey ?? this.encryptedKey,
-      keyDecryptionNonce: keyDecryptionNonce ?? this.keyDecryptionNonce,
+      kekSalt ?? this.kekSalt,
+      kekHash ?? this.kekHash,
+      encryptedKey ?? this.encryptedKey,
+      keyDecryptionNonce ?? this.keyDecryptionNonce,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'passphraseHash': passphraseHash,
       'kekSalt': kekSalt,
+      'kekHash': kekHash,
       'encryptedKey': encryptedKey,
       'keyDecryptionNonce': keyDecryptionNonce,
     };
@@ -40,10 +40,10 @@ class KeyAttributes {
     if (map == null) return null;
 
     return KeyAttributes(
-      passphraseHash: map['passphraseHash'],
-      kekSalt: map['kekSalt'],
-      encryptedKey: map['encryptedKey'],
-      keyDecryptionNonce: map['keyDecryptionNonce'],
+      map['kekSalt'],
+      map['kekHash'],
+      map['encryptedKey'],
+      map['keyDecryptionNonce'],
     );
   }
 
@@ -54,7 +54,7 @@ class KeyAttributes {
 
   @override
   String toString() {
-    return 'KeyAttributes(passphraseHash: $passphraseHash, kekSalt: $kekSalt, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce)';
+    return 'KeyAttributes(kekSalt: $kekSalt, kekHash: $kekHash, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce)';
   }
 
   @override
@@ -62,16 +62,16 @@ class KeyAttributes {
     if (identical(this, o)) return true;
 
     return o is KeyAttributes &&
-        o.passphraseHash == passphraseHash &&
         o.kekSalt == kekSalt &&
+        o.kekHash == kekHash &&
         o.encryptedKey == encryptedKey &&
         o.keyDecryptionNonce == keyDecryptionNonce;
   }
 
   @override
   int get hashCode {
-    return passphraseHash.hashCode ^
-        kekSalt.hashCode ^
+    return kekSalt.hashCode ^
+        kekHash.hashCode ^
         encryptedKey.hashCode ^
         keyDecryptionNonce.hashCode;
   }
