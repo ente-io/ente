@@ -39,6 +39,20 @@ class Crypto {
         await sodium.ready;
         return sodium.crypto_secretbox_open_easy(data, nonce, key);
     }
+
+    async hash(input) {
+        await sodium.ready;
+        return sodium.crypto_pwhash_str(
+            input,
+            sodium.crypto_pwhash_MEMLIMIT_SENSITIVE,
+            sodium.crypto_pwhash_MEMLIMIT_SENSITIVE
+        );
+    }
+
+    async verifyHash(hash, input) {
+        await sodium.ready;
+        return sodium.crypto_pwhash_str_verify(hash, input);
+    }
 }
 
 Comlink.expose(Crypto);
