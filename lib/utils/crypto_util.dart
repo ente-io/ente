@@ -27,6 +27,10 @@ String cryptoPwhashStr(Map<String, dynamic> args) {
       args["input"], args["opsLimit"], args["memLimit"]);
 }
 
+bool cryptoPwhashStrVerify(Map<String, dynamic> args) {
+  return Sodium.cryptoPwhashStrVerify(args["hash"], args["input"]) == 0;
+}
+
 ChaChaAttributes chachaEncrypt(Map<String, dynamic> args) {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final logger = Logger("ChaChaEncrypt");
@@ -189,7 +193,10 @@ class CryptoUtil {
     }
   }
 
-  static bool verifyHash(Uint8List passphrase, String hash) {
-    return Sodium.cryptoPwhashStrVerify(hash, passphrase) == 0;
+  static Future<bool> verifyHash(Uint8List input, String hash) async {
+    final args = Map<String, dynamic>();
+    args["input"] = input;
+    args["hash"] = hash;
+    return await Computer().compute(cryptoPwhashStrVerify, param: args);
   }
 }
