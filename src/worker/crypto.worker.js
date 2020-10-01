@@ -1,18 +1,17 @@
 import * as Comlink from 'comlink';
-import { base64ToUint8 } from "utils/crypto/common";
-import sodium from 'libsodium-wrappers';
+import * as libsodium from 'utils/crypto/libsodium';
 
-class Crypto {
+export class Crypto {
     async decryptMetadata(event) {
         const { data } = event;
-        const key = await this.decrypt(
-            base64ToUint8(data.metadata.decryptionParams.encryptedKey),
-            base64ToUint8(data.metadata.decryptionParams.keyDecryptionNonce),
-            base64ToUint8(event.key));
-        const metadata = await this.decrypt(
-            base64ToUint8(data.metadata.encryptedData),
-            base64ToUint8(data.metadata.decryptionParams.nonce),
-            key);
+        const key = await libsodium.decryptToB64(
+            data.metadata.decryptionParams.encryptedKey,
+            data.metadata.decryptionParams.keyDecryptionNonce,
+            event.key);
+        const metadata = await libsodium.fromB64(await libsodium.decryptToB64(
+            data.metadata.encryptedData,
+            data.metadata.decryptionParams.nonce,
+            key));
         return {
             ...data,
             metadata: JSON.parse(new TextDecoder().decode(metadata))
@@ -21,37 +20,38 @@ class Crypto {
 
     async decryptThumbnail(event) {
         const { data } = event;
-        const key = await this.decrypt(
-            base64ToUint8(data.thumbnail.decryptionParams.encryptedKey),
-            base64ToUint8(data.thumbnail.decryptionParams.keyDecryptionNonce),
-            base64ToUint8(event.key));
-        const thumbnail = await this.decrypt(
+        const key = await libsodium.decryptToB64(
+            data.thumbnail.decryptionParams.encryptedKey,
+            data.thumbnail.decryptionParams.keyDecryptionNonce,
+            event.key);
+        const thumbnail = await libsodium.decrypt(
             new Uint8Array(data.file),
-            base64ToUint8(data.thumbnail.decryptionParams.nonce),
-            key);
+            await libsodium.fromB64(data.thumbnail.decryptionParams.nonce),
+            await libsodium.fromB64(key));
         return {
             id: data.id,
             data: thumbnail,
         };
     }
 
+    async encrypt(data, key) {
+        return libsodium.encrypt(data, key);
+    }
+
     async decrypt(data, nonce, key) {
-        await sodium.ready;
-        return sodium.crypto_secretbox_open_easy(data, nonce, key);
+        return libsodium.decrypt(data, nonce, key);
     }
 
     async hash(input) {
-        await sodium.ready;
-        return sodium.crypto_pwhash_str(
-            input,
-            sodium.crypto_pwhash_MEMLIMIT_SENSITIVE,
-            sodium.crypto_pwhash_MEMLIMIT_SENSITIVE
-        );
+        return libsodium.hash(input);
     }
 
     async verifyHash(hash, input) {
-        await sodium.ready;
-        return sodium.crypto_pwhash_str_verify(hash, input);
+        return libsodium.verifyHash(hash, input);
+    }
+
+    async deriveKey(passphrase, salt) {
+        return libsodium.deriveKey(passphrase, salt);
     }
 }
 
