@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import Container from 'components/Container';
 import styled from 'styled-components';
 import Card from 'react-bootstrap/Card';
@@ -9,11 +9,9 @@ import { Formik, FormikHelpers } from 'formik';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import * as Yup from 'yup';
-import { hash } from 'utils/crypto/scrypt';
-import { strToUint8, base64ToUint8, secureRandomString } from 'utils/crypto/common';
-import { decrypt, encrypt } from 'utils/crypto/aes';
 import { keyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
+import * as libsodium from 'utils/crypto/libsodium';
 
 const Image = styled.img`
     width: 200px;
@@ -29,7 +27,7 @@ export default function Credentials() {
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<keyAttributes>();
     const [loading, setLoading] = useState(false);
-    
+
     useEffect(() => {
         router.prefetch('/gallery');
         const user = getData(LS_KEYS.USER);
@@ -50,16 +48,20 @@ export default function Credentials() {
         setLoading(true);
         try {
             const { passphrase } = values;
-            const kek = await hash(strToUint8(passphrase), base64ToUint8(keyAttributes.kekSalt));
-            const kekHash = await hash(base64ToUint8(kek), base64ToUint8(keyAttributes.kekHashSalt));
-    
-            if (kekHash === keyAttributes.kekHash) {
-                const key = await decrypt(keyAttributes.encryptedKey, kek, keyAttributes.encryptedKeyIV);
-                const sessionKey = secureRandomString(32);
-                const sessionIV = secureRandomString(16);
-                const encryptionKey = await encrypt(key, sessionKey, sessionIV);
+            const kek = await libsodium.deriveKey(await libsodium.fromString(passphrase),
+                await libsodium.fromB64(keyAttributes.kekSalt));
+
+            if (await libsodium.verifyHash(keyAttributes.kekHash, kek)) {
+                const key = await libsodium.decrypt(
+                    await libsodium.fromB64(keyAttributes.encryptedKey),
+                    await libsodium.fromB64(keyAttributes.keyDecryptionNonce),
+                    kek);
+                const sessionKeyAttributes = await libsodium.encrypt(key);
+                const sessionKey = await libsodium.toB64(sessionKeyAttributes.key);
+                const sessionNonce = await libsodium.toB64(sessionKeyAttributes.nonce);
+                const encryptionKey = await libsodium.toB64(sessionKeyAttributes.encryptedData);
                 setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
-                setData(LS_KEYS.SESSION, { sessionKey, sessionIV });
+                setData(LS_KEYS.SESSION, { sessionKey, sessionNonce });
                 router.push('/gallery');
             } else {
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
@@ -72,7 +74,7 @@ export default function Credentials() {
 
     return (<Container>
         <Image alt='vault' src='/vault.svg' />
-        <Card style={{ minWidth: '300px'}}>
+        <Card style={{ minWidth: '300px' }}>
             <Card.Body>
                 <p className="text-center">{constants.ENTER_PASSPHRASE}</p>
                 <Formik<formValues>
