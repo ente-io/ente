@@ -44,20 +44,27 @@ export async function decrypt(data: Uint8Array, nonce: Uint8Array, key: Uint8Arr
     return sodium.crypto_secretbox_open_easy(data, nonce, key);
 }
 
+// TODO(https://github.com/firstfloorsoftware/flutter_sodium/issues/46)
 export async function verifyHash(hash: string, input: Uint8Array) {
-    // hash =
-    //     '$argon2id$v=19$m=262144,t=4,p=1$WxOZeKEfky2PulhotYHn2Q$JzOaXBmxDkAmFyK+HJZfgvEEHYE41Awk53In8BK2cCE�';
-    console.log(hash);
+    var sanitizedHash = "";
+    for (var index = 0; index < hash.length; index++) {
+        if (hash.charCodeAt(index) == 0) {
+            sanitizedHash += "\uFFFD";
+            break;
+        } else {
+            sanitizedHash += hash.charAt(index);
+        }
+    }
     await sodium.ready;
-    return (sodium.crypto_pwhash_str_verify(hash, input) == 0);
+    return (sodium.crypto_pwhash_str_verify(sanitizedHash, input) == 0);
 }
 
 export async function hash(input: string | Uint8Array) {
     await sodium.ready;
     return sodium.crypto_pwhash_str(
         input,
-        sodium.crypto_pwhash_MEMLIMIT_SENSITIVE,
-        sodium.crypto_pwhash_MEMLIMIT_SENSITIVE,
+        sodium.crypto_pwhash_OPSLIMIT_SENSITIVE,
+        sodium.crypto_pwhash_MEMLIMIT_MODERATE,
     );
 }
 
