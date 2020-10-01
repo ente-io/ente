@@ -12,6 +12,10 @@ import * as Yup from 'yup';
 import { keyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import * as libsodium from 'utils/crypto/libsodium';
+import * as Comlink from "comlink";
+
+const CryptoWorker = typeof window !== 'undefined'
+    && Comlink.wrap(new Worker("worker/crypto.worker.js", { type: 'module' }));
 
 const Image = styled.img`
     width: 200px;
@@ -47,11 +51,12 @@ export default function Credentials() {
     const verifyPassphrase = async (values: formValues, { setFieldError }: FormikHelpers<formValues>) => {
         setLoading(true);
         try {
+            const cryptoWorker = await new CryptoWorker();
             const { passphrase } = values;
             const kek = await libsodium.deriveKey(await libsodium.fromString(passphrase),
                 await libsodium.fromB64(keyAttributes.kekSalt));
 
-            if (await libsodium.verifyHash(keyAttributes.kekHash, kek)) {
+            if (await cryptoWorker.verifyHash(keyAttributes.kekHash, kek)) {
                 const key = await libsodium.decrypt(
                     await libsodium.fromB64(keyAttributes.encryptedKey),
                     await libsodium.fromB64(keyAttributes.keyDecryptionNonce),
