@@ -44,19 +44,11 @@ export async function decrypt(data: Uint8Array, nonce: Uint8Array, key: Uint8Arr
     return sodium.crypto_secretbox_open_easy(data, nonce, key);
 }
 
-// TODO(https://github.com/firstfloorsoftware/flutter_sodium/issues/46)
-export async function verifyHash(hash: string, input: Uint8Array) {
-    var sanitizedHash = "";
-    for (var index = 0; index < hash.length; index++) {
-        if (hash.charCodeAt(index) == 0) {
-            sanitizedHash += "\uFFFD";
-            break;
-        } else {
-            sanitizedHash += hash.charAt(index);
-        }
-    }
+export async function verifyHash(hash: Uint8Array, input: Uint8Array) {
     await sodium.ready;
-    return (sodium.crypto_pwhash_str_verify(sanitizedHash, input) == 0);
+    return sodium.crypto_pwhash_str_verify(
+        sodium.to_string(hash),
+        input);
 }
 
 export async function hash(input: string | Uint8Array) {

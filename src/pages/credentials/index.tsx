@@ -56,7 +56,7 @@ export default function Credentials() {
             const kek = await libsodium.deriveKey(await libsodium.fromString(passphrase),
                 await libsodium.fromB64(keyAttributes.kekSalt));
 
-            if (await cryptoWorker.verifyHash(keyAttributes.kekHash, kek)) {
+            if (await cryptoWorker.verifyHash(await libsodium.fromB64(keyAttributes.kekHash), kek)) {
                 const key = await libsodium.decrypt(
                     await libsodium.fromB64(keyAttributes.encryptedKey),
                     await libsodium.fromB64(keyAttributes.keyDecryptionNonce),
