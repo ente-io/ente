@@ -58,10 +58,11 @@ export default function Generate() {
                     await libsodium.fromString(passphrase), kekSalt);
                 const kekHash = await cryptoWorker.hash(kek);
                 const encryptedKeyAttributes = await cryptoWorker.encrypt(key, kek);
-                const encryptedKey = encryptedKeyAttributes.encryptedData;
-                const keyDecryptionNonce = encryptedKeyAttributes.nonce;
                 const keyAttributes = {
-                    kekSalt, kekHash, encryptedKey, keyDecryptionNonce,
+                    kekSalt: await libsodium.toB64(kekSalt),
+                    kekHash,
+                    encryptedKey: await libsodium.toB64(encryptedKeyAttributes.encryptedData),
+                    keyDecryptionNonce: await libsodium.toB64(encryptedKeyAttributes.nonce),
                 };
                 await putKeyAttributes(token, keyAttributes);
                 setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
