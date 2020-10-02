@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'dart:io' as io;
@@ -22,7 +23,7 @@ Uint8List cryptoSecretboxOpenEasy(Map<String, dynamic> args) {
       args["cipher"], args["nonce"], args["key"]);
 }
 
-String cryptoPwhashStr(Map<String, dynamic> args) {
+Uint8List cryptoPwhashStr(Map<String, dynamic> args) {
   return Sodium.cryptoPwhashStr(
       args["input"], args["opsLimit"], args["memLimit"]);
 }
@@ -179,20 +180,14 @@ class CryptoUtil {
     final args = Map<String, dynamic>();
     args["input"] = input;
     args["opsLimit"] = Sodium.cryptoPwhashOpslimitSensitive;
-    args["memLimit"] = Sodium.cryptoPwhashMemlimitSensitive;
-    try {
-      return await Computer().compute(cryptoPwhashStr, param: args);
-    } catch (e) {
-      Logger("CryptoUtil").warning("Forced to reduce memory limit", e);
-      args["memLimit"] = Sodium.cryptoPwhashMemlimitModerate;
-      return await Computer().compute(cryptoPwhashStr, param: args);
-    }
+    args["memLimit"] = Sodium.cryptoPwhashMemlimitModerate;
+    return utf8.decode(await Computer().compute(cryptoPwhashStr, param: args));
   }
 
   static Future<bool> verifyHash(Uint8List input, String hash) async {
     final args = Map<String, dynamic>();
     args["input"] = input;
-    args["hash"] = hash;
+    args["hash"] = utf8.encode(hash);
     return await Computer().compute(cryptoPwhashStrVerify, param: args);
   }
 }
