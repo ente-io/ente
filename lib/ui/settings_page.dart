@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
@@ -289,7 +290,7 @@ class DebugWidget extends StatelessWidget {
       content: SingleChildScrollView(
         child: Column(children: [
           Text("Key", style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(Configuration.instance.getBase64EncodedKey()),
+          Text(Sodium.bin2base64(Configuration.instance.getKey())),
           Padding(padding: EdgeInsets.all(12)),
           Text("Encrypted Key", style: TextStyle(fontWeight: FontWeight.bold)),
           Text(keyAttributes.encryptedKey),

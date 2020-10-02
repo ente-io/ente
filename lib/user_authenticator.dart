@@ -65,7 +65,7 @@ class UserAuthenticator {
         await _saveConfiguration(response);
         showToast("Email verification successful!");
         var page;
-        if (Configuration.instance.getEncryptedKey() != null) {
+        if (Configuration.instance.getKeyAttributes() != null) {
           page = PassphraseReentryPage();
         } else {
           page = PassphraseEntryPage();

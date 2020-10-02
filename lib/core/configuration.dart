@@ -21,10 +21,7 @@ class Configuration {
   static const hasOptedForE2EKey = "has_opted_for_e2e_encryption";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyKey = "key";
-  static const kekSaltKey = "kek_salt";
-  static const kekHashKey = "kek_hash";
-  static const encryptedKeyKey = "encrypted_key";
-  static const keyDecryptionNonceKey = "key_decryption_nonce";
+  static const keyAttributesKey = "key_attributes";
 
   SharedPreferences _preferences;
   FlutterSecureStorage _secureStorage;
@@ -58,11 +55,20 @@ class Configuration {
 
     // Hash the passphrase so that its correctness can be compared later
     final kekHash = await CryptoUtil.hash(kek);
+
+    // Generate a public-private keypair and encrypt the latter
+    final keyPair = await CryptoUtil.generateKeyPair();
+    final encryptedSecretKeyData =
+        await CryptoUtil.encrypt(keyPair.sk, key: kek);
+
     final attributes = KeyAttributes(
       Sodium.bin2base64(kekSalt),
       kekHash,
       encryptedKeyData.encryptedData.base64,
       encryptedKeyData.nonce.base64,
+      Sodium.bin2base64(keyPair.pk),
+      encryptedSecretKeyData.encryptedData.base64,
+      encryptedSecretKeyData.nonce.base64,
     );
     await setKey(Sodium.bin2base64(key));
     await setKeyAttributes(attributes);
@@ -146,26 +152,16 @@ class Configuration {
 
   Future<void> setKeyAttributes(KeyAttributes attributes) async {
     await _preferences.setString(
-        kekSaltKey, attributes == null ? null : attributes.kekSalt);
-    await _preferences.setString(
-        kekHashKey, attributes == null ? null : attributes.kekHash);
-    await _preferences.setString(
-        encryptedKeyKey, attributes == null ? null : attributes.encryptedKey);
-    await _preferences.setString(keyDecryptionNonceKey,
-        attributes == null ? null : attributes.keyDecryptionNonce);
+        keyAttributesKey, attributes == null ? null : attributes.toJson());
   }
 
   KeyAttributes getKeyAttributes() {
-    return KeyAttributes(
-      _preferences.getString(kekSaltKey),
-      _preferences.getString(kekHashKey),
-      _preferences.getString(encryptedKeyKey),
-      _preferences.getString(keyDecryptionNonceKey),
-    );
-  }
-
-  String getEncryptedKey() {
-    return _preferences.getString(encryptedKeyKey);
+    final jsonValue = _preferences.getString(keyAttributesKey);
+    if (keyAttributesKey == null) {
+      return null;
+    } else {
+      return KeyAttributes.fromJson(jsonValue);
+    }
   }
 
   Future<void> setKey(String key) async {
@@ -175,10 +171,6 @@ class Configuration {
 
   Uint8List getKey() {
     return Sodium.base642bin(_key);
-  }
-
-  String getBase64EncodedKey() {
-    return _key;
   }
 
   String getDocumentsDirectory() {
@@ -194,6 +186,6 @@ class Configuration {
   }
 
   bool hasConfiguredAccount() {
-    return getToken() != null && getBase64EncodedKey() != null;
+    return getToken() != null && getKey() != null;
   }
 }

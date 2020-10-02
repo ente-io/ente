@@ -108,7 +108,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             page = EmailEntryPage();
           } else {
             // No key
-            if (Configuration.instance.getEncryptedKey() != null) {
+            if (Configuration.instance.getKey() == null) {
               // Yet to decrypt the key
               page = PassphraseReentryPage();
             } else {

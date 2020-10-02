@@ -190,4 +190,8 @@ class CryptoUtil {
     args["hash"] = utf8.encode(hash);
     return await Computer().compute(cryptoPwhashStrVerify, param: args);
   }
+
+  static Future<KeyPair> generateKeyPair() async {
+    return Sodium.cryptoBoxKeypair();
+  }
 }
