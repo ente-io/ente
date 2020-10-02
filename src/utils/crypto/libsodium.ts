@@ -44,11 +44,9 @@ export async function decrypt(data: Uint8Array, nonce: Uint8Array, key: Uint8Arr
     return sodium.crypto_secretbox_open_easy(data, nonce, key);
 }
 
-export async function verifyHash(hash: Uint8Array, input: Uint8Array) {
+export async function verifyHash(hash: string, input: Uint8Array) {
     await sodium.ready;
-    return sodium.crypto_pwhash_str_verify(
-        sodium.to_string(hash),
-        input);
+    return sodium.crypto_pwhash_str_verify(hash, input);
 }
 
 export async function hash(input: string | Uint8Array) {
