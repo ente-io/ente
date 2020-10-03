@@ -55,27 +55,31 @@ export class Crypto {
     }
 
     async decryptToB64(encryptedKey, sessionNonce, sessionKey) {
-        return await libsodium.decryptToB64(encryptedKey, sessionNonce, sessionKey)
+        return libsodium.decryptToB64(encryptedKey, sessionNonce, sessionKey)
     }
 
     async generateMasterKey() {
-        return await libsodium.generateMasterKey();
+        return libsodium.generateMasterKey();
     }
 
     async generateSaltToDeriveKey() {
-        return await libsodium.generateSaltToDeriveKey();
+        return libsodium.generateSaltToDeriveKey();
     }
 
     async deriveKey(passphrase, salt) {
-        return await libsodium.deriveKey(passphrase, salt);
+        return libsodium.deriveKey(passphrase, salt);
     }
 
     async fromString(string) {
-        return await libsodium.fromString(string);
+        return libsodium.fromString(string);
     }
 
     async toB64(data) {
-        return await libsodium.toB64(data);
+        return libsodium.toB64(data);
+    }
+
+    async fromB64(string) {
+        return libsodium.fromB64(string);
     }
 }
 
