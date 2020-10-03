@@ -9,7 +9,7 @@ export async function encryptToB64(data: string, key: string) {
         bKey = await fromB64(key)
     }
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, key);
+    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, bKey);
     return {
         encryptedData: await toB64(encryptedData),
         key: await toB64(bKey),

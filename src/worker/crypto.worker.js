@@ -53,6 +53,30 @@ export class Crypto {
     async deriveKey(passphrase, salt) {
         return libsodium.deriveKey(passphrase, salt);
     }
+
+    async decryptToB64(encryptedKey, sessionNonce, sessionKey) {
+        return await libsodium.decryptToB64(encryptedKey, sessionNonce, sessionKey)
+    }
+
+    async generateMasterKey() {
+        return await libsodium.generateMasterKey();
+    }
+
+    async generateSaltToDeriveKey() {
+        return await libsodium.generateSaltToDeriveKey();
+    }
+
+    async deriveKey(passphrase, salt) {
+        return await libsodium.deriveKey(passphrase, salt);
+    }
+
+    async fromString(string) {
+        return await libsodium.fromString(string);
+    }
+
+    async toB64(data) {
+        return await libsodium.toB64(data);
+    }
 }
 
 Comlink.expose(Crypto);

@@ -2,7 +2,7 @@ import { getEndpoint } from "utils/common/apiUtil";
 import HTTPService from "./HTTPService";
 import * as Comlink from "comlink";
 
-const CryptoWorker = typeof window !== 'undefined'
+const CryptoWorker:any = typeof window !== 'undefined'
     && Comlink.wrap(new Worker("worker/crypto.worker.js", { type: 'module' }));
 const ENDPOINT = getEndpoint();
 

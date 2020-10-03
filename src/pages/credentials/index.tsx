@@ -11,10 +11,9 @@ import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import { keyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
-import * as libsodium from 'utils/crypto/libsodium';
 import * as Comlink from "comlink";
 
-const CryptoWorker = typeof window !== 'undefined'
+const CryptoWorker: any = typeof window !== 'undefined'
     && Comlink.wrap(new Worker("worker/crypto.worker.js", { type: 'module' }));
 
 const Image = styled.img`
@@ -53,18 +52,18 @@ export default function Credentials() {
         try {
             const cryptoWorker = await new CryptoWorker();
             const { passphrase } = values;
-            const kek = await libsodium.deriveKey(await libsodium.fromString(passphrase),
-                await libsodium.fromB64(keyAttributes.kekSalt));
+            const kek = await cryptoWorker.deriveKey(await cryptoWorker.fromString(passphrase),
+                await cryptoWorker.fromB64(keyAttributes.kekSalt));
 
             if (await cryptoWorker.verifyHash(keyAttributes.kekHash, kek)) {
-                const key = await libsodium.decrypt(
-                    await libsodium.fromB64(keyAttributes.encryptedKey),
-                    await libsodium.fromB64(keyAttributes.keyDecryptionNonce),
+                const key = await cryptoWorker.decrypt(
+                    await cryptoWorker.fromB64(keyAttributes.encryptedKey),
+                    await cryptoWorker.fromB64(keyAttributes.keyDecryptionNonce),
                     kek);
-                const sessionKeyAttributes = await libsodium.encrypt(key);
-                const sessionKey = await libsodium.toB64(sessionKeyAttributes.key);
-                const sessionNonce = await libsodium.toB64(sessionKeyAttributes.nonce);
-                const encryptionKey = await libsodium.toB64(sessionKeyAttributes.encryptedData);
+                const sessionKeyAttributes = await cryptoWorker.encrypt(key);
+                const sessionKey = await cryptoWorker.toB64(sessionKeyAttributes.key);
+                const sessionNonce = await cryptoWorker.toB64(sessionKeyAttributes.nonce);
+                const encryptionKey = await cryptoWorker.toB64(sessionKeyAttributes.encryptedData);
                 setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
                 setData(LS_KEYS.SESSION, { sessionKey, sessionNonce });
                 router.push('/gallery');
