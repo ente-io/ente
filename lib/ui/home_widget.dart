@@ -9,9 +9,9 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/file_repository.dart';
+import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/file_sync_manager.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/device_folders_gallery_widget.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
@@ -76,7 +76,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       bottomNavigationBar: _buildBottomNavigationBar(),
       body: IndexedStack(
         children: <Widget>[
-          FileSyncManager.instance.hasScannedDisk()
+          SyncService.instance.hasScannedDisk()
               ? _getMainGalleryWidget()
               : LoadingPhotosWidget(),
           _deviceFolderGalleryWidget,
@@ -155,7 +155,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               return _getFilteredPhotos(FileRepository.instance.files);
             },
             reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-            onRefresh: FileSyncManager.instance.sync,
+            onRefresh: SyncService.instance.sync,
             tagPrefix: "home_gallery",
             selectedFiles: _selectedFiles,
             headerWidget: _memoriesWidget,

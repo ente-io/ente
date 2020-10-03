@@ -8,7 +8,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/folder_service.dart';
 import 'package:photos/services/memories_service.dart';
-import 'package:photos/file_sync_manager.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/home_widget.dart';
 import 'package:sentry/sentry.dart';
 import 'package:super_logging/super_logging.dart';
@@ -31,7 +31,7 @@ void _main() async {
     areLogsEnabled: false,
   );
   await Configuration.instance.init();
-  await FileSyncManager.instance.init();
+  await SyncService.instance.init();
   await MemoriesService.instance.init();
   await FavoritesService.instance.init();
   _sync();
@@ -54,7 +54,7 @@ void _sync() async {
   FolderSharingService.instance.sync().catchError((e) {
     _logger.warning(e);
   });
-  FileSyncManager.instance.sync().catchError((e) {
+  SyncService.instance.sync().catchError((e) {
     _logger.warning(e);
   });
 }

@@ -3,7 +3,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/file_repository.dart';
+import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';

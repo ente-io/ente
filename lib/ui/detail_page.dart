@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:photos/services/favorites_service.dart';
-import 'package:photos/file_repository.dart';
+import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/video_widget.dart';

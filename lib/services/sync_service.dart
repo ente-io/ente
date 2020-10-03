@@ -6,10 +6,10 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
-import 'package:photos/file_downloader.dart';
-import 'package:photos/file_repository.dart';
+import 'package:photos/utils/file_downloader.dart';
+import 'package:photos/repositories/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/file_uploader.dart';
+import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/utils/file_name_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +18,7 @@ import 'package:photos/models/file.dart';
 
 import 'package:photos/core/configuration.dart';
 
-class FileSyncManager {
+class SyncService {
   final _logger = Logger("PhotoSyncManager");
   final _dio = Dio();
   final _db = FilesDB.instance;
@@ -34,13 +34,13 @@ class FileSyncManager {
   static final _dbUpdationTimeKey = "db_updation_time";
   static final _diffLimit = 100;
 
-  FileSyncManager._privateConstructor() {
+  SyncService._privateConstructor() {
     Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
       sync();
     });
   }
 
-  static final FileSyncManager instance = FileSyncManager._privateConstructor();
+  static final SyncService instance = SyncService._privateConstructor();
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
