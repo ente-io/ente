@@ -10,7 +10,7 @@ import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/models/file.dart';
 
-import 'core/event_bus.dart';
+import '../core/event_bus.dart';
 
 class FolderSharingService {
   final _logger = Logger("FolderSharingService");

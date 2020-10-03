@@ -13,14 +13,13 @@ import 'package:photos/ui/passphrase_reentry_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
-class UserAuthenticator {
+class UserService {
   final _dio = Dio();
   final _logger = Logger("UserAuthenticator");
 
-  UserAuthenticator._privateConstructor();
+  UserService._privateConstructor();
 
-  static final UserAuthenticator instance =
-      UserAuthenticator._privateConstructor();
+  static final UserService instance = UserService._privateConstructor();
 
   Future<void> getOtt(BuildContext context, String email) async {
     final dialog = createProgressDialog(context, "Please wait...");

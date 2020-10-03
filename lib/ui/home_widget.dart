@@ -11,7 +11,7 @@ import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/photo_sync_manager.dart';
+import 'package:photos/file_sync_manager.dart';
 import 'package:photos/ui/device_folders_gallery_widget.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
@@ -20,7 +20,7 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/ui/remote_folder_gallery_widget.dart';
 import 'package:photos/ui/search_page.dart';
-import 'package:photos/user_authenticator.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/utils/logging_util.dart';
 import 'package:shake/shake.dart';
 import 'package:logging/logging.dart';
@@ -76,7 +76,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       bottomNavigationBar: _buildBottomNavigationBar(),
       body: IndexedStack(
         children: <Widget>[
-          PhotoSyncManager.instance.hasScannedDisk()
+          FileSyncManager.instance.hasScannedDisk()
               ? _getMainGalleryWidget()
               : LoadingPhotosWidget(),
           _deviceFolderGalleryWidget,
@@ -140,7 +140,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     final ott = Uri.parse(link).queryParameters["ott"];
     _logger.info("Ott: " + ott);
-    UserAuthenticator.instance.getCredentials(context, ott);
+    UserService.instance.getCredentials(context, ott);
   }
 
   Widget _getMainGalleryWidget() {
@@ -155,7 +155,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               return _getFilteredPhotos(FileRepository.instance.files);
             },
             reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-            onRefresh: PhotoSyncManager.instance.sync,
+            onRefresh: FileSyncManager.instance.sync,
             tagPrefix: "home_gallery",
             selectedFiles: _selectedFiles,
             headerWidget: _memoriesWidget,

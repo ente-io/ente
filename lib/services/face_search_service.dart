@@ -7,13 +7,13 @@ import 'package:photos/models/face.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/file_name_util.dart';
 
-class FaceSearchManager {
+class FaceSearchService {
   final _logger = Logger("FaceSearchManager");
   final _dio = Dio();
 
-  FaceSearchManager._privateConstructor();
-  static final FaceSearchManager instance =
-      FaceSearchManager._privateConstructor();
+  FaceSearchService._privateConstructor();
+  static final FaceSearchService instance =
+      FaceSearchService._privateConstructor();
 
   Future<List<Face>> getFaces() {
     return _dio

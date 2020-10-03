@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/photo_upload_event.dart';
-import 'package:photos/photo_sync_manager.dart';
+import 'package:photos/file_sync_manager.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class SyncIndicator extends StatefulWidget {
@@ -67,7 +67,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                   child: Text("YES"),
                   onPressed: () {
                     Navigator.of(context).pop();
-                    PhotoSyncManager.instance.stopSync();
+                    FileSyncManager.instance.stopSync();
                     _completeText = "Sync stopped.";
                     setState(() {});
                     widget.refreshController.refreshCompleted();

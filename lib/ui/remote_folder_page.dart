@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/folder_service.dart';
+import 'package:photos/services/folder_service.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';

@@ -3,11 +3,11 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class FavoriteFilesRepository {
+class FavoritesService {
   static final _favoritePhotoIdsKey = "favorite_photo_ids";
-  FavoriteFilesRepository._privateConstructor();
-  static FavoriteFilesRepository instance =
-      FavoriteFilesRepository._privateConstructor();
+  FavoritesService._privateConstructor();
+  static FavoritesService instance =
+      FavoritesService._privateConstructor();
 
   SharedPreferences _preferences;
 

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/email_entry_page.dart';
-import 'package:photos/user_authenticator.dart';
+import 'package:photos/services/user_service.dart';
 
 class OTTVerificationPage extends StatefulWidget {
   OTTVerificationPage({Key key}) : super(key: key);
@@ -84,7 +84,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                           _verificationCodeController.text.isEmpty
                       ? null
                       : () {
-                          UserAuthenticator.instance.getCredentials(
+                          UserService.instance.getCredentials(
                               context, _verificationCodeController.text);
                         },
                   padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),

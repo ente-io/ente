@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/user_authenticator.dart';
+import 'package:photos/services/user_service.dart';
 
 class EmailEntryPage extends StatefulWidget {
   EmailEntryPage({Key key}) : super(key: key);
@@ -54,7 +54,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   onPressed: () {
                     final email = _emailController.text;
                     Configuration.instance.setEmail(email);
-                    UserAuthenticator.instance.getOtt(context, email);
+                    UserService.instance.getOtt(context, email);
                   },
                   padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
                   child: Text("Sign In"),

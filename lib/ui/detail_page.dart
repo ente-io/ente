@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
-import 'package:photos/favorite_files_repository.dart';
+import 'package:photos/services/favorites_service.dart';
 import 'package:photos/file_repository.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/file.dart';
@@ -178,9 +178,9 @@ class _DetailPageState extends State<DetailPage> {
   Widget _getFavoriteButton() {
     final file = _files[_selectedIndex];
     return LikeButton(
-      isLiked: FavoriteFilesRepository.instance.isLiked(file),
+      isLiked: FavoritesService.instance.isLiked(file),
       onTap: (oldValue) {
-        return FavoriteFilesRepository.instance.setLiked(file, !oldValue);
+        return FavoritesService.instance.setLiked(file, !oldValue);
       },
       likeBuilder: (isLiked) {
         return Icon(

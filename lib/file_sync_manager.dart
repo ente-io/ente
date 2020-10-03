@@ -18,7 +18,7 @@ import 'package:photos/models/file.dart';
 
 import 'package:photos/core/configuration.dart';
 
-class PhotoSyncManager {
+class FileSyncManager {
   final _logger = Logger("PhotoSyncManager");
   final _dio = Dio();
   final _db = FilesDB.instance;
@@ -34,14 +34,13 @@ class PhotoSyncManager {
   static final _dbUpdationTimeKey = "db_updation_time";
   static final _diffLimit = 100;
 
-  PhotoSyncManager._privateConstructor() {
+  FileSyncManager._privateConstructor() {
     Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
       sync();
     });
   }
 
-  static final PhotoSyncManager instance =
-      PhotoSyncManager._privateConstructor();
+  static final FileSyncManager instance = FileSyncManager._privateConstructor();
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();

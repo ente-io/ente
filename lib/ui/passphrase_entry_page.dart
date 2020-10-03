@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:photos/user_authenticator.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class PassphraseEntryPage extends StatefulWidget {
@@ -142,7 +142,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
           child: Text("Confirm"),
           onPressed: () {
             Navigator.of(context).pop();
-            UserAuthenticator.instance
+            UserService.instance
                 .setupKey(context, _passphraseController1.text);
           },
         ),

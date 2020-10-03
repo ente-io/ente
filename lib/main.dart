@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/favorite_files_repository.dart';
-import 'package:photos/folder_service.dart';
-import 'package:photos/memories_service.dart';
-import 'package:photos/photo_sync_manager.dart';
+import 'package:photos/services/favorites_service.dart';
+import 'package:photos/services/folder_service.dart';
+import 'package:photos/services/memories_service.dart';
+import 'package:photos/file_sync_manager.dart';
 import 'package:photos/ui/home_widget.dart';
 import 'package:sentry/sentry.dart';
 import 'package:super_logging/super_logging.dart';
@@ -31,9 +31,9 @@ void _main() async {
     areLogsEnabled: false,
   );
   await Configuration.instance.init();
-  await PhotoSyncManager.instance.init();
+  await FileSyncManager.instance.init();
   await MemoriesService.instance.init();
-  await FavoriteFilesRepository.instance.init();
+  await FavoritesService.instance.init();
   _sync();
 
   final SentryClient sentry = new SentryClient(dsn: SENTRY_DSN);
@@ -54,7 +54,7 @@ void _sync() async {
   FolderSharingService.instance.sync().catchError((e) {
     _logger.warning(e);
   });
-  PhotoSyncManager.instance.sync().catchError((e) {
+  FileSyncManager.instance.sync().catchError((e) {
     _logger.warning(e);
   });
 }

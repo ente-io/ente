@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/favorite_files_repository.dart';
+import 'package:photos/services/favorites_service.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/filters/favorite_items_filter.dart';
 import 'package:photos/models/filters/folder_name_filter.dart';
@@ -85,9 +85,9 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
       return second.thumbnail.creationTime
           .compareTo(first.thumbnail.creationTime);
     });
-    if (FavoriteFilesRepository.instance.hasFavorites()) {
+    if (FavoritesService.instance.hasFavorites()) {
       final file = await FilesDB.instance.getLatestFileAmongGeneratedIDs(
-          FavoriteFilesRepository.instance.getLiked().toList());
+          FavoritesService.instance.getLiked().toList());
       folders.insert(0,
           DeviceFolder("Favorites", "/Favorites", file, FavoriteItemsFilter()));
     }

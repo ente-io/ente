@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/face_search_manager.dart';
+import 'package:photos/services/face_search_service.dart';
 import 'package:photos/models/face.dart';
 import 'package:photos/ui/circular_network_image_widget.dart';
 import 'package:photos/ui/face_search_results_page.dart';
@@ -12,7 +12,7 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final FaceSearchManager _faceSearchManager = FaceSearchManager.instance;
+  final FaceSearchService _faceSearchManager = FaceSearchService.instance;
   String _searchString = "";
 
   @override
