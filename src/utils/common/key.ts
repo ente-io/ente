@@ -9,6 +9,6 @@ export const getActualKey = async () => {
     const cryptoWorker = await new CryptoWorker();
     const encryptedKey = getKey(SESSION_KEYS.ENCRYPTION_KEY).encryptionKey;
     const session = getData(LS_KEYS.SESSION);
-    const key = await cryptoWorker.(encryptedKey, session.sessionNonce, session.sessionKey);
+    const key = await cryptoWorker.decryptToB64(encryptedKey, session.sessionNonce, session.sessionKey);
     return key;
 }
