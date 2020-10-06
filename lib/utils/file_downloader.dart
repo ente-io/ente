@@ -38,10 +38,11 @@ class DiffFetcher {
               file.isEncrypted = true;
               file.encryptedKey = item["encryptedKey"];
               file.keyDecryptionNonce = item["keyDecryptionNonce"];
-              file.fileDecryptionHeader = item["fileDecryptionHeader"];
+              file.fileDecryptionHeader = item["file"]["decryptionHeader"];
               file.thumbnailDecryptionHeader =
-                  item["thumbnailDecryptionHeader"];
-              file.metadataDecryptionHeader = item["metadataDecryptionHeader"];
+                  item["thumbnail"]["decryptionHeader"];
+              file.metadataDecryptionHeader =
+                  item["metadata"]["decryptionHeader"];
               final encodedMetadata = CryptoUtil.decryptChaCha(
                 Sodium.base642bin(item["metadata"]["encryptedData"]),
                 await decryptFileKey(file),

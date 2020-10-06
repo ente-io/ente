@@ -96,15 +96,15 @@ class FileUploader {
       "keyDecryptionNonce": keyDecryptionNonce,
       "file": {
         "objectKey": fileObjectKey,
-        "header": fileDecryptionHeader,
+        "decryptionHeader": fileDecryptionHeader,
       },
       "thumbnail": {
         "objectKey": thumbnailObjectKey,
-        "header": thumbnailDecryptionHeader,
+        "decryptionHeader": thumbnailDecryptionHeader,
       },
       "metadata": {
         "encryptedData": encryptedMetadata,
-        "header": metadataDecryptionHeader,
+        "decryptionHeader": metadataDecryptionHeader,
       }
     };
     return _dio
