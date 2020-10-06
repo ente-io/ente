@@ -65,7 +65,7 @@ class FileUploader {
         file.generatedID.toString() + "_thumbnail.encrypted";
     final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
     final encryptedThumbnail =
-        CryptoUtil.encryptStream(thumbnailData, fileAttributes.key.bytes);
+        CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key.bytes);
     io.File(encryptedThumbnailPath)
         .writeAsBytesSync(encryptedThumbnail.encryptedData);
 
@@ -73,7 +73,7 @@ class FileUploader {
     String thumbnailObjectKey =
         await putFile(thumbnailUploadURL, io.File(encryptedThumbnailPath));
 
-    final encryptedMetadata = CryptoUtil.encryptStream(
+    final encryptedMetadata = CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key.bytes);
 
     final encryptedFileKey = await CryptoUtil.encrypt(

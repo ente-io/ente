@@ -42,7 +42,7 @@ class DiffFetcher {
               file.thumbnailDecryptionHeader =
                   item["thumbnailDecryptionHeader"];
               file.metadataDecryptionHeader = item["metadataDecryptionHeader"];
-              final encodedMetadata = CryptoUtil.decryptStream(
+              final encodedMetadata = CryptoUtil.decryptChaCha(
                 Sodium.base642bin(item["metadata"]["encryptedData"]),
                 await decryptFileKey(file),
                 Sodium.base642bin(file.metadataDecryptionHeader),

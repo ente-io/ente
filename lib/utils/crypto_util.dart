@@ -119,26 +119,6 @@ class CryptoUtil {
         EncryptionAttribute(bytes: encryptedData));
   }
 
-  static ChaChaEncryptionResult encryptStream(Uint8List source, Uint8List key) {
-    final initPushResult =
-        Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
-    final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
-        initPushResult.state,
-        source,
-        null,
-        Sodium.cryptoSecretstreamXchacha20poly1305TagFinal);
-    return ChaChaEncryptionResult(encryptedData, initPushResult.header);
-  }
-
-  static Uint8List decryptStream(
-      Uint8List source, Uint8List key, Uint8List header) {
-    final pullState =
-        Sodium.cryptoSecretstreamXchacha20poly1305InitPull(header, key);
-    final pullResult =
-        Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, source, null);
-    return pullResult.m;
-  }
-
   static Future<Uint8List> decrypt(
       Uint8List cipher, Uint8List key, Uint8List nonce,
       {bool background = false}) async {
@@ -151,6 +131,26 @@ class CryptoUtil {
     } else {
       return cryptoSecretboxOpenEasy(args);
     }
+  }
+
+  static ChaChaEncryptionResult encryptChaCha(Uint8List source, Uint8List key) {
+    final initPushResult =
+        Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
+    final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
+        initPushResult.state,
+        source,
+        null,
+        Sodium.cryptoSecretstreamXchacha20poly1305TagFinal);
+    return ChaChaEncryptionResult(encryptedData, header: initPushResult.header);
+  }
+
+  static Uint8List decryptChaCha(
+      Uint8List source, Uint8List key, Uint8List header) {
+    final pullState =
+        Sodium.cryptoSecretstreamXchacha20poly1305InitPull(header, key);
+    final pullResult =
+        Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, source, null);
+    return pullResult.m;
   }
 
   static Future<ChaChaAttributes> encryptFile(

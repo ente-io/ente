@@ -207,7 +207,7 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
   return Dio().download(file.getThumbnailUrl(), temporaryPath).then((_) async {
     final encryptedFile = io.File(temporaryPath);
     final thumbnailDecryptionKey = await decryptFileKey(file);
-    final data = CryptoUtil.decryptStream(
+    final data = CryptoUtil.decryptChaCha(
       encryptedFile.readAsBytesSync(),
       thumbnailDecryptionKey,
       Sodium.base642bin(file.thumbnailDecryptionHeader),
