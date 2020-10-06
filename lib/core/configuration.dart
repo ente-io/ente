@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path_provider/path_provider.dart';
@@ -92,6 +93,9 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
+    if (kDebugMode) {
+      return "http://192.168.0.100";
+    }
     return "https://api.staging.ente.io";
   }
 
@@ -157,7 +161,7 @@ class Configuration {
 
   KeyAttributes getKeyAttributes() {
     final jsonValue = _preferences.getString(keyAttributesKey);
-    if (keyAttributesKey == null) {
+    if (jsonValue == null) {
       return null;
     } else {
       return KeyAttributes.fromJson(jsonValue);
@@ -165,12 +169,16 @@ class Configuration {
   }
 
   Future<void> setKey(String key) async {
-    await _secureStorage.write(key: keyKey, value: key);
     _key = key;
+    if (key == null) {
+      await _secureStorage.delete(key: keyKey);
+    } else {
+      await _secureStorage.write(key: keyKey, value: key);
+    }
   }
 
   Uint8List getKey() {
-    return Sodium.base642bin(_key);
+    return _key == null ? null : Sodium.base642bin(_key);
   }
 
   String getDocumentsDirectory() {
