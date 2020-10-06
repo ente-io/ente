@@ -16,7 +16,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/encrypted_file_attributes.dart';
-import 'package:photos/models/encryption_attribute.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 
@@ -177,10 +176,8 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     }
     logger.info("File downloaded: " + file.uploadedFileID.toString());
     var attributes = ChaChaAttributes(
-      EncryptionAttribute(
-        bytes: await decryptFileKey(file),
-      ),
-      EncryptionAttribute(base64: file.fileDecryptionHeader),
+      await decryptFileKey(file),
+      Sodium.base642bin(file.fileDecryptionHeader),
     );
     await CryptoUtil.decryptFile(
         encryptedFilePath, decryptedFilePath, attributes);

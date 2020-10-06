@@ -65,7 +65,7 @@ class FileUploader {
         file.generatedID.toString() + "_thumbnail.encrypted";
     final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
     final encryptedThumbnail =
-        CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key.bytes);
+        CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key);
     io.File(encryptedThumbnailPath)
         .writeAsBytesSync(encryptedThumbnail.encryptedData);
 
@@ -73,28 +73,38 @@ class FileUploader {
     String thumbnailObjectKey =
         await putFile(thumbnailUploadURL, io.File(encryptedThumbnailPath));
 
-    final encryptedMetadata = CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key.bytes);
+    final encryptedMetadataData = CryptoUtil.encryptChaCha(
+        utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);
 
-    final encryptedFileKey = await CryptoUtil.encrypt(
-      fileAttributes.key.bytes,
-      key: Configuration.instance.getKey(),
+    final encryptedFileKeyData = await CryptoUtil.encrypt(
+      fileAttributes.key,
+      Configuration.instance.getKey(),
     );
 
+    final encryptedKey = Sodium.bin2base64(encryptedFileKeyData.encryptedData);
+    final keyDecryptionNonce = Sodium.bin2base64(encryptedFileKeyData.nonce);
+    final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);
+    final thumbnailDecryptionHeader =
+        Sodium.bin2base64(encryptedThumbnail.header);
+    final encryptedMetadata =
+        Sodium.bin2base64(encryptedMetadataData.encryptedData);
+    final metadataDecryptionHeader =
+        Sodium.bin2base64(encryptedMetadataData.header);
+
     final data = {
-      "encryptedKey": encryptedFileKey.encryptedData.base64,
-      "keyDecryptionNonce": encryptedFileKey.nonce.base64,
+      "encryptedKey": encryptedKey,
+      "keyDecryptionNonce": keyDecryptionNonce,
       "file": {
         "objectKey": fileObjectKey,
-        "header": fileAttributes.header.base64,
+        "header": fileDecryptionHeader,
       },
       "thumbnail": {
         "objectKey": thumbnailObjectKey,
-        "header": Sodium.bin2base64(encryptedThumbnail.header),
+        "header": thumbnailDecryptionHeader,
       },
       "metadata": {
-        "encryptedData": Sodium.bin2base64(encryptedMetadata.encryptedData),
-        "header": Sodium.bin2base64(encryptedMetadata.header),
+        "encryptedData": encryptedMetadata,
+        "header": metadataDecryptionHeader,
       }
     };
     return _dio
@@ -111,13 +121,11 @@ class FileUploader {
       file.uploadedFileID = data["id"];
       file.updationTime = data["updationTime"];
       file.ownerID = data["ownerID"];
-      file.encryptedKey = encryptedFileKey.encryptedData.base64;
-      file.keyDecryptionNonce = encryptedFileKey.nonce.base64;
-      file.fileDecryptionHeader = fileAttributes.header.base64;
-      file.thumbnailDecryptionHeader =
-          Sodium.bin2base64(encryptedThumbnail.header);
-      file.metadataDecryptionHeader =
-          Sodium.bin2base64(encryptedMetadata.header);
+      file.encryptedKey = encryptedKey;
+      file.keyDecryptionNonce = keyDecryptionNonce;
+      file.fileDecryptionHeader = fileDecryptionHeader;
+      file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
+      file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
     });
   }

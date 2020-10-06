@@ -52,24 +52,23 @@ class Configuration {
     final kek = CryptoUtil.deriveKey(utf8.encode(passphrase), kekSalt);
 
     // Encrypt the key with this derived key
-    final encryptedKeyData = await CryptoUtil.encrypt(key, key: kek);
+    final encryptedKeyData = await CryptoUtil.encrypt(key, kek);
 
     // Hash the passphrase so that its correctness can be compared later
     final kekHash = await CryptoUtil.hash(kek);
 
     // Generate a public-private keypair and encrypt the latter
     final keyPair = await CryptoUtil.generateKeyPair();
-    final encryptedSecretKeyData =
-        await CryptoUtil.encrypt(keyPair.sk, key: kek);
+    final encryptedSecretKeyData = await CryptoUtil.encrypt(keyPair.sk, kek);
 
     final attributes = KeyAttributes(
       Sodium.bin2base64(kekSalt),
       kekHash,
-      encryptedKeyData.encryptedData.base64,
-      encryptedKeyData.nonce.base64,
+      Sodium.bin2base64(encryptedKeyData.encryptedData),
+      Sodium.bin2base64(encryptedKeyData.nonce),
       Sodium.bin2base64(keyPair.pk),
-      encryptedSecretKeyData.encryptedData.base64,
-      encryptedSecretKeyData.nonce.base64,
+      Sodium.bin2base64(encryptedSecretKeyData.encryptedData),
+      Sodium.bin2base64(encryptedSecretKeyData.nonce),
     );
     await setKey(Sodium.bin2base64(key));
     await setKeyAttributes(attributes);
