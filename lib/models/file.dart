@@ -1,7 +1,6 @@
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/models/decryption_params.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 
@@ -19,9 +18,11 @@ class File {
   int updationTime;
   Location location;
   FileType fileType;
-  DecryptionParams fileDecryptionParams;
-  DecryptionParams thumbnailDecryptionParams;
-  DecryptionParams metadataDecryptionParams;
+  String encryptedKey;
+  String keyDecryptionNonce;
+  String fileDecryptionHeader;
+  String thumbnailDecryptionHeader;
+  String metadataDecryptionHeader;
 
   File();
 
@@ -137,10 +138,7 @@ class File {
   @override
   String toString() {
     return '''File(generatedId: $generatedID, uploadedFileId: $uploadedFileID, 
-      localId: $localID, title: $title, deviceFolder: $deviceFolder, 
-      fileDecryptionParams: $fileDecryptionParams, 
-      thumbnailDecryptionParams: $thumbnailDecryptionParams,
-      metadataDecryptionParams: $metadataDecryptionParams,
+      localId: $localID, title: $title, deviceFolder: $deviceFolder,
       location: $location, fileType: $fileType, creationTime: $creationTime, 
       modificationTime: $modificationTime, updationTime: $updationTime)''';
   }

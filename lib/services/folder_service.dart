@@ -74,9 +74,11 @@ class FolderSharingService {
           existingPhoto.generatedID,
           file.uploadedFileID,
           file.updationTime,
-          file.fileDecryptionParams,
-          file.thumbnailDecryptionParams,
-          file.metadataDecryptionParams,
+          file.encryptedKey,
+          file.keyDecryptionNonce,
+          file.fileDecryptionHeader,
+          file.thumbnailDecryptionHeader,
+          file.metadataDecryptionHeader,
         );
       } catch (e) {
         await FilesDB.instance.insert(file);

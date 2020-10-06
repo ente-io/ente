@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:logging/logging.dart';
-import 'package:photos/models/decryption_params.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/file.dart';
@@ -32,9 +31,11 @@ class FilesDB {
   static final columnCreationTime = 'creation_time';
   static final columnModificationTime = 'modification_time';
   static final columnUpdationTime = 'updation_time';
-  static final columnFileDecryptionParams = 'file_decryption_params';
-  static final columnThumbnailDecryptionParams = 'thumbnail_decryption_params';
-  static final columnMetadataDecryptionParams = 'metadata_decryption_params';
+  static final columnEncryptedKey = 'encrypted_key';
+  static final columnKeyDecryptionNonce = 'key_decryption_nonce';
+  static final columnFileDecryptionHeader = 'file_decryption_header';
+  static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
+  static final columnMetadataDecryptionHeader = 'metadata_decryption_header';
 
   // make this a singleton class
   FilesDB._privateConstructor();
@@ -76,9 +77,12 @@ class FilesDB {
             $columnCreationTime TEXT NOT NULL,
             $columnModificationTime TEXT NOT NULL,
             $columnUpdationTime TEXT,
-            $columnFileDecryptionParams TEXT,
-            $columnThumbnailDecryptionParams TEXT,
-            $columnMetadataDecryptionParams TEXT
+            $columnEncryptedKey TEXT,
+            $columnKeyDecryptionNonce TEXT,
+            $columnUpdationTime TEXT,
+            $columnFileDecryptionHeader TEXT,
+            $columnThumbnailDecryptionHeader TEXT,
+            $columnMetadataDecryptionHeader TEXT
           )
           ''');
   }
@@ -227,18 +231,21 @@ class FilesDB {
     int generatedID,
     int uploadedID,
     int updationTime,
-    DecryptionParams fileDecryptionParams,
-    DecryptionParams thumbnailDecryptionParams,
-    DecryptionParams metadataDecryptionParams,
+    String encryptedKey,
+    String keyDecryptionNonce,
+    String fileDecryptionHeader,
+    String thumbnailDecryptionHeader,
+    String metadataDecryptionHeader,
   ) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
     values[columnUploadedFileID] = uploadedID;
     values[columnUpdationTime] = updationTime;
-    values[columnFileDecryptionParams] = fileDecryptionParams.toJson();
-    values[columnThumbnailDecryptionParams] =
-        thumbnailDecryptionParams.toJson();
-    values[columnMetadataDecryptionParams] = metadataDecryptionParams.toJson();
+    values[columnEncryptedKey] = encryptedKey;
+    values[columnKeyDecryptionNonce] = keyDecryptionNonce;
+    values[columnFileDecryptionHeader] = fileDecryptionHeader;
+    values[columnThumbnailDecryptionHeader] = thumbnailDecryptionHeader;
+    values[columnMetadataDecryptionHeader] = metadataDecryptionHeader;
     return await db.update(
       table,
       values,
@@ -390,16 +397,11 @@ class FilesDB {
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
-    row[columnFileDecryptionParams] = file.fileDecryptionParams == null
-        ? null
-        : file.fileDecryptionParams.toJson();
-    row[columnThumbnailDecryptionParams] =
-        file.thumbnailDecryptionParams == null
-            ? null
-            : file.thumbnailDecryptionParams.toJson();
-    row[columnMetadataDecryptionParams] = file.metadataDecryptionParams == null
-        ? null
-        : file.metadataDecryptionParams.toJson();
+    row[columnEncryptedKey] = file.encryptedKey;
+    row[columnKeyDecryptionNonce] = file.keyDecryptionNonce;
+    row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
+    row[columnThumbnailDecryptionHeader] = file.thumbnailDecryptionHeader;
+    row[columnMetadataDecryptionHeader] = file.metadataDecryptionHeader;
     return row;
   }
 
@@ -422,12 +424,11 @@ class FilesDB {
     file.updationTime = row[columnUpdationTime] == null
         ? -1
         : int.parse(row[columnUpdationTime]);
-    file.fileDecryptionParams =
-        DecryptionParams.fromJson(row[columnFileDecryptionParams]);
-    file.thumbnailDecryptionParams =
-        DecryptionParams.fromJson(row[columnThumbnailDecryptionParams]);
-    file.metadataDecryptionParams =
-        DecryptionParams.fromJson(row[columnMetadataDecryptionParams]);
+    file.encryptedKey = row[columnEncryptedKey];
+    file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
+    file.fileDecryptionHeader = row[columnFileDecryptionHeader];
+    file.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
+    file.metadataDecryptionHeader = row[columnMetadataDecryptionHeader];
     return file;
   }
 }

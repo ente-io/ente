@@ -6,9 +6,9 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/remote_sync_event.dart';
-import 'package:photos/models/decryption_params.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/file_util.dart';
 
 class DiffFetcher {
   final _logger = Logger("FileDownloader");
@@ -36,21 +36,16 @@ class DiffFetcher {
               file.ownerID = item["ownerID"];
               file.updationTime = item["updationTime"];
               file.isEncrypted = true;
-              file.fileDecryptionParams =
-                  DecryptionParams.fromMap(item["file"]["decryptionParams"]);
-              file.thumbnailDecryptionParams = DecryptionParams.fromMap(
-                  item["thumbnail"]["decryptionParams"]);
-              file.metadataDecryptionParams = DecryptionParams.fromMap(
-                  item["metadata"]["decryptionParams"]);
-              final metadataDecryptionKey = await CryptoUtil.decrypt(
-                  Sodium.base642bin(file.metadataDecryptionParams.encryptedKey),
-                  Configuration.instance.getKey(),
-                  Sodium.base642bin(
-                      file.metadataDecryptionParams.keyDecryptionNonce));
-              final encodedMetadata = await CryptoUtil.decrypt(
+              file.encryptedKey = item["encryptedKey"];
+              file.keyDecryptionNonce = item["keyDecryptionNonce"];
+              file.fileDecryptionHeader = item["fileDecryptionHeader"];
+              file.thumbnailDecryptionHeader =
+                  item["thumbnailDecryptionHeader"];
+              file.metadataDecryptionHeader = item["metadataDecryptionHeader"];
+              final encodedMetadata = CryptoUtil.decryptStream(
                 Sodium.base642bin(item["metadata"]["encryptedData"]),
-                metadataDecryptionKey,
-                Sodium.base642bin(file.metadataDecryptionParams.nonce),
+                await decryptFileKey(file),
+                Sodium.base642bin(file.metadataDecryptionHeader),
               );
               Map<String, dynamic> metadata =
                   jsonDecode(utf8.decode(encodedMetadata));

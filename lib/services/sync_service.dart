@@ -229,9 +229,11 @@ class SyncService {
           file.generatedID,
           uploadedFile.uploadedFileID,
           uploadedFile.updationTime,
-          file.fileDecryptionParams,
-          file.thumbnailDecryptionParams,
-          file.metadataDecryptionParams,
+          file.encryptedKey,
+          file.keyDecryptionNonce,
+          file.fileDecryptionHeader,
+          file.thumbnailDecryptionHeader,
+          file.metadataDecryptionHeader,
         );
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: filesToBeUploaded.length));
@@ -245,20 +247,18 @@ class SyncService {
   Future _storeDiff(List<File> diff, String prefKey) async {
     for (File file in diff) {
       try {
-        final existingPhoto = await _db.getMatchingFile(
-            file.localID,
-            file.title,
-            file.deviceFolder,
-            file.creationTime,
-            file.modificationTime,
+        final existingFile = await _db.getMatchingFile(file.localID, file.title,
+            file.deviceFolder, file.creationTime, file.modificationTime,
             alternateTitle: getHEICFileNameForJPG(file));
         await _db.update(
-          existingPhoto.generatedID,
+          existingFile.generatedID,
           file.uploadedFileID,
           file.updationTime,
-          file.fileDecryptionParams,
-          file.thumbnailDecryptionParams,
-          file.metadataDecryptionParams,
+          file.encryptedKey,
+          file.keyDecryptionNonce,
+          file.fileDecryptionHeader,
+          file.thumbnailDecryptionHeader,
+          file.metadataDecryptionHeader,
         );
       } catch (e) {
         file.localID = null; // File uploaded from a different device

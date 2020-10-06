@@ -178,12 +178,9 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     logger.info("File downloaded: " + file.uploadedFileID.toString());
     var attributes = ChaChaAttributes(
       EncryptionAttribute(
-          bytes: await CryptoUtil.decrypt(
-        Sodium.base642bin(file.fileDecryptionParams.encryptedKey),
-        Configuration.instance.getKey(),
-        Sodium.base642bin(file.fileDecryptionParams.keyDecryptionNonce),
-      )),
-      EncryptionAttribute(base64: file.fileDecryptionParams.header),
+        bytes: await decryptFileKey(file),
+      ),
+      EncryptionAttribute(base64: file.fileDecryptionHeader),
     );
     await CryptoUtil.decryptFile(
         encryptedFilePath, decryptedFilePath, attributes);
@@ -209,14 +206,11 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
       "_thumbnail.decrypted";
   return Dio().download(file.getThumbnailUrl(), temporaryPath).then((_) async {
     final encryptedFile = io.File(temporaryPath);
-    final thumbnailDecryptionKey = await CryptoUtil.decrypt(
-        Sodium.base642bin(file.thumbnailDecryptionParams.encryptedKey),
-        Configuration.instance.getKey(),
-        Sodium.base642bin(file.thumbnailDecryptionParams.keyDecryptionNonce));
-    final data = await CryptoUtil.decrypt(
+    final thumbnailDecryptionKey = await decryptFileKey(file);
+    final data = CryptoUtil.decryptStream(
       encryptedFile.readAsBytesSync(),
       thumbnailDecryptionKey,
-      Sodium.base642bin(file.thumbnailDecryptionParams.nonce),
+      Sodium.base642bin(file.thumbnailDecryptionHeader),
     );
     encryptedFile.deleteSync();
     return ThumbnailCacheManager().putFile(
@@ -226,4 +220,11 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
       maxAge: Duration(days: 365),
     );
   });
+}
+
+Future<Uint8List> decryptFileKey(File file) {
+  return CryptoUtil.decrypt(
+      Sodium.base642bin(file.encryptedKey),
+      Configuration.instance.getKey(),
+      Sodium.base642bin(file.keyDecryptionNonce));
 }

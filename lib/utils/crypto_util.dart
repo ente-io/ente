@@ -5,6 +5,7 @@ import 'dart:io' as io;
 import 'package:computer/computer.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/models/chacha_encryption_result.dart';
 
 import 'package:photos/models/encrypted_data_attributes.dart';
 import 'package:photos/models/encrypted_file_attributes.dart';
@@ -32,7 +33,7 @@ bool cryptoPwhashStrVerify(Map<String, dynamic> args) {
   return Sodium.cryptoPwhashStrVerify(args["hash"], args["input"]) == 0;
 }
 
-ChaChaAttributes chachaEncrypt(Map<String, dynamic> args) {
+ChaChaAttributes chachaEncryptFile(Map<String, dynamic> args) {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final logger = Logger("ChaChaEncrypt");
   final sourceFile = io.File(args["sourceFilePath"]);
@@ -111,13 +112,31 @@ class CryptoUtil {
     args["source"] = source;
     args["nonce"] = nonce;
     args["key"] = key;
-    final encryptedData =
-        await Computer().compute(cryptoSecretboxEasy, param: args);
-
+    final encryptedData = cryptoSecretboxEasy(args);
     return EncryptedData(
         EncryptionAttribute(bytes: key),
         EncryptionAttribute(bytes: nonce),
         EncryptionAttribute(bytes: encryptedData));
+  }
+
+  static ChaChaEncryptionResult encryptStream(Uint8List source, Uint8List key) {
+    final initPushResult =
+        Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
+    final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
+        initPushResult.state,
+        source,
+        null,
+        Sodium.cryptoSecretstreamXchacha20poly1305TagFinal);
+    return ChaChaEncryptionResult(encryptedData, initPushResult.header);
+  }
+
+  static Uint8List decryptStream(
+      Uint8List source, Uint8List key, Uint8List header) {
+    final pullState =
+        Sodium.cryptoSecretstreamXchacha20poly1305InitPull(header, key);
+    final pullResult =
+        Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, source, null);
+    return pullResult.m;
   }
 
   static Future<Uint8List> decrypt(
@@ -141,7 +160,7 @@ class CryptoUtil {
     final args = Map<String, dynamic>();
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
-    return Computer().compute(chachaEncrypt, param: args);
+    return Computer().compute(chachaEncryptFile, param: args);
   }
 
   static Future<void> decryptFile(

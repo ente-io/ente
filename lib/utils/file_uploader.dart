@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io' as io;
 import 'package:dio/dio.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/models/decryption_params.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -56,16 +56,6 @@ class FileUploader {
     final fileUploadURL = await getUploadURL();
     String fileObjectKey = await putFile(fileUploadURL, encryptedFile);
 
-    final encryptedFileKey = await CryptoUtil.encrypt(
-      fileAttributes.key.bytes,
-      key: Configuration.instance.getKey(),
-    );
-    final fileDecryptionParams = DecryptionParams(
-      encryptedKey: encryptedFileKey.encryptedData.base64,
-      keyDecryptionNonce: encryptedFileKey.nonce.base64,
-      header: fileAttributes.header.base64,
-    );
-
     final thumbnailData = (await (await file.getAsset()).thumbDataWithSize(
       THUMBNAIL_LARGE_SIZE,
       THUMBNAIL_LARGE_SIZE,
@@ -74,47 +64,37 @@ class FileUploader {
     final encryptedThumbnailName =
         file.generatedID.toString() + "_thumbnail.encrypted";
     final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
-    final encryptedThumbnail = await CryptoUtil.encrypt(thumbnailData);
+    final encryptedThumbnail =
+        CryptoUtil.encryptStream(thumbnailData, fileAttributes.key.bytes);
     io.File(encryptedThumbnailPath)
-        .writeAsBytesSync(encryptedThumbnail.encryptedData.bytes);
+        .writeAsBytesSync(encryptedThumbnail.encryptedData);
 
     final thumbnailUploadURL = await getUploadURL();
     String thumbnailObjectKey =
         await putFile(thumbnailUploadURL, io.File(encryptedThumbnailPath));
 
-    final encryptedThumbnailKey = await CryptoUtil.encrypt(
-      encryptedThumbnail.key.bytes,
+    final encryptedMetadata = CryptoUtil.encryptStream(
+        utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key.bytes);
+
+    final encryptedFileKey = await CryptoUtil.encrypt(
+      fileAttributes.key.bytes,
       key: Configuration.instance.getKey(),
-    );
-    final thumbnailDecryptionParams = DecryptionParams(
-      encryptedKey: encryptedThumbnailKey.encryptedData.base64,
-      keyDecryptionNonce: encryptedThumbnailKey.nonce.base64,
-      nonce: encryptedThumbnail.nonce.base64,
     );
 
-    final metadata = jsonEncode(file.getMetadata());
-    final encryptedMetadata = await CryptoUtil.encrypt(utf8.encode(metadata));
-    final encryptedMetadataKey = await CryptoUtil.encrypt(
-      encryptedMetadata.key.bytes,
-      key: Configuration.instance.getKey(),
-    );
-    final metadataDecryptionParams = DecryptionParams(
-      encryptedKey: encryptedMetadataKey.encryptedData.base64,
-      keyDecryptionNonce: encryptedMetadataKey.nonce.base64,
-      nonce: encryptedMetadata.nonce.base64,
-    );
     final data = {
+      "encryptedKey": encryptedFileKey.encryptedData.base64,
+      "keyDecryptionNonce": encryptedFileKey.nonce.base64,
       "file": {
         "objectKey": fileObjectKey,
-        "decryptionParams": fileDecryptionParams.toMap(),
+        "header": fileAttributes.header.base64,
       },
       "thumbnail": {
         "objectKey": thumbnailObjectKey,
-        "decryptionParams": thumbnailDecryptionParams.toMap(),
+        "header": Sodium.bin2base64(encryptedThumbnail.header),
       },
       "metadata": {
-        "encryptedData": encryptedMetadata.encryptedData.base64,
-        "decryptionParams": metadataDecryptionParams.toMap(),
+        "encryptedData": Sodium.bin2base64(encryptedMetadata.encryptedData),
+        "header": Sodium.bin2base64(encryptedMetadata.header),
       }
     };
     return _dio
@@ -131,9 +111,13 @@ class FileUploader {
       file.uploadedFileID = data["id"];
       file.updationTime = data["updationTime"];
       file.ownerID = data["ownerID"];
-      file.fileDecryptionParams = fileDecryptionParams;
-      file.thumbnailDecryptionParams = thumbnailDecryptionParams;
-      file.metadataDecryptionParams = metadataDecryptionParams;
+      file.encryptedKey = encryptedFileKey.encryptedData.base64;
+      file.keyDecryptionNonce = encryptedFileKey.nonce.base64;
+      file.fileDecryptionHeader = fileAttributes.header.base64;
+      file.thumbnailDecryptionHeader =
+          Sodium.bin2base64(encryptedThumbnail.header);
+      file.metadataDecryptionHeader =
+          Sodium.bin2base64(encryptedMetadata.header);
       return file;
     });
   }
