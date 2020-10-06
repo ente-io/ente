@@ -72,17 +72,16 @@ class FilesDB {
             $columnLongitude REAL,
             $columnFileType INTEGER,
             $columnRemoteFolderID INTEGER,
-            $columnIsEncrypted INTEGER DEFAULT 0,
-            $columnIsDeleted INTEGER DEFAULT 0,
-            $columnCreationTime TEXT NOT NULL,
+            $columnIsEncrypted INTEGER DEFAULT 1,
             $columnModificationTime TEXT NOT NULL,
-            $columnUpdationTime TEXT,
             $columnEncryptedKey TEXT,
             $columnKeyDecryptionNonce TEXT,
-            $columnUpdationTime TEXT,
             $columnFileDecryptionHeader TEXT,
             $columnThumbnailDecryptionHeader TEXT,
-            $columnMetadataDecryptionHeader TEXT
+            $columnMetadataDecryptionHeader TEXT,
+            $columnIsDeleted INTEGER DEFAULT 0,
+            $columnCreationTime TEXT NOT NULL,
+            $columnUpdationTime TEXT
           )
           ''');
   }
