@@ -15,7 +15,6 @@ import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/models/encrypted_file_attributes.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 
@@ -175,12 +174,11 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
       return null;
     }
     logger.info("File downloaded: " + file.uploadedFileID.toString());
-    var attributes = ChaChaAttributes(
-      await decryptFileKey(file),
-      Sodium.base642bin(file.fileDecryptionHeader),
-    );
     await CryptoUtil.decryptFile(
-        encryptedFilePath, decryptedFilePath, attributes);
+        encryptedFilePath,
+        decryptedFilePath,
+        await decryptFileKey(file),
+        Sodium.base642bin(file.fileDecryptionHeader));
     logger.info("File decrypted: " + file.uploadedFileID.toString());
     io.File(encryptedFilePath).deleteSync();
     final fileExtension = extension(file.title).substring(1).toLowerCase();
