@@ -177,8 +177,8 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     await CryptoUtil.decryptFile(
         encryptedFilePath,
         decryptedFilePath,
-        await decryptFileKey(file),
-        Sodium.base642bin(file.fileDecryptionHeader));
+        Sodium.base642bin(file.fileDecryptionHeader),
+        await decryptFileKey(file));
     logger.info("File decrypted: " + file.uploadedFileID.toString());
     io.File(encryptedFilePath).deleteSync();
     final fileExtension = extension(file.title).substring(1).toLowerCase();
@@ -192,6 +192,8 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     decryptedFile.deleteSync();
     downloadsInProgress.remove(file.uploadedFileID);
     return cachedFile;
+  }).catchError((e) {
+    downloadsInProgress.remove(file.uploadedFileID);
   });
 }
 
