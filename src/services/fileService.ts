@@ -2,11 +2,8 @@ import { getEndpoint } from "utils/common/apiUtil";
 import HTTPService from "./HTTPService";
 import * as Comlink from "comlink";
 
-const decryptMetadata: any = typeof window !== 'undefined'
-    && Comlink.wrap(new Worker("worker/decryptMetadata.worker.js", { type: 'module' }));
-const decryptThumbnail: any = typeof window !== 'undefined'
-    && Comlink.wrap(new Worker("worker/decryptThumbnail.worker.js", { type: 'module' }));
-
+const CryptoWorker:any = typeof window !== 'undefined'
+    && Comlink.wrap(new Worker("worker/crypto.worker.js", { type: 'module' }));
 const ENDPOINT = getEndpoint();
 
 export interface decryptionParams {
@@ -37,12 +34,14 @@ export interface fileData {
     data?: string;
 };
 
-const getFileMetaDataUsingWorker = (data: any, key: string) => {
-    return decryptMetadata({ data, key });
+const getFileMetaDataUsingWorker = async (data: any, key: string) => {
+    const worker = await new CryptoWorker();
+    return worker.decryptMetadata({ data, key });
 }
 
-const getFileUsingWorker = (data: any, key: string) => {
-    return decryptThumbnail({ data, key });
+const getFileUsingWorker = async (data: any, key: string) => {
+    const worker = await new CryptoWorker();
+    return worker.decryptThumbnail({ data, key });
 }
 
 export const getFiles = async (sinceTime: string, token: string, limit: string, key: string) => {

@@ -57,8 +57,8 @@ export default function Gallery() {
             items={data.map(item => ({
                 ...item,
                 src: '/image.svg',
-                w: 512,
-                h: 512,
+                w: window.innerWidth,
+                h: window.innerHeight,
             }))}
             thumbnailContent={getThumbnail}
         />

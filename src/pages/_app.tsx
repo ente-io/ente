@@ -43,6 +43,10 @@ const GlobalStyles = createGlobalStyle`
     svg {
         fill: currentColor;
     }
+
+    .pswp__img {
+        object-fit: contain;
+    }
 `;
 
 const Image = styled.img`

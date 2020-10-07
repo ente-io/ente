@@ -7,13 +7,14 @@ import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Button from 'react-bootstrap/Button';
-import { secureRandomString, strToUint8, base64ToUint8, binToBase64 } from 'utils/crypto/common';
-import { hash } from 'utils/crypto/scrypt';
-import { encrypt } from 'utils/crypto/aes';
 import { putKeyAttributes } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
+import * as Comlink from "comlink";
+
+const CryptoWorker: any = typeof window !== 'undefined'
+    && Comlink.wrap(new Worker("worker/crypto.worker.js", { type: 'module' }));
 
 const Image = styled.img`
     width: 200px;
@@ -31,7 +32,7 @@ export default function Generate() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
     const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-    
+
     useEffect(() => {
         router.prefetch('/gallery');
         const user = getData(LS_KEYS.USER);
@@ -49,24 +50,28 @@ export default function Generate() {
         try {
             const { passphrase, confirm } = values;
             if (passphrase === confirm) {
-                const key = secureRandomString(32);
-                const kekSalt = secureRandomString(32);
-                const kek = await hash(strToUint8(passphrase), base64ToUint8(kekSalt));
-                const kekHashSalt = secureRandomString(32);
-                const kekHash = await hash(base64ToUint8(kek), base64ToUint8(kekHashSalt));
-                const encryptedKeyIV = secureRandomString(16);
-                const encryptedKey = await encrypt(key, kek, encryptedKeyIV);
+                const cryptoWorker = await new CryptoWorker();
+                const key = await cryptoWorker.generateMasterKey();
+                const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
+                const kek = await cryptoWorker.deriveKey(
+                    await cryptoWorker.fromString(passphrase), kekSalt);
+                const kekHash = await cryptoWorker.hash(kek);
+                const encryptedKeyAttributes = await cryptoWorker.encrypt(key, kek);
                 const keyAttributes = {
-                    kekSalt, kekHashSalt, kekHash,
-                    encryptedKeyIV, encryptedKey,
+                    kekSalt: await cryptoWorker.toB64(kekSalt),
+                    kekHash,
+                    encryptedKey: await cryptoWorker.toB64(encryptedKeyAttributes.encryptedData),
+                    keyDecryptionNonce: await cryptoWorker.toB64(encryptedKeyAttributes.nonce),
                 };
                 await putKeyAttributes(token, keyAttributes);
                 setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-                const sessionKey = secureRandomString(32);
-                const sessionIV = secureRandomString(16);
-                const encryptionKey = await encrypt(key, sessionKey, sessionIV);
+
+                const sessionKeyAttributes = await cryptoWorker.encrypt(key);
+                const sessionKey = await cryptoWorker.toB64(sessionKeyAttributes.key);
+                const sessionNonce = await cryptoWorker.toB64(sessionKeyAttributes.nonce);
+                const encryptionKey = await cryptoWorker.toB64(sessionKeyAttributes.encryptedData);
                 setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
-                setData(LS_KEYS.SESSION, { sessionKey, sessionIV });
+                setData(LS_KEYS.SESSION, { sessionKey, sessionNonce });
                 router.push('/gallery');
             } else {
                 setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
@@ -76,7 +81,7 @@ export default function Generate() {
         }
         setLoading(false);
     }
-    
+
     return (<Container>
         <Image alt='vault' src='/vault.svg' />
         <Card>
