@@ -169,7 +169,7 @@ class CryptoUtil {
   }
 
   static Uint8List generateMasterKey() {
-    return Sodium.cryptoKdfKeygen();
+    return Sodium.cryptoSecretboxKeygen();
   }
 
   static Uint8List getSaltToDeriveKey() {
