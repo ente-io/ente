@@ -38,6 +38,10 @@ Future<void> _shareVideo(ProgressDialog dialog, File file) async {
   return ShareExtend.share(path, "image");
 }
 
+Future<void> shareText(String text) async {
+  return ShareExtend.share(text, "text");
+}
+
 Future<void> _shareImage(ProgressDialog dialog, File file) async {
   await dialog.show();
   final bytes = await getBytes(file);
