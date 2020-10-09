@@ -24,7 +24,7 @@ class Collection {
   );
 
   static Collection emptyCollection() {
-    return Collection(null, null, null, null, null, null, null, null);
+    return Collection(null, null, null, null, null, null, null, List<String>());
   }
 
   Collection copyWith({
