@@ -85,6 +85,9 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
         hintColor: Colors.grey,
         accentColor: Colors.pink[400],
         buttonColor: Colors.pink,
+        buttonTheme: ButtonThemeData().copyWith(
+          buttonColor: Colors.pink,
+        ),
         toggleableActiveColor: Colors.pink[400],
       ),
       home: HomeWidget(_title),

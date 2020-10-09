@@ -91,7 +91,6 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                   child: Text(
                     "Verify",
                   ),
-                  color: Colors.pink,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18.0),
                   ),
