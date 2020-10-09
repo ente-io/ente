@@ -47,6 +47,30 @@ class UserService {
     });
   }
 
+  Future<String> getPublicKey(BuildContext context, String email) async {
+    final dialog = createProgressDialog(context, "Searching for user...");
+    await dialog.show();
+    try {
+      final response = await _dio.get(
+        Configuration.instance.getHttpEndpoint() + "/users/public-key",
+        queryParameters: {
+          "email": email,
+        },
+        options: Options(
+          headers: {
+            "X-Auth-Token": Configuration.instance.getToken(),
+          },
+        ),
+      );
+      return response.data["publicKey"];
+    } on DioError catch (e) {
+      _logger.info(e);
+      return null;
+    } finally {
+      await dialog.hide();
+    }
+  }
+
   Future<void> getCredentials(BuildContext context, String ott) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
