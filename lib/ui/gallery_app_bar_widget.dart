@@ -87,18 +87,27 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   List<Widget> _getDefaultActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
     if (Configuration.instance.hasConfiguredAccount()) {
-      actions.add(IconButton(
-        icon: Icon(Icons.settings),
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return SettingsPage();
-              },
-            ),
-          );
-        },
-      ));
+      if (widget.type == GalleryAppBarType.homepage) {
+        actions.add(IconButton(
+          icon: Icon(Icons.settings),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return SettingsPage();
+                },
+              ),
+            );
+          },
+        ));
+      } else if (widget.type == GalleryAppBarType.local_folder) {
+        actions.add(IconButton(
+          icon: Icon(Icons.share),
+          onPressed: () {
+            _showShareCollectionDialog();
+          },
+        ));
+      }
     } else {
       actions.add(IconButton(
         icon: Icon(Icons.sync_disabled),
