@@ -45,7 +45,7 @@ class DiffFetcher {
                   item["metadata"]["decryptionHeader"];
               final encodedMetadata = CryptoUtil.decryptChaCha(
                 Sodium.base642bin(item["metadata"]["encryptedData"]),
-                await decryptFileKey(file),
+                decryptFileKey(file),
                 Sodium.base642bin(file.metadataDecryptionHeader),
               );
               Map<String, dynamic> metadata =
