@@ -3,21 +3,19 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/collection.dart';
 
 class CollectionsService {
   final _logger = Logger("CollectionsService");
 
-  CollectionsService._privateConstructor() {
-    Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
-      // TODO: sync();
-    });
-  }
+  CollectionsService._privateConstructor() {}
 
   static final CollectionsService instance =
       CollectionsService._privateConstructor();
+
+  Future<void> sync() async {
+    // TODO
+  }
 
   Future<Collection> getFolder(String path) async {
     return Dio()

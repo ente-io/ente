@@ -6,6 +6,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/file_downloader.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -157,6 +158,7 @@ class SyncService {
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }
+    await CollectionsService.instance.sync();
     await _persistFilesDiff();
     await _persistEncryptedFilesDiff();
     await _uploadDiff();
