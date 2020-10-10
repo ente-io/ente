@@ -88,7 +88,7 @@ class Configuration {
     if (!correctPassphrase) {
       throw Exception("Incorrect passphrase");
     }
-    final key = await CryptoUtil.decrypt(
+    final key = CryptoUtil.decryptSync(
         Sodium.base642bin(attributes.encryptedKey),
         kek,
         Sodium.base642bin(attributes.keyDecryptionNonce));

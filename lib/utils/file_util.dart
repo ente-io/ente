@@ -174,11 +174,8 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
       return null;
     }
     logger.info("File downloaded: " + file.uploadedFileID.toString());
-    await CryptoUtil.decryptFile(
-        encryptedFilePath,
-        decryptedFilePath,
-        Sodium.base642bin(file.fileDecryptionHeader),
-        await decryptFileKey(file));
+    await CryptoUtil.decryptFile(encryptedFilePath, decryptedFilePath,
+        Sodium.base642bin(file.fileDecryptionHeader), decryptFileKey(file));
     logger.info("File decrypted: " + file.uploadedFileID.toString());
     io.File(encryptedFilePath).deleteSync();
     final fileExtension = extension(file.title).substring(1).toLowerCase();
@@ -203,7 +200,7 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
       "_thumbnail.decrypted";
   return Dio().download(file.getThumbnailUrl(), temporaryPath).then((_) async {
     final encryptedFile = io.File(temporaryPath);
-    final thumbnailDecryptionKey = await decryptFileKey(file);
+    final thumbnailDecryptionKey = decryptFileKey(file);
     final data = CryptoUtil.decryptChaCha(
       encryptedFile.readAsBytesSync(),
       thumbnailDecryptionKey,
@@ -219,8 +216,8 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
   });
 }
 
-Future<Uint8List> decryptFileKey(File file) {
-  return CryptoUtil.decrypt(
+Uint8List decryptFileKey(File file) {
+  return CryptoUtil.decryptSync(
       Sodium.base642bin(file.encryptedKey),
       Configuration.instance.getKey(),
       Sodium.base642bin(file.keyDecryptionNonce));

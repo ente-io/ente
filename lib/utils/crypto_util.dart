@@ -110,17 +110,15 @@ class CryptoUtil {
   }
 
   static Future<Uint8List> decrypt(
-      Uint8List cipher, Uint8List key, Uint8List nonce,
-      {bool background = false}) async {
+    Uint8List cipher,
+    Uint8List key,
+    Uint8List nonce,
+  ) async {
     final args = Map<String, dynamic>();
     args["cipher"] = cipher;
     args["nonce"] = nonce;
     args["key"] = key;
-    if (background) {
-      return Computer().compute(cryptoSecretboxOpenEasy, param: args);
-    } else {
-      return cryptoSecretboxOpenEasy(args);
-    }
+    return Computer().compute(cryptoSecretboxOpenEasy, param: args);
   }
 
   static Uint8List decryptSync(
