@@ -17,7 +17,8 @@ class CollectionsDB {
   static final columnKeyDecryptionNonce = 'key_decryption_nonce';
   static final columnName = 'name';
   static final columnType = 'type';
-  static final columnEncryptedPath = 'path';
+  static final columnEncryptedPath = 'encrypted_path';
+  static final columnPathDecryptionNonce = 'path_decryption_nonce';
   static final columnCreationTime = 'creation_time';
 
   CollectionsDB._privateConstructor();
@@ -50,6 +51,7 @@ class CollectionsDB {
                   $columnName TEXT NOT NULL,
                   $columnType TEXT NOT NULL,
                   $columnEncryptedPath TEXT,
+                  $columnPathDecryptionNonce TEXT,
                   $columnCreationTime TEXT NOT NULL,
                 )
                 ''');
@@ -63,6 +65,16 @@ class CollectionsDB {
           conflictAlgorithm: ConflictAlgorithm.replace);
     }
     return await batch.commit();
+  }
+
+  Future<List<Collection>> getAll() async {
+    final db = await instance.database;
+    final rows = await db.query(table);
+    final collections = List<Collection>();
+    for (final row in rows) {
+      collections.add(_convertToCollection(row));
+    }
+    return collections;
   }
 
   Future<int> getLastCollectionCreationTime() async {
@@ -88,6 +100,7 @@ class CollectionsDB {
     row[columnName] = collection.name;
     row[columnType] = collection.type;
     row[columnEncryptedPath] = collection.encryptedPath;
+    row[columnPathDecryptionNonce] = collection.pathDecryptionNonce;
     row[columnCreationTime] = collection.creationTime;
     return row;
   }
@@ -101,6 +114,7 @@ class CollectionsDB {
       row[columnName],
       row[columnType],
       row[columnEncryptedPath],
+      row[columnPathDecryptionNonce],
       int.parse(row[columnCreationTime]),
       null,
     );

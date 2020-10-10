@@ -10,6 +10,7 @@ class Collection {
   final String name;
   final CollectionType type;
   final String encryptedPath;
+  final String pathDecryptionNonce;
   final int creationTime;
   final List<String> sharees;
 
@@ -21,12 +22,14 @@ class Collection {
     this.name,
     this.type,
     this.encryptedPath,
+    this.pathDecryptionNonce,
     this.creationTime,
     this.sharees,
   );
 
   static Collection emptyCollection() {
-    return Collection(null, null, null, null, null, null, null, null, List<String>());
+    return Collection(
+        null, null, null, null, null, null, null, null, null, List<String>());
   }
 
   Collection copyWith({
@@ -37,6 +40,7 @@ class Collection {
     String name,
     CollectionType type,
     String encryptedPath,
+    String pathDecryptionNonce,
     int creationTime,
     List<String> sharees,
   }) {
@@ -48,6 +52,7 @@ class Collection {
       name ?? this.name,
       type ?? this.type,
       encryptedPath ?? this.encryptedPath,
+      encryptedPath ?? this.pathDecryptionNonce,
       creationTime ?? this.creationTime,
       sharees ?? this.sharees,
     );
@@ -63,6 +68,7 @@ class Collection {
       'type': type.toString(),
       'creationTime': creationTime,
       'encryptedPath': encryptedPath,
+      'pathDecryptionNonce': pathDecryptionNonce,
       'sharees': sharees,
     };
   }
@@ -78,6 +84,7 @@ class Collection {
       map['name'],
       fromString(map['type']),
       map['encryptedPath'],
+      map['pathDecryptionNonce'],
       map['creationTime'],
       map['sharees'] == null ? null : List<String>.from(map['sharees']),
     );
@@ -90,7 +97,7 @@ class Collection {
 
   @override
   String toString() {
-    return 'Collection(id: $id, ownerID: $ownerID, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, encryptedPath: $encryptedPath, creationTime: $creationTime, sharees: $sharees)';
+    return 'Collection(id: $id, ownerID: $ownerID, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, encryptedPath: $encryptedPath, pathDecryptionNonce: $pathDecryptionNonce, creationTime: $creationTime, sharees: $sharees)';
   }
 
   @override
@@ -105,6 +112,7 @@ class Collection {
         o.name == name &&
         o.type == type &&
         o.encryptedPath == encryptedPath &&
+        o.pathDecryptionNonce == pathDecryptionNonce &&
         o.creationTime == creationTime &&
         listEquals(o.sharees, sharees);
   }
@@ -118,6 +126,7 @@ class Collection {
         name.hashCode ^
         type.hashCode ^
         encryptedPath.hashCode ^
+        pathDecryptionNonce.hashCode ^
         creationTime.hashCode ^
         sharees.hashCode;
   }
