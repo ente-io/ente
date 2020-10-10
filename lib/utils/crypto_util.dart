@@ -123,6 +123,18 @@ class CryptoUtil {
     }
   }
 
+  static Uint8List decryptSync(
+    Uint8List cipher,
+    Uint8List key,
+    Uint8List nonce,
+  ) {
+    final args = Map<String, dynamic>();
+    args["cipher"] = cipher;
+    args["nonce"] = nonce;
+    args["key"] = key;
+    return cryptoSecretboxOpenEasy(args);
+  }
+
   static EncryptionResult encryptChaCha(Uint8List source, Uint8List key) {
     final initPushResult =
         Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
@@ -204,5 +216,10 @@ class CryptoUtil {
 
   static Future<KeyPair> generateKeyPair() async {
     return Sodium.cryptoBoxKeypair();
+  }
+
+  static Uint8List openSealSync(
+      Uint8List input, Uint8List publicKey, Uint8List secretKey) {
+    return Sodium.cryptoBoxSealOpen(input, publicKey, secretKey);
   }
 }

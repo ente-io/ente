@@ -22,11 +22,13 @@ class Configuration {
   static const hasOptedForE2EKey = "has_opted_for_e2e_encryption";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyKey = "key";
+  static const secretKeyKey = "secret_key";
   static const keyAttributesKey = "key_attributes";
 
   SharedPreferences _preferences;
   FlutterSecureStorage _secureStorage;
   String _key;
+  String _secretKey;
   String _documentsDirectory;
   String _tempDirectory;
   String _thumbnailsDirectory;
@@ -40,6 +42,7 @@ class Configuration {
     new io.Directory(_tempDirectory).createSync(recursive: true);
     new io.Directory(_thumbnailsDirectory).createSync(recursive: true);
     _key = await _secureStorage.read(key: keyKey);
+    _secretKey = await _secureStorage.read(key: secretKeyKey);
   }
 
   Future<KeyAttributes> generateAndSaveKey(String passphrase) async {
@@ -71,6 +74,7 @@ class Configuration {
       Sodium.bin2base64(encryptedSecretKeyData.nonce),
     );
     await setKey(Sodium.bin2base64(key));
+    await setSecretKey(Sodium.bin2base64(keyPair.sk));
     await setKeyAttributes(attributes);
     return attributes;
   }
@@ -176,8 +180,21 @@ class Configuration {
     }
   }
 
+  Future<void> setSecretKey(String secretKey) async {
+    _secretKey = secretKey;
+    if (secretKey == null) {
+      await _secureStorage.delete(key: secretKeyKey);
+    } else {
+      await _secureStorage.write(key: secretKeyKey, value: secretKey);
+    }
+  }
+
   Uint8List getKey() {
     return _key == null ? null : Sodium.base642bin(_key);
+  }
+
+  Uint8List getSecretKey() {
+    return _secretKey == null ? null : Sodium.base642bin(_secretKey);
   }
 
   String getDocumentsDirectory() {
