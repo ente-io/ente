@@ -146,8 +146,10 @@ class _SharingWidgetState extends State<SharingWidget> {
           "Please enter a valid email address");
       return;
     }
-
-    final publicKey = await UserService.instance.getPublicKey(context, _email);
+    final dialog = createProgressDialog(context, "Searching for user...");
+    await dialog.show();
+    final publicKey = await UserService.instance.getPublicKey(email: _email);
+    await dialog.hide();
     if (publicKey == null) {
       Navigator.of(context).pop();
       final dialog = AlertDialog(
