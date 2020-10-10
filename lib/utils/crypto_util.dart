@@ -96,8 +96,7 @@ void chachaDecrypt(Map<String, dynamic> args) {
 }
 
 class CryptoUtil {
-  static Future<EncryptionResult> encrypt(
-      Uint8List source, Uint8List key) async {
+  static EncryptionResult encryptSync(Uint8List source, Uint8List key) {
     final nonce = Sodium.randombytesBuf(Sodium.cryptoSecretboxNoncebytes);
 
     final args = Map<String, dynamic>();
@@ -178,7 +177,7 @@ class CryptoUtil {
     return Computer().compute(chachaDecrypt, param: args);
   }
 
-  static Uint8List generateMasterKey() {
+  static Uint8List generateKey() {
     return Sodium.cryptoSecretboxKeygen();
   }
 

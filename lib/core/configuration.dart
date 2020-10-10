@@ -47,7 +47,7 @@ class Configuration {
 
   Future<KeyAttributes> generateAndSaveKey(String passphrase) async {
     // Create a master key
-    final key = CryptoUtil.generateMasterKey();
+    final key = CryptoUtil.generateKey();
 
     // Derive a key from the passphrase that will be used to encrypt and
     // decrypt the master key
@@ -55,14 +55,14 @@ class Configuration {
     final kek = CryptoUtil.deriveKey(utf8.encode(passphrase), kekSalt);
 
     // Encrypt the key with this derived key
-    final encryptedKeyData = await CryptoUtil.encrypt(key, kek);
+    final encryptedKeyData = CryptoUtil.encryptSync(key, kek);
 
     // Hash the passphrase so that its correctness can be compared later
     final kekHash = await CryptoUtil.hash(kek);
 
     // Generate a public-private keypair and encrypt the latter
     final keyPair = await CryptoUtil.generateKeyPair();
-    final encryptedSecretKeyData = await CryptoUtil.encrypt(keyPair.sk, kek);
+    final encryptedSecretKeyData = CryptoUtil.encryptSync(keyPair.sk, kek);
 
     final attributes = KeyAttributes(
       Sodium.bin2base64(kekSalt),

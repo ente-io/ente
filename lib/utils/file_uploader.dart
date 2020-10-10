@@ -76,7 +76,7 @@ class FileUploader {
     final encryptedMetadataData = CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);
 
-    final encryptedFileKeyData = await CryptoUtil.encrypt(
+    final encryptedFileKeyData = CryptoUtil.encryptSync(
       fileAttributes.key,
       Configuration.instance.getKey(),
     );
