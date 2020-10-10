@@ -154,8 +154,6 @@ class SyncService {
   }
 
   Future<void> _syncWithRemote() async {
-    // TODO:  Fix race conditions triggered due to concurrent syncs.
-    //        Add device_id/last_sync_timestamp to the upload request?
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }
