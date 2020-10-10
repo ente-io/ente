@@ -220,4 +220,8 @@ class CryptoUtil {
       Uint8List input, Uint8List publicKey, Uint8List secretKey) {
     return Sodium.cryptoBoxSealOpen(input, publicKey, secretKey);
   }
+
+  static Uint8List sealSync(Uint8List input, Uint8List publicKey) {
+    return Sodium.cryptoBoxSeal(input, publicKey);
+  }
 }
