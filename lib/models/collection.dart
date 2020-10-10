@@ -9,7 +9,8 @@ class Collection {
   final String keyDecryptionNonce;
   final String name;
   final CollectionType type;
-  final Map<String, dynamic> attributes;
+  final String encryptedPath;
+  final int creationTime;
   final List<String> sharees;
 
   Collection(
@@ -19,12 +20,13 @@ class Collection {
     this.keyDecryptionNonce,
     this.name,
     this.type,
-    this.attributes,
+    this.encryptedPath,
+    this.creationTime,
     this.sharees,
   );
 
   static Collection emptyCollection() {
-    return Collection(null, null, null, null, null, null, null, List<String>());
+    return Collection(null, null, null, null, null, null, null, null, List<String>());
   }
 
   Collection copyWith({
@@ -34,7 +36,8 @@ class Collection {
     String keyDecryptionNonce,
     String name,
     CollectionType type,
-    Map<String, dynamic> attributes,
+    String encryptedPath,
+    int creationTime,
     List<String> sharees,
   }) {
     return Collection(
@@ -44,7 +47,8 @@ class Collection {
       keyDecryptionNonce ?? this.keyDecryptionNonce,
       name ?? this.name,
       type ?? this.type,
-      attributes ?? this.attributes,
+      encryptedPath ?? this.encryptedPath,
+      creationTime ?? this.creationTime,
       sharees ?? this.sharees,
     );
   }
@@ -57,7 +61,8 @@ class Collection {
       'keyDecryptionNonce': keyDecryptionNonce,
       'name': name,
       'type': type.toString(),
-      'attributes': attributes,
+      'creationTime': creationTime,
+      'encryptedPath': encryptedPath,
       'sharees': sharees,
     };
   }
@@ -72,8 +77,9 @@ class Collection {
       map['keyDecryptionNonce'],
       map['name'],
       fromString(map['type']),
-      Map<String, dynamic>.from(map['attributes']),
-      List<String>.from(map['sharees']),
+      map['encryptedPath'],
+      map['creationTime'],
+      map['sharees'] == null ? null : List<String>.from(map['sharees']),
     );
   }
 
@@ -84,7 +90,7 @@ class Collection {
 
   @override
   String toString() {
-    return 'Collection(id: $id, ownerID: $ownerID, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, attributes: $attributes, sharees: $sharees)';
+    return 'Collection(id: $id, ownerID: $ownerID, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, encryptedPath: $encryptedPath, creationTime: $creationTime, sharees: $sharees)';
   }
 
   @override
@@ -98,7 +104,9 @@ class Collection {
         o.keyDecryptionNonce == keyDecryptionNonce &&
         o.name == name &&
         o.type == type &&
-        mapEquals(o.attributes, attributes);
+        o.encryptedPath == encryptedPath &&
+        o.creationTime == creationTime &&
+        listEquals(o.sharees, sharees);
   }
 
   @override
@@ -109,7 +117,9 @@ class Collection {
         keyDecryptionNonce.hashCode ^
         name.hashCode ^
         type.hashCode ^
-        attributes.hashCode;
+        encryptedPath.hashCode ^
+        creationTime.hashCode ^
+        sharees.hashCode;
   }
 }
 
