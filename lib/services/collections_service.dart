@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -7,7 +8,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/services/user_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 
 class CollectionsService {
@@ -15,12 +15,11 @@ class CollectionsService {
 
   CollectionsDB _db;
   Configuration _config;
-  UserService _userService;
+  Map<String, Collection> _localCollections;
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
     _config = Configuration.instance;
-    _userService = UserService.instance;
   }
 
   static final CollectionsService instance =
@@ -29,8 +28,18 @@ class CollectionsService {
   Future<void> sync() async {
     final lastCollectionCreationTime =
         await _db.getLastCollectionCreationTime();
-    final collections = await getCollections(lastCollectionCreationTime ?? 0);
+    var collections = await getCollections(lastCollectionCreationTime ?? 0);
     await _db.insert(collections);
+    collections = await _db.getAll();
+    for (final collection in collections) {
+      if (collection.ownerID == _config.getUserID()) {
+        var path = utf8.decode(CryptoUtil.decryptSync(
+            Sodium.base642bin(collection.encryptedPath),
+            _config.getKey(),
+            Sodium.base642bin(collection.pathDecryptionNonce)));
+        _localCollections[path] = collection;
+      }
+    }
   }
 
   Future<Collection> getFolder(String path) async {
@@ -86,6 +95,48 @@ class CollectionsService {
         }
       }
       return collections;
+    });
+  }
+
+  Future<Collection> getOrCreateForPath(String path) async {
+    if (_localCollections.containsKey(path)) {
+      return _localCollections[path];
+    }
+    var collection = await getFolder(path);
+    if (collection.id == null) {
+      final key = CryptoUtil.generateKey();
+      final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
+      final encryptedPath =
+          CryptoUtil.encryptSync(utf8.encode(path), _config.getKey());
+      collection = await createCollection(Collection(
+        null,
+        null,
+        Sodium.bin2base64(encryptedKeyData.encryptedData),
+        Sodium.bin2base64(encryptedKeyData.nonce),
+        path,
+        CollectionType.folder,
+        Sodium.bin2base64(encryptedPath.encryptedData),
+        Sodium.bin2base64(encryptedPath.nonce),
+        null,
+        null,
+      ));
+      _localCollections[path] = collection;
+      return collection;
+    } else {
+      return collection;
+    }
+  }
+
+  Future<Collection> createCollection(Collection collection) async {
+    return Dio()
+        .post(
+      Configuration.instance.getHttpEndpoint() + "/collections/",
+      data: collection.toMap(),
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    )
+        .then((response) {
+      return Collection.fromMap(response.data["collection"]);
     });
   }
 }
