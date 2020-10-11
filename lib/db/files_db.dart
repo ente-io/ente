@@ -19,6 +19,7 @@ class FilesDB {
   static final columnGeneratedID = '_id';
   static final columnUploadedFileID = 'uploaded_file_id';
   static final columnOwnerID = 'owner_id';
+  static final columnCollectionID = 'collection_id';
   static final columnLocalID = 'local_id';
   static final columnTitle = 'title';
   static final columnDeviceFolder = 'device_folder';
@@ -66,6 +67,7 @@ class FilesDB {
             $columnLocalID TEXT,
             $columnUploadedFileID INTEGER,
             $columnOwnerID INTEGER,
+            $columnCollectionID INTEGER,
             $columnTitle TEXT NOT NULL,
             $columnDeviceFolder TEXT NOT NULL,
             $columnLatitude REAL,
@@ -375,6 +377,7 @@ class FilesDB {
     row[columnLocalID] = file.localID;
     row[columnUploadedFileID] = file.uploadedFileID;
     row[columnOwnerID] = file.ownerID;
+    row[columnCollectionID] = file.collectionID;
     row[columnTitle] = file.title;
     row[columnDeviceFolder] = file.deviceFolder;
     if (file.location != null) {
@@ -410,6 +413,7 @@ class FilesDB {
     file.localID = row[columnLocalID];
     file.uploadedFileID = row[columnUploadedFileID];
     file.ownerID = row[columnUploadedFileID];
+    file.collectionID = row[columnCollectionID];
     file.title = row[columnTitle];
     file.deviceFolder = row[columnDeviceFolder];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {

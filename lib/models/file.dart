@@ -8,6 +8,7 @@ class File {
   int generatedID;
   int uploadedFileID;
   int ownerID;
+  int collectionID;
   String localID;
   String title;
   String deviceFolder;
@@ -29,6 +30,7 @@ class File {
   File.fromJson(Map<String, dynamic> json) {
     uploadedFileID = json["id"];
     ownerID = json["ownerID"];
+    collectionID = json["collectionID"];
     localID = json["deviceFileID"];
     deviceFolder = json["deviceFolder"];
     title = json["title"];

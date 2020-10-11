@@ -34,6 +34,7 @@ class DiffFetcher {
               final file = File();
               file.uploadedFileID = item["id"];
               file.ownerID = item["ownerID"];
+              file.collectionID = item["collectionID"];
               file.updationTime = item["updationTime"];
               file.isEncrypted = true;
               file.encryptedKey = item["encryptedKey"];
