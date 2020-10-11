@@ -17,6 +17,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/services/collections_service.dart';
 
 import 'crypto_util.dart';
 
@@ -217,8 +218,14 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
 }
 
 Uint8List decryptFileKey(File file) {
-  return CryptoUtil.decryptSync(
-      Sodium.base642bin(file.encryptedKey),
-      Configuration.instance.getKey(),
-      Sodium.base642bin(file.keyDecryptionNonce));
+  final encryptedKey = Sodium.base642bin(file.encryptedKey);
+  final nonce = Sodium.base642bin(file.keyDecryptionNonce);
+  if (file.ownerID == Configuration.instance.getUserID()) {
+    return CryptoUtil.decryptSync(
+        encryptedKey, Configuration.instance.getKey(), nonce);
+  } else {
+    final collectionKey =
+        CollectionsService.instance.getCollectionKey(file.collectionID);
+    return CryptoUtil.decryptSync(encryptedKey, collectionKey, nonce);
+  }
 }

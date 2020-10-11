@@ -15,7 +15,9 @@ class CollectionsService {
 
   CollectionsDB _db;
   Configuration _config;
-  Map<String, Collection> _localCollections;
+  final _localCollections = Map<String, Collection>();
+  final _collectionIDToCollection = Map<int, Collection>();
+  final _cachedKeys = Map<int, Uint8List>();
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
@@ -39,6 +41,7 @@ class CollectionsService {
             Sodium.base642bin(collection.pathDecryptionNonce)));
         _localCollections[path] = collection;
       }
+      _collectionIDToCollection[collection.id] = collection;
     }
   }
 
@@ -63,17 +66,23 @@ class CollectionsService {
     });
   }
 
-  Uint8List getCollectionKey(Collection collection) {
-    final encryptedKey = Sodium.base642bin(collection.encryptedKey);
-    if (collection.ownerID == _config.getUserID()) {
-      return CryptoUtil.decryptSync(encryptedKey, _config.getKey(),
-          Sodium.base642bin(collection.keyDecryptionNonce));
-    } else {
-      return CryptoUtil.openSealSync(
-          encryptedKey,
-          Sodium.base642bin(_config.getKeyAttributes().publicKey),
-          _config.getSecretKey());
+  Uint8List getCollectionKey(int collectionID) {
+    if (!_cachedKeys.containsKey(collectionID)) {
+      final collection = _collectionIDToCollection[collectionID];
+      final encryptedKey = Sodium.base642bin(collection.encryptedKey);
+      var key;
+      if (collection.ownerID == _config.getUserID()) {
+        key = CryptoUtil.decryptSync(encryptedKey, _config.getKey(),
+            Sodium.base642bin(collection.keyDecryptionNonce));
+      } else {
+        key = CryptoUtil.openSealSync(
+            encryptedKey,
+            Sodium.base642bin(_config.getKeyAttributes().publicKey),
+            _config.getSecretKey());
+      }
+      _cachedKeys[collection.id] = key;
     }
+    return _cachedKeys[collectionID];
   }
 
   Future<List<Collection>> getCollections(int sinceTime) {
