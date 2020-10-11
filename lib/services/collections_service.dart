@@ -111,29 +111,24 @@ class CollectionsService {
     if (_localCollections.containsKey(path)) {
       return _localCollections[path];
     }
-    var collection = await getFolder(path);
-    if (collection.id == null) {
-      final key = CryptoUtil.generateKey();
-      final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
-      final encryptedPath =
-          CryptoUtil.encryptSync(utf8.encode(path), _config.getKey());
-      collection = await createCollection(Collection(
-        null,
-        null,
-        Sodium.bin2base64(encryptedKeyData.encryptedData),
-        Sodium.bin2base64(encryptedKeyData.nonce),
-        path,
-        CollectionType.folder,
-        Sodium.bin2base64(encryptedPath.encryptedData),
-        Sodium.bin2base64(encryptedPath.nonce),
-        null,
-        null,
-      ));
-      _localCollections[path] = collection;
-      return collection;
-    } else {
-      return collection;
-    }
+    final key = CryptoUtil.generateKey();
+    final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
+    final encryptedPath =
+        CryptoUtil.encryptSync(utf8.encode(path), _config.getKey());
+    final collection = await createCollection(Collection(
+      null,
+      null,
+      Sodium.bin2base64(encryptedKeyData.encryptedData),
+      Sodium.bin2base64(encryptedKeyData.nonce),
+      path,
+      CollectionType.folder,
+      Sodium.bin2base64(encryptedPath.encryptedData),
+      Sodium.bin2base64(encryptedPath.nonce),
+      null,
+      null,
+    ));
+    _localCollections[path] = collection;
+    return collection;
   }
 
   Future<Collection> createCollection(Collection collection) async {
