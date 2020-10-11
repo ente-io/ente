@@ -34,14 +34,7 @@ class CollectionsService {
     await _db.insert(collections);
     collections = await _db.getAll();
     for (final collection in collections) {
-      if (collection.ownerID == _config.getUserID()) {
-        var path = utf8.decode(CryptoUtil.decryptSync(
-            Sodium.base642bin(collection.encryptedPath),
-            _config.getKey(),
-            Sodium.base642bin(collection.pathDecryptionNonce)));
-        _localCollections[path] = collection;
-      }
-      _collectionIDToCollection[collection.id] = collection;
+      _cacheCollectionAttributes(collection);
     }
   }
 
@@ -127,7 +120,7 @@ class CollectionsService {
       null,
       null,
     ));
-    _localCollections[path] = collection;
+    _cacheCollectionAttributes(collection);
     return collection;
   }
 
@@ -142,5 +135,17 @@ class CollectionsService {
         .then((response) {
       return Collection.fromMap(response.data["collection"]);
     });
+  }
+
+  void _cacheCollectionAttributes(Collection collection) {
+    if (collection.ownerID == _config.getUserID()) {
+      var path = utf8.decode(CryptoUtil.decryptSync(
+          Sodium.base642bin(collection.encryptedPath),
+          _config.getKey(),
+          Sodium.base642bin(collection.pathDecryptionNonce)));
+      _localCollections[path] = collection;
+    }
+    _collectionIDToCollection[collection.id] = collection;
+    getCollectionKey(collection.id);
   }
 }

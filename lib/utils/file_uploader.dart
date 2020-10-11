@@ -7,6 +7,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/upload_url.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_name_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -44,6 +45,10 @@ class FileUploader {
   Future<File> encryptAndUploadFile(File file) async {
     _logger.info("Uploading " + file.toString());
 
+    file.collectionID = (await CollectionsService.instance
+            .getOrCreateForPath(file.deviceFolder))
+        .id;
+
     final encryptedFileName = file.generatedID.toString() + ".encrypted";
     final tempDirectory = Configuration.instance.getTempDirectory();
     final encryptedFilePath = tempDirectory + encryptedFileName;
@@ -78,7 +83,7 @@ class FileUploader {
 
     final encryptedFileKeyData = CryptoUtil.encryptSync(
       fileAttributes.key,
-      Configuration.instance.getKey(),
+      CollectionsService.instance.getCollectionKey(file.collectionID),
     );
 
     final encryptedKey = Sodium.bin2base64(encryptedFileKeyData.encryptedData);
