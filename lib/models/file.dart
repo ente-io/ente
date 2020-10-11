@@ -106,11 +106,8 @@ class File {
   }
 
   String getDownloadUrl() {
-    final api = isEncrypted ? "encrypted-files" : "files";
     return Configuration.instance.getHttpEndpoint() +
-        "/" +
-        api +
-        "/download/" +
+        "/files/download/" +
         uploadedFileID.toString() +
         "?token=" +
         Configuration.instance.getToken();
@@ -127,11 +124,8 @@ class File {
   }
 
   String getThumbnailUrl() {
-    final api = isEncrypted ? "encrypted-files" : "files";
     return Configuration.instance.getHttpEndpoint() +
-        "/" +
-        api +
-        "/preview/" +
+        "/files/preview/" +
         uploadedFileID.toString() +
         "?token=" +
         Configuration.instance.getToken();

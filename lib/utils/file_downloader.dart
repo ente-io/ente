@@ -17,7 +17,7 @@ class DiffFetcher {
   Future<List<File>> getEncryptedFilesDiff(int lastSyncTime, int limit) async {
     return _dio
         .get(
-          Configuration.instance.getHttpEndpoint() + "/encrypted-files/diff",
+          Configuration.instance.getHttpEndpoint() + "/files/diff",
           queryParameters: {
             "token": Configuration.instance.getToken(),
             "sinceTime": lastSyncTime,

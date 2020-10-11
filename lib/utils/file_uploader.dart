@@ -19,8 +19,7 @@ class FileUploader {
   Future<UploadURL> getUploadURL() {
     return Dio()
         .get(
-          Configuration.instance.getHttpEndpoint() +
-              "/encrypted-files/upload-url",
+          Configuration.instance.getHttpEndpoint() + "/files/upload-url",
           options: Options(
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         )
@@ -114,7 +113,7 @@ class FileUploader {
     };
     return _dio
         .post(
-      Configuration.instance.getHttpEndpoint() + "/encrypted-files",
+      Configuration.instance.getHttpEndpoint() + "/files",
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       data: data,
