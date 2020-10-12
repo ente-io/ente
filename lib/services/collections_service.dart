@@ -30,7 +30,8 @@ class CollectionsService {
   Future<void> sync() async {
     final lastCollectionCreationTime =
         await _db.getLastCollectionCreationTime();
-    var collections = await getCollections(lastCollectionCreationTime ?? 0);
+    var collections =
+        await getOwnedCollections(lastCollectionCreationTime ?? 0);
     await _db.insert(collections);
     collections = await _db.getAll();
     for (final collection in collections) {
@@ -78,10 +79,10 @@ class CollectionsService {
     return _cachedKeys[collectionID];
   }
 
-  Future<List<Collection>> getCollections(int sinceTime) {
+  Future<List<Collection>> getOwnedCollections(int sinceTime) {
     return Dio()
         .get(
-      Configuration.instance.getHttpEndpoint() + "/collections/",
+      Configuration.instance.getHttpEndpoint() + "/collections/owned",
       queryParameters: {
         "sinceTime": sinceTime,
       },
