@@ -220,12 +220,7 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
 Uint8List decryptFileKey(File file) {
   final encryptedKey = Sodium.base642bin(file.encryptedKey);
   final nonce = Sodium.base642bin(file.keyDecryptionNonce);
-  if (file.ownerID == Configuration.instance.getUserID()) {
-    return CryptoUtil.decryptSync(
-        encryptedKey, Configuration.instance.getKey(), nonce);
-  } else {
-    final collectionKey =
-        CollectionsService.instance.getCollectionKey(file.collectionID);
-    return CryptoUtil.decryptSync(encryptedKey, collectionKey, nonce);
-  }
+  final collectionKey =
+      CollectionsService.instance.getCollectionKey(file.collectionID);
+  return CryptoUtil.decryptSync(encryptedKey, collectionKey, nonce);
 }
