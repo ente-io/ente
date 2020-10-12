@@ -18,8 +18,9 @@ class DiffFetcher {
     return _dio
         .get(
           Configuration.instance.getHttpEndpoint() + "/files/diff",
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
           queryParameters: {
-            "token": Configuration.instance.getToken(),
             "sinceTime": lastSyncTime,
             "limit": limit,
           },
@@ -59,26 +60,5 @@ class DiffFetcher {
           }
           return files;
         });
-  }
-
-  Future<List<File>> getFilesDiff(int lastSyncTime, int limit) async {
-    Response response = await _dio.get(
-      Configuration.instance.getHttpEndpoint() + "/files/diff",
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      queryParameters: {
-        "sinceTime": lastSyncTime,
-        "limit": limit,
-      },
-    ).catchError((e) => _logger.severe(e));
-    if (response != null) {
-      Bus.instance.fire(RemoteSyncEvent(true));
-      return (response.data["diff"] as List)
-          .map((file) => new File.fromJson(file))
-          .toList();
-    } else {
-      Bus.instance.fire(RemoteSyncEvent(false));
-      return null;
-    }
   }
 }

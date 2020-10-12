@@ -158,30 +158,11 @@ class SyncService {
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }
+    // TODO: Verify flow starting here
     await CollectionsService.instance.sync();
-    await _persistFilesDiff();
     await _persistEncryptedFilesDiff();
     await _uploadDiff();
     await _deletePhotosOnServer();
-  }
-
-  Future<void> _persistFilesDiff() async {
-    final diff = await _downloader.getFilesDiff(_getSyncTime(), _diffLimit);
-    if (diff != null && diff.isNotEmpty) {
-      await _storeDiff(diff, _syncTimeKey);
-      FileRepository.instance.reloadFiles();
-      if (diff.length == _diffLimit) {
-        return await _persistFilesDiff();
-      }
-    }
-  }
-
-  int _getSyncTime() {
-    var syncTime = _prefs.getInt(_syncTimeKey);
-    if (syncTime == null) {
-      syncTime = 0;
-    }
-    return syncTime;
   }
 
   Future<void> _persistEncryptedFilesDiff() async {
