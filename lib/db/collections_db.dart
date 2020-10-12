@@ -45,7 +45,7 @@ class CollectionsDB {
     await db.execute('''
                 CREATE TABLE $table (
                   $columnID INTEGER PRIMARY KEY NOT NULL,
-                  $columnOwnerID TEXT NOT NULL,
+                  $columnOwnerID INTEGER NOT NULL,
                   $columnEncryptedKey TEXT NOT NULL,
                   $columnKeyDecryptionNonce TEXT NOT NULL,
                   $columnName TEXT NOT NULL,
