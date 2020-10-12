@@ -52,7 +52,7 @@ class CollectionsDB {
                   $columnType TEXT NOT NULL,
                   $columnEncryptedPath TEXT,
                   $columnPathDecryptionNonce TEXT,
-                  $columnCreationTime TEXT NOT NULL,
+                  $columnCreationTime TEXT NOT NULL
                 )
                 ''');
   }
@@ -98,7 +98,7 @@ class CollectionsDB {
     row[columnEncryptedKey] = collection.encryptedKey;
     row[columnKeyDecryptionNonce] = collection.keyDecryptionNonce;
     row[columnName] = collection.name;
-    row[columnType] = collection.type;
+    row[columnType] = typeToString(collection.type);
     row[columnEncryptedPath] = collection.encryptedPath;
     row[columnPathDecryptionNonce] = collection.pathDecryptionNonce;
     row[columnCreationTime] = collection.creationTime;
@@ -112,7 +112,7 @@ class CollectionsDB {
       row[columnEncryptedKey],
       row[columnKeyDecryptionNonce],
       row[columnName],
-      row[columnType],
+      typeFromString(row[columnType]),
       row[columnEncryptedPath],
       row[columnPathDecryptionNonce],
       int.parse(row[columnCreationTime]),

@@ -65,7 +65,7 @@ class Collection {
       'encryptedKey': encryptedKey,
       'keyDecryptionNonce': keyDecryptionNonce,
       'name': name,
-      'type': type.toString(),
+      'type': typeToString(type),
       'creationTime': creationTime,
       'encryptedPath': encryptedPath,
       'pathDecryptionNonce': pathDecryptionNonce,
@@ -82,7 +82,7 @@ class Collection {
       map['encryptedKey'],
       map['keyDecryptionNonce'],
       map['name'],
-      fromString(map['type']),
+      typeFromString(map['type']),
       map['encryptedPath'],
       map['pathDecryptionNonce'],
       map['creationTime'],
@@ -132,7 +132,7 @@ class Collection {
   }
 }
 
-CollectionType fromString(String type) {
+CollectionType typeFromString(String type) {
   switch (type) {
     case "folder":
       return CollectionType.folder;
@@ -140,6 +140,17 @@ CollectionType fromString(String type) {
       return CollectionType.favorites;
   }
   return CollectionType.album;
+}
+
+String typeToString(CollectionType type) {
+  switch (type) {
+    case CollectionType.folder:
+      return "folder";
+    case CollectionType.favorites:
+      return "favorites";
+    default:
+      return "album";
+  }
 }
 
 enum CollectionType {
