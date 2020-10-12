@@ -96,6 +96,7 @@ class FileUploader {
         Sodium.bin2base64(encryptedMetadataData.header);
 
     final data = {
+      "collectionID": file.collectionID,
       "encryptedKey": encryptedKey,
       "keyDecryptionNonce": keyDecryptionNonce,
       "file": {
