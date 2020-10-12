@@ -47,7 +47,7 @@ dependencies:
   logging: ^0.11.4
   flutter_image_compress: ^0.6.5+1
   flutter_typeahead: ^1.8.1
-  pull_to_refresh: ^1.5.7
+  pull_to_refresh: ^1.6.2
   fluttertoast: ^4.0.1
   extended_image: ^0.9.0
   video_player: ^0.10.11+1
