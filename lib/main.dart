@@ -50,8 +50,8 @@ void _main() async {
 }
 
 void _sync() async {
-  SyncService.instance.sync().catchError((e) {
-    _logger.warning(e);
+  SyncService.instance.sync().catchError((e, s) {
+    _logger.severe("Sync error", e, s);
   });
 }
 
