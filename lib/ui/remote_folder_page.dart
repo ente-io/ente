@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/services/folder_service.dart';
 import 'package:photos/models/folder.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';
@@ -27,7 +26,7 @@ class _RemoteFolderPageState extends State<RemoteFolderPage> {
               ? DateTime.now().microsecondsSinceEpoch
               : lastFile.creationTime,
           limit),
-      onRefresh: () => FolderSharingService.instance.syncDiff(widget.folder),
+      // onRefresh: () => FolderSharingService.instance.syncDiff(widget.folder),
       tagPrefix: "remote_folder",
       selectedFiles: _selectedFiles,
     );
