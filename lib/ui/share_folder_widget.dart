@@ -30,18 +30,15 @@ class ShareFolderWidget extends StatefulWidget {
 }
 
 class _ShareFolderWidgetState extends State<ShareFolderWidget> {
-  bool _showEntryField = false;
-  String _email;
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<String>>(
       future: widget.collection == null
-          ? List<String>()
+          ? Future.value(List<String>())
           : CollectionsService.instance.getSharees(widget.collection.id),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _getSharingDialog(snapshot.data);
+          return SharingDialog(widget.collection, snapshot.data);
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else {
@@ -50,15 +47,32 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
       },
     );
   }
+}
 
-  Widget _getSharingDialog(List<String> sharees) {
-    log(sharees.toString());
+class SharingDialog extends StatefulWidget {
+  final Collection collection;
+  final List<String> sharees;
+
+  SharingDialog(this.collection, this.sharees, {Key key}) : super(key: key);
+
+  @override
+  _SharingDialogState createState() => _SharingDialogState();
+}
+
+class _SharingDialogState extends State<SharingDialog> {
+  bool _showEntryField = false;
+  List<String> _sharees;
+  String _email;
+
+  @override
+  Widget build(BuildContext context) {
+    _sharees = widget.sharees;
     final children = List<Widget>();
     if (!_showEntryField &&
-        (widget.collection == null || sharees.length == 0)) {
+        (widget.collection == null || _sharees.length == 0)) {
       children.add(Text("Click the + button to share this folder."));
     } else {
-      for (final email in sharees) {
+      for (final email in _sharees) {
         children.add(EmailItemWidget(email));
       }
     }
@@ -164,10 +178,13 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
         // TODO: Create collection
         // TODO: Add files to collection
       }
-      // TODO: Add email to collection
-      setState(() {
-        // sharees.add(email);
-        _showEntryField = false;
+      CollectionsService.instance
+          .share(widget.collection.id, _email, publicKey)
+          .then((value) {
+        setState(() {
+          _sharees.add(_email);
+          _showEntryField = false;
+        });
       });
     }
   }

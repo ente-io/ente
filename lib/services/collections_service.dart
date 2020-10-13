@@ -55,8 +55,27 @@ class CollectionsService {
     )
         .then((response) {
       _logger.info(response.toString());
-      return response.data["emails"] as List<String>;
+      final emails = List<String>();
+      for (final email in response.data["emails"]) {
+        emails.add(email);
+      }
+      return emails;
     });
+  }
+
+  Future<void> share(int collectionID, String email, String publicKey) {
+    final encryptedKey = CryptoUtil.sealSync(
+        getCollectionKey(collectionID), Sodium.base642bin(publicKey));
+    return Dio().post(
+      Configuration.instance.getHttpEndpoint() + "/collections/share",
+      data: {
+        "collectionID": collectionID,
+        "email": email,
+        "encryptedKey": Sodium.bin2base64(encryptedKey),
+      },
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    );
   }
 
   Uint8List getCollectionKey(int collectionID) {
