@@ -16,7 +16,8 @@ class CollectionsService {
   CollectionsDB _db;
   Configuration _config;
   final _localCollections = Map<String, Collection>();
-  final _collectionIDToCollection = Map<int, Collection>();
+  final _collectionIDToOwnedCollections = Map<int, Collection>();
+  final _collectionIDToSharedCollections = Map<int, SharedCollection>();
   final _cachedKeys = Map<int, Uint8List>();
 
   CollectionsService._privateConstructor() {
@@ -43,6 +44,10 @@ class CollectionsService {
     var sharedCollections =
         await getSharedCollections(lastSharedCollectionCreationTime ?? 0);
     await _db.insertSharedCollections(sharedCollections);
+    sharedCollections = await _db.getAllSharedCollections();
+    for (final collection in sharedCollections) {
+      _collectionIDToSharedCollections[collection.id] = collection;
+    }
   }
 
   Collection getCollectionForPath(String path) {
@@ -86,19 +91,21 @@ class CollectionsService {
 
   Uint8List getCollectionKey(int collectionID) {
     if (!_cachedKeys.containsKey(collectionID)) {
-      final collection = _collectionIDToCollection[collectionID];
-      final encryptedKey = Sodium.base642bin(collection.encryptedKey);
       var key;
-      if (collection.ownerID == _config.getUserID()) {
+      if (_collectionIDToOwnedCollections.containsKey(collectionID)) {
+        final collection = _collectionIDToOwnedCollections[collectionID];
+        final encryptedKey = Sodium.base642bin(collection.encryptedKey);
         key = CryptoUtil.decryptSync(encryptedKey, _config.getKey(),
             Sodium.base642bin(collection.keyDecryptionNonce));
       } else {
+        final collection = _collectionIDToSharedCollections[collectionID];
+        final encryptedKey = Sodium.base642bin(collection.encryptedKey);
         key = CryptoUtil.openSealSync(
             encryptedKey,
             Sodium.base642bin(_config.getKeyAttributes().publicKey),
             _config.getSecretKey());
       }
-      _cachedKeys[collection.id] = key;
+      _cachedKeys[collectionID] = key;
     }
     return _cachedKeys[collectionID];
   }
@@ -191,7 +198,7 @@ class CollectionsService {
           Sodium.base642bin(collection.pathDecryptionNonce)));
       _localCollections[path] = collection;
     }
-    _collectionIDToCollection[collection.id] = collection;
+    _collectionIDToOwnedCollections[collection.id] = collection;
     getCollectionKey(collection.id);
   }
 }

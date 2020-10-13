@@ -92,12 +92,17 @@ class Configuration {
         Sodium.base642bin(attributes.encryptedKey),
         kek,
         Sodium.base642bin(attributes.keyDecryptionNonce));
+    final secretKey = CryptoUtil.decryptSync(
+        Sodium.base642bin(attributes.encryptedSecretKey),
+        kek,
+        Sodium.base642bin(attributes.secretKeyDecryptionNonce));
     await setKey(Sodium.bin2base64(key));
+    await setSecretKey(Sodium.bin2base64(secretKey));
   }
 
   String getHttpEndpoint() {
     if (kDebugMode) {
-      return "http://192.168.0.100";
+      return "http://192.168.1.3:80";
     }
     return "https://api.staging.ente.io";
   }

@@ -231,6 +231,8 @@ class FilesDB {
   Future<int> update(
     int generatedID,
     int uploadedID,
+    int ownerID,
+    int collectionID,
     int updationTime,
     String encryptedKey,
     String keyDecryptionNonce,
@@ -241,6 +243,8 @@ class FilesDB {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
     values[columnUploadedFileID] = uploadedID;
+    values[columnOwnerID] = ownerID;
+    values[columnCollectionID] = collectionID;
     values[columnUpdationTime] = updationTime;
     values[columnEncryptedKey] = encryptedKey;
     values[columnKeyDecryptionNonce] = keyDecryptionNonce;
@@ -333,6 +337,22 @@ class FilesDB {
     }
   }
 
+  Future<File> getLatestFileInCollection(int collectionID) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      where: '$columnCollectionID =?',
+      whereArgs: [collectionID],
+      orderBy: '$columnCreationTime DESC',
+      limit: 1,
+    );
+    if (rows.isNotEmpty) {
+      return _getFileFromRow(rows[0]);
+    } else {
+      throw ("No file found in collection " + collectionID.toString());
+    }
+  }
+
   Future<File> getLastSyncedFileInRemoteFolder(int folderID) async {
     final db = await instance.database;
     final rows = await db.query(
@@ -412,7 +432,7 @@ class FilesDB {
     file.generatedID = row[columnGeneratedID];
     file.localID = row[columnLocalID];
     file.uploadedFileID = row[columnUploadedFileID];
-    file.ownerID = row[columnUploadedFileID];
+    file.ownerID = row[columnOwnerID];
     file.collectionID = row[columnCollectionID];
     file.title = row[columnTitle];
     file.deviceFolder = row[columnDeviceFolder];

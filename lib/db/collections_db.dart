@@ -85,7 +85,8 @@ class CollectionsDB {
     final db = await instance.database;
     var batch = db.batch();
     for (final collection in collections) {
-      batch.insert(collectionsTable, _getRowForSharedCollection(collection),
+      batch.insert(
+          sharedCollectionsTable, _getRowForSharedCollection(collection),
           conflictAlgorithm: ConflictAlgorithm.replace);
     }
     return await batch.commit();
@@ -103,7 +104,7 @@ class CollectionsDB {
 
   Future<List<SharedCollection>> getAllSharedCollections() async {
     final db = await instance.database;
-    final rows = await db.query(collectionsTable);
+    final rows = await db.query(sharedCollectionsTable);
     final collections = List<SharedCollection>();
     for (final row in rows) {
       collections.add(_convertToSharedCollection(row));

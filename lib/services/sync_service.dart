@@ -207,6 +207,8 @@ class SyncService {
         await _db.update(
           file.generatedID,
           uploadedFile.uploadedFileID,
+          uploadedFile.ownerID,
+          uploadedFile.collectionID,
           uploadedFile.updationTime,
           file.encryptedKey,
           file.keyDecryptionNonce,
@@ -232,6 +234,8 @@ class SyncService {
         await _db.update(
           existingFile.generatedID,
           file.uploadedFileID,
+          file.ownerID,
+          file.collectionID,
           file.updationTime,
           file.encryptedKey,
           file.keyDecryptionNonce,
