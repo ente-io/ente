@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -8,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/shared_collection.dart';
 import 'package:photos/utils/crypto_util.dart';
 
 class CollectionsService {
@@ -33,10 +33,16 @@ class CollectionsService {
     var collections =
         await getOwnedCollections(lastCollectionCreationTime ?? 0);
     await _db.insert(collections);
-    collections = await _db.getAll();
+    collections = await _db.getAllCollections();
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
     }
+
+    final lastSharedCollectionCreationTime =
+        await _db.getLastCollectionCreationTime();
+    var sharedCollections =
+        await getSharedCollections(lastSharedCollectionCreationTime ?? 0);
+    await _db.insertSharedCollections(sharedCollections);
   }
 
   Collection getCollectionForPath(String path) {
@@ -113,6 +119,28 @@ class CollectionsService {
         final c = response.data["collections"];
         for (final collection in c) {
           collections.add(Collection.fromMap(collection));
+        }
+      }
+      return collections;
+    });
+  }
+
+  Future<List<SharedCollection>> getSharedCollections(int sinceTime) {
+    return Dio()
+        .get(
+      Configuration.instance.getHttpEndpoint() + "/collections/shared",
+      queryParameters: {
+        "sinceTime": sinceTime,
+      },
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    )
+        .then((response) {
+      final collections = List<SharedCollection>();
+      if (response != null) {
+        final c = response.data["collections"];
+        for (final collection in c) {
+          collections.add(SharedCollection.fromMap(collection));
         }
       }
       return collections;
