@@ -205,9 +205,11 @@ class EmailItemWidget extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              email,
-              style: TextStyle(fontSize: 16),
+            Flexible(
+              child: Text(
+                email,
+                style: TextStyle(fontSize: 16),
+              ),
             ),
             Icon(
               Icons.delete_forever,
