@@ -98,7 +98,7 @@ class CollectionsDB {
     row[columnEncryptedKey] = collection.encryptedKey;
     row[columnKeyDecryptionNonce] = collection.keyDecryptionNonce;
     row[columnName] = collection.name;
-    row[columnType] = typeToString(collection.type);
+    row[columnType] = Collection.typeToString(collection.type);
     row[columnEncryptedPath] = collection.encryptedPath;
     row[columnPathDecryptionNonce] = collection.pathDecryptionNonce;
     row[columnCreationTime] = collection.creationTime;
@@ -112,7 +112,7 @@ class CollectionsDB {
       row[columnEncryptedKey],
       row[columnKeyDecryptionNonce],
       row[columnName],
-      typeFromString(row[columnType]),
+      Collection.typeFromString(row[columnType]),
       row[columnEncryptedPath],
       row[columnPathDecryptionNonce],
       int.parse(row[columnCreationTime]),

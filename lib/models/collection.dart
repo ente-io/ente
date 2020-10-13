@@ -116,26 +116,26 @@ class Collection {
         pathDecryptionNonce.hashCode ^
         creationTime.hashCode;
   }
-}
 
-CollectionType typeFromString(String type) {
-  switch (type) {
-    case "folder":
-      return CollectionType.folder;
-    case "favorites":
-      return CollectionType.favorites;
+  static CollectionType typeFromString(String type) {
+    switch (type) {
+      case "folder":
+        return CollectionType.folder;
+      case "favorites":
+        return CollectionType.favorites;
+    }
+    return CollectionType.album;
   }
-  return CollectionType.album;
-}
 
-String typeToString(CollectionType type) {
-  switch (type) {
-    case CollectionType.folder:
-      return "folder";
-    case CollectionType.favorites:
-      return "favorites";
-    default:
-      return "album";
+  static String typeToString(CollectionType type) {
+    switch (type) {
+      case CollectionType.folder:
+        return "folder";
+      case CollectionType.favorites:
+        return "favorites";
+      default:
+        return "album";
+    }
   }
 }
 
