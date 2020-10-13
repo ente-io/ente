@@ -30,7 +30,6 @@ class SyncService {
   Future<void> _existingSync;
   SharedPreferences _prefs;
 
-  static final _syncTimeKey = "sync_time";
   static final _encryptedFilesSyncTimeKey = "encrypted_files_sync_time";
   static final _dbUpdationTimeKey = "db_updation_time";
   static final _diffLimit = 100;
