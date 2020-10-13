@@ -39,24 +39,23 @@ class CollectionsService {
     }
   }
 
-  Future<Collection> getFolder(String path) async {
+  Collection getCollectionForPath(String path) {
+    return _localCollections[path];
+  }
+
+  Future<List<String>> getSharees(int collectionID) {
     return Dio()
         .get(
-      Configuration.instance.getHttpEndpoint() + "/collections/folder/",
+      Configuration.instance.getHttpEndpoint() + "/collections/sharees",
       queryParameters: {
-        "path": path,
+        "collectionID": collectionID,
       },
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     )
         .then((response) {
-      return Collection.fromMap(response.data);
-    }).catchError((e) {
-      if (e.response.statusCode == HttpStatus.notFound) {
-        return Collection.emptyCollection();
-      } else {
-        throw e;
-      }
+      _logger.info(response.toString());
+      return response.data["emails"] as List<String>;
     });
   }
 
@@ -118,7 +117,6 @@ class CollectionsService {
       CollectionType.folder,
       Sodium.bin2base64(encryptedPath.encryptedData),
       Sodium.bin2base64(encryptedPath.nonce),
-      null,
       null,
     ));
     _cacheCollectionAttributes(collection);
