@@ -19,7 +19,7 @@ import 'package:photos/utils/share_util.dart';
 enum GalleryAppBarType {
   homepage,
   local_folder,
-  remote_folder,
+  shared_collection,
   search_results,
 }
 
@@ -156,7 +156,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
     if (widget.selectedFiles.files.isNotEmpty) {
-      if (widget.type != GalleryAppBarType.remote_folder &&
+      if (widget.type != GalleryAppBarType.shared_collection &&
           widget.type != GalleryAppBarType.search_results) {
         actions.add(IconButton(
           icon: Icon(Icons.delete),

@@ -11,6 +11,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/shared_collection.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/shared_collection_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
 class SharedCollectionGallery extends StatefulWidget {
@@ -101,7 +102,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
                     null // When the user has shared a folder without photos
                 ? Icon(Icons.error)
                 : Hero(
-                    tag: "remote_folder" + c.thumbnail.tag(),
+                    tag: "shared_collection" + c.thumbnail.tag(),
                     child: ThumbnailWidget(c.thumbnail)),
             height: 150,
             width: 150,
@@ -118,15 +119,14 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
         ],
       ),
       onTap: () {
-        // TODO
-        // final page = RemoteFolderPage(folder);
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder: (BuildContext context) {
-        //       return page;
-        //     },
-        //   ),
-        // );
+        final page = SharedCollectionPage(c.collection);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page;
+            },
+          ),
+        );
       },
     );
   }
