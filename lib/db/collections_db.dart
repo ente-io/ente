@@ -116,7 +116,6 @@ class CollectionsDB {
       row[columnEncryptedPath],
       row[columnPathDecryptionNonce],
       int.parse(row[columnCreationTime]),
-      null,
     );
   }
 }

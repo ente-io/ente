@@ -16,10 +16,12 @@ import 'package:photos/utils/toast_util.dart';
 class ShareFolderWidget extends StatefulWidget {
   final String title;
   final String path;
+  final Collection collection;
 
   const ShareFolderWidget(
     this.title,
     this.path, {
+    this.collection,
     Key key,
   }) : super(key: key);
 
@@ -28,10 +30,15 @@ class ShareFolderWidget extends StatefulWidget {
 }
 
 class _ShareFolderWidgetState extends State<ShareFolderWidget> {
+  bool _showEntryField = false;
+  String _email;
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Collection>(
-      future: CollectionsService.instance.getFolder(widget.path),
+    return FutureBuilder<List<String>>(
+      future: widget.collection == null
+          ? List<String>()
+          : CollectionsService.instance.getSharees(widget.collection.id),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _getSharingDialog(snapshot.data);
@@ -44,46 +51,14 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
     );
   }
 
-  Widget _getSharingDialog(Collection collection) {
-    return AlertDialog(
-      title: Text("Sharing"),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: <Widget>[
-            SharingWidget(collection),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class SharingWidget extends StatefulWidget {
-  final Collection collection;
-  SharingWidget(this.collection, {Key key}) : super(key: key);
-
-  @override
-  _SharingWidgetState createState() => _SharingWidgetState();
-}
-
-class _SharingWidgetState extends State<SharingWidget> {
-  bool _showEntryField = false;
-  String _email;
-  List<String> _emails;
-
-  @override
-  void initState() {
-    _emails = widget.collection.sharees;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _getSharingDialog(List<String> sharees) {
+    log(sharees.toString());
     final children = List<Widget>();
-    if (!_showEntryField && _emails.length == 0) {
+    if (!_showEntryField &&
+        (widget.collection == null || sharees.length == 0)) {
       children.add(Text("Click the + button to share this folder."));
     } else {
-      for (final email in _emails) {
+      for (final email in sharees) {
         children.add(EmailItemWidget(email));
       }
     }
@@ -133,11 +108,21 @@ class _SharingWidgetState extends State<SharingWidget> {
         ),
       ));
     }
-    return Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Column(
-          children: children,
-        ));
+
+    return AlertDialog(
+      title: Text("Sharing"),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Column(
+                  children: children,
+                )),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _addEmailToCollection(BuildContext context) async {
@@ -174,20 +159,17 @@ class _SharingWidgetState extends State<SharingWidget> {
         },
       );
     } else {
-      _shareCollection(_email, publicKey);
+      if (widget.collection == null) {
+        log("Collection is null");
+        // TODO: Create collection
+        // TODO: Add files to collection
+      }
+      // TODO: Add email to collection
+      setState(() {
+        // sharees.add(email);
+        _showEntryField = false;
+      });
     }
-  }
-
-  void _shareCollection(String email, String publicKey) {
-    if (widget.collection.id == null) {
-      // TODO: Create collection
-      // TODO: Add files to collection
-    }
-    // TODO: Add email to collection
-    setState(() {
-      _emails.add(email);
-      _showEntryField = false;
-    });
   }
 }
 
@@ -217,48 +199,5 @@ class EmailItemWidget extends StatelessWidget {
             ),
           ],
         ));
-  }
-}
-
-class SharingCheckboxWidget extends StatefulWidget {
-  final Map<int, bool> sharingStatus;
-
-  const SharingCheckboxWidget(
-    this.sharingStatus, {
-    Key key,
-  }) : super(key: key);
-
-  @override
-  _SharingCheckboxWidgetState createState() => _SharingCheckboxWidgetState();
-}
-
-class _SharingCheckboxWidgetState extends State<SharingCheckboxWidget> {
-  Map<int, bool> _sharingStatus;
-
-  @override
-  void initState() {
-    _sharingStatus = widget.sharingStatus;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final checkboxes = List<Widget>();
-    for (final user in _sharingStatus.keys) {
-      checkboxes.add(Row(
-        children: <Widget>[
-          Checkbox(
-              materialTapTargetSize: MaterialTapTargetSize.padded,
-              value: _sharingStatus[user],
-              onChanged: (value) {
-                setState(() {
-                  _sharingStatus[user] = value;
-                });
-              }),
-          Text(user.toString()),
-        ],
-      ));
-    }
-    return Column(children: checkboxes);
   }
 }

@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-
 class Collection {
   final int id;
   final int ownerID;
@@ -12,7 +10,6 @@ class Collection {
   final String encryptedPath;
   final String pathDecryptionNonce;
   final int creationTime;
-  final List<String> sharees;
 
   Collection(
     this.id,
@@ -24,13 +21,7 @@ class Collection {
     this.encryptedPath,
     this.pathDecryptionNonce,
     this.creationTime,
-    this.sharees,
   );
-
-  static Collection emptyCollection() {
-    return Collection(
-        null, null, null, null, null, null, null, null, null, List<String>());
-  }
 
   Collection copyWith({
     int id,
@@ -54,7 +45,6 @@ class Collection {
       encryptedPath ?? this.encryptedPath,
       encryptedPath ?? this.pathDecryptionNonce,
       creationTime ?? this.creationTime,
-      sharees ?? this.sharees,
     );
   }
 
@@ -69,7 +59,6 @@ class Collection {
       'creationTime': creationTime,
       'encryptedPath': encryptedPath,
       'pathDecryptionNonce': pathDecryptionNonce,
-      'sharees': sharees,
     };
   }
 
@@ -86,7 +75,6 @@ class Collection {
       map['encryptedPath'],
       map['pathDecryptionNonce'],
       map['creationTime'],
-      map['sharees'] == null ? null : List<String>.from(map['sharees']),
     );
   }
 
@@ -97,7 +85,7 @@ class Collection {
 
   @override
   String toString() {
-    return 'Collection(id: $id, ownerID: $ownerID, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, encryptedPath: $encryptedPath, pathDecryptionNonce: $pathDecryptionNonce, creationTime: $creationTime, sharees: $sharees)';
+    return 'Collection(id: $id, ownerID: $ownerID, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, encryptedPath: $encryptedPath, pathDecryptionNonce: $pathDecryptionNonce, creationTime: $creationTime)';
   }
 
   @override
@@ -113,8 +101,7 @@ class Collection {
         o.type == type &&
         o.encryptedPath == encryptedPath &&
         o.pathDecryptionNonce == pathDecryptionNonce &&
-        o.creationTime == creationTime &&
-        listEquals(o.sharees, sharees);
+        o.creationTime == creationTime;
   }
 
   @override
@@ -127,8 +114,7 @@ class Collection {
         type.hashCode ^
         encryptedPath.hashCode ^
         pathDecryptionNonce.hashCode ^
-        creationTime.hashCode ^
-        sharees.hashCode;
+        creationTime.hashCode;
   }
 }
 

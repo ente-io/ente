@@ -6,6 +6,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/passphrase_entry_page.dart';
 import 'package:photos/ui/passphrase_reentry_page.dart';
@@ -142,7 +143,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return ShareFolderWidget(widget.title, widget.path);
+        return ShareFolderWidget(
+          widget.title,
+          widget.path,
+          collection:
+              CollectionsService.instance.getCollectionForPath(widget.path),
+        );
       },
     );
   }
