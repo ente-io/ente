@@ -18,7 +18,6 @@ import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
-import 'package:photos/ui/remote_folder_gallery_widget.dart';
 import 'package:photos/ui/search_page.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
