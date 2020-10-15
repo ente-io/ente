@@ -47,6 +47,30 @@ class UserService {
     });
   }
 
+  Future<String> getPublicKey({String email, int userID}) async {
+    final queryParams = Map<String, dynamic>();
+    if (userID != null) {
+      queryParams["userID"] = userID;
+    } else {
+      queryParams["email"] = email;
+    }
+    try {
+      final response = await _dio.get(
+        Configuration.instance.getHttpEndpoint() + "/users/public-key",
+        queryParameters: queryParams,
+        options: Options(
+          headers: {
+            "X-Auth-Token": Configuration.instance.getToken(),
+          },
+        ),
+      );
+      return response.data["publicKey"];
+    } on DioError catch (e) {
+      _logger.info(e);
+      return null;
+    }
+  }
+
   Future<void> getCredentials(BuildContext context, String ott) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();

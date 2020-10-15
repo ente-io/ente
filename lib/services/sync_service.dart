@@ -6,6 +6,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/file_downloader.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -29,7 +30,6 @@ class SyncService {
   Future<void> _existingSync;
   SharedPreferences _prefs;
 
-  static final _syncTimeKey = "sync_time";
   static final _encryptedFilesSyncTimeKey = "encrypted_files_sync_time";
   static final _dbUpdationTimeKey = "db_updation_time";
   static final _diffLimit = 100;
@@ -154,34 +154,13 @@ class SyncService {
   }
 
   Future<void> _syncWithRemote() async {
-    // TODO:  Fix race conditions triggered due to concurrent syncs.
-    //        Add device_id/last_sync_timestamp to the upload request?
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }
-    await _persistFilesDiff();
+    await CollectionsService.instance.sync();
     await _persistEncryptedFilesDiff();
     await _uploadDiff();
     await _deletePhotosOnServer();
-  }
-
-  Future<void> _persistFilesDiff() async {
-    final diff = await _downloader.getFilesDiff(_getSyncTime(), _diffLimit);
-    if (diff != null && diff.isNotEmpty) {
-      await _storeDiff(diff, _syncTimeKey);
-      FileRepository.instance.reloadFiles();
-      if (diff.length == _diffLimit) {
-        return await _persistFilesDiff();
-      }
-    }
-  }
-
-  int _getSyncTime() {
-    var syncTime = _prefs.getInt(_syncTimeKey);
-    if (syncTime == null) {
-      syncTime = 0;
-    }
-    return syncTime;
   }
 
   Future<void> _persistEncryptedFilesDiff() async {
@@ -228,10 +207,14 @@ class SyncService {
         await _db.update(
           file.generatedID,
           uploadedFile.uploadedFileID,
+          uploadedFile.ownerID,
+          uploadedFile.collectionID,
           uploadedFile.updationTime,
-          file.fileDecryptionParams,
-          file.thumbnailDecryptionParams,
-          file.metadataDecryptionParams,
+          file.encryptedKey,
+          file.keyDecryptionNonce,
+          file.fileDecryptionHeader,
+          file.thumbnailDecryptionHeader,
+          file.metadataDecryptionHeader,
         );
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: filesToBeUploaded.length));
@@ -245,20 +228,20 @@ class SyncService {
   Future _storeDiff(List<File> diff, String prefKey) async {
     for (File file in diff) {
       try {
-        final existingPhoto = await _db.getMatchingFile(
-            file.localID,
-            file.title,
-            file.deviceFolder,
-            file.creationTime,
-            file.modificationTime,
+        final existingFile = await _db.getMatchingFile(file.localID, file.title,
+            file.deviceFolder, file.creationTime, file.modificationTime,
             alternateTitle: getHEICFileNameForJPG(file));
         await _db.update(
-          existingPhoto.generatedID,
+          existingFile.generatedID,
           file.uploadedFileID,
+          file.ownerID,
+          file.collectionID,
           file.updationTime,
-          file.fileDecryptionParams,
-          file.thumbnailDecryptionParams,
-          file.metadataDecryptionParams,
+          file.encryptedKey,
+          file.keyDecryptionNonce,
+          file.fileDecryptionHeader,
+          file.thumbnailDecryptionHeader,
+          file.metadataDecryptionHeader,
         );
       } catch (e) {
         file.localID = null; // File uploaded from a different device

@@ -1,41 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/models/folder.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/models/shared_collection.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 
-class RemoteFolderPage extends StatefulWidget {
-  final Folder folder;
+class SharedCollectionPage extends StatefulWidget {
+  final SharedCollection collection;
 
-  const RemoteFolderPage(this.folder, {Key key}) : super(key: key);
+  const SharedCollectionPage(this.collection, {Key key}) : super(key: key);
 
   @override
-  _RemoteFolderPageState createState() => _RemoteFolderPageState();
+  _SharedCollectionPageState createState() => _SharedCollectionPageState();
 }
 
-class _RemoteFolderPageState extends State<RemoteFolderPage> {
+class _SharedCollectionPageState extends State<SharedCollectionPage> {
   final _selectedFiles = SelectedFiles();
 
   @override
   Widget build(Object context) {
     var gallery = Gallery(
-      asyncLoader: (lastFile, limit) => FilesDB.instance.getAllInFolder(
-          widget.folder.id,
+      asyncLoader: (lastFile, limit) => FilesDB.instance.getAllInCollection(
+          widget.collection.id,
           lastFile == null
               ? DateTime.now().microsecondsSinceEpoch
               : lastFile.creationTime,
           limit),
       // onRefresh: () => FolderSharingService.instance.syncDiff(widget.folder),
-      tagPrefix: "remote_folder",
+      tagPrefix: "shared_collection",
       selectedFiles: _selectedFiles,
     );
     return Scaffold(
       appBar: GalleryAppBarWidget(
         GalleryAppBarType.shared_collection,
-        widget.folder.name,
+        widget.collection.name,
         _selectedFiles,
-        widget.folder.deviceFolder,
       ),
       body: gallery,
     );

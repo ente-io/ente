@@ -1,19 +1,27 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:photos/services/folder_service.dart';
-import 'package:photos/models/folder.dart';
+import 'package:photos/models/collection.dart';
+import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/email_util.dart';
+import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class ShareFolderWidget extends StatefulWidget {
   final String title;
   final String path;
+  final Collection collection;
 
   const ShareFolderWidget(
     this.title,
     this.path, {
+    this.collection,
     Key key,
   }) : super(key: key);
 
@@ -22,19 +30,15 @@ class ShareFolderWidget extends StatefulWidget {
 }
 
 class _ShareFolderWidgetState extends State<ShareFolderWidget> {
-  Folder _folder;
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<int, bool>>(
-      future:
-          FolderSharingService.instance.getFolder(widget.path).then((folder) {
-        _folder = folder;
-        return FolderSharingService.instance.getSharingStatus(folder);
-      }),
+    return FutureBuilder<List<String>>(
+      future: widget.collection == null
+          ? Future.value(List<String>())
+          : CollectionsService.instance.getSharees(widget.collection.id),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _getSharingDialog(snapshot.data);
+          return SharingDialog(widget.collection, snapshot.data);
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else {
@@ -43,102 +47,146 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
       },
     );
   }
-
-  Widget _getSharingDialog(Map<int, bool> sharingStatus) {
-    return AlertDialog(
-      title: Text('Sharing'),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: <Widget>[
-            // SharingCheckboxWidget(sharingStatus),
-            SharingWidget(["vishnu@ente.io", "shanthy@ente.io"]),
-          ],
-        ),
-      ),
-      // actions: <Widget>[
-      //   FlatButton(
-      //     child: Text("Save"),
-      //     onPressed: () async {
-      //       var sharedWith = Set<int>();
-      //       for (var user in sharingStatus.keys) {
-      //         if (sharingStatus[user]) {
-      //           sharedWith.add(user);
-      //         }
-      //       }
-      //       _folder.sharedWith.clear();
-      //       _folder.sharedWith.addAll(sharedWith);
-      //       await FolderSharingService.instance.updateFolder(_folder);
-      //       showToast("Sharing configuration updated successfully.");
-      //       Navigator.of(context).pop();
-      //     },
-      //   ),
-      // ],
-    );
-  }
 }
 
-class SharingWidget extends StatefulWidget {
-  final List<String> emails;
-  SharingWidget(this.emails, {Key key}) : super(key: key);
+class SharingDialog extends StatefulWidget {
+  final Collection collection;
+  final List<String> sharees;
+
+  SharingDialog(this.collection, this.sharees, {Key key}) : super(key: key);
 
   @override
-  _SharingWidgetState createState() => _SharingWidgetState();
+  _SharingDialogState createState() => _SharingDialogState();
 }
 
-class _SharingWidgetState extends State<SharingWidget> {
+class _SharingDialogState extends State<SharingDialog> {
   bool _showEntryField = false;
-  List<String> _emails;
-
-  @override
-  void initState() {
-    _emails = widget.emails;
-    super.initState();
-  }
+  List<String> _sharees;
+  String _email;
 
   @override
   Widget build(BuildContext context) {
+    _sharees = widget.sharees;
     final children = List<Widget>();
-    for (final email in _emails) {
-      children.add(EmailItemWidget(email));
+    if (!_showEntryField &&
+        (widget.collection == null || _sharees.length == 0)) {
+      children.add(Text("Click the + button to share this folder."));
+    } else {
+      for (final email in _sharees) {
+        children.add(EmailItemWidget(email));
+      }
     }
     if (_showEntryField) {
       children.add(TextField(
         keyboardType: TextInputType.emailAddress,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: "email@your-friend.com",
+        ),
         autofocus: true,
-        onSubmitted: (s) {
-          final progressDialog = createProgressDialog(context, "Sharing...");
-          progressDialog.show();
-          Future.delayed(Duration(milliseconds: 1000), () {
-            progressDialog.hide();
-            showToast("Shared with " + s + ".");
-            setState(() {
-              _emails.add(s);
-              _showEntryField = false;
-            });
+        onChanged: (s) {
+          setState(() {
+            _email = s;
           });
+        },
+        onSubmitted: (s) {
+          _addEmailToCollection(context);
         },
       ));
     }
     children.add(Padding(
       padding: EdgeInsets.all(8),
     ));
-    children.add(Container(
-      width: 220,
-      child: OutlineButton(
-        child: Icon(
-          Icons.add,
+    if (!_showEntryField) {
+      children.add(Container(
+        width: 220,
+        child: OutlineButton(
+          child: Icon(
+            Icons.add,
+          ),
+          onPressed: () {
+            setState(() {
+              _showEntryField = true;
+            });
+          },
         ),
-        onPressed: () {
-          setState(() {
-            _showEntryField = true;
-          });
-        },
+      ));
+    } else {
+      children.add(Container(
+        width: 220,
+        child: button(
+          "Add",
+          onPressed: () async {
+            await _addEmailToCollection(context);
+          },
+        ),
+      ));
+    }
+
+    return AlertDialog(
+      title: Text("Sharing"),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Column(
+                  children: children,
+                )),
+          ],
+        ),
       ),
-    ));
-    var column = Column(
-      children: children,
     );
-    return column;
+  }
+
+  Future<void> _addEmailToCollection(BuildContext context) async {
+    if (!isValidEmail(_email)) {
+      showErrorDialog(context, "Invalid email address",
+          "Please enter a valid email address");
+      return;
+    }
+    final dialog = createProgressDialog(context, "Searching for user...");
+    await dialog.show();
+    final publicKey = await UserService.instance.getPublicKey(email: _email);
+    await dialog.hide();
+    if (publicKey == null) {
+      Navigator.of(context).pop();
+      final dialog = AlertDialog(
+        title: Text("Invite to ente?"),
+        content: Text("Looks like " +
+            _email +
+            " hasn't signed up for ente yet. Would you like to invite them?"),
+        actions: [
+          FlatButton(
+            child: Text("Invite"),
+            onPressed: () {
+              shareText(
+                  "Hey, I've got some really nice photos to share. Please install ente.io so that I can share them privately.");
+            },
+          ),
+        ],
+      );
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return dialog;
+        },
+      );
+    } else {
+      if (widget.collection == null) {
+        log("Collection is null");
+        // TODO: Create collection
+        // TODO: Add files to collection
+      }
+      CollectionsService.instance
+          .share(widget.collection.id, _email, publicKey)
+          .then((value) {
+        setState(() {
+          _sharees.add(_email);
+          _showEntryField = false;
+        });
+      });
+    }
   }
 }
 
@@ -152,63 +200,21 @@ class EmailItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            email,
-            style: TextStyle(fontSize: 14),
-          ),
-          Icon(
-            Icons.remove_circle_outline,
-            color: Colors.redAccent,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class SharingCheckboxWidget extends StatefulWidget {
-  final Map<int, bool> sharingStatus;
-
-  const SharingCheckboxWidget(
-    this.sharingStatus, {
-    Key key,
-  }) : super(key: key);
-
-  @override
-  _SharingCheckboxWidgetState createState() => _SharingCheckboxWidgetState();
-}
-
-class _SharingCheckboxWidgetState extends State<SharingCheckboxWidget> {
-  Map<int, bool> _sharingStatus;
-
-  @override
-  void initState() {
-    _sharingStatus = widget.sharingStatus;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final checkboxes = List<Widget>();
-    for (final user in _sharingStatus.keys) {
-      checkboxes.add(Row(
-        children: <Widget>[
-          Checkbox(
-              materialTapTargetSize: MaterialTapTargetSize.padded,
-              value: _sharingStatus[user],
-              onChanged: (value) {
-                setState(() {
-                  _sharingStatus[user] = value;
-                });
-              }),
-          Text(user.toString()),
-        ],
-      ));
-    }
-    return Column(children: checkboxes);
+        padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                email,
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            Icon(
+              Icons.delete_forever,
+              color: Colors.redAccent,
+            ),
+          ],
+        ));
   }
 }

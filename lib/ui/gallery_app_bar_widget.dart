@@ -6,6 +6,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/passphrase_entry_page.dart';
 import 'package:photos/ui/passphrase_reentry_page.dart';
@@ -18,7 +19,7 @@ import 'package:photos/utils/share_util.dart';
 enum GalleryAppBarType {
   homepage,
   local_folder,
-  remote_folder,
+  shared_collection,
   search_results,
 }
 
@@ -87,18 +88,27 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   List<Widget> _getDefaultActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
     if (Configuration.instance.hasConfiguredAccount()) {
-      actions.add(IconButton(
-        icon: Icon(Icons.settings),
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return SettingsPage();
-              },
-            ),
-          );
-        },
-      ));
+      if (widget.type == GalleryAppBarType.homepage) {
+        actions.add(IconButton(
+          icon: Icon(Icons.settings),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return SettingsPage();
+                },
+              ),
+            );
+          },
+        ));
+      } else if (widget.type == GalleryAppBarType.local_folder) {
+        actions.add(IconButton(
+          icon: Icon(Icons.share),
+          onPressed: () {
+            _showShareCollectionDialog();
+          },
+        ));
+      }
     } else {
       actions.add(IconButton(
         icon: Icon(Icons.sync_disabled),
@@ -133,7 +143,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return ShareFolderWidget(widget.title, widget.path);
+        return ShareFolderWidget(
+          widget.title,
+          widget.path,
+          collection:
+              CollectionsService.instance.getCollectionForPath(widget.path),
+        );
       },
     );
   }
@@ -141,7 +156,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
     if (widget.selectedFiles.files.isNotEmpty) {
-      if (widget.type != GalleryAppBarType.remote_folder &&
+      if (widget.type != GalleryAppBarType.shared_collection &&
           widget.type != GalleryAppBarType.search_results) {
         actions.add(IconButton(
           icon: Icon(Icons.delete),

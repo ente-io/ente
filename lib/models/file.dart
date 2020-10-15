@@ -1,7 +1,6 @@
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/models/decryption_params.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 
@@ -9,6 +8,7 @@ class File {
   int generatedID;
   int uploadedFileID;
   int ownerID;
+  int collectionID;
   String localID;
   String title;
   String deviceFolder;
@@ -19,15 +19,18 @@ class File {
   int updationTime;
   Location location;
   FileType fileType;
-  DecryptionParams fileDecryptionParams;
-  DecryptionParams thumbnailDecryptionParams;
-  DecryptionParams metadataDecryptionParams;
+  String encryptedKey;
+  String keyDecryptionNonce;
+  String fileDecryptionHeader;
+  String thumbnailDecryptionHeader;
+  String metadataDecryptionHeader;
 
   File();
 
   File.fromJson(Map<String, dynamic> json) {
     uploadedFileID = json["id"];
     ownerID = json["ownerID"];
+    collectionID = json["collectionID"];
     localID = json["deviceFileID"];
     deviceFolder = json["deviceFolder"];
     title = json["title"];
@@ -103,11 +106,8 @@ class File {
   }
 
   String getDownloadUrl() {
-    final api = isEncrypted ? "encrypted-files" : "files";
     return Configuration.instance.getHttpEndpoint() +
-        "/" +
-        api +
-        "/download/" +
+        "/files/download/" +
         uploadedFileID.toString() +
         "?token=" +
         Configuration.instance.getToken();
@@ -124,11 +124,8 @@ class File {
   }
 
   String getThumbnailUrl() {
-    final api = isEncrypted ? "encrypted-files" : "files";
     return Configuration.instance.getHttpEndpoint() +
-        "/" +
-        api +
-        "/preview/" +
+        "/files/preview/" +
         uploadedFileID.toString() +
         "?token=" +
         Configuration.instance.getToken();
@@ -137,10 +134,8 @@ class File {
   @override
   String toString() {
     return '''File(generatedId: $generatedID, uploadedFileId: $uploadedFileID, 
-      localId: $localID, title: $title, deviceFolder: $deviceFolder, 
-      fileDecryptionParams: $fileDecryptionParams, 
-      thumbnailDecryptionParams: $thumbnailDecryptionParams,
-      metadataDecryptionParams: $metadataDecryptionParams,
+      ownerID: $ownerID, collectionID: $collectionID,
+      localId: $localID, title: $title, deviceFolder: $deviceFolder,
       location: $location, fileType: $fileType, creationTime: $creationTime, 
       modificationTime: $modificationTime, updationTime: $updationTime)''';
   }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,11 +22,13 @@ class Configuration {
   static const hasOptedForE2EKey = "has_opted_for_e2e_encryption";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyKey = "key";
+  static const secretKeyKey = "secret_key";
   static const keyAttributesKey = "key_attributes";
 
   SharedPreferences _preferences;
   FlutterSecureStorage _secureStorage;
   String _key;
+  String _secretKey;
   String _documentsDirectory;
   String _tempDirectory;
   String _thumbnailsDirectory;
@@ -39,11 +42,12 @@ class Configuration {
     new io.Directory(_tempDirectory).createSync(recursive: true);
     new io.Directory(_thumbnailsDirectory).createSync(recursive: true);
     _key = await _secureStorage.read(key: keyKey);
+    _secretKey = await _secureStorage.read(key: secretKeyKey);
   }
 
   Future<KeyAttributes> generateAndSaveKey(String passphrase) async {
     // Create a master key
-    final key = CryptoUtil.generateMasterKey();
+    final key = CryptoUtil.generateKey();
 
     // Derive a key from the passphrase that will be used to encrypt and
     // decrypt the master key
@@ -51,26 +55,26 @@ class Configuration {
     final kek = CryptoUtil.deriveKey(utf8.encode(passphrase), kekSalt);
 
     // Encrypt the key with this derived key
-    final encryptedKeyData = await CryptoUtil.encrypt(key, key: kek);
+    final encryptedKeyData = CryptoUtil.encryptSync(key, kek);
 
     // Hash the passphrase so that its correctness can be compared later
     final kekHash = await CryptoUtil.hash(kek);
 
     // Generate a public-private keypair and encrypt the latter
     final keyPair = await CryptoUtil.generateKeyPair();
-    final encryptedSecretKeyData =
-        await CryptoUtil.encrypt(keyPair.sk, key: kek);
+    final encryptedSecretKeyData = CryptoUtil.encryptSync(keyPair.sk, kek);
 
     final attributes = KeyAttributes(
       Sodium.bin2base64(kekSalt),
       kekHash,
-      encryptedKeyData.encryptedData.base64,
-      encryptedKeyData.nonce.base64,
+      Sodium.bin2base64(encryptedKeyData.encryptedData),
+      Sodium.bin2base64(encryptedKeyData.nonce),
       Sodium.bin2base64(keyPair.pk),
-      encryptedSecretKeyData.encryptedData.base64,
-      encryptedSecretKeyData.nonce.base64,
+      Sodium.bin2base64(encryptedSecretKeyData.encryptedData),
+      Sodium.bin2base64(encryptedSecretKeyData.nonce),
     );
     await setKey(Sodium.bin2base64(key));
+    await setSecretKey(Sodium.bin2base64(keyPair.sk));
     await setKeyAttributes(attributes);
     return attributes;
   }
@@ -84,14 +88,22 @@ class Configuration {
     if (!correctPassphrase) {
       throw Exception("Incorrect passphrase");
     }
-    final key = await CryptoUtil.decrypt(
+    final key = CryptoUtil.decryptSync(
         Sodium.base642bin(attributes.encryptedKey),
         kek,
         Sodium.base642bin(attributes.keyDecryptionNonce));
+    final secretKey = CryptoUtil.decryptSync(
+        Sodium.base642bin(attributes.encryptedSecretKey),
+        kek,
+        Sodium.base642bin(attributes.secretKeyDecryptionNonce));
     await setKey(Sodium.bin2base64(key));
+    await setSecretKey(Sodium.bin2base64(secretKey));
   }
 
   String getHttpEndpoint() {
+    if (kDebugMode) {
+      return "http://192.168.1.3:80";
+    }
     return "https://api.staging.ente.io";
   }
 
@@ -157,7 +169,7 @@ class Configuration {
 
   KeyAttributes getKeyAttributes() {
     final jsonValue = _preferences.getString(keyAttributesKey);
-    if (keyAttributesKey == null) {
+    if (jsonValue == null) {
       return null;
     } else {
       return KeyAttributes.fromJson(jsonValue);
@@ -165,12 +177,29 @@ class Configuration {
   }
 
   Future<void> setKey(String key) async {
-    await _secureStorage.write(key: keyKey, value: key);
     _key = key;
+    if (key == null) {
+      await _secureStorage.delete(key: keyKey);
+    } else {
+      await _secureStorage.write(key: keyKey, value: key);
+    }
+  }
+
+  Future<void> setSecretKey(String secretKey) async {
+    _secretKey = secretKey;
+    if (secretKey == null) {
+      await _secureStorage.delete(key: secretKeyKey);
+    } else {
+      await _secureStorage.write(key: secretKeyKey, value: secretKey);
+    }
   }
 
   Uint8List getKey() {
-    return Sodium.base642bin(_key);
+    return _key == null ? null : Sodium.base642bin(_key);
+  }
+
+  Uint8List getSecretKey() {
+    return _secretKey == null ? null : Sodium.base642bin(_secretKey);
   }
 
   String getDocumentsDirectory() {

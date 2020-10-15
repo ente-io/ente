@@ -21,6 +21,7 @@ import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/ui/remote_folder_gallery_widget.dart';
 import 'package:photos/ui/search_page.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:photos/utils/logging_util.dart';
 import 'package:shake/shake.dart';
 import 'package:logging/logging.dart';
@@ -38,7 +39,7 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static final importantItemsFilter = ImportantItemsFilter();
   final _logger = Logger("HomeWidgetState");
-  final _remoteFolderGalleryWidget = RemoteFolderGalleryWidget();
+  final _sharedCollectionGallery = SharedCollectionGallery();
   final _deviceFolderGalleryWidget = DeviceFolderGalleryWidget();
   final _selectedFiles = SelectedFiles();
   final _memoriesWidget = MemoriesWidget();
@@ -80,7 +81,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               ? _getMainGalleryWidget()
               : LoadingPhotosWidget(),
           _deviceFolderGalleryWidget,
-          _remoteFolderGalleryWidget,
+          _sharedCollectionGallery,
         ],
         index: _selectedNavBarItem,
       ),
