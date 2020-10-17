@@ -152,7 +152,7 @@ class _SharingDialogState extends State<SharingDialog> {
     }
     final dialog = createProgressDialog(context, "Searching for user...");
     await dialog.show();
-    final publicKey = await UserService.instance.getPublicKey(email: _email);
+    final publicKey = await UserService.instance.getPublicKey(_email);
     await dialog.hide();
     if (publicKey == null) {
       Navigator.of(context).pop();

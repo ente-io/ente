@@ -47,17 +47,11 @@ class UserService {
     });
   }
 
-  Future<String> getPublicKey({String email, int userID}) async {
-    final queryParams = Map<String, dynamic>();
-    if (userID != null) {
-      queryParams["userID"] = userID;
-    } else {
-      queryParams["email"] = email;
-    }
+  Future<String> getPublicKey(String email) async {
     try {
       final response = await _dio.get(
         Configuration.instance.getHttpEndpoint() + "/users/public-key",
-        queryParameters: queryParams,
+        queryParameters: {"email": email},
         options: Options(
           headers: {
             "X-Auth-Token": Configuration.instance.getToken(),
