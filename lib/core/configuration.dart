@@ -102,7 +102,7 @@ class Configuration {
 
   String getHttpEndpoint() {
     if (kDebugMode) {
-      return "http://192.168.1.3:80";
+      return "http://192.168.0.100";
     }
     return "https://api.staging.ente.io";
   }
