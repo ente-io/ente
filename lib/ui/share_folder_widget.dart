@@ -147,7 +147,11 @@ class _SharingDialogState extends State<SharingDialog> {
   Future<void> _addEmailToCollection(BuildContext context) async {
     if (!isValidEmail(_email)) {
       showErrorDialog(context, "Invalid email address",
-          "Please enter a valid email address");
+          "Please enter a valid email address.");
+      return;
+    } else if (_email == Configuration.instance.getEmail()) {
+      showErrorDialog(
+          context, "Oops", "You cannot share the album with yourself.");
       return;
     }
     final dialog = createProgressDialog(context, "Searching for user...");
