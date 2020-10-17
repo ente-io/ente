@@ -144,7 +144,7 @@ class Configuration {
     // return _preferences.getBool(hasOptedForE2EKey);
   }
 
-  Set<String> getFoldersToBackUp() {
+  Set<String> getPathsToBackUp() {
     if (_preferences.containsKey(foldersToBackUpKey)) {
       return _preferences.getStringList(foldersToBackUpKey).toSet();
     } else {
@@ -158,8 +158,14 @@ class Configuration {
     }
   }
 
-  Future<void> setFoldersToBackUp(Set<String> folders) async {
+  Future<void> setPathsToBackUp(Set<String> folders) async {
     await _preferences.setStringList(foldersToBackUpKey, folders.toList());
+  }
+
+  Future<void> addPathToFoldersToBeBackedUp(String path) async {
+    final currentPaths = getPathsToBackUp();
+    currentPaths.add(path);
+    return setPathsToBackUp(currentPaths);
   }
 
   Future<void> setKeyAttributes(KeyAttributes attributes) async {

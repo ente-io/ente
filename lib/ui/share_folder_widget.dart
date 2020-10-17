@@ -1,10 +1,13 @@
 import 'dart:developer';
+import 'dart:html';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -38,7 +41,7 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
           : CollectionsService.instance.getSharees(widget.collection.id),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return SharingDialog(widget.collection, snapshot.data);
+          return SharingDialog(widget.collection, snapshot.data, widget.path);
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else {
@@ -52,8 +55,10 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
 class SharingDialog extends StatefulWidget {
   final Collection collection;
   final List<String> sharees;
+  final String path;
 
-  SharingDialog(this.collection, this.sharees, {Key key}) : super(key: key);
+  SharingDialog(this.collection, this.sharees, this.path, {Key key})
+      : super(key: key);
 
   @override
   _SharingDialogState createState() => _SharingDialogState();
@@ -116,8 +121,8 @@ class _SharingDialogState extends State<SharingDialog> {
         width: 220,
         child: button(
           "Add",
-          onPressed: () async {
-            await _addEmailToCollection(context);
+          onPressed: () {
+            _addEmailToCollection(context);
           },
         ),
       ));
@@ -173,14 +178,22 @@ class _SharingDialogState extends State<SharingDialog> {
         },
       );
     } else {
-      if (widget.collection == null) {
-        log("Collection is null");
-        // TODO: Create collection
-        // TODO: Add files to collection
+      final dialog = createProgressDialog(context, "Sharing...");
+      await dialog.show();
+      var collectionID;
+      if (widget.collection != null) {
+        collectionID = widget.collection.id;
+      } else {
+        collectionID =
+            (await CollectionsService.instance.getOrCreateForPath(widget.path))
+                .id;
+        await Configuration.instance.addPathToFoldersToBeBackedUp(widget.path);
+        SyncService.instance.sync();
       }
-      CollectionsService.instance
-          .share(widget.collection.id, _email, publicKey)
-          .then((value) {
+      return CollectionsService.instance
+          .share(collectionID, _email, publicKey)
+          .then((value) async {
+        await dialog.hide();
         setState(() {
           _sharees.add(_email);
           _showEntryField = false;
