@@ -8,6 +8,7 @@ import 'package:photos/db/public_keys_db.dart';
 
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/key_attributes.dart';
+import 'package:photos/models/public_key.dart';
 import 'package:photos/ui/ott_verification_page.dart';
 import 'package:photos/ui/passphrase_entry_page.dart';
 import 'package:photos/ui/passphrase_reentry_page.dart';
@@ -59,8 +60,8 @@ class UserService {
           },
         ),
       );
-      final publicKey =  response.data["publicKey"];
-      await PublicKeysDB.instance.setKey(email, publicKey);
+      final publicKey = response.data["publicKey"];
+      await PublicKeysDB.instance.setKey(PublicKey(email, publicKey));
       return publicKey;
     } on DioError catch (e) {
       _logger.info(e);

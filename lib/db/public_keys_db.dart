@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart';
+import 'package:photos/models/public_key.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -43,13 +44,13 @@ class PublicKeysDB {
                 ''');
   }
 
-  Future<int> setKey(String email, String publicKey) async {
+  Future<int> setKey(PublicKey key) async {
     final db = await instance.database;
-    return db.insert(table, _getRow(email, publicKey),
+    return db.insert(table, _getRow(key),
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Future<Map<String, String>> searchByEmail(String email) async {
+  Future<List<PublicKey>> searchByEmail(String email) async {
     final db = await instance.database;
     return _convertRows(await db.query(
       table,
@@ -58,17 +59,17 @@ class PublicKeysDB {
     ));
   }
 
-  Map<String, dynamic> _getRow(String email, String publicKey) {
+  Map<String, dynamic> _getRow(PublicKey key) {
     var row = new Map<String, dynamic>();
-    row[columnEmail] = email;
-    row[columnPublicKey] = publicKey;
+    row[columnEmail] = key.email;
+    row[columnPublicKey] = key.publicKey;
     return row;
   }
 
-  Map<String, String> _convertRows(List<Map<String, dynamic>> rows) {
-    final keys = Map<String, String>();
+  List<PublicKey> _convertRows(List<Map<String, dynamic>> rows) {
+    final keys = List<PublicKey>();
     for (final row in rows) {
-      keys[row[columnEmail]] = row[columnPublicKey];
+      keys.add(PublicKey(row[columnEmail], row[columnPublicKey]));
     }
     return keys;
   }
