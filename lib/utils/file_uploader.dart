@@ -27,7 +27,9 @@ class FileUploader {
   }
 
   Future<String> putFile(UploadURL uploadURL, io.File file) async {
-    _logger.info("Putting file to " + uploadURL.url);
+    final fileSize = file.lengthSync().toString();
+    final startTime = DateTime.now().millisecondsSinceEpoch;
+    _logger.info("Putting file of size " + fileSize + " to " + uploadURL.url);
     return Dio()
         .put(uploadURL.url,
             data: file.openRead(),
@@ -36,7 +38,13 @@ class FileUploader {
             }))
         .catchError((e) {
       _logger.severe(e);
+      throw e;
     }).then((value) {
+      _logger.info("Upload speed : " +
+          (file.lengthSync() /
+                  (DateTime.now().millisecondsSinceEpoch - startTime))
+              .toString() +
+          " kilo bytes per second");
       return uploadURL.objectKey;
     });
   }

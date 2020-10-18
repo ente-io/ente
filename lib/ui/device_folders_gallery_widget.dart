@@ -8,7 +8,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/filters/favorite_items_filter.dart';
-import 'package:photos/models/filters/folder_name_filter.dart';
+import 'package:photos/models/filters/device_folder_name_filter.dart';
 import 'package:photos/models/filters/video_file_filter.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/device_folder_page.dart';
@@ -79,7 +79,7 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
       final file = await FilesDB.instance.getLatestFileInPath(path);
       final folderName = p.basename(path);
       folders.add(
-          DeviceFolder(folderName, path, file, FolderNameFilter(folderName)));
+          DeviceFolder(folderName, path, file, DeviceFolderNameFilter(folderName)));
     }
     folders.sort((first, second) {
       return second.thumbnail.creationTime

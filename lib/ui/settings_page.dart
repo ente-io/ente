@@ -169,7 +169,7 @@ class _BackedUpFoldersWidgetState extends State<BackedUpFoldersWidget> {
           snapshot.data.sort((first, second) {
             return first.toLowerCase().compareTo(second.toLowerCase());
           });
-          final backedUpFolders = Configuration.instance.getFoldersToBackUp();
+          final backedUpFolders = Configuration.instance.getPathsToBackUp();
           final foldersWidget = List<Row>();
           for (final folder in snapshot.data) {
             foldersWidget.add(Row(children: [
@@ -182,7 +182,7 @@ class _BackedUpFoldersWidgetState extends State<BackedUpFoldersWidget> {
                     backedUpFolders.remove(folder);
                   }
                   await Configuration.instance
-                      .setFoldersToBackUp(backedUpFolders);
+                      .setPathsToBackUp(backedUpFolders);
                   setState(() {});
                 },
               ),

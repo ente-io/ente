@@ -1,10 +1,13 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -38,7 +41,7 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
           : CollectionsService.instance.getSharees(widget.collection.id),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return SharingDialog(widget.collection, snapshot.data);
+          return SharingDialog(widget.collection, snapshot.data, widget.path);
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else {
@@ -52,8 +55,10 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
 class SharingDialog extends StatefulWidget {
   final Collection collection;
   final List<String> sharees;
+  final String path;
 
-  SharingDialog(this.collection, this.sharees, {Key key}) : super(key: key);
+  SharingDialog(this.collection, this.sharees, this.path, {Key key})
+      : super(key: key);
 
   @override
   _SharingDialogState createState() => _SharingDialogState();
@@ -77,22 +82,7 @@ class _SharingDialogState extends State<SharingDialog> {
       }
     }
     if (_showEntryField) {
-      children.add(TextField(
-        keyboardType: TextInputType.emailAddress,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: "email@your-friend.com",
-        ),
-        autofocus: true,
-        onChanged: (s) {
-          setState(() {
-            _email = s;
-          });
-        },
-        onSubmitted: (s) {
-          _addEmailToCollection(context);
-        },
-      ));
+      children.add(_getEmailField());
     }
     children.add(Padding(
       padding: EdgeInsets.all(8),
@@ -116,8 +106,8 @@ class _SharingDialogState extends State<SharingDialog> {
         width: 220,
         child: button(
           "Add",
-          onPressed: () async {
-            await _addEmailToCollection(context);
+          onPressed: () {
+            _addEmailToCollection(_email, null);
           },
         ),
       ));
@@ -139,22 +129,63 @@ class _SharingDialogState extends State<SharingDialog> {
     );
   }
 
-  Future<void> _addEmailToCollection(BuildContext context) async {
-    if (!isValidEmail(_email)) {
+  Widget _getEmailField() {
+    return TypeAheadField(
+      textFieldConfiguration: TextFieldConfiguration(
+        keyboardType: TextInputType.emailAddress,
+        autofocus: true,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: "email@your-friend.com",
+        ),
+      ),
+      hideOnEmpty: true,
+      loadingBuilder: (context) {
+        return loadWidget;
+      },
+      suggestionsCallback: (pattern) async {
+        _email = pattern;
+        return PublicKeysDB.instance.searchByEmail(_email);
+      },
+      itemBuilder: (context, suggestion) {
+        return Container(
+          padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+          child: Container(
+            child: Text(
+              suggestion.email,
+              overflow: TextOverflow.clip,
+            ),
+          ),
+        );
+      },
+      onSuggestionSelected: (PublicKey suggestion) {
+        _addEmailToCollection(suggestion.email, suggestion.publicKey);
+      },
+    );
+  }
+
+  Future<void> _addEmailToCollection(String email, String publicKey) async {
+    if (!isValidEmail(email)) {
       showErrorDialog(context, "Invalid email address",
-          "Please enter a valid email address");
+          "Please enter a valid email address.");
+      return;
+    } else if (email == Configuration.instance.getEmail()) {
+      showErrorDialog(
+          context, "Oops", "You cannot share the album with yourself.");
       return;
     }
-    final dialog = createProgressDialog(context, "Searching for user...");
-    await dialog.show();
-    final publicKey = await UserService.instance.getPublicKey(email: _email);
-    await dialog.hide();
+    if (publicKey == null) {
+      final dialog = createProgressDialog(context, "Searching for user...");
+      await dialog.show();
+      publicKey = await UserService.instance.getPublicKey(email);
+      await dialog.hide();
+    }
     if (publicKey == null) {
       Navigator.of(context).pop();
       final dialog = AlertDialog(
         title: Text("Invite to ente?"),
         content: Text("Looks like " +
-            _email +
+            email +
             " hasn't signed up for ente yet. Would you like to invite them?"),
         actions: [
           FlatButton(
@@ -173,19 +204,30 @@ class _SharingDialogState extends State<SharingDialog> {
         },
       );
     } else {
-      if (widget.collection == null) {
-        log("Collection is null");
-        // TODO: Create collection
-        // TODO: Add files to collection
+      final dialog = createProgressDialog(context, "Sharing...");
+      await dialog.show();
+      var collectionID;
+      if (widget.collection != null) {
+        collectionID = widget.collection.id;
+      } else {
+        collectionID =
+            (await CollectionsService.instance.getOrCreateForPath(widget.path))
+                .id;
+        await Configuration.instance.addPathToFoldersToBeBackedUp(widget.path);
+        SyncService.instance.sync();
       }
-      CollectionsService.instance
-          .share(widget.collection.id, _email, publicKey)
-          .then((value) {
+      try {
+        await CollectionsService.instance.share(collectionID, email, publicKey);
+        await dialog.hide();
+        showToast("Folder shared successfully!");
         setState(() {
-          _sharees.add(_email);
+          _sharees.add(email);
           _showEntryField = false;
         });
-      });
+      } catch (e) {
+        await dialog.hide();
+        showGenericErrorDialog(context);
+      }
     }
   }
 }

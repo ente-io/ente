@@ -184,7 +184,7 @@ class SyncService {
   }
 
   Future<void> _uploadDiff() async {
-    final foldersToBackUp = Configuration.instance.getFoldersToBackUp();
+    final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded =
         await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
     for (int i = 0; i < filesToBeUploaded.length; i++) {
