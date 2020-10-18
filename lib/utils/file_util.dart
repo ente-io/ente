@@ -160,6 +160,7 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
 
   final encryptedFile = io.File(encryptedFilePath);
   final decryptedFile = io.File(decryptedFilePath);
+  final startTime = DateTime.now().millisecondsSinceEpoch;
   return Dio()
       .download(
     file.getDownloadUrl(),
@@ -175,6 +176,11 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
       return null;
     }
     logger.info("File downloaded: " + file.uploadedFileID.toString());
+    logger.info("Download speed: " +
+        (io.File(encryptedFilePath).lengthSync() /
+                (DateTime.now().millisecondsSinceEpoch - startTime))
+            .toString() +
+        "kBps");
     await CryptoUtil.decryptFile(encryptedFilePath, decryptedFilePath,
         Sodium.base642bin(file.fileDecryptionHeader), decryptFileKey(file));
     logger.info("File decrypted: " + file.uploadedFileID.toString());
