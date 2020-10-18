@@ -53,8 +53,8 @@ class PublicKeysDB {
     final db = await instance.database;
     return _convertRows(await db.query(
       table,
-      where: '$columnEmail LIKE %?%',
-      whereArgs: [email],
+      where: '$columnEmail LIKE ?',
+      whereArgs: ['%$email%'],
     ));
   }
 
