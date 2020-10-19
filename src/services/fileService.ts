@@ -92,3 +92,16 @@ export const getPreview = async (token: string, file: file) => {
         file.key);
     return URL.createObjectURL(new Blob([decrypted]));
 }
+
+export const getFile = async (token: string, file: file) => {
+    const resp = await HTTPService.get(
+        `${ENDPOINT}/files/download/${file.id}`,
+        { token }, null, { responseType: 'arraybuffer' },
+    );
+    const worker = await new CryptoWorker();
+    const decrypted: any = await worker.decryptFile(
+        new Uint8Array(resp.data),
+        await worker.fromB64(file.file.decryptionHeader),
+        file.key);
+    return URL.createObjectURL(new Blob([decrypted]));
+}
