@@ -2,36 +2,19 @@ import * as Comlink from 'comlink';
 import * as libsodium from 'utils/crypto/libsodium';
 
 export class Crypto {
-    async decryptMetadata(event) {
-        const { data } = event;
-        const key = await libsodium.decryptToB64(
-            data.metadata.decryptionParams.encryptedKey,
-            data.metadata.decryptionParams.keyDecryptionNonce,
-            event.key);
-        const metadata = await libsodium.fromB64(await libsodium.decryptToB64(
-            data.metadata.encryptedData,
-            data.metadata.decryptionParams.nonce,
-            key));
-        return {
-            ...data,
-            metadata: JSON.parse(new TextDecoder().decode(metadata))
-        };
+    async decryptMetadata(file) {
+        const encodedMetadata = await libsodium.decryptChaCha(
+            await libsodium.fromB64(file.metadata.encryptedData),
+            await libsodium.fromB64(file.metadata.decryptionHeader),
+            file.key);
+        return JSON.parse(new TextDecoder().decode(encodedMetadata));
     }
 
-    async decryptThumbnail(event) {
-        const { data } = event;
-        const key = await libsodium.decryptToB64(
-            data.thumbnail.decryptionParams.encryptedKey,
-            data.thumbnail.decryptionParams.keyDecryptionNonce,
-            event.key);
-        const thumbnail = await libsodium.decrypt(
-            new Uint8Array(data.file),
-            await libsodium.fromB64(data.thumbnail.decryptionParams.nonce),
-            await libsodium.fromB64(key));
-        return {
-            id: data.id,
-            data: thumbnail,
-        };
+    async decryptFile(fileData, header, key) {
+        return libsodium.decryptChaCha(
+            fileData,
+            header,
+            key);
     }
 
     async encrypt(data, key) {

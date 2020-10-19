@@ -1,5 +1,12 @@
 import sodium from 'libsodium-wrappers';
 
+export async function decryptChaCha(data: Uint8Array, header: Uint8Array, key: Uint8Array) {
+    await sodium.ready;
+    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(header, key);
+    const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(pullState, data, null);
+    return pullResult.message;
+}
+
 export async function encryptToB64(data: string, key: string) {
     await sodium.ready;
     var bKey: Uint8Array;
