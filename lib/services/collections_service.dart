@@ -7,8 +7,11 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection_file_item.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/shared_collection.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/file_util.dart';
 
 class CollectionsService {
   final _logger = Logger("CollectionsService");
@@ -36,7 +39,7 @@ class CollectionsService {
     await _db.insert(collections);
     collections = await _db.getAllCollections();
     for (final collection in collections) {
-      _cacheCollectionAttributes(collection);
+      _cacheOwnedCollectionAttributes(collection);
     }
 
     final lastSharedCollectionCreationTime =
@@ -162,7 +165,7 @@ class CollectionsService {
     final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
     final encryptedPath =
         CryptoUtil.encryptSync(utf8.encode(path), _config.getKey());
-    final collection = await createCollection(Collection(
+    final collection = await createAndCacheCollection(Collection(
       null,
       null,
       Sodium.bin2base64(encryptedKeyData.encryptedData),
@@ -173,11 +176,33 @@ class CollectionsService {
       Sodium.bin2base64(encryptedPath.nonce),
       null,
     ));
-    _cacheCollectionAttributes(collection);
     return collection;
   }
 
-  Future<Collection> createCollection(Collection collection) async {
+  Future<void> addToCollection(int collectionID, List<File> files) {
+    final items = List<CollectionFileItem>();
+    for (final file in files) {
+      final key = decryptFileKey(file);
+      final encryptedKeyData =
+          CryptoUtil.encryptSync(key, getCollectionKey(collectionID));
+      items.add(CollectionFileItem(
+        file.uploadedFileID,
+        Sodium.bin2base64(encryptedKeyData.encryptedData),
+        Sodium.bin2base64(encryptedKeyData.nonce),
+      ));
+    }
+    return Dio().post(
+      Configuration.instance.getHttpEndpoint() + "/collections/add-files",
+      data: {
+        "id": collectionID,
+        "files": items,
+      },
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    );
+  }
+
+  Future<Collection> createAndCacheCollection(Collection collection) async {
     return Dio()
         .post(
       Configuration.instance.getHttpEndpoint() + "/collections/",
@@ -186,12 +211,14 @@ class CollectionsService {
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     )
         .then((response) {
-      return Collection.fromMap(response.data["collection"]);
+      final collection = Collection.fromMap(response.data["collection"]);
+      _cacheOwnedCollectionAttributes(collection);
+      return collection;
     });
   }
 
-  void _cacheCollectionAttributes(Collection collection) {
-    if (collection.ownerID == _config.getUserID()) {
+  void _cacheOwnedCollectionAttributes(Collection collection) {
+    if (collection.encryptedPath != null) {
       var path = utf8.decode(CryptoUtil.decryptSync(
           Sodium.base642bin(collection.encryptedPath),
           _config.getKey(),
