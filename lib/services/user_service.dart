@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -18,6 +19,7 @@ import 'package:photos/utils/toast_util.dart';
 class UserService {
   final _dio = Dio();
   final _logger = Logger("UserAuthenticator");
+  final _config = Configuration.instance;
 
   UserService._privateConstructor();
 
@@ -27,7 +29,7 @@ class UserService {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     await _dio.get(
-      Configuration.instance.getHttpEndpoint() + "/users/ott",
+      _config.getHttpEndpoint() + "/users/ott",
       queryParameters: {
         "email": email,
       },
@@ -52,11 +54,11 @@ class UserService {
   Future<String> getPublicKey(String email) async {
     try {
       final response = await _dio.get(
-        Configuration.instance.getHttpEndpoint() + "/users/public-key",
+        _config.getHttpEndpoint() + "/users/public-key",
         queryParameters: {"email": email},
         options: Options(
           headers: {
-            "X-Auth-Token": Configuration.instance.getToken(),
+            "X-Auth-Token": _config.getToken(),
           },
         ),
       );
@@ -73,9 +75,9 @@ class UserService {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     await _dio.get(
-      Configuration.instance.getHttpEndpoint() + "/users/credentials",
+      _config.getHttpEndpoint() + "/users/credentials",
       queryParameters: {
-        "email": Configuration.instance.getEmail(),
+        "email": _config.getEmail(),
         "ott": ott,
       },
     ).catchError((e) async {
@@ -109,32 +111,30 @@ class UserService {
   Future<void> setupKey(BuildContext context, String passphrase) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
-    final keyAttributes =
-        await Configuration.instance.generateAndSaveKey(passphrase);
+    final result = await _config.generateKey(passphrase);
     await _dio
         .put(
-      Configuration.instance.getHttpEndpoint() + "/users/key-attributes",
-      data: keyAttributes.toMap(),
+      _config.getHttpEndpoint() + "/users/key-attributes",
+      data: result.keyAttributes.toMap(),
       options: Options(
         headers: {
-          "X-Auth-Token": Configuration.instance.getToken(),
+          "X-Auth-Token": _config.getToken(),
         },
       ),
     )
         .catchError((e) async {
       await dialog.hide();
-      await Configuration.instance.setKey(null);
-      await Configuration.instance.setKeyAttributes(null);
       _logger.severe(e);
       showGenericErrorDialog(context);
     }).then((response) async {
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
+        await _config.setKey(result.privateKeyAttributes.key);
+        await _config.setSecretKey(result.privateKeyAttributes.secretKey);
+        await _config.setKeyAttributes(result.keyAttributes);
         Bus.instance.fire(UserAuthenticatedEvent());
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
-        await Configuration.instance.setKey(null);
-        await Configuration.instance.setKeyAttributes(null);
         showGenericErrorDialog(context);
       }
     });

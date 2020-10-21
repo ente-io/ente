@@ -7,6 +7,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/key_attributes.dart';
+import 'package:photos/models/key_gen_result.dart';
+import 'package:photos/models/private_key_attributes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:photos/utils/crypto_util.dart';
@@ -45,7 +47,7 @@ class Configuration {
     _secretKey = await _secureStorage.read(key: secretKeyKey);
   }
 
-  Future<KeyAttributes> generateAndSaveKey(String passphrase) async {
+  Future<KeyGenResult> generateKey(String passphrase) async {
     // Create a master key
     final key = CryptoUtil.generateKey();
 
@@ -73,10 +75,9 @@ class Configuration {
       Sodium.bin2base64(encryptedSecretKeyData.encryptedData),
       Sodium.bin2base64(encryptedSecretKeyData.nonce),
     );
-    await setKey(Sodium.bin2base64(key));
-    await setSecretKey(Sodium.bin2base64(keyPair.sk));
-    await setKeyAttributes(attributes);
-    return attributes;
+    final privateAttributes = PrivateKeyAttributes(
+        Sodium.bin2base64(key), Sodium.bin2base64(keyPair.sk));
+    return KeyGenResult(attributes, privateAttributes);
   }
 
   Future<void> decryptAndSaveKey(
