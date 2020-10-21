@@ -66,8 +66,9 @@ class FavoritesService {
     if (fileID == null) {
       file.collectionID = collectionID;
       fileID = (await _fileUploader.encryptAndUploadFile(file)).uploadedFileID;
+    } else {
+      return _collectionsService.addToCollection(collectionID, [file]);
     }
-    return _collectionsService.addToCollection(collectionID, [file]);
   }
 
   Future<int> getOrCreateFavoriteCollectionID() async {
