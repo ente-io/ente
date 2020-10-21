@@ -16,6 +16,9 @@ class FileUploader {
   final _logger = Logger("FileUploader");
   final _dio = Dio();
 
+  FileUploader._privateConstructor();
+  static FileUploader instance = FileUploader._privateConstructor();
+
   Future<UploadURL> getUploadURL() {
     return Dio()
         .get(
@@ -51,11 +54,6 @@ class FileUploader {
 
   Future<File> encryptAndUploadFile(File file) async {
     _logger.info("Uploading " + file.toString());
-
-    file.collectionID = (await CollectionsService.instance
-            .getOrCreateForPath(file.deviceFolder))
-        .id;
-
     final encryptedFileName = file.generatedID.toString() + ".encrypted";
     final tempDirectory = Configuration.instance.getTempDirectory();
     final encryptedFilePath = tempDirectory + encryptedFileName;

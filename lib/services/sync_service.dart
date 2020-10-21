@@ -23,7 +23,7 @@ class SyncService {
   final _logger = Logger("PhotoSyncManager");
   final _dio = Dio();
   final _db = FilesDB.instance;
-  final _uploader = FileUploader();
+  final _uploader = FileUploader.instance;
   final _downloader = DiffFetcher();
   bool _isSyncInProgress = false;
   bool _syncStopRequested = false;
@@ -198,6 +198,9 @@ class SyncService {
         continue;
       }
       try {
+        file.collectionID = (await CollectionsService.instance
+                .getOrCreateForPath(file.deviceFolder))
+            .id;
         var uploadedFile;
         if (Configuration.instance.hasOptedForE2E()) {
           uploadedFile = await _uploader.encryptAndUploadFile(file);
