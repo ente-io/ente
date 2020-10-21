@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/models/collection.dart';
@@ -172,31 +174,33 @@ class CollectionsService {
       Sodium.bin2base64(encryptedKeyData.nonce),
       path,
       CollectionType.folder,
-      Sodium.bin2base64(encryptedPath.encryptedData),
-      Sodium.bin2base64(encryptedPath.nonce),
+      CollectionAttributes(
+          encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData),
+          pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce)),
       null,
     ));
     return collection;
   }
 
   Future<void> addToCollection(int collectionID, List<File> files) {
-    final items = List<CollectionFileItem>();
+    final params = Map<String, dynamic>();
+    params["collectionID"] = collectionID;
     for (final file in files) {
       final key = decryptFileKey(file);
       final encryptedKeyData =
           CryptoUtil.encryptSync(key, getCollectionKey(collectionID));
-      items.add(CollectionFileItem(
+      if (params["files"] == null) {
+        params["files"] = [];
+      }
+      params["files"].add(CollectionFileItem(
         file.uploadedFileID,
         Sodium.bin2base64(encryptedKeyData.encryptedData),
         Sodium.bin2base64(encryptedKeyData.nonce),
-      ));
+      ).toMap());
     }
     return Dio().post(
       Configuration.instance.getHttpEndpoint() + "/collections/add-files",
-      data: {
-        "id": collectionID,
-        "files": items,
-      },
+      data: params,
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     );
@@ -218,14 +222,72 @@ class CollectionsService {
   }
 
   void _cacheOwnedCollectionAttributes(Collection collection) {
-    if (collection.encryptedPath != null) {
+    if (collection.attributes.encryptedPath != null) {
       var path = utf8.decode(CryptoUtil.decryptSync(
-          Sodium.base642bin(collection.encryptedPath),
+          Sodium.base642bin(collection.attributes.encryptedPath),
           _config.getKey(),
-          Sodium.base642bin(collection.pathDecryptionNonce)));
+          Sodium.base642bin(collection.attributes.pathDecryptionNonce)));
       _localCollections[path] = collection;
     }
     _collectionIDToOwnedCollections[collection.id] = collection;
     getCollectionKey(collection.id);
   }
+}
+
+class AddFilesRequest {
+  final int collectionID;
+  final List<CollectionFileItem> files;
+
+  AddFilesRequest(
+    this.collectionID,
+    this.files,
+  );
+
+  AddFilesRequest copyWith({
+    int collectionID,
+    List<CollectionFileItem> files,
+  }) {
+    return AddFilesRequest(
+      collectionID ?? this.collectionID,
+      files ?? this.files,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'collectionID': collectionID,
+      'files': files?.map((x) => x?.toMap())?.toList(),
+    };
+  }
+
+  factory AddFilesRequest.fromMap(Map<String, dynamic> map) {
+    if (map == null) return null;
+
+    return AddFilesRequest(
+      map['collectionID'],
+      List<CollectionFileItem>.from(
+          map['files']?.map((x) => CollectionFileItem.fromMap(x))),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory AddFilesRequest.fromJson(String source) =>
+      AddFilesRequest.fromMap(json.decode(source));
+
+  @override
+  String toString() =>
+      'AddFilesRequest(collectionID: $collectionID, files: $files)';
+
+  @override
+  bool operator ==(Object o) {
+    if (identical(this, o)) return true;
+
+    return o is AddFilesRequest &&
+        o.collectionID == collectionID &&
+        listEquals(o.files, files);
+  }
+
+  @override
+  int get hashCode => collectionID.hashCode ^ files.hashCode;
 }

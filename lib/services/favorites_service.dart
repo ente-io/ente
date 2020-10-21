@@ -84,8 +84,7 @@ class FavoritesService {
       Sodium.bin2base64(encryptedKeyData.nonce),
       "Favorites",
       CollectionType.favorites,
-      null,
-      null,
+      CollectionAttributes(),
       null,
     ));
     await _preferences.setInt(_favoritesCollectionIDKey, collection.id);

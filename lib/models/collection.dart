@@ -7,8 +7,7 @@ class Collection {
   final String keyDecryptionNonce;
   final String name;
   final CollectionType type;
-  final String encryptedPath;
-  final String pathDecryptionNonce;
+  final CollectionAttributes attributes;
   final int creationTime;
 
   Collection(
@@ -18,104 +17,9 @@ class Collection {
     this.keyDecryptionNonce,
     this.name,
     this.type,
-    this.encryptedPath,
-    this.pathDecryptionNonce,
+    this.attributes,
     this.creationTime,
   );
-
-  Collection copyWith({
-    int id,
-    int ownerID,
-    String encryptedKey,
-    String keyDecryptionNonce,
-    String name,
-    CollectionType type,
-    String encryptedPath,
-    String pathDecryptionNonce,
-    int creationTime,
-    List<String> sharees,
-  }) {
-    return Collection(
-      id ?? this.id,
-      ownerID ?? this.ownerID,
-      encryptedKey ?? this.encryptedKey,
-      keyDecryptionNonce ?? this.keyDecryptionNonce,
-      name ?? this.name,
-      type ?? this.type,
-      encryptedPath ?? this.encryptedPath,
-      encryptedPath ?? this.pathDecryptionNonce,
-      creationTime ?? this.creationTime,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'ownerID': ownerID,
-      'encryptedKey': encryptedKey,
-      'keyDecryptionNonce': keyDecryptionNonce,
-      'name': name,
-      'type': typeToString(type),
-      'creationTime': creationTime,
-      'encryptedPath': encryptedPath,
-      'pathDecryptionNonce': pathDecryptionNonce,
-    };
-  }
-
-  factory Collection.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
-    return Collection(
-      map['id'],
-      map['ownerID'],
-      map['encryptedKey'],
-      map['keyDecryptionNonce'],
-      map['name'],
-      typeFromString(map['type']),
-      map['encryptedPath'],
-      map['pathDecryptionNonce'],
-      map['creationTime'],
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory Collection.fromJson(String source) =>
-      Collection.fromMap(json.decode(source));
-
-  @override
-  String toString() {
-    return 'Collection(id: $id, ownerID: $ownerID, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, encryptedPath: $encryptedPath, pathDecryptionNonce: $pathDecryptionNonce, creationTime: $creationTime)';
-  }
-
-  @override
-  bool operator ==(Object o) {
-    if (identical(this, o)) return true;
-
-    return o is Collection &&
-        o.id == id &&
-        o.ownerID == ownerID &&
-        o.encryptedKey == encryptedKey &&
-        o.keyDecryptionNonce == keyDecryptionNonce &&
-        o.name == name &&
-        o.type == type &&
-        o.encryptedPath == encryptedPath &&
-        o.pathDecryptionNonce == pathDecryptionNonce &&
-        o.creationTime == creationTime;
-  }
-
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        ownerID.hashCode ^
-        encryptedKey.hashCode ^
-        keyDecryptionNonce.hashCode ^
-        name.hashCode ^
-        type.hashCode ^
-        encryptedPath.hashCode ^
-        pathDecryptionNonce.hashCode ^
-        creationTime.hashCode;
-  }
 
   static CollectionType typeFromString(String type) {
     switch (type) {
@@ -137,10 +41,158 @@ class Collection {
         return "album";
     }
   }
+
+  Collection copyWith({
+    int id,
+    int ownerID,
+    String encryptedKey,
+    String keyDecryptionNonce,
+    String name,
+    CollectionType type,
+    CollectionAttributes attributes,
+    int creationTime,
+  }) {
+    return Collection(
+      id ?? this.id,
+      ownerID ?? this.ownerID,
+      encryptedKey ?? this.encryptedKey,
+      keyDecryptionNonce ?? this.keyDecryptionNonce,
+      name ?? this.name,
+      type ?? this.type,
+      attributes ?? this.attributes,
+      creationTime ?? this.creationTime,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'ownerID': ownerID,
+      'encryptedKey': encryptedKey,
+      'keyDecryptionNonce': keyDecryptionNonce,
+      'name': name,
+      'type': typeToString(type),
+      'attributes': attributes?.toMap(),
+      'creationTime': creationTime,
+    };
+  }
+
+  factory Collection.fromMap(Map<String, dynamic> map) {
+    if (map == null) return null;
+
+    return Collection(
+      map['id'],
+      map['ownerID'],
+      map['encryptedKey'],
+      map['keyDecryptionNonce'],
+      map['name'],
+      typeFromString(map['type']),
+      CollectionAttributes.fromMap(map['attributes']),
+      map['creationTime'],
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory Collection.fromJson(String source) =>
+      Collection.fromMap(json.decode(source));
+
+  @override
+  String toString() {
+    return 'Collection(id: $id, ownerID: $ownerID, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, attributes: $attributes, creationTime: $creationTime)';
+  }
+
+  @override
+  bool operator ==(Object o) {
+    if (identical(this, o)) return true;
+
+    return o is Collection &&
+        o.id == id &&
+        o.ownerID == ownerID &&
+        o.encryptedKey == encryptedKey &&
+        o.keyDecryptionNonce == keyDecryptionNonce &&
+        o.name == name &&
+        o.type == type &&
+        o.attributes == attributes &&
+        o.creationTime == creationTime;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        ownerID.hashCode ^
+        encryptedKey.hashCode ^
+        keyDecryptionNonce.hashCode ^
+        name.hashCode ^
+        type.hashCode ^
+        attributes.hashCode ^
+        creationTime.hashCode;
+  }
 }
 
 enum CollectionType {
   folder,
   favorites,
   album,
+}
+
+class CollectionAttributes {
+  final String encryptedPath;
+  final String pathDecryptionNonce;
+
+  CollectionAttributes({
+    this.encryptedPath,
+    this.pathDecryptionNonce,
+  });
+
+  CollectionAttributes copyWith({
+    String encryptedPath,
+    String pathDecryptionNonce,
+  }) {
+    return CollectionAttributes(
+      encryptedPath: encryptedPath ?? this.encryptedPath,
+      pathDecryptionNonce: pathDecryptionNonce ?? this.pathDecryptionNonce,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    final map = Map<String, dynamic>();
+    if (encryptedPath != null) {
+      map['encryptedPath'] = encryptedPath;
+    }
+    if (pathDecryptionNonce != null) {
+      map['pathDecryptionNonce'] = pathDecryptionNonce;
+    }
+    return map;
+  }
+
+  factory CollectionAttributes.fromMap(Map<String, dynamic> map) {
+    if (map == null) return null;
+
+    return CollectionAttributes(
+      encryptedPath: map['encryptedPath'],
+      pathDecryptionNonce: map['pathDecryptionNonce'],
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory CollectionAttributes.fromJson(String source) =>
+      CollectionAttributes.fromMap(json.decode(source));
+
+  @override
+  String toString() =>
+      'CollectionAttributes(encryptedPath: $encryptedPath, pathDecryptionNonce: $pathDecryptionNonce)';
+
+  @override
+  bool operator ==(Object o) {
+    if (identical(this, o)) return true;
+
+    return o is CollectionAttributes &&
+        o.encryptedPath == encryptedPath &&
+        o.pathDecryptionNonce == pathDecryptionNonce;
+  }
+
+  @override
+  int get hashCode => encryptedPath.hashCode ^ pathDecryptionNonce.hashCode;
 }
