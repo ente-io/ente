@@ -295,6 +295,15 @@ class FilesDB {
     );
   }
 
+  Future<int> deleteFromCollection(int uploadedFileID, int collectionID) async {
+    final db = await instance.database;
+    return db.delete(
+      table,
+      where: '$columnUploadedFileID = ? AND $columnCollectionID = ?',
+      whereArgs: [uploadedFileID, collectionID],
+    );
+  }
+
   Future<int> deleteFilesInRemoteFolder(int folderID) async {
     final db = await instance.database;
     return db.delete(

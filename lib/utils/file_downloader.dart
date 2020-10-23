@@ -5,6 +5,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -34,8 +35,13 @@ class DiffFetcher {
             for (final item in diff) {
               final file = File();
               file.uploadedFileID = item["id"];
-              file.ownerID = item["ownerID"];
               file.collectionID = item["collectionID"];
+              if (item["isDeleted"]) {
+                await FilesDB.instance.deleteFromCollection(
+                    file.uploadedFileID, file.collectionID);
+                continue;
+              }
+              file.ownerID = item["ownerID"];
               file.updationTime = item["updationTime"];
               file.isEncrypted = true;
               file.encryptedKey = item["encryptedKey"];
