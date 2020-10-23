@@ -206,6 +206,23 @@ class CollectionsService {
     );
   }
 
+  Future<void> removeFromCollection(int collectionID, List<File> files) {
+    final params = Map<String, dynamic>();
+    params["collectionID"] = collectionID;
+    for (final file in files) {
+      if (params["fileIDs"] == null) {
+        params["fileIDs"] = [];
+      }
+      params["fileIDs"].add(file.uploadedFileID);
+    }
+    return Dio().post(
+      Configuration.instance.getHttpEndpoint() + "/collections/remove-files",
+      data: params,
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    );
+  }
+
   Future<Collection> createAndCacheCollection(Collection collection) async {
     return Dio()
         .post(
