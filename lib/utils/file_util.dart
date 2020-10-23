@@ -17,21 +17,22 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/sync_service.dart';
 
 import 'crypto_util.dart';
 
 final logger = Logger("FileUtil");
 
-Future<void> deleteFiles(List<File> files,
-    {bool deleteEveryWhere = false}) async {
+Future<void> deleteFiles(List<File> files) async {
   await PhotoManager.editor
       .deleteWithIds(files.map((file) => file.localID).toList());
   for (File file in files) {
-    deleteEveryWhere
-        ? await FilesDB.instance.markForDeletion(file)
-        : await FilesDB.instance.delete(file);
+    await FilesDB.instance.markForDeletion(file);
   }
+  await FileRepository.instance.reloadFiles();
+  SyncService.instance.sync();
 }
 
 void preloadFile(File file) {

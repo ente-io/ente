@@ -88,7 +88,6 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         widget.file.getAsset().then((asset) async {
           if (asset == null) {
             await deleteFiles([widget.file]);
-            await FileRepository.instance.reloadFiles();
             return;
           }
           asset

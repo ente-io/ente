@@ -181,21 +181,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   void _showDeleteSheet(BuildContext context) {
     final action = CupertinoActionSheet(
+      title: Text("Delete file?"),
       actions: <Widget>[
         CupertinoActionSheetAction(
-          child: Text("Delete on device"),
+          child: Text("Delete"),
           isDestructiveAction: true,
-          onPressed: () {
-            _deleteSelected(context, false);
+          onPressed: () async {
+            await _deleteSelected();
           },
         ),
-        CupertinoActionSheetAction(
-          child: Text("Delete everywhere [WiP]"),
-          isDestructiveAction: true,
-          onPressed: () {
-            _deleteSelected(context, true);
-          },
-        )
       ],
       cancelButton: CupertinoActionSheetAction(
         child: Text("Cancel"),
@@ -207,13 +201,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     showCupertinoModalPopup(context: context, builder: (_) => action);
   }
 
-  _deleteSelected(BuildContext context, bool deleteEveryWhere) async {
+  _deleteSelected() async {
     Navigator.of(context, rootNavigator: true).pop();
     final dialog = createProgressDialog(context, "Deleting...");
     await dialog.show();
-    await deleteFiles(widget.selectedFiles.files.toList(),
-        deleteEveryWhere: deleteEveryWhere);
-    await FileRepository.instance.reloadFiles();
+    await deleteFiles(widget.selectedFiles.files.toList());
     _clearSelectedFiles();
     await dialog.hide();
   }

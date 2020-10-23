@@ -8,6 +8,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/ui/video_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:logging/logging.dart';
@@ -179,8 +180,19 @@ class _DetailPageState extends State<DetailPage> {
     final file = _files[_selectedIndex];
     return LikeButton(
       isLiked: FavoritesService.instance.isLiked(file),
-      onTap: (oldValue) {
-        return FavoritesService.instance.setLiked(file, !oldValue);
+      onTap: (oldValue) async {
+        // return FavoritesService.instance.setLiked(file, !oldValue);
+        final dialog = createProgressDialog(context, "Adding to favorites...");
+        await dialog.show();
+        try {
+          await FavoritesService.instance.addToFavorites(file);
+        } catch (e, s) {
+          _logger.severe(e, s);
+          await dialog.hide();
+          showGenericErrorDialog(context);
+        } finally {
+          await dialog.hide();
+        }
       },
       likeBuilder: (isLiked) {
         return Icon(
@@ -255,21 +267,15 @@ class _DetailPageState extends State<DetailPage> {
 
   void _showDeleteSheet() {
     final action = CupertinoActionSheet(
+      title: Text("Delete file?"),
       actions: <Widget>[
         CupertinoActionSheetAction(
-          child: Text("Delete on device"),
+          child: Text("Delete"),
           isDestructiveAction: true,
           onPressed: () async {
-            await _delete(false);
+            await _delete();
           },
         ),
-        CupertinoActionSheetAction(
-          child: Text("Delete everywhere [WiP]"),
-          isDestructiveAction: true,
-          onPressed: () async {
-            await _delete(true);
-          },
-        )
       ],
       cancelButton: CupertinoActionSheetAction(
         child: Text("Cancel"),
@@ -281,7 +287,7 @@ class _DetailPageState extends State<DetailPage> {
     showCupertinoModalPopup(context: context, builder: (_) => action);
   }
 
-  Future _delete(bool deleteEveryWhere) async {
+  Future _delete() async {
     final file = _files[_selectedIndex];
     final totalFiles = _files.length;
     if (_selectedIndex == totalFiles - 1) {
@@ -305,7 +311,6 @@ class _DetailPageState extends State<DetailPage> {
       Navigator.of(context, rootNavigator: true).pop(); // Close gallery
     }
 
-    await deleteFiles([file], deleteEveryWhere: deleteEveryWhere);
-    FileRepository.instance.reloadFiles();
+    await deleteFiles([file]);
   }
 }
