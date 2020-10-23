@@ -71,6 +71,16 @@ class FavoritesService {
     }
   }
 
+  Future<void> removeFromFavorites(File file) async {
+    final collectionID = await getOrCreateFavoriteCollectionID();
+    var fileID = file.uploadedFileID;
+    if (fileID == null) {
+      // Do nothing, ignore
+    } else {
+      return _collectionsService.removeFromCollection(collectionID, [file]);
+    }
+  }
+
   Future<int> getOrCreateFavoriteCollectionID() async {
     if (_preferences.containsKey(_favoritesCollectionIDKey)) {
       return _preferences.getInt(_favoritesCollectionIDKey);

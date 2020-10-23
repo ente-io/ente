@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:photos/services/favorites_service.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/video_widget.dart';
@@ -12,6 +11,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class DetailPage extends StatefulWidget {
   final List<File> files;
@@ -181,18 +181,37 @@ class _DetailPageState extends State<DetailPage> {
     return LikeButton(
       isLiked: FavoritesService.instance.isLiked(file),
       onTap: (oldValue) async {
-        // return FavoritesService.instance.setLiked(file, !oldValue);
-        final dialog = createProgressDialog(context, "Adding to favorites...");
-        await dialog.show();
-        try {
-          await FavoritesService.instance.addToFavorites(file);
-        } catch (e, s) {
-          _logger.severe(e, s);
-          await dialog.hide();
-          showGenericErrorDialog(context);
-        } finally {
-          await dialog.hide();
+        final isLiked = !oldValue;
+        if (isLiked) {
+          final dialog =
+              createProgressDialog(context, "Adding to favorites...");
+          await dialog.show();
+          try {
+            await FavoritesService.instance.addToFavorites(file);
+            showToast("Added to favorites.");
+          } catch (e, s) {
+            _logger.severe(e, s);
+            await dialog.hide();
+            showGenericErrorDialog(context);
+          } finally {
+            await dialog.hide();
+          }
+        } else {
+          final dialog =
+              createProgressDialog(context, "Removing from favorites...");
+          await dialog.show();
+          try {
+            await FavoritesService.instance.removeFromFavorites(file);
+            showToast("Removed from favorites.");
+          } catch (e, s) {
+            _logger.severe(e, s);
+            await dialog.hide();
+            showGenericErrorDialog(context);
+          } finally {
+            await dialog.hide();
+          }
         }
+        return isLiked;
       },
       likeBuilder: (isLiked) {
         return Icon(
