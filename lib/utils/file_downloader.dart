@@ -36,9 +36,6 @@ class DiffFetcher {
               file.uploadedFileID = item["id"];
               file.ownerID = item["ownerID"];
               file.collectionID = item["collectionID"];
-              if (file.collectionID == 4) {
-                _logger.info("Found");
-              }
               file.updationTime = item["updationTime"];
               file.isEncrypted = true;
               file.encryptedKey = item["encryptedKey"];
