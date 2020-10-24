@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common_elements.dart';
 
 class EmailEntryPage extends StatefulWidget {
   EmailEntryPage({Key key}) : super(key: key);
@@ -25,7 +26,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Preserve Memories"),
+        title: Text("Sign Up"),
       ),
       body: _getBody(),
     );
@@ -37,9 +38,15 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         padding: EdgeInsets.all(8),
         child: Column(
           children: [
+            Image.asset(
+              "assets/welcome.png",
+              width: 300,
+              height: 200,
+            ),
+            Padding(padding: EdgeInsets.all(12)),
             TextFormField(
               decoration: InputDecoration(
-                hintText: 'email@domain.com',
+                hintText: 'you@email.com',
                 contentPadding: EdgeInsets.all(20),
               ),
               controller: _emailController,
@@ -48,21 +55,15 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               keyboardType: TextInputType.emailAddress,
             ),
             Padding(padding: EdgeInsets.all(8)),
-            SizedBox(
-                width: double.infinity,
-                child: RaisedButton(
-                  onPressed: () {
-                    final email = _emailController.text;
-                    Configuration.instance.setEmail(email);
-                    UserService.instance.getOtt(context, email);
-                  },
-                  padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
-                  child: Text("Sign In"),
-                  color: Theme.of(context).buttonColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
-                )),
+            Container(
+              width: double.infinity,
+              height: 44,
+              child: button("Sign In", onPressed: () {
+                final email = _emailController.text;
+                Configuration.instance.setEmail(email);
+                UserService.instance.getOtt(context, email);
+              }),
+            ),
           ],
         ),
       ),

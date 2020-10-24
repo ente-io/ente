@@ -8,7 +8,7 @@ RaisedButton button(String text, {VoidCallback onPressed}) {
     child: Text(text),
     onPressed: onPressed,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(6.0),
+      borderRadius: BorderRadius.circular(10.0),
     ),
   );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class PassphraseEntryPage extends StatefulWidget {
@@ -89,9 +90,11 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
               },
             ),
             Padding(padding: EdgeInsets.all(8)),
-            SizedBox(
+            Container(
                 width: double.infinity,
-                child: RaisedButton(
+                height: 44,
+                child: button(
+                  "Set Passphrase",
                   onPressed: _passphraseController1.text.isNotEmpty &&
                           _passphraseController2.text.isNotEmpty
                       ? () {
@@ -104,12 +107,6 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
                           }
                         }
                       : null,
-                  padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
-                  child: Text("Set Passphrase"),
-                  color: Theme.of(context).buttonColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
                 )),
           ],
         ),
@@ -142,8 +139,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
           child: Text("Confirm"),
           onPressed: () {
             Navigator.of(context).pop();
-            UserService.instance
-                .setupKey(context, _passphraseController1.text);
+            UserService.instance.setupKey(context, _passphraseController1.text);
           },
         ),
       ],

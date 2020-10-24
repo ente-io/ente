@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/services/user_service.dart';
 
@@ -77,9 +78,11 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               },
             ),
             Padding(padding: EdgeInsets.all(8)),
-            SizedBox(
+            Container(
                 width: double.infinity,
-                child: RaisedButton(
+                height: 44,
+                child: button(
+                  "Verify",
                   onPressed: _verificationCodeController.text == null ||
                           _verificationCodeController.text.isEmpty
                       ? null
@@ -87,13 +90,6 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                           UserService.instance.getCredentials(
                               context, _verificationCodeController.text);
                         },
-                  padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
-                  child: Text(
-                    "Verify",
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
                 )),
             Padding(padding: EdgeInsets.all(8)),
             FlatButton(

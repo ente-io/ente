@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class PassphraseReentryPage extends StatefulWidget {
@@ -62,9 +63,11 @@ class _PassphraseReentryPageState extends State<PassphraseReentryPage> {
               },
             ),
             Padding(padding: EdgeInsets.all(12)),
-            SizedBox(
+            Container(
                 width: double.infinity,
-                child: RaisedButton(
+                height: 44,
+                child: button(
+                  "Verify Passphrase",
                   onPressed: _passphraseController.text.isNotEmpty
                       ? () async {
                           final dialog =
@@ -86,12 +89,6 @@ class _PassphraseReentryPageState extends State<PassphraseReentryPage> {
                               .popUntil((route) => route.isFirst);
                         }
                       : null,
-                  padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
-                  child: Text("Set Passphrase"),
-                  color: Theme.of(context).buttonColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
                 )),
           ],
         ),
