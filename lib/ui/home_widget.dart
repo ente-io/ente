@@ -12,7 +12,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/ui/device_folders_gallery_widget.dart';
+import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
@@ -39,7 +39,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   static final importantItemsFilter = ImportantItemsFilter();
   final _logger = Logger("HomeWidgetState");
   final _sharedCollectionGallery = SharedCollectionGallery();
-  final _deviceFolderGalleryWidget = DeviceFolderGalleryWidget();
+  final _deviceFolderGalleryWidget = CollectionsGalleryWidget();
   final _selectedFiles = SelectedFiles();
   final _memoriesWidget = MemoriesWidget();
 
@@ -174,15 +174,15 @@ class _HomeWidgetState extends State<HomeWidget> {
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: Icon(Icons.photo_library),
-          title: Text('Photos'),
+          label: "Photos",
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.folder),
-          title: Text('Folders'),
+          icon: Icon(Icons.folder_special),
+          label: "Collections",
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.folder_shared),
-          title: Text('Shared'),
+          label: "Shared",
         ),
       ],
       currentIndex: _selectedNavBarItem,

@@ -159,6 +159,10 @@ class CollectionsService {
     });
   }
 
+  Collection getOwnedCollectionByID(int collectionID) {
+    return _collectionIDToOwnedCollections[collectionID];
+  }
+
   Future<Collection> getOrCreateForPath(String path) async {
     if (_localCollections.containsKey(path)) {
       return _localCollections[path];

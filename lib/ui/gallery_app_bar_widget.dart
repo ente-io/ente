@@ -19,6 +19,7 @@ enum GalleryAppBarType {
   homepage,
   local_folder,
   shared_collection,
+  collection,
   search_results,
 }
 

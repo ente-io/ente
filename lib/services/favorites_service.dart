@@ -47,7 +47,7 @@ class FavoritesService {
   }
 
   Future<void> addToFavorites(File file) async {
-    final collectionID = await getOrCreateFavoriteCollectionID();
+    final collectionID = await _getOrCreateFavoriteCollectionID();
     var fileID = file.uploadedFileID;
     if (fileID == null) {
       file.collectionID = collectionID;
@@ -72,7 +72,7 @@ class FavoritesService {
   }
 
   Future<void> removeFromFavorites(File file) async {
-    final collectionID = await getOrCreateFavoriteCollectionID();
+    final collectionID = await _getOrCreateFavoriteCollectionID();
     var fileID = file.uploadedFileID;
     if (fileID == null) {
       // Do nothing, ignore
@@ -83,7 +83,15 @@ class FavoritesService {
     }
   }
 
-  Future<int> getOrCreateFavoriteCollectionID() async {
+  Collection getFavoritesCollection() {
+    if (!_preferences.containsKey(_favoritesCollectionIDKey)) {
+      return null;
+    }
+    return _collectionsService
+        .getOwnedCollectionByID(_preferences.getInt(_favoritesCollectionIDKey));
+  }
+
+  Future<int> _getOrCreateFavoriteCollectionID() async {
     if (_preferences.containsKey(_favoritesCollectionIDKey)) {
       return _preferences.getInt(_favoritesCollectionIDKey);
     }
