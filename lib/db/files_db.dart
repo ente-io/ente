@@ -83,7 +83,8 @@ class FilesDB {
             $columnMetadataDecryptionHeader TEXT,
             $columnIsDeleted INTEGER DEFAULT 0,
             $columnCreationTime TEXT NOT NULL,
-            $columnUpdationTime TEXT
+            $columnUpdationTime TEXT,
+            UNIQUE($columnUploadedFileID, $columnCollectionID)
           )
           ''');
   }
@@ -102,7 +103,11 @@ class FilesDB {
         await batch.commit();
         batch = db.batch();
       }
-      batch.insert(table, _getRowForFile(file));
+      batch.insert(
+        table,
+        _getRowForFile(file),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
       batchCounter++;
     }
     return await batch.commit();
@@ -167,8 +172,7 @@ class FilesDB {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where:
-          '$columnCollectionID = ?',
+      where: '$columnCollectionID = ?',
       whereArgs: [collectionID],
       orderBy: '$columnCreationTime DESC',
     );
