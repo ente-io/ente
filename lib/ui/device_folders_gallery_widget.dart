@@ -75,7 +75,6 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
     final paths = await FilesDB.instance.getLocalPaths();
     final folders = List<DeviceFolder>();
     for (final path in paths) {
-      final thumbnail = await FilesDB.instance.getLatestFileInPath(path);
       final files = List<File>();
       for (File file in FileRepository.instance.files) {
         if (file.deviceFolder == path) {
@@ -83,7 +82,7 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
         }
       }
       final folderName = p.basename(path);
-      folders.add(DeviceFolder(folderName, path, () => files, thumbnail));
+      folders.add(DeviceFolder(folderName, path, () => files, files[0]));
     }
     folders.sort((first, second) {
       return second.thumbnail.creationTime
