@@ -208,16 +208,13 @@ class SyncService {
           // Eg: Addition to an album or favorites
           await CollectionsService.instance
               .addToCollection(file.collectionID, [existingFile]);
-        } else if (_uploader.getCurrentUploadStatus(file.generatedID) !=
-            null) {
+        } else if (_uploader.getCurrentUploadStatus(file.generatedID) != null) {
           // The file is currently being uploaded outside this loop
           // Eg: Addition to an album or favorites
           await _uploader.getCurrentUploadStatus(file.generatedID);
           await CollectionsService.instance
               .addToCollection(file.collectionID, [existingFile]);
         } else {
-          // TODO: The file might be currently being uploaded leading to two
-          // deep copies
           final uploadedFile = await _uploader.encryptAndUploadFile(file);
           await _db.update(
             file.generatedID,
