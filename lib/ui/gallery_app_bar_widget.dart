@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/email_entry_page.dart';

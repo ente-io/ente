@@ -104,11 +104,6 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
             return favorites;
           }, favorites[0]));
     }
-    final videos = await FilesDB.instance.getAllVideos();
-    if (videos.length > 0) {
-      folders.insert(
-          0, DeviceFolder("Videos", "/Videos", () => videos, videos[0]));
-    }
     return folders;
   }
 
