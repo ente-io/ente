@@ -15,9 +15,14 @@ import 'package:photos/utils/file_util.dart';
 class FileUploader {
   final _logger = Logger("FileUploader");
   final _dio = Dio();
+  final _currentlyUploading = Map<int, Future<File>>();
 
   FileUploader._privateConstructor();
   static FileUploader instance = FileUploader._privateConstructor();
+
+  Future<File> getCurrentUploadStatus(int generatedID) {
+    return _currentlyUploading[generatedID];
+  }
 
   Future<UploadURL> getUploadURL() {
     return Dio()
@@ -53,6 +58,11 @@ class FileUploader {
   }
 
   Future<File> encryptAndUploadFile(File file) async {
+    _currentlyUploading[file.generatedID] = _encryptAndUploadFile(file);
+    return _currentlyUploading[file.generatedID];
+  }
+
+  Future<File> _encryptAndUploadFile(File file) async {
     _logger.info("Uploading " + file.toString());
     final encryptedFileName = file.generatedID.toString() + ".encrypted";
     final tempDirectory = Configuration.instance.getTempDirectory();
@@ -137,6 +147,7 @@ class FileUploader {
       file.fileDecryptionHeader = fileDecryptionHeader;
       file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
       file.metadataDecryptionHeader = metadataDecryptionHeader;
+      _currentlyUploading.remove(file.generatedID);
       return file;
     });
   }

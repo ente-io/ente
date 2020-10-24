@@ -201,24 +201,37 @@ class SyncService {
         file.collectionID = (await CollectionsService.instance
                 .getOrCreateForPath(file.deviceFolder))
             .id;
-        var uploadedFile;
-        if (Configuration.instance.hasOptedForE2E()) {
-          uploadedFile = await _uploader.encryptAndUploadFile(file);
+        final existingFile = await _db.getFile(file.generatedID);
+
+        if (existingFile.uploadedFileID != null) {
+          // The file was uploaded outside this loop
+          // Eg: Addition to an album or favorites
+          await CollectionsService.instance
+              .addToCollection(file.collectionID, [existingFile]);
+        } else if (_uploader.getCurrentUploadStatus(file.generatedID) !=
+            null) {
+          // The file is currently being uploaded outside this loop
+          // Eg: Addition to an album or favorites
+          await _uploader.getCurrentUploadStatus(file.generatedID);
+          await CollectionsService.instance
+              .addToCollection(file.collectionID, [existingFile]);
         } else {
-          uploadedFile = await _uploader.uploadFile(file);
+          // TODO: The file might be currently being uploaded leading to two
+          // deep copies
+          final uploadedFile = await _uploader.encryptAndUploadFile(file);
+          await _db.update(
+            file.generatedID,
+            uploadedFile.uploadedFileID,
+            uploadedFile.ownerID,
+            uploadedFile.collectionID,
+            uploadedFile.updationTime,
+            file.encryptedKey,
+            file.keyDecryptionNonce,
+            file.fileDecryptionHeader,
+            file.thumbnailDecryptionHeader,
+            file.metadataDecryptionHeader,
+          );
         }
-        await _db.update(
-          file.generatedID,
-          uploadedFile.uploadedFileID,
-          uploadedFile.ownerID,
-          uploadedFile.collectionID,
-          uploadedFile.updationTime,
-          file.encryptedKey,
-          file.keyDecryptionNonce,
-          file.fileDecryptionHeader,
-          file.thumbnailDecryptionHeader,
-          file.metadataDecryptionHeader,
-        );
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: filesToBeUploaded.length));
       } catch (e) {

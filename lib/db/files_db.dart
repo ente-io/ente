@@ -113,6 +113,18 @@ class FilesDB {
     return await batch.commit();
   }
 
+  Future<File> getFile(int generatedID) async {
+    final db = await instance.database;
+    final results = await db.query(table,
+        where: '$columnGeneratedID = ?', whereArgs: [generatedID]);
+    final convertedResults = _convertToFiles(results);
+    if (convertedResults.length == 0) {
+      return null;
+    } else {
+      return convertedResults[1];
+    }
+  }
+
   Future<List<File>> getOwnedFiles(int ownerID) async {
     final db = await instance.database;
     final whereArgs = List<dynamic>();
