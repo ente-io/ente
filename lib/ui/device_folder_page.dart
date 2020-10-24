@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_folder.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
@@ -23,7 +21,7 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
   @override
   Widget build(Object context) {
     var gallery = Gallery(
-      syncLoader: () => _getFilteredFiles(FileRepository.instance.files),
+      syncLoader: widget.folder.loader,
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       tagPrefix: "device_folder:" + widget.folder.path,
       selectedFiles: _selectedFiles,
@@ -37,18 +35,5 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
       ),
       body: gallery,
     );
-  }
-
-  List<File> _getFilteredFiles(List<File> unfilteredFiles) {
-    if (widget.folder.filter == null) {
-      return unfilteredFiles;
-    }
-    final List<File> filteredFiles = List<File>();
-    for (File file in unfilteredFiles) {
-      if (widget.folder.filter.shouldInclude(file)) {
-        filteredFiles.add(file);
-      }
-    }
-    return filteredFiles;
   }
 }

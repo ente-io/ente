@@ -5,11 +5,10 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/models/file.dart';
+import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/models/device_folder.dart';
-import 'package:photos/models/filters/favorite_items_filter.dart';
-import 'package:photos/models/filters/device_folder_name_filter.dart';
-import 'package:photos/models/filters/video_file_filter.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/device_folder_page.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -76,25 +75,40 @@ class _DeviceFolderGalleryWidgetState extends State<DeviceFolderGalleryWidget> {
     final paths = await FilesDB.instance.getLocalPaths();
     final folders = List<DeviceFolder>();
     for (final path in paths) {
-      final file = await FilesDB.instance.getLatestFileInPath(path);
+      final thumbnail = await FilesDB.instance.getLatestFileInPath(path);
+      final files = List<File>();
+      for (File file in FileRepository.instance.files) {
+        if (file.deviceFolder == path) {
+          files.add(file);
+        }
+      }
       final folderName = p.basename(path);
-      folders.add(
-          DeviceFolder(folderName, path, file, DeviceFolderNameFilter(folderName)));
+      folders.add(DeviceFolder(folderName, path, () => files, thumbnail));
     }
     folders.sort((first, second) {
       return second.thumbnail.creationTime
           .compareTo(first.thumbnail.creationTime);
     });
-    if (FavoritesService.instance.hasFavorites()) {
-      final file = await FilesDB.instance.getLatestFileAmongGeneratedIDs(
-          FavoritesService.instance.getLiked().toList());
-      folders.insert(0,
-          DeviceFolder("Favorites", "/Favorites", file, FavoriteItemsFilter()));
+    final favorites = FavoritesService.instance.getFavoriteFiles().toList();
+    favorites.sort((first, second) {
+      return second.creationTime.compareTo(first.creationTime);
+    });
+    if (favorites.length > 0) {
+      folders.insert(
+          0,
+          DeviceFolder("Favorites", "/Favorites", () {
+            final favorites =
+                FavoritesService.instance.getFavoriteFiles().toList();
+            favorites.sort((first, second) {
+              return second.creationTime.compareTo(first.creationTime);
+            });
+            return favorites;
+          }, favorites[0]));
     }
     final videos = await FilesDB.instance.getAllVideos();
     if (videos.length > 0) {
       folders.insert(
-          0, DeviceFolder("Videos", "/Videos", videos[0], VideoFileFilter()));
+          0, DeviceFolder("Videos", "/Videos", () => videos, videos[0]));
     }
     return folders;
   }

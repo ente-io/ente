@@ -1,6 +1,7 @@
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
@@ -10,17 +11,19 @@ import 'package:photos/utils/file_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoritesService {
-  static final _favoritePhotoIdsKey = "favorite_photo_ids";
   static final _favoritesCollectionIDKey = "favorites_collection_id";
 
+  final _cachedFavoriteFiles = Set<File>();
   Configuration _config;
   CollectionsService _collectionsService;
   FileUploader _fileUploader;
+  FilesDB _filesDB;
 
   FavoritesService._privateConstructor() {
     _config = Configuration.instance;
     _collectionsService = CollectionsService.instance;
     _fileUploader = FileUploader.instance;
+    _filesDB = FilesDB.instance;
   }
   static FavoritesService instance = FavoritesService._privateConstructor();
 
@@ -28,36 +31,19 @@ class FavoritesService {
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
-  }
-
-  bool isLiked(File photo) {
-    return getLiked().contains(photo.generatedID.toString());
-  }
-
-  bool hasFavorites() {
-    return getLiked().isNotEmpty;
-  }
-
-  Future<bool> setLiked(File photo, bool isLiked) {
-    final liked = getLiked();
-    if (isLiked) {
-      liked.add(photo.generatedID.toString());
-    } else {
-      liked.remove(photo.generatedID.toString());
+    if (_preferences.containsKey(_favoritesCollectionIDKey)) {
+      final collectionID = _preferences.getInt(_favoritesCollectionIDKey);
+      _cachedFavoriteFiles
+          .addAll((await _filesDB.getAllInCollection(collectionID)).toSet());
     }
-    Bus.instance.fire(LocalPhotosUpdatedEvent());
-    return _preferences
-        .setStringList(_favoritePhotoIdsKey, liked.toList())
-        .then((_) => isLiked);
   }
 
-  Set<String> getLiked() {
-    final value = _preferences.getStringList(_favoritePhotoIdsKey);
-    if (value == null) {
-      return Set<String>();
-    } else {
-      return value.toSet();
-    }
+  Set<File> getFavoriteFiles() {
+    return _cachedFavoriteFiles;
+  }
+
+  bool isLiked(File file) {
+    return _cachedFavoriteFiles.contains(file);
   }
 
   Future<void> addToFavorites(File file) async {
@@ -66,8 +52,22 @@ class FavoritesService {
     if (fileID == null) {
       file.collectionID = collectionID;
       fileID = (await _fileUploader.encryptAndUploadFile(file)).uploadedFileID;
+      await _filesDB.update(
+        file.generatedID,
+        file.uploadedFileID,
+        file.ownerID,
+        file.collectionID,
+        file.updationTime,
+        file.encryptedKey,
+        file.keyDecryptionNonce,
+        file.fileDecryptionHeader,
+        file.thumbnailDecryptionHeader,
+        file.metadataDecryptionHeader,
+      );
     } else {
-      return _collectionsService.addToCollection(collectionID, [file]);
+      await _collectionsService.addToCollection(collectionID, [file]);
+      _cachedFavoriteFiles.add(file);
+      Bus.instance.fire(LocalPhotosUpdatedEvent());
     }
   }
 
@@ -77,7 +77,9 @@ class FavoritesService {
     if (fileID == null) {
       // Do nothing, ignore
     } else {
-      return _collectionsService.removeFromCollection(collectionID, [file]);
+      await _collectionsService.removeFromCollection(collectionID, [file]);
+      _cachedFavoriteFiles.remove(file);
+      Bus.instance.fire(LocalPhotosUpdatedEvent());
     }
   }
 

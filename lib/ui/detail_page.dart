@@ -182,6 +182,7 @@ class _DetailPageState extends State<DetailPage> {
       isLiked: FavoritesService.instance.isLiked(file),
       onTap: (oldValue) async {
         final isLiked = !oldValue;
+        bool hasError = false;
         if (isLiked) {
           final dialog =
               createProgressDialog(context, "Adding to favorites...");
@@ -192,6 +193,7 @@ class _DetailPageState extends State<DetailPage> {
           } catch (e, s) {
             _logger.severe(e, s);
             await dialog.hide();
+            hasError = true;
             showGenericErrorDialog(context);
           } finally {
             await dialog.hide();
@@ -206,12 +208,13 @@ class _DetailPageState extends State<DetailPage> {
           } catch (e, s) {
             _logger.severe(e, s);
             await dialog.hide();
+            hasError = true;
             showGenericErrorDialog(context);
           } finally {
             await dialog.hide();
           }
         }
-        return isLiked;
+        return hasError ? oldValue : isLiked;
       },
       likeBuilder: (isLiked) {
         return Icon(

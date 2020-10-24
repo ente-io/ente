@@ -20,12 +20,13 @@ class _SharedCollectionPageState extends State<SharedCollectionPage> {
   @override
   Widget build(Object context) {
     var gallery = Gallery(
-      asyncLoader: (lastFile, limit) => FilesDB.instance.getAllInCollection(
-          widget.collection.id,
-          lastFile == null
-              ? DateTime.now().microsecondsSinceEpoch
-              : lastFile.creationTime,
-          limit),
+      asyncLoader: (lastFile, limit) => FilesDB.instance
+          .getAllInCollectionBeforeCreationTime(
+              widget.collection.id,
+              lastFile == null
+                  ? DateTime.now().microsecondsSinceEpoch
+                  : lastFile.creationTime,
+              limit),
       // onRefresh: () => FolderSharingService.instance.syncDiff(widget.folder),
       tagPrefix: "shared_collection",
       selectedFiles: _selectedFiles,
