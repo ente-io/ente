@@ -117,16 +117,25 @@ class FilesDB {
     final db = await instance.database;
     final results = await db.query(table,
         where: '$columnGeneratedID = ?', whereArgs: [generatedID]);
-    return _convertToFiles(results)[0];
+    final convertedResults = _convertToFiles(results);
+    if (convertedResults.length == 0) {
+      return null;
+    } else {
+      return convertedResults[1];
+    }
   }
 
   Future<List<File>> getOwnedFiles(int ownerID) async {
     final db = await instance.database;
+    final whereArgs = List<dynamic>();
+    if (ownerID != null) {
+      whereArgs.add(ownerID);
+    }
     final results = await db.query(
       table,
-      where: '$columnIsDeleted = 0' +
-          (ownerID == null ? '' : ' AND $columnOwnerID = ?'),
-      whereArgs: [ownerID],
+      // where: '$columnIsDeleted = 0' +
+      //     (ownerID == null ? '' : ' AND $columnOwnerID = ?'),
+      // whereArgs: whereArgs,
       orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
