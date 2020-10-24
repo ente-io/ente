@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/location.dart';
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -92,6 +93,11 @@ class FileUploader {
     final thumbnailUploadURL = await getUploadURL();
     String thumbnailObjectKey =
         await putFile(thumbnailUploadURL, io.File(encryptedThumbnailPath));
+
+    if (file.location.latitude == 0 && file.location.longitude == 0) {
+      final latLong = await (await file.getAsset()).latlngAsync();
+      file.location = Location(latLong.latitude, latLong.longitude);
+    }
 
     final encryptedMetadataData = CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);

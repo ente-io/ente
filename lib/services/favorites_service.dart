@@ -48,22 +48,10 @@ class FavoritesService {
 
   Future<void> addToFavorites(File file) async {
     final collectionID = await _getOrCreateFavoriteCollectionID();
-    var fileID = file.uploadedFileID;
-    if (fileID == null) {
+    if (file.uploadedFileID == null) {
       file.collectionID = collectionID;
-      fileID = (await _fileUploader.encryptAndUploadFile(file)).uploadedFileID;
-      await _filesDB.update(
-        file.generatedID,
-        file.uploadedFileID,
-        file.ownerID,
-        file.collectionID,
-        file.updationTime,
-        file.encryptedKey,
-        file.keyDecryptionNonce,
-        file.fileDecryptionHeader,
-        file.thumbnailDecryptionHeader,
-        file.metadataDecryptionHeader,
-      );
+      final uploadedFile = (await _fileUploader.encryptAndUploadFile(file));
+      await _filesDB.update(uploadedFile);
     } else {
       await _collectionsService.addToCollection(collectionID, [file]);
       _cachedFavoriteFiles.add(file);

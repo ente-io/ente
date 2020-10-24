@@ -216,18 +216,7 @@ class SyncService {
               .addToCollection(file.collectionID, [existingFile]);
         } else {
           final uploadedFile = await _uploader.encryptAndUploadFile(file);
-          await _db.update(
-            file.generatedID,
-            uploadedFile.uploadedFileID,
-            uploadedFile.ownerID,
-            uploadedFile.collectionID,
-            uploadedFile.updationTime,
-            file.encryptedKey,
-            file.keyDecryptionNonce,
-            file.fileDecryptionHeader,
-            file.thumbnailDecryptionHeader,
-            file.metadataDecryptionHeader,
-          );
+          await _db.update(uploadedFile);
         }
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: filesToBeUploaded.length));
@@ -244,18 +233,16 @@ class SyncService {
         final existingFile = await _db.getMatchingFile(file.localID, file.title,
             file.deviceFolder, file.creationTime, file.modificationTime,
             alternateTitle: getHEICFileNameForJPG(file));
-        await _db.update(
-          existingFile.generatedID,
-          file.uploadedFileID,
-          file.ownerID,
-          file.collectionID,
-          file.updationTime,
-          file.encryptedKey,
-          file.keyDecryptionNonce,
-          file.fileDecryptionHeader,
-          file.thumbnailDecryptionHeader,
-          file.metadataDecryptionHeader,
-        );
+        file.localID = existingFile.localID;
+        if (existingFile.collectionID == null ||
+            existingFile.collectionID == file.collectionID) {
+          // Uploaded for the first time || updated within the same collection
+          file.generatedID = existingFile.generatedID;
+          await _db.update(file);
+        } else {
+          // If an existing file was added to a collection
+          await _db.insert(file);
+        }
       } catch (e) {
         file.localID = null; // File uploaded from a different device
         await _db.insert(file);

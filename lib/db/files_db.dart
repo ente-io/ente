@@ -267,34 +267,13 @@ class FilesDB {
     }
   }
 
-  Future<int> update(
-    int generatedID,
-    int uploadedID,
-    int ownerID,
-    int collectionID,
-    int updationTime,
-    String encryptedKey,
-    String keyDecryptionNonce,
-    String fileDecryptionHeader,
-    String thumbnailDecryptionHeader,
-    String metadataDecryptionHeader,
-  ) async {
+  Future<int> update(File file) async {
     final db = await instance.database;
-    final values = new Map<String, dynamic>();
-    values[columnUploadedFileID] = uploadedID;
-    values[columnOwnerID] = ownerID;
-    values[columnCollectionID] = collectionID;
-    values[columnUpdationTime] = updationTime;
-    values[columnEncryptedKey] = encryptedKey;
-    values[columnKeyDecryptionNonce] = keyDecryptionNonce;
-    values[columnFileDecryptionHeader] = fileDecryptionHeader;
-    values[columnThumbnailDecryptionHeader] = thumbnailDecryptionHeader;
-    values[columnMetadataDecryptionHeader] = metadataDecryptionHeader;
     return await db.update(
       table,
-      values,
+      _getRowForFile(file),
       where: '$columnGeneratedID = ?',
-      whereArgs: [generatedID],
+      whereArgs: [file.generatedID],
     );
   }
 
