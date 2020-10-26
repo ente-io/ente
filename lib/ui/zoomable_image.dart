@@ -79,11 +79,28 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _loadNetworkImage() {
     if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      _imageProvider = CachedNetworkImageProvider(
-        _photo.getThumbnailUrl(),
-        cacheManager: ThumbnailCacheManager(),
-      );
-      _loadedSmallThumbnail = true;
+      final cachedThumbnail = ThumbnailFileLruCache.get(_photo);
+      if (cachedThumbnail != null) {
+        _imageProvider = Image.file(cachedThumbnail).image;
+        _loadedSmallThumbnail = true;
+      } else {
+        getThumbnailFromServer(_photo).then((file) {
+          final imageProvider = Image.file(file).image;
+          if (mounted) {
+            precacheImage(imageProvider, context).then((value) {
+              if (mounted) {
+                setState(() {
+                  _imageProvider = imageProvider;
+                  _loadedSmallThumbnail = true;
+                });
+              }
+            }).catchError((e) {
+              _logger.severe("Could not load image " + _photo.toString());
+              _loadedSmallThumbnail = true;
+            });
+          }
+        });
+      }
     }
     if (!_loadedFinalImage) {
       getFileFromServer(_photo).then((file) {

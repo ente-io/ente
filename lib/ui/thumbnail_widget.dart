@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/file.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
