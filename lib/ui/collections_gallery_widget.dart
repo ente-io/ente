@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/repositories/file_repository.dart';
@@ -15,6 +18,7 @@ import 'package:photos/ui/device_folder_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:path/path.dart' as p;
+import 'package:photos/utils/toast_util.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
@@ -80,9 +84,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
             padding: EdgeInsets.only(bottom: 12),
             physics: ScrollPhysics(), // to disable GridView's scrolling
             itemBuilder: (context, index) {
-              return _buildCollection(context, items.collections[index]);
+              return _buildCollection(context, items.collections, index);
             },
-            itemCount: items.collections.length,
+            itemCount: items.collections.length + 1, // To include the + button
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
             ),
@@ -165,7 +169,27 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
     );
   }
 
-  Widget _buildCollection(BuildContext context, CollectionWithThumbnail c) {
+  Widget _buildCollection(BuildContext context,
+      List<CollectionWithThumbnail> collections, int index) {
+    if (index == collections.length) {
+      return Container(
+        height: 150,
+        width: 150,
+        margin: EdgeInsets.fromLTRB(0, 0, 12, 28),
+        child: OutlineButton(
+          child: Icon(
+            Icons.add,
+          ),
+          onPressed: () async {
+            await showToast(
+                "Long press to select photos and click + to create an album.",
+                toastLength: Toast.LENGTH_LONG);
+            Bus.instance.fire(TabChangedEvent(0));
+          },
+        ),
+      );
+    }
+    final c = collections[index];
     return GestureDetector(
       child: Column(
         children: <Widget>[

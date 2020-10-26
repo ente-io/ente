@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/repositories/file_repository.dart';
@@ -47,6 +48,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   int _selectedNavBarItem = 0;
   StreamSubscription<LocalPhotosUpdatedEvent>
       _localPhotosUpdatedEventSubscription;
+  StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
 
   @override
   void initState() {
@@ -59,6 +61,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     _localPhotosUpdatedEventSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       setState(() {});
+    });
+    _tabChangedEventSubscription =
+        Bus.instance.on<TabChangedEvent>().listen((event) {
+      setState(() {
+        _selectedNavBarItem = event.selectedIndex;
+      });
     });
     _initDeepLinks();
     super.initState();
@@ -211,6 +219,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   void dispose() {
     _detector.stopListening();
     _localPhotosUpdatedEventSubscription.cancel();
+    _tabChangedEventSubscription.cancel();
     super.dispose();
   }
 }
