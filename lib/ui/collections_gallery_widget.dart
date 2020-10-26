@@ -114,7 +114,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
     });
     if (favorites.length > 0) {
       collections.add(CollectionWithThumbnail(
-          FavoritesService.instance.getFavoritesCollection(), favorites[0]));
+          await FavoritesService.instance.getFavoritesCollection(),
+          favorites[0]));
     }
     return CollectionItems(folders, collections);
   }

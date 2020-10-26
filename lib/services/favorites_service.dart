@@ -71,8 +71,15 @@ class FavoritesService {
     }
   }
 
-  Collection getFavoritesCollection() {
+  Future<Collection> getFavoritesCollection() async {
     if (!_preferences.containsKey(_favoritesCollectionIDKey)) {
+      final collections = _collectionsService.getOwnedCollections();
+      for (final collection in collections) {
+        if (collection.type == CollectionType.favorites) {
+          await _preferences.setInt(_favoritesCollectionIDKey, collection.id);
+          return collection;
+        }
+      }
       return null;
     }
     return _collectionsService
