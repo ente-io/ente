@@ -23,10 +23,11 @@ Future<void> shareMultiple(BuildContext context, List<File> files) async {
   }
   final dialog = createProgressDialog(context, "Preparing...");
   await dialog.show();
-  final pathList = List<String>();
+  final pathFutures = List<Future<String>>();
   for (File file in files) {
-    pathList.add((await getNativeFile(file)).path);
+    pathFutures.add(getNativeFile(file).then((file) => file.path));
   }
+  final pathList = await Future.wait(pathFutures);
   await dialog.hide();
   return ShareExtend.shareMultiple(pathList, "image");
 }
