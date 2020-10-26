@@ -96,7 +96,10 @@ Future<Uint8List> getBytesFromDisk(File file, {int quality = 100}) async {
   }
 }
 
-final Map<int, Future<io.File>> downloadsInProgress =
+final Map<int, Future<io.File>> fileDownloadsInProgress =
+    Map<int, Future<io.File>>();
+
+final Map<int, Future<io.File>> thumbnailDownloadsInProgress =
     Map<int, Future<io.File>>();
 
 Future<io.File> getFileFromServer(File file,
@@ -109,14 +112,14 @@ Future<io.File> getFileFromServer(File file,
   } else {
     return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
       if (info == null) {
-        if (!downloadsInProgress.containsKey(file.uploadedFileID)) {
-          downloadsInProgress[file.uploadedFileID] = _downloadAndDecrypt(
+        if (!fileDownloadsInProgress.containsKey(file.uploadedFileID)) {
+          fileDownloadsInProgress[file.uploadedFileID] = _downloadAndDecrypt(
             file,
             cacheManager,
             progressCallback: progressCallback,
           );
         }
-        return downloadsInProgress[file.uploadedFileID];
+        return fileDownloadsInProgress[file.uploadedFileID];
       } else {
         return info.file;
       }
@@ -137,10 +140,14 @@ Future<io.File> getThumbnailFromServer(File file) async {
         .getFileFromCache(file.getThumbnailUrl())
         .then((info) {
       if (info == null) {
-        return _downloadAndDecryptThumbnail(file).then((data) {
-          ThumbnailFileLruCache.put(file, data);
-          return data;
-        });
+        if (!thumbnailDownloadsInProgress.containsKey(file.uploadedFileID)) {
+          thumbnailDownloadsInProgress[file.uploadedFileID] =
+              _downloadAndDecryptThumbnail(file).then((data) {
+            ThumbnailFileLruCache.put(file, data);
+            return data;
+          });
+        }
+        return thumbnailDownloadsInProgress[file.uploadedFileID];
       } else {
         ThumbnailFileLruCache.put(file, info.file);
         return info.file;
@@ -195,10 +202,10 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
       fileExtension: fileExtension,
     );
     decryptedFile.deleteSync();
-    downloadsInProgress.remove(file.uploadedFileID);
+    fileDownloadsInProgress.remove(file.uploadedFileID);
     return cachedFile;
   }).catchError((e) {
-    downloadsInProgress.remove(file.uploadedFileID);
+    fileDownloadsInProgress.remove(file.uploadedFileID);
   });
 }
 
