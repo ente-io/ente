@@ -33,11 +33,22 @@ class CollectionsService {
   static final CollectionsService instance =
       CollectionsService._privateConstructor();
 
+  Future<void> init() async {
+    final collections = await _db.getAllCollections();
+    for (final collection in collections) {
+      _cacheOwnedCollectionAttributes(collection);
+    }
+    final sharedCollections = await _db.getAllSharedCollections();
+    for (final collection in sharedCollections) {
+      _collectionIDToSharedCollections[collection.id] = collection;
+    }
+  }
+
   Future<void> sync() async {
     final lastCollectionCreationTime =
         await _db.getLastCollectionCreationTime();
     var collections =
-        await getOwnedCollections(lastCollectionCreationTime ?? 0);
+        await _getOwnedCollections(lastCollectionCreationTime ?? 0);
     await _db.insert(collections);
     collections = await _db.getAllCollections();
     for (final collection in collections) {
@@ -57,6 +68,10 @@ class CollectionsService {
 
   Collection getCollectionForPath(String path) {
     return _localCollections[path];
+  }
+
+  List<Collection> getOwnedCollections() {
+    return _collectionIDToOwnedCollections.values.toList();
   }
 
   Future<List<String>> getSharees(int collectionID) {
@@ -115,7 +130,7 @@ class CollectionsService {
     return _cachedKeys[collectionID];
   }
 
-  Future<List<Collection>> getOwnedCollections(int sinceTime) {
+  Future<List<Collection>> _getOwnedCollections(int sinceTime) {
     return Dio()
         .get(
       Configuration.instance.getHttpEndpoint() + "/collections/owned",

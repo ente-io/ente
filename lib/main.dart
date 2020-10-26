@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -30,6 +31,7 @@ void _main() async {
     areLogsEnabled: false,
   );
   await Configuration.instance.init();
+  await CollectionsService.instance.init();
   await SyncService.instance.init();
   await MemoriesService.instance.init();
   await FavoritesService.instance.init();
