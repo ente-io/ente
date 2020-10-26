@@ -58,15 +58,18 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
           SectionTitle("Device Folders"),
           Container(
             height: 160,
-            child: ListView.builder(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-              physics: ScrollPhysics(), // to disable GridView's scrolling
-              itemBuilder: (context, index) {
-                return _buildFolder(context, items.folders[index]);
-              },
-              itemCount: items.folders.length,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: ListView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                physics: ScrollPhysics(), // to disable GridView's scrolling
+                itemBuilder: (context, index) {
+                  return _buildFolder(context, items.folders[index]);
+                },
+                itemCount: items.folders.length,
+              ),
             ),
           ),
           Divider(height: 12),
@@ -126,12 +129,16 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
-            Container(
-              child: Hero(
-                  tag: "device_folder:" + folder.path + folder.thumbnail.tag(),
-                  child: ThumbnailWidget(folder.thumbnail)),
-              height: 110,
-              width: 110,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4.0),
+              child: Container(
+                child: Hero(
+                    tag:
+                        "device_folder:" + folder.path + folder.thumbnail.tag(),
+                    child: ThumbnailWidget(folder.thumbnail)),
+                height: 110,
+                width: 110,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(6.0),
@@ -162,15 +169,18 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
     return GestureDetector(
       child: Column(
         children: <Widget>[
-          Container(
-            child: c.thumbnail ==
-                    null // When the user has shared a folder without photos
-                ? Icon(Icons.error)
-                : Hero(
-                    tag: "collection" + c.thumbnail.tag(),
-                    child: ThumbnailWidget(c.thumbnail)),
-            height: 150,
-            width: 150,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4.0),
+            child: Container(
+              child: c.thumbnail ==
+                      null // When the user has shared a folder without photos
+                  ? Icon(Icons.error)
+                  : Hero(
+                      tag: "collection" + c.thumbnail.tag(),
+                      child: ThumbnailWidget(c.thumbnail)),
+              height: 150,
+              width: 150,
+            ),
           ),
           Padding(padding: EdgeInsets.all(2)),
           Expanded(

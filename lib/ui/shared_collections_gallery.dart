@@ -97,15 +97,18 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
     return GestureDetector(
       child: Column(
         children: <Widget>[
-          Container(
-            child: c.thumbnail ==
-                    null // When the user has shared a folder without photos
-                ? Icon(Icons.error)
-                : Hero(
-                    tag: "shared_collection" + c.thumbnail.tag(),
-                    child: ThumbnailWidget(c.thumbnail)),
-            height: 150,
-            width: 150,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4.0),
+            child: Container(
+              child: c.thumbnail ==
+                      null // When the user has shared a folder without photos
+                  ? Icon(Icons.error)
+                  : Hero(
+                      tag: "shared_collection" + c.thumbnail.tag(),
+                      child: ThumbnailWidget(c.thumbnail)),
+              height: 150,
+              width: 150,
+            ),
           ),
           Padding(padding: EdgeInsets.all(2)),
           Expanded(
