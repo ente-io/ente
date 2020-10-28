@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/passphrase_entry_page.dart';
 import 'package:photos/ui/passphrase_reentry_page.dart';
@@ -153,11 +155,22 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     );
   }
 
+  Future<void> _createAlbum() async {
+    Navigator.push(
+        context,
+        PageTransition(
+            type: PageTransitionType.bottomToTop,
+            child: CreateCollectionPage(
+              widget.selectedFiles.files.toList(),
+            )));
+  }
+
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
     if (widget.selectedFiles.files.isNotEmpty) {
-      if (widget.type != GalleryAppBarType.shared_collection &&
-          widget.type != GalleryAppBarType.search_results) {
+      if (widget.type == GalleryAppBarType.homepage ||
+          widget.type == GalleryAppBarType.local_folder ||
+          widget.type == GalleryAppBarType.collection) {
         actions.add(IconButton(
           icon: Icon(Icons.delete),
           onPressed: () {
@@ -165,6 +178,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           },
         ));
       }
+      actions.add(IconButton(
+        icon: Icon(Icons.add),
+        onPressed: () {
+          _createAlbum();
+        },
+      ));
       actions.add(IconButton(
         icon: Icon(Icons.share),
         onPressed: () {

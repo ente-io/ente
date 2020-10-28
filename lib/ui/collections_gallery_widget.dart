@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/collection.dart';
@@ -29,11 +29,17 @@ class CollectionsGalleryWidget extends StatefulWidget {
 }
 
 class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
-  StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
+  StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
+  StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
 
   @override
   void initState() {
-    _subscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _localFilesSubscription =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      setState(() {});
+    });
+    _collectionUpdatesSubscription =
+        Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       setState(() {});
     });
     super.initState();
@@ -232,7 +238,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _localFilesSubscription.cancel();
+    _collectionUpdatesSubscription.cancel();
     super.dispose();
   }
 }

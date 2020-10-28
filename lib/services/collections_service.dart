@@ -7,7 +7,9 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/file.dart';
@@ -178,6 +180,22 @@ class CollectionsService {
     return _collectionIDToOwnedCollections[collectionID];
   }
 
+  Future<Collection> createAlbum(String albumName) async {
+    final key = CryptoUtil.generateKey();
+    final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
+    final collection = await createAndCacheCollection(Collection(
+      null,
+      null,
+      Sodium.bin2base64(encryptedKeyData.encryptedData),
+      Sodium.bin2base64(encryptedKeyData.nonce),
+      albumName,
+      CollectionType.album,
+      CollectionAttributes(),
+      null,
+    ));
+    return collection;
+  }
+
   Future<Collection> getOrCreateForPath(String path) async {
     if (_localCollections.containsKey(path)) {
       return _localCollections[path];
@@ -217,12 +235,15 @@ class CollectionsService {
         Sodium.bin2base64(encryptedKeyData.nonce),
       ).toMap());
     }
-    return Dio().post(
-      Configuration.instance.getHttpEndpoint() + "/collections/add-files",
-      data: params,
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-    );
+    return Dio()
+        .post(
+          Configuration.instance.getHttpEndpoint() + "/collections/add-files",
+          data: params,
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        )
+        .then(
+            (value) => Bus.instance.fire(CollectionUpdatedEvent(collectionID)));
   }
 
   Future<void> removeFromCollection(int collectionID, List<File> files) {
@@ -234,12 +255,17 @@ class CollectionsService {
       }
       params["fileIDs"].add(file.uploadedFileID);
     }
-    return Dio().post(
-      Configuration.instance.getHttpEndpoint() + "/collections/remove-files",
-      data: params,
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-    );
+    return Dio()
+        .post(
+          Configuration.instance.getHttpEndpoint() +
+              "/collections/remove-files",
+          data: params,
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        )
+        .then(
+            (value) => Bus.instance.fire(CollectionUpdatedEvent(collectionID)));
+    ;
   }
 
   Future<Collection> createAndCacheCollection(Collection collection) async {
