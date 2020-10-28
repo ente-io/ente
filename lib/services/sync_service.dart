@@ -57,8 +57,8 @@ class SyncService {
       _logger.info("Syncing...");
       try {
         await _doSync();
-      } catch (e) {
-        throw e;
+      } catch (e, s) {
+        _logger.severe(e, s);
       } finally {
         _isSyncInProgress = false;
       }

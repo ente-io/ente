@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/models/shared_collection.dart';
+import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/shared_collection_page.dart';
@@ -38,12 +38,14 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<SharedCollectionWithThumbnail>>(
-      future: CollectionsDB.instance
-          .getAllSharedCollections()
-          .then((collections) async {
-        final c = List<SharedCollectionWithThumbnail>();
+    return FutureBuilder<List<CollectionWithThumbnail>>(
+      future:
+          CollectionsDB.instance.getAllCollections().then((collections) async {
+        final c = List<CollectionWithThumbnail>();
         for (final collection in collections) {
+          if (collection.ownerID == Configuration.instance.getUserID()) {
+            continue;
+          }
           var thumbnail;
           try {
             thumbnail =
@@ -51,7 +53,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
           } catch (e) {
             _logger.warning(e.toString());
           }
-          c.add(SharedCollectionWithThumbnail(collection, thumbnail));
+          c.add(CollectionWithThumbnail(collection, thumbnail));
         }
         return c;
       }),
@@ -73,7 +75,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
   }
 
   Widget _getSharedCollectionsGallery(
-      List<SharedCollectionWithThumbnail> collections) {
+      List<CollectionWithThumbnail> collections) {
     return Container(
       margin: EdgeInsets.only(top: 24),
       child: GridView.builder(
@@ -91,9 +93,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
     );
   }
 
-  Widget _buildCollection(
-      BuildContext context, SharedCollectionWithThumbnail c) {
-    _logger.info("Building collection " + c.collection.toString());
+  Widget _buildCollection(BuildContext context, CollectionWithThumbnail c) {
     return GestureDetector(
       child: Column(
         children: <Widget>[
@@ -139,11 +139,4 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
     _subscription.cancel();
     super.dispose();
   }
-}
-
-class SharedCollectionWithThumbnail {
-  final SharedCollection collection;
-  final File thumbnail;
-
-  SharedCollectionWithThumbnail(this.collection, this.thumbnail);
 }

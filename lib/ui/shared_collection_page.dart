@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/models/shared_collection.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 
 class SharedCollectionPage extends StatefulWidget {
-  final SharedCollection collection;
+  final Collection collection;
 
   const SharedCollectionPage(this.collection, {Key key}) : super(key: key);
 

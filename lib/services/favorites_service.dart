@@ -69,7 +69,7 @@ class FavoritesService {
 
   Future<Collection> getFavoritesCollection() async {
     if (!_preferences.containsKey(_favoritesCollectionIDKey)) {
-      final collections = _collectionsService.getOwnedCollections();
+      final collections = _collectionsService.getCollections();
       for (final collection in collections) {
         if (collection.type == CollectionType.favorites) {
           await _preferences.setInt(_favoritesCollectionIDKey, collection.id);
@@ -79,7 +79,7 @@ class FavoritesService {
       return null;
     }
     return _collectionsService
-        .getOwnedCollectionByID(_preferences.getInt(_favoritesCollectionIDKey));
+        .getCollectionByID(_preferences.getInt(_favoritesCollectionIDKey));
   }
 
   Future<int> _getOrCreateFavoriteCollectionID() async {

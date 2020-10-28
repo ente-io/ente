@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -11,6 +13,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/repositories/file_repository.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/ui/collection_page.dart';
@@ -29,6 +32,7 @@ class CollectionsGalleryWidget extends StatefulWidget {
 }
 
 class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
+  final _logger = Logger("CollectionsGallery");
   StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
 
@@ -120,17 +124,25 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
           .compareTo(first.thumbnail.creationTime);
     });
 
-    final collections = List<CollectionWithThumbnail>();
+    final collectionsWithThumbnail = List<CollectionWithThumbnail>();
     final favorites = FavoritesService.instance.getFavoriteFiles().toList();
     favorites.sort((first, second) {
       return second.creationTime.compareTo(first.creationTime);
     });
     if (favorites.length > 0) {
-      collections.add(CollectionWithThumbnail(
+      collectionsWithThumbnail.add(CollectionWithThumbnail(
           await FavoritesService.instance.getFavoritesCollection(),
           favorites[0]));
     }
-    return CollectionItems(folders, collections);
+    final collections = CollectionsService.instance.getCollections();
+    for (final c in collections) {
+      if (c.ownerID != Configuration.instance.getUserID()) {
+        continue;
+      }
+      collectionsWithThumbnail.add(CollectionWithThumbnail(
+          c, await FilesDB.instance.getLatestFileInCollection(c.id)));
+    }
+    return CollectionItems(folders, collectionsWithThumbnail);
   }
 
   Widget _buildFolder(BuildContext context, DeviceFolder folder) {

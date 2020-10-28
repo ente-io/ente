@@ -290,7 +290,8 @@ class FilesDB {
     final db = await instance.database;
     return db.delete(
       table,
-      where: '$columnCollectionID =? AND ',
+      where:
+          '$columnCollectionID =? AND $columnUploadedFileID IN (${fileIDs.join(', ')})',
       whereArgs: [collectionID],
     );
   }
@@ -322,7 +323,7 @@ class FilesDB {
     if (rows.isNotEmpty) {
       return _getFileFromRow(rows[0]);
     } else {
-      throw ("No file found in collection " + collectionID.toString());
+      return null;
     }
   }
 
