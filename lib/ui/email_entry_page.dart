@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/email_util.dart';
 
 class EmailEntryPage extends StatefulWidget {
   EmailEntryPage({Key key}) : super(key: key);
@@ -60,6 +62,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               height: 44,
               child: button("Sign In", onPressed: () {
                 final email = _emailController.text;
+                if (!isValidEmail(email)) {
+                  showErrorDialog(context, "Invalid email address",
+                      "Please enter a valid email address.");
+                  return;
+                }
                 Configuration.instance.setEmail(email);
                 UserService.instance.getOtt(context, email);
               }),
