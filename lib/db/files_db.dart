@@ -141,20 +141,6 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
-  Future<List<File>> getAllInFolder(
-      int folderID, int beforeCreationTime, int limit) async {
-    final db = await instance.database;
-    final results = await db.query(
-      table,
-      where:
-          '$columnRemoteFolderID = ? AND $columnIsDeleted = 0 AND $columnCreationTime < ?',
-      whereArgs: [folderID, beforeCreationTime],
-      orderBy: '$columnCreationTime DESC',
-      limit: limit,
-    );
-    return _convertToFiles(results);
-  }
-
   Future<List<File>> getAllInCollectionBeforeCreationTime(
       int collectionID, int beforeCreationTime, int limit) async {
     final db = await instance.database;
@@ -300,12 +286,12 @@ class FilesDB {
     );
   }
 
-  Future<int> deleteFilesInRemoteFolder(int folderID) async {
+  Future<int> removeFromCollection(int collectionID, List<int> fileIDs) async {
     final db = await instance.database;
     return db.delete(
       table,
-      where: '$columnRemoteFolderID =?',
-      whereArgs: [folderID],
+      where: '$columnCollectionID =? AND ',
+      whereArgs: [collectionID],
     );
   }
 
@@ -324,38 +310,6 @@ class FilesDB {
     return result;
   }
 
-  Future<File> getLatestFileInPath(String path) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '$columnDeviceFolder =?',
-      whereArgs: [path],
-      orderBy: '$columnCreationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      throw ("No file found in path");
-    }
-  }
-
-  Future<File> getLatestFileInRemoteFolder(int folderID) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '$columnRemoteFolderID =?',
-      whereArgs: [folderID],
-      orderBy: '$columnCreationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      throw ("No file found in remote folder " + folderID.toString());
-    }
-  }
-
   Future<File> getLatestFileInCollection(int collectionID) async {
     final db = await instance.database;
     final rows = await db.query(
@@ -369,37 +323,6 @@ class FilesDB {
       return _getFileFromRow(rows[0]);
     } else {
       throw ("No file found in collection " + collectionID.toString());
-    }
-  }
-
-  Future<File> getLastSyncedFileInRemoteFolder(int folderID) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '$columnRemoteFolderID =?',
-      whereArgs: [folderID],
-      orderBy: '$columnUpdationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      throw ("No file found in remote folder " + folderID.toString());
-    }
-  }
-
-  Future<File> getLatestFileAmongGeneratedIDs(List<String> generatedIDs) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '$columnGeneratedID IN (${generatedIDs.join(",")})',
-      orderBy: '$columnCreationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      throw ("No file found with ids " + generatedIDs.join(", ").toString());
     }
   }
 
