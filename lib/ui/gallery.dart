@@ -106,12 +106,10 @@ class _GalleryState extends State<Gallery> {
   }
 
   Widget _onDataLoaded() {
-    _logger.info("Loaded " + _files.length.toString());
     if (_files.isEmpty) {
       return nothingToSeeHere;
     }
     _collateFiles();
-    _logger.info("Collated length " + _collatedFiles.length.toString());
     _scrollController = ScrollController(
       initialScrollOffset: _scrollOffset,
     );
@@ -214,7 +212,6 @@ class _GalleryState extends State<Gallery> {
   }
 
   Widget _getGallery(List<File> files) {
-    _logger.info("Building gallery with " + files.length.toString());
     return GridView.builder(
       shrinkWrap: true,
       padding: EdgeInsets.only(bottom: 12),
