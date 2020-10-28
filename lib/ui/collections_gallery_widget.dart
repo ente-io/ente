@@ -139,8 +139,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
       if (c.ownerID != Configuration.instance.getUserID()) {
         continue;
       }
-      collectionsWithThumbnail.add(CollectionWithThumbnail(
-          c, await FilesDB.instance.getLatestFileInCollection(c.id)));
+      var thumbnail = await FilesDB.instance.getLatestFileInCollection(c.id);
+      if (thumbnail == null) {
+        continue;
+      }
+      collectionsWithThumbnail.add(CollectionWithThumbnail(c, thumbnail));
     }
     return CollectionItems(folders, collectionsWithThumbnail);
   }
