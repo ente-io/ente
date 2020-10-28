@@ -24,13 +24,14 @@ class SyncService {
   final _dio = Dio();
   final _db = FilesDB.instance;
   final _uploader = FileUploader.instance;
+  final _collectionsService = CollectionsService.instance;
   final _downloader = DiffFetcher();
   bool _isSyncInProgress = false;
   bool _syncStopRequested = false;
   Future<void> _existingSync;
   SharedPreferences _prefs;
 
-  static final _encryptedFilesSyncTimeKey = "encrypted_files_sync_time";
+  static final _collectionSyncTimeKeyPrefix = "collection_sync_time_";
   static final _dbUpdationTimeKey = "db_updation_time";
   static final _diffLimit = 100;
 
@@ -157,30 +158,42 @@ class SyncService {
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }
-    await CollectionsService.instance.sync();
-    await _persistEncryptedFilesDiff();
+    await _collectionsService.sync();
+    final collections = _collectionsService.getCollections();
+    for (final collection in collections) {
+      await _fetchEncryptedFilesDiff(collection.id);
+    }
     await _uploadDiff();
     await _deletePhotosOnServer();
   }
 
-  Future<void> _persistEncryptedFilesDiff() async {
+  Future<void> _fetchEncryptedFilesDiff(int collectionID) async {
     final diff = await _downloader.getEncryptedFilesDiff(
-        _getEncryptedFilesSyncTime(), _diffLimit);
+      collectionID,
+      _getCollectionSyncTime(collectionID),
+      _diffLimit,
+    );
     if (diff.isNotEmpty) {
-      await _storeDiff(diff, _encryptedFilesSyncTimeKey);
+      await _storeDiff(diff, collectionID);
       FileRepository.instance.reloadFiles();
       if (diff.length == _diffLimit) {
-        return await _persistEncryptedFilesDiff();
+        return await _fetchEncryptedFilesDiff(collectionID);
       }
     }
   }
 
-  int _getEncryptedFilesSyncTime() {
-    var syncTime = _prefs.getInt(_encryptedFilesSyncTimeKey);
+  int _getCollectionSyncTime(int collectionID) {
+    var syncTime =
+        _prefs.getInt(_collectionSyncTimeKeyPrefix + collectionID.toString());
     if (syncTime == null) {
       syncTime = 0;
     }
     return syncTime;
+  }
+
+  Future<void> _setCollectionSyncTime(int collectionID, int time) async {
+    return _prefs.setInt(
+        _collectionSyncTimeKeyPrefix + collectionID.toString(), time);
   }
 
   Future<void> _uploadDiff() async {
@@ -227,7 +240,7 @@ class SyncService {
     }
   }
 
-  Future _storeDiff(List<File> diff, String prefKey) async {
+  Future _storeDiff(List<File> diff, int collectionID) async {
     for (File file in diff) {
       try {
         final existingFile = await _db.getMatchingFile(file.localID, file.title,
@@ -247,7 +260,7 @@ class SyncService {
         file.localID = null; // File uploaded from a different device
         await _db.insert(file);
       }
-      await _prefs.setInt(prefKey, file.updationTime);
+      await _setCollectionSyncTime(collectionID, file.updationTime);
     }
   }
 

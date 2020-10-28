@@ -15,14 +15,16 @@ class DiffFetcher {
   final _logger = Logger("FileDownloader");
   final _dio = Dio();
 
-  Future<List<File>> getEncryptedFilesDiff(int lastSyncTime, int limit) async {
+  Future<List<File>> getEncryptedFilesDiff(
+      int collectionID, int sinceTime, int limit) async {
     return _dio
         .get(
-          Configuration.instance.getHttpEndpoint() + "/files/diff",
+          Configuration.instance.getHttpEndpoint() + "/collections/diff",
           options: Options(
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
           queryParameters: {
-            "sinceTime": lastSyncTime,
+            "collectionID": collectionID,
+            "sinceTime": sinceTime,
             "limit": limit,
           },
         )
