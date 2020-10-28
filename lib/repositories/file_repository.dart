@@ -16,9 +16,22 @@ class FileRepository {
   }
 
   Future<List<File>> loadFiles() async {
-    var files = await FilesDB.instance.getFiles();
+    final files = await FilesDB.instance.getFiles();
+    final deduplicatedFiles = List<File>();
+    for (int index = 0; index < files.length; index++) {
+      if (index != 0) {
+        bool isSameUploadedFile = files[index].uploadedFileID != null &&
+            (files[index].uploadedFileID == files[index - 1].uploadedFileID);
+        bool isSameLocalFile = files[index].localID != null &&
+            (files[index].localID == files[index - 1].localID);
+        if (isSameUploadedFile || isSameLocalFile) {
+          continue;
+        }
+      }
+      deduplicatedFiles.add(files[index]);
+    }
     _files.clear();
-    _files.addAll(files);
+    _files.addAll(deduplicatedFiles);
 
     return _files;
   }
