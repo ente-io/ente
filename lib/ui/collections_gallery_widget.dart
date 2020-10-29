@@ -108,12 +108,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
   }
 
   Future<CollectionItems> _getCollections() async {
+    final userID = Configuration.instance.getUserID();
     final paths = await FilesDB.instance.getLocalPaths();
     final folders = List<DeviceFolder>();
     for (final path in paths) {
       final files = List<File>();
       for (File file in FileRepository.instance.files) {
-        if (file.deviceFolder == path) {
+        if ((file.ownerID == null || file.ownerID == userID) &&
+            file.deviceFolder == path) {
           files.add(file);
         }
       }
@@ -141,7 +143,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
     final collections = CollectionsService.instance.getCollections();
 
     for (final c in collections) {
-      if (c.ownerID != Configuration.instance.getUserID()) {
+      if (c.ownerID != userID) {
         continue;
       }
       final thumbnail = await FilesDB.instance.getLatestFileInCollection(c.id);
