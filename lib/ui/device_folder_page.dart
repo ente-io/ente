@@ -31,7 +31,7 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
         GalleryAppBarType.local_folder,
         widget.folder.name,
         _selectedFiles,
-        widget.folder.thumbnail.deviceFolder,
+        path: widget.folder.thumbnail.deviceFolder,
       ),
       body: gallery,
     );

@@ -79,7 +79,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         GalleryAppBarType.homepage,
         widget.title,
         _selectedFiles,
-        "/",
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
       body: IndexedStack(

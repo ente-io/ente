@@ -7,7 +7,6 @@ import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -17,14 +16,10 @@ import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class ShareFolderWidget extends StatefulWidget {
-  final String title;
-  final String path;
   final Collection collection;
 
   const ShareFolderWidget(
-    this.title,
-    this.path, {
-    this.collection,
+    this.collection, {
     Key key,
   }) : super(key: key);
 
@@ -41,7 +36,7 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
           : CollectionsService.instance.getSharees(widget.collection.id),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return SharingDialog(widget.collection, snapshot.data, widget.path);
+          return SharingDialog(widget.collection, snapshot.data);
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else {
@@ -55,10 +50,8 @@ class _ShareFolderWidgetState extends State<ShareFolderWidget> {
 class SharingDialog extends StatefulWidget {
   final Collection collection;
   final List<String> sharees;
-  final String path;
 
-  SharingDialog(this.collection, this.sharees, this.path, {Key key})
-      : super(key: key);
+  SharingDialog(this.collection, this.sharees, {Key key}) : super(key: key);
 
   @override
   _SharingDialogState createState() => _SharingDialogState();
@@ -170,13 +163,13 @@ class _SharingDialogState extends State<SharingDialog> {
           "Please enter a valid email address.");
       return;
     } else if (email == Configuration.instance.getEmail()) {
-      showErrorDialog(
-          context, "Oops", "You cannot share the album with yourself.");
+      showErrorDialog(context, "Oops", "You cannot share with yourself.");
       return;
     }
     if (publicKey == null) {
       final dialog = createProgressDialog(context, "Searching for user...");
       await dialog.show();
+
       publicKey = await UserService.instance.getPublicKey(email);
       await dialog.hide();
     }
@@ -192,7 +185,7 @@ class _SharingDialogState extends State<SharingDialog> {
             child: Text("Invite"),
             onPressed: () {
               shareText(
-                  "Hey, I've got some really nice photos to share. Please install ente.io so that I can share them privately.");
+                  "Hey, I have some really nice photos to share. Please install ente.io so that I can share them privately.");
             },
           ),
         ],
@@ -206,20 +199,11 @@ class _SharingDialogState extends State<SharingDialog> {
     } else {
       final dialog = createProgressDialog(context, "Sharing...");
       await dialog.show();
-      var collectionID;
-      if (widget.collection != null) {
-        collectionID = widget.collection.id;
-      } else {
-        collectionID =
-            (await CollectionsService.instance.getOrCreateForPath(widget.path))
-                .id;
-        await Configuration.instance.addPathToFoldersToBeBackedUp(widget.path);
-        SyncService.instance.sync();
-      }
       try {
-        await CollectionsService.instance.share(collectionID, email, publicKey);
+        await CollectionsService.instance
+            .share(widget.collection.id, email, publicKey);
         await dialog.hide();
-        showToast("Folder shared successfully!");
+        showToast("Shared successfully!");
         setState(() {
           _sharees.add(email);
           _showEntryField = false;

@@ -37,6 +37,7 @@ class _CollectionPageState extends State<CollectionPage> {
         GalleryAppBarType.collection,
         widget.collection.name,
         _selectedFiles,
+        collection: widget.collection,
       ),
       body: gallery,
     );

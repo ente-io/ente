@@ -5,6 +5,7 @@ import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
@@ -31,13 +32,15 @@ class GalleryAppBarWidget extends StatefulWidget
   final String title;
   final SelectedFiles selectedFiles;
   final String path;
+  final Collection collection;
 
   GalleryAppBarWidget(
     this.type,
     this.title,
-    this.selectedFiles, [
+    this.selectedFiles, {
     this.path,
-  ]);
+    this.collection,
+  });
 
   @override
   _GalleryAppBarWidgetState createState() => _GalleryAppBarWidgetState();
@@ -103,9 +106,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             );
           },
         ));
-      } else if (widget.type == GalleryAppBarType.local_folder) {
+      } else if (widget.type == GalleryAppBarType.local_folder ||
+          widget.type == GalleryAppBarType.collection) {
         actions.add(IconButton(
-          icon: Icon(Icons.share),
+          icon: Icon(Icons.person_add),
           onPressed: () {
             _showShareCollectionDialog();
           },
@@ -142,15 +146,27 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> _showShareCollectionDialog() async {
+    var collection = widget.collection;
+    if (collection == null) {
+      if (widget.type == GalleryAppBarType.local_folder) {
+        collection =
+            CollectionsService.instance.getCollectionForPath(widget.path);
+        if (collection == null) {
+          final dialog = createProgressDialog(context, "Please wait...");
+          await dialog.show();
+          collection =
+              await CollectionsService.instance.getOrCreateForPath(widget.path);
+          await dialog.hide();
+        }
+      } else {
+        throw Exception(
+            "Cannot create a collection of type" + widget.type.toString());
+      }
+    }
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return ShareFolderWidget(
-          widget.title,
-          widget.path,
-          collection:
-              CollectionsService.instance.getCollectionForPath(widget.path),
-        );
+        return ShareFolderWidget(collection);
       },
     );
   }
