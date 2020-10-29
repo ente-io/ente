@@ -242,23 +242,38 @@ class SyncService {
 
   Future _storeDiff(List<File> diff, int collectionID) async {
     for (File file in diff) {
-      try {
-        final existingFile = await _db.getMatchingFile(file.localID, file.title,
-            file.deviceFolder, file.creationTime, file.modificationTime,
-            alternateTitle: getHEICFileNameForJPG(file));
-        file.localID = existingFile.localID;
-        if (existingFile.collectionID == null ||
-            existingFile.collectionID == file.collectionID) {
-          // Uploaded for the first time || updated within the same collection
-          file.generatedID = existingFile.generatedID;
+      final existingFiles = await _db.getMatchingFiles(file.title,
+          file.deviceFolder, file.creationTime, file.modificationTime,
+          alternateTitle: getHEICFileNameForJPG(file));
+      if (existingFiles == null) {
+        // File uploaded from a different device
+        file.localID = null;
+        await _db.insert(file);
+      } else {
+        // File exists on device
+        bool wasUploadedOnAPreviousInstallation =
+            existingFiles.length == 1 && existingFiles[0].collectionID == null;
+        file.localID = existingFiles[0]
+            .localID; // File should ideally have the same localID
+        if (wasUploadedOnAPreviousInstallation) {
+          file.generatedID = existingFiles[0].generatedID;
           await _db.update(file);
         } else {
-          // If an existing file was added to a collection
-          await _db.insert(file);
+          bool wasUpdatedInExistingCollection = false;
+          for (final existingFile in existingFiles) {
+            if (file.collectionID == existingFile.collectionID) {
+              file.generatedID = existingFile.generatedID;
+              wasUpdatedInExistingCollection = true;
+              break;
+            }
+          }
+          if (wasUpdatedInExistingCollection) {
+            await _db.update(file);
+          } else {
+            // Added to a new collection
+            await _db.insert(file);
+          }
         }
-      } catch (e) {
-        file.localID = null; // File uploaded from a different device
-        await _db.insert(file);
       }
       await _setCollectionSyncTime(collectionID, file.updationTime);
     }

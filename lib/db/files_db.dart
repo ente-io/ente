@@ -206,17 +206,16 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
-  Future<File> getMatchingFile(String localID, String title,
-      String deviceFolder, int creationTime, int modificationTime,
+  Future<List<File>> getMatchingFiles(
+      String title, String deviceFolder, int creationTime, int modificationTime,
       {String alternateTitle}) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '''$columnLocalID=? AND ($columnTitle=? OR $columnTitle=?) AND 
+      where: '''($columnTitle=? OR $columnTitle=?) AND 
           $columnDeviceFolder=? AND $columnCreationTime=? AND 
           $columnModificationTime=?''',
       whereArgs: [
-        localID,
         title,
         alternateTitle,
         deviceFolder,
@@ -225,9 +224,9 @@ class FilesDB {
       ],
     );
     if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
+      return _convertToFiles(rows);
     } else {
-      throw ("No matching file found");
+      return null;
     }
   }
 
@@ -255,7 +254,6 @@ class FilesDB {
     );
   }
 
-  // TODO: Remove deleted files on remote
   Future<int> markForDeletion(File file) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
