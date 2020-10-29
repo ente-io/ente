@@ -247,13 +247,16 @@ class CollectionsService {
 
   void _cacheCollectionAttributes(Collection collection) {
     if (collection.attributes.encryptedPath != null) {
-      var path = utf8.decode(CryptoUtil.decryptSync(
-          Sodium.base642bin(collection.attributes.encryptedPath),
-          _config.getKey(),
-          Sodium.base642bin(collection.attributes.pathDecryptionNonce)));
-      _localCollections[path] = collection;
+      _localCollections[decryptCollectionPath(collection)] = collection;
     }
     _collectionIDToCollections[collection.id] = collection;
+  }
+
+  String decryptCollectionPath(Collection collection) {
+    return utf8.decode(CryptoUtil.decryptSync(
+        Sodium.base642bin(collection.attributes.encryptedPath),
+        _config.getKey(),
+        Sodium.base642bin(collection.attributes.pathDecryptionNonce)));
   }
 }
 

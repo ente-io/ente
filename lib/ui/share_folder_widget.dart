@@ -1,15 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
@@ -199,6 +202,15 @@ class _SharingDialogState extends State<SharingDialog> {
     } else {
       final dialog = createProgressDialog(context, "Sharing...");
       await dialog.show();
+      final collection = widget.collection;
+      if (collection.type == CollectionType.folder) {
+        final path =
+            CollectionsService.instance.decryptCollectionPath(collection);
+        if (!Configuration.instance.getPathsToBackUp().contains(path)) {
+          await Configuration.instance.addPathToFoldersToBeBackedUp(path);
+          SyncService.instance.sync();
+        }
+      }
       try {
         await CollectionsService.instance
             .share(widget.collection.id, email, publicKey);
