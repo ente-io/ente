@@ -1,0 +1,17 @@
+import 'package:photos/models/collection.dart';
+import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/file.dart';
+
+class CollectionItems {
+  final List<DeviceFolder> folders;
+  final List<CollectionWithThumbnail> collections;
+
+  CollectionItems(this.folders, this.collections);
+}
+
+class CollectionWithThumbnail {
+  final Collection collection;
+  final File thumbnail;
+
+  CollectionWithThumbnail(this.collection, this.thumbnail);
+}

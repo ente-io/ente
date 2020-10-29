@@ -161,7 +161,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         PageTransition(
             type: PageTransitionType.bottomToTop,
             child: CreateCollectionPage(
-              widget.selectedFiles.files.toList(),
+              widget.selectedFiles,
             )));
   }
 

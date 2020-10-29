@@ -11,6 +11,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/services/collections_service.dart';
@@ -217,12 +218,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
           ClipRRect(
             borderRadius: BorderRadius.circular(4.0),
             child: Container(
-              child: c.thumbnail ==
-                      null // When the user has shared a folder without photos
-                  ? Icon(Icons.error)
-                  : Hero(
-                      tag: "collection" + c.thumbnail.tag(),
-                      child: ThumbnailWidget(c.thumbnail)),
+              child: Hero(
+                  tag: "collection" + c.thumbnail.tag(),
+                  child: ThumbnailWidget(c.thumbnail)),
               height: 150,
               width: 150,
             ),
@@ -280,18 +278,4 @@ class SectionTitle extends StatelessWidget {
           ),
         ]));
   }
-}
-
-class CollectionItems {
-  final List<DeviceFolder> folders;
-  final List<CollectionWithThumbnail> collections;
-
-  CollectionItems(this.folders, this.collections);
-}
-
-class CollectionWithThumbnail {
-  final Collection collection;
-  final File thumbnail;
-
-  CollectionWithThumbnail(this.collection, this.thumbnail);
 }

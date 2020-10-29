@@ -8,7 +8,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/remote_sync_event.dart';
-import 'package:photos/ui/collections_gallery_widget.dart';
+import 'package:photos/models/collection_items.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/shared_collection_page.dart';
