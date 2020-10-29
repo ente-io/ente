@@ -153,8 +153,18 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       if (thumbnail == null) {
         continue;
       }
-      collectionsWithThumbnail.add(CollectionWithThumbnail(c, thumbnail));
+      final lastUpdatedFile =
+          await FilesDB.instance.getLastModifiedFileInCollection(c.id);
+      collectionsWithThumbnail.add(CollectionWithThumbnail(
+        c,
+        thumbnail,
+        lastUpdatedFile,
+      ));
     }
+    collectionsWithThumbnail.sort((first, second) {
+      return second.lastUpdatedFile.updationTime
+          .compareTo(first.lastUpdatedFile.updationTime);
+    });
     return collectionsWithThumbnail;
   }
 

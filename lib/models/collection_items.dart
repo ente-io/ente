@@ -12,6 +12,11 @@ class CollectionItems {
 class CollectionWithThumbnail {
   final Collection collection;
   final File thumbnail;
+  final File lastUpdatedFile;
 
-  CollectionWithThumbnail(this.collection, this.thumbnail);
+  CollectionWithThumbnail(
+    this.collection,
+    this.thumbnail,
+    this.lastUpdatedFile,
+  );
 }

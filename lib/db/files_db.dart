@@ -325,6 +325,22 @@ class FilesDB {
     }
   }
 
+  Future<File> getLastModifiedFileInCollection(int collectionID) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      where: '$columnCollectionID =?',
+      whereArgs: [collectionID],
+      orderBy: '$columnUpdationTime DESC',
+      limit: 1,
+    );
+    if (rows.isNotEmpty) {
+      return _getFileFromRow(rows[0]);
+    } else {
+      return null;
+    }
+  }
+
   List<File> _convertToFiles(List<Map<String, dynamic>> results) {
     final files = List<File>();
     for (final result in results) {

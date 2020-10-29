@@ -131,21 +131,36 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
       return second.creationTime.compareTo(first.creationTime);
     });
     if (favorites.length > 0) {
+      final favoritesCollection =
+          await FavoritesService.instance.getFavoritesCollection();
+      final lastUpdatedFile = await FilesDB.instance
+          .getLastModifiedFileInCollection(favoritesCollection.id);
       collectionsWithThumbnail.add(CollectionWithThumbnail(
-          await FavoritesService.instance.getFavoritesCollection(),
-          favorites[0]));
+          favoritesCollection, favorites[0], lastUpdatedFile));
     }
     final collections = CollectionsService.instance.getCollections();
+
     for (final c in collections) {
       if (c.ownerID != Configuration.instance.getUserID()) {
         continue;
       }
-      var thumbnail = await FilesDB.instance.getLatestFileInCollection(c.id);
+      final thumbnail = await FilesDB.instance.getLatestFileInCollection(c.id);
       if (thumbnail == null) {
         continue;
       }
-      collectionsWithThumbnail.add(CollectionWithThumbnail(c, thumbnail));
+      final lastUpdatedFile =
+          await FilesDB.instance.getLastModifiedFileInCollection(c.id);
+      collectionsWithThumbnail.add(CollectionWithThumbnail(
+        c,
+        thumbnail,
+        lastUpdatedFile,
+      ));
     }
+    collectionsWithThumbnail.sort((first, second) {
+      return second.lastUpdatedFile.updationTime
+          .compareTo(first.lastUpdatedFile.updationTime);
+    });
+
     return CollectionItems(folders, collectionsWithThumbnail);
   }
 

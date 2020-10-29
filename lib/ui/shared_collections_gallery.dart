@@ -46,15 +46,23 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
           if (collection.ownerID == Configuration.instance.getUserID()) {
             continue;
           }
-          var thumbnail;
-          try {
-            thumbnail =
-                await FilesDB.instance.getLatestFileInCollection(collection.id);
-          } catch (e) {
-            _logger.warning(e.toString());
+          final thumbnail =
+              await FilesDB.instance.getLatestFileInCollection(collection.id);
+          if (thumbnail == null) {
+            continue;
           }
-          c.add(CollectionWithThumbnail(collection, thumbnail));
+          final lastUpdatedFile = await FilesDB.instance
+              .getLastModifiedFileInCollection(collection.id);
+          c.add(CollectionWithThumbnail(
+            collection,
+            thumbnail,
+            lastUpdatedFile,
+          ));
         }
+        c.sort((first, second) {
+          return second.lastUpdatedFile.updationTime
+              .compareTo(first.lastUpdatedFile.updationTime);
+        });
         return c;
       }),
       builder: (context, snapshot) {
