@@ -12,7 +12,6 @@ class File {
   String localID;
   String title;
   String deviceFolder;
-  int remoteFolderID;
   bool isEncrypted;
   int creationTime;
   int modificationTime;
