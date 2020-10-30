@@ -193,14 +193,20 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
-  Future<List<File>> getAllDeleted() async {
+  Future<List<int>> getDeletedFileIDs() async {
     final db = await instance.database;
-    final results = await db.query(
+    final rows = await db.query(
       table,
+      columns: [columnUploadedFileID],
+      distinct: true,
       where: '$columnIsDeleted = 1',
       orderBy: '$columnCreationTime DESC',
     );
-    return _convertToFiles(results);
+    final result = List<int>();
+    for (final row in rows) {
+      result.add(row[columnUploadedFileID]);
+    }
+    return result;
   }
 
   Future<List<File>> getFilesToBeUploadedWithinFolders(
@@ -246,7 +252,7 @@ class FilesDB {
         $columnUpdationTime,
         MAX($columnCreationTime) as $columnCreationTime
       FROM $table
-      WHERE $columnCollectionID IN (${collectionIDs.join(', ')})
+      WHERE $columnCollectionID IN (${collectionIDs.join(', ')}) AND $columnIsDeleted = 0
       GROUP BY $columnCollectionID
       ORDER BY $columnCreationTime DESC;
     ''');
@@ -284,7 +290,7 @@ class FilesDB {
         $columnCreationTime,
         MAX($columnUpdationTime) AS $columnUpdationTime
       FROM $table
-      WHERE $columnCollectionID IN (${collectionIDs.join(', ')})
+      WHERE $columnCollectionID IN (${collectionIDs.join(', ')}) AND $columnIsDeleted = 0
       GROUP BY $columnCollectionID
       ORDER BY $columnUpdationTime DESC;
     ''');
@@ -344,24 +350,24 @@ class FilesDB {
     );
   }
 
-  Future<int> markForDeletion(File file) async {
+  Future<int> markForDeletion(int uploadedFileID) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
     values[columnIsDeleted] = 1;
     return db.update(
       table,
       values,
-      where: '$columnGeneratedID =?',
-      whereArgs: [file.generatedID],
+      where: '$columnUploadedFileID =?',
+      whereArgs: [uploadedFileID],
     );
   }
 
-  Future<int> delete(File file) async {
+  Future<int> delete(int uploadedFileID) async {
     final db = await instance.database;
     return db.delete(
       table,
-      where: '$columnGeneratedID =?',
-      whereArgs: [file.generatedID],
+      where: '$columnUploadedFileID =?',
+      whereArgs: [uploadedFileID],
     );
   }
 

@@ -26,11 +26,16 @@ import 'crypto_util.dart';
 final logger = Logger("FileUtil");
 
 Future<void> deleteFiles(List<File> files) async {
-  await PhotoManager.editor
-      .deleteWithIds(files.map((file) => file.localID).toList());
-  for (File file in files) {
-    await FilesDB.instance.markForDeletion(file);
+  final localIDs = List<String>();
+  for (final file in files) {
+    if (file.localID != null) {
+      localIDs.add(file.localID);
+    }
+    if (file.uploadedFileID != null) {
+      await FilesDB.instance.markForDeletion(file.uploadedFileID);
+    }
   }
+  await PhotoManager.editor.deleteWithIds(localIDs);
   await FileRepository.instance.reloadFiles();
   SyncService.instance.sync();
 }

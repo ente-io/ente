@@ -281,20 +281,20 @@ class SyncService {
   }
 
   Future<void> _deletePhotosOnServer() async {
-    return _db.getAllDeleted().then((deletedPhotos) async {
-      for (File deletedPhoto in deletedPhotos) {
-        await _deleteFileOnServer(deletedPhoto);
-        await _db.delete(deletedPhoto);
+    return _db.getDeletedFileIDs().then((ids) async {
+      for (int id in ids) {
+        await _deleteFileOnServer(id);
+        await _db.delete(id);
       }
     });
   }
 
-  Future<void> _deleteFileOnServer(File file) async {
+  Future<void> _deleteFileOnServer(int fileID) async {
     return _dio
         .delete(
           Configuration.instance.getHttpEndpoint() +
               "/files/" +
-              file.uploadedFileID.toString(),
+              fileID.toString(),
           options: Options(
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         )
