@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/public_keys_db.dart';
@@ -12,43 +11,10 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
-
-class ShareFolderWidget extends StatefulWidget {
-  final Collection collection;
-
-  const ShareFolderWidget(
-    this.collection, {
-    Key key,
-  }) : super(key: key);
-
-  @override
-  _ShareFolderWidgetState createState() => _ShareFolderWidgetState();
-}
-
-class _ShareFolderWidgetState extends State<ShareFolderWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<String>>(
-      future: widget.collection == null
-          ? Future.value(List<String>())
-          : CollectionsService.instance.getSharees(widget.collection.id),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return SharingDialog(widget.collection, snapshot.data);
-        } else if (snapshot.hasError) {
-          return Text(snapshot.error.toString());
-        } else {
-          return loadWidget;
-        }
-      },
-    );
-  }
-}
 
 class SharingDialog extends StatefulWidget {
   final Collection collection;

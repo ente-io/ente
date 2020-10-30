@@ -14,7 +14,7 @@ import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/passphrase_entry_page.dart';
 import 'package:photos/ui/passphrase_reentry_page.dart';
 import 'package:photos/ui/settings_page.dart';
-import 'package:photos/ui/share_folder_widget.dart';
+import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/share_util.dart';
@@ -158,21 +158,38 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         if (collection == null) {
           final dialog = createProgressDialog(context, "Please wait...");
           await dialog.show();
-          collection =
-              await CollectionsService.instance.getOrCreateForPath(widget.path);
-          await dialog.hide();
+          try {
+            collection = await CollectionsService.instance
+                .getOrCreateForPath(widget.path);
+            await dialog.hide();
+          } catch (e, s) {
+            _logger.severe(e, s);
+            await dialog.hide();
+            showGenericErrorDialog(context);
+          }
         }
       } else {
         throw Exception(
             "Cannot create a collection of type" + widget.type.toString());
       }
     }
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return ShareFolderWidget(collection);
-      },
-    );
+    final dialog = createProgressDialog(context, "Please wait...");
+    await dialog.show();
+    try {
+      final sharees =
+          await CollectionsService.instance.getSharees(widget.collection.id);
+      await dialog.hide();
+      return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return SharingDialog(collection, sharees);
+        },
+      );
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await dialog.hide();
+      showGenericErrorDialog(context);
+    }
   }
 
   Future<void> _createAlbum() async {
