@@ -85,7 +85,12 @@ class FilesDB {
             $columnCreationTime TEXT NOT NULL,
             $columnUpdationTime TEXT,
             UNIQUE($columnUploadedFileID, $columnCollectionID)
-          )
+          );
+
+          CREATE INDEX collection_id_index ON $table($columnCollectionID);
+          CREATE INDEX device_folder_index ON $table($columnDeviceFolder);
+          CREATE INDEX creation_time_index ON $table($columnCreationTime);
+          CREATE INDEX updation_time_index ON $table($columnUpdationTime);
           ''');
   }
 
@@ -118,6 +123,17 @@ class FilesDB {
     final results = await db.query(table,
         where: '$columnGeneratedID = ?', whereArgs: [generatedID]);
     return _convertToFiles(results)[0];
+  }
+
+  Future<List<File>> getDeduplicatedFiles() async {
+    _logger.info("Getting files for collection");
+    final db = await instance.database;
+    final results = await db.query(table,
+        where: '$columnIsDeleted = 0',
+        orderBy: '$columnCreationTime DESC',
+        groupBy:
+            'IFNULL($columnUploadedFileID, $columnGeneratedID), IFNULL($columnLocalID, $columnGeneratedID)');
+    return _convertToFiles(results);
   }
 
   Future<List<File>> getFiles() async {
@@ -204,6 +220,84 @@ class FilesDB {
       orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
+  }
+
+  Future<Map<int, File>> getLastCreatedFilesInCollections(
+      List<int> collectionIDs) async {
+    final db = await instance.database;
+    final rows = await db.rawQuery('''
+      SELECT 
+        $columnGeneratedID,
+        $columnLocalID,
+        $columnUploadedFileID,
+        $columnOwnerID,
+        $columnCollectionID,
+        $columnTitle,
+        $columnDeviceFolder,
+        $columnLatitude,
+        $columnLongitude,
+        $columnFileType,
+        $columnRemoteFolderID,
+        $columnIsEncrypted,
+        $columnModificationTime,
+        $columnEncryptedKey,
+        $columnKeyDecryptionNonce,
+        $columnFileDecryptionHeader,
+        $columnThumbnailDecryptionHeader,
+        $columnMetadataDecryptionHeader,
+        $columnIsDeleted,
+        $columnUpdationTime,
+        MAX($columnCreationTime) as $columnCreationTime
+      FROM $table
+      WHERE $columnCollectionID IN (${collectionIDs.join(', ')})
+      GROUP BY $columnCollectionID
+      ORDER BY $columnCreationTime DESC;
+    ''');
+    final result = Map<int, File>();
+    final files = _convertToFiles(rows);
+    for (final file in files) {
+      result[file.collectionID] = file;
+    }
+    return result;
+  }
+
+  Future<Map<int, File>> getLastUpdatedFilesInCollections(
+      List<int> collectionIDs) async {
+    final db = await instance.database;
+    final rows = await db.rawQuery('''
+      SELECT 
+        $columnGeneratedID,
+        $columnLocalID,
+        $columnUploadedFileID,
+        $columnOwnerID,
+        $columnCollectionID,
+        $columnTitle,
+        $columnDeviceFolder,
+        $columnLatitude,
+        $columnLongitude,
+        $columnFileType,
+        $columnRemoteFolderID,
+        $columnIsEncrypted,
+        $columnModificationTime,
+        $columnEncryptedKey,
+        $columnKeyDecryptionNonce,
+        $columnFileDecryptionHeader,
+        $columnThumbnailDecryptionHeader,
+        $columnMetadataDecryptionHeader,
+        $columnIsDeleted,
+        $columnCreationTime,
+        MAX($columnUpdationTime) AS $columnUpdationTime
+      FROM $table
+      WHERE $columnCollectionID IN (${collectionIDs.join(', ')})
+      GROUP BY $columnCollectionID
+      ORDER BY $columnUpdationTime DESC;
+    ''');
+    final result = Map<int, File>();
+    final files = _convertToFiles(rows);
+    for (final file in files) {
+      result[file.collectionID] = file;
+    }
+    return result;
   }
 
   Future<List<File>> getMatchingFiles(
@@ -300,7 +394,6 @@ class FilesDB {
       table,
       columns: [columnDeviceFolder],
       distinct: true,
-      where: '$columnRemoteFolderID IS NULL',
     );
     List<String> result = List<String>();
     for (final row in rows) {

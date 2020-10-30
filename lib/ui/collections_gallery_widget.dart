@@ -106,8 +106,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
   }
 
   Future<CollectionItems> _getCollections() async {
+    final filesDB = FilesDB.instance;
+    final collectionsService = CollectionsService.instance;
     final userID = Configuration.instance.getUserID();
-    final paths = await FilesDB.instance.getLocalPaths();
+    // Query takes ~3 seconds, find out why
+    final paths = await filesDB.getLocalPaths();
     final folders = List<DeviceFolder>();
     for (final path in paths) {
       final files = List<File>();
@@ -120,34 +123,32 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
       final folderName = p.basename(path);
       folders.add(DeviceFolder(folderName, path, () => files, files[0]));
     }
+
     folders.sort((first, second) {
       return second.thumbnail.creationTime
           .compareTo(first.thumbnail.creationTime);
     });
-
     final collectionsWithThumbnail = List<CollectionWithThumbnail>();
-    final collections = CollectionsService.instance.getCollections();
-
+    final collections = collectionsService.getCollections();
+    final ownedCollectionIDs = List<int>();
     for (final c in collections) {
       if (c.ownerID != userID) {
         continue;
+      } else {
+        ownedCollectionIDs.add(c.id);
       }
-      final thumbnail = await FilesDB.instance.getLatestFileInCollection(c.id);
-      if (thumbnail == null) {
-        continue;
-      }
-      final lastUpdatedFile =
-          await FilesDB.instance.getLastModifiedFileInCollection(c.id);
-      collectionsWithThumbnail.add(CollectionWithThumbnail(
-        c,
-        thumbnail,
-        lastUpdatedFile,
-      ));
     }
-    collectionsWithThumbnail.sort((first, second) {
-      return second.lastUpdatedFile.updationTime
-          .compareTo(first.lastUpdatedFile.updationTime);
-    });
+    final thumbnails =
+        await filesDB.getLastCreatedFilesInCollections(ownedCollectionIDs);
+    final lastUpdatedFiles =
+        await filesDB.getLastUpdatedFilesInCollections(ownedCollectionIDs);
+    for (final collectionID in lastUpdatedFiles.keys) {
+      collectionsWithThumbnail.add(CollectionWithThumbnail(
+          collectionsService.getCollectionByID(collectionID),
+          thumbnails[collectionID],
+          lastUpdatedFiles[collectionID]));
+    }
+
     return CollectionItems(folders, collectionsWithThumbnail);
   }
 

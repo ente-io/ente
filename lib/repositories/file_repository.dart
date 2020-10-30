@@ -5,7 +5,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 
 class FileRepository {
-  final _logger = Logger("PhotoRepository");
+  final _logger = Logger("FileRepository");
   final _files = List<File>();
 
   FileRepository._privateConstructor();
@@ -32,7 +32,6 @@ class FileRepository {
     }
     _files.clear();
     _files.addAll(deduplicatedFiles);
-
     return _files;
   }
 
