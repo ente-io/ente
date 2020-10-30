@@ -118,7 +118,7 @@ class SyncService {
     final filterOptionGroup = FilterOptionGroup();
     filterOptionGroup.setOption(AssetType.image, FilterOption(needTitle: true));
     filterOptionGroup.setOption(AssetType.video, FilterOption(needTitle: true));
-    filterOptionGroup.dateTimeCond = DateTimeCond(
+    filterOptionGroup.createTimeCond = DateTimeCond(
       min: DateTime.fromMicrosecondsSinceEpoch(fromTimestamp),
       max: DateTime.fromMicrosecondsSinceEpoch(toTimestamp),
     );
