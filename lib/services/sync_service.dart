@@ -107,9 +107,10 @@ class SyncService {
     }
     files.sort(
         (first, second) => first.creationTime.compareTo(second.creationTime));
-
-    await _insertFilesToDB(files, syncStartTime);
-    await FileRepository.instance.reloadFiles();
+    if (files.isNotEmpty) {
+      await _insertFilesToDB(files, syncStartTime);
+      await FileRepository.instance.reloadFiles();
+    }
     await syncWithRemote();
   }
 
