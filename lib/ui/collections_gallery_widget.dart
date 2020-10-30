@@ -107,23 +107,26 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
 
   Future<CollectionItems> _getCollections() async {
     final filesDB = FilesDB.instance;
+    final filesRepo = FileRepository.instance;
     final collectionsService = CollectionsService.instance;
     final userID = Configuration.instance.getUserID();
-    // Query takes ~3 seconds, find out why
-    final paths = await filesDB.getLocalPaths();
     final folders = List<DeviceFolder>();
-    for (final path in paths) {
-      final files = List<File>();
-      for (File file in FileRepository.instance.files) {
-        if ((file.ownerID == null || file.ownerID == userID) &&
-            file.deviceFolder == path) {
-          files.add(file);
-        }
+    final files = filesRepo.hasLoadedFiles
+        ? filesRepo.files
+        : await filesRepo.loadFiles();
+    final filePathMap = Map<String, List<File>>();
+    for (final file in files) {
+      final path = file.deviceFolder;
+      if (filePathMap[path] == null) {
+        filePathMap[path] = List<File>();
       }
-      final folderName = p.basename(path);
-      folders.add(DeviceFolder(folderName, path, () => files, files[0]));
+      filePathMap[path].add(file);
     }
-
+    for (final path in filePathMap.keys) {
+      final folderName = p.basename(path);
+      folders.add(DeviceFolder(
+          folderName, path, () => filePathMap[path], filePathMap[path][0]));
+    }
     folders.sort((first, second) {
       return second.thumbnail.creationTime
           .compareTo(first.thumbnail.creationTime);
@@ -132,9 +135,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
     final collections = collectionsService.getCollections();
     final ownedCollectionIDs = List<int>();
     for (final c in collections) {
-      if (c.ownerID != userID) {
-        continue;
-      } else {
+      if (c.ownerID == userID) {
         ownedCollectionIDs.add(c.id);
       }
     }

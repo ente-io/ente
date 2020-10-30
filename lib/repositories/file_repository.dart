@@ -15,7 +15,32 @@ class FileRepository {
     return _files;
   }
 
+  bool _hasLoadedFiles = false;
+
+  bool get hasLoadedFiles {
+    return _hasLoadedFiles;
+  }
+
+  Future<List<File>> _cachedFuture;
+
   Future<List<File>> loadFiles() async {
+    if (_cachedFuture == null) {
+      _cachedFuture = _loadFiles().then((value) {
+        _hasLoadedFiles = true;
+        _cachedFuture = null;
+        return value;
+      });
+    }
+    return _cachedFuture;
+  }
+
+  Future<void> reloadFiles() async {
+    _logger.info("Reloading...");
+    await loadFiles();
+    Bus.instance.fire(LocalPhotosUpdatedEvent());
+  }
+
+  Future<List<File>> _loadFiles() async {
     final files = await FilesDB.instance.getFiles();
     final deduplicatedFiles = List<File>();
     for (int index = 0; index < files.length; index++) {
@@ -33,11 +58,5 @@ class FileRepository {
     _files.clear();
     _files.addAll(deduplicatedFiles);
     return _files;
-  }
-
-  Future<void> reloadFiles() async {
-    _logger.info("Reloading...");
-    await loadFiles();
-    Bus.instance.fire(LocalPhotosUpdatedEvent());
   }
 }

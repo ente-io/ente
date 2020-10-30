@@ -43,16 +43,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _memoriesWidget = MemoriesWidget();
 
   int _selectedNavBarItem = 0;
-  StreamSubscription<LocalPhotosUpdatedEvent>
-      _localPhotosUpdatedEventSubscription;
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
 
   @override
   void initState() {
-    _localPhotosUpdatedEventSubscription =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      setState(() {});
-    });
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       setState(() {
@@ -143,9 +137,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _getMainGalleryWidget() {
     return FutureBuilder(
-      future: FileRepository.instance.loadFiles().then((files) {
-        return _getFilteredPhotos(files);
-      }),
+      future: FileRepository.instance.loadFiles(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Gallery(
@@ -207,7 +199,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   void dispose() {
-    _localPhotosUpdatedEventSubscription.cancel();
     _tabChangedEventSubscription.cancel();
     super.dispose();
   }
