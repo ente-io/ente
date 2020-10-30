@@ -92,6 +92,7 @@ class FavoritesService {
         await _collectionsService.createAndCacheCollection(Collection(
       null,
       null,
+      null,
       Sodium.bin2base64(encryptedKeyData.encryptedData),
       Sodium.bin2base64(encryptedKeyData.nonce),
       "Favorites",

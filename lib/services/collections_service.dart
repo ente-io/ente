@@ -147,6 +147,7 @@ class CollectionsService {
     final collection = await createAndCacheCollection(Collection(
       null,
       null,
+      null,
       Sodium.bin2base64(encryptedKeyData.encryptedData),
       Sodium.bin2base64(encryptedKeyData.nonce),
       albumName,
@@ -166,6 +167,7 @@ class CollectionsService {
     final encryptedPath =
         CryptoUtil.encryptSync(utf8.encode(path), _config.getKey());
     final collection = await createAndCacheCollection(Collection(
+      null,
       null,
       null,
       Sodium.bin2base64(encryptedKeyData.encryptedData),

@@ -13,6 +13,7 @@ class CollectionsDB {
 
   static final columnID = 'collection_id';
   static final columnOwnerID = 'owner_id';
+  static final columnOwnerEmail = 'owner_email';
   static final columnEncryptedKey = 'encrypted_key';
   static final columnKeyDecryptionNonce = 'key_decryption_nonce';
   static final columnName = 'name';
@@ -46,6 +47,7 @@ class CollectionsDB {
                 CREATE TABLE $collectionsTable (
                   $columnID INTEGER PRIMARY KEY NOT NULL,
                   $columnOwnerID INTEGER NOT NULL,
+                  $columnOwnerEmail TEXT,
                   $columnEncryptedKey TEXT NOT NULL,
                   $columnKeyDecryptionNonce TEXT,
                   $columnName TEXT NOT NULL,
@@ -95,6 +97,7 @@ class CollectionsDB {
     var row = new Map<String, dynamic>();
     row[columnID] = collection.id;
     row[columnOwnerID] = collection.ownerID;
+    row[columnOwnerEmail] = collection.ownerEmail;
     row[columnEncryptedKey] = collection.encryptedKey;
     row[columnKeyDecryptionNonce] = collection.keyDecryptionNonce;
     row[columnName] = collection.name;
@@ -109,6 +112,7 @@ class CollectionsDB {
     return Collection(
       row[columnID],
       row[columnOwnerID],
+      row[columnOwnerEmail],
       row[columnEncryptedKey],
       row[columnKeyDecryptionNonce],
       row[columnName],

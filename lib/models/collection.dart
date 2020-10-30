@@ -3,6 +3,7 @@ import 'dart:convert';
 class Collection {
   final int id;
   final int ownerID;
+  final String ownerEmail;
   final String encryptedKey;
   final String keyDecryptionNonce;
   final String name;
@@ -13,6 +14,7 @@ class Collection {
   Collection(
     this.id,
     this.ownerID,
+    this.ownerEmail,
     this.encryptedKey,
     this.keyDecryptionNonce,
     this.name,
@@ -42,28 +44,6 @@ class Collection {
     }
   }
 
-  Collection copyWith({
-    int id,
-    int ownerID,
-    String encryptedKey,
-    String keyDecryptionNonce,
-    String name,
-    CollectionType type,
-    CollectionAttributes attributes,
-    int creationTime,
-  }) {
-    return Collection(
-      id ?? this.id,
-      ownerID ?? this.ownerID,
-      encryptedKey ?? this.encryptedKey,
-      keyDecryptionNonce ?? this.keyDecryptionNonce,
-      name ?? this.name,
-      type ?? this.type,
-      attributes ?? this.attributes,
-      creationTime ?? this.creationTime,
-    );
-  }
-
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -83,6 +63,7 @@ class Collection {
     return Collection(
       map['id'],
       map['ownerID'],
+      map['ownerEmail'],
       map['encryptedKey'],
       map['keyDecryptionNonce'],
       map['name'],
@@ -99,7 +80,7 @@ class Collection {
 
   @override
   String toString() {
-    return 'Collection(id: $id, ownerID: $ownerID, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, attributes: $attributes, creationTime: $creationTime)';
+    return 'Collection(id: $id, ownerID: $ownerID, ownerEmail: $ownerEmail, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, attributes: $attributes, creationTime: $creationTime)';
   }
 
   @override
@@ -109,6 +90,7 @@ class Collection {
     return o is Collection &&
         o.id == id &&
         o.ownerID == ownerID &&
+        o.ownerEmail == ownerEmail &&
         o.encryptedKey == encryptedKey &&
         o.keyDecryptionNonce == keyDecryptionNonce &&
         o.name == name &&
@@ -121,6 +103,7 @@ class Collection {
   int get hashCode {
     return id.hashCode ^
         ownerID.hashCode ^
+        ownerEmail.hashCode ^
         encryptedKey.hashCode ^
         keyDecryptionNonce.hashCode ^
         name.hashCode ^

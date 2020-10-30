@@ -108,12 +108,28 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
           ClipRRect(
             borderRadius: BorderRadius.circular(4.0),
             child: Container(
-              child: c.thumbnail ==
-                      null // When the user has shared a folder without photos
-                  ? Icon(Icons.error)
-                  : Hero(
+              child: Stack(
+                children: [
+                  Hero(
                       tag: "shared_collection" + c.thumbnail.tag(),
                       child: ThumbnailWidget(c.thumbnail)),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      child: Text(
+                        c.collection.ownerEmail.substring(0, 1),
+                        textAlign: TextAlign.center,
+                      ),
+                      padding: EdgeInsets.all(8),
+                      margin: EdgeInsets.fromLTRB(0, 0, 4, 0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).accentColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               height: 150,
               width: 150,
             ),
