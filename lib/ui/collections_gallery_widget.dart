@@ -10,12 +10,10 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
-import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/favorites_service.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/ui/collection_page.dart';
 import 'package:photos/ui/device_folder_page.dart';
@@ -150,7 +148,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
       return second.lastUpdatedFile.updationTime
           .compareTo(first.lastUpdatedFile.updationTime);
     });
-
     return CollectionItems(folders, collectionsWithThumbnail);
   }
 

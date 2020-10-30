@@ -110,7 +110,7 @@ class SyncService {
 
     await _insertFilesToDB(files, syncStartTime);
     await FileRepository.instance.reloadFiles();
-    await _syncWithRemote();
+    await syncWithRemote();
   }
 
   Future<List<AssetPathEntity>> _getGalleryList(
@@ -154,7 +154,7 @@ class SyncService {
     }
   }
 
-  Future<void> _syncWithRemote() async {
+  Future<void> syncWithRemote() async {
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }

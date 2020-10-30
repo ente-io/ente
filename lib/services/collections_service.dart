@@ -14,6 +14,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 
@@ -44,11 +45,15 @@ class CollectionsService {
   Future<void> sync() async {
     final lastCollectionCreationTime =
         await _db.getLastCollectionCreationTime();
-    var collections = await _fetchCollections(lastCollectionCreationTime ?? 0);
-    await _db.insert(collections);
-    collections = await _db.getAllCollections();
+    final fetchedCollections =
+        await _fetchCollections(lastCollectionCreationTime ?? 0);
+    await _db.insert(fetchedCollections);
+    final collections = await _db.getAllCollections();
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
+    }
+    if (fetchedCollections.isNotEmpty) {
+      Bus.instance.fire(CollectionUpdatedEvent());
     }
   }
 
@@ -208,7 +213,8 @@ class CollectionsService {
     )
         .then((value) async {
       await FilesDB.instance.insertMultiple(files);
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID));
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
+      SyncService.instance.syncWithRemote();
     });
   }
 
@@ -229,7 +235,8 @@ class CollectionsService {
     );
     await FilesDB.instance
         .removeFromCollection(collectionID, params["fileIDs"]);
-    Bus.instance.fire(CollectionUpdatedEvent(collectionID));
+    Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
+    SyncService.instance.syncWithRemote();
   }
 
   Future<Collection> createAndCacheCollection(Collection collection) async {
