@@ -128,18 +128,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
     });
 
     final collectionsWithThumbnail = List<CollectionWithThumbnail>();
-    final favorites = FavoritesService.instance.getFavoriteFiles().toList();
-    favorites.sort((first, second) {
-      return second.creationTime.compareTo(first.creationTime);
-    });
-    if (favorites.length > 0) {
-      final favoritesCollection =
-          await FavoritesService.instance.getFavoritesCollection();
-      final lastUpdatedFile = await FilesDB.instance
-          .getLastModifiedFileInCollection(favoritesCollection.id);
-      collectionsWithThumbnail.add(CollectionWithThumbnail(
-          favoritesCollection, favorites[0], lastUpdatedFile));
-    }
     final collections = CollectionsService.instance.getCollections();
 
     for (final c in collections) {

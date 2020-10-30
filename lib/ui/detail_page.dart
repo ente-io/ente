@@ -178,8 +178,22 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget _getFavoriteButton() {
     final file = _files[_selectedIndex];
+
+    return FutureBuilder(
+      future: FavoritesService.instance.isFavorite(file),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return _getLikeButton(file, snapshot.data);
+        } else {
+          return _getLikeButton(file, false);
+        }
+      },
+    );
+  }
+
+  Widget _getLikeButton(File file, bool isLiked) {
     return LikeButton(
-      isLiked: FavoritesService.instance.isLiked(file.uploadedFileID),
+      isLiked: isLiked,
       onTap: (oldValue) async {
         final isLiked = !oldValue;
         bool hasError = false;

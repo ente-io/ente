@@ -341,6 +341,18 @@ class FilesDB {
     }
   }
 
+  Future<bool> doesFileExistInCollection(
+      int uploadedFileID, int collectionID) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      where: '$columnUploadedFileID = ? AND $columnCollectionID = ?',
+      whereArgs: [uploadedFileID, collectionID],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
   List<File> _convertToFiles(List<Map<String, dynamic>> results) {
     final files = List<File>();
     for (final result in results) {
