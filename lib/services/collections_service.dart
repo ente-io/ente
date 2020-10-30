@@ -217,7 +217,7 @@ class CollectionsService {
     params["collectionID"] = collectionID;
     for (final file in files) {
       if (params["fileIDs"] == null) {
-        params["fileIDs"] = [];
+        params["fileIDs"] = List<int>();
       }
       params["fileIDs"].add(file.uploadedFileID);
     }

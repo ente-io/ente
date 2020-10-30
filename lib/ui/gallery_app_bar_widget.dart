@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -50,7 +51,10 @@ class GalleryAppBarWidget extends StatefulWidget
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
+  final _logger = Logger("GalleryAppBar");
+
   StreamSubscription _userAuthEventSubscription;
+
   @override
   void initState() {
     widget.selectedFiles.addListener(() {
@@ -183,27 +187,62 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
-    if (widget.selectedFiles.files.isNotEmpty) {
-      if (widget.type == GalleryAppBarType.homepage ||
-          widget.type == GalleryAppBarType.local_folder ||
-          widget.type == GalleryAppBarType.collection) {
-        actions.add(IconButton(
-          icon: Icon(Icons.delete),
-          onPressed: () {
-            _showDeleteSheet(context);
-          },
-        ));
-      }
+    actions.add(IconButton(
+      icon: Icon(Icons.add),
+      onPressed: () {
+        _createAlbum();
+      },
+    ));
+    actions.add(IconButton(
+      icon: Icon(Icons.share),
+      onPressed: () {
+        _shareSelected(context);
+      },
+    ));
+    if (widget.type == GalleryAppBarType.homepage ||
+        widget.type == GalleryAppBarType.local_folder) {
       actions.add(IconButton(
-        icon: Icon(Icons.add),
+        icon: Icon(Icons.delete),
         onPressed: () {
-          _createAlbum();
+          _showDeleteSheet(context);
         },
       ));
-      actions.add(IconButton(
-        icon: Icon(Icons.share),
-        onPressed: () {
-          _shareSelected(context);
+    } else if (widget.type == GalleryAppBarType.collection) {
+      actions.add(PopupMenuButton(
+        itemBuilder: (context) {
+          return [
+            PopupMenuItem(
+              value: 1,
+              child: Row(
+                children: [
+                  Icon(Icons.remove_circle),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("Remove"),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 2,
+              child: Row(
+                children: [
+                  Icon(Icons.delete),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("Delete"),
+                ],
+              ),
+            )
+          ];
+        },
+        onSelected: (value) {
+          if (value == 1) {
+            _showRemoveFromCollectionSheet(context);
+          } else if (value == 2) {
+            _showDeleteSheet(context);
+          }
         },
       ));
     }
@@ -214,9 +253,50 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     shareMultiple(context, widget.selectedFiles.files.toList());
   }
 
+  void _showRemoveFromCollectionSheet(BuildContext context) {
+    final action = CupertinoActionSheet(
+      title: Text("Remove " +
+          widget.selectedFiles.files.length.toString() +
+          " files from " +
+          widget.collection.name +
+          "?"),
+      actions: <Widget>[
+        CupertinoActionSheetAction(
+          child: Text("Remove"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            final dialog = createProgressDialog(context, "Removing files...");
+            await dialog.show();
+            try {
+              CollectionsService.instance.removeFromCollection(
+                  widget.collection.id, widget.selectedFiles.files.toList());
+              await dialog.hide();
+              widget.selectedFiles.clearAll();
+              Navigator.of(context).pop();
+            } catch (e, s) {
+              _logger.severe(e, s);
+              await dialog.hide();
+              Navigator.of(context).pop();
+              showGenericErrorDialog(context);
+            }
+          },
+        ),
+      ],
+      cancelButton: CupertinoActionSheetAction(
+        child: Text("Cancel"),
+        onPressed: () {
+          Navigator.of(context, rootNavigator: true).pop();
+        },
+      ),
+    );
+    showCupertinoModalPopup(context: context, builder: (_) => action);
+  }
+
   void _showDeleteSheet(BuildContext context) {
     final action = CupertinoActionSheet(
-      title: Text("Delete file?"),
+      title: Text("Permanently delete " +
+          widget.selectedFiles.files.length.toString() +
+          " files?"),
       actions: <Widget>[
         CupertinoActionSheetAction(
           child: Text("Delete"),

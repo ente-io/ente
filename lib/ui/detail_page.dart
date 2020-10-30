@@ -179,7 +179,7 @@ class _DetailPageState extends State<DetailPage> {
   Widget _getFavoriteButton() {
     final file = _files[_selectedIndex];
     return LikeButton(
-      isLiked: FavoritesService.instance.isLiked(file),
+      isLiked: FavoritesService.instance.isLiked(file.uploadedFileID),
       onTap: (oldValue) async {
         final isLiked = !oldValue;
         bool hasError = false;
