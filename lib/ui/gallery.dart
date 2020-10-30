@@ -62,9 +62,11 @@ class _GalleryState extends State<Gallery> {
     _requiresLoad = true;
     if (widget.reloadEvent != null) {
       widget.reloadEvent.listen((event) {
-        setState(() {
-          _requiresLoad = true;
-        });
+        if (mounted) {
+          setState(() {
+            _requiresLoad = true;
+          });
+        }
       });
     }
     widget.selectedFiles.addListener(() {
