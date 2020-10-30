@@ -22,8 +22,6 @@ import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/ui/search_page.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
-import 'package:photos/utils/logging_util.dart';
-import 'package:shake/shake.dart';
 import 'package:logging/logging.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -44,7 +42,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _selectedFiles = SelectedFiles();
   final _memoriesWidget = MemoriesWidget();
 
-  ShakeDetector _detector;
   int _selectedNavBarItem = 0;
   StreamSubscription<LocalPhotosUpdatedEvent>
       _localPhotosUpdatedEventSubscription;
@@ -52,12 +49,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   void initState() {
-    _detector = ShakeDetector.autoStart(
-        shakeThresholdGravity: 3,
-        onPhoneShake: () {
-          _logger.info("Emailing logs");
-          LoggingUtil.instance.emailLogs();
-        });
     _localPhotosUpdatedEventSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       setState(() {});
@@ -216,7 +207,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   void dispose() {
-    _detector.stopListening();
     _localPhotosUpdatedEventSubscription.cancel();
     _tabChangedEventSubscription.cancel();
     super.dispose();

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:archive/archive_io.dart';
 import 'package:crisp/crisp.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -6,10 +9,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/dialog_util.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key key}) : super(key: key);
@@ -235,8 +240,20 @@ class SupportSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
+            final dialog = createProgressDialog(context, "Preparing logs...");
+            await dialog.show();
+            final tempPath = (await getTemporaryDirectory()).path;
+            final zipFilePath = tempPath + "/logs.zip";
+            final logsDirectory = Directory(tempPath + "/logs");
+            var encoder = ZipFileEncoder();
+            encoder.create(zipFilePath);
+            encoder.addDirectory(logsDirectory);
+            encoder.close();
+            await dialog.hide();
             final Email email = Email(
               recipients: ['support@ente.io'],
+              cc: ['vishnu@ente.io'],
+              attachmentPaths: [zipFilePath],
               isHTML: false,
             );
             await FlutterEmailSender.send(email);
