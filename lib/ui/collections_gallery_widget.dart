@@ -212,9 +212,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
       List<CollectionWithThumbnail> collections, int index) {
     if (index == collections.length) {
       return Container(
-        height: 150,
-        width: 150,
-        margin: EdgeInsets.fromLTRB(0, 0, 12, 28),
+        padding: EdgeInsets.fromLTRB(28, 0, 28, 56),
         child: OutlineButton(
           child: Icon(
             Icons.add,
