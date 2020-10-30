@@ -115,9 +115,7 @@ class _DetailPageState extends State<DetailPage> {
 
   AppBar _buildAppBar() {
     final actions = List<Widget>();
-    if (_files[_selectedIndex].localID != null) {
-      actions.add(_getFavoriteButton());
-    }
+    actions.add(_getFavoriteButton());
     actions.add(PopupMenuButton(
       itemBuilder: (context) {
         return [
