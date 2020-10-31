@@ -7,7 +7,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/events/remote_sync_event.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -24,14 +24,12 @@ class SharedCollectionGallery extends StatefulWidget {
 
 class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
   Logger _logger = Logger("SharedCollectionGallery");
-  StreamSubscription<RemoteSyncEvent> _subscription;
+  StreamSubscription<CollectionUpdatedEvent> _subscription;
 
   @override
   void initState() {
-    _subscription = Bus.instance.on<RemoteSyncEvent>().listen((event) {
-      if (event.success) {
-        setState(() {});
-      }
+    _subscription = Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+      setState(() {});
     });
     super.initState();
   }
