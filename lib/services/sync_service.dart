@@ -178,7 +178,7 @@ class SyncService {
     if (diff.isNotEmpty) {
       await _storeDiff(diff, collectionID);
       FileRepository.instance.reloadFiles();
-      Bus.instance.fire(CollectionUpdatedEvent());
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
       if (diff.length == _diffLimit) {
         return await _fetchEncryptedFilesDiff(collectionID);
       }
