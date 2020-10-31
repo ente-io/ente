@@ -22,6 +22,7 @@ class CollectionsService {
   final _logger = Logger("CollectionsService");
 
   CollectionsDB _db;
+  FilesDB _filesDB;
   Configuration _config;
   final _localCollections = Map<String, Collection>();
   final _collectionIDToCollections = Map<int, Collection>();
@@ -29,6 +30,7 @@ class CollectionsService {
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
+    _filesDB = FilesDB.instance;
     _config = Configuration.instance;
   }
 
@@ -44,10 +46,19 @@ class CollectionsService {
 
   Future<void> sync() async {
     final lastCollectionCreationTime =
-        await _db.getLastCollectionCreationTime();
+        await _db.getLastCollectionUpdationTime();
     final fetchedCollections =
         await _fetchCollections(lastCollectionCreationTime ?? 0);
-    await _db.insert(fetchedCollections);
+    final updatedCollections = List<Collection>();
+    for (final collection in fetchedCollections) {
+      if (collection.isDeleted) {
+        await _filesDB.deleteCollection(collection.id);
+        await _db.deleteCollection(collection.id);
+      } else {
+        updatedCollections.add(collection);
+      }
+    }
+    await _db.insert(updatedCollections);
     final collections = await _db.getAllCollections();
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
@@ -212,7 +223,7 @@ class CollectionsService {
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     )
         .then((value) async {
-      await FilesDB.instance.insertMultiple(files);
+      await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
       SyncService.instance.syncWithRemote();
     });
@@ -233,8 +244,7 @@ class CollectionsService {
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     );
-    await FilesDB.instance
-        .removeFromCollection(collectionID, params["fileIDs"]);
+    await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
     Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
     SyncService.instance.syncWithRemote();
   }

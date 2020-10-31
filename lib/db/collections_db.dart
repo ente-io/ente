@@ -20,7 +20,7 @@ class CollectionsDB {
   static final columnType = 'type';
   static final columnEncryptedPath = 'encrypted_path';
   static final columnPathDecryptionNonce = 'path_decryption_nonce';
-  static final columnCreationTime = 'creation_time';
+  static final columnUpdationTime = 'updation_time';
 
   CollectionsDB._privateConstructor();
   static final CollectionsDB instance = CollectionsDB._privateConstructor();
@@ -54,7 +54,7 @@ class CollectionsDB {
                   $columnType TEXT NOT NULL,
                   $columnEncryptedPath TEXT,
                   $columnPathDecryptionNonce TEXT,
-                  $columnCreationTime TEXT NOT NULL
+                  $columnUpdationTime TEXT NOT NULL
                 )
                 ''');
   }
@@ -79,18 +79,27 @@ class CollectionsDB {
     return collections;
   }
 
-  Future<int> getLastCollectionCreationTime() async {
+  Future<int> getLastCollectionUpdationTime() async {
     final db = await instance.database;
     final rows = await db.query(
       collectionsTable,
-      orderBy: '$columnCreationTime DESC',
+      orderBy: '$columnUpdationTime DESC',
       limit: 1,
     );
     if (rows.isNotEmpty) {
-      return int.parse(rows[0][columnCreationTime]);
+      return int.parse(rows[0][columnUpdationTime]);
     } else {
       return null;
     }
+  }
+
+  Future<int> deleteCollection(int collectionID) async {
+    final db = await instance.database;
+    return db.delete(
+      collectionsTable,
+      where: '$columnID = ?',
+      whereArgs: [collectionID],
+    );
   }
 
   Map<String, dynamic> _getRowForCollection(Collection collection) {
@@ -104,7 +113,7 @@ class CollectionsDB {
     row[columnType] = Collection.typeToString(collection.type);
     row[columnEncryptedPath] = collection.attributes.encryptedPath;
     row[columnPathDecryptionNonce] = collection.attributes.pathDecryptionNonce;
-    row[columnCreationTime] = collection.creationTime;
+    row[columnUpdationTime] = collection.updationTime;
     return row;
   }
 
@@ -120,7 +129,7 @@ class CollectionsDB {
       CollectionAttributes(
           encryptedPath: row[columnEncryptedPath],
           pathDecryptionNonce: row[columnPathDecryptionNonce]),
-      int.parse(row[columnCreationTime]),
+      int.parse(row[columnUpdationTime]),
     );
   }
 }

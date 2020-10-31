@@ -9,7 +9,8 @@ class Collection {
   final String name;
   final CollectionType type;
   final CollectionAttributes attributes;
-  final int creationTime;
+  final int updationTime;
+  final bool isDeleted;
 
   Collection(
     this.id,
@@ -20,8 +21,9 @@ class Collection {
     this.name,
     this.type,
     this.attributes,
-    this.creationTime,
-  );
+    this.updationTime, {
+    this.isDeleted = false,
+  });
 
   static CollectionType typeFromString(String type) {
     switch (type) {
@@ -53,7 +55,7 @@ class Collection {
       'name': name,
       'type': typeToString(type),
       'attributes': attributes?.toMap(),
-      'creationTime': creationTime,
+      'updationTime': updationTime,
     };
   }
 
@@ -69,7 +71,8 @@ class Collection {
       map['name'],
       typeFromString(map['type']),
       CollectionAttributes.fromMap(map['attributes']),
-      map['creationTime'],
+      map['updationTime'],
+      isDeleted: map['isDeleted'] ?? false,
     );
   }
 
@@ -80,7 +83,7 @@ class Collection {
 
   @override
   String toString() {
-    return 'Collection(id: $id, ownerID: $ownerID, ownerEmail: $ownerEmail, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, attributes: $attributes, creationTime: $creationTime)';
+    return 'Collection(id: $id, ownerID: $ownerID, ownerEmail: $ownerEmail, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, attributes: $attributes, creationTime: $updationTime)';
   }
 
   @override
@@ -96,7 +99,7 @@ class Collection {
         o.name == name &&
         o.type == type &&
         o.attributes == attributes &&
-        o.creationTime == creationTime;
+        o.updationTime == updationTime;
   }
 
   @override
@@ -109,7 +112,7 @@ class Collection {
         name.hashCode ^
         type.hashCode ^
         attributes.hashCode ^
-        creationTime.hashCode;
+        updationTime.hashCode;
   }
 }
 
