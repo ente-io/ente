@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/services/collections_service.dart';
@@ -177,6 +178,7 @@ class SyncService {
     if (diff.isNotEmpty) {
       await _storeDiff(diff, collectionID);
       FileRepository.instance.reloadFiles();
+      Bus.instance.fire(CollectionUpdatedEvent());
       if (diff.length == _diffLimit) {
         return await _fetchEncryptedFilesDiff(collectionID);
       }

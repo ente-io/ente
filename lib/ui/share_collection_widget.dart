@@ -228,6 +228,8 @@ class EmailItemWidget extends StatelessWidget {
                   await CollectionsService.instance
                       .unshare(collectionID, email);
                   await dialog.hide();
+                  showToast("Stopped sharing with " + email + ".");
+                  Navigator.of(context).pop();
                 } catch (e, s) {
                   Logger("EmailItemWidget").severe(e, s);
                   await dialog.hide();
