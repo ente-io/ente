@@ -43,10 +43,15 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _memoriesWidget = MemoriesWidget();
 
   int _selectedNavBarItem = 0;
+  StreamSubscription<LocalPhotosUpdatedEvent> _photosUpdatedEvent;
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
 
   @override
   void initState() {
+    _photosUpdatedEvent =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      setState(() {});
+    });
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       setState(() {
@@ -200,6 +205,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void dispose() {
     _tabChangedEventSubscription.cancel();
+    _photosUpdatedEvent.cancel();
     super.dispose();
   }
 }
