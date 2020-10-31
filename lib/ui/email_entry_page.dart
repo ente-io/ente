@@ -50,7 +50,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             Padding(padding: EdgeInsets.all(12)),
             TextFormField(
               decoration: InputDecoration(
-                hintText: 'Full Name',
+                hintText: 'your name',
                 contentPadding: EdgeInsets.all(20),
               ),
               controller: _nameController,
