@@ -15,12 +15,14 @@ class EmailEntryPage extends StatefulWidget {
 }
 
 class _EmailEntryPageState extends State<EmailEntryPage> {
+  final _config = Configuration.instance;
   TextEditingController _emailController;
+  TextEditingController _nameController;
 
   @override
   void initState() {
-    _emailController =
-        TextEditingController(text: Configuration.instance.getEmail());
+    _emailController = TextEditingController(text: _config.getEmail());
+    _nameController = TextEditingController(text: _config.getName());
     super.initState();
   }
 
@@ -48,11 +50,21 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             Padding(padding: EdgeInsets.all(12)),
             TextFormField(
               decoration: InputDecoration(
+                hintText: 'Full Name',
+                contentPadding: EdgeInsets.all(20),
+              ),
+              controller: _nameController,
+              autofocus: true,
+              autocorrect: false,
+              keyboardType: TextInputType.name,
+            ),
+            Padding(padding: EdgeInsets.all(12)),
+            TextFormField(
+              decoration: InputDecoration(
                 hintText: 'you@email.com',
                 contentPadding: EdgeInsets.all(20),
               ),
               controller: _emailController,
-              autofocus: true,
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
             ),
@@ -67,7 +79,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       "Please enter a valid email address.");
                   return;
                 }
-                Configuration.instance.setEmail(email);
+                _config.setEmail(email);
+                _config.setName(_nameController.text);
                 UserService.instance.getOtt(context, email);
               }),
             ),
