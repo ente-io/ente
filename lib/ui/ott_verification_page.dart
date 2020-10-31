@@ -30,7 +30,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   Widget _getBody() {
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.fromLTRB(8, 40, 8, 8),
+        padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
@@ -38,8 +38,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
           children: [
             Image.asset(
               "assets/email_sent.png",
-              width: 256,
-              height: 256,
+              width: 220,
+              height: 220,
             ),
             Padding(padding: EdgeInsets.all(12)),
             Text.rich(

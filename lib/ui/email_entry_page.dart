@@ -51,24 +51,24 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             TextFormField(
               decoration: InputDecoration(
                 hintText: 'your name',
-                contentPadding: EdgeInsets.all(20),
+                contentPadding: EdgeInsets.all(12),
               ),
               controller: _nameController,
               autofocus: true,
               autocorrect: false,
               keyboardType: TextInputType.name,
             ),
-            Padding(padding: EdgeInsets.all(12)),
+            Padding(padding: EdgeInsets.all(8)),
             TextFormField(
               decoration: InputDecoration(
                 hintText: 'you@email.com',
-                contentPadding: EdgeInsets.all(20),
+                contentPadding: EdgeInsets.all(12),
               ),
               controller: _emailController,
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            Padding(padding: EdgeInsets.all(12)),
             Container(
               width: double.infinity,
               height: 44,
