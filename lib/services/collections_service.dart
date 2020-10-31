@@ -111,6 +111,18 @@ class CollectionsService {
     );
   }
 
+  Future<void> unshare(int collectionID, String email) {
+    return Dio().post(
+      Configuration.instance.getHttpEndpoint() + "/collections/unshare",
+      data: {
+        "collectionID": collectionID,
+        "email": email,
+      },
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    );
+  }
+
   Uint8List getCollectionKey(int collectionID) {
     if (!_cachedKeys.containsKey(collectionID)) {
       final collection = _collectionIDToCollections[collectionID];

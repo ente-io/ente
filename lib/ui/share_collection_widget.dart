@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/models/collection.dart';
@@ -40,7 +41,7 @@ class _SharingDialogState extends State<SharingDialog> {
       children.add(Text("Click the + button to share this folder."));
     } else {
       for (final email in _sharees) {
-        children.add(EmailItemWidget(email));
+        children.add(EmailItemWidget(widget.collection.id, email));
       }
     }
     if (_showEntryField) {
@@ -195,8 +196,11 @@ class _SharingDialogState extends State<SharingDialog> {
 }
 
 class EmailItemWidget extends StatelessWidget {
+  final int collectionID;
   final String email;
+
   const EmailItemWidget(
+    this.collectionID,
     this.email, {
     Key key,
   }) : super(key: key);
@@ -214,9 +218,22 @@ class EmailItemWidget extends StatelessWidget {
                 style: TextStyle(fontSize: 16),
               ),
             ),
-            Icon(
-              Icons.delete_forever,
+            IconButton(
+              icon: Icon(Icons.delete_forever),
               color: Colors.redAccent,
+              onPressed: () async {
+                final dialog = createProgressDialog(context, "Please wait...");
+                await dialog.show();
+                try {
+                  await CollectionsService.instance
+                      .unshare(collectionID, email);
+                  await dialog.hide();
+                } catch (e, s) {
+                  Logger("EmailItemWidget").severe(e, s);
+                  await dialog.hide();
+                  showGenericErrorDialog(context);
+                }
+              },
             ),
           ],
         ));
