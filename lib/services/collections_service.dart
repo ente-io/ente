@@ -127,7 +127,7 @@ class CollectionsService {
     if (!_cachedKeys.containsKey(collectionID)) {
       final collection = _collectionIDToCollections[collectionID];
       var key;
-      if (collection.ownerID == _config.getUserID()) {
+      if (collection.owner.id == _config.getUserID()) {
         final encryptedKey = Sodium.base642bin(collection.encryptedKey);
         key = CryptoUtil.decryptSync(encryptedKey, _config.getKey(),
             Sodium.base642bin(collection.keyDecryptionNonce));
@@ -175,7 +175,6 @@ class CollectionsService {
     final collection = await createAndCacheCollection(Collection(
       null,
       null,
-      null,
       Sodium.bin2base64(encryptedKeyData.encryptedData),
       Sodium.bin2base64(encryptedKeyData.nonce),
       albumName,
@@ -195,7 +194,6 @@ class CollectionsService {
     final encryptedPath =
         CryptoUtil.encryptSync(utf8.encode(path), _config.getKey());
     final collection = await createAndCacheCollection(Collection(
-      null,
       null,
       null,
       Sodium.bin2base64(encryptedKeyData.encryptedData),

@@ -43,7 +43,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
           CollectionsDB.instance.getAllCollections().then((collections) async {
         final c = List<CollectionWithThumbnail>();
         for (final collection in collections) {
-          if (collection.ownerID == Configuration.instance.getUserID()) {
+          if (collection.owner.id == Configuration.instance.getUserID()) {
             continue;
           }
           final thumbnail =
@@ -117,7 +117,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
                     alignment: Alignment.bottomRight,
                     child: Container(
                       child: Text(
-                        c.collection.ownerEmail.substring(0, 1),
+                        c.collection.owner.name.substring(0, 1),
                         textAlign: TextAlign.center,
                       ),
                       padding: EdgeInsets.all(8),

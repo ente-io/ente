@@ -135,7 +135,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
     final collections = collectionsService.getCollections();
     final ownedCollectionIDs = List<int>();
     for (final c in collections) {
-      if (c.ownerID == userID) {
+      if (c.owner.id == userID) {
         ownedCollectionIDs.add(c.id);
       }
     }

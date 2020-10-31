@@ -2,8 +2,7 @@ import 'dart:convert';
 
 class Collection {
   final int id;
-  final int ownerID;
-  final String ownerEmail;
+  final CollectionOwner owner;
   final String encryptedKey;
   final String keyDecryptionNonce;
   final String name;
@@ -14,8 +13,7 @@ class Collection {
 
   Collection(
     this.id,
-    this.ownerID,
-    this.ownerEmail,
+    this.owner,
     this.encryptedKey,
     this.keyDecryptionNonce,
     this.name,
@@ -49,7 +47,7 @@ class Collection {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'ownerID': ownerID,
+      'owner': owner?.toMap(),
       'encryptedKey': encryptedKey,
       'keyDecryptionNonce': keyDecryptionNonce,
       'name': name,
@@ -64,8 +62,7 @@ class Collection {
 
     return Collection(
       map['id'],
-      map['ownerID'],
-      map['ownerEmail'],
+      CollectionOwner.fromMap(map['owner']),
       map['encryptedKey'],
       map['keyDecryptionNonce'],
       map['name'],
@@ -83,7 +80,7 @@ class Collection {
 
   @override
   String toString() {
-    return 'Collection(id: $id, ownerID: $ownerID, ownerEmail: $ownerEmail, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, attributes: $attributes, creationTime: $updationTime)';
+    return 'Collection(id: $id, owner: ${owner.toString()} encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, attributes: $attributes, creationTime: $updationTime)';
   }
 
   @override
@@ -92,8 +89,7 @@ class Collection {
 
     return o is Collection &&
         o.id == id &&
-        o.ownerID == ownerID &&
-        o.ownerEmail == ownerEmail &&
+        o.owner == owner &&
         o.encryptedKey == encryptedKey &&
         o.keyDecryptionNonce == keyDecryptionNonce &&
         o.name == name &&
@@ -105,8 +101,7 @@ class Collection {
   @override
   int get hashCode {
     return id.hashCode ^
-        ownerID.hashCode ^
-        ownerEmail.hashCode ^
+        owner.hashCode ^
         encryptedKey.hashCode ^
         keyDecryptionNonce.hashCode ^
         name.hashCode ^
@@ -181,4 +176,67 @@ class CollectionAttributes {
 
   @override
   int get hashCode => encryptedPath.hashCode ^ pathDecryptionNonce.hashCode;
+}
+
+class CollectionOwner {
+  int id;
+  String email;
+  String name;
+
+  CollectionOwner({
+    this.id,
+    this.email,
+    this.name,
+  });
+
+  CollectionOwner copyWith({
+    int id,
+    String email,
+    String name,
+  }) {
+    return CollectionOwner(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'email': email,
+      'name': name,
+    };
+  }
+
+  factory CollectionOwner.fromMap(Map<String, dynamic> map) {
+    if (map == null) return null;
+
+    return CollectionOwner(
+      id: map['id'],
+      email: map['email'],
+      name: map['name'],
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory CollectionOwner.fromJson(String source) =>
+      CollectionOwner.fromMap(json.decode(source));
+
+  @override
+  String toString() => 'CollectionOwner(id: $id, email: $email, name: $name)';
+
+  @override
+  bool operator ==(Object o) {
+    if (identical(this, o)) return true;
+
+    return o is CollectionOwner &&
+        o.id == id &&
+        o.email == email &&
+        o.name == name;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ email.hashCode ^ name.hashCode;
 }

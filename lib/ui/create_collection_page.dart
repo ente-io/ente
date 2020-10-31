@@ -146,7 +146,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     final collectionsWithThumbnail = List<CollectionWithThumbnail>();
     final collections = CollectionsService.instance.getCollections();
     for (final c in collections) {
-      if (c.ownerID != Configuration.instance.getUserID()) {
+      if (c.owner.id != Configuration.instance.getUserID()) {
         continue;
       }
       var thumbnail = await FilesDB.instance.getLatestFileInCollection(c.id);

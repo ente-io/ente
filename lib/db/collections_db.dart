@@ -14,6 +14,7 @@ class CollectionsDB {
   static final columnID = 'collection_id';
   static final columnOwnerID = 'owner_id';
   static final columnOwnerEmail = 'owner_email';
+  static final columnOwnerName = 'owner_name';
   static final columnEncryptedKey = 'encrypted_key';
   static final columnKeyDecryptionNonce = 'key_decryption_nonce';
   static final columnName = 'name';
@@ -48,6 +49,7 @@ class CollectionsDB {
                   $columnID INTEGER PRIMARY KEY NOT NULL,
                   $columnOwnerID INTEGER NOT NULL,
                   $columnOwnerEmail TEXT,
+                  $columnOwnerName TEXT,
                   $columnEncryptedKey TEXT NOT NULL,
                   $columnKeyDecryptionNonce TEXT,
                   $columnName TEXT NOT NULL,
@@ -105,8 +107,9 @@ class CollectionsDB {
   Map<String, dynamic> _getRowForCollection(Collection collection) {
     var row = new Map<String, dynamic>();
     row[columnID] = collection.id;
-    row[columnOwnerID] = collection.ownerID;
-    row[columnOwnerEmail] = collection.ownerEmail;
+    row[columnOwnerID] = collection.owner.id;
+    row[columnOwnerEmail] = collection.owner.email;
+    row[columnOwnerName] = collection.owner.name;
     row[columnEncryptedKey] = collection.encryptedKey;
     row[columnKeyDecryptionNonce] = collection.keyDecryptionNonce;
     row[columnName] = collection.name;
@@ -120,8 +123,11 @@ class CollectionsDB {
   Collection _convertToCollection(Map<String, dynamic> row) {
     return Collection(
       row[columnID],
-      row[columnOwnerID],
-      row[columnOwnerEmail],
+      CollectionOwner(
+        id: row[columnOwnerID],
+        email: row[columnOwnerEmail],
+        name: row[columnOwnerName],
+      ),
       row[columnEncryptedKey],
       row[columnKeyDecryptionNonce],
       row[columnName],
