@@ -45,6 +45,7 @@ class CollectionsService {
   }
 
   Future<void> sync() async {
+    _logger.info("Syncing");
     final lastCollectionCreationTime =
         await _db.getLastCollectionUpdationTime();
     final fetchedCollections =
@@ -64,6 +65,7 @@ class CollectionsService {
       _cacheCollectionAttributes(collection);
     }
     if (fetchedCollections.isNotEmpty) {
+      _logger.info("Collections updated");
       Bus.instance.fire(CollectionUpdatedEvent());
     }
   }
