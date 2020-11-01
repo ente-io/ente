@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:math';
-
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -8,9 +6,11 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/file_downloader.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/utils/file_sync_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_name_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,7 +20,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/core/configuration.dart';
 
 class SyncService {
-  final _logger = Logger("PhotoSyncManager");
+  final _logger = Logger("SyncService");
   final _dio = Dio();
   final _db = FilesDB.instance;
   final _uploader = FileUploader.instance;
@@ -86,72 +86,37 @@ class SyncService {
       _logger.severe("Did not get permission");
     }
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
-    var lastDBUpdationTime = _prefs.getInt(_dbUpdationTimeKey);
-    if (lastDBUpdationTime == null) {
-      lastDBUpdationTime = 0;
-    }
-
-    final pathEntities =
-        await _getGalleryList(lastDBUpdationTime, syncStartTime);
-    final files = List<File>();
-    AssetPathEntity recents;
-    for (AssetPathEntity pathEntity in pathEntities) {
-      if (pathEntity.name == "Recent" || pathEntity.name == "Recents") {
-        recents = pathEntity;
-      } else {
-        await _addToPhotos(pathEntity, lastDBUpdationTime, files);
+    final lastDBUpdationTime = _prefs.getInt(_dbUpdationTimeKey);
+    if (lastDBUpdationTime != null && lastDBUpdationTime != 0) {
+      await _loadAndStorePhotos(lastDBUpdationTime, syncStartTime);
+    } else {
+      // Load from 0 - 01.01.2010
+      var startTime = 0;
+      var toYear = 2010;
+      var toTime = DateTime(toYear).microsecondsSinceEpoch;
+      while (toTime < syncStartTime) {
+        await _loadAndStorePhotos(startTime, toTime);
+        startTime = toTime;
+        toYear++;
+        toTime = DateTime(toYear).microsecondsSinceEpoch;
       }
-    }
-    if (recents != null) {
-      await _addToPhotos(recents, lastDBUpdationTime, files);
-    }
-    files.sort(
-        (first, second) => first.creationTime.compareTo(second.creationTime));
-    if (files.isNotEmpty) {
-      await _insertFilesToDB(files, syncStartTime);
-      await FileRepository.instance.reloadFiles();
+      await _loadAndStorePhotos(startTime, syncStartTime);
     }
     await syncWithRemote();
   }
 
-  Future<List<AssetPathEntity>> _getGalleryList(
-      final int fromTimestamp, final int toTimestamp) async {
-    final filterOptionGroup = FilterOptionGroup();
-    filterOptionGroup.setOption(AssetType.image, FilterOption(needTitle: true));
-    filterOptionGroup.setOption(AssetType.video, FilterOption(needTitle: true));
-    filterOptionGroup.createTimeCond = DateTimeCond(
-      min: DateTime.fromMicrosecondsSinceEpoch(fromTimestamp),
-      max: DateTime.fromMicrosecondsSinceEpoch(toTimestamp),
-    );
-    final galleryList = await PhotoManager.getAssetPathList(
-      hasAll: true,
-      type: RequestType.common,
-      filterOption: filterOptionGroup,
-    );
-
-    galleryList.sort((s1, s2) {
-      return s2.assetCount.compareTo(s1.assetCount);
-    });
-
-    return galleryList;
-  }
-
-  Future _addToPhotos(AssetPathEntity pathEntity, int lastDBUpdationTime,
-      List<File> files) async {
-    final assetList = await pathEntity.assetList;
-    for (AssetEntity entity in assetList) {
-      if (max(entity.createDateTime.microsecondsSinceEpoch,
-              entity.modifiedDateTime.microsecondsSinceEpoch) >
-          lastDBUpdationTime) {
-        try {
-          final file = await File.fromAsset(pathEntity, entity);
-          if (!files.contains(file)) {
-            files.add(file);
-          }
-        } catch (e) {
-          _logger.severe(e);
-        }
-      }
+  Future<void> _loadAndStorePhotos(int fromTime, int toTime) async {
+    _logger.info("Loading photos from " +
+        getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(fromTime)) +
+        " to " +
+        getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(toTime)));
+    final files = await getDeviceFiles(fromTime, toTime);
+    if (files.isNotEmpty) {
+      _logger.info("Fetched " + files.length.toString() + " files.");
+      await _db.insertMultiple(files);
+      _logger.info("Inserted " + files.length.toString() + " files.");
+      await _prefs.setInt(_dbUpdationTimeKey, toTime);
+      await FileRepository.instance.reloadFiles();
     }
   }
 
@@ -303,11 +268,5 @@ class SyncService {
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         )
         .catchError((e) => _logger.severe(e));
-  }
-
-  Future<bool> _insertFilesToDB(List<File> files, int timestamp) async {
-    await _db.insertMultiple(files);
-    _logger.info("Inserted " + files.length.toString() + " files.");
-    return await _prefs.setInt(_dbUpdationTimeKey, timestamp);
   }
 }
