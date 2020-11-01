@@ -125,7 +125,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
     for (final path in filePathMap.keys) {
       final folderName = p.basename(path);
       folders.add(DeviceFolder(
-          folderName, path, () => filePathMap[path], filePathMap[path][0]));
+          folderName, path, filePathMap[path][0]));
     }
     folders.sort((first, second) {
       return second.thumbnail.creationTime

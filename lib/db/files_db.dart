@@ -169,6 +169,20 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
+  Future<List<File>> getAllInPathBeforeCreationTime(
+      String path, int beforeCreationTime, int limit) async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where:
+          '$columnDeviceFolder = ? AND $columnIsDeleted = 0 AND $columnCreationTime < ?',
+      whereArgs: [path, beforeCreationTime],
+      orderBy: '$columnCreationTime DESC',
+      limit: limit,
+    );
+    return _convertToFiles(results);
+  }
+
   Future<List<File>> getAllInCollection(int collectionID) async {
     final db = await instance.database;
     final results = await db.query(
