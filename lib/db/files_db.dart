@@ -432,7 +432,7 @@ class FilesDB {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '$columnCollectionID =?',
+      where: '$columnCollectionID = ? AND $columnIsDeleted = 0',
       whereArgs: [collectionID],
       orderBy: '$columnCreationTime DESC',
       limit: 1,
@@ -448,7 +448,7 @@ class FilesDB {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '$columnCollectionID =?',
+      where: '$columnCollectionID = ? AND $columnIsDeleted = 0',
       whereArgs: [collectionID],
       orderBy: '$columnUpdationTime DESC',
       limit: 1,
