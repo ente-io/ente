@@ -37,6 +37,8 @@ Future<void> deleteFiles(List<File> files) async {
     if (file.uploadedFileID != null) {
       hasUploadedFiles = true;
       await FilesDB.instance.markForDeletion(file.uploadedFileID);
+    } else {
+      await FilesDB.instance.deleteLocalFile(file.localID);
     }
   }
   await PhotoManager.editor.deleteWithIds(localIDs);

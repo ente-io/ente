@@ -120,6 +120,9 @@ class FilesDB {
     final db = await instance.database;
     final results = await db.query(table,
         where: '$columnGeneratedID = ?', whereArgs: [generatedID]);
+    if (results.isEmpty) {
+      return null;
+    }
     return _convertToFiles(results)[0];
   }
 
@@ -383,6 +386,15 @@ class FilesDB {
       table,
       where: '$columnUploadedFileID =?',
       whereArgs: [uploadedFileID],
+    );
+  }
+
+  Future<int> deleteLocalFile(String localID) async {
+    final db = await instance.database;
+    return db.delete(
+      table,
+      where: '$columnLocalID =?',
+      whereArgs: [localID],
     );
   }
 

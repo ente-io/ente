@@ -218,7 +218,11 @@ class SyncService {
                 .getOrCreateForPath(file.deviceFolder))
             .id;
         final existingFile = await _db.getFile(file.generatedID);
-
+        if (existingFile == null) {
+          // File was deleted locally while being uploaded
+          await _deleteFileOnServer(file.uploadedFileID);
+          continue;
+        }
         if (existingFile.uploadedFileID != null) {
           // The file was uploaded outside this loop
           // Eg: Addition to an album or favorites
