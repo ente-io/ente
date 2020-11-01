@@ -31,7 +31,9 @@ class _CollectionPageState extends State<CollectionPage> {
                   ? DateTime.now().microsecondsSinceEpoch
                   : lastFile.creationTime,
               limit),
-      reloadEvent: Bus.instance.on<CollectionUpdatedEvent>(),
+      reloadEvent: Bus.instance
+          .on<CollectionUpdatedEvent>()
+          .where((event) => event.collectionID == widget.collection.id),
       tagPrefix: "collection",
       selectedFiles: _selectedFiles,
     );
