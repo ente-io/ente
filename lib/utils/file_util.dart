@@ -14,7 +14,9 @@ import 'package:photos/core/cache/thumbnail_cache_manager.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/repositories/file_repository.dart';
@@ -27,16 +29,21 @@ final logger = Logger("FileUtil");
 
 Future<void> deleteFiles(List<File> files) async {
   final localIDs = List<String>();
+  bool hasUploadedFiles = false;
   for (final file in files) {
     if (file.localID != null) {
       localIDs.add(file.localID);
     }
     if (file.uploadedFileID != null) {
+      hasUploadedFiles = true;
       await FilesDB.instance.markForDeletion(file.uploadedFileID);
     }
   }
   await PhotoManager.editor.deleteWithIds(localIDs);
   await FileRepository.instance.reloadFiles();
+  if (hasUploadedFiles) {
+    Bus.instance.fire(CollectionUpdatedEvent());
+  }
   SyncService.instance.sync();
 }
 
