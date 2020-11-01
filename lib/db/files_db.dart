@@ -175,9 +175,10 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnDeviceFolder = ? AND $columnIsDeleted = 0 AND $columnCreationTime < ?',
+          '$columnLocalID IS NOT NULL AND $columnDeviceFolder = ? AND $columnIsDeleted = 0 AND $columnCreationTime < ?',
       whereArgs: [path, beforeCreationTime],
       orderBy: '$columnCreationTime DESC',
+      groupBy: '$columnLocalID',
       limit: limit,
     );
     return _convertToFiles(results);
