@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -41,6 +42,8 @@ class DiffFetcher {
               if (item["isDeleted"]) {
                 await FilesDB.instance.deleteFromCollection(
                     file.uploadedFileID, file.collectionID);
+                Bus.instance.fire(
+                    CollectionUpdatedEvent(collectionID: file.collectionID));
                 continue;
               }
               file.ownerID = item["ownerID"];

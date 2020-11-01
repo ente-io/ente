@@ -46,10 +46,10 @@ class CollectionsService {
 
   Future<void> sync() async {
     _logger.info("Syncing");
-    final lastCollectionCreationTime =
+    final lastCollectionUpdationTime =
         await _db.getLastCollectionUpdationTime();
     final fetchedCollections =
-        await _fetchCollections(lastCollectionCreationTime ?? 0);
+        await _fetchCollections(lastCollectionUpdationTime ?? 0);
     final updatedCollections = List<Collection>();
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {

@@ -166,7 +166,7 @@ class SyncService {
       await _fetchEncryptedFilesDiff(collection.id);
     }
     await _uploadDiff();
-    await _deletePhotosOnServer();
+    await deleteFilesOnServer();
   }
 
   Future<void> _fetchEncryptedFilesDiff(int collectionID) async {
@@ -284,7 +284,7 @@ class SyncService {
     }
   }
 
-  Future<void> _deletePhotosOnServer() async {
+  Future<void> deleteFilesOnServer() async {
     return _db.getDeletedFileIDs().then((ids) async {
       for (int id in ids) {
         await _deleteFileOnServer(id);

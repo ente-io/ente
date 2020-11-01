@@ -43,8 +43,9 @@ Future<void> deleteFiles(List<File> files) async {
   await FileRepository.instance.reloadFiles();
   if (hasUploadedFiles) {
     Bus.instance.fire(CollectionUpdatedEvent());
+    // TODO: Blocking call?
+    SyncService.instance.deleteFilesOnServer();
   }
-  SyncService.instance.sync();
 }
 
 void preloadFile(File file) {
