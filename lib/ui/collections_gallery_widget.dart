@@ -86,7 +86,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
             ),
           ),
           Divider(height: 12),
-          SectionTitle("Collections"),
+          SectionTitle("Saved Collections"),
           Padding(padding: EdgeInsets.all(6)),
           GridView.builder(
             shrinkWrap: true,
@@ -199,7 +199,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
       List<CollectionWithThumbnail> collections, int index) {
     if (index == collections.length) {
       return Container(
-        padding: EdgeInsets.fromLTRB(28, 0, 28, 56),
+        padding: EdgeInsets.fromLTRB(28, 12, 28, 46),
         child: OutlineButton(
           child: Icon(
             Icons.add,

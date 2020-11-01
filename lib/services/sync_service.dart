@@ -234,6 +234,8 @@ class SyncService {
           final uploadedFile = await _uploader.encryptAndUploadFile(file);
           await _db.update(uploadedFile);
         }
+        Bus.instance
+            .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: filesToBeUploaded.length));
       } catch (e) {
