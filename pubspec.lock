@@ -222,7 +222,7 @@ packages:
       name: flutter_launcher_icons
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.5"
+    version: "0.8.0"
   flutter_secure_storage:
     dependency: "direct main"
     description:
