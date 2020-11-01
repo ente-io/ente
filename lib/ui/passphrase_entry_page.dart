@@ -63,7 +63,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
             Padding(padding: EdgeInsets.all(12)),
             TextFormField(
               decoration: InputDecoration(
-                hintText: "something you'll never forget",
+                hintText: "enter your passphrase",
                 contentPadding: EdgeInsets.all(20),
               ),
               controller: _passphraseController1,
@@ -77,7 +77,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
             Padding(padding: EdgeInsets.all(8)),
             TextFormField(
               decoration: InputDecoration(
-                hintText: "something you'll never ever forget",
+                hintText: "reenter your passphrase",
                 contentPadding: EdgeInsets.all(20),
               ),
               controller: _passphraseController2,
@@ -139,7 +139,8 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
           child: Text("Confirm"),
           onPressed: () {
             Navigator.of(context).pop();
-            UserService.instance.setupAttributes(context, _passphraseController1.text);
+            UserService.instance
+                .setupAttributes(context, _passphraseController1.text);
           },
         ),
       ],
