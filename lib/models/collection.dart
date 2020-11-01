@@ -2,24 +2,26 @@ import 'dart:convert';
 
 class Collection {
   final int id;
-  final int ownerID;
+  final CollectionOwner owner;
   final String encryptedKey;
   final String keyDecryptionNonce;
   final String name;
   final CollectionType type;
   final CollectionAttributes attributes;
-  final int creationTime;
+  final int updationTime;
+  final bool isDeleted;
 
   Collection(
     this.id,
-    this.ownerID,
+    this.owner,
     this.encryptedKey,
     this.keyDecryptionNonce,
     this.name,
     this.type,
     this.attributes,
-    this.creationTime,
-  );
+    this.updationTime, {
+    this.isDeleted = false,
+  });
 
   static CollectionType typeFromString(String type) {
     switch (type) {
@@ -42,38 +44,16 @@ class Collection {
     }
   }
 
-  Collection copyWith({
-    int id,
-    int ownerID,
-    String encryptedKey,
-    String keyDecryptionNonce,
-    String name,
-    CollectionType type,
-    CollectionAttributes attributes,
-    int creationTime,
-  }) {
-    return Collection(
-      id ?? this.id,
-      ownerID ?? this.ownerID,
-      encryptedKey ?? this.encryptedKey,
-      keyDecryptionNonce ?? this.keyDecryptionNonce,
-      name ?? this.name,
-      type ?? this.type,
-      attributes ?? this.attributes,
-      creationTime ?? this.creationTime,
-    );
-  }
-
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'ownerID': ownerID,
+      'owner': owner?.toMap(),
       'encryptedKey': encryptedKey,
       'keyDecryptionNonce': keyDecryptionNonce,
       'name': name,
       'type': typeToString(type),
       'attributes': attributes?.toMap(),
-      'creationTime': creationTime,
+      'updationTime': updationTime,
     };
   }
 
@@ -82,13 +62,14 @@ class Collection {
 
     return Collection(
       map['id'],
-      map['ownerID'],
+      CollectionOwner.fromMap(map['owner']),
       map['encryptedKey'],
       map['keyDecryptionNonce'],
       map['name'],
       typeFromString(map['type']),
       CollectionAttributes.fromMap(map['attributes']),
-      map['creationTime'],
+      map['updationTime'],
+      isDeleted: map['isDeleted'] ?? false,
     );
   }
 
@@ -99,7 +80,7 @@ class Collection {
 
   @override
   String toString() {
-    return 'Collection(id: $id, ownerID: $ownerID, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, attributes: $attributes, creationTime: $creationTime)';
+    return 'Collection(id: $id, owner: ${owner.toString()} encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, attributes: $attributes, creationTime: $updationTime)';
   }
 
   @override
@@ -108,25 +89,25 @@ class Collection {
 
     return o is Collection &&
         o.id == id &&
-        o.ownerID == ownerID &&
+        o.owner == owner &&
         o.encryptedKey == encryptedKey &&
         o.keyDecryptionNonce == keyDecryptionNonce &&
         o.name == name &&
         o.type == type &&
         o.attributes == attributes &&
-        o.creationTime == creationTime;
+        o.updationTime == updationTime;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-        ownerID.hashCode ^
+        owner.hashCode ^
         encryptedKey.hashCode ^
         keyDecryptionNonce.hashCode ^
         name.hashCode ^
         type.hashCode ^
         attributes.hashCode ^
-        creationTime.hashCode;
+        updationTime.hashCode;
   }
 }
 
@@ -195,4 +176,67 @@ class CollectionAttributes {
 
   @override
   int get hashCode => encryptedPath.hashCode ^ pathDecryptionNonce.hashCode;
+}
+
+class CollectionOwner {
+  int id;
+  String email;
+  String name;
+
+  CollectionOwner({
+    this.id,
+    this.email,
+    this.name,
+  });
+
+  CollectionOwner copyWith({
+    int id,
+    String email,
+    String name,
+  }) {
+    return CollectionOwner(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'email': email,
+      'name': name,
+    };
+  }
+
+  factory CollectionOwner.fromMap(Map<String, dynamic> map) {
+    if (map == null) return null;
+
+    return CollectionOwner(
+      id: map['id'],
+      email: map['email'],
+      name: map['name'],
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory CollectionOwner.fromJson(String source) =>
+      CollectionOwner.fromMap(json.decode(source));
+
+  @override
+  String toString() => 'CollectionOwner(id: $id, email: $email, name: $name)';
+
+  @override
+  bool operator ==(Object o) {
+    if (identical(this, o)) return true;
+
+    return o is CollectionOwner &&
+        o.id == id &&
+        o.email == email &&
+        o.name == name;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ email.hashCode ^ name.hashCode;
 }

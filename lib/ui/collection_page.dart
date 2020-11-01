@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/selected_files.dart';
 
@@ -29,6 +31,9 @@ class _CollectionPageState extends State<CollectionPage> {
                   ? DateTime.now().microsecondsSinceEpoch
                   : lastFile.creationTime,
               limit),
+      reloadEvent: Bus.instance
+          .on<CollectionUpdatedEvent>()
+          .where((event) => event.collectionID == widget.collection.id),
       tagPrefix: "collection",
       selectedFiles: _selectedFiles,
     );
@@ -37,6 +42,7 @@ class _CollectionPageState extends State<CollectionPage> {
         GalleryAppBarType.collection,
         widget.collection.name,
         _selectedFiles,
+        collection: widget.collection,
       ),
       body: gallery,
     );

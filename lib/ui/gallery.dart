@@ -62,9 +62,11 @@ class _GalleryState extends State<Gallery> {
     _requiresLoad = true;
     if (widget.reloadEvent != null) {
       widget.reloadEvent.listen((event) {
-        setState(() {
-          _requiresLoad = true;
-        });
+        if (mounted) {
+          setState(() {
+            _requiresLoad = true;
+          });
+        }
       });
     }
     widget.selectedFiles.addListener(() {
@@ -72,6 +74,9 @@ class _GalleryState extends State<Gallery> {
         _saveScrollPosition();
       });
     });
+    if (widget.asyncLoader == null) {
+      _hasLoadedAll = true;
+    }
     super.initState();
   }
 
@@ -103,7 +108,6 @@ class _GalleryState extends State<Gallery> {
   }
 
   Widget _onDataLoaded() {
-    _logger.info("Loaded " + _files.length.toString());
     if (_files.isEmpty) {
       return nothingToSeeHere;
     }
@@ -146,18 +150,23 @@ class _GalleryState extends State<Gallery> {
       // Eagerly load next batch
       _loadNextItems();
     }
-    if (index == _collatedFiles.length) {
-      if (_hasLoadedAll || widget.asyncLoader == null) {
-        return Container();
-      }
-      return loadWidget;
-    }
-    var fileIndex = index;
+    var fileIndex;
     if (widget.headerWidget != null) {
       if (index == 0) {
         return widget.headerWidget;
       }
-      fileIndex--;
+      fileIndex = index - 1;
+    } else {
+      fileIndex = index;
+    }
+    if (fileIndex == _collatedFiles.length) {
+      if (widget.asyncLoader != null) {
+        if (!_hasLoadedAll) {
+          return loadWidget;
+        } else {
+          return Container();
+        }
+      }
     }
     if (fileIndex < 0 || fileIndex >= _collatedFiles.length) {
       return Container();

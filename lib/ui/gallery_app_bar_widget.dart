@@ -1,16 +1,20 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/passphrase_entry_page.dart';
 import 'package:photos/ui/passphrase_reentry_page.dart';
 import 'package:photos/ui/settings_page.dart';
-import 'package:photos/ui/share_folder_widget.dart';
+import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/share_util.dart';
@@ -29,13 +33,15 @@ class GalleryAppBarWidget extends StatefulWidget
   final String title;
   final SelectedFiles selectedFiles;
   final String path;
+  final Collection collection;
 
   GalleryAppBarWidget(
     this.type,
     this.title,
-    this.selectedFiles, [
+    this.selectedFiles, {
     this.path,
-  ]);
+    this.collection,
+  });
 
   @override
   _GalleryAppBarWidgetState createState() => _GalleryAppBarWidgetState();
@@ -45,7 +51,10 @@ class GalleryAppBarWidget extends StatefulWidget
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
+  final _logger = Logger("GalleryAppBar");
+
   StreamSubscription _userAuthEventSubscription;
+
   @override
   void initState() {
     widget.selectedFiles.addListener(() {
@@ -101,9 +110,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             );
           },
         ));
-      } else if (widget.type == GalleryAppBarType.local_folder) {
+      } else if (widget.type == GalleryAppBarType.local_folder ||
+          widget.type == GalleryAppBarType.collection) {
         actions.add(IconButton(
-          icon: Icon(Icons.share),
+          icon: Icon(Icons.person_add),
           onPressed: () {
             _showShareCollectionDialog();
           },
@@ -140,35 +150,116 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> _showShareCollectionDialog() async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return ShareFolderWidget(
-          widget.title,
-          widget.path,
-          collection:
-              CollectionsService.instance.getCollectionForPath(widget.path),
-        );
-      },
-    );
+    var collection = widget.collection;
+    if (collection == null) {
+      if (widget.type == GalleryAppBarType.local_folder) {
+        collection =
+            CollectionsService.instance.getCollectionForPath(widget.path);
+        if (collection == null) {
+          final dialog = createProgressDialog(context, "Please wait...");
+          await dialog.show();
+          try {
+            collection = await CollectionsService.instance
+                .getOrCreateForPath(widget.path);
+            await dialog.hide();
+          } catch (e, s) {
+            _logger.severe(e, s);
+            await dialog.hide();
+            showGenericErrorDialog(context);
+          }
+        }
+      } else {
+        throw Exception(
+            "Cannot create a collection of type" + widget.type.toString());
+      }
+    }
+    final dialog = createProgressDialog(context, "Please wait...");
+    await dialog.show();
+    try {
+      final sharees =
+          await CollectionsService.instance.getSharees(widget.collection.id);
+      await dialog.hide();
+      return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return SharingDialog(collection, sharees);
+        },
+      );
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await dialog.hide();
+      showGenericErrorDialog(context);
+    }
+  }
+
+  Future<void> _createAlbum() async {
+    Navigator.push(
+        context,
+        PageTransition(
+            type: PageTransitionType.bottomToTop,
+            child: CreateCollectionPage(
+              widget.selectedFiles,
+            )));
   }
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
-    if (widget.selectedFiles.files.isNotEmpty) {
-      if (widget.type != GalleryAppBarType.shared_collection &&
-          widget.type != GalleryAppBarType.search_results) {
-        actions.add(IconButton(
-          icon: Icon(Icons.delete),
-          onPressed: () {
-            _showDeleteSheet(context);
-          },
-        ));
-      }
+    actions.add(IconButton(
+      icon: Icon(Icons.add),
+      onPressed: () {
+        _createAlbum();
+      },
+    ));
+    actions.add(IconButton(
+      icon: Icon(Icons.share),
+      onPressed: () {
+        _shareSelected(context);
+      },
+    ));
+    if (widget.type == GalleryAppBarType.homepage ||
+        widget.type == GalleryAppBarType.local_folder) {
       actions.add(IconButton(
-        icon: Icon(Icons.share),
+        icon: Icon(Icons.delete),
         onPressed: () {
-          _shareSelected(context);
+          _showDeleteSheet(context);
+        },
+      ));
+    } else if (widget.type == GalleryAppBarType.collection) {
+      actions.add(PopupMenuButton(
+        itemBuilder: (context) {
+          return [
+            PopupMenuItem(
+              value: 1,
+              child: Row(
+                children: [
+                  Icon(Icons.remove_circle),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("Remove"),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 2,
+              child: Row(
+                children: [
+                  Icon(Icons.delete),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("Delete"),
+                ],
+              ),
+            )
+          ];
+        },
+        onSelected: (value) {
+          if (value == 1) {
+            _showRemoveFromCollectionSheet(context);
+          } else if (value == 2) {
+            _showDeleteSheet(context);
+          }
         },
       ));
     }
@@ -179,9 +270,55 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     shareMultiple(context, widget.selectedFiles.files.toList());
   }
 
-  void _showDeleteSheet(BuildContext context) {
+  void _showRemoveFromCollectionSheet(BuildContext context) {
+    final count = widget.selectedFiles.files.length;
     final action = CupertinoActionSheet(
-      title: Text("Delete file?"),
+      title: Text("Remove " +
+          count.toString() +
+          " file" +
+          (count == 1 ? "" : "s") +
+          " from " +
+          widget.collection.name +
+          "?"),
+      actions: <Widget>[
+        CupertinoActionSheetAction(
+          child: Text("Remove"),
+          isDestructiveAction: true,
+          onPressed: () async {
+            final dialog = createProgressDialog(context, "Removing files...");
+            await dialog.show();
+            try {
+              CollectionsService.instance.removeFromCollection(
+                  widget.collection.id, widget.selectedFiles.files.toList());
+              await dialog.hide();
+              widget.selectedFiles.clearAll();
+              Navigator.of(context).pop();
+            } catch (e, s) {
+              _logger.severe(e, s);
+              await dialog.hide();
+              Navigator.of(context).pop();
+              showGenericErrorDialog(context);
+            }
+          },
+        ),
+      ],
+      cancelButton: CupertinoActionSheetAction(
+        child: Text("Cancel"),
+        onPressed: () {
+          Navigator.of(context, rootNavigator: true).pop();
+        },
+      ),
+    );
+    showCupertinoModalPopup(context: context, builder: (_) => action);
+  }
+
+  void _showDeleteSheet(BuildContext context) {
+    final count = widget.selectedFiles.files.length;
+    final action = CupertinoActionSheet(
+      title: Text("Permanently delete " +
+          count.toString() +
+          " file" +
+          (count == 1 ? "?" : "s?")),
       actions: <Widget>[
         CupertinoActionSheetAction(
           child: Text("Delete"),

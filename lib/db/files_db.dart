@@ -26,7 +26,6 @@ class FilesDB {
   static final columnLatitude = 'latitude';
   static final columnLongitude = 'longitude';
   static final columnFileType = 'file_type';
-  static final columnRemoteFolderID = 'remote_folder_id';
   static final columnIsEncrypted = 'is_encrypted';
   static final columnIsDeleted = 'is_deleted';
   static final columnCreationTime = 'creation_time';
@@ -73,7 +72,6 @@ class FilesDB {
             $columnLatitude REAL,
             $columnLongitude REAL,
             $columnFileType INTEGER,
-            $columnRemoteFolderID INTEGER,
             $columnIsEncrypted INTEGER DEFAULT 1,
             $columnModificationTime TEXT NOT NULL,
             $columnEncryptedKey TEXT,
@@ -85,7 +83,12 @@ class FilesDB {
             $columnCreationTime TEXT NOT NULL,
             $columnUpdationTime TEXT,
             UNIQUE($columnUploadedFileID, $columnCollectionID)
-          )
+          );
+
+          CREATE INDEX collection_id_index ON $table($columnCollectionID);
+          CREATE INDEX device_folder_index ON $table($columnDeviceFolder);
+          CREATE INDEX creation_time_index ON $table($columnCreationTime);
+          CREATE INDEX updation_time_index ON $table($columnUpdationTime);
           ''');
   }
 
@@ -120,6 +123,17 @@ class FilesDB {
     return _convertToFiles(results)[0];
   }
 
+  Future<List<File>> getDeduplicatedFiles() async {
+    _logger.info("Getting files for collection");
+    final db = await instance.database;
+    final results = await db.query(table,
+        where: '$columnIsDeleted = 0',
+        orderBy: '$columnCreationTime DESC',
+        groupBy:
+            'IFNULL($columnUploadedFileID, $columnGeneratedID), IFNULL($columnLocalID, $columnGeneratedID)');
+    return _convertToFiles(results);
+  }
+
   Future<List<File>> getFiles() async {
     final db = await instance.database;
     final results = await db.query(
@@ -141,20 +155,6 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
-  Future<List<File>> getAllInFolder(
-      int folderID, int beforeCreationTime, int limit) async {
-    final db = await instance.database;
-    final results = await db.query(
-      table,
-      where:
-          '$columnRemoteFolderID = ? AND $columnIsDeleted = 0 AND $columnCreationTime < ?',
-      whereArgs: [folderID, beforeCreationTime],
-      orderBy: '$columnCreationTime DESC',
-      limit: limit,
-    );
-    return _convertToFiles(results);
-  }
-
   Future<List<File>> getAllInCollectionBeforeCreationTime(
       int collectionID, int beforeCreationTime, int limit) async {
     final db = await instance.database;
@@ -164,6 +164,21 @@ class FilesDB {
           '$columnCollectionID = ? AND $columnIsDeleted = 0 AND $columnCreationTime < ?',
       whereArgs: [collectionID, beforeCreationTime],
       orderBy: '$columnCreationTime DESC',
+      limit: limit,
+    );
+    return _convertToFiles(results);
+  }
+
+  Future<List<File>> getAllInPathBeforeCreationTime(
+      String path, int beforeCreationTime, int limit) async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where:
+          '$columnLocalID IS NOT NULL AND $columnDeviceFolder = ? AND $columnIsDeleted = 0 AND $columnCreationTime < ?',
+      whereArgs: [path, beforeCreationTime],
+      orderBy: '$columnCreationTime DESC',
+      groupBy: '$columnLocalID',
       limit: limit,
     );
     return _convertToFiles(results);
@@ -193,14 +208,20 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
-  Future<List<File>> getAllDeleted() async {
+  Future<List<int>> getDeletedFileIDs() async {
     final db = await instance.database;
-    final results = await db.query(
+    final rows = await db.query(
       table,
+      columns: [columnUploadedFileID],
+      distinct: true,
       where: '$columnIsDeleted = 1',
       orderBy: '$columnCreationTime DESC',
     );
-    return _convertToFiles(results);
+    final result = List<int>();
+    for (final row in rows) {
+      result.add(row[columnUploadedFileID]);
+    }
+    return result;
   }
 
   Future<List<File>> getFilesToBeUploadedWithinFolders(
@@ -220,17 +241,92 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
-  Future<File> getMatchingFile(String localID, String title,
-      String deviceFolder, int creationTime, int modificationTime,
+  Future<Map<int, File>> getLastCreatedFilesInCollections(
+      List<int> collectionIDs) async {
+    final db = await instance.database;
+    final rows = await db.rawQuery('''
+      SELECT 
+        $columnGeneratedID,
+        $columnLocalID,
+        $columnUploadedFileID,
+        $columnOwnerID,
+        $columnCollectionID,
+        $columnTitle,
+        $columnDeviceFolder,
+        $columnLatitude,
+        $columnLongitude,
+        $columnFileType,
+        $columnIsEncrypted,
+        $columnModificationTime,
+        $columnEncryptedKey,
+        $columnKeyDecryptionNonce,
+        $columnFileDecryptionHeader,
+        $columnThumbnailDecryptionHeader,
+        $columnMetadataDecryptionHeader,
+        $columnIsDeleted,
+        $columnUpdationTime,
+        MAX($columnCreationTime) as $columnCreationTime
+      FROM $table
+      WHERE $columnCollectionID IN (${collectionIDs.join(', ')}) AND $columnIsDeleted = 0
+      GROUP BY $columnCollectionID
+      ORDER BY $columnCreationTime DESC;
+    ''');
+    final result = Map<int, File>();
+    final files = _convertToFiles(rows);
+    for (final file in files) {
+      result[file.collectionID] = file;
+    }
+    return result;
+  }
+
+  Future<Map<int, File>> getLastUpdatedFilesInCollections(
+      List<int> collectionIDs) async {
+    final db = await instance.database;
+    final rows = await db.rawQuery('''
+      SELECT 
+        $columnGeneratedID,
+        $columnLocalID,
+        $columnUploadedFileID,
+        $columnOwnerID,
+        $columnCollectionID,
+        $columnTitle,
+        $columnDeviceFolder,
+        $columnLatitude,
+        $columnLongitude,
+        $columnFileType,
+        $columnIsEncrypted,
+        $columnModificationTime,
+        $columnEncryptedKey,
+        $columnKeyDecryptionNonce,
+        $columnFileDecryptionHeader,
+        $columnThumbnailDecryptionHeader,
+        $columnMetadataDecryptionHeader,
+        $columnIsDeleted,
+        $columnCreationTime,
+        MAX($columnUpdationTime) AS $columnUpdationTime
+      FROM $table
+      WHERE $columnCollectionID IN (${collectionIDs.join(', ')}) AND $columnIsDeleted = 0
+      GROUP BY $columnCollectionID
+      ORDER BY $columnUpdationTime DESC;
+    ''');
+    final result = Map<int, File>();
+    final files = _convertToFiles(rows);
+    for (final file in files) {
+      result[file.collectionID] = file;
+    }
+    return result;
+  }
+
+  Future<List<File>> getMatchingFiles(
+      String title, String deviceFolder, int creationTime, int modificationTime,
       {String alternateTitle}) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '''$columnLocalID=? AND ($columnTitle=? OR $columnTitle=?) AND 
+      where: '''($columnTitle=? OR $columnTitle=?) AND 
           $columnDeviceFolder=? AND $columnCreationTime=? AND 
           $columnModificationTime=?''',
       whereArgs: [
-        localID,
         title,
         alternateTitle,
         deviceFolder,
@@ -239,9 +335,9 @@ class FilesDB {
       ],
     );
     if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
+      return _convertToFiles(rows);
     } else {
-      throw ("No matching file found");
+      return null;
     }
   }
 
@@ -269,25 +365,24 @@ class FilesDB {
     );
   }
 
-  // TODO: Remove deleted files on remote
-  Future<int> markForDeletion(File file) async {
+  Future<int> markForDeletion(int uploadedFileID) async {
     final db = await instance.database;
     final values = new Map<String, dynamic>();
     values[columnIsDeleted] = 1;
     return db.update(
       table,
       values,
-      where: '$columnGeneratedID =?',
-      whereArgs: [file.generatedID],
+      where: '$columnUploadedFileID =?',
+      whereArgs: [uploadedFileID],
     );
   }
 
-  Future<int> delete(File file) async {
+  Future<int> delete(int uploadedFileID) async {
     final db = await instance.database;
     return db.delete(
       table,
-      where: '$columnGeneratedID =?',
-      whereArgs: [file.generatedID],
+      where: '$columnUploadedFileID =?',
+      whereArgs: [uploadedFileID],
     );
   }
 
@@ -300,12 +395,22 @@ class FilesDB {
     );
   }
 
-  Future<int> deleteFilesInRemoteFolder(int folderID) async {
+  Future<int> deleteCollection(int collectionID) async {
     final db = await instance.database;
     return db.delete(
       table,
-      where: '$columnRemoteFolderID =?',
-      whereArgs: [folderID],
+      where: '$columnCollectionID = ?',
+      whereArgs: [collectionID],
+    );
+  }
+
+  Future<int> removeFromCollection(int collectionID, List<int> fileIDs) async {
+    final db = await instance.database;
+    return db.delete(
+      table,
+      where:
+          '$columnCollectionID =? AND $columnUploadedFileID IN (${fileIDs.join(', ')})',
+      whereArgs: [collectionID],
     );
   }
 
@@ -315,7 +420,6 @@ class FilesDB {
       table,
       columns: [columnDeviceFolder],
       distinct: true,
-      where: '$columnRemoteFolderID IS NULL',
     );
     List<String> result = List<String>();
     for (final row in rows) {
@@ -324,43 +428,11 @@ class FilesDB {
     return result;
   }
 
-  Future<File> getLatestFileInPath(String path) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '$columnDeviceFolder =?',
-      whereArgs: [path],
-      orderBy: '$columnCreationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      throw ("No file found in path");
-    }
-  }
-
-  Future<File> getLatestFileInRemoteFolder(int folderID) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '$columnRemoteFolderID =?',
-      whereArgs: [folderID],
-      orderBy: '$columnCreationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      throw ("No file found in remote folder " + folderID.toString());
-    }
-  }
-
   Future<File> getLatestFileInCollection(int collectionID) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '$columnCollectionID =?',
+      where: '$columnCollectionID = ? AND $columnIsDeleted = 0',
       whereArgs: [collectionID],
       orderBy: '$columnCreationTime DESC',
       limit: 1,
@@ -368,39 +440,36 @@ class FilesDB {
     if (rows.isNotEmpty) {
       return _getFileFromRow(rows[0]);
     } else {
-      throw ("No file found in collection " + collectionID.toString());
+      return null;
     }
   }
 
-  Future<File> getLastSyncedFileInRemoteFolder(int folderID) async {
+  Future<File> getLastModifiedFileInCollection(int collectionID) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '$columnRemoteFolderID =?',
-      whereArgs: [folderID],
+      where: '$columnCollectionID = ? AND $columnIsDeleted = 0',
+      whereArgs: [collectionID],
       orderBy: '$columnUpdationTime DESC',
       limit: 1,
     );
     if (rows.isNotEmpty) {
       return _getFileFromRow(rows[0]);
     } else {
-      throw ("No file found in remote folder " + folderID.toString());
+      return null;
     }
   }
 
-  Future<File> getLatestFileAmongGeneratedIDs(List<String> generatedIDs) async {
+  Future<bool> doesFileExistInCollection(
+      int uploadedFileID, int collectionID) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '$columnGeneratedID IN (${generatedIDs.join(",")})',
-      orderBy: '$columnCreationTime DESC',
+      where: '$columnUploadedFileID = ? AND $columnCollectionID = ?',
+      whereArgs: [uploadedFileID, collectionID],
       limit: 1,
     );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      throw ("No file found with ids " + generatedIDs.join(", ").toString());
-    }
+    return rows.isNotEmpty;
   }
 
   List<File> _convertToFiles(List<Map<String, dynamic>> results) {
@@ -434,7 +503,6 @@ class FilesDB {
         row[columnFileType] = -1;
     }
     row[columnIsEncrypted] = file.isEncrypted ? 1 : 0;
-    row[columnRemoteFolderID] = file.remoteFolderID;
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
@@ -459,7 +527,6 @@ class FilesDB {
       file.location = Location(row[columnLatitude], row[columnLongitude]);
     }
     file.fileType = getFileType(row[columnFileType]);
-    file.remoteFolderID = row[columnRemoteFolderID];
     file.isEncrypted = row[columnIsEncrypted] == 1;
     file.creationTime = int.parse(row[columnCreationTime]);
     file.modificationTime = int.parse(row[columnModificationTime]);

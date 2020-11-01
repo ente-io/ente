@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/events/remote_sync_event.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/models/shared_collection.dart';
+import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/models/collection_items.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/shared_collection_page.dart';
@@ -24,35 +24,43 @@ class SharedCollectionGallery extends StatefulWidget {
 
 class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
   Logger _logger = Logger("SharedCollectionGallery");
-  StreamSubscription<RemoteSyncEvent> _subscription;
+  StreamSubscription<CollectionUpdatedEvent> _subscription;
 
   @override
   void initState() {
-    _subscription = Bus.instance.on<RemoteSyncEvent>().listen((event) {
-      if (event.success) {
-        setState(() {});
-      }
+    _subscription = Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+      setState(() {});
     });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<SharedCollectionWithThumbnail>>(
-      future: CollectionsDB.instance
-          .getAllSharedCollections()
-          .then((collections) async {
-        final c = List<SharedCollectionWithThumbnail>();
+    return FutureBuilder<List<CollectionWithThumbnail>>(
+      future:
+          CollectionsDB.instance.getAllCollections().then((collections) async {
+        final c = List<CollectionWithThumbnail>();
         for (final collection in collections) {
-          var thumbnail;
-          try {
-            thumbnail =
-                await FilesDB.instance.getLatestFileInCollection(collection.id);
-          } catch (e) {
-            _logger.warning(e.toString());
+          if (collection.owner.id == Configuration.instance.getUserID()) {
+            continue;
           }
-          c.add(SharedCollectionWithThumbnail(collection, thumbnail));
+          final thumbnail =
+              await FilesDB.instance.getLatestFileInCollection(collection.id);
+          if (thumbnail == null) {
+            continue;
+          }
+          final lastUpdatedFile = await FilesDB.instance
+              .getLastModifiedFileInCollection(collection.id);
+          c.add(CollectionWithThumbnail(
+            collection,
+            thumbnail,
+            lastUpdatedFile,
+          ));
         }
+        c.sort((first, second) {
+          return second.lastUpdatedFile.updationTime
+              .compareTo(first.lastUpdatedFile.updationTime);
+        });
         return c;
       }),
       builder: (context, snapshot) {
@@ -73,7 +81,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
   }
 
   Widget _getSharedCollectionsGallery(
-      List<SharedCollectionWithThumbnail> collections) {
+      List<CollectionWithThumbnail> collections) {
     return Container(
       margin: EdgeInsets.only(top: 24),
       child: GridView.builder(
@@ -91,21 +99,35 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
     );
   }
 
-  Widget _buildCollection(
-      BuildContext context, SharedCollectionWithThumbnail c) {
-    _logger.info("Building collection " + c.collection.toString());
+  Widget _buildCollection(BuildContext context, CollectionWithThumbnail c) {
     return GestureDetector(
       child: Column(
         children: <Widget>[
           ClipRRect(
             borderRadius: BorderRadius.circular(4.0),
             child: Container(
-              child: c.thumbnail ==
-                      null // When the user has shared a folder without photos
-                  ? Icon(Icons.error)
-                  : Hero(
+              child: Stack(
+                children: [
+                  Hero(
                       tag: "shared_collection" + c.thumbnail.tag(),
                       child: ThumbnailWidget(c.thumbnail)),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      child: Text(
+                        c.collection.owner.name.substring(0, 1),
+                        textAlign: TextAlign.center,
+                      ),
+                      padding: EdgeInsets.all(8),
+                      margin: EdgeInsets.fromLTRB(0, 0, 4, 0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).accentColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               height: 150,
               width: 150,
             ),
@@ -139,11 +161,4 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
     _subscription.cancel();
     super.dispose();
   }
-}
-
-class SharedCollectionWithThumbnail {
-  final SharedCollection collection;
-  final File thumbnail;
-
-  SharedCollectionWithThumbnail(this.collection, this.thumbnail);
 }

@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/home_widget.dart';
@@ -34,7 +33,6 @@ void _main() async {
   await CollectionsService.instance.init();
   await SyncService.instance.init();
   await MemoriesService.instance.init();
-  await FavoritesService.instance.init();
   _sync();
 
   final SentryClient sentry = new SentryClient(dsn: SENTRY_DSN);

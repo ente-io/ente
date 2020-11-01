@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -108,14 +107,18 @@ class UserService {
     });
   }
 
-  Future<void> setupKey(BuildContext context, String passphrase) async {
+  Future<void> setupAttributes(BuildContext context, String passphrase) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     final result = await _config.generateKey(passphrase);
+    final name = _config.getName();
     await _dio
         .put(
-      _config.getHttpEndpoint() + "/users/key-attributes",
-      data: result.keyAttributes.toMap(),
+      _config.getHttpEndpoint() + "/users/attributes",
+      data: {
+        "name": name,
+        "keyAttributes": result.keyAttributes.toMap(),
+      },
       options: Options(
         headers: {
           "X-Auth-Token": _config.getToken(),

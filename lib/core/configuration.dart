@@ -20,6 +20,7 @@ class Configuration {
   static const endpointKey = "endpoint";
   static const userIDKey = "user_id";
   static const emailKey = "email";
+  static const nameKey = "name";
   static const tokenKey = "token";
   static const hasOptedForE2EKey = "has_opted_for_e2e_encryption";
   static const foldersToBackUpKey = "folders_to_back_up";
@@ -105,7 +106,7 @@ class Configuration {
     if (kDebugMode) {
       return "http://192.168.0.100";
     }
-    return "https://api.staging.ente.io";
+    return "https://api.ente.io";
   }
 
   Future<void> setEndpoint(String endpoint) async {
@@ -126,6 +127,14 @@ class Configuration {
 
   Future<void> setEmail(String email) async {
     await _preferences.setString(emailKey, email);
+  }
+
+  String getName() {
+    return _preferences.getString(nameKey);
+  }
+
+  Future<void> setName(String name) async {
+    await _preferences.setString(nameKey, name);
   }
 
   int getUserID() {

@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/email_util.dart';
 
 class EmailEntryPage extends StatefulWidget {
   EmailEntryPage({Key key}) : super(key: key);
@@ -13,12 +15,14 @@ class EmailEntryPage extends StatefulWidget {
 }
 
 class _EmailEntryPageState extends State<EmailEntryPage> {
+  final _config = Configuration.instance;
   TextEditingController _emailController;
+  TextEditingController _nameController;
 
   @override
   void initState() {
-    _emailController =
-        TextEditingController(text: Configuration.instance.getEmail());
+    _emailController = TextEditingController(text: _config.getEmail());
+    _nameController = TextEditingController(text: _config.getName());
     super.initState();
   }
 
@@ -46,21 +50,37 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             Padding(padding: EdgeInsets.all(12)),
             TextFormField(
               decoration: InputDecoration(
+                hintText: 'your name',
+                contentPadding: EdgeInsets.all(12),
+              ),
+              controller: _nameController,
+              autofocus: true,
+              autocorrect: false,
+              keyboardType: TextInputType.name,
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+            TextFormField(
+              decoration: InputDecoration(
                 hintText: 'you@email.com',
-                contentPadding: EdgeInsets.all(20),
+                contentPadding: EdgeInsets.all(12),
               ),
               controller: _emailController,
-              autofocus: true,
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            Padding(padding: EdgeInsets.all(12)),
             Container(
               width: double.infinity,
               height: 44,
               child: button("Sign In", onPressed: () {
                 final email = _emailController.text;
-                Configuration.instance.setEmail(email);
+                if (!isValidEmail(email)) {
+                  showErrorDialog(context, "Invalid email address",
+                      "Please enter a valid email address.");
+                  return;
+                }
+                _config.setEmail(email);
+                _config.setName(_nameController.text);
                 UserService.instance.getOtt(context, email);
               }),
             ),

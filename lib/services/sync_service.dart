@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/services/collections_service.dart';
@@ -24,13 +25,14 @@ class SyncService {
   final _dio = Dio();
   final _db = FilesDB.instance;
   final _uploader = FileUploader.instance;
+  final _collectionsService = CollectionsService.instance;
   final _downloader = DiffFetcher();
   bool _isSyncInProgress = false;
   bool _syncStopRequested = false;
   Future<void> _existingSync;
   SharedPreferences _prefs;
 
-  static final _encryptedFilesSyncTimeKey = "encrypted_files_sync_time";
+  static final _collectionSyncTimeKeyPrefix = "collection_sync_time_";
   static final _dbUpdationTimeKey = "db_updation_time";
   static final _diffLimit = 100;
 
@@ -57,8 +59,8 @@ class SyncService {
       _logger.info("Syncing...");
       try {
         await _doSync();
-      } catch (e) {
-        throw e;
+      } catch (e, s) {
+        _logger.severe(e, s);
       } finally {
         _isSyncInProgress = false;
       }
@@ -106,10 +108,11 @@ class SyncService {
     }
     files.sort(
         (first, second) => first.creationTime.compareTo(second.creationTime));
-
-    await _insertFilesToDB(files, syncStartTime);
-    await FileRepository.instance.reloadFiles();
-    await _syncWithRemote();
+    if (files.isNotEmpty) {
+      await _insertFilesToDB(files, syncStartTime);
+      await FileRepository.instance.reloadFiles();
+    }
+    await syncWithRemote();
   }
 
   Future<List<AssetPathEntity>> _getGalleryList(
@@ -117,7 +120,7 @@ class SyncService {
     final filterOptionGroup = FilterOptionGroup();
     filterOptionGroup.setOption(AssetType.image, FilterOption(needTitle: true));
     filterOptionGroup.setOption(AssetType.video, FilterOption(needTitle: true));
-    filterOptionGroup.dateTimeCond = DateTimeCond(
+    filterOptionGroup.createTimeCond = DateTimeCond(
       min: DateTime.fromMicrosecondsSinceEpoch(fromTimestamp),
       max: DateTime.fromMicrosecondsSinceEpoch(toTimestamp),
     );
@@ -153,34 +156,47 @@ class SyncService {
     }
   }
 
-  Future<void> _syncWithRemote() async {
+  Future<void> syncWithRemote() async {
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }
-    await CollectionsService.instance.sync();
-    await _persistEncryptedFilesDiff();
+    await _collectionsService.sync();
+    final collections = _collectionsService.getCollections();
+    for (final collection in collections) {
+      await _fetchEncryptedFilesDiff(collection.id);
+    }
     await _uploadDiff();
-    await _deletePhotosOnServer();
+    await deleteFilesOnServer();
   }
 
-  Future<void> _persistEncryptedFilesDiff() async {
+  Future<void> _fetchEncryptedFilesDiff(int collectionID) async {
     final diff = await _downloader.getEncryptedFilesDiff(
-        _getEncryptedFilesSyncTime(), _diffLimit);
+      collectionID,
+      _getCollectionSyncTime(collectionID),
+      _diffLimit,
+    );
     if (diff.isNotEmpty) {
-      await _storeDiff(diff, _encryptedFilesSyncTimeKey);
+      await _storeDiff(diff, collectionID);
       FileRepository.instance.reloadFiles();
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
       if (diff.length == _diffLimit) {
-        return await _persistEncryptedFilesDiff();
+        return await _fetchEncryptedFilesDiff(collectionID);
       }
     }
   }
 
-  int _getEncryptedFilesSyncTime() {
-    var syncTime = _prefs.getInt(_encryptedFilesSyncTimeKey);
+  int _getCollectionSyncTime(int collectionID) {
+    var syncTime =
+        _prefs.getInt(_collectionSyncTimeKeyPrefix + collectionID.toString());
     if (syncTime == null) {
       syncTime = 0;
     }
     return syncTime;
+  }
+
+  Future<void> _setCollectionSyncTime(int collectionID, int time) async {
+    return _prefs.setInt(
+        _collectionSyncTimeKeyPrefix + collectionID.toString(), time);
   }
 
   Future<void> _uploadDiff() async {
@@ -218,6 +234,8 @@ class SyncService {
           final uploadedFile = await _uploader.encryptAndUploadFile(file);
           await _db.update(uploadedFile);
         }
+        Bus.instance
+            .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
         Bus.instance.fire(PhotoUploadEvent(
             completed: i + 1, total: filesToBeUploaded.length));
       } catch (e) {
@@ -227,45 +245,60 @@ class SyncService {
     }
   }
 
-  Future _storeDiff(List<File> diff, String prefKey) async {
+  Future _storeDiff(List<File> diff, int collectionID) async {
     for (File file in diff) {
-      try {
-        final existingFile = await _db.getMatchingFile(file.localID, file.title,
-            file.deviceFolder, file.creationTime, file.modificationTime,
-            alternateTitle: getHEICFileNameForJPG(file));
-        file.localID = existingFile.localID;
-        if (existingFile.collectionID == null ||
-            existingFile.collectionID == file.collectionID) {
-          // Uploaded for the first time || updated within the same collection
-          file.generatedID = existingFile.generatedID;
+      final existingFiles = await _db.getMatchingFiles(file.title,
+          file.deviceFolder, file.creationTime, file.modificationTime,
+          alternateTitle: getHEICFileNameForJPG(file));
+      if (existingFiles == null) {
+        // File uploaded from a different device
+        file.localID = null;
+        await _db.insert(file);
+      } else {
+        // File exists on device
+        bool wasUploadedOnAPreviousInstallation =
+            existingFiles.length == 1 && existingFiles[0].collectionID == null;
+        file.localID = existingFiles[0]
+            .localID; // File should ideally have the same localID
+        if (wasUploadedOnAPreviousInstallation) {
+          file.generatedID = existingFiles[0].generatedID;
           await _db.update(file);
         } else {
-          // If an existing file was added to a collection
-          await _db.insert(file);
+          bool wasUpdatedInExistingCollection = false;
+          for (final existingFile in existingFiles) {
+            if (file.collectionID == existingFile.collectionID) {
+              file.generatedID = existingFile.generatedID;
+              wasUpdatedInExistingCollection = true;
+              break;
+            }
+          }
+          if (wasUpdatedInExistingCollection) {
+            await _db.update(file);
+          } else {
+            // Added to a new collection
+            await _db.insert(file);
+          }
         }
-      } catch (e) {
-        file.localID = null; // File uploaded from a different device
-        await _db.insert(file);
       }
-      await _prefs.setInt(prefKey, file.updationTime);
+      await _setCollectionSyncTime(collectionID, file.updationTime);
     }
   }
 
-  Future<void> _deletePhotosOnServer() async {
-    return _db.getAllDeleted().then((deletedPhotos) async {
-      for (File deletedPhoto in deletedPhotos) {
-        await _deleteFileOnServer(deletedPhoto);
-        await _db.delete(deletedPhoto);
+  Future<void> deleteFilesOnServer() async {
+    return _db.getDeletedFileIDs().then((ids) async {
+      for (int id in ids) {
+        await _deleteFileOnServer(id);
+        await _db.delete(id);
       }
     });
   }
 
-  Future<void> _deleteFileOnServer(File file) async {
+  Future<void> _deleteFileOnServer(int fileID) async {
     return _dio
         .delete(
           Configuration.instance.getHttpEndpoint() +
               "/files/" +
-              file.uploadedFileID.toString(),
+              fileID.toString(),
           options: Options(
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         )

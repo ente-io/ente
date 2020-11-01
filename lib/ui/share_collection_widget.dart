@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/models/collection.dart';
@@ -16,49 +17,11 @@ import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
-class ShareFolderWidget extends StatefulWidget {
-  final String title;
-  final String path;
-  final Collection collection;
-
-  const ShareFolderWidget(
-    this.title,
-    this.path, {
-    this.collection,
-    Key key,
-  }) : super(key: key);
-
-  @override
-  _ShareFolderWidgetState createState() => _ShareFolderWidgetState();
-}
-
-class _ShareFolderWidgetState extends State<ShareFolderWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<String>>(
-      future: widget.collection == null
-          ? Future.value(List<String>())
-          : CollectionsService.instance.getSharees(widget.collection.id),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return SharingDialog(widget.collection, snapshot.data, widget.path);
-        } else if (snapshot.hasError) {
-          return Text(snapshot.error.toString());
-        } else {
-          return loadWidget;
-        }
-      },
-    );
-  }
-}
-
 class SharingDialog extends StatefulWidget {
   final Collection collection;
   final List<String> sharees;
-  final String path;
 
-  SharingDialog(this.collection, this.sharees, this.path, {Key key})
-      : super(key: key);
+  SharingDialog(this.collection, this.sharees, {Key key}) : super(key: key);
 
   @override
   _SharingDialogState createState() => _SharingDialogState();
@@ -75,10 +38,12 @@ class _SharingDialogState extends State<SharingDialog> {
     final children = List<Widget>();
     if (!_showEntryField &&
         (widget.collection == null || _sharees.length == 0)) {
-      children.add(Text("Click the + button to share this folder."));
+      children.add(Text("Click the + button to share this " +
+          Collection.typeToString(widget.collection.type) +
+          "."));
     } else {
       for (final email in _sharees) {
-        children.add(EmailItemWidget(email));
+        children.add(EmailItemWidget(widget.collection.id, email));
       }
     }
     if (_showEntryField) {
@@ -170,13 +135,13 @@ class _SharingDialogState extends State<SharingDialog> {
           "Please enter a valid email address.");
       return;
     } else if (email == Configuration.instance.getEmail()) {
-      showErrorDialog(
-          context, "Oops", "You cannot share the album with yourself.");
+      showErrorDialog(context, "Oops", "You cannot share with yourself.");
       return;
     }
     if (publicKey == null) {
       final dialog = createProgressDialog(context, "Searching for user...");
       await dialog.show();
+
       publicKey = await UserService.instance.getPublicKey(email);
       await dialog.hide();
     }
@@ -192,7 +157,7 @@ class _SharingDialogState extends State<SharingDialog> {
             child: Text("Invite"),
             onPressed: () {
               shareText(
-                  "Hey, I've got some really nice photos to share. Please install ente.io so that I can share them privately.");
+                  "Hey, I have some really nice photos to share. Please install ente.io so that I can share them privately.");
             },
           ),
         ],
@@ -206,20 +171,20 @@ class _SharingDialogState extends State<SharingDialog> {
     } else {
       final dialog = createProgressDialog(context, "Sharing...");
       await dialog.show();
-      var collectionID;
-      if (widget.collection != null) {
-        collectionID = widget.collection.id;
-      } else {
-        collectionID =
-            (await CollectionsService.instance.getOrCreateForPath(widget.path))
-                .id;
-        await Configuration.instance.addPathToFoldersToBeBackedUp(widget.path);
-        SyncService.instance.sync();
+      final collection = widget.collection;
+      if (collection.type == CollectionType.folder) {
+        final path =
+            CollectionsService.instance.decryptCollectionPath(collection);
+        if (!Configuration.instance.getPathsToBackUp().contains(path)) {
+          await Configuration.instance.addPathToFoldersToBeBackedUp(path);
+          SyncService.instance.sync();
+        }
       }
       try {
-        await CollectionsService.instance.share(collectionID, email, publicKey);
+        await CollectionsService.instance
+            .share(widget.collection.id, email, publicKey);
         await dialog.hide();
-        showToast("Folder shared successfully!");
+        showToast("Shared successfully!");
         setState(() {
           _sharees.add(email);
           _showEntryField = false;
@@ -233,8 +198,11 @@ class _SharingDialogState extends State<SharingDialog> {
 }
 
 class EmailItemWidget extends StatelessWidget {
+  final int collectionID;
   final String email;
+
   const EmailItemWidget(
+    this.collectionID,
     this.email, {
     Key key,
   }) : super(key: key);
@@ -252,9 +220,24 @@ class EmailItemWidget extends StatelessWidget {
                 style: TextStyle(fontSize: 16),
               ),
             ),
-            Icon(
-              Icons.delete_forever,
+            IconButton(
+              icon: Icon(Icons.delete_forever),
               color: Colors.redAccent,
+              onPressed: () async {
+                final dialog = createProgressDialog(context, "Please wait...");
+                await dialog.show();
+                try {
+                  await CollectionsService.instance
+                      .unshare(collectionID, email);
+                  await dialog.hide();
+                  showToast("Stopped sharing with " + email + ".");
+                  Navigator.of(context).pop();
+                } catch (e, s) {
+                  Logger("EmailItemWidget").severe(e, s);
+                  await dialog.hide();
+                  showGenericErrorDialog(context);
+                }
+              },
             ),
           ],
         ));

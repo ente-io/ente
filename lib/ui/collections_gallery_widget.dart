@@ -1,20 +1,27 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/models/collection.dart';
+import 'package:photos/events/tab_changed_event.dart';
+import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/repositories/file_repository.dart';
-import 'package:photos/services/favorites_service.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/ui/collection_page.dart';
 import 'package:photos/ui/device_folder_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:path/path.dart' as p;
+import 'package:photos/utils/toast_util.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
@@ -25,11 +32,18 @@ class CollectionsGalleryWidget extends StatefulWidget {
 }
 
 class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
-  StreamSubscription<LocalPhotosUpdatedEvent> _subscription;
+  final _logger = Logger("CollectionsGallery");
+  StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
+  StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
 
   @override
   void initState() {
-    _subscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _localFilesSubscription =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      setState(() {});
+    });
+    _collectionUpdatesSubscription =
+        Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       setState(() {});
     });
     super.initState();
@@ -73,16 +87,16 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
             ),
           ),
           Divider(height: 12),
-          SectionTitle("Collections"),
+          SectionTitle("Saved Collections"),
           Padding(padding: EdgeInsets.all(6)),
           GridView.builder(
             shrinkWrap: true,
             padding: EdgeInsets.only(bottom: 12),
             physics: ScrollPhysics(), // to disable GridView's scrolling
             itemBuilder: (context, index) {
-              return _buildCollection(context, items.collections[index]);
+              return _buildCollection(context, items.collections, index);
             },
-            itemCount: items.collections.length,
+            itemCount: items.collections.length + 1, // To include the + button
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
             ),
@@ -93,34 +107,52 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
   }
 
   Future<CollectionItems> _getCollections() async {
-    final paths = await FilesDB.instance.getLocalPaths();
+    final filesDB = FilesDB.instance;
+    final filesRepo = FileRepository.instance;
+    final collectionsService = CollectionsService.instance;
+    final userID = Configuration.instance.getUserID();
     final folders = List<DeviceFolder>();
-    for (final path in paths) {
-      final files = List<File>();
-      for (File file in FileRepository.instance.files) {
-        if (file.deviceFolder == path) {
-          files.add(file);
+    final files = filesRepo.hasLoadedFiles
+        ? filesRepo.files
+        : await filesRepo.loadFiles();
+    final filePathMap = LinkedHashMap<String, List<File>>();
+    final thumbnailPathMap = Map<String, File>();
+    for (final file in files) {
+      final path = file.deviceFolder;
+      if (filePathMap[path] == null) {
+        filePathMap[path] = List<File>();
+      }
+      if (file.localID != null) {
+        filePathMap[path].add(file);
+        if (thumbnailPathMap[path] == null) {
+          thumbnailPathMap[path] = file;
         }
       }
+    }
+    for (final path in thumbnailPathMap.keys) {
       final folderName = p.basename(path);
-      folders.add(DeviceFolder(folderName, path, () => files, files[0]));
+      folders.add(DeviceFolder(folderName, path, thumbnailPathMap[path]));
     }
-    folders.sort((first, second) {
-      return second.thumbnail.creationTime
-          .compareTo(first.thumbnail.creationTime);
-    });
+    final collectionsWithThumbnail = List<CollectionWithThumbnail>();
+    final collections = collectionsService.getCollections();
+    final ownedCollectionIDs = List<int>();
+    for (final c in collections) {
+      if (c.owner.id == userID) {
+        ownedCollectionIDs.add(c.id);
+      }
+    }
+    final thumbnails =
+        await filesDB.getLastCreatedFilesInCollections(ownedCollectionIDs);
+    final lastUpdatedFiles =
+        await filesDB.getLastUpdatedFilesInCollections(ownedCollectionIDs);
+    for (final collectionID in lastUpdatedFiles.keys) {
+      collectionsWithThumbnail.add(CollectionWithThumbnail(
+          collectionsService.getCollectionByID(collectionID),
+          thumbnails[collectionID],
+          lastUpdatedFiles[collectionID]));
+    }
 
-    final collections = List<CollectionWithThumbnail>();
-    final favorites = FavoritesService.instance.getFavoriteFiles().toList();
-    favorites.sort((first, second) {
-      return second.creationTime.compareTo(first.creationTime);
-    });
-    if (favorites.length > 0) {
-      collections.add(CollectionWithThumbnail(
-          await FavoritesService.instance.getFavoritesCollection(),
-          favorites[0]));
-    }
-    return CollectionItems(folders, collections);
+    return CollectionItems(folders, collectionsWithThumbnail);
   }
 
   Widget _buildFolder(BuildContext context, DeviceFolder folder) {
@@ -165,19 +197,34 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
     );
   }
 
-  Widget _buildCollection(BuildContext context, CollectionWithThumbnail c) {
+  Widget _buildCollection(BuildContext context,
+      List<CollectionWithThumbnail> collections, int index) {
+    if (index == collections.length) {
+      return Container(
+        padding: EdgeInsets.fromLTRB(28, 12, 28, 46),
+        child: OutlineButton(
+          child: Icon(
+            Icons.add,
+          ),
+          onPressed: () async {
+            await showToast(
+                "Long press to select photos and click + to create an album.",
+                toastLength: Toast.LENGTH_LONG);
+            Bus.instance.fire(TabChangedEvent(0));
+          },
+        ),
+      );
+    }
+    final c = collections[index];
     return GestureDetector(
       child: Column(
         children: <Widget>[
           ClipRRect(
             borderRadius: BorderRadius.circular(4.0),
             child: Container(
-              child: c.thumbnail ==
-                      null // When the user has shared a folder without photos
-                  ? Icon(Icons.error)
-                  : Hero(
-                      tag: "collection" + c.thumbnail.tag(),
-                      child: ThumbnailWidget(c.thumbnail)),
+              child: Hero(
+                  tag: "collection" + c.thumbnail.tag(),
+                  child: ThumbnailWidget(c.thumbnail)),
               height: 150,
               width: 150,
             ),
@@ -208,7 +255,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _localFilesSubscription.cancel();
+    _collectionUpdatesSubscription.cancel();
     super.dispose();
   }
 }
@@ -234,18 +282,4 @@ class SectionTitle extends StatelessWidget {
           ),
         ]));
   }
-}
-
-class CollectionItems {
-  final List<DeviceFolder> folders;
-  final List<CollectionWithThumbnail> collections;
-
-  CollectionItems(this.folders, this.collections);
-}
-
-class CollectionWithThumbnail {
-  final Collection collection;
-  final File thumbnail;
-
-  CollectionWithThumbnail(this.collection, this.thumbnail);
 }

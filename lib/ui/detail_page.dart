@@ -115,9 +115,7 @@ class _DetailPageState extends State<DetailPage> {
 
   AppBar _buildAppBar() {
     final actions = List<Widget>();
-    if (_files[_selectedIndex].localID != null) {
-      actions.add(_getFavoriteButton());
-    }
+    actions.add(_getFavoriteButton());
     actions.add(PopupMenuButton(
       itemBuilder: (context) {
         return [
@@ -178,8 +176,22 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget _getFavoriteButton() {
     final file = _files[_selectedIndex];
+
+    return FutureBuilder(
+      future: FavoritesService.instance.isFavorite(file),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return _getLikeButton(file, snapshot.data);
+        } else {
+          return _getLikeButton(file, false);
+        }
+      },
+    );
+  }
+
+  Widget _getLikeButton(File file, bool isLiked) {
     return LikeButton(
-      isLiked: FavoritesService.instance.isLiked(file),
+      isLiked: isLiked,
       onTap: (oldValue) async {
         final isLiked = !oldValue;
         bool hasError = false;
@@ -250,22 +262,24 @@ class _DetailPageState extends State<DetailPage> {
           ),
           Padding(padding: EdgeInsets.all(4)),
         ];
-        if (file.fileType == FileType.image) {
-          items.add(Row(
-            children: [
-              Icon(Icons.photo_size_select_actual),
-              Padding(padding: EdgeInsets.all(4)),
-              Text(asset.width.toString() + " x " + asset.height.toString()),
-            ],
-          ));
-        } else {
-          items.add(Row(
-            children: [
-              Icon(Icons.timer),
-              Padding(padding: EdgeInsets.all(4)),
-              Text(asset.videoDuration.toString()),
-            ],
-          ));
+        if (asset != null) {
+          if (file.fileType == FileType.image) {
+            items.add(Row(
+              children: [
+                Icon(Icons.photo_size_select_actual),
+                Padding(padding: EdgeInsets.all(4)),
+                Text(asset.width.toString() + " x " + asset.height.toString()),
+              ],
+            ));
+          } else {
+            items.add(Row(
+              children: [
+                Icon(Icons.timer),
+                Padding(padding: EdgeInsets.all(4)),
+                Text(asset.videoDuration.toString()),
+              ],
+            ));
+          }
         }
         return AlertDialog(
           title: Text(file.title),

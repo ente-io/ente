@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/repositories/file_repository.dart';
@@ -21,8 +22,6 @@ import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/ui/search_page.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
-import 'package:photos/utils/logging_util.dart';
-import 'package:shake/shake.dart';
 import 'package:logging/logging.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -43,22 +42,21 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _selectedFiles = SelectedFiles();
   final _memoriesWidget = MemoriesWidget();
 
-  ShakeDetector _detector;
   int _selectedNavBarItem = 0;
-  StreamSubscription<LocalPhotosUpdatedEvent>
-      _localPhotosUpdatedEventSubscription;
+  StreamSubscription<LocalPhotosUpdatedEvent> _photosUpdatedEvent;
+  StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
 
   @override
   void initState() {
-    _detector = ShakeDetector.autoStart(
-        shakeThresholdGravity: 3,
-        onPhoneShake: () {
-          _logger.info("Emailing logs");
-          LoggingUtil.instance.emailLogs();
-        });
-    _localPhotosUpdatedEventSubscription =
+    _photosUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       setState(() {});
+    });
+    _tabChangedEventSubscription =
+        Bus.instance.on<TabChangedEvent>().listen((event) {
+      setState(() {
+        _selectedNavBarItem = event.selectedIndex;
+      });
     });
     _initDeepLinks();
     super.initState();
@@ -71,7 +69,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         GalleryAppBarType.homepage,
         widget.title,
         _selectedFiles,
-        "/",
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
       body: IndexedStack(
@@ -145,9 +142,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _getMainGalleryWidget() {
     return FutureBuilder(
-      future: FileRepository.instance.loadFiles().then((files) {
-        return _getFilteredPhotos(files);
-      }),
+      future: FileRepository.instance.loadFiles(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Gallery(
@@ -209,8 +204,8 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   void dispose() {
-    _detector.stopListening();
-    _localPhotosUpdatedEventSubscription.cancel();
+    _tabChangedEventSubscription.cancel();
+    _photosUpdatedEvent.cancel();
     super.dispose();
   }
 }

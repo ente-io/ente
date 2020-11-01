@@ -14,7 +14,9 @@ import 'package:photos/core/cache/thumbnail_cache_manager.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/repositories/file_repository.dart';
@@ -26,13 +28,24 @@ import 'crypto_util.dart';
 final logger = Logger("FileUtil");
 
 Future<void> deleteFiles(List<File> files) async {
-  await PhotoManager.editor
-      .deleteWithIds(files.map((file) => file.localID).toList());
-  for (File file in files) {
-    await FilesDB.instance.markForDeletion(file);
+  final localIDs = List<String>();
+  bool hasUploadedFiles = false;
+  for (final file in files) {
+    if (file.localID != null) {
+      localIDs.add(file.localID);
+    }
+    if (file.uploadedFileID != null) {
+      hasUploadedFiles = true;
+      await FilesDB.instance.markForDeletion(file.uploadedFileID);
+    }
   }
+  await PhotoManager.editor.deleteWithIds(localIDs);
   await FileRepository.instance.reloadFiles();
-  SyncService.instance.sync();
+  if (hasUploadedFiles) {
+    Bus.instance.fire(CollectionUpdatedEvent());
+    // TODO: Blocking call?
+    SyncService.instance.deleteFilesOnServer();
+  }
 }
 
 void preloadFile(File file) {

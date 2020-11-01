@@ -139,7 +139,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
           child: Text("Confirm"),
           onPressed: () {
             Navigator.of(context).pop();
-            UserService.instance.setupKey(context, _passphraseController1.text);
+            UserService.instance.setupAttributes(context, _passphraseController1.text);
           },
         ),
       ],
