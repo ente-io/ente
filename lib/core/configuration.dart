@@ -106,7 +106,7 @@ class Configuration {
     if (kDebugMode) {
       return "http://192.168.0.100";
     }
-    return "https://api.staging.ente.io";
+    return "https://api.ente.io";
   }
 
   Future<void> setEndpoint(String endpoint) async {
