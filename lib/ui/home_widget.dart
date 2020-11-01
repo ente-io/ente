@@ -81,24 +81,24 @@ class _HomeWidgetState extends State<HomeWidget> {
         ],
         index: _selectedNavBarItem,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return SearchPage();
-              },
-            ),
-          );
-        },
-        child: Icon(
-          Icons.search,
-          size: 28,
-        ),
-        elevation: 1,
-        backgroundColor: Colors.black38,
-        foregroundColor: Theme.of(context).accentColor,
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     Navigator.of(context).push(
+      //       MaterialPageRoute(
+      //         builder: (BuildContext context) {
+      //           return SearchPage();
+      //         },
+      //       ),
+      //     );
+      //   },
+      //   child: Icon(
+      //     Icons.search,
+      //     size: 28,
+      //   ),
+      //   elevation: 1,
+      //   backgroundColor: Colors.black38,
+      //   foregroundColor: Theme.of(context).accentColor,
+      // ),
     );
   }
 
