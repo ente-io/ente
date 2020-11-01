@@ -38,7 +38,9 @@ class _SharingDialogState extends State<SharingDialog> {
     final children = List<Widget>();
     if (!_showEntryField &&
         (widget.collection == null || _sharees.length == 0)) {
-      children.add(Text("Click the + button to share this folder."));
+      children.add(Text("Click the + button to share this " +
+          Collection.typeToString(widget.collection.type) +
+          "."));
     } else {
       for (final email in _sharees) {
         children.add(EmailItemWidget(widget.collection.id, email));

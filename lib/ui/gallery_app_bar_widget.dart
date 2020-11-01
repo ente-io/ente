@@ -271,10 +271,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _showRemoveFromCollectionSheet(BuildContext context) {
+    final count = widget.selectedFiles.files.length;
     final action = CupertinoActionSheet(
       title: Text("Remove " +
-          widget.selectedFiles.files.length.toString() +
-          " files from " +
+          count.toString() +
+          " file" +
+          (count == 1 ? "" : "s") +
+          " from " +
           widget.collection.name +
           "?"),
       actions: <Widget>[
@@ -310,10 +313,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _showDeleteSheet(BuildContext context) {
+    final count = widget.selectedFiles.files.length;
     final action = CupertinoActionSheet(
       title: Text("Permanently delete " +
-          widget.selectedFiles.files.length.toString() +
-          " files?"),
+          count.toString() +
+          " file" +
+          (count == 1 ? "?" : "s?")),
       actions: <Widget>[
         CupertinoActionSheetAction(
           child: Text("Delete"),
