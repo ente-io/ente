@@ -131,18 +131,18 @@ class _DetailPageState extends State<DetailPage> {
               ],
             ),
           ),
-          // PopupMenuItem(
-          //   value: 2,
-          //   child: Row(
-          //     children: [
-          //       Icon(Icons.info),
-          //       Padding(
-          //         padding: EdgeInsets.all(8),
-          //       ),
-          //       Text("Info"),
-          //     ],
-          //   ),
-          // ),
+          PopupMenuItem(
+            value: 2,
+            child: Row(
+              children: [
+                Icon(Icons.info),
+                Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text("Info"),
+              ],
+            ),
+          ),
           PopupMenuItem(
             value: 3,
             child: Row(
@@ -262,22 +262,24 @@ class _DetailPageState extends State<DetailPage> {
           ),
           Padding(padding: EdgeInsets.all(4)),
         ];
-        if (file.fileType == FileType.image) {
-          items.add(Row(
-            children: [
-              Icon(Icons.photo_size_select_actual),
-              Padding(padding: EdgeInsets.all(4)),
-              Text(asset.width.toString() + " x " + asset.height.toString()),
-            ],
-          ));
-        } else {
-          items.add(Row(
-            children: [
-              Icon(Icons.timer),
-              Padding(padding: EdgeInsets.all(4)),
-              Text(asset.videoDuration.toString()),
-            ],
-          ));
+        if (asset != null) {
+          if (file.fileType == FileType.image) {
+            items.add(Row(
+              children: [
+                Icon(Icons.photo_size_select_actual),
+                Padding(padding: EdgeInsets.all(4)),
+                Text(asset.width.toString() + " x " + asset.height.toString()),
+              ],
+            ));
+          } else {
+            items.add(Row(
+              children: [
+                Icon(Icons.timer),
+                Padding(padding: EdgeInsets.all(4)),
+                Text(asset.videoDuration.toString()),
+              ],
+            ));
+          }
         }
         return AlertDialog(
           title: Text(file.title),
