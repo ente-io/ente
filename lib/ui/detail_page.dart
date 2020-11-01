@@ -131,18 +131,18 @@ class _DetailPageState extends State<DetailPage> {
               ],
             ),
           ),
-          PopupMenuItem(
-            value: 2,
-            child: Row(
-              children: [
-                Icon(Icons.info),
-                Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text("Info"),
-              ],
-            ),
-          ),
+          // PopupMenuItem(
+          //   value: 2,
+          //   child: Row(
+          //     children: [
+          //       Icon(Icons.info),
+          //       Padding(
+          //         padding: EdgeInsets.all(8),
+          //       ),
+          //       Text("Info"),
+          //     ],
+          //   ),
+          // ),
           PopupMenuItem(
             value: 3,
             child: Row(
