@@ -16,13 +16,11 @@ class EmailEntryPage extends StatefulWidget {
 
 class _EmailEntryPageState extends State<EmailEntryPage> {
   final _config = Configuration.instance;
-  TextEditingController _emailController;
-  TextEditingController _nameController;
+  String _email;
+  String _name;
 
   @override
   void initState() {
-    _emailController = TextEditingController(text: _config.getEmail());
-    _nameController = TextEditingController(text: _config.getName());
     super.initState();
   }
 
@@ -53,7 +51,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 hintText: 'your name',
                 contentPadding: EdgeInsets.all(12),
               ),
-              controller: _nameController,
+              onChanged: (value) {
+                setState(() {
+                  _name = value;
+                });
+              },
               autofocus: true,
               autocorrect: false,
               keyboardType: TextInputType.name,
@@ -64,24 +66,28 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 hintText: 'you@email.com',
                 contentPadding: EdgeInsets.all(12),
               ),
-              controller: _emailController,
+              onChanged: (value) {
+                setState(() {
+                  _email = value;
+                });
+              },
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
+              initialValue: _config.getEmail(),
             ),
             Padding(padding: EdgeInsets.all(12)),
             Container(
               width: double.infinity,
               height: 44,
               child: button("Sign In", onPressed: () {
-                final email = _emailController.text;
-                if (!isValidEmail(email)) {
+                if (!isValidEmail(_email)) {
                   showErrorDialog(context, "Invalid email address",
                       "Please enter a valid email address.");
                   return;
                 }
-                _config.setEmail(email);
-                _config.setName(_nameController.text);
-                UserService.instance.getOtt(context, email);
+                _config.setEmail(_email);
+                _config.setName(_name);
+                UserService.instance.getOtt(context, _email);
               }),
             ),
           ],
