@@ -13,7 +13,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -90,16 +89,6 @@ class UsageWidgetState extends State<UsageWidget> {
                     ),
             ],
           ),
-          Padding(padding: EdgeInsets.all(4)),
-          Divider(height: 4),
-          Padding(padding: EdgeInsets.all(4)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Tentative bill for " + getFullMonth(DateTime.now())),
-              _usageInGBs == null ? loadWidget : _getCost(_usageInGBs),
-            ],
-          )
         ],
       ),
     );
@@ -125,10 +114,6 @@ class UsageWidgetState extends State<UsageWidget> {
         return alert;
       },
     );
-  }
-
-  Text _getCost(double usageInGBs) {
-    return Text("\$" + (usageInGBs * 0.1).toStringAsFixed(2));
   }
 
   void _getUsage() {
