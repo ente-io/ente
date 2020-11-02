@@ -60,6 +60,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               autocorrect: false,
               keyboardType: TextInputType.text,
               textCapitalization: TextCapitalization.words,
+              initialValue: _config.getName(),
             ),
             Padding(padding: EdgeInsets.all(8)),
             TextFormField(
