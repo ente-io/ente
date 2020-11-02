@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/ui/gallery.dart';
@@ -27,7 +29,9 @@ class _SharedCollectionPageState extends State<SharedCollectionPage> {
                   ? DateTime.now().microsecondsSinceEpoch
                   : lastFile.creationTime,
               limit),
-      // onRefresh: () => FolderSharingService.instance.syncDiff(widget.folder),
+      reloadEvent: Bus.instance
+          .on<CollectionUpdatedEvent>()
+          .where((event) => event.collectionID == widget.collection.id),
       tagPrefix: "shared_collection",
       selectedFiles: _selectedFiles,
     );
