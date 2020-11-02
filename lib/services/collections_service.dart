@@ -78,7 +78,7 @@ class CollectionsService {
     return _collectionIDToCollections.values.toList();
   }
 
-  Future<List<String>> getSharees(int collectionID) {
+  Future<List<User>> getSharees(int collectionID) {
     return Dio()
         .get(
       Configuration.instance.getHttpEndpoint() + "/collections/sharees",
@@ -90,27 +90,29 @@ class CollectionsService {
     )
         .then((response) {
       _logger.info(response.toString());
-      final emails = List<String>();
-      for (final email in response.data["emails"]) {
-        emails.add(email);
+      final sharees = List<User>();
+      for (final user in response.data["sharees"]) {
+        sharees.add(User.fromMap(user));
       }
-      return emails;
+      return sharees;
     });
   }
 
   Future<void> share(int collectionID, String email, String publicKey) {
     final encryptedKey = CryptoUtil.sealSync(
         getCollectionKey(collectionID), Sodium.base642bin(publicKey));
-    return Dio().post(
-      Configuration.instance.getHttpEndpoint() + "/collections/share",
-      data: {
-        "collectionID": collectionID,
-        "email": email,
-        "encryptedKey": Sodium.bin2base64(encryptedKey),
-      },
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-    );
+    return Dio()
+        .post(
+          Configuration.instance.getHttpEndpoint() + "/collections/share",
+          data: {
+            "collectionID": collectionID,
+            "email": email,
+            "encryptedKey": Sodium.bin2base64(encryptedKey),
+          },
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        )
+        .then((value) => sync());
   }
 
   Future<void> unshare(int collectionID, String email) {
@@ -183,6 +185,7 @@ class CollectionsService {
       CollectionType.album,
       CollectionAttributes(),
       null,
+      null,
     ));
     return collection;
   }
@@ -205,6 +208,7 @@ class CollectionsService {
       CollectionAttributes(
           encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData),
           pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce)),
+      null,
       null,
     ));
     return collection;

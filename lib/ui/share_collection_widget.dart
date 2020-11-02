@@ -19,7 +19,7 @@ import 'package:photos/utils/toast_util.dart';
 
 class SharingDialog extends StatefulWidget {
   final Collection collection;
-  final List<String> sharees;
+  final List<User> sharees;
 
   SharingDialog(this.collection, this.sharees, {Key key}) : super(key: key);
 
@@ -29,7 +29,7 @@ class SharingDialog extends StatefulWidget {
 
 class _SharingDialogState extends State<SharingDialog> {
   bool _showEntryField = false;
-  List<String> _sharees;
+  List<User> _sharees;
   String _email;
 
   @override
@@ -42,8 +42,8 @@ class _SharingDialogState extends State<SharingDialog> {
           Collection.typeToString(widget.collection.type) +
           "."));
     } else {
-      for (final email in _sharees) {
-        children.add(EmailItemWidget(widget.collection.id, email));
+      for (final user in _sharees) {
+        children.add(EmailItemWidget(widget.collection.id, user.email));
       }
     }
     if (_showEntryField) {
@@ -186,7 +186,7 @@ class _SharingDialogState extends State<SharingDialog> {
         await dialog.hide();
         showToast("Shared successfully!");
         setState(() {
-          _sharees.add(email);
+          _sharees.add(User(email: email));
           _showEntryField = false;
         });
       } catch (e) {

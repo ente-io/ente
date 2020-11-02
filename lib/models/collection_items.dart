@@ -20,3 +20,10 @@ class CollectionWithThumbnail {
     this.lastUpdatedFile,
   );
 }
+
+class SharedCollections {
+  final List<CollectionWithThumbnail> outgoing;
+  final List<CollectionWithThumbnail> incoming;
+
+  SharedCollections(this.outgoing, this.incoming);
+}

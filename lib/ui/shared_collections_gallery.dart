@@ -8,7 +8,10 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/ui/collection_page.dart';
+import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/shared_collection_page.dart';
@@ -36,40 +39,42 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<CollectionWithThumbnail>>(
+    return FutureBuilder<SharedCollections>(
       future:
           CollectionsDB.instance.getAllCollections().then((collections) async {
-        final c = List<CollectionWithThumbnail>();
+        final outgoing = List<CollectionWithThumbnail>();
+        final incoming = List<CollectionWithThumbnail>();
         for (final collection in collections) {
           if (collection.owner.id == Configuration.instance.getUserID()) {
-            continue;
+            if (collection.sharees.length > 0) {
+              final withThumbnail =
+                  await _getCollectionWithThumbnail(collection);
+              if (withThumbnail.thumbnail != null) {
+                outgoing.add(withThumbnail);
+              }
+            } else {
+              continue;
+            }
+          } else {
+            final withThumbnail = await _getCollectionWithThumbnail(collection);
+            if (withThumbnail.thumbnail != null) {
+              incoming.add(withThumbnail);
+            }
           }
-          final thumbnail =
-              await FilesDB.instance.getLatestFileInCollection(collection.id);
-          if (thumbnail == null) {
-            continue;
-          }
-          final lastUpdatedFile = await FilesDB.instance
-              .getLastModifiedFileInCollection(collection.id);
-          c.add(CollectionWithThumbnail(
-            collection,
-            thumbnail,
-            lastUpdatedFile,
-          ));
         }
-        c.sort((first, second) {
+        outgoing.sort((first, second) {
           return second.lastUpdatedFile.updationTime
               .compareTo(first.lastUpdatedFile.updationTime);
         });
-        return c;
+        incoming.sort((first, second) {
+          return second.lastUpdatedFile.updationTime
+              .compareTo(first.lastUpdatedFile.updationTime);
+        });
+        return SharedCollections(outgoing, incoming);
       }),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          if (snapshot.data.isEmpty) {
-            return nothingToSeeHere;
-          } else {
-            return _getSharedCollectionsGallery(snapshot.data);
-          }
+          return _getSharedCollectionsGallery(snapshot.data);
         } else if (snapshot.hasError) {
           _logger.shout(snapshot.error);
           return Center(child: Text(snapshot.error.toString()));
@@ -80,26 +85,114 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
     );
   }
 
-  Widget _getSharedCollectionsGallery(
-      List<CollectionWithThumbnail> collections) {
-    return Container(
-      margin: EdgeInsets.only(top: 24),
-      child: GridView.builder(
-        shrinkWrap: true,
-        padding: EdgeInsets.only(bottom: 12),
-        physics: ScrollPhysics(), // to disable GridView's scrolling
-        itemBuilder: (context, index) {
-          return _buildCollection(context, collections[index]);
-        },
-        itemCount: collections.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-        ),
+  Widget _getSharedCollectionsGallery(SharedCollections collections) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SectionTitle("INCOMING"),
+          Padding(padding: EdgeInsets.all(8)),
+          collections.incoming.length > 0
+              ? GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return _buildIncomingCollection(
+                        context, collections.incoming[index]);
+                  },
+                  itemCount: collections.incoming.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                  ),
+                )
+              : nothingToSeeHere,
+          Padding(padding: EdgeInsets.all(8)),
+          Divider(height: 16),
+          SectionTitle("OUTGOING"),
+          Padding(padding: EdgeInsets.all(8)),
+          collections.outgoing.length > 0
+              ? ListView.builder(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.only(bottom: 12),
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return _buildOutgoingCollection(
+                        context, collections.outgoing[index]);
+                  },
+                  itemCount: collections.outgoing.length,
+                )
+              : nothingToSeeHere,
+        ],
       ),
     );
   }
 
-  Widget _buildCollection(BuildContext context, CollectionWithThumbnail c) {
+  Widget _buildOutgoingCollection(
+      BuildContext context, CollectionWithThumbnail c) {
+    return GestureDetector(
+      child: Container(
+        margin: EdgeInsets.fromLTRB(16, 4, 8, 12),
+        child: Row(
+          children: <Widget>[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(2.0),
+              child: Container(
+                child: Hero(
+                    tag: "outgoing_collection" + c.thumbnail.tag(),
+                    child: ThumbnailWidget(
+                      c.thumbnail,
+                    )),
+                height: 60,
+                width: 60,
+              ),
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  c.collection.name,
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Text(
+                    "Shared with " +
+                        c.collection.sharees
+                            .map((u) => u.name.split(" ")[0])
+                            .join(", "),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).primaryColorLight,
+                    ),
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      onTap: () {
+        final page = CollectionPage(
+          c.collection,
+          tagPrefix: "outgoing_collection",
+        );
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page;
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildIncomingCollection(
+      BuildContext context, CollectionWithThumbnail c) {
     return GestureDetector(
       child: Column(
         children: <Widget>[
@@ -153,6 +246,19 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
           ),
         );
       },
+    );
+  }
+
+  Future<CollectionWithThumbnail> _getCollectionWithThumbnail(
+      Collection collection) async {
+    final thumbnail =
+        await FilesDB.instance.getLatestFileInCollection(collection.id);
+    final lastUpdatedFile =
+        await FilesDB.instance.getLastModifiedFileInCollection(collection.id);
+    return CollectionWithThumbnail(
+      collection,
+      thumbnail,
+      lastUpdatedFile,
     );
   }
 

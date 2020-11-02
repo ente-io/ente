@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart';
@@ -12,15 +13,14 @@ class CollectionsDB {
   static final collectionsTable = 'collections';
 
   static final columnID = 'collection_id';
-  static final columnOwnerID = 'owner_id';
-  static final columnOwnerEmail = 'owner_email';
-  static final columnOwnerName = 'owner_name';
+  static final columnOwner = 'owner';
   static final columnEncryptedKey = 'encrypted_key';
   static final columnKeyDecryptionNonce = 'key_decryption_nonce';
   static final columnName = 'name';
   static final columnType = 'type';
   static final columnEncryptedPath = 'encrypted_path';
   static final columnPathDecryptionNonce = 'path_decryption_nonce';
+  static final columnSharees = 'sharees';
   static final columnUpdationTime = 'updation_time';
 
   CollectionsDB._privateConstructor();
@@ -47,15 +47,14 @@ class CollectionsDB {
     await db.execute('''
                 CREATE TABLE $collectionsTable (
                   $columnID INTEGER PRIMARY KEY NOT NULL,
-                  $columnOwnerID INTEGER NOT NULL,
-                  $columnOwnerEmail TEXT,
-                  $columnOwnerName TEXT,
+                  $columnOwner TEXT NOT NULL,
                   $columnEncryptedKey TEXT NOT NULL,
                   $columnKeyDecryptionNonce TEXT,
                   $columnName TEXT NOT NULL,
                   $columnType TEXT NOT NULL,
                   $columnEncryptedPath TEXT,
                   $columnPathDecryptionNonce TEXT,
+                  $columnSharees TEXT,
                   $columnUpdationTime TEXT NOT NULL
                 )
                 ''');
@@ -107,15 +106,15 @@ class CollectionsDB {
   Map<String, dynamic> _getRowForCollection(Collection collection) {
     var row = new Map<String, dynamic>();
     row[columnID] = collection.id;
-    row[columnOwnerID] = collection.owner.id;
-    row[columnOwnerEmail] = collection.owner.email;
-    row[columnOwnerName] = collection.owner.name;
+    row[columnOwner] = collection.owner.toJson();
     row[columnEncryptedKey] = collection.encryptedKey;
     row[columnKeyDecryptionNonce] = collection.keyDecryptionNonce;
     row[columnName] = collection.name;
     row[columnType] = Collection.typeToString(collection.type);
     row[columnEncryptedPath] = collection.attributes.encryptedPath;
     row[columnPathDecryptionNonce] = collection.attributes.pathDecryptionNonce;
+    row[columnSharees] =
+        json.encode(collection.sharees?.map((x) => x?.toMap())?.toList());
     row[columnUpdationTime] = collection.updationTime;
     return row;
   }
@@ -123,11 +122,7 @@ class CollectionsDB {
   Collection _convertToCollection(Map<String, dynamic> row) {
     return Collection(
       row[columnID],
-      CollectionOwner(
-        id: row[columnOwnerID],
-        email: row[columnOwnerEmail],
-        name: row[columnOwnerName],
-      ),
+      User.fromJson(row[columnOwner]),
       row[columnEncryptedKey],
       row[columnKeyDecryptionNonce],
       row[columnName],
@@ -135,6 +130,8 @@ class CollectionsDB {
       CollectionAttributes(
           encryptedPath: row[columnEncryptedPath],
           pathDecryptionNonce: row[columnPathDecryptionNonce]),
+      List<User>.from((json.decode(row[columnSharees]) as List)
+          .map((x) => User.fromMap(x))),
       int.parse(row[columnUpdationTime]),
     );
   }

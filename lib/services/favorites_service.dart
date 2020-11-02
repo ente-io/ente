@@ -82,6 +82,7 @@ class FavoritesService {
       CollectionType.favorites,
       CollectionAttributes(),
       null,
+      null,
     ));
     _cachedFavoritesCollectionID = collection.id;
     return collection.id;

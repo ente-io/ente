@@ -11,8 +11,9 @@ import 'gallery_app_bar_widget.dart';
 
 class CollectionPage extends StatefulWidget {
   final Collection collection;
+  final String tagPrefix;
 
-  const CollectionPage(this.collection, {Key key}) : super(key: key);
+  const CollectionPage(this.collection, {this.tagPrefix = "collection", Key key}) : super(key: key);
 
   @override
   _CollectionPageState createState() => _CollectionPageState();
@@ -34,7 +35,7 @@ class _CollectionPageState extends State<CollectionPage> {
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()
           .where((event) => event.collectionID == widget.collection.id),
-      tagPrefix: "collection",
+      tagPrefix: widget.tagPrefix,
       selectedFiles: _selectedFiles,
     );
     return Scaffold(
