@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/photo_upload_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/file_downloader.dart';
@@ -174,6 +176,11 @@ class SyncService {
         return;
       }
       File file = filesToBeUploaded[i];
+      if (kDebugMode) {
+        if (file.fileType == FileType.video) {
+          continue;
+        }
+      }
       try {
         file.collectionID = (await CollectionsService.instance
                 .getOrCreateForPath(file.deviceFolder))
