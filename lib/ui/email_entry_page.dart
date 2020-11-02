@@ -58,7 +58,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               },
               autofocus: true,
               autocorrect: false,
-              keyboardType: TextInputType.name,
+              keyboardType: TextInputType.text,
+              textCapitalization: TextCapitalization.words,
             ),
             Padding(padding: EdgeInsets.all(8)),
             TextFormField(
