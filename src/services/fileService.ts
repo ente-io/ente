@@ -1,6 +1,8 @@
 import { getEndpoint } from "utils/common/apiUtil";
 import HTTPService from "./HTTPService";
 import * as Comlink from "comlink";
+import { getData, LS_KEYS } from "utils/storage/localStorage";
+import { decrypt } from "utils/crypto/libsodium";
 
 const CryptoWorker: any = typeof window !== 'undefined'
     && Comlink.wrap(new Worker("worker/crypto.worker.js", { type: 'module' }));
@@ -11,13 +13,21 @@ export interface fileAttribute {
     decryptionHeader: string;
 };
 
+export interface user {
+    id: number;
+    name: string;
+    email: string;
+}
+
 export interface collection {
     id: number;
-    ownerID: number;
+    owner: user;
     key: string;
     name: string;
     type: string;
     creationTime: number;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
 }
 
 export interface file {
@@ -34,50 +44,63 @@ export interface file {
     h: number;
 };
 
-const getCollectionKeyUsingWorker = async (collection: any, key: Uint8Array) => {
+const getCollectionKey = async (collection: collection, key: Uint8Array) => {
     const worker = await new CryptoWorker();
-    const collectionKey = await worker.decrypt(
-        await worker.fromB64(collection.encryptedKey),
-        await worker.fromB64(collection.keyDecryptionNonce),
-        key);
+    const userID = getData(LS_KEYS.USER).id;
+    var decryptedKey;
+    if (collection.owner.id == userID) {
+        decryptedKey = await worker.decrypt(
+            await worker.fromB64(collection.encryptedKey),
+            await worker.fromB64(collection.keyDecryptionNonce),
+            key);
+    } else {
+        // TODO
+        decryptedKey = null;
+    }
     return {
         ...collection,
-        key: collectionKey
+        key: decryptedKey
     };
 }
 
-const getCollections = async (token: string, key: Uint8Array): Promise<collection[]> => {
-    const resp = await HTTPService.get(`${ENDPOINT}/collections/owned`, {
-        token
+const getCollections = async (token: string, sinceTime: string, key: Uint8Array): Promise<collection[]> => {
+    const resp = await HTTPService.get(`http://localhost/collections/`, {
+        'token': token,
+        'sinceTime': sinceTime,
     });
 
     const promises: Promise<collection>[] = resp.data.collections.map(
-        (collection: collection) => getCollectionKeyUsingWorker(collection, key));
+        (collection: collection) => getCollectionKey(collection, key));
     return await Promise.all(promises);
 }
 
 export const getFiles = async (sinceTime: string, token: string, limit: string, key: string) => {
     const worker = await new CryptoWorker();
 
-    const collections = await getCollections(token, await worker.fromB64(key));
-    const collectionMap = {}
-    for (const collectionIndex in collections) {
-        collectionMap[collections[collectionIndex].id] = collections[collectionIndex];
-    }
-    const resp = await HTTPService.get(`${ENDPOINT}/files/diff`, {
-        sinceTime, token, limit,
-    });
-
-    const promises: Promise<file>[] = resp.data.diff.map(
-        async (file: file) => {
-            file.key = await worker.decrypt(
-                await worker.fromB64(file.encryptedKey),
-                await worker.fromB64(file.keyDecryptionNonce),
-                collectionMap[file.collectionID].key)
-            file.metadata = await worker.decryptMetadata(file);
-            return file;
+    const collections = await getCollections(token, "0", await worker.fromB64(key));
+    var files: Array<file> = [];
+    for (const index in collections) {
+        const collection = collections[index];
+        if (collection.key == null) {
+            continue;
+        }
+        const resp = await HTTPService.get(`${ENDPOINT}/collections/diff/`, {
+            'collectionID': collection.id.toString(), sinceTime, token, limit,
         });
-    return await Promise.all(promises);
+
+        const promises: Promise<file>[] = resp.data.diff.map(
+            async (file: file) => {
+                file.key = await worker.decrypt(
+                    await worker.fromB64(file.encryptedKey),
+                    await worker.fromB64(file.keyDecryptionNonce),
+                    collection.key)
+                file.metadata = await worker.decryptMetadata(file);
+                return file;
+            });
+        files.push(...await Promise.all(promises));
+        console.log(files);
+    }
+    return files;
 }
 
 export const getPreview = async (token: string, file: file) => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Spinner from 'react-bootstrap/Spinner';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { fileData, getFiles } from 'services/fileService';
+import { file, getFiles } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
 import { getActualKey } from 'utils/common/key';
@@ -24,7 +24,7 @@ const Container = styled.div`
 export default function Gallery() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [data, setData] = useState<fileData[]>();
+    const [data, setData] = useState<file[]>();
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -44,12 +44,12 @@ export default function Gallery() {
 
     if (!data || loading) {
         return <div className="text-center">
-            <Spinner animation="border" variant="primary"/>;
+            <Spinner animation="border" variant="primary" />;
         </div>
     }
 
     const getThumbnail = (item) => (
-        <PreviewCard data={item}/>
+        <PreviewCard data={item} />
     )
 
     return (<Container>
