@@ -130,19 +130,16 @@ class CollectionsService {
   Uint8List getCollectionKey(int collectionID) {
     if (!_cachedKeys.containsKey(collectionID)) {
       final collection = _collectionIDToCollections[collectionID];
-      var key;
+      final encryptedKey = Sodium.base642bin(collection.encryptedKey);
       if (collection.owner.id == _config.getUserID()) {
-        final encryptedKey = Sodium.base642bin(collection.encryptedKey);
-        key = CryptoUtil.decryptSync(encryptedKey, _config.getKey(),
-            Sodium.base642bin(collection.keyDecryptionNonce));
+        _cachedKeys[collectionID] = CryptoUtil.decryptSync(encryptedKey,
+            _config.getKey(), Sodium.base642bin(collection.keyDecryptionNonce));
       } else {
-        final encryptedKey = Sodium.base642bin(collection.encryptedKey);
-        key = CryptoUtil.openSealSync(
+        _cachedKeys[collectionID] = CryptoUtil.openSealSync(
             encryptedKey,
             Sodium.base642bin(_config.getKeyAttributes().publicKey),
             _config.getSecretKey());
       }
-      _cachedKeys[collectionID] = key;
     }
     return _cachedKeys[collectionID];
   }
