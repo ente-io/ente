@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { fileData, getPreview } from 'services/fileService';
+import { file, getPreview } from 'services/fileService';
 import { getActualKey } from 'utils/common/key';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import styled from 'styled-components';
 
 interface IProps {
-    data: fileData,
+    data: file,
 }
 
 const Cont = styled.div`
@@ -32,7 +32,7 @@ export default function PreviewCard(props: IProps) {
             const main = async () => {
                 const token = getData(LS_KEYS.USER).token;
                 const key = await getActualKey();
-                const url = await getPreview(token, data, key);
+                const url = await getPreview(token, data);
                 setImgSrc(url);
                 data.src = url;
             }
@@ -41,6 +41,6 @@ export default function PreviewCard(props: IProps) {
     }, [data]);
 
     return <Cont>
-        <img src={imgSrc}/>
+        <img src={imgSrc} />
     </Cont>;
 }
