@@ -87,6 +87,11 @@ export async function generateSaltToDeriveKey() {
     return sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
 }
 
+export async function generateKeyPair() {
+    await sodium.ready;
+    return sodium.crypto_box_keypair();
+}
+
 export async function fromB64(input: string) {
     await sodium.ready;
     return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);

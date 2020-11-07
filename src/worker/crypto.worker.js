@@ -53,6 +53,10 @@ export class Crypto {
         return libsodium.deriveKey(passphrase, salt);
     }
 
+    async generateKeyPair() {
+        return libsodium.generateKeyPair();
+    }
+
     async fromString(string) {
         return libsodium.fromString(string);
     }

@@ -13,7 +13,7 @@ export const verifyOtt = (email: string, ott: string) => {
 }
 
 export const putKeyAttributes = (token: string, keyAttributes: keyAttributes) => {
-    return HTTPService.put(`${ENDPOINT}/users/key-attributes`, keyAttributes, null, {
+    return HTTPService.put(`${ENDPOINT}/users/attributes`, { 'keyAttributes': keyAttributes, 'name': 'Dummy Name' }, null, {
         'X-Auth-Token': token,
     });
 }

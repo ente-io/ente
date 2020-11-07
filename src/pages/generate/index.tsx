@@ -57,11 +57,16 @@ export default function Generate() {
                     await cryptoWorker.fromString(passphrase), kekSalt);
                 const kekHash = await cryptoWorker.hash(kek);
                 const encryptedKeyAttributes = await cryptoWorker.encrypt(key, kek);
+                const keyPair = await cryptoWorker.generateKeyPair();
+                const encryptedKeyPairAttributes = await cryptoWorker.encrypt(keyPair.privateKey, kek);
                 const keyAttributes = {
                     kekSalt: await cryptoWorker.toB64(kekSalt),
-                    kekHash,
+                    kekHash: kekHash,
                     encryptedKey: await cryptoWorker.toB64(encryptedKeyAttributes.encryptedData),
                     keyDecryptionNonce: await cryptoWorker.toB64(encryptedKeyAttributes.nonce),
+                    publicKey: await cryptoWorker.toB64(keyPair.publicKey),
+                    encryptedSecretKey: await cryptoWorker.toB64(encryptedKeyPairAttributes.encryptedData),
+                    secretKeyDecryptionNonce: await cryptoWorker.toB64(encryptedKeyPairAttributes.nonce)
                 };
                 await putKeyAttributes(token, keyAttributes);
                 setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
