@@ -64,7 +64,7 @@ const getCollectionKey = async (collection: collection, key: Uint8Array) => {
 }
 
 const getCollections = async (token: string, sinceTime: string, key: Uint8Array): Promise<collection[]> => {
-    const resp = await HTTPService.get(`http://localhost/collections/`, {
+    const resp = await HTTPService.get(`${ENDPOINT}/collections/`, {
         'token': token,
         'sinceTime': sinceTime,
     });
@@ -84,7 +84,7 @@ export const getFiles = async (sinceTime: string, token: string, limit: string, 
         if (collection.key == null) {
             continue;
         }
-        const resp = await HTTPService.get(`${ENDPOINT}/collections/diff/`, {
+        const resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
             'collectionID': collection.id.toString(), sinceTime, token, limit,
         });
 
