@@ -20,6 +20,7 @@ class FileUploader {
   final _queue = LinkedHashMap<int, FileUploadItem>();
   final _maximumConcurrentUploads = 4;
   int _currentlyUploading = 0;
+  final _uploadURLs = Queue<UploadURL>();
 
   FileUploader._privateConstructor();
   static FileUploader instance = FileUploader._privateConstructor();
@@ -48,10 +49,6 @@ class FileUploader {
         return uploadedFile;
       });
     });
-  }
-
-  Future<File> getCurrentUploadStatus(File file) {
-    return _queue[file.generatedID]?.completer?.future;
   }
 
   Future<File> forceUpload(File file, int collectionID) async {
@@ -215,14 +212,35 @@ class FileUploader {
     });
   }
 
-  Future<UploadURL> _getUploadURL() {
-    return Dio()
-        .get(
-          Configuration.instance.getHttpEndpoint() + "/files/upload-url",
-          options: Options(
-              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-        )
-        .then((response) => UploadURL.fromMap(response.data));
+  Future<UploadURL> _getUploadURL() async {
+    if (_uploadURLs.isEmpty) {
+      await _fetchUploadURLs();
+    }
+    return _uploadURLs.removeFirst();
+  }
+
+  Future<void> _uploadURLFetchInProgress;
+
+  Future<void> _fetchUploadURLs() {
+    if (_uploadURLFetchInProgress == null) {
+      _uploadURLFetchInProgress = Dio()
+          .get(
+        Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
+        queryParameters: {
+          "count": 42, // m4gic number
+        },
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      )
+          .then((response) {
+        _uploadURLFetchInProgress = null;
+        final urls = (response.data["urls"] as List)
+            .map((e) => UploadURL.fromMap(e))
+            .toList();
+        _uploadURLs.addAll(urls);
+      });
+    }
+    return _uploadURLFetchInProgress;
   }
 
   Future<String> _putFile(UploadURL uploadURL, io.File file) async {
