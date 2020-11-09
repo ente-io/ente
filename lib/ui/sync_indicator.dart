@@ -109,10 +109,10 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       } else if (_event.wasStopped) {
         s = "Sync stopped.";
       } else {
-        s = "Backing up " +
-            _event.completed.toString() +
+        s = _event.completed.toString() +
             "/" +
-            _event.total.toString();
+            _event.total.toString() +
+            " memories preserved";
       }
       _event = null;
       return s;
