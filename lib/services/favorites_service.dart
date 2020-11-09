@@ -1,6 +1,8 @@
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
@@ -37,6 +39,7 @@ class FavoritesService {
       file.collectionID = collectionID;
       final uploadedFile = (await _fileUploader.forceUpload(file));
       await _filesDB.update(uploadedFile);
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
     } else {
       await _collectionsService.addToCollection(collectionID, [file]);
     }
