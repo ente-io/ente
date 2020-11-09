@@ -7,6 +7,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/upload_url.dart';
@@ -23,20 +24,77 @@ class FileUploader {
   FileUploader._privateConstructor();
   static FileUploader instance = FileUploader._privateConstructor();
 
-  Future<File> addToQueue(File file) {
-    if (_queue[file.generatedID] == null) {
-      _queue[file.generatedID] = FileUploadItem(file, Completer<File>());
+  Future<File> upload(File file, int collectionID) {
+    // If the file hasn't been queued yet, queue it
+    if (!_queue.containsKey(file.generatedID)) {
+      final completer = Completer<File>();
+      _queue[file.generatedID] = FileUploadItem(file, collectionID, completer);
       _pollQueue();
+      return completer.future;
     }
-    return _queue[file.generatedID].completer.future;
+
+    // If the file exists in the queue for a matching collectionID,
+    // return the existing future
+    final item = _queue[file.generatedID];
+    if (item.collectionID == collectionID) {
+      return item.completer.future;
+    }
+
+    // Else wait for the existing upload to complete,
+    // and add it to the relevant collection
+    return item.completer.future.then((uploadedFile) {
+      return CollectionsService.instance
+          .addToCollection(collectionID, [uploadedFile]).then((aVoid) {
+        return uploadedFile;
+      });
+    });
   }
 
   Future<File> getCurrentUploadStatus(File file) {
     return _queue[file.generatedID]?.completer?.future;
   }
 
-  Future<File> forceUpload(File file) async {
-    return _encryptAndUploadFile(file, forcedUpload: true);
+  Future<File> forceUpload(File file, int collectionID) async {
+    // If the file hasn't been queued yet, ez.
+    if (!_queue.containsKey(file.generatedID)) {
+      return _encryptAndUploadFileToCollection(file, collectionID,
+          forcedUpload: true);
+    }
+    var item = _queue[file.generatedID];
+    // If the file is being uploaded right now, wait and proceed
+    if (item.status == UploadStatus.in_progress) {
+      return item.completer.future.then((uploadedFile) async {
+        if (uploadedFile.collectionID == collectionID) {
+          // Do nothing
+          return uploadedFile;
+        } else {
+          return CollectionsService.instance
+              .addToCollection(collectionID, [uploadedFile]).then((aVoid) {
+            return uploadedFile;
+          });
+        }
+      });
+    } else {
+      // If the file is yet to be processed,
+      // 1. Remove it from the queue,
+      // 2. Force upload the current file
+      // 3. Trigger the callback for the original request
+      item = _queue.remove(file.generatedID);
+      return _encryptAndUploadFileToCollection(file, collectionID,
+              forcedUpload: true)
+          .then((uploadedFile) {
+        if (item.collectionID == collectionID) {
+          item.completer.complete(uploadedFile);
+          return uploadedFile;
+        } else {
+          CollectionsService.instance
+              .addToCollection(item.collectionID, [uploadedFile]).then((aVoid) {
+            item.completer.complete(uploadedFile);
+          });
+          return uploadedFile;
+        }
+      });
+    }
   }
 
   void _pollQueue() {
@@ -45,11 +103,12 @@ class FileUploader {
           .firstWhere((entry) => entry.value.status == UploadStatus.not_started)
           .value;
       firstPendingEntry.status = UploadStatus.in_progress;
-      _encryptAndUploadFile(firstPendingEntry.file);
+      _encryptAndUploadFileToCollection(
+          firstPendingEntry.file, firstPendingEntry.collectionID);
     }
   }
 
-  Future<File> _encryptAndUploadFile(File file,
+  Future<File> _encryptAndUploadFileToCollection(File file, int collectionID,
       {bool forcedUpload = false}) async {
     _logger.info("Uploading " + file.toString());
     if (!forcedUpload) {
@@ -95,7 +154,7 @@ class FileUploader {
 
     final encryptedFileKeyData = CryptoUtil.encryptSync(
       fileAttributes.key,
-      CollectionsService.instance.getCollectionKey(file.collectionID),
+      CollectionsService.instance.getCollectionKey(collectionID),
     );
 
     final encryptedKey = Sodium.bin2base64(encryptedFileKeyData.encryptedData);
@@ -109,7 +168,7 @@ class FileUploader {
         Sodium.bin2base64(encryptedMetadataData.header);
 
     final data = {
-      "collectionID": file.collectionID,
+      "collectionID": collectionID,
       "encryptedKey": encryptedKey,
       "keyDecryptionNonce": keyDecryptionNonce,
       "file": {
@@ -132,11 +191,12 @@ class FileUploader {
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
       data: data,
     )
-        .then((response) {
+        .then((response) async {
       encryptedFile.deleteSync();
       encryptedThumbnail.deleteSync();
       final data = response.data;
       file.uploadedFileID = data["id"];
+      file.collectionID = collectionID;
       file.updationTime = data["updationTime"];
       file.ownerID = data["ownerID"];
       file.encryptedKey = encryptedKey;
@@ -150,6 +210,7 @@ class FileUploader {
         _queue.remove(file.generatedID);
         _pollQueue();
       }
+      await FilesDB.instance.update(file);
       return file;
     });
   }
@@ -190,11 +251,13 @@ class FileUploader {
 
 class FileUploadItem {
   final File file;
+  final int collectionID;
   final Completer<File> completer;
   UploadStatus status;
 
   FileUploadItem(
     this.file,
+    this.collectionID,
     this.completer, {
     this.status = UploadStatus.not_started,
   });

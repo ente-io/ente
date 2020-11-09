@@ -183,38 +183,16 @@ class SyncService {
         }
       }
       try {
-        file.collectionID = (await CollectionsService.instance
+        final collectionID = (await CollectionsService.instance
                 .getOrCreateForPath(file.deviceFolder))
             .id;
-        final currentFile = await _db.getFile(file.generatedID);
-        Future<void> future;
-        if (currentFile.uploadedFileID != null) {
-          // The file was uploaded outside this loop
-          // Eg: Addition to an album or favorites
-          future = CollectionsService.instance
-              .addToCollection(file.collectionID, [currentFile]);
-        } else {
-          if (_uploader.getCurrentUploadStatus(file) != null) {
-            // The file is currently being uploaded outside this loop
-            // Eg: Addition to an album or favorites
-            future = _uploader
-                .getCurrentUploadStatus(file)
-                .then((uploadedFile) async {
-              await CollectionsService.instance
-                  .addToCollection(file.collectionID, [uploadedFile]);
-            });
-          } else {
-            future = _uploader.addToQueue(file).then((uploadedFile) async {
-              await _db.update(uploadedFile);
-            });
-          }
-        }
-        futures.add(future.then((value) {
+        final future = _uploader.upload(file, collectionID).then((value) {
           Bus.instance
               .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
           Bus.instance.fire(PhotoUploadEvent(
               completed: i + 1, total: filesToBeUploaded.length));
-        }));
+        });
+        futures.add(future);
       } catch (e) {
         Bus.instance.fire(PhotoUploadEvent(hasError: true));
         throw e;

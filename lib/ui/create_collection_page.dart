@@ -222,10 +222,8 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     final files = List<File>();
     for (final file in widget.selectedFiles.files) {
       if (file.uploadedFileID == null) {
-        file.collectionID = collectionID;
         final uploadedFile =
-            (await FileUploader.instance.forceUpload(file));
-        await FilesDB.instance.update(uploadedFile);
+            (await FileUploader.instance.forceUpload(file, collectionID));
         files.add(uploadedFile);
       } else {
         files.add(file);
