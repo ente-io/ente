@@ -208,7 +208,10 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
                     alignment: Alignment.bottomRight,
                     child: Container(
                       child: Text(
-                        c.collection.owner.name.substring(0, 1),
+                        c.collection.owner.name == null ||
+                                c.collection.owner.name.isEmpty
+                            ? c.collection.owner.email.substring(0, 1)
+                            : c.collection.owner.name.substring(0, 1),
                         textAlign: TextAlign.center,
                       ),
                       padding: EdgeInsets.all(8),
