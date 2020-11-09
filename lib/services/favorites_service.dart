@@ -35,7 +35,7 @@ class FavoritesService {
     final collectionID = await _getOrCreateFavoriteCollectionID();
     if (file.uploadedFileID == null) {
       file.collectionID = collectionID;
-      final uploadedFile = (await _fileUploader.encryptAndUploadFile(file));
+      final uploadedFile = (await _fileUploader.forceUpload(file));
       await _filesDB.update(uploadedFile);
     } else {
       await _collectionsService.addToCollection(collectionID, [file]);

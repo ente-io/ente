@@ -131,8 +131,8 @@ class SyncService {
     for (final collection in collections) {
       await _fetchEncryptedFilesDiff(collection.id);
     }
-    await _uploadDiff();
     await deleteFilesOnServer();
+    await _uploadDiff();
   }
 
   Future<void> _fetchEncryptedFilesDiff(int collectionID) async {
@@ -169,6 +169,7 @@ class SyncService {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded =
         await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
+    final futures = List<Future>();
     for (int i = 0; i < filesToBeUploaded.length; i++) {
       if (_syncStopRequested) {
         _syncStopRequested = false;
@@ -185,36 +186,46 @@ class SyncService {
         file.collectionID = (await CollectionsService.instance
                 .getOrCreateForPath(file.deviceFolder))
             .id;
-        final existingFile = await _db.getFile(file.generatedID);
-        if (existingFile == null) {
+        final currentFile = await _db.getFile(file.generatedID);
+        if (currentFile == null) {
           // File was deleted locally while being uploaded
           await _deleteFileOnServer(file.uploadedFileID);
           continue;
         }
-        if (existingFile.uploadedFileID != null) {
+        Future<void> future;
+        if (currentFile.uploadedFileID != null) {
           // The file was uploaded outside this loop
           // Eg: Addition to an album or favorites
-          await CollectionsService.instance
-              .addToCollection(file.collectionID, [existingFile]);
-        } else if (_uploader.getCurrentUploadStatus(file.generatedID) != null) {
-          // The file is currently being uploaded outside this loop
-          // Eg: Addition to an album or favorites
-          await _uploader.getCurrentUploadStatus(file.generatedID);
-          await CollectionsService.instance
-              .addToCollection(file.collectionID, [existingFile]);
+          future = CollectionsService.instance
+              .addToCollection(file.collectionID, [currentFile]);
         } else {
-          final uploadedFile = await _uploader.encryptAndUploadFile(file);
-          await _db.update(uploadedFile);
+          if (_uploader.getCurrentUploadStatus(file) != null) {
+            // The file is currently being uploaded outside this loop
+            // Eg: Addition to an album or favorites
+            future = _uploader
+                .getCurrentUploadStatus(file)
+                .then((uploadedFile) async {
+              await CollectionsService.instance
+                  .addToCollection(file.collectionID, [uploadedFile]);
+            });
+          } else {
+            future = _uploader.addToQueue(file).then((uploadedFile) async {
+              await _db.update(uploadedFile);
+            });
+          }
         }
-        Bus.instance
-            .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
-        Bus.instance.fire(PhotoUploadEvent(
-            completed: i + 1, total: filesToBeUploaded.length));
+        futures.add(future.then((value) {
+          Bus.instance
+              .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
+          Bus.instance.fire(PhotoUploadEvent(
+              completed: i + 1, total: filesToBeUploaded.length));
+        }));
       } catch (e) {
         Bus.instance.fire(PhotoUploadEvent(hasError: true));
         throw e;
       }
     }
+    await Future.wait(futures);
   }
 
   Future _storeDiff(List<File> diff, int collectionID) async {

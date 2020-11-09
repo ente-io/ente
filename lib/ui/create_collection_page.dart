@@ -224,7 +224,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       if (file.uploadedFileID == null) {
         file.collectionID = collectionID;
         final uploadedFile =
-            (await FileUploader.instance.encryptAndUploadFile(file));
+            (await FileUploader.instance.forceUpload(file));
         await FilesDB.instance.update(uploadedFile);
         files.add(uploadedFile);
       } else {

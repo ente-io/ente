@@ -147,7 +147,7 @@ class CollectionsService {
   Future<List<Collection>> _fetchCollections(int sinceTime) {
     return Dio()
         .get(
-      Configuration.instance.getHttpEndpoint() + "/collections/",
+      Configuration.instance.getHttpEndpoint() + "/collections",
       queryParameters: {
         "sinceTime": sinceTime,
       },
@@ -265,7 +265,7 @@ class CollectionsService {
   Future<Collection> createAndCacheCollection(Collection collection) async {
     return Dio()
         .post(
-      Configuration.instance.getHttpEndpoint() + "/collections/",
+      Configuration.instance.getHttpEndpoint() + "/collections",
       data: collection.toMap(),
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
