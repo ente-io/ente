@@ -104,7 +104,7 @@ class Configuration {
 
   String getHttpEndpoint() {
     if (kDebugMode) {
-      return "http://192.168.0.100";
+      return "http://192.168.1.111";
     }
     return "https://api.ente.io";
   }
