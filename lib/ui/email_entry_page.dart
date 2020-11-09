@@ -21,6 +21,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   void initState() {
+    _email = _config.getEmail();
+    _name = _config.getName();
     super.initState();
   }
 
@@ -60,7 +62,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               autocorrect: false,
               keyboardType: TextInputType.text,
               textCapitalization: TextCapitalization.words,
-              initialValue: _config.getName(),
+              initialValue: _name,
             ),
             Padding(padding: EdgeInsets.all(8)),
             TextFormField(
@@ -75,7 +77,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               },
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
-              initialValue: _config.getEmail(),
+              initialValue: _email,
             ),
             Padding(padding: EdgeInsets.all(12)),
             Container(
