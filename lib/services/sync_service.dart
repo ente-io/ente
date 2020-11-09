@@ -193,12 +193,17 @@ class SyncService {
               completed: i + 1, total: filesToBeUploaded.length));
         });
         futures.add(future);
-      } catch (e) {
+      } catch (e, s) {
         Bus.instance.fire(PhotoUploadEvent(hasError: true));
-        throw e;
+        _logger.severe(e, s);
       }
     }
-    await Future.wait(futures);
+    try {
+      await Future.wait(futures);
+    } catch (e, s) {
+      Bus.instance.fire(PhotoUploadEvent(hasError: true));
+      _logger.severe("Error in syncing files", e, s);
+    }
   }
 
   Future _storeDiff(List<File> diff, int collectionID) async {

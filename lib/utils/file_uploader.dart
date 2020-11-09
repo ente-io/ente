@@ -111,6 +111,31 @@ class FileUploader {
     if (!forcedUpload) {
       _currentlyUploading++;
     }
+    try {
+      final uploadedFile = await _tryToUpload(file, collectionID, forcedUpload);
+      await FilesDB.instance.update(uploadedFile);
+      if (!forcedUpload) {
+        _queue.remove(file.generatedID).completer.complete(uploadedFile);
+      }
+    } catch (e, s) {
+      _logger.severe(
+          "File upload failed for file ID " + file.generatedID.toString(),
+          e,
+          s);
+      if (!forcedUpload) {
+        _queue.remove(file.generatedID).completer.completeError(e);
+      }
+    } finally {
+      if (!forcedUpload) {
+        _currentlyUploading--;
+        _pollQueue();
+      }
+    }
+    return null;
+  }
+
+  Future<File> _tryToUpload(
+      File file, int collectionID, bool forcedUpload) async {
     final encryptedFileName = file.generatedID.toString() + ".encrypted";
     final tempDirectory = Configuration.instance.getTempDirectory();
     final encryptedFilePath = tempDirectory + encryptedFileName;
@@ -164,7 +189,7 @@ class FileUploader {
     final metadataDecryptionHeader =
         Sodium.bin2base64(encryptedMetadataData.header);
 
-    final data = {
+    final request = {
       "collectionID": collectionID,
       "encryptedKey": encryptedKey,
       "keyDecryptionNonce": keyDecryptionNonce,
@@ -181,35 +206,25 @@ class FileUploader {
         "decryptionHeader": metadataDecryptionHeader,
       }
     };
-    return _dio
-        .post(
+    final response = await _dio.post(
       Configuration.instance.getHttpEndpoint() + "/files",
       options:
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      data: data,
-    )
-        .then((response) async {
-      encryptedFile.deleteSync();
-      encryptedThumbnail.deleteSync();
-      final data = response.data;
-      file.uploadedFileID = data["id"];
-      file.collectionID = collectionID;
-      file.updationTime = data["updationTime"];
-      file.ownerID = data["ownerID"];
-      file.encryptedKey = encryptedKey;
-      file.keyDecryptionNonce = keyDecryptionNonce;
-      file.fileDecryptionHeader = fileDecryptionHeader;
-      file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
-      file.metadataDecryptionHeader = metadataDecryptionHeader;
-      if (!forcedUpload) {
-        _currentlyUploading--;
-        _queue[file.generatedID].completer.complete(file);
-        _queue.remove(file.generatedID);
-        _pollQueue();
-      }
-      await FilesDB.instance.update(file);
-      return file;
-    });
+      data: request,
+    );
+    encryptedFile.deleteSync();
+    encryptedThumbnail.deleteSync();
+    final data = response.data;
+    file.uploadedFileID = data["id"];
+    file.collectionID = collectionID;
+    file.updationTime = data["updationTime"];
+    file.ownerID = data["ownerID"];
+    file.encryptedKey = encryptedKey;
+    file.keyDecryptionNonce = keyDecryptionNonce;
+    file.fileDecryptionHeader = fileDecryptionHeader;
+    file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
+    file.metadataDecryptionHeader = metadataDecryptionHeader;
+    return file;
   }
 
   Future<UploadURL> _getUploadURL() async {
