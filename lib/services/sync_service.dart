@@ -187,11 +187,6 @@ class SyncService {
                 .getOrCreateForPath(file.deviceFolder))
             .id;
         final currentFile = await _db.getFile(file.generatedID);
-        if (currentFile == null) {
-          // File was deleted locally while being uploaded
-          await _deleteFileOnServer(file.uploadedFileID);
-          continue;
-        }
         Future<void> future;
         if (currentFile.uploadedFileID != null) {
           // The file was uploaded outside this loop
