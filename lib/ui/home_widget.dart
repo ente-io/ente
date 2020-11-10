@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,7 +20,6 @@ import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
-import 'package:photos/ui/search_page.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:logging/logging.dart';
@@ -37,12 +37,13 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static final importantItemsFilter = ImportantItemsFilter();
   final _logger = Logger("HomeWidgetState");
-  final _sharedCollectionGallery = SharedCollectionGallery();
   final _deviceFolderGalleryWidget = CollectionsGalleryWidget();
+  final _sharedCollectionGallery = SharedCollectionGallery();
   final _selectedFiles = SelectedFiles();
   final _memoriesWidget = MemoriesWidget();
+  final PageController _pageController = PageController();
 
-  int _selectedNavBarItem = 0;
+  GlobalKey<ConvexAppBarState> _appBarKey = GlobalKey<ConvexAppBarState>();
   StreamSubscription<LocalPhotosUpdatedEvent> _photosUpdatedEvent;
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
 
@@ -53,9 +54,18 @@ class _HomeWidgetState extends State<HomeWidget> {
       setState(() {});
     });
     _tabChangedEventSubscription =
-        Bus.instance.on<TabChangedEvent>().listen((event) {
+        Bus.instance.on<TabChangedEvent>().listen((event) async {
       setState(() {
-        _selectedNavBarItem = event.selectedIndex;
+        if (event.source != TabChangedEventSource.tab_bar) {
+          _appBarKey.currentState.animateTo(event.selectedIndex);
+        }
+        if (event.source != TabChangedEventSource.page_view) {
+          _pageController.animateToPage(
+            event.selectedIndex,
+            duration: Duration(milliseconds: 150),
+            curve: Curves.easeIn,
+          );
+        }
       });
     });
     _initDeepLinks();
@@ -71,34 +81,22 @@ class _HomeWidgetState extends State<HomeWidget> {
         _selectedFiles,
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
-      body: IndexedStack(
-        children: <Widget>[
+      body: PageView(
+        children: [
           SyncService.instance.hasScannedDisk()
               ? _getMainGalleryWidget()
               : LoadingPhotosWidget(),
           _deviceFolderGalleryWidget,
           _sharedCollectionGallery,
         ],
-        index: _selectedNavBarItem,
+        onPageChanged: (page) {
+          Bus.instance.fire(TabChangedEvent(
+            page,
+            TabChangedEventSource.page_view,
+          ));
+        },
+        controller: _pageController,
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     Navigator.of(context).push(
-      //       MaterialPageRoute(
-      //         builder: (BuildContext context) {
-      //           return SearchPage();
-      //         },
-      //       ),
-      //     );
-      //   },
-      //   child: Icon(
-      //     Icons.search,
-      //     size: 28,
-      //   ),
-      //   elevation: 1,
-      //   backgroundColor: Colors.black38,
-      //   foregroundColor: Theme.of(context).accentColor,
-      // ),
     );
   }
 
@@ -136,7 +134,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       return;
     }
     final ott = Uri.parse(link).queryParameters["ott"];
-    _logger.info("Ott: " + ott);
     UserService.instance.getCredentials(context, ott);
   }
 
@@ -164,29 +161,36 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  BottomNavigationBar _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.photo_library),
-          label: "Photos",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.folder_special),
-          label: "Collections",
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.folder_shared),
-          label: "Shared",
-        ),
-      ],
-      currentIndex: _selectedNavBarItem,
-      selectedItemColor: Theme.of(context).accentColor,
-      onTap: (index) {
-        setState(() {
-          _selectedNavBarItem = index;
-        });
-      },
+  Widget _buildBottomNavigationBar() {
+    return StyleProvider(
+      style: BottomNavBarStyle(),
+      child: ConvexAppBar(
+        key: _appBarKey,
+        items: [
+          TabItem(
+            icon: Icons.photo_library,
+            title: "Photos",
+          ),
+          TabItem(
+            icon: Icons.folder_special,
+            title: "Collections",
+          ),
+          TabItem(
+            icon: Icons.folder_shared,
+            title: "Shared",
+          ),
+        ],
+        onTap: (index) {
+          Bus.instance.fire(TabChangedEvent(
+            index,
+            TabChangedEventSource.tab_bar,
+          ));
+        },
+        style: TabStyle.reactCircle,
+        height: 52,
+        backgroundColor: Colors.grey[900],
+        top: -24,
+      ),
     );
   }
 
@@ -207,5 +211,24 @@ class _HomeWidgetState extends State<HomeWidget> {
     _tabChangedEventSubscription.cancel();
     _photosUpdatedEvent.cancel();
     super.dispose();
+  }
+}
+
+class BottomNavBarStyle extends StyleHook {
+  @override
+  double get activeIconSize => 32;
+
+  @override
+  double get activeIconMargin => 6;
+
+  @override
+  double get iconSize => 20;
+
+  @override
+  TextStyle textStyle(Color color) {
+    return TextStyle(
+      color: color,
+      fontSize: 12,
+    );
   }
 }

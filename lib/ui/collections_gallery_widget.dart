@@ -31,7 +31,8 @@ class CollectionsGalleryWidget extends StatefulWidget {
       _CollectionsGalleryWidgetState();
 }
 
-class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
+class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
+    with AutomaticKeepAliveClientMixin {
   final _logger = Logger("CollectionsGallery");
   StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
@@ -210,7 +211,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
             await showToast(
                 "Long press to select photos and click + to create an album.",
                 toastLength: Toast.LENGTH_LONG);
-            Bus.instance.fire(TabChangedEvent(0));
+            Bus.instance.fire(
+                TabChangedEvent(0, TabChangedEventSource.collections_page));
           },
         ),
       );
@@ -259,6 +261,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget> {
     _collectionUpdatesSubscription.cancel();
     super.dispose();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class SectionTitle extends StatelessWidget {

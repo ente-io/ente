@@ -25,7 +25,8 @@ class SharedCollectionGallery extends StatefulWidget {
       _SharedCollectionGalleryState();
 }
 
-class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
+class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
+    with AutomaticKeepAliveClientMixin {
   Logger _logger = Logger("SharedCollectionGallery");
   StreamSubscription<CollectionUpdatedEvent> _subscription;
 
@@ -270,4 +271,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery> {
     _subscription.cancel();
     super.dispose();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
