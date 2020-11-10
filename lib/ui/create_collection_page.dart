@@ -173,7 +173,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       title: Text("Album title"),
       content: TextFormField(
         decoration: InputDecoration(
-          hintText: "Christmas 21 / Dinner at Bob's",
+          hintText: "Christmas 2020 / Dinner at Alice's",
           contentPadding: EdgeInsets.all(8),
         ),
         onChanged: (value) {
@@ -183,6 +183,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         },
         autofocus: true,
         keyboardType: TextInputType.text,
+        textCapitalization: TextCapitalization.words,
       ),
       actions: [
         FlatButton(
