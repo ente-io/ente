@@ -23,6 +23,7 @@ import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/ui/sign_in_header_widget.dart';
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
@@ -41,6 +42,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _sharedCollectionGallery = SharedCollectionGallery();
   final _selectedFiles = SelectedFiles();
   final _memoriesWidget = MemoriesWidget();
+  final _signInHeader = SignInHeader();
   final PageController _pageController = PageController();
 
   GlobalKey<ConvexAppBarState> _appBarKey = GlobalKey<ConvexAppBarState>();
@@ -150,7 +152,12 @@ class _HomeWidgetState extends State<HomeWidget> {
             onRefresh: SyncService.instance.sync,
             tagPrefix: "home_gallery",
             selectedFiles: _selectedFiles,
-            headerWidget: _memoriesWidget,
+            headerWidget: Column(
+              children: [
+                _signInHeader,
+                _memoriesWidget,
+              ],
+            ),
           );
         } else if (snapshot.hasError) {
           return Center(child: Text(snapshot.error.toString()));

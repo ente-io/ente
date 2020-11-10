@@ -4,15 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
-import 'package:photos/ui/email_entry_page.dart';
-import 'package:photos/ui/passphrase_entry_page.dart';
-import 'package:photos/ui/passphrase_reentry_page.dart';
 import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -53,24 +48,12 @@ class GalleryAppBarWidget extends StatefulWidget
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   final _logger = Logger("GalleryAppBar");
 
-  StreamSubscription _userAuthEventSubscription;
-
   @override
   void initState() {
     widget.selectedFiles.addListener(() {
       setState(() {});
     });
-    _userAuthEventSubscription =
-        Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
-      setState(() {});
-    });
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _userAuthEventSubscription.cancel();
-    super.dispose();
   }
 
   @override
@@ -119,32 +102,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           },
         ));
       }
-    } else {
-      actions.add(IconButton(
-        icon: Icon(Icons.sync_disabled),
-        onPressed: () {
-          var page;
-          if (Configuration.instance.getToken() == null) {
-            page = EmailEntryPage();
-          } else {
-            // No key
-            if (Configuration.instance.getKeyAttributes() != null) {
-              // Yet to set or decrypt the key
-              page = PassphraseReentryPage();
-            } else {
-              // Never had a key
-              page = PassphraseEntryPage();
-            }
-          }
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return page;
-              },
-            ),
-          );
-        },
-      ));
     }
     return actions;
   }
