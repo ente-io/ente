@@ -231,10 +231,14 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           ),
           Padding(padding: EdgeInsets.all(2)),
           Expanded(
-            child: Text(
-              c.collection.name,
-              style: TextStyle(
-                fontSize: 16,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+              child: Text(
+                c.collection.name,
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
