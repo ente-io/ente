@@ -1,10 +1,12 @@
-class PhotoUploadEvent {
+import 'package:photos/events/event.dart';
+
+class SyncStatusUpdate extends Event {
   final int completed;
   final int total;
   final bool hasError;
   final bool wasStopped;
 
-  PhotoUploadEvent({
+  SyncStatusUpdate({
     this.completed,
     this.total,
     this.hasError = false,

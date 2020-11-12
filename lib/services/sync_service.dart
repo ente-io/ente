@@ -64,6 +64,7 @@ class SyncService {
         _logger.severe(e, s);
       } finally {
         _isSyncInProgress = false;
+        Bus.instance.fire(SyncStatusUpdate(hasError: true));
       }
     });
     return _existingSync;
@@ -80,6 +81,10 @@ class SyncService {
 
   bool hasScannedDisk() {
     return _prefs.containsKey(_dbUpdationTimeKey);
+  }
+
+  bool isSyncInProgress() {
+    return _isSyncInProgress;
   }
 
   Future<void> _doSync() async {
@@ -169,19 +174,19 @@ class SyncService {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded =
         await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
+    if (kDebugMode) {
+      filesToBeUploaded = filesToBeUploaded
+          .where((element) => element.fileType != FileType.video)
+          .toList();
+    }
     final futures = List<Future>();
     for (int i = 0; i < filesToBeUploaded.length; i++) {
       if (_syncStopRequested) {
         _syncStopRequested = false;
-        Bus.instance.fire(PhotoUploadEvent(wasStopped: true));
+        Bus.instance.fire(SyncStatusUpdate(wasStopped: true));
         return;
       }
       File file = filesToBeUploaded[i];
-      if (kDebugMode) {
-        if (file.fileType == FileType.video) {
-          continue;
-        }
-      }
       try {
         final collectionID = (await CollectionsService.instance
                 .getOrCreateForPath(file.deviceFolder))
@@ -189,19 +194,20 @@ class SyncService {
         final future = _uploader.upload(file, collectionID).then((value) {
           Bus.instance
               .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
-          Bus.instance.fire(PhotoUploadEvent(
+          Bus.instance.fire(SyncStatusUpdate(
               completed: i + 1, total: filesToBeUploaded.length));
         });
         futures.add(future);
       } catch (e, s) {
-        Bus.instance.fire(PhotoUploadEvent(hasError: true));
+        Bus.instance.fire(SyncStatusUpdate(hasError: true));
         _logger.severe(e, s);
       }
     }
     try {
       await Future.wait(futures);
     } catch (e, s) {
-      Bus.instance.fire(PhotoUploadEvent(hasError: true));
+      _isSyncInProgress = false;
+      Bus.instance.fire(SyncStatusUpdate(hasError: true));
       _logger.severe("Error in syncing files", e, s);
     }
   }

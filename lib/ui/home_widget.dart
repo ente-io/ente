@@ -24,6 +24,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ui/sign_in_header_widget.dart';
+import 'package:photos/ui/sync_indicator.dart';
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
@@ -43,6 +44,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _selectedFiles = SelectedFiles();
   final _memoriesWidget = MemoriesWidget();
   final _signInHeader = SignInHeader();
+  final _syncIndicator = SyncIndicator();
   final PageController _pageController = PageController();
 
   GlobalKey<ConvexAppBarState> _appBarKey = GlobalKey<ConvexAppBarState>();
@@ -153,6 +155,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             selectedFiles: _selectedFiles,
             headerWidget: Column(
               children: [
+                _syncIndicator,
                 _signInHeader,
                 _memoriesWidget,
               ],
