@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,11 +10,11 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/detail_page.dart';
+import 'package:photos/ui/draggable_scrollbar.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/sync_indicator.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class Gallery extends StatefulWidget {
   final List<File> Function() syncLoader;
@@ -48,14 +49,15 @@ class _GalleryState extends State<Gallery> {
 
   final Logger _logger = Logger("Gallery");
   final List<List<File>> _collatedFiles = List<List<File>>();
+  final _scrollController = ItemScrollController();
+  final _itemPositionsListener = ItemPositionsListener.create();
+  final _scrollKey = GlobalKey<DraggableScrollbarState>();
 
-  ScrollController _scrollController = ScrollController();
   bool _requiresLoad = false;
   bool _hasLoadedAll = false;
   bool _isLoadingNext = false;
-  double _scrollOffset = 0;
   List<File> _files;
-  RefreshController _refreshController = RefreshController();
+  int _lastIndex = 0;
 
   @override
   void initState() {
@@ -70,14 +72,19 @@ class _GalleryState extends State<Gallery> {
       });
     }
     widget.selectedFiles.addListener(() {
-      setState(() {
-        _saveScrollPosition();
-      });
+      setState(() {});
     });
     if (widget.asyncLoader == null) {
       _hasLoadedAll = true;
     }
+    _itemPositionsListener.itemPositions.addListener(_moveScrollbar);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _itemPositionsListener.itemPositions.removeListener(_moveScrollbar);
+    super.dispose();
   }
 
   @override
@@ -112,37 +119,44 @@ class _GalleryState extends State<Gallery> {
       return nothingToSeeHere;
     }
     _collateFiles();
-    _scrollController = ScrollController(
-      initialScrollOffset: _scrollOffset,
+    final itemCount =
+        _collatedFiles.length + (widget.headerWidget == null ? 1 : 2);
+    return DraggableScrollbar.semicircle(
+      key: _scrollKey,
+      labelTextBuilder: (position) {
+        final index =
+            min((position * itemCount).floor(), _collatedFiles.length - 1);
+        return Text(
+          getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
+              _collatedFiles[index][0].creationTime)),
+          style: TextStyle(
+            color: Colors.black,
+            backgroundColor: Colors.white,
+            fontSize: 14,
+          ),
+        );
+      },
+      labelConstraints: BoxConstraints.tightFor(width: 100.0, height: 36.0),
+      onChange: (position) {
+        final index =
+            min((position * itemCount).floor(), _collatedFiles.length - 1);
+        if (index == _lastIndex) {
+          return;
+        }
+        _lastIndex = index;
+        _scrollController.jumpTo(index: index);
+      },
+      child: ScrollablePositionedList.builder(
+        itemCount: itemCount,
+        itemBuilder: _buildListItem,
+        itemScrollController: _scrollController,
+        minCacheExtent: 1500,
+        addAutomaticKeepAlives: true,
+        physics: _MaxVelocityPhysics(velocityThreshold: 128),
+        itemPositionsListener: _itemPositionsListener,
+      ),
+      itemCount: itemCount,
     );
-    final list = ListView.builder(
-      itemCount:
-          _collatedFiles.length + (widget.headerWidget == null ? 1 : 2), // h4ck
-      itemBuilder: _buildListItem,
-      controller: _scrollController,
-      cacheExtent: 1500,
-      addAutomaticKeepAlives: true,
-    );
-    if (widget.onRefresh != null) {
-      return SmartRefresher(
-        controller: _refreshController,
-        child: list,
-        header: SyncIndicator(_refreshController),
-        onRefresh: () {
-          widget.onRefresh().then((_) {
-            _refreshController.refreshCompleted();
-            setState(() {
-              _requiresLoad = true;
-            });
-          }).catchError((e) {
-            _refreshController.refreshFailed();
-            setState(() {});
-          });
-        },
-      );
-    } else {
-      return list;
-    }
   }
 
   Widget _buildListItem(BuildContext context, int index) {
@@ -188,7 +202,6 @@ class _GalleryState extends State<Gallery> {
     widget.asyncLoader(_files[_files.length - 1], kLoadLimit).then((files) {
       setState(() {
         _isLoadingNext = false;
-        _saveScrollPosition();
         if (files.length < kLoadLimit) {
           _hasLoadedAll = true;
         } else {
@@ -196,10 +209,6 @@ class _GalleryState extends State<Gallery> {
         }
       });
     });
-  }
-
-  void _saveScrollPosition() {
-    _scrollOffset = _scrollController.offset;
   }
 
   Widget _getDay(int timestamp) {
@@ -302,5 +311,29 @@ class _GalleryState extends State<Gallery> {
     return firstDate.year == secondDate.year &&
         firstDate.month == secondDate.month &&
         firstDate.day == secondDate.day;
+  }
+
+  void _moveScrollbar() {
+    final index = _itemPositionsListener.itemPositions.value.first.index;
+    _scrollKey.currentState?.setPosition(index / _collatedFiles.length);
+  }
+}
+
+class _MaxVelocityPhysics extends AlwaysScrollableScrollPhysics {
+  final double velocityThreshold;
+
+  _MaxVelocityPhysics({@required this.velocityThreshold, ScrollPhysics parent})
+      : super(parent: parent);
+
+  @override
+  bool recommendDeferredLoading(
+      double velocity, ScrollMetrics metrics, BuildContext context) {
+    return velocity.abs() > velocityThreshold;
+  }
+
+  @override
+  _MaxVelocityPhysics applyTo(ScrollPhysics ancestor) {
+    return _MaxVelocityPhysics(
+        velocityThreshold: velocityThreshold, parent: buildParent(ancestor));
   }
 }
