@@ -44,7 +44,6 @@ dependencies:
   logging: ^0.11.4
   flutter_image_compress: ^0.6.5+1
   flutter_typeahead: ^1.8.1
-  pull_to_refresh: ^1.6.2
   fluttertoast: ^4.0.1
   video_player: ^0.10.11+1
   chewie: ^0.9.10
@@ -61,7 +60,6 @@ dependencies:
   page_transition: "^1.1.7+2"
   convex_bottom_bar: ^2.6.0
   scrollable_positioned_list: ^0.1.8
-  quiver: ^2.1.5
 
 dev_dependencies:
   flutter_test:
