@@ -19,10 +19,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 class Gallery extends StatefulWidget {
   final List<File> Function() syncLoader;
   final Future<List<File>> Function(File lastFile, int limit) asyncLoader;
-  // TODO: Verify why the event is necessary when calling loader post onRefresh
-  // should have done the job.
   final Stream<Event> reloadEvent;
-  final Future<void> Function() onRefresh;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
   final Widget headerWidget;
@@ -31,7 +28,6 @@ class Gallery extends StatefulWidget {
     this.syncLoader,
     this.asyncLoader,
     this.reloadEvent,
-    this.onRefresh,
     this.headerWidget,
     @required this.selectedFiles,
     @required this.tagPrefix,

@@ -149,7 +149,6 @@ class _HomeWidgetState extends State<HomeWidget> {
               return _getFilteredPhotos(FileRepository.instance.files);
             },
             reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-            onRefresh: SyncService.instance.sync,
             tagPrefix: "home_gallery",
             selectedFiles: _selectedFiles,
             headerWidget: Column(
