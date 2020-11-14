@@ -223,10 +223,10 @@ class SyncService {
         await _db.insert(file);
       } else {
         // File exists on device
-        bool wasUploadedOnAPreviousInstallation =
-            existingFiles.length == 1 && existingFiles[0].collectionID == null;
         file.localID = existingFiles[0]
             .localID; // File should ideally have the same localID
+        bool wasUploadedOnAPreviousInstallation =
+            existingFiles.length == 1 && existingFiles[0].collectionID == null;
         if (wasUploadedOnAPreviousInstallation) {
           file.generatedID = existingFiles[0].generatedID;
           await _db.update(file);
