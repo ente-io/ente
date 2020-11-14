@@ -31,6 +31,7 @@ class Configuration {
   SharedPreferences _preferences;
   FlutterSecureStorage _secureStorage;
   String _key;
+  String _cachedToken;
   String _secretKey;
   String _documentsDirectory;
   String _tempDirectory;
@@ -114,10 +115,14 @@ class Configuration {
   }
 
   String getToken() {
-    return _preferences.getString(tokenKey);
+    if (_cachedToken == null) {
+      _cachedToken = _preferences.getString(tokenKey);
+    }
+    return _cachedToken;
   }
 
   Future<void> setToken(String token) async {
+    _cachedToken = token;
     await _preferences.setString(tokenKey, token);
   }
 
