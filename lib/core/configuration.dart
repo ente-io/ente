@@ -231,6 +231,6 @@ class Configuration {
   }
 
   bool hasConfiguredAccount() {
-    return getToken() != null && getKey() != null;
+    return getToken() != null && _key != null;
   }
 }
