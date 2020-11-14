@@ -365,7 +365,6 @@ class FilesDB {
       _getRowForFile(file),
       where: '$columnGeneratedID = ?',
       whereArgs: [file.generatedID],
-      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
