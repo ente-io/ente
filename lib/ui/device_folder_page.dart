@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/selected_files.dart';
@@ -22,13 +21,7 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
   @override
   Widget build(Object context) {
     var gallery = Gallery(
-      asyncLoader: (lastFile, limit) => FilesDB.instance
-          .getAllInPathBeforeCreationTime(
-              widget.folder.path,
-              lastFile == null
-                  ? DateTime.now().microsecondsSinceEpoch
-                  : lastFile.creationTime,
-              limit),
+      syncLoader: () => widget.folder.files,
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       tagPrefix: "device_folder:" + widget.folder.path,
       selectedFiles: _selectedFiles,

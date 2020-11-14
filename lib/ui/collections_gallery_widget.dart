@@ -132,7 +132,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     }
     for (final path in thumbnailPathMap.keys) {
       final folderName = p.basename(path);
-      folders.add(DeviceFolder(folderName, path, thumbnailPathMap[path]));
+      folders.add(DeviceFolder(
+          folderName, path, thumbnailPathMap[path], filePathMap[path]));
     }
     final collectionsWithThumbnail = List<CollectionWithThumbnail>();
     final collections = collectionsService.getCollections();
