@@ -208,11 +208,17 @@ class _GalleryState extends State<Gallery> {
   }
 
   Widget _getDay(int timestamp) {
+    var date = DateTime.fromMicrosecondsSinceEpoch(timestamp);
+    var title = getDayAndMonth(date);
+    if (date.year != DateTime.now().year) {
+      title += " " + date.year.toString();
+    }
+
     return Container(
       padding: const EdgeInsets.all(8.0),
       alignment: Alignment.centerLeft,
       child: Text(
-        getDayAndMonth(DateTime.fromMicrosecondsSinceEpoch(timestamp)),
+        title,
         style: TextStyle(fontSize: 16),
       ),
     );

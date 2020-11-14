@@ -45,9 +45,9 @@ String getMonthAndYear(DateTime dateTime) {
 String getDayAndMonth(DateTime dateTime) {
   return _days[dateTime.weekday] +
       ", " +
-      _months[dateTime.month] +
+      dateTime.day.toString() +
       " " +
-      dateTime.day.toString();
+      _months[dateTime.month];
 }
 
 String getDay(DateTime dateTime) {
