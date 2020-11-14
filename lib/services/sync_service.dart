@@ -231,17 +231,17 @@ class SyncService {
           file.generatedID = existingFiles[0].generatedID;
           await _db.update(file);
         } else {
-          bool wasUpdatedInExistingCollection = false;
+          bool foundMatchingCollection = false;
           for (final existingFile in existingFiles) {
-            if (file.collectionID == existingFile.collectionID) {
+            if (file.collectionID == existingFile.collectionID &&
+                file.uploadedFileID == existingFile.uploadedFileID) {
+              foundMatchingCollection = true;
               file.generatedID = existingFile.generatedID;
-              wasUpdatedInExistingCollection = true;
+              await _db.update(file);
               break;
             }
           }
-          if (wasUpdatedInExistingCollection) {
-            await _db.update(file);
-          } else {
+          if (!foundMatchingCollection) {
             // Added to a new collection
             await _db.insert(file);
           }
