@@ -66,7 +66,7 @@ class Configuration {
 
     // Generate a public-private keypair and encrypt the latter
     final keyPair = await CryptoUtil.generateKeyPair();
-    final encryptedSecretKeyData = CryptoUtil.encryptSync(keyPair.sk, kek);
+    final encryptedSecretKeyData = CryptoUtil.encryptSync(keyPair.sk, key);
 
     final attributes = KeyAttributes(
       Sodium.bin2base64(kekSalt),
@@ -97,7 +97,7 @@ class Configuration {
         Sodium.base642bin(attributes.keyDecryptionNonce));
     final secretKey = CryptoUtil.decryptSync(
         Sodium.base642bin(attributes.encryptedSecretKey),
-        kek,
+        key,
         Sodium.base642bin(attributes.secretKeyDecryptionNonce));
     await setKey(Sodium.bin2base64(key));
     await setSecretKey(Sodium.bin2base64(secretKey));
