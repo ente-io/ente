@@ -179,8 +179,16 @@ class _BackedUpFoldersWidgetState extends State<BackedUpFoldersWidget> {
               Text(folder)
             ]));
           }
-          return SingleChildScrollView(
-            child: Column(children: foldersWidget),
+          final scrollController = ScrollController();
+          return Container(
+            child: Scrollbar(
+              isAlwaysShown: true,
+              controller: scrollController,
+              child: SingleChildScrollView(
+                child: Column(children: foldersWidget),
+                controller: scrollController,
+              ),
+            ),
           );
         }
         return loadWidget;
