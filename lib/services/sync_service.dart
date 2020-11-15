@@ -56,6 +56,7 @@ class SyncService {
       return _existingSync;
     }
     _isSyncInProgress = true;
+    Bus.instance.fire(SyncStatusUpdate(SyncStatus.not_started));
     _existingSync = Future<void>(() async {
       _logger.info("Syncing...");
       try {
@@ -64,7 +65,7 @@ class SyncService {
         _logger.severe(e, s);
       } finally {
         _isSyncInProgress = false;
-        Bus.instance.fire(SyncStatusUpdate(hasError: true));
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
       }
     });
     return _existingSync;
@@ -183,7 +184,8 @@ class SyncService {
     for (int i = 0; i < filesToBeUploaded.length; i++) {
       if (_syncStopRequested) {
         _syncStopRequested = false;
-        Bus.instance.fire(SyncStatusUpdate(wasStopped: true));
+        Bus.instance
+            .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
         return;
       }
       File file = filesToBeUploaded[i];
@@ -194,12 +196,12 @@ class SyncService {
         final future = _uploader.upload(file, collectionID).then((value) {
           Bus.instance
               .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
-          Bus.instance.fire(SyncStatusUpdate(
+          Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
               completed: i + 1, total: filesToBeUploaded.length));
         });
         futures.add(future);
       } catch (e, s) {
-        Bus.instance.fire(SyncStatusUpdate(hasError: true));
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
         _logger.severe(e, s);
       }
     }
@@ -207,7 +209,7 @@ class SyncService {
       await Future.wait(futures);
     } catch (e, s) {
       _isSyncInProgress = false;
-      Bus.instance.fire(SyncStatusUpdate(hasError: true));
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
       _logger.severe("Error in syncing files", e, s);
     }
   }

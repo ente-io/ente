@@ -23,7 +23,8 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
       setState(() {
         _event = event;
-        if (!_event.hasError && _event.completed > _latestCompletedCount) {
+        if (_event.status == SyncStatus.in_progress &&
+            _event.completed > _latestCompletedCount) {
           _latestCompletedCount = _event.completed;
         }
       });
@@ -76,14 +77,14 @@ class _SyncIndicatorState extends State<SyncIndicator> {
   }
 
   String _getRefreshingText() {
-    if (_event == null) {
+    if (_event == null || _event.status == SyncStatus.not_started) {
       return "Syncing...";
     } else {
       var s;
       // TODO: Display errors softly
-      if (_event.hasError) {
+      if (_event.status == SyncStatus.error) {
         s = "Upload failed.";
-      } else if (_event.wasStopped) {
+      } else if (_event.status == SyncStatus.completed && _event.wasStopped) {
         s = "Sync stopped.";
       } else {
         s = _latestCompletedCount.toString() +
