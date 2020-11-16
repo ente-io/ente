@@ -117,11 +117,7 @@ class FileUploader {
       if (!forcedUpload) {
         _queue.remove(file.generatedID).completer.complete(uploadedFile);
       }
-    } catch (e, s) {
-      _logger.severe(
-          "File upload failed for file ID " + file.generatedID.toString(),
-          e,
-          s);
+    } catch (e) {
       if (!forcedUpload) {
         _queue.remove(file.generatedID).completer.completeError(e);
       }
@@ -206,12 +202,21 @@ class FileUploader {
         "decryptionHeader": metadataDecryptionHeader,
       }
     };
-    final response = await _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/files",
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      data: request,
-    );
+    var response;
+    try {
+      response = await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/files",
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        data: request,
+      );
+    } catch (e, s) {
+      _logger.severe(
+          "File upload failed for " + file.generatedID.toString(), e, s);
+      encryptedFile.deleteSync();
+      encryptedThumbnail.deleteSync();
+      throw e;
+    }
     encryptedFile.deleteSync();
     encryptedThumbnail.deleteSync();
     final data = response.data;

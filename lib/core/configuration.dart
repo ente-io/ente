@@ -35,16 +35,15 @@ class Configuration {
   String _secretKey;
   String _documentsDirectory;
   String _tempDirectory;
-  String _thumbnailsDirectory;
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
     _secureStorage = FlutterSecureStorage();
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
     _tempDirectory = _documentsDirectory + "/temp/";
-    _thumbnailsDirectory = _documentsDirectory + "/thumbnails/";
-    new io.Directory(_tempDirectory).createSync(recursive: true);
-    new io.Directory(_thumbnailsDirectory).createSync(recursive: true);
+    final tempDirectory = new io.Directory(_tempDirectory);
+    tempDirectory.deleteSync(recursive: true);
+    tempDirectory.createSync(recursive: true);
     _key = await _secureStorage.read(key: keyKey);
     _secretKey = await _secureStorage.read(key: secretKeyKey);
   }
@@ -227,10 +226,7 @@ class Configuration {
     return _documentsDirectory;
   }
 
-  String getThumbnailsDirectory() {
-    return _thumbnailsDirectory;
-  }
-
+  // Caution: This directory is cleared on app start
   String getTempDirectory() {
     return _tempDirectory;
   }
