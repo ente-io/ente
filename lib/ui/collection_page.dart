@@ -35,28 +35,16 @@ class _CollectionPageState extends State<CollectionPage> {
         _selectedFiles,
         collection: widget.collection,
       ),
-      body: _getGallery(),
-    );
-  }
-
-  Widget _getGallery() {
-    return FutureBuilder<List<File>>(
-      future: FilesDB.instance.getAllInCollection(widget.collection.id),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Gallery(
-            syncLoader: () => snapshot.data,
-            reloadEvent: Bus.instance
-                .on<CollectionUpdatedEvent>()
-                .where((event) => event.collectionID == widget.collection.id),
-            tagPrefix: widget.tagPrefix,
-            selectedFiles: _selectedFiles,
-          );
-        } else if (snapshot.hasError) {
-          return Text(snapshot.error.toString());
-        }
-        return loadWidget;
-      },
+      body: Gallery(
+        asyncLoader: (_, __) =>
+            FilesDB.instance.getAllInCollection(widget.collection.id),
+        shouldLoadAll: true,
+        reloadEvent: Bus.instance
+            .on<CollectionUpdatedEvent>()
+            .where((event) => event.collectionID == widget.collection.id),
+        tagPrefix: widget.tagPrefix,
+        selectedFiles: _selectedFiles,
+      ),
     );
   }
 }

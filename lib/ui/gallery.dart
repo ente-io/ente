@@ -19,6 +19,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 class Gallery extends StatefulWidget {
   final List<File> Function() syncLoader;
   final Future<List<File>> Function(File lastFile, int limit) asyncLoader;
+  final bool shouldLoadAll;
   final Stream<Event> reloadEvent;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
@@ -27,6 +28,7 @@ class Gallery extends StatefulWidget {
   Gallery({
     this.syncLoader,
     this.asyncLoader,
+    this.shouldLoadAll = false,
     this.reloadEvent,
     this.headerWidget,
     @required this.selectedFiles,
@@ -70,7 +72,7 @@ class _GalleryState extends State<Gallery> {
     widget.selectedFiles.addListener(() {
       setState(() {});
     });
-    if (widget.asyncLoader == null) {
+    if (widget.asyncLoader == null || widget.shouldLoadAll) {
       _hasLoadedAll = true;
     }
     _itemPositionsListener.itemPositions.addListener(_updateScrollbar);
@@ -202,9 +204,8 @@ class _GalleryState extends State<Gallery> {
         _isLoadingNext = false;
         if (files.length < kLoadLimit) {
           _hasLoadedAll = true;
-        } else {
-          _files.addAll(files);
         }
+        _files.addAll(files);
       });
     });
   }
