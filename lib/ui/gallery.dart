@@ -73,13 +73,13 @@ class _GalleryState extends State<Gallery> {
     if (widget.asyncLoader == null) {
       _hasLoadedAll = true;
     }
-    _itemPositionsListener.itemPositions.addListener(_moveScrollbar);
+    _itemPositionsListener.itemPositions.addListener(_updateScrollbar);
     super.initState();
   }
 
   @override
   void dispose() {
-    _itemPositionsListener.itemPositions.removeListener(_moveScrollbar);
+    _itemPositionsListener.itemPositions.removeListener(_updateScrollbar);
     super.dispose();
   }
 
@@ -119,6 +119,7 @@ class _GalleryState extends State<Gallery> {
         _collatedFiles.length + (widget.headerWidget == null ? 1 : 2);
     return DraggableScrollbar.semicircle(
       key: _scrollKey,
+      initialScrollIndex: _lastIndex,
       labelTextBuilder: (position) {
         final index =
             min((position * itemCount).floor(), _collatedFiles.length - 1);
@@ -146,6 +147,7 @@ class _GalleryState extends State<Gallery> {
         itemCount: itemCount,
         itemBuilder: _buildListItem,
         itemScrollController: _scrollController,
+        initialScrollIndex: _lastIndex,
         minCacheExtent: 1500,
         addAutomaticKeepAlives: true,
         physics: _MaxVelocityPhysics(velocityThreshold: 128),
@@ -315,8 +317,9 @@ class _GalleryState extends State<Gallery> {
         firstDate.day == secondDate.day;
   }
 
-  void _moveScrollbar() {
+  void _updateScrollbar() {
     final index = _itemPositionsListener.itemPositions.value.first.index;
+    _lastIndex = index;
     _scrollKey.currentState?.setPosition(index / _collatedFiles.length);
   }
 }
