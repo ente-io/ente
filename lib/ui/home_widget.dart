@@ -15,6 +15,7 @@ import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
+import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
@@ -58,19 +59,17 @@ class _HomeWidgetState extends State<HomeWidget> {
       setState(() {});
     });
     _tabChangedEventSubscription =
-        Bus.instance.on<TabChangedEvent>().listen((event) async {
-      setState(() {
-        if (event.source != TabChangedEventSource.tab_bar) {
-          _appBarKey.currentState.animateTo(event.selectedIndex);
-        }
-        if (event.source != TabChangedEventSource.page_view) {
-          _pageController.animateToPage(
-            event.selectedIndex,
-            duration: Duration(milliseconds: 150),
-            curve: Curves.easeIn,
-          );
-        }
-      });
+        Bus.instance.on<TabChangedEvent>().listen((event) {
+      if (event.source != TabChangedEventSource.tab_bar) {
+        _appBarKey.currentState.animateTo(event.selectedIndex);
+      }
+      if (event.source != TabChangedEventSource.page_view) {
+        _pageController.animateToPage(
+          event.selectedIndex,
+          duration: Duration(milliseconds: 150),
+          curve: Curves.easeIn,
+        );
+      }
     });
     _initDeepLinks();
     super.initState();
@@ -85,7 +84,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         _selectedFiles,
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
-      body: PageView(
+      body: ExtentsPageView(
         children: [
           SyncService.instance.hasScannedDisk()
               ? _getMainGalleryWidget()

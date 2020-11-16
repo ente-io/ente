@@ -58,7 +58,7 @@ class ExtentsPageView extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
   })  : controller = controller ?? _defaultPageController,
         childrenDelegate = SliverChildListDelegate(children),
-        extents = 0,
+        extents = children.length,
         super(key: key);
 
   /// Creates a scrollable list that works page by page using widgets that are

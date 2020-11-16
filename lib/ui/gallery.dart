@@ -87,7 +87,7 @@ class _GalleryState extends State<Gallery> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building");
+    _logger.info("Building " + widget.tagPrefix);
     if (!_requiresLoad) {
       return _onDataLoaded();
     }
