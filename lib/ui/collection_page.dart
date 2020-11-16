@@ -4,9 +4,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/ui/loading_widget.dart';
 
 import 'gallery.dart';
 import 'gallery_app_bar_widget.dart';
