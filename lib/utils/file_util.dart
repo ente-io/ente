@@ -74,7 +74,11 @@ void preloadLocalFileThumbnail(File file) {
   }
   file.getAsset().then((asset) {
     asset
-        .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
+        .thumbDataWithSize(
+      THUMBNAIL_SMALL_SIZE,
+      THUMBNAIL_SMALL_SIZE,
+      quality: THUMBNAIL_SMALL_SIZE_QUALITY,
+    )
         .then((data) {
       ThumbnailLruCache.put(file, THUMBNAIL_SMALL_SIZE, data);
     });

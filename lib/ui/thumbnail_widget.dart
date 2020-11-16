@@ -90,7 +90,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
             return;
           }
           asset
-              .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE)
+              .thumbDataWithSize(
+            THUMBNAIL_SMALL_SIZE,
+            THUMBNAIL_SMALL_SIZE,
+            quality: THUMBNAIL_SMALL_SIZE_QUALITY,
+          )
               .then((data) {
             if (data != null && mounted) {
               final imageProvider = Image.memory(data).image;
