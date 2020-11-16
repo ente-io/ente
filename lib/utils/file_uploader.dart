@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io' as io;
+import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
@@ -97,11 +98,14 @@ class FileUploader {
   void _pollQueue() {
     if (_queue.length > 0 && _currentlyUploading < _maximumConcurrentUploads) {
       final firstPendingEntry = _queue.entries
-          .firstWhere((entry) => entry.value.status == UploadStatus.not_started)
-          .value;
-      firstPendingEntry.status = UploadStatus.in_progress;
-      _encryptAndUploadFileToCollection(
-          firstPendingEntry.file, firstPendingEntry.collectionID);
+          .firstWhere((entry) => entry.value.status == UploadStatus.not_started,
+              orElse: () => null)
+          ?.value;
+      if (firstPendingEntry != null) {
+        firstPendingEntry.status = UploadStatus.in_progress;
+        _encryptAndUploadFileToCollection(
+            firstPendingEntry.file, firstPendingEntry.collectionID);
+      }
     }
   }
 
@@ -132,6 +136,12 @@ class FileUploader {
 
   Future<File> _tryToUpload(
       File file, int collectionID, bool forcedUpload) async {
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult != ConnectivityResult.wifi &&
+        !Configuration.instance.shouldBackupOverMobileData()) {
+      throw WiFiUnavailableError();
+    }
+
     final encryptedFileName = file.generatedID.toString() + ".encrypted";
     final tempDirectory = Configuration.instance.getTempDirectory();
     final encryptedFilePath = tempDirectory + encryptedFileName;
@@ -141,14 +151,15 @@ class FileUploader {
     final fileAttributes =
         await CryptoUtil.encryptFile(sourceFile.path, encryptedFilePath);
 
-    final fileUploadURL = await _getUploadURL();
-    String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
-
     final thumbnailData = (await (await file.getAsset()).thumbDataWithSize(
       THUMBNAIL_LARGE_SIZE,
       THUMBNAIL_LARGE_SIZE,
       quality: 50,
     ));
+    if (thumbnailData == null) {
+      _logger.severe("Could not generate thumbnail for " + file.toString());
+      throw InvalidFileError();
+    }
     final encryptedThumbnailName =
         file.generatedID.toString() + "_thumbnail.encrypted";
     final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
@@ -156,6 +167,9 @@ class FileUploader {
         CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key);
     final encryptedThumbnail = io.File(encryptedThumbnailPath);
     encryptedThumbnail.writeAsBytesSync(encryptedThumbnailData.encryptedData);
+
+    final fileUploadURL = await _getUploadURL();
+    String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
     final thumbnailUploadURL = await _getUploadURL();
     String thumbnailObjectKey =
@@ -306,3 +320,7 @@ enum UploadStatus {
   in_progress,
   completed,
 }
+
+class InvalidFileError extends Error {}
+
+class WiFiUnavailableError extends Error {}

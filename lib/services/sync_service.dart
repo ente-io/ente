@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
-import 'package:photos/events/photo_upload_event.dart';
+import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
@@ -32,6 +33,7 @@ class SyncService {
   bool _syncStopRequested = false;
   Future<void> _existingSync;
   SharedPreferences _prefs;
+  SyncStatusUpdate _lastSyncStatusEvent;
 
   static final _collectionSyncTimeKeyPrefix = "collection_sync_time_";
   static final _dbUpdationTimeKey = "db_updation_time";
@@ -40,6 +42,15 @@ class SyncService {
   SyncService._privateConstructor() {
     Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
       sync();
+    });
+
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      _logger.info("Connectivity change detected " + result.toString());
+      sync();
+    });
+
+    Bus.instance.on<SyncStatusUpdate>().listen((event) {
+      _lastSyncStatusEvent = event;
     });
   }
 
@@ -61,11 +72,16 @@ class SyncService {
       _logger.info("Syncing...");
       try {
         await _doSync();
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
+      } on WiFiUnavailableError {
+        _logger.warning("Not uploading over mobile data");
+        Bus.instance.fire(
+            SyncStatusUpdate(SyncStatus.paused, reason: "Waiting for WiFi..."));
       } catch (e, s) {
         _logger.severe(e, s);
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
       } finally {
         _isSyncInProgress = false;
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
       }
     });
     return _existingSync;
@@ -86,6 +102,10 @@ class SyncService {
 
   bool isSyncInProgress() {
     return _isSyncInProgress;
+  }
+
+  SyncStatusUpdate getLastSyncStatusEvent() {
+    return _lastSyncStatusEvent;
   }
 
   Future<void> _doSync() async {
@@ -189,24 +209,23 @@ class SyncService {
         return;
       }
       File file = filesToBeUploaded[i];
-      try {
-        final collectionID = (await CollectionsService.instance
-                .getOrCreateForPath(file.deviceFolder))
-            .id;
-        final future = _uploader.upload(file, collectionID).then((value) {
-          Bus.instance
-              .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
-          Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
-              completed: i + 1, total: filesToBeUploaded.length));
-        });
-        futures.add(future);
-      } catch (e, s) {
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
-        _logger.severe(e, s);
-      }
+      final collectionID = (await CollectionsService.instance
+              .getOrCreateForPath(file.deviceFolder))
+          .id;
+      final future = _uploader.upload(file, collectionID).then((value) {
+        Bus.instance
+            .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
+            completed: i + 1, total: filesToBeUploaded.length));
+      });
+      futures.add(future);
     }
     try {
       await Future.wait(futures);
+    } on InvalidFileError {
+      // Do nothing
+    } on WiFiUnavailableError {
+      throw WiFiUnavailableError();
     } catch (e, s) {
       _isSyncInProgress = false;
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));

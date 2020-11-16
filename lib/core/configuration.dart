@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/private_key_attributes.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:photos/utils/crypto_util.dart';
@@ -27,6 +28,7 @@ class Configuration {
   static const keyKey = "key";
   static const secretKeyKey = "secret_key";
   static const keyAttributesKey = "key_attributes";
+  static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
 
   SharedPreferences _preferences;
   FlutterSecureStorage _secureStorage;
@@ -42,7 +44,9 @@ class Configuration {
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
     _tempDirectory = _documentsDirectory + "/temp/";
     final tempDirectory = new io.Directory(_tempDirectory);
-    tempDirectory.deleteSync(recursive: true);
+    if (tempDirectory.existsSync()) {
+      tempDirectory.deleteSync(recursive: true);
+    }
     tempDirectory.createSync(recursive: true);
     _key = await _secureStorage.read(key: keyKey);
     _secretKey = await _secureStorage.read(key: secretKeyKey);
@@ -233,5 +237,20 @@ class Configuration {
 
   bool hasConfiguredAccount() {
     return getToken() != null && _key != null;
+  }
+
+  bool shouldBackupOverMobileData() {
+    if (_preferences.containsKey(keyShouldBackupOverMobileData)) {
+      return _preferences.getBool(keyShouldBackupOverMobileData);
+    } else {
+      return false;
+    }
+  }
+
+  Future<void> setBackupOverMobileData(bool value) async {
+    await _preferences.setBool(keyShouldBackupOverMobileData, value);
+    if (value) {
+      SyncService.instance.sync();
+    }
   }
 }

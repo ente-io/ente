@@ -60,6 +60,7 @@ dependencies:
   page_transition: "^1.1.7+2"
   convex_bottom_bar: ^2.6.0
   scrollable_positioned_list: ^0.1.8
+  connectivity: ^2.0.1
 
 dev_dependencies:
   flutter_test:
