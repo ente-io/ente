@@ -52,6 +52,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return FutureBuilder<CollectionItems>(
       future: _getCollections(),
       builder: (context, snapshot) {
