@@ -89,20 +89,23 @@ class UsageWidgetState extends State<UsageWidget> {
                     ),
             ],
           ),
-          Divider(height: 4),
           Padding(padding: EdgeInsets.all(4)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Backup over mobile data"),
-              Switch(
-                value: Configuration.instance.shouldBackupOverMobileData(),
-                onChanged: (value) async {
-                  Configuration.instance.setBackupOverMobileData(value);
-                  setState(() {});
-                },
-              ),
-            ],
+          Divider(height: 4),
+          Container(
+            height: 36,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Backup over mobile data"),
+                Switch(
+                  value: Configuration.instance.shouldBackupOverMobileData(),
+                  onChanged: (value) async {
+                    Configuration.instance.setBackupOverMobileData(value);
+                    setState(() {});
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),
