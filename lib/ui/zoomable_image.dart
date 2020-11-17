@@ -6,7 +6,9 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache_manager.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/constants.dart';
@@ -44,6 +46,7 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   @override
   void initState() {
+    _photo = widget.photo;
     _scaleStateChangedCallback = (value) {
       if (widget.shouldDisableScroll != null) {
         widget.shouldDisableScroll(value != PhotoViewScaleState.initial);
@@ -54,7 +57,6 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   @override
   Widget build(BuildContext context) {
-    _photo = widget.photo;
     if (_photo.localID == null) {
       _loadNetworkImage();
     } else {
@@ -136,9 +138,17 @@ class _ZoomableImageState extends State<ZoomableImage>
         _onLargeThumbnailLoaded(Image.memory(cachedThumbnail).image, context);
       } else {
         _photo.getAsset().then((asset) {
+          if (asset == null) {
+            // Deleted file
+            return;
+          }
           asset
               .thumbDataWithSize(THUMBNAIL_LARGE_SIZE, THUMBNAIL_LARGE_SIZE)
               .then((data) {
+            if (data == null) {
+              // Deleted file
+              return;
+            }
             _onLargeThumbnailLoaded(Image.memory(data).image, context);
             ThumbnailLruCache.put(_photo, THUMBNAIL_LARGE_SIZE, data);
           });
@@ -152,7 +162,19 @@ class _ZoomableImageState extends State<ZoomableImage>
       if (cachedFile != null) {
         _onFinalImageLoaded(Image.file(cachedFile).image, context);
       } else {
-        _photo.getAsset().then((asset) {
+        _photo.getAsset().then((asset) async {
+          if (asset == null || !(await asset.exists)) {
+            _logger.info("File was deleted " + _photo.toString());
+            if (_photo.uploadedFileID != null) {
+              _photo.localID = null;
+              FilesDB.instance.update(_photo);
+              _loadNetworkImage();
+            } else {
+              FilesDB.instance.deleteLocalFile(_photo.localID);
+              FileRepository.instance.reloadFiles();
+            }
+            return;
+          }
           asset.file.then((file) {
             if (mounted) {
               _onFinalImageLoaded(Image.file(file).image, context);

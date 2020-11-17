@@ -38,38 +38,47 @@ class _VideoWidgetState extends State<VideoWidget> {
   void initState() {
     super.initState();
     if (widget.file.localID == null) {
-      if (!widget.file.isEncrypted) {
-        _setVideoPlayerController(url: widget.file.getStreamUrl());
-        _videoPlayerController.addListener(() {
-          if (_videoPlayerController.value.hasError) {
-            _logger.warning(_videoPlayerController.value.errorDescription);
-            showToast(
-                "The video has not been processed yet. Downloading the original one...",
-                toastLength: Toast.LENGTH_SHORT);
-            _setVideoPlayerController(url: widget.file.getDownloadUrl());
-          }
-        });
-      } else {
-        getFileFromServer(
-          widget.file,
-          progressCallback: (count, total) {
-            setState(() {
-              _progress = count / total;
-              if (_progress == 1) {
-                showToast("Decrypting video...",
-                    toastLength: Toast.LENGTH_SHORT);
-              }
-            });
-          },
-        ).then((file) {
-          _setVideoPlayerController(file: file);
-        });
-      }
+      _loadNetworkVideo();
     } else {
-      widget.file.getAsset().then((asset) {
-        asset.getMediaUrl().then((url) {
-          _setVideoPlayerController(url: url);
-        });
+      widget.file.getAsset().then((asset) async {
+        if (asset == null || !(await asset.exists)) {
+          if (widget.file.uploadedFileID != null) {
+            _loadNetworkVideo();
+          }
+        } else {
+          asset.getMediaUrl().then((url) {
+            _setVideoPlayerController(url: url);
+          });
+        }
+      });
+    }
+  }
+
+  void _loadNetworkVideo() {
+    if (!widget.file.isEncrypted) {
+      _setVideoPlayerController(url: widget.file.getStreamUrl());
+      _videoPlayerController.addListener(() {
+        if (_videoPlayerController.value.hasError) {
+          _logger.warning(_videoPlayerController.value.errorDescription);
+          showToast(
+              "The video has not been processed yet. Downloading the original one...",
+              toastLength: Toast.LENGTH_SHORT);
+          _setVideoPlayerController(url: widget.file.getDownloadUrl());
+        }
+      });
+    } else {
+      getFileFromServer(
+        widget.file,
+        progressCallback: (count, total) {
+          setState(() {
+            _progress = count / total;
+            if (_progress == 1) {
+              showToast("Decrypting video...", toastLength: Toast.LENGTH_SHORT);
+            }
+          });
+        },
+      ).then((file) {
+        _setVideoPlayerController(file: file);
       });
     }
   }

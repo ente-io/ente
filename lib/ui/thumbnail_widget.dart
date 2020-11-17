@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/utils/file_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -26,14 +28,21 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     color: Colors.grey[800],
   );
 
+  File _file;
   bool _hasLoadedThumbnail = false;
   bool _isLoadingThumbnail = false;
   bool _encounteredErrorLoadingThumbnail = false;
   ImageProvider _imageProvider;
 
   @override
+  void initState() {
+    _file = widget.file;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (widget.file.localID == null) {
+    if (_file.localID == null) {
       _loadNetworkImage();
     } else {
       _loadLocalImage(context);
@@ -48,7 +57,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
     var content;
     if (image != null) {
-      if (widget.file.fileType == FileType.video) {
+      if (_file.fileType == FileType.video) {
         content = Stack(
           children: [
             image,
@@ -79,14 +88,21 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_isLoadingThumbnail) {
       _isLoadingThumbnail = true;
       final cachedSmallThumbnail =
-          ThumbnailLruCache.get(widget.file, THUMBNAIL_SMALL_SIZE);
+          ThumbnailLruCache.get(_file, THUMBNAIL_SMALL_SIZE);
       if (cachedSmallThumbnail != null) {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
       } else {
-        widget.file.getAsset().then((asset) async {
-          if (asset == null) {
-            await deleteFiles([widget.file]);
+        _file.getAsset().then((asset) async {
+          if (asset == null || !(await asset.exists)) {
+            if (_file.uploadedFileID != null) {
+              _file.localID = null;
+              FilesDB.instance.update(_file);
+              _loadNetworkImage();
+            } else {
+              FilesDB.instance.deleteLocalFile(_file.localID);
+              FileRepository.instance.reloadFiles();
+            }
             return;
           }
           asset
@@ -107,7 +123,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
                 }
               });
             }
-            ThumbnailLruCache.put(widget.file, THUMBNAIL_SMALL_SIZE, data);
+            ThumbnailLruCache.put(_file, THUMBNAIL_SMALL_SIZE, data);
           });
         }).catchError((e) {
           _logger.warning("Could not load image: ", e);
@@ -122,13 +138,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_encounteredErrorLoadingThumbnail &&
         !_isLoadingThumbnail) {
       _isLoadingThumbnail = true;
-      final cachedThumbnail = ThumbnailFileLruCache.get(widget.file);
+      final cachedThumbnail = ThumbnailFileLruCache.get(_file);
       if (cachedThumbnail != null) {
         _imageProvider = Image.file(cachedThumbnail).image;
         _hasLoadedThumbnail = true;
         return;
       }
-      getThumbnailFromServer(widget.file).then((file) {
+      getThumbnailFromServer(_file).then((file) {
         final imageProvider = Image.file(file).image;
         if (mounted) {
           precacheImage(imageProvider, context).then((value) {
@@ -139,7 +155,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
               });
             }
           }).catchError((e) {
-            _logger.severe("Could not load image " + widget.file.toString());
+            _logger.severe("Could not load image " + _file.toString());
             _encounteredErrorLoadingThumbnail = true;
           });
         }

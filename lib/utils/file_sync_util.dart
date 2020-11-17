@@ -4,6 +4,8 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/models/file.dart';
 
+final _logger = Logger("FileSyncUtil");
+
 Future<List<File>> getDeviceFiles(int fromTime, int toTime) async {
   final pathEntities = await _getGalleryList(fromTime, toTime);
   final files = List<File>();
@@ -58,7 +60,7 @@ Future _addToPhotos(
           files.add(file);
         }
       } catch (e) {
-        Logger("FileSyncUtil").severe(e);
+        _logger.severe(e);
       }
     }
   }
