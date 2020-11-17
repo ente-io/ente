@@ -159,7 +159,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     if (!_loadingFinalImage && !_loadedFinalImage) {
       _loadingFinalImage = true;
       final cachedFile = FileLruCache.get(_photo);
-      if (cachedFile != null) {
+      if (cachedFile != null && cachedFile.existsSync()) {
         _onFinalImageLoaded(Image.file(cachedFile).image, context);
       } else {
         _photo.getAsset().then((asset) async {
