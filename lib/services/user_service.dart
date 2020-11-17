@@ -36,14 +36,22 @@ class UserService {
       _logger.severe(e);
     }).then((response) async {
       await dialog.hide();
-      if (response != null && response.statusCode == 200) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return OTTVerificationPage();
-            },
-          ),
-        );
+      if (response != null) {
+        if (response.statusCode == 200) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return OTTVerificationPage();
+              },
+            ),
+          );
+        } else if (response.statusCode == 403) {
+          showErrorDialog(
+            context,
+            "Please wait...",
+            "We are currently not accepting new registrations. You have been added to the waitlist and we will let you know once we are ready for you.",
+          );
+        }
       } else {
         showGenericErrorDialog(context);
       }
