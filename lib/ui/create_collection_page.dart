@@ -222,12 +222,13 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     await dialog.show();
     final files = List<File>();
     for (final file in widget.selectedFiles.files) {
-      if (file.uploadedFileID == null) {
-        final uploadedFile =
-            (await FileUploader.instance.forceUpload(file, collectionID));
+      final currentFile = await FilesDB.instance.getFile(file.generatedID);
+      if (currentFile.uploadedFileID == null) {
+        final uploadedFile = (await FileUploader.instance
+            .forceUpload(currentFile, collectionID));
         files.add(uploadedFile);
       } else {
-        files.add(file);
+        files.add(currentFile);
       }
     }
     try {
