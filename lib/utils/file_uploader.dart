@@ -137,8 +137,10 @@ class FileUploader {
   Future<File> _tryToUpload(
       File file, int collectionID, bool forcedUpload) async {
     final connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult != ConnectivityResult.wifi &&
-        !Configuration.instance.shouldBackupOverMobileData()) {
+    var canUploadUnderCurrentNetworkConditions =
+        (connectivityResult == ConnectivityResult.wifi ||
+            Configuration.instance.shouldBackupOverMobileData());
+    if (!canUploadUnderCurrentNetworkConditions && !forcedUpload) {
       throw WiFiUnavailableError();
     }
 
