@@ -55,8 +55,15 @@ class FileUploader {
   Future<File> forceUpload(File file, int collectionID) async {
     // If the file hasn't been queued yet, ez.
     if (!_queue.containsKey(file.generatedID)) {
-      return _encryptAndUploadFileToCollection(file, collectionID,
-          forcedUpload: true);
+      final completer = Completer<File>();
+      _queue[file.generatedID] = FileUploadItem(
+        file,
+        collectionID,
+        completer,
+        status: UploadStatus.in_progress,
+      );
+      _encryptAndUploadFileToCollection(file, collectionID, forcedUpload: true);
+      return completer.future;
     }
     var item = _queue[file.generatedID];
     // If the file is being uploaded right now, wait and proceed
@@ -112,24 +119,16 @@ class FileUploader {
   Future<File> _encryptAndUploadFileToCollection(File file, int collectionID,
       {bool forcedUpload = false}) async {
     _logger.info("Uploading " + file.toString());
-    if (!forcedUpload) {
-      _currentlyUploading++;
-    }
+    _currentlyUploading++;
     try {
       final uploadedFile = await _tryToUpload(file, collectionID, forcedUpload);
       await FilesDB.instance.update(uploadedFile);
-      if (!forcedUpload) {
-        _queue.remove(file.generatedID).completer.complete(uploadedFile);
-      }
+      _queue.remove(file.generatedID).completer.complete(uploadedFile);
     } catch (e) {
-      if (!forcedUpload) {
-        _queue.remove(file.generatedID).completer.completeError(e);
-      }
+      _queue.remove(file.generatedID).completer.completeError(e);
     } finally {
-      if (!forcedUpload) {
-        _currentlyUploading--;
-        _pollQueue();
-      }
+      _currentlyUploading--;
+      _pollQueue();
     }
     return null;
   }
@@ -283,23 +282,17 @@ class FileUploader {
     final fileSize = file.lengthSync().toString();
     final startTime = DateTime.now().millisecondsSinceEpoch;
     _logger.info("Putting file of size " + fileSize + " to " + uploadURL.url);
-    return Dio()
-        .put(uploadURL.url,
-            data: file.openRead(),
-            options: Options(headers: {
-              Headers.contentLengthHeader: await file.length(),
-            }))
-        .catchError((e) {
-      _logger.severe(e);
-      throw e;
-    }).then((value) {
-      _logger.info("Upload speed : " +
-          (file.lengthSync() /
-                  (DateTime.now().millisecondsSinceEpoch - startTime))
-              .toString() +
-          " kilo bytes per second");
-      return uploadURL.objectKey;
-    });
+    await Dio().put(uploadURL.url,
+        data: file.openRead(),
+        options: Options(headers: {
+          Headers.contentLengthHeader: await file.length(),
+        }));
+    _logger.info("Upload speed : " +
+        (file.lengthSync() /
+                (DateTime.now().millisecondsSinceEpoch - startTime))
+            .toString() +
+        " kilo bytes per second");
+    return uploadURL.objectKey;
   }
 }
 
