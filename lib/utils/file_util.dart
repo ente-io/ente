@@ -15,6 +15,7 @@ import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/file.dart';
@@ -188,12 +189,13 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
   final encryptedFile = io.File(encryptedFilePath);
   final decryptedFile = io.File(decryptedFilePath);
   final startTime = DateTime.now().millisecondsSinceEpoch;
-  return Dio()
+  return Network.instance
+      .getDio()
       .download(
-    file.getDownloadUrl(),
-    encryptedFilePath,
-    onReceiveProgress: progressCallback,
-  )
+        file.getDownloadUrl(),
+        encryptedFilePath,
+        onReceiveProgress: progressCallback,
+      )
       .then((response) async {
     if (response.statusCode != 200) {
       logger.warning("Could not download file: ", response.toString());
@@ -232,7 +234,10 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
   final temporaryPath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       "_thumbnail.decrypted";
-  return Dio().download(file.getThumbnailUrl(), temporaryPath).then((_) async {
+  return Network.instance
+      .getDio()
+      .download(file.getThumbnailUrl(), temporaryPath)
+      .then((_) async {
     final encryptedFile = io.File(temporaryPath);
     final thumbnailDecryptionKey = decryptFileKey(file);
     final data = CryptoUtil.decryptChaCha(

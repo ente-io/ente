@@ -8,6 +8,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
@@ -17,7 +18,7 @@ import 'package:photos/utils/crypto_util.dart';
 
 class FileUploader {
   final _logger = Logger("FileUploader");
-  final _dio = Dio();
+  final _dio = Network.instance.getDio();
   final _queue = LinkedHashMap<int, FileUploadItem>();
   final _maximumConcurrentUploads = 4;
   int _currentlyUploading = 0;
@@ -258,7 +259,7 @@ class FileUploader {
 
   Future<void> _fetchUploadURLs() {
     if (_uploadURLFetchInProgress == null) {
-      _uploadURLFetchInProgress = Dio()
+      _uploadURLFetchInProgress = _dio
           .get(
         Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
         queryParameters: {
@@ -282,7 +283,7 @@ class FileUploader {
     final fileSize = file.lengthSync().toString();
     final startTime = DateTime.now().millisecondsSinceEpoch;
     _logger.info("Putting file of size " + fileSize + " to " + uploadURL.url);
-    await Dio().put(uploadURL.url,
+    await _dio.put(uploadURL.url,
         data: file.openRead(),
         options: Options(headers: {
           Headers.contentLengthHeader: await file.length(),

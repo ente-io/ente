@@ -3,6 +3,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
@@ -24,7 +25,7 @@ import 'package:photos/core/configuration.dart';
 
 class SyncService {
   final _logger = Logger("SyncService");
-  final _dio = Dio();
+  final _dio = Network.instance.getDio();
   final _db = FilesDB.instance;
   final _uploader = FileUploader.instance;
   final _collectionsService = CollectionsService.instance;

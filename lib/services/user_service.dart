@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/core/network.dart';
 import 'package:photos/db/public_keys_db.dart';
 
 import 'package:photos/events/user_authenticated_event.dart';
@@ -16,7 +17,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class UserService {
-  final _dio = Dio();
+  final _dio = Network.instance.getDio();
   final _logger = Logger("UserAuthenticator");
   final _config = Configuration.instance;
 

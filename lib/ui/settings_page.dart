@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:crisp/crisp.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -11,6 +10,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -56,6 +56,7 @@ class UsageWidget extends StatefulWidget {
 
 class UsageWidgetState extends State<UsageWidget> {
   double _usageInGBs;
+
   @override
   void initState() {
     _getUsage();
@@ -135,7 +136,7 @@ class UsageWidgetState extends State<UsageWidget> {
   }
 
   void _getUsage() {
-    Dio().get(
+    Network.instance.getDio().get(
       Configuration.instance.getHttpEndpoint() + "/billing/usage",
       queryParameters: {
         "startTime": 0,

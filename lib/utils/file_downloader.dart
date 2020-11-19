@@ -5,6 +5,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/remote_sync_event.dart';
@@ -14,7 +15,7 @@ import 'package:photos/utils/file_util.dart';
 
 class DiffFetcher {
   final _logger = Logger("FileDownloader");
-  final _dio = Dio();
+  final _dio = Network.instance.getDio();
 
   Future<List<File>> getEncryptedFilesDiff(
       int collectionID, int sinceTime, int limit) async {

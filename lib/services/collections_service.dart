@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/core/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -24,6 +25,7 @@ class CollectionsService {
   CollectionsDB _db;
   FilesDB _filesDB;
   Configuration _config;
+  final _dio = Network.instance.getDio();
   final _localCollections = Map<String, Collection>();
   final _collectionIDToCollections = Map<int, Collection>();
   final _cachedKeys = Map<int, Uint8List>();
@@ -79,7 +81,7 @@ class CollectionsService {
   }
 
   Future<List<User>> getSharees(int collectionID) {
-    return Dio()
+    return _dio
         .get(
       Configuration.instance.getHttpEndpoint() + "/collections/sharees",
       queryParameters: {
@@ -101,7 +103,7 @@ class CollectionsService {
   Future<void> share(int collectionID, String email, String publicKey) {
     final encryptedKey = CryptoUtil.sealSync(
         getCollectionKey(collectionID), Sodium.base642bin(publicKey));
-    return Dio()
+    return _dio
         .post(
           Configuration.instance.getHttpEndpoint() + "/collections/share",
           data: {
@@ -116,7 +118,7 @@ class CollectionsService {
   }
 
   Future<void> unshare(int collectionID, String email) {
-    return Dio().post(
+    return _dio.post(
       Configuration.instance.getHttpEndpoint() + "/collections/unshare",
       data: {
         "collectionID": collectionID,
@@ -145,7 +147,7 @@ class CollectionsService {
   }
 
   Future<List<Collection>> _fetchCollections(int sinceTime) {
-    return Dio()
+    return _dio
         .get(
       Configuration.instance.getHttpEndpoint() + "/collections",
       queryParameters: {
@@ -228,7 +230,7 @@ class CollectionsService {
               file.uploadedFileID, file.encryptedKey, file.keyDecryptionNonce)
           .toMap());
     }
-    return Dio()
+    return _dio
         .post(
       Configuration.instance.getHttpEndpoint() + "/collections/add-files",
       data: params,
@@ -251,7 +253,7 @@ class CollectionsService {
       }
       params["fileIDs"].add(file.uploadedFileID);
     }
-    await Dio().post(
+    await _dio.post(
       Configuration.instance.getHttpEndpoint() + "/collections/remove-files",
       data: params,
       options:
@@ -263,7 +265,7 @@ class CollectionsService {
   }
 
   Future<Collection> createAndCacheCollection(Collection collection) async {
-    return Dio()
+    return _dio
         .post(
       Configuration.instance.getHttpEndpoint() + "/collections",
       data: collection.toMap(),

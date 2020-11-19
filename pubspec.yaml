@@ -37,7 +37,7 @@ dependencies:
   visibility_detector: ^0.1.5
   event_bus: ^1.1.1
   sentry: ">=3.0.0 <4.0.0"
-  super_logging: ^1.0.0
+  super_logging: ^2.0.1
   archive: ^2.0.11
   flutter_email_sender: ^3.0.1
   like_button: ^0.2.0
@@ -61,6 +61,7 @@ dependencies:
   convex_bottom_bar: ^2.6.0
   scrollable_positioned_list: ^0.1.8
   connectivity: ^2.0.1
+  pretty_dio_logger: ^1.1.1
 
 dev_dependencies:
   flutter_test:

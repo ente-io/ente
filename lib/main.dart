@@ -17,11 +17,9 @@ final _logger = Logger("main");
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SuperLogging.main(LogConfig(
-    body: _main,
-    logDirPath: (await getTemporaryDirectory()).path + "/logs",
-    enableInDebugMode: true,
-  ));
+  SuperLogging.logDirPath = (await getTemporaryDirectory()).path + "/logs";
+  SuperLogging.enableInDebugMode = true;
+  await SuperLogging.main(_main);
 }
 
 void _main() async {
