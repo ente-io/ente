@@ -44,7 +44,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
   Widget build(BuildContext context) {
     if (Configuration.instance.hasConfiguredAccount() && _event != null) {
       if (_event.status == SyncStatus.completed) {
-        Future.delayed(Duration(milliseconds: 5000), () {
+        Future.delayed(Duration(milliseconds: 3000), () {
           setState(() {
             _containerHeight = 0;
           });
