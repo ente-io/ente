@@ -220,24 +220,24 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   Future<bool> _addToCollection(int collectionID) async {
     final dialog = createProgressDialog(context, "Uploading files to album...");
     await dialog.show();
-    final files = List<File>();
-    for (final file in widget.selectedFiles.files) {
-      final currentFile = await FilesDB.instance.getFile(file.generatedID);
-      if (currentFile.uploadedFileID == null) {
-        final uploadedFile = (await FileUploader.instance
-            .forceUpload(currentFile, collectionID));
-        files.add(uploadedFile);
-      } else {
-        files.add(currentFile);
-      }
-    }
     try {
+      final files = List<File>();
+      for (final file in widget.selectedFiles.files) {
+        final currentFile = await FilesDB.instance.getFile(file.generatedID);
+        if (currentFile.uploadedFileID == null) {
+          final uploadedFile = (await FileUploader.instance
+              .forceUpload(currentFile, collectionID));
+          files.add(uploadedFile);
+        } else {
+          files.add(currentFile);
+        }
+      }
       await CollectionsService.instance.addToCollection(collectionID, files);
       await dialog.hide();
       widget.selectedFiles.clearAll();
       return true;
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Could not add to album", e, s);
       await dialog.hide();
       showGenericErrorDialog(context);
     }
