@@ -13,6 +13,7 @@ class Network {
     _dio.interceptors.add(PrettyDioLogger(
         requestHeader: false,
         responseHeader: false,
+        requestBody: true,
         responseBody: true,
         logPrint: (object) {
           log(object);
