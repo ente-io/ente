@@ -12,8 +12,8 @@ const Cont = styled.div`
     background: #555 url(/image.svg) no-repeat center;
     margin: 0 4px;
     display: inline-block;
-    width: 200px;
-    height: 200px;
+    width: 192px;
+    height: 192px;
     overflow: hidden;
 
     & > img {

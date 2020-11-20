@@ -2,15 +2,23 @@ import { getEndpoint } from "utils/common/apiUtil";
 import HTTPService from "./HTTPService";
 import * as Comlink from "comlink";
 import { getData, LS_KEYS } from "utils/storage/localStorage";
-import { decrypt } from "utils/crypto/libsodium";
+import localForage from "localforage";
 
 const CryptoWorker: any = typeof window !== 'undefined'
     && Comlink.wrap(new Worker("worker/crypto.worker.js", { type: 'module' }));
 const ENDPOINT = getEndpoint();
 
+localForage.config({
+    driver: localForage.INDEXEDDB,
+    name: 'ente-files',
+    version: 1.0,
+    storeName: 'files',
+});
+
 export interface fileAttribute {
     encryptedData: string;
     decryptionHeader: string;
+    creationTime: number;
 };
 
 export interface user {
@@ -20,7 +28,7 @@ export interface user {
 }
 
 export interface collection {
-    id: number;
+    id: string;
     owner: user;
     key: string;
     name: string;
@@ -71,7 +79,7 @@ const getCollectionKey = async (collection: collection, key: Uint8Array) => {
 }
 
 const getCollections = async (token: string, sinceTime: string, key: Uint8Array): Promise<collection[]> => {
-    const resp = await HTTPService.get(`${ENDPOINT}/collections`, {
+    const resp = await HTTPService.get(`${ENDPOINT}/collections/`, {
         'token': token,
         'sinceTime': sinceTime,
     });
@@ -85,25 +93,33 @@ export const getFiles = async (sinceTime: string, token: string, limit: string, 
     const worker = await new CryptoWorker();
 
     const collections = await getCollections(token, "0", await worker.fromB64(key));
-    var files: Array<file> = [];
+    var files: Array<file> = await localForage.getItem<file[]>('files') || [];
     for (const index in collections) {
         const collection = collections[index];
-        const resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
-            'collectionID': collection.id.toString(), sinceTime, token, limit,
-        });
-
-        const promises: Promise<file>[] = resp.data.diff.map(
-            async (file: file) => {
-                file.key = await worker.decrypt(
-                    await worker.fromB64(file.encryptedKey),
-                    await worker.fromB64(file.keyDecryptionNonce),
-                    collection.key)
-                file.metadata = await worker.decryptMetadata(file);
-                return file;
+        let time = await localForage.getItem<string>(`${collection.id}-time`) || sinceTime;
+        let resp;
+        do {
+            resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
+                'collectionID': collection.id, sinceTime: time, token, limit,
             });
-        files.push(...await Promise.all(promises));
-        console.log(files);
+            const promises: Promise<file>[] = resp.data.diff.map(
+                async (file: file) => {
+                    file.key = await worker.decrypt(
+                        await worker.fromB64(file.encryptedKey),
+                        await worker.fromB64(file.keyDecryptionNonce),
+                        collection.key);
+                    file.metadata = await worker.decryptMetadata(file);
+                    return file;
+                });
+            files.push(...await Promise.all(promises));
+            files = files.sort((a, b) => b.metadata.creationTime - a.metadata.creationTime);
+            if (resp.data.diff.length) {
+                time = (resp.data.diff.slice(-1)[0].updationTime).toString();
+            }
+        } while (resp.data.diff.length);
+        await localForage.setItem(`${collection.id}-time`, time);
     }
+    await localForage.setItem('files', files);
     return files;
 }
 

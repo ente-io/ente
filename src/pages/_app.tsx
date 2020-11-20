@@ -12,6 +12,14 @@ import PowerSettings from 'components/power_settings';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-photoswipe/lib/photoswipe.css';
+import localForage from 'localforage';
+
+localForage.config({
+    driver: localForage.INDEXEDDB,
+    name: 'ente-files',
+    version: 1.0,
+    storeName: 'files',
+});
 
 const GlobalStyles = createGlobalStyle`
     html, body {
@@ -83,6 +91,7 @@ export default function App({ Component, pageProps }) {
     const logout = () => {
         clearKeys();
         clearData();
+        localForage.clear();
         router.push("/");
     }
 
