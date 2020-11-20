@@ -239,7 +239,11 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Future<void> _displayInfo(File file) async {
-    final asset = await file.getAsset();
+    var asset;
+    final isLocalFile = file.localID != null;
+    if (isLocalFile) {
+      asset = await file.getAsset();
+    }
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -262,7 +266,7 @@ class _DetailPageState extends State<DetailPage> {
           ),
           Padding(padding: EdgeInsets.all(4)),
         ];
-        if (asset != null) {
+        if (isLocalFile) {
           if (file.fileType == FileType.image) {
             items.add(Row(
               children: [
