@@ -54,8 +54,15 @@ const getCollectionKey = async (collection: collection, key: Uint8Array) => {
             await worker.fromB64(collection.keyDecryptionNonce),
             key);
     } else {
-        // TODO
-        decryptedKey = null;
+        const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const secretKey = await worker.decrypt(
+            await worker.fromB64(keyAttributes.encryptedSecretKey),
+            await worker.fromB64(keyAttributes.secretKeyDecryptionNonce),
+            key);
+        decryptedKey = await worker.boxSealOpen(
+            await worker.fromB64(collection.encryptedKey),
+            await worker.fromB64(keyAttributes.publicKey),
+            secretKey);
     }
     return {
         ...collection,
@@ -81,9 +88,6 @@ export const getFiles = async (sinceTime: string, token: string, limit: string, 
     var files: Array<file> = [];
     for (const index in collections) {
         const collection = collections[index];
-        if (collection.key == null) {
-            continue;
-        }
         const resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
             'collectionID': collection.id.toString(), sinceTime, token, limit,
         });

@@ -58,7 +58,7 @@ export default function Generate() {
                 const kekHash = await cryptoWorker.hash(kek);
                 const encryptedKeyAttributes = await cryptoWorker.encrypt(key, kek);
                 const keyPair = await cryptoWorker.generateKeyPair();
-                const encryptedKeyPairAttributes = await cryptoWorker.encrypt(keyPair.privateKey, kek);
+                const encryptedKeyPairAttributes = await cryptoWorker.encrypt(keyPair.privateKey, key);
                 const keyAttributes = {
                     kekSalt: await cryptoWorker.toB64(kekSalt),
                     kekHash: kekHash,
