@@ -8,12 +8,13 @@ import PreviewCard from './components/PreviewCard';
 import { getActualKey } from 'utils/common/key';
 import styled from 'styled-components';
 import { PhotoSwipeGallery } from 'react-photoswipe';
-import InfiniteLoader from 'react-window-infinite-loader';
-import { FixedSizeGrid as Grid } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { FixedSizeList as List } from 'react-window';
 
 const Container = styled.div`
-    max-width: 1000px;
-    display: flex;
+    display: block;
+    flex: 1;
+    width: 100%;
     flex-wrap: wrap;
     margin: 0 auto;
 
@@ -21,6 +22,11 @@ const Container = styled.div`
         display: inline-block;
         cursor: pointer;
     }
+`;
+
+const ListItem = styled.div`
+   display: flex;
+   justify-content: center;
 `;
 
 const PAGE_SIZE = 12;
@@ -59,14 +65,24 @@ export default function Gallery() {
     )
 
     return (<Container>
-        <PhotoSwipeGallery
-            items={data.map(item => ({
-                ...item,
-                src: '/image.svg',
-                w: window.innerWidth,
-                h: window.innerHeight,
-            }))}
-            thumbnailContent={getThumbnail}
-        />
+        <AutoSizer>
+            {({ height, width }) => (
+                <List
+                    itemSize={200}
+                    height={height}
+                    width={width}
+                    itemCount={data.length / 5}
+                    
+                >
+                    {({ index, style }) => <ListItem style={style}>
+                        {getThumbnail(data[index * 5])}
+                        {getThumbnail(data[index * 5 + 1])}
+                        {getThumbnail(data[index * 5 + 2])}
+                        {getThumbnail(data[index * 5 + 3])}
+                        {getThumbnail(data[index * 5 + 4])}
+                    </ListItem>}
+                </List>
+            )}
+        </AutoSizer>
     </Container>);
 }
