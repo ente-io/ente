@@ -92,6 +92,11 @@ export async function generateKeyPair() {
     return sodium.crypto_box_keypair();
 }
 
+export async function boxSealOpen(input: Uint8Array, publicKey: Uint8Array, secretKey: Uint8Array) {
+    await sodium.ready;
+    return sodium.crypto_box_seal_open(input, publicKey, secretKey);
+}
+
 export async function fromB64(input: string) {
     await sodium.ready;
     return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
