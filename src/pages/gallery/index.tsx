@@ -41,7 +41,7 @@ export default function Gallery() {
         const main = async () => {
             setLoading(true);
             const encryptionKey = await getActualKey();
-            const resp = await getFiles("0", token, "24", encryptionKey);
+            const resp = await getFiles("0", token, "100", encryptionKey);
             setLoading(false);
             setData(resp);
         };
