@@ -47,12 +47,9 @@ Future<void> _shareImage(ProgressDialog dialog, File file) async {
   await dialog.show();
   final bytes = await getBytes(file);
   final filename = _getFilename(file.title);
-  final ext = extension(file.title);
-  final shareExt = file.title.endsWith(".HEIC")
-      ? "jpg"
-      : ext.substring(1, ext.length).toLowerCase();
+  final ext = extension(filename);
   await dialog.hide();
-  return Share.file(filename, filename, bytes, "image/" + shareExt);
+  return Share.file(filename, filename, bytes, "image/" + ext);
 }
 
 String _getFilename(String name) {

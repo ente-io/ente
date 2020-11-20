@@ -1,4 +1,5 @@
 import 'dart:io' as io;
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -213,16 +214,25 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     await CryptoUtil.decryptFile(encryptedFilePath, decryptedFilePath,
         Sodium.base642bin(file.fileDecryptionHeader), decryptFileKey(file));
     logger.info("File decrypted: " + file.uploadedFileID.toString());
-    io.File(encryptedFilePath).deleteSync();
-    final fileExtension = extension(file.title).substring(1).toLowerCase();
+    encryptedFile.deleteSync();
+    var fileExtension = extension(file.title).substring(1).toLowerCase();
+    var outputFile = decryptedFile;
+    if (Platform.isAndroid && fileExtension == "heic") {
+      outputFile = await FlutterImageCompress.compressAndGetFile(
+        decryptedFilePath,
+        decryptedFilePath + ".jpg",
+        keepExif: true,
+      );
+      decryptedFile.deleteSync();
+    }
     final cachedFile = await cacheManager.putFile(
       file.getDownloadUrl(),
-      decryptedFile.readAsBytesSync(),
+      outputFile.readAsBytesSync(),
       eTag: file.getDownloadUrl(),
       maxAge: Duration(days: 365),
       fileExtension: fileExtension,
     );
-    decryptedFile.deleteSync();
+    outputFile.deleteSync();
     fileDownloadsInProgress.remove(file.uploadedFileID);
     return cachedFile;
   }).catchError((e) {

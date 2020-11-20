@@ -16,7 +16,6 @@ import 'package:photos/repositories/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/utils/file_sync_util.dart';
 import 'package:photos/utils/file_uploader.dart';
-import 'package:photos/utils/file_name_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:photos/models/file.dart';
@@ -237,8 +236,7 @@ class SyncService {
   Future _storeDiff(List<File> diff, int collectionID) async {
     for (File file in diff) {
       final existingFiles = await _db.getMatchingFiles(file.title,
-          file.deviceFolder, file.creationTime, file.modificationTime,
-          alternateTitle: getHEICFileNameForJPG(file));
+          file.deviceFolder, file.creationTime, file.modificationTime);
       if (existingFiles == null) {
         // File uploaded from a different device
         file.localID = null;

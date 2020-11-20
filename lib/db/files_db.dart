@@ -97,7 +97,7 @@ class FilesDB {
     return await db.insert(table, _getRowForFile(file));
   }
 
-  Future<List<dynamic>> insertMultiple(List<File> files) async {
+  Future<void> insertMultiple(List<File> files) async {
     final db = await instance.database;
     var batch = db.batch();
     int batchCounter = 0;
@@ -113,7 +113,7 @@ class FilesDB {
       );
       batchCounter++;
     }
-    return await batch.commit();
+    await batch.commit(noResult: true);
   }
 
   Future<File> getFile(int generatedID) async {
@@ -333,17 +333,18 @@ class FilesDB {
   }
 
   Future<List<File>> getMatchingFiles(
-      String title, String deviceFolder, int creationTime, int modificationTime,
-      {String alternateTitle}) async {
+    String title,
+    String deviceFolder,
+    int creationTime,
+    int modificationTime,
+  ) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '''($columnTitle=? OR $columnTitle=?) AND 
-          $columnDeviceFolder=? AND $columnCreationTime=? AND 
-          $columnModificationTime=?''',
+      where: '''$columnTitle=? AND $columnDeviceFolder=? AND 
+          $columnCreationTime=? AND $columnModificationTime=?''',
       whereArgs: [
         title,
-        alternateTitle,
         deviceFolder,
         creationTime,
         modificationTime,
