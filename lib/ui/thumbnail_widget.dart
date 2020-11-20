@@ -28,7 +28,6 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     color: Colors.grey[800],
   );
 
-  File _file;
   bool _hasLoadedThumbnail = false;
   bool _isLoadingThumbnail = false;
   bool _encounteredErrorLoadingThumbnail = false;
@@ -36,13 +35,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   void initState() {
-    _file = widget.file;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_file.localID == null) {
+    if (widget.file.localID == null) {
       _loadNetworkImage();
     } else {
       _loadLocalImage(context);
@@ -57,7 +55,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
     var content;
     if (image != null) {
-      if (_file.fileType == FileType.video) {
+      if (widget.file.fileType == FileType.video) {
         content = Stack(
           children: [
             image,
@@ -88,19 +86,19 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_isLoadingThumbnail) {
       _isLoadingThumbnail = true;
       final cachedSmallThumbnail =
-          ThumbnailLruCache.get(_file, THUMBNAIL_SMALL_SIZE);
+          ThumbnailLruCache.get(widget.file, THUMBNAIL_SMALL_SIZE);
       if (cachedSmallThumbnail != null) {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
       } else {
-        _file.getAsset().then((asset) async {
+        widget.file.getAsset().then((asset) async {
           if (asset == null || !(await asset.exists)) {
-            if (_file.uploadedFileID != null) {
-              _file.localID = null;
-              FilesDB.instance.update(_file);
+            if (widget.file.uploadedFileID != null) {
+              widget.file.localID = null;
+              FilesDB.instance.update(widget.file);
               _loadNetworkImage();
             } else {
-              FilesDB.instance.deleteLocalFile(_file.localID);
+              FilesDB.instance.deleteLocalFile(widget.file.localID);
               FileRepository.instance.reloadFiles();
             }
             return;
@@ -123,7 +121,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
                 }
               });
             }
-            ThumbnailLruCache.put(_file, THUMBNAIL_SMALL_SIZE, data);
+            ThumbnailLruCache.put(widget.file, THUMBNAIL_SMALL_SIZE, data);
           });
         }).catchError((e) {
           _logger.warning("Could not load image: ", e);
@@ -138,13 +136,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_encounteredErrorLoadingThumbnail &&
         !_isLoadingThumbnail) {
       _isLoadingThumbnail = true;
-      final cachedThumbnail = ThumbnailFileLruCache.get(_file);
+      final cachedThumbnail = ThumbnailFileLruCache.get(widget.file);
       if (cachedThumbnail != null) {
         _imageProvider = Image.file(cachedThumbnail).image;
         _hasLoadedThumbnail = true;
         return;
       }
-      getThumbnailFromServer(_file).then((file) {
+      getThumbnailFromServer(widget.file).then((file) {
         final imageProvider = Image.file(file).image;
         if (mounted) {
           precacheImage(imageProvider, context).then((value) {
@@ -155,7 +153,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
               });
             }
           }).catchError((e) {
-            _logger.severe("Could not load image " + _file.toString());
+            _logger.severe("Could not load image " + widget.file.toString());
             _encounteredErrorLoadingThumbnail = true;
           });
         }
