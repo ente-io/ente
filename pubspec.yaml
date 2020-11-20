@@ -42,7 +42,8 @@ dependencies:
   flutter_email_sender: ^3.0.1
   like_button: ^0.2.0
   logging: ^0.11.4
-  flutter_image_compress: ^0.6.5+1
+  flutter_image_compress:
+    path: thirdparty/flutter_image_compress
   flutter_typeahead: ^1.8.1
   fluttertoast: ^4.0.1
   video_player: ^0.10.11+1
