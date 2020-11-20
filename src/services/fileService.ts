@@ -79,7 +79,7 @@ const getCollectionKey = async (collection: collection, key: Uint8Array) => {
 }
 
 const getCollections = async (token: string, sinceTime: string, key: Uint8Array): Promise<collection[]> => {
-    const resp = await HTTPService.get(`${ENDPOINT}/collections/`, {
+    const resp = await HTTPService.get(`${ENDPOINT}/collections`, {
         'token': token,
         'sinceTime': sinceTime,
     });
