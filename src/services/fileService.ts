@@ -36,6 +36,7 @@ export interface collection {
     creationTime: number;
     encryptedKey: string;
     keyDecryptionNonce: string;
+    isDeleted: boolean;
 }
 
 export interface file {
@@ -96,6 +97,10 @@ export const getFiles = async (sinceTime: string, token: string, limit: string, 
     var files: Array<file> = await localForage.getItem<file[]>('files') || [];
     for (const index in collections) {
         const collection = collections[index];
+        if (collection.isDeleted) {
+            // TODO: Remove files in this collection from localForage
+            continue;
+        }
         let time = await localForage.getItem<string>(`${collection.id}-time`) || sinceTime;
         let resp;
         do {
