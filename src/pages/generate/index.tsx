@@ -7,7 +7,7 @@ import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Button from 'react-bootstrap/Button';
-import { putKeyAttributes } from 'services/userService';
+import { putAttributes } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
@@ -68,7 +68,7 @@ export default function Generate() {
                     encryptedSecretKey: await cryptoWorker.toB64(encryptedKeyPairAttributes.encryptedData),
                     secretKeyDecryptionNonce: await cryptoWorker.toB64(encryptedKeyPairAttributes.nonce)
                 };
-                await putKeyAttributes(token, keyAttributes);
+                await putAttributes(token, getData(LS_KEYS.USER).name, keyAttributes);
                 setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
 
                 const sessionKeyAttributes = await cryptoWorker.encrypt(key);

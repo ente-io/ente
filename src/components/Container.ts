@@ -11,3 +11,10 @@ const Container = styled.div`
 `;
 
 export default Container;
+
+
+export const DisclaimerContainer = styled.div`
+    margin: 16px 0; 
+    color: rgb(158, 150, 137);
+    font-size: 14px;
+`;

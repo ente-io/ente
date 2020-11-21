@@ -45,6 +45,7 @@ export default function Verify() {
             setLoading(true);
             const resp = await verifyOtt(email, ott);
             setData(LS_KEYS.USER, {
+                ...getData(LS_KEYS.USER),
                 email,
                 token: resp.data.token,
                 id: resp.data.id,

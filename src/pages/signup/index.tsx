@@ -10,10 +10,13 @@ import * as Yup from 'yup';
 import { getOtt } from 'services/userService';
 import Container from 'components/Container';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
+import { DisclaimerContainer } from 'components/Container';
 
-interface formValues {
+interface FormValues {
+    name: string;
     email: string;
 }
+
 
 export default function Home() {
     const [loading, setLoading] = useState(false);
@@ -21,18 +24,17 @@ export default function Home() {
 
     useEffect(() => {
         router.prefetch('/verify');
-        router.prefetch('/signup');
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
             router.push('/verify');
         }
     }, []);
 
-    const loginUser = async ({ email }: formValues, { setFieldError }: FormikHelpers<formValues>) => {
+    const registerUser = async ({ name, email }: FormValues, { setFieldError }: FormikHelpers<FormValues>) => {
         try {
             setLoading(true);
+            setData(LS_KEYS.USER, { name, email });
             await getOtt(email);
-            setData(LS_KEYS.USER, { email });
             router.push('/verify');
         } catch (e) {
             setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
@@ -40,27 +42,39 @@ export default function Home() {
         setLoading(false);
     }
 
-    const register = () => {
-        router.push('/signup');
-    }
-
     return (
         <Container>
-            <Card style={{ minWidth: '300px' }} className="text-center">
+            <Card style={{ minWidth: '300px' }} className="text-center" >
                 <Card.Body>
-                    <Card.Title style={{ marginBottom: '20px' }}>{constants.LOGIN}</Card.Title>
-                    <Formik<formValues>
-                        initialValues={{ email: '' }}
+                    <Card.Title style={{ marginBottom: '20px' }}>{constants.SIGN_UP}</Card.Title>
+                    <Formik<FormValues>
+                        initialValues={{ name: '', email: '' }}
                         validationSchema={Yup.object().shape({
+                            name: Yup.string()
+                                .required(constants.REQUIRED),
                             email: Yup.string()
                                 .email(constants.EMAIL_ERROR)
                                 .required(constants.REQUIRED)
                         })}
-                        onSubmit={loginUser}
+                        onSubmit={registerUser}
                     >
-                        {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
+                        {({ values, errors, touched, handleChange, handleBlur, handleSubmit }): JSX.Element => (
                             <Form noValidate onSubmit={handleSubmit}>
-                                <Form.Group controlId="formBasicEmail">
+                                <Form.Group controlId="registrationForm.name">
+                                    <Form.Control
+                                        type="text"
+                                        placeholder={constants.ENTER_NAME}
+                                        value={values.name}
+                                        onChange={handleChange('name')}
+                                        onBlur={handleBlur('name')}
+                                        isInvalid={Boolean(touched.name && errors.name)}
+                                        disabled={loading}
+                                    />
+                                    <FormControl.Feedback type="invalid">
+                                        {errors.name}
+                                    </FormControl.Feedback>
+                                </Form.Group>
+                                <Form.Group controlId="registrationForm.email">
                                     <Form.Control
                                         type="email"
                                         placeholder={constants.ENTER_EMAIL}
@@ -74,17 +88,18 @@ export default function Home() {
                                         {errors.email}
                                     </FormControl.Feedback>
                                 </Form.Group>
+                                <DisclaimerContainer>
+                                    {constants.DATA_DISCLAIMER}
+                                </DisclaimerContainer>
                                 <Button
                                     variant="primary" type="submit" block
                                     disabled={loading}
-                                    style={{ marginBottom: '12px' }}
                                 >
                                     {constants.SUBMIT}
                                 </Button>
                             </Form>
                         )}
                     </Formik>
-                    <Card.Link href="#" onClick={register} style={{ fontSize: '14px' }}>Don't have an account?</Card.Link>
                 </Card.Body>
             </Card>
         </Container>
