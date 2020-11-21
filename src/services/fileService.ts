@@ -134,7 +134,7 @@ export const getPreview = async (token: string, file: file) => {
         { token }, null, { responseType: 'arraybuffer' },
     );
     const worker = await new CryptoWorker();
-    const decrypted: any = await worker.decryptFile(
+    const decrypted: any = await worker.decryptThumbnail(
         new Uint8Array(resp.data),
         await worker.fromB64(file.thumbnail.decryptionHeader),
         file.key);

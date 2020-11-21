@@ -3,11 +3,18 @@ import * as libsodium from 'utils/crypto/libsodium';
 
 export class Crypto {
     async decryptMetadata(file) {
-        const encodedMetadata = await libsodium.decryptChaCha(
+        const encodedMetadata = await libsodium.decryptChaChaOneShot(
             await libsodium.fromB64(file.metadata.encryptedData),
             await libsodium.fromB64(file.metadata.decryptionHeader),
             file.key);
         return JSON.parse(new TextDecoder().decode(encodedMetadata));
+    }
+
+    async decryptThumbnail(fileData, header, key) {
+        return libsodium.decryptChaChaOneShot(
+            fileData,
+            header,
+            key);
     }
 
     async decryptFile(fileData, header, key) {
