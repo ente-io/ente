@@ -148,7 +148,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         await filesDB.getLastCreatedFilesInCollections(ownedCollectionIDs);
     final lastUpdatedFiles =
         await filesDB.getLastUpdatedFilesInCollections(ownedCollectionIDs);
-    for (final collectionID in lastUpdatedFiles.keys) {
+    for (final collectionID in thumbnails.keys) {
       collectionsWithThumbnail.add(CollectionWithThumbnail(
           collectionsService.getCollectionByID(collectionID),
           thumbnails[collectionID],
