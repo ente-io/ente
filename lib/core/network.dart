@@ -17,7 +17,7 @@ class Network {
         responseBody: true,
         logPrint: (object) {
           log(object);
-          SuperLogging.logFile.writeAsStringSync(
+          SuperLogging.logFile.writeAsString(
             object.toString() + "\n",
             encoding: Utf8Codec(allowMalformed: true),
             flush: true,
