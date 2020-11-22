@@ -47,13 +47,16 @@ class _GalleryState extends State<Gallery> {
 
   final Logger _logger = Logger("Gallery");
   final List<List<File>> _collatedFiles = List<List<File>>();
-  final _scrollController = ItemScrollController();
+  final _itemScrollController = ItemScrollController();
   final _itemPositionsListener = ItemPositionsListener.create();
   final _scrollKey = GlobalKey<DraggableScrollbarState>();
 
+  ScrollController _scrollController = ScrollController();
+  double _scrollOffset = 0;
   bool _requiresLoad = false;
   bool _hasLoadedAll = false;
   bool _isLoadingNext = false;
+  bool _hasDraggableScrollbar = false;
   List<File> _files;
   int _lastIndex = 0;
 
@@ -70,7 +73,9 @@ class _GalleryState extends State<Gallery> {
       });
     }
     widget.selectedFiles.addListener(() {
-      setState(() {});
+      setState(() {
+        _saveScrollPosition();
+      });
     });
     if (widget.asyncLoader == null || widget.shouldLoadAll) {
       _hasLoadedAll = true;
@@ -119,6 +124,17 @@ class _GalleryState extends State<Gallery> {
     _collateFiles();
     final itemCount =
         _collatedFiles.length + (widget.headerWidget == null ? 1 : 2);
+    _hasDraggableScrollbar = itemCount > 25 || _files.length > 50;
+    if (!_hasDraggableScrollbar) {
+      _scrollController = ScrollController(initialScrollOffset: _scrollOffset);
+      return ListView.builder(
+        itemCount: itemCount,
+        itemBuilder: _buildListItem,
+        controller: _scrollController,
+        cacheExtent: 1500,
+        addAutomaticKeepAlives: true,
+      );
+    }
     return DraggableScrollbar.semicircle(
       key: _scrollKey,
       initialScrollIndex: _lastIndex,
@@ -143,12 +159,12 @@ class _GalleryState extends State<Gallery> {
           return;
         }
         _lastIndex = index;
-        _scrollController.jumpTo(index: index);
+        _itemScrollController.jumpTo(index: index);
       },
       child: ScrollablePositionedList.builder(
         itemCount: itemCount,
         itemBuilder: _buildListItem,
-        itemScrollController: _scrollController,
+        itemScrollController: _itemScrollController,
         initialScrollIndex: _lastIndex,
         minCacheExtent: 1500,
         addAutomaticKeepAlives: true,
@@ -202,12 +218,17 @@ class _GalleryState extends State<Gallery> {
     widget.asyncLoader(_files[_files.length - 1], kLoadLimit).then((files) {
       setState(() {
         _isLoadingNext = false;
+        _saveScrollPosition();
         if (files.length < kLoadLimit) {
           _hasLoadedAll = true;
         }
         _files.addAll(files);
       });
     });
+  }
+
+  void _saveScrollPosition() {
+    _scrollOffset = _scrollController.offset;
   }
 
   Widget _getDay(int timestamp) {
