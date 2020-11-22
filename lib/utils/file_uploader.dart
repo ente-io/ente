@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -15,6 +16,7 @@ import 'package:photos/models/location.dart';
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/file_util.dart';
 
 class FileUploader {
   final _logger = Logger("FileUploader");
@@ -153,7 +155,7 @@ class FileUploader {
     final fileAttributes =
         await CryptoUtil.encryptFile(sourceFile.path, encryptedFilePath);
 
-    final thumbnailData = (await (await file.getAsset()).thumbDataWithSize(
+    var thumbnailData = (await (await file.getAsset()).thumbDataWithSize(
       THUMBNAIL_LARGE_SIZE,
       THUMBNAIL_LARGE_SIZE,
       quality: 50,
@@ -162,6 +164,14 @@ class FileUploader {
       _logger.severe("Could not generate thumbnail for " + file.toString());
       throw InvalidFileError();
     }
+    final thumbnailSize = thumbnailData.length;
+    if (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
+      thumbnailData = await compressThumbnail(thumbnailData);
+      _logger.info("Thumbnail size " + thumbnailSize.toString());
+      _logger
+          .info("Compressed thumbnail size " + thumbnailData.length.toString());
+    }
+
     final encryptedThumbnailName =
         file.generatedID.toString() + "_thumbnail.encrypted";
     final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;

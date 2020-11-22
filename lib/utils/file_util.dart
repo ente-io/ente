@@ -289,8 +289,8 @@ Uint8List decryptFileKey(File file) {
 Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
   return FlutterImageCompress.compressWithList(
     thumbnail,
-    minHeight: 1080,
-    minWidth: 1080,
+    minHeight: COMPRESSED_THUMBNAIL_RESOLUTION,
+    minWidth: COMPRESSED_THUMBNAIL_RESOLUTION,
     quality: 25,
   );
 }
