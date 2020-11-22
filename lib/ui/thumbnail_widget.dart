@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/db/files_db.dart';
@@ -142,23 +143,38 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _hasLoadedThumbnail = true;
         return;
       }
-      getThumbnailFromServer(widget.file).then((file) {
-        final imageProvider = Image.file(file).image;
-        if (mounted) {
-          precacheImage(imageProvider, context).then((value) {
-            if (mounted) {
-              setState(() {
-                _imageProvider = imageProvider;
-                _hasLoadedThumbnail = true;
-              });
-            }
-          }).catchError((e) {
-            _logger.severe("Could not load image " + widget.file.toString());
-            _encounteredErrorLoadingThumbnail = true;
-          });
-        }
-      });
+      _getThumbnailFromServer();
     }
+  }
+
+  void _getThumbnailFromServer() {
+    getThumbnailFromServer(widget.file).then((file) async {
+      var imageProvider;
+      if (file.lengthSync() > THUMBNAIL_DATA_LIMIT) {
+        final compressed = await FlutterImageCompress.compressWithFile(
+          file.path,
+          quality: 25,
+          minHeight: THUMBNAIL_SMALL_SIZE,
+          minWidth: THUMBNAIL_SMALL_SIZE,
+        );
+        imageProvider = Image.memory(compressed).image;
+      } else {
+        imageProvider = Image.file(file).image;
+      }
+      if (mounted) {
+        precacheImage(imageProvider, context).then((value) {
+          if (mounted) {
+            setState(() {
+              _imageProvider = imageProvider;
+              _hasLoadedThumbnail = true;
+            });
+          }
+        }).catchError((e) {
+          _logger.severe("Could not load image " + widget.file.toString());
+          _encounteredErrorLoadingThumbnail = true;
+        });
+      }
+    });
   }
 
   @override

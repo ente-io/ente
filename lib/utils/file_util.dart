@@ -27,7 +27,7 @@ import 'package:photos/services/sync_service.dart';
 
 import 'crypto_util.dart';
 
-final logger = Logger("FileUtil");
+final _logger = Logger("FileUtil");
 
 Future<void> deleteFiles(List<File> files) async {
   final localIDs = List<String>();
@@ -179,7 +179,7 @@ Future<io.File> getThumbnailFromServer(File file) async {
 
 Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     {ProgressCallback progressCallback}) async {
-  logger.info("Downloading file " + file.uploadedFileID.toString());
+  _logger.info("Downloading file " + file.uploadedFileID.toString());
   final encryptedFilePath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       ".encrypted";
@@ -199,21 +199,21 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
       )
       .then((response) async {
     if (response.statusCode != 200) {
-      logger.warning("Could not download file: ", response.toString());
+      _logger.warning("Could not download file: ", response.toString());
       return null;
     } else if (!encryptedFile.existsSync()) {
-      logger.warning("File was not downloaded correctly.");
+      _logger.warning("File was not downloaded correctly.");
       return null;
     }
-    logger.info("File downloaded: " + file.uploadedFileID.toString());
-    logger.info("Download speed: " +
+    _logger.info("File downloaded: " + file.uploadedFileID.toString());
+    _logger.info("Download speed: " +
         (io.File(encryptedFilePath).lengthSync() /
                 (DateTime.now().millisecondsSinceEpoch - startTime))
             .toString() +
         "kBps");
     await CryptoUtil.decryptFile(encryptedFilePath, decryptedFilePath,
         Sodium.base642bin(file.fileDecryptionHeader), decryptFileKey(file));
-    logger.info("File decrypted: " + file.uploadedFileID.toString());
+    _logger.info("File decrypted: " + file.uploadedFileID.toString());
     encryptedFile.deleteSync();
     var fileExtension = extension(file.title).substring(1).toLowerCase();
     var outputFile = decryptedFile;
@@ -241,6 +241,9 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
 }
 
 Future<io.File> _downloadAndDecryptThumbnail(File file) async {
+  _logger.info("Downloading thumbnail for " + file.uploadedFileID.toString());
+  _logger.info("Downloads in progress " +
+      thumbnailDownloadsInProgress.length.toString());
   final temporaryPath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       "_thumbnail.decrypted";
@@ -250,18 +253,31 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
       .then((_) async {
     final encryptedFile = io.File(temporaryPath);
     final thumbnailDecryptionKey = decryptFileKey(file);
-    final data = CryptoUtil.decryptChaCha(
+    var data = CryptoUtil.decryptChaCha(
       encryptedFile.readAsBytesSync(),
       thumbnailDecryptionKey,
       Sodium.base642bin(file.thumbnailDecryptionHeader),
     );
+    if (data.length > THUMBNAIL_DATA_LIMIT) {
+      data = await FlutterImageCompress.compressWithList(
+        data,
+        quality: 50,
+        minHeight: THUMBNAIL_SMALL_SIZE,
+        minWidth: THUMBNAIL_SMALL_SIZE,
+      );
+    }
     encryptedFile.deleteSync();
-    return ThumbnailCacheManager().putFile(
+    final cachedThumbnail = ThumbnailCacheManager().putFile(
       file.getThumbnailUrl(),
       data,
       eTag: file.getThumbnailUrl(),
       maxAge: Duration(days: 365),
     );
+    thumbnailDownloadsInProgress.remove(file.uploadedFileID);
+    return cachedThumbnail;
+  }).catchError((e, s) {
+    _logger.severe("Error downloading thumbnail ", e, s);
+    thumbnailDownloadsInProgress.remove(file.uploadedFileID);
   });
 }
 
