@@ -20,7 +20,6 @@ class Network {
           SuperLogging.logFile.writeAsString(
             object.toString() + "\n",
             encoding: Utf8Codec(allowMalformed: true),
-            flush: true,
             mode: FileMode.append,
           );
         }));
