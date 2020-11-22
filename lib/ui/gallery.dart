@@ -74,7 +74,9 @@ class _GalleryState extends State<Gallery> {
     }
     widget.selectedFiles.addListener(() {
       setState(() {
-        _saveScrollPosition();
+        if (!_hasDraggableScrollbar) {
+          _saveScrollPosition();
+        }
       });
     });
     if (widget.asyncLoader == null || widget.shouldLoadAll) {
