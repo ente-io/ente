@@ -241,9 +241,6 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
 }
 
 Future<io.File> _downloadAndDecryptThumbnail(File file) async {
-  _logger.info("Downloading thumbnail for " + file.uploadedFileID.toString());
-  _logger.info("Downloads in progress " +
-      thumbnailDownloadsInProgress.length.toString());
   final temporaryPath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       "_thumbnail.decrypted";
@@ -258,13 +255,13 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
       thumbnailDecryptionKey,
       Sodium.base642bin(file.thumbnailDecryptionHeader),
     );
-    if (data.length > THUMBNAIL_DATA_LIMIT) {
-      data = await FlutterImageCompress.compressWithList(
-        data,
-        quality: 50,
-        minHeight: THUMBNAIL_SMALL_SIZE,
-        minWidth: THUMBNAIL_SMALL_SIZE,
-      );
+    final thumbnailSize = data.length;
+    if (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
+      data = await compressThumbnail(data);
+      _logger.info("Compressed thumbnail from " +
+          thumbnailSize.toString() +
+          " to " +
+          data.length.toString());
     }
     encryptedFile.deleteSync();
     final cachedThumbnail = ThumbnailCacheManager().putFile(
@@ -287,4 +284,13 @@ Uint8List decryptFileKey(File file) {
   final collectionKey =
       CollectionsService.instance.getCollectionKey(file.collectionID);
   return CryptoUtil.decryptSync(encryptedKey, collectionKey, nonce);
+}
+
+Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
+  return FlutterImageCompress.compressWithList(
+    thumbnail,
+    minHeight: 1080,
+    minWidth: 1080,
+    quality: 25,
+  );
 }

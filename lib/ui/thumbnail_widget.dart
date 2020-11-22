@@ -149,19 +149,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   void _getThumbnailFromServer() {
     getThumbnailFromServer(widget.file).then((file) async {
-      var imageProvider;
       if (file.lengthSync() > THUMBNAIL_DATA_LIMIT) {
-        final compressed = await FlutterImageCompress.compressWithFile(
-          file.path,
-          quality: 25,
-          minHeight: THUMBNAIL_SMALL_SIZE,
-          minWidth: THUMBNAIL_SMALL_SIZE,
-        );
-        imageProvider = Image.memory(compressed).image;
-      } else {
-        imageProvider = Image.file(file).image;
+        _logger.warning(widget.file.title +
+            " has a thumbnail of size " +
+            file.lengthSync().toString());
       }
       if (mounted) {
+        final imageProvider = Image.file(file).image;
         precacheImage(imageProvider, context).then((value) {
           if (mounted) {
             setState(() {
