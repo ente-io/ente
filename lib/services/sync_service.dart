@@ -169,6 +169,7 @@ class SyncService {
     );
     if (diff.isNotEmpty) {
       await _storeDiff(diff, collectionID);
+      _logger.info("Updated files in collection " + collectionID.toString());
       FileRepository.instance.reloadFiles();
       Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
       if (diff.length == _diffLimit) {
