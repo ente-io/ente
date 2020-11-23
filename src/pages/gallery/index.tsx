@@ -98,23 +98,37 @@ export default function Gallery() {
 
     return (<Container>
         <AutoSizer>
-            {({ height, width }) => (
-                <List
-                    itemSize={200}
-                    height={height}
-                    width={width}
-                    itemCount={data.length / 5}
-                    
-                >
-                    {({ index, style }) => <ListItem style={style}>
-                        {getThumbnail(data, index * 5)}
-                        {getThumbnail(data, index * 5 + 1)}
-                        {getThumbnail(data, index * 5 + 2)}
-                        {getThumbnail(data, index * 5 + 3)}
-                        {getThumbnail(data, index * 5 + 4)}
-                    </ListItem>}
-                </List>
-            )}
+            {({ height, width }) => {
+                let columns;
+                if (width >= 1000) {
+                    columns = 5;
+                } else if (width < 1000 && width >= 450) {
+                    columns = 3;
+                } else if (width < 450 && width >= 300) {
+                    columns = 2;
+                } else {
+                    columns = 1;
+                }
+                return (
+                    <List
+                        itemSize={200}
+                        height={height}
+                        width={width}
+                        itemCount={data.length / columns}
+                        
+                    >
+                        {({ index, style }) => {
+                            const arr = [];
+                            for (let i = 0; i < columns; i++) {
+                                arr.push(index * columns + i);
+                            }
+                            return (<ListItem style={style}>
+                                {arr.map(i => getThumbnail(data, i))}
+                            </ListItem>);
+                        }}
+                    </List>
+                )
+            }}
         </AutoSizer>
         <PhotoSwipe
             isOpen={open}
