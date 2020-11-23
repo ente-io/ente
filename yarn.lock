@@ -1149,6 +1149,11 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.6.4.tgz#a145cc0bb14ef9c4777361b7bbafa5cf8e3acb5a"
   integrity sha512-Wk7nG1JSaMfMpoMJDKUsWYugliB2Vy55pdjLpmLixeyMi7HizW2I/9QoxsPCkXl3dO+ZOVqPumKaDUv5zJu2uQ==
 
+"@types/photoswipe@*":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@types/photoswipe/-/photoswipe-4.1.0.tgz#212ad2b05d67828b24d424a01cb6fbb0735d37db"
+  integrity sha512-SWcWlJH8exQ/yijUNQn5pJdSrcsfPwyBmksBPa4NLNaUr4rhaC7YOGcrNSoIAC9LByoEbTIKWQpFVtHjomTTLA==
+
 "@types/prop-types@*", "@types/prop-types@^15.7.3":
   version "15.7.3"
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.3.tgz#2ab0d5da2e5815f94b0b9d4b95d1e5f243ab2ca7"
@@ -1159,6 +1164,14 @@
   resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.63.17.tgz#364402e33b2805cadfe703d5a84f2e84ad684000"
   integrity sha512-xSU9JCHKGqC5Mxnqoc5xs4dquo2bW3ttNqz7IWRtHqEKQvbDcXUgZPNNqEKBiq+5ifMcJs5Dex7jgu8ywKoXBA==
   dependencies:
+    "@types/react" "*"
+
+"@types/react-photoswipe@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@types/react-photoswipe/-/react-photoswipe-1.3.0.tgz#c22948d540e7febe541f9a96742110b566105026"
+  integrity sha512-HqOyG+N1Ifjs3xd88bxGQbxv+ookIs94L/JPpYvcnkb1UMc7nBtEcCNvQ9QPB+eiFFG72z/uqA0poagRl0nopA==
+  dependencies:
+    "@types/photoswipe" "*"
     "@types/react" "*"
 
 "@types/react-transition-group@^4.4.0":

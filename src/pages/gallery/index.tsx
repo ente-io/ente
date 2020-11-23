@@ -7,7 +7,8 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
 import { getActualKey } from 'utils/common/key';
 import styled from 'styled-components';
-import { PhotoSwipeGallery } from 'react-photoswipe';
+import { PhotoSwipe } from 'react-photoswipe';
+import { Options } from 'photoswipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
 
@@ -36,7 +37,10 @@ export default function Gallery() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState<file[]>();
-    const [total, setTotal] = useState(1);
+    const [open, setOpen] = useState(false);
+    const [options, setOptions] = useState<Options>({
+        history: false,
+    });
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -49,7 +53,11 @@ export default function Gallery() {
             const encryptionKey = await getActualKey();
             const resp = await getFiles("0", token, "100", encryptionKey);
             setLoading(false);
-            setData(resp);
+            setData(resp.map(item => ({
+                ...item,
+                w: window.innerWidth,
+                h: window.innerHeight,
+            })));
         };
         main();
     }, []);
@@ -60,8 +68,32 @@ export default function Gallery() {
         </div>
     }
 
-    const getThumbnail = (item) => (
-        <PreviewCard data={item} />
+    const updateUrl = (index: number) => (url: string) => {
+        data[index] = {
+            ...data[index],
+            src: url,
+        }
+        setData(data);
+    }
+
+    const handleClose = () => {
+        setOpen(false);
+    }
+
+    const onThumbnailClick = (index: number) => () => {
+        setOptions({
+            ...options,
+            index,
+        });
+        setOpen(true);
+    }
+
+    const getThumbnail = (data: file[], index: number) => (
+        <PreviewCard
+            data={data[index]}
+            updateUrl={updateUrl(index)}
+            onClick={onThumbnailClick(index)}
+        />
     )
 
     return (<Container>
@@ -75,14 +107,20 @@ export default function Gallery() {
                     
                 >
                     {({ index, style }) => <ListItem style={style}>
-                        {getThumbnail(data[index * 5])}
-                        {getThumbnail(data[index * 5 + 1])}
-                        {getThumbnail(data[index * 5 + 2])}
-                        {getThumbnail(data[index * 5 + 3])}
-                        {getThumbnail(data[index * 5 + 4])}
+                        {getThumbnail(data, index * 5)}
+                        {getThumbnail(data, index * 5 + 1)}
+                        {getThumbnail(data, index * 5 + 2)}
+                        {getThumbnail(data, index * 5 + 3)}
+                        {getThumbnail(data, index * 5 + 4)}
                     </ListItem>}
                 </List>
             )}
         </AutoSizer>
+        <PhotoSwipe
+            isOpen={open}
+            items={data}
+            options={options}
+            onClose={handleClose}
+        />
     </Container>);
 }
