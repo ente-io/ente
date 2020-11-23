@@ -48,7 +48,7 @@ export default function PreviewCard(props: IProps) {
         }
     }
 
-    return <Cont onClick={handleClick} disabled={!data.src && !imgSrc}>
-        <img src={data.src || imgSrc} />
+    return <Cont onClick={handleClick} disabled={!data?.src && !imgSrc}>
+        <img src={data?.src || imgSrc} />
     </Cont>;
 }
