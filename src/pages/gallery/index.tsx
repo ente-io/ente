@@ -124,9 +124,11 @@ export default function Gallery() {
             }
             item.w = window.innerWidth;
             item.h = window.innerHeight;
-            if (instance.framework.getScrollY() > 0) {
+            try {
                 instance.invalidateCurrItems();
                 instance.updateSize(true);
+            } catch (e) {
+                // ignore
             }
         }
         if ((!item.src || item.src === item.msrc) && !fetching[index]) {
@@ -136,9 +138,11 @@ export default function Gallery() {
             item.src = url;
             item.w = window.innerWidth;
             item.h = window.innerHeight;
-            if (instance.framework.getScrollY() > 0) {
+            try {
                 instance.invalidateCurrItems();
                 instance.updateSize(true);
+            } catch (e) {
+                // ignore
             }
         }
     }
