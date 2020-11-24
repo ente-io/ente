@@ -49,6 +49,7 @@ export interface file {
     keyDecryptionNonce: string;
     key: Uint8Array;
     src: string;
+    msrc: string;
     w: number;
     h: number;
 };

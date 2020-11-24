@@ -30,12 +30,12 @@ export default function PreviewCard(props: IProps) {
     const { data, onClick, updateUrl } = props;
 
     useEffect(() => {
-        if (data && !data.src) {
+        if (data && !data.msrc) {
             const main = async () => {
                 const token = getData(LS_KEYS.USER).token;
                 const url = await getPreview(token, data);
                 setImgSrc(url);
-                data.src = url;
+                data.msrc = url;
                 updateUrl(url);
             }
             main();
@@ -43,12 +43,12 @@ export default function PreviewCard(props: IProps) {
     }, [data]);
 
     const handleClick = () => {
-        if (data.src || imgSrc) {
+        if (data.msrc || imgSrc) {
             onClick();
         }
     }
 
-    return <Cont onClick={handleClick} disabled={!data?.src && !imgSrc}>
-        <img src={data?.src || imgSrc} />
+    return <Cont onClick={handleClick} disabled={!data?.msrc && !imgSrc}>
+        <img src={data?.msrc || imgSrc} />
     </Cont>;
 }

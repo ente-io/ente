@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Spinner from 'react-bootstrap/Spinner';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { file, getFiles } from 'services/fileService';
+import { file, getFile, getFiles, getPreview } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
 import { getActualKey } from 'utils/common/key';
@@ -41,6 +41,7 @@ export default function Gallery() {
     const [options, setOptions] = useState<Options>({
         history: false,
     });
+    const fetching: { [k: number]: boolean }  = {};
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -71,7 +72,22 @@ export default function Gallery() {
     const updateUrl = (index: number) => (url: string) => {
         data[index] = {
             ...data[index],
+            msrc: url,
+            w: window.innerWidth,
+            h: window.innerHeight,
+        }
+        if (!data[index].src) {
+            data[index].src = url;
+        }
+        setData(data);
+    }
+
+    const updateSrcUrl = (index: number, url: string) => {
+        data[index] = {
+            ...data[index],
             src: url,
+            w: window.innerWidth,
+            h: window.innerHeight,
         }
         setData(data);
     }
@@ -90,11 +106,42 @@ export default function Gallery() {
 
     const getThumbnail = (data: file[], index: number) => (
         <PreviewCard
+            key={`tile-${index}`}
             data={data[index]}
             updateUrl={updateUrl(index)}
             onClick={onThumbnailClick(index)}
         />
     )
+
+    const getSlideData = async (instance: any, index: number, item: file) => {
+        const token = getData(LS_KEYS.USER).token;
+        if (!item.msrc) {
+            const url = await getPreview(token, item);
+            updateUrl(index)(url);
+            item.msrc = url;
+            if (!item.src) {
+                item.src = url;
+            }
+            item.w = window.innerWidth;
+            item.h = window.innerHeight;
+            if (instance.framework.getScrollY() > 0) {
+                instance.invalidateCurrItems();
+                instance.updateSize(true);
+            }
+        }
+        if ((!item.src || item.src === item.msrc) && !fetching[index]) {
+            fetching[index] = true;
+            const url = await getFile(token, item);
+            updateSrcUrl(index, url);
+            item.src = url;
+            item.w = window.innerWidth;
+            item.h = window.innerHeight;
+            if (instance.framework.getScrollY() > 0) {
+                instance.invalidateCurrItems();
+                instance.updateSize(true);
+            }
+        }
+    }
 
     return (<Container>
         <AutoSizer>
@@ -135,6 +182,7 @@ export default function Gallery() {
             items={data}
             options={options}
             onClose={handleClose}
+            gettingData={getSlideData}
         />
     </Container>);
 }
