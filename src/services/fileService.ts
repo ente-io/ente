@@ -130,6 +130,11 @@ export const getFiles = async (sinceTime: string, token: string, limit: string, 
 }
 
 export const getPreview = async (token: string, file: file) => {
+    const cache = await caches.open('thumbs');
+    const cacheResp: Response = await cache.match(file.id.toString());
+    if (cacheResp) {
+        return URL.createObjectURL(await cacheResp.blob());
+    }
     const resp = await HTTPService.get(
         `${ENDPOINT}/files/preview/${file.id}`,
         { token }, null, { responseType: 'arraybuffer' },
@@ -139,6 +144,7 @@ export const getPreview = async (token: string, file: file) => {
         new Uint8Array(resp.data),
         await worker.fromB64(file.thumbnail.decryptionHeader),
         file.key);
+    await cache.put(file.id.toString(), new Response(new Blob([decrypted])));
     return URL.createObjectURL(new Blob([decrypted]));
 }
 
