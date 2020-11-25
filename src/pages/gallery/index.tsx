@@ -65,7 +65,7 @@ export default function Gallery() {
 
     if (!data || loading) {
         return <div className="text-center">
-            <Spinner animation="border" variant="primary" />;
+            <Spinner animation="border" variant="primary" />
         </div>
     }
 
