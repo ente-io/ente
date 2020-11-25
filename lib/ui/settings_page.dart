@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
-import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
@@ -328,11 +327,9 @@ class InfoSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            final packageInfo = await PackageInfo.fromPlatform();
             showAboutDialog(
               context: context,
-              applicationName: packageInfo.appName,
-              applicationVersion: packageInfo.version,
+              applicationName: "ente",
               applicationIcon: Image.asset(
                 "assets/icon.png",
                 height: 32,
