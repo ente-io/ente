@@ -24,7 +24,7 @@
 				<key>CFBundleTypeRole</key>
 				<string>Editor</string>
 				<key>CFBundleURLName</key>
-				<string>io.ente.photos</string>
+				<string>io.ente.frame</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>ente</string>
