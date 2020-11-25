@@ -99,7 +99,7 @@ export const getFiles = async (sinceTime: string, token: string, limit: string, 
     for (const index in collections) {
         const collection = collections[index];
         if (collection.isDeleted) {
-            // TODO: Remove files in this collection from localForage
+            // TODO: Remove files in this collection from localForage and cache
             continue;
         }
         let time = await localForage.getItem<string>(`${collection.id}-time`) || sinceTime;
@@ -144,7 +144,11 @@ export const getPreview = async (token: string, file: file) => {
         new Uint8Array(resp.data),
         await worker.fromB64(file.thumbnail.decryptionHeader),
         file.key);
-    await cache.put(file.id.toString(), new Response(new Blob([decrypted])));
+    try {
+        await cache.put(file.id.toString(), new Response(new Blob([decrypted])));
+    } catch (e) {
+        // TODO: handle storage full exception.
+    }
     return URL.createObjectURL(new Blob([decrypted]));
 }
 

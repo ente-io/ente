@@ -88,10 +88,11 @@ export default function App({ Component, pageProps }) {
         });
     }, []);
 
-    const logout = () => {
+    const logout = async () => {
         clearKeys();
         clearData();
         localForage.clear();
+        const cache = await caches.delete('thumbs');
         router.push("/");
     }
 
