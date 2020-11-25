@@ -40,6 +40,8 @@ export default function Gallery() {
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState<Options>({
         history: false,
+        maxSpreadZoom: 5,
+        shareEl: false,
     });
     const fetching: { [k: number]: boolean }  = {};
 
