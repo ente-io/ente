@@ -8,14 +8,15 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/share_util.dart';
 import 'package:share_extend/share_extend.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key key}) : super(key: key);
@@ -34,6 +35,7 @@ class SettingsPage extends StatelessWidget {
     final contents = [
       UsageWidget(),
       SupportSectionWidget(),
+      InfoSectionWidget(),
     ];
     if (kDebugMode) {
       contents.add(DebugWidget());
@@ -291,6 +293,56 @@ class SupportSectionWidget extends StatelessWidget {
             );
           },
           child: SettingsTextItem(text: "Chat", icon: Icons.navigate_next),
+        ),
+      ]),
+    );
+  }
+}
+
+class InfoSectionWidget extends StatelessWidget {
+  const InfoSectionWidget({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(children: [
+        Padding(padding: EdgeInsets.all(12)),
+        SettingsSectionTitle("ABOUT"),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            launch("https://ente.io/terms");
+          },
+          child: SettingsTextItem(text: "Terms", icon: Icons.navigate_next),
+        ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            launch("https://ente.io/privacy");
+          },
+          child: SettingsTextItem(text: "Privacy", icon: Icons.navigate_next),
+        ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            final packageInfo = await PackageInfo.fromPlatform();
+            showAboutDialog(
+              context: context,
+              applicationName: packageInfo.appName,
+              applicationVersion: packageInfo.version,
+              applicationIcon: Image.asset(
+                "assets/icon.png",
+                height: 32,
+                width: 32,
+              ),
+              applicationLegalese:
+                  "© Drizzle Technologies Private Limited, 2020",
+            );
+          },
+          child: SettingsTextItem(text: "More Info", icon: Icons.navigate_next),
         ),
       ]),
     );
