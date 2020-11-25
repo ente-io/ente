@@ -694,12 +694,12 @@ packages:
     source: hosted
     version: "0.4.0"
   url_launcher:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.7.8"
+    version: "5.7.10"
   url_launcher_linux:
     dependency: transitive
     description:

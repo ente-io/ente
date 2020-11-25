@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
@@ -6,6 +7,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EmailEntryPage extends StatefulWidget {
   EmailEntryPage({Key key}) : super(key: key);
@@ -79,7 +81,45 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               keyboardType: TextInputType.emailAddress,
               initialValue: _email,
             ),
-            Padding(padding: EdgeInsets.all(12)),
+            Padding(padding: EdgeInsets.all(8)),
+            Padding(
+              padding: const EdgeInsets.all(6),
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(text: "By clicking Sign In, I agree to the "),
+                    TextSpan(
+                      text: "Terms of Service",
+                      style: TextStyle(
+                        color: Colors.blue,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launch("https://ente.io/terms");
+                        },
+                    ),
+                    TextSpan(text: " and "),
+                    TextSpan(
+                      text: "Privacy Policy",
+                      style: TextStyle(
+                        color: Colors.blue,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launch("https://ente.io/privacy");
+                        },
+                    ),
+                    TextSpan(text: "."),
+                  ],
+                  style: TextStyle(
+                    height: 1.25,
+                    // color: Colors.grey,
+                  ),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Padding(padding: EdgeInsets.all(8)),
             Container(
               width: double.infinity,
               height: 44,

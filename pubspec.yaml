@@ -63,6 +63,7 @@ dependencies:
   scrollable_positioned_list: ^0.1.8
   connectivity: ^2.0.1
   pretty_dio_logger: ^1.1.1
+  url_launcher: ^5.7.10
 
 dev_dependencies:
   flutter_test:
