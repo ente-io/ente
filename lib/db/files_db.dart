@@ -176,7 +176,8 @@ class FilesDB {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where: '$columnLocalID IS NOT NULL AND $columnDeviceFolder = ?',
+      where:
+          '$columnLocalID IS NOT NULL AND $columnDeviceFolder = ? AND $columnIsDeleted = 0',
       whereArgs: [path],
       orderBy: '$columnCreationTime DESC',
       groupBy: '$columnLocalID',
