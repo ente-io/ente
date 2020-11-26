@@ -104,7 +104,7 @@ export default function Gallery() {
         if (data[index].metadata.fileType === 1) {
             data[index].html = `
                 <video controls>
-                    <source src="${url}" type="video/mp4">
+                    <source src="${url}" />
                     Your browser does not support the video tag.
                 </video>
             `;
@@ -159,7 +159,7 @@ export default function Gallery() {
             if (item.metadata.fileType === 1) {
                 item.html = `
                     <video width="320" height="240" controls>
-                        <source src="${url}" type="video/mp4">
+                        <source src="${url}" />
                         Your browser does not support the video tag.
                     </video>
                 `;
