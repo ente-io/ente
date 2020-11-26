@@ -117,15 +117,10 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     final files = filesRepo.hasLoadedFiles
         ? filesRepo.files
         : await filesRepo.loadFiles();
-    final filePathMap = LinkedHashMap<String, List<File>>();
     final thumbnailPathMap = Map<String, File>();
     for (final file in files) {
       final path = file.deviceFolder;
-      if (filePathMap[path] == null) {
-        filePathMap[path] = List<File>();
-      }
       if (file.localID != null) {
-        filePathMap[path].add(file);
         if (thumbnailPathMap[path] == null) {
           thumbnailPathMap[path] = file;
         }
@@ -133,8 +128,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     }
     for (final path in thumbnailPathMap.keys) {
       final folderName = p.basename(path);
-      folders.add(DeviceFolder(
-          folderName, path, thumbnailPathMap[path], filePathMap[path]));
+      folders.add(DeviceFolder(folderName, path, thumbnailPathMap[path]));
     }
     final collectionsWithThumbnail = List<CollectionWithThumbnail>();
     final collections = collectionsService.getCollections();
