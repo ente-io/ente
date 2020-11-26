@@ -329,28 +329,29 @@ class _DetailPageState extends State<DetailPage> {
 
   Future _delete() async {
     final file = _files[_selectedIndex];
+    await deleteFiles([file]);
     final totalFiles = _files.length;
+    if (totalFiles == 1) {
+      // Deleted the only file
+      Navigator.of(context, rootNavigator: true).pop(); // Close pageview
+      Navigator.of(context, rootNavigator: true).pop(); // Close gallery
+      return;
+    }
     if (_selectedIndex == totalFiles - 1) {
       // Deleted the last file
       await _pageController.previousPage(
           duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
+      setState(() {
+        _files.remove(file);
+      });
     } else {
       await _pageController.nextPage(
           duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
       setState(() {
+        _selectedIndex--;
         _files.remove(file);
-      });
-      Future.delayed(Duration(milliseconds: 200), () {
-        _pageController.jumpToPage(_selectedIndex - 1);
       });
     }
     Navigator.of(context, rootNavigator: true).pop(); // Close dialog
-    if (_files.length == 0) {
-      // Deleted the last file in gallery
-      Navigator.of(context, rootNavigator: true).pop(); // Close pageview
-      Navigator.of(context, rootNavigator: true).pop(); // Close gallery
-    }
-
-    await deleteFiles([file]);
   }
 }
