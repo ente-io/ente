@@ -171,7 +171,11 @@ class Configuration {
       foldersToBackUp.add("Recents");
       foldersToBackUp.add("DCIM");
       foldersToBackUp.add("Download");
+      foldersToBackUp.add("Downloads");
       foldersToBackUp.add("Screenshot");
+      foldersToBackUp.add("Screenshots");
+      foldersToBackUp.add("Selfies");
+      foldersToBackUp.add("Portrait");
       return foldersToBackUp;
     }
   }
