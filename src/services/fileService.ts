@@ -19,6 +19,7 @@ export interface fileAttribute {
     encryptedData: string;
     decryptionHeader: string;
     creationTime: number;
+    fileType: number;
 };
 
 export interface user {

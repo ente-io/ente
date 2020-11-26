@@ -77,7 +77,18 @@ export default function Gallery() {
             w: window.innerWidth,
             h: window.innerHeight,
         }
-        if (!data[index].src) {
+        if (data[index].metadata.fileType === 1 && !data[index].html) {
+            data[index].html = `
+                <div class="video-loading">
+                    <img src="${url}" />
+                    <div class="spinner-border text-light" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            `;
+            delete data[index].src;
+        }
+        if (data[index].metadata.fileType === 0 && !data[index].src) {
             data[index].src = url;
         }
         setData(data);
@@ -89,6 +100,15 @@ export default function Gallery() {
             src: url,
             w: window.innerWidth,
             h: window.innerHeight,
+        }
+        if (data[index].metadata.fileType === 1) {
+            data[index].html = `
+                <video controls>
+                    <source src="${url}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            `;
+            delete data[index].src;
         }
         setData(data);
     }
@@ -136,8 +156,16 @@ export default function Gallery() {
             fetching[index] = true;
             const url = await getFile(token, item);
             updateSrcUrl(index, url);
-            item.src = url;
-            item.w = window.innerWidth;
+            if (item.metadata.fileType === 1) {
+                item.html = `
+                    <video width="320" height="240" controls>
+                        <source src="${url}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                `;
+                delete item.src;
+                item.w = window.innerWidth;
+            }
             item.h = window.innerHeight;
             try {
                 instance.invalidateCurrItems();

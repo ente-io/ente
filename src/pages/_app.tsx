@@ -43,6 +43,29 @@ const GlobalStyles = createGlobalStyle`
         vertical-align: middle;
         margin: 8px;
     }
+    
+    .pswp__item video {
+        width: 100%;
+        height: 100%;
+    }
+
+    .video-loading {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+    .video-loading > img {
+        object-fit: contain;
+        width: 100%;
+        height: 100%;
+    }
+
+    .video-loading > div {
+        position: relative;
+        top: -50vh;
+        left: 50vw;
+    }
 
     :root {
         --primary: #e26f99,
