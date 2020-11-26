@@ -64,6 +64,6 @@ export default function PreviewCard(props: IProps) {
 
     return <Cont onClick={handleClick} disabled={!data?.msrc && !imgSrc}>
         <img src={data?.msrc || imgSrc} />
-        {data.metadata.fileType === 1 && <PlayCircleOutline />}
+        {data?.metadata.fileType === 1 && <PlayCircleOutline />}
     </Cont>;
 }

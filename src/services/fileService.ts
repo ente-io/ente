@@ -51,6 +51,7 @@ export interface file {
     key: Uint8Array;
     src: string;
     msrc: string;
+    html: string;
     w: number;
     h: number;
 };
