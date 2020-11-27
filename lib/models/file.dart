@@ -107,9 +107,7 @@ class File {
   String getDownloadUrl() {
     return Configuration.instance.getHttpEndpoint() +
         "/files/download/" +
-        uploadedFileID.toString() +
-        "?token=" +
-        Configuration.instance.getToken();
+        uploadedFileID.toString();
   }
 
   // Passing token within the URL due to https://github.com/flutter/flutter/issues/16466
@@ -125,9 +123,7 @@ class File {
   String getThumbnailUrl() {
     return Configuration.instance.getHttpEndpoint() +
         "/files/preview/" +
-        uploadedFileID.toString() +
-        "?token=" +
-        Configuration.instance.getToken();
+        uploadedFileID.toString();
   }
 
   @override

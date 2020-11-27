@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:crisp/crisp.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -139,14 +140,19 @@ class UsageWidgetState extends State<UsageWidget> {
   }
 
   void _getUsage() {
-    Network.instance.getDio().get(
-      Configuration.instance.getHttpEndpoint() + "/billing/usage",
-      queryParameters: {
-        "startTime": 0,
-        "endTime": DateTime.now().microsecondsSinceEpoch,
-        "token": Configuration.instance.getToken(),
-      },
-    ).catchError((e) async {
+    Network.instance
+        .getDio()
+        .get(
+          Configuration.instance.getHttpEndpoint() + "/billing/usage",
+          queryParameters: {
+            "startTime": 0,
+            "endTime": DateTime.now().microsecondsSinceEpoch,
+          },
+          options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()},
+          ),
+        )
+        .catchError((e) async {
       Logger("Settings").severe(e);
     }).then((response) async {
       if (response != null && response.statusCode == 200) {

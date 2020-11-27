@@ -195,6 +195,9 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
       .download(
         file.getDownloadUrl(),
         encryptedFilePath,
+        options: Options(
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
         onReceiveProgress: progressCallback,
       )
       .then((response) async {
@@ -246,7 +249,13 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
       "_thumbnail.decrypted";
   return Network.instance
       .getDio()
-      .download(file.getThumbnailUrl(), temporaryPath)
+      .download(
+        file.getThumbnailUrl(),
+        temporaryPath,
+        options: Options(
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
+      )
       .then((_) async {
     final encryptedFile = io.File(temporaryPath);
     final thumbnailDecryptionKey = decryptFileKey(file);
