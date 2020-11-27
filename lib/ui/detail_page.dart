@@ -329,7 +329,7 @@ class _DetailPageState extends State<DetailPage> {
 
   Future _delete() async {
     final file = _files[_selectedIndex];
-    await deleteFiles([file]);
+    await deleteFilesFromEverywhere([file]);
     final totalFiles = _files.length;
     if (totalFiles == 1) {
       // Deleted the only file

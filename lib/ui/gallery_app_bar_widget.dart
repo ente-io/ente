@@ -312,7 +312,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     Navigator.of(context, rootNavigator: true).pop();
     final dialog = createProgressDialog(context, "Deleting...");
     await dialog.show();
-    await deleteFiles(widget.selectedFiles.files.toList());
+    await deleteFilesFromEverywhere(widget.selectedFiles.files.toList());
     _clearSelectedFiles();
     await dialog.hide();
   }

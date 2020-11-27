@@ -29,7 +29,7 @@ import 'crypto_util.dart';
 
 final _logger = Logger("FileUtil");
 
-Future<void> deleteFiles(List<File> files) async {
+Future<void> deleteFilesFromEverywhere(List<File> files) async {
   final localIDs = List<String>();
   bool hasUploadedFiles = false;
   for (final file in files) {
