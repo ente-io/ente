@@ -43,6 +43,8 @@ const DeadCenter = styled.div`
 `;
 
 const ListContainer = styled.div`
+    display: flex;
+
     @media (min-width: 1000px) {
         width: 1000px;
     }
@@ -52,7 +54,7 @@ const ListContainer = styled.div`
     }
 
     @media (max-width: 450px) {
-        max-width: 100%;
+        width: 100%;
     }
 `;
 
