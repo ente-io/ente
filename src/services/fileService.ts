@@ -54,6 +54,8 @@ export interface file {
     html: string;
     w: number;
     h: number;
+    isDeleted: boolean;
+    dataIndex: number;
 };
 
 const getCollectionKey = async (collection: collection, key: Uint8Array) => {
@@ -93,11 +95,14 @@ const getCollections = async (token: string, sinceTime: string, key: Uint8Array)
     return await Promise.all(promises);
 }
 
-export const getFiles = async (sinceTime: string, token: string, limit: string, key: string) => {
+export const fetchCollections = async (token: string, key: string) => {
     const worker = await new CryptoWorker();
+    return getCollections(token, "0", await worker.fromB64(key));
+}
 
-    const collections = await getCollections(token, "0", await worker.fromB64(key));
-    var files: Array<file> = await localForage.getItem<file[]>('files') || [];
+export const getFiles = async (sinceTime: string, token: string, limit: string, key: string, collections: collection[]) => {
+    const worker = await new CryptoWorker();
+    let files: Array<file> = await localForage.getItem<file[]>('files') || [];
     for (const index in collections) {
         const collection = collections[index];
         if (collection.isDeleted) {
@@ -127,6 +132,7 @@ export const getFiles = async (sinceTime: string, token: string, limit: string, 
         } while (resp.data.diff.length);
         await localForage.setItem(`${collection.id}-time`, time);
     }
+    files = files.filter(item => !item.isDeleted)
     await localForage.setItem('files', files);
     return files;
 }

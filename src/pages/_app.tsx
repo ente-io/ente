@@ -100,8 +100,10 @@ export default function App({ Component, pageProps }) {
         console.log(`%c${constants.CONSOLE_WARNING_STOP}`, 'color: red; font-size: 52px;');
         console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
 
-        router.events.on('routeChangeStart', () => {
-            setLoading(true);
+        router.events.on('routeChangeStart', (url: string) => {
+            if (window.location.pathname !== url.split('?')[0]) {
+                setLoading(true);
+            }
         });
 
         router.events.on('routeChangeComplete', () => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Spinner from 'react-bootstrap/Spinner';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { file, getFile, getFiles, getPreview } from 'services/fileService';
+import { collection, fetchCollections, file, getFile, getFiles, getPreview } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
 import { getActualKey } from 'utils/common/key';
@@ -11,6 +11,8 @@ import { PhotoSwipe } from 'react-photoswipe';
 import { Options } from 'photoswipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
+import Collections from './components/Collections';
+import SadFace from 'components/SadFace';
 
 const Container = styled.div`
     display: block;
@@ -26,8 +28,32 @@ const Container = styled.div`
 `;
 
 const ListItem = styled.div`
-   display: flex;
-   justify-content: center;
+    display: flex;
+    justify-content: center;
+`;
+
+const DeadCenter = styled.div`
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    text-align: center;
+    flex-direction: column;
+`;
+
+const ListContainer = styled.div`
+    @media (min-width: 1000px) {
+        width: 1000px;
+    }
+
+    @media (min-width: 450px) and (max-width: 1000px) {
+        max-width: 600px;
+    }
+
+    @media (max-width: 450px) {
+        max-width: 100%;
+    }
 `;
 
 const PAGE_SIZE = 12;
@@ -36,6 +62,7 @@ const COLUMNS = 3;
 export default function Gallery() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [collections, setCollections] = useState<collection[]>([])
     const [data, setData] = useState<file[]>();
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState<Options>({
@@ -53,15 +80,17 @@ export default function Gallery() {
         const main = async () => {
             setLoading(true);
             const encryptionKey = await getActualKey();
-            const resp = await getFiles("0", token, "100", encryptionKey);
+            const collections = await fetchCollections(token, encryptionKey);
+            const resp = await getFiles("0", token, "100", encryptionKey, collections);
             setLoading(false);
+            setCollections(collections);
             setData(resp.map(item => ({
                 ...item,
                 w: window.innerWidth,
                 h: window.innerHeight,
             })));
         };
-        main();
+        main(); 
     }, []);
 
     if (!data || loading) {
@@ -125,14 +154,14 @@ export default function Gallery() {
         setOpen(true);
     }
 
-    const getThumbnail = (data: file[], index: number) => (
-        <PreviewCard
-            key={`tile-${index}`}
-            data={data[index]}
-            updateUrl={updateUrl(index)}
+    const getThumbnail = (file: file[], index: number) => {
+        return (<PreviewCard
+            key={`tile-${file[index].id}`}
+            data={file[index]}
+            updateUrl={updateUrl(file[index].dataIndex)}
             onClick={onThumbnailClick(index)}
-        />
-    )
+        />);
+    }
 
     const getSlideData = async (instance: any, index: number, item: file) => {
         const token = getData(LS_KEYS.USER).token;
@@ -176,46 +205,81 @@ export default function Gallery() {
         }
     }
 
-    return (<Container>
-        <AutoSizer>
-            {({ height, width }) => {
-                let columns;
-                if (width >= 1000) {
-                    columns = 5;
-                } else if (width < 1000 && width >= 450) {
-                    columns = 3;
-                } else if (width < 450 && width >= 300) {
-                    columns = 2;
-                } else {
-                    columns = 1;
-                }
-                return (
-                    <List
-                        itemSize={200}
-                        height={height}
-                        width={width}
-                        itemCount={data.length / columns}
-                        
-                    >
-                        {({ index, style }) => {
-                            const arr = [];
-                            for (let i = 0; i < columns; i++) {
-                                arr.push(index * columns + i);
-                            }
-                            return (<ListItem style={style}>
-                                {arr.map(i => getThumbnail(data, i))}
-                            </ListItem>);
-                        }}
-                    </List>
-                )
-            }}
-        </AutoSizer>
-        <PhotoSwipe
-            isOpen={open}
-            items={data}
-            options={options}
-            onClose={handleClose}
-            gettingData={getSlideData}
+    const selectCollection = (id?: string) => {
+        const href = `/gallery?collection=${id || ''}`;
+        router.push(href, undefined, { shallow: true });
+    }
+
+    const idSet = new Set();
+    const filteredData = data.map((item, index) => ({
+        ...item,
+        dataIndex: index,
+    })).filter(item => {
+        if (!idSet.has(item.id)) {
+            if (!router.query.collection || router.query.collection === item.collectionID.toString()) {
+                idSet.add(item.id);
+                return true;
+            }
+            return false;
+        }
+        return false;
+    });
+
+    return (<>
+        <Collections
+            collections={collections}
+            selected={router.query.collection?.toString()}
+            selectCollection={selectCollection}
         />
-    </Container>);
+        {
+            filteredData.length
+                ? <Container>
+                    <AutoSizer>
+                        {({ height, width }) => {
+                            let columns;
+                            if (width >= 1000) {
+                                columns = 5;
+                            } else if (width < 1000 && width >= 450) {
+                                columns = 3;
+                            } else if (width < 450 && width >= 300) {
+                                columns = 2;
+                            } else {
+                                columns = 1;
+                            }
+                            return (
+                                <List
+                                    itemSize={200}
+                                    height={height}
+                                    width={width}
+                                    itemCount={Math.ceil(filteredData.length / columns)}
+                                >
+                                    {({ index, style }) => {
+                                        const arr = [];
+                                        for (let i = 0; i < columns; i++) {
+                                            arr.push(index * columns + i);
+                                        }
+                                        return (<ListItem style={style}>
+                                            <ListContainer>
+                                                {arr.map(i => filteredData[i] && getThumbnail(filteredData, i))}
+                                            </ListContainer>
+                                        </ListItem>);
+                                    }}
+                                </List>
+                            )
+                        }}
+                    </AutoSizer>
+                    <PhotoSwipe
+                        isOpen={open}
+                        items={filteredData}
+                        options={options}
+                        onClose={handleClose}
+                        gettingData={getSlideData}
+                    />
+                </Container>
+                : <DeadCenter>
+                    <SadFace height={100} width={100} />
+                    <div>No content found!</div>
+                </DeadCenter>
+        }
+    </>);
 }
