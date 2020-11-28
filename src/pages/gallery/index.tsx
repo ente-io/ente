@@ -169,7 +169,7 @@ export default function Gallery() {
         const token = getData(LS_KEYS.USER).token;
         if (!item.msrc) {
             const url = await getPreview(token, item);
-            updateUrl(index)(url);
+            updateUrl(item.dataIndex)(url);
             item.msrc = url;
             if (!item.src) {
                 item.src = url;
@@ -183,10 +183,10 @@ export default function Gallery() {
                 // ignore
             }
         }
-        if ((!item.src || item.src === item.msrc) && !fetching[index]) {
-            fetching[index] = true;
+        if ((!item.src || item.src === item.msrc) && !fetching[item.dataIndex]) {
+            fetching[item.dataIndex] = true;
             const url = await getFile(token, item);
-            updateSrcUrl(index, url);
+            updateSrcUrl(item.dataIndex, url);
             if (item.metadata.fileType === 1) {
                 item.html = `
                     <video width="320" height="240" controls>
@@ -196,6 +196,8 @@ export default function Gallery() {
                 `;
                 delete item.src;
                 item.w = window.innerWidth;
+            } else {
+                item.src = url;
             }
             item.h = window.innerHeight;
             try {
