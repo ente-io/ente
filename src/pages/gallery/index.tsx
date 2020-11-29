@@ -318,6 +318,7 @@ export default function Gallery() {
                                     height={height}
                                     width={width}
                                     itemCount={timeStampList.length}
+                                    key={`${router.query.collection}-${columns}`}
                                 >
                                     {({ index, style }) => {
                                         return (<ListItem style={style}>
