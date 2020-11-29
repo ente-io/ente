@@ -10,9 +10,21 @@ import styled from 'styled-components';
 import { PhotoSwipe } from 'react-photoswipe';
 import { Options } from 'photoswipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { FixedSizeList as List } from 'react-window';
+import { VariableSizeList as List } from 'react-window';
 import Collections from './components/Collections';
 import SadFace from 'components/SadFace';
+
+enum ITEM_TYPE {
+    TIME='TIME',
+    TILE='TILE'
+}
+
+interface TimeStampListItem {
+    itemType: ITEM_TYPE,
+    items?: file[],
+    itemStartIndex?: number,
+    date?: string,
+}
 
 const Container = styled.div`
     display: block;
@@ -44,13 +56,15 @@ const DeadCenter = styled.div`
 
 const ListContainer = styled.div`
     display: flex;
+    max-width: 100%;
+    color: #fff;
 
     @media (min-width: 1000px) {
         width: 1000px;
     }
 
     @media (min-width: 450px) and (max-width: 1000px) {
-        max-width: 600px;
+        width: 600px;
     }
 
     @media (max-width: 450px) {
@@ -229,6 +243,12 @@ export default function Gallery() {
         return false;
     });
 
+    const isSameDay = (first, second) => {
+        return first.getFullYear() === second.getFullYear() &&
+            first.getMonth() === second.getMonth() &&
+            first.getDate() === second.getDate();
+    }
+
     return (<>
         <Collections
             collections={collections}
@@ -250,21 +270,61 @@ export default function Gallery() {
                             } else {
                                 columns = 1;
                             }
+
+                            const timeStampList: TimeStampListItem[] = [];
+                            let listItemIndex = 0;
+                            let currentDate = -1;
+                            filteredData.forEach((item, index) => {
+                                if (!isSameDay(new Date(item.metadata.creationTime/1000), new Date(currentDate))) {
+                                    currentDate = item.metadata.creationTime/1000;
+                                    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
+                                        weekday: 'short',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    });
+                                    timeStampList.push({
+                                        itemType: ITEM_TYPE.TIME,
+                                        date: dateTimeFormat.format(currentDate),
+                                    });
+                                    timeStampList.push({
+                                        itemType: ITEM_TYPE.TILE,
+                                        items: [item],
+                                        itemStartIndex: index,
+                                    });
+                                    listItemIndex = 1;
+                                } else {
+                                    if (listItemIndex < columns) {
+                                        timeStampList[timeStampList.length - 1].items.push(item);
+                                        listItemIndex++;
+                                    } else {
+                                        listItemIndex = 1;
+                                        timeStampList.push({
+                                            itemType: ITEM_TYPE.TILE,
+                                            items: [item],
+                                            itemStartIndex: index,
+                                        })
+                                    }
+                                }
+                            });
+
                             return (
                                 <List
-                                    itemSize={200}
+                                    itemSize={(index) => timeStampList[index].itemType === ITEM_TYPE.TIME ? 30 : 200}
                                     height={height}
                                     width={width}
-                                    itemCount={Math.ceil(filteredData.length / columns)}
+                                    itemCount={timeStampList.length}
                                 >
                                     {({ index, style }) => {
-                                        const arr = [];
-                                        for (let i = 0; i < columns; i++) {
-                                            arr.push(index * columns + i);
-                                        }
                                         return (<ListItem style={style}>
                                             <ListContainer>
-                                                {arr.map(i => filteredData[i] && getThumbnail(filteredData, i))}
+                                                {
+                                                    timeStampList[index].itemType === ITEM_TYPE.TIME
+                                                        ? timeStampList[index].date
+                                                        : timeStampList[index].items.map((item, idx) =>{
+                                                            return getThumbnail(filteredData, timeStampList[index].itemStartIndex + idx);
+                                                        })
+                                                }
                                             </ListContainer>
                                         </ListItem>);
                                     }}

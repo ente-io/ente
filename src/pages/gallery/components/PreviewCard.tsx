@@ -12,7 +12,7 @@ interface IProps {
 
 const Cont = styled.div<{ disabled: boolean }>`
     background: #555 url(/image.svg) no-repeat center;
-    margin: 0 4px;
+    margin-right: 8px;
     display: inline-block;
     width: 192px;
     height: 192px;

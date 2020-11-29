@@ -13,17 +13,18 @@ const Container = styled.div`
     overflow-y: hidden;
     height: 40px;
     display: flex;
+    max-width: 100%;
 
     @media (min-width: 1000px) {
         width: 1000px;
     }
 
     @media (min-width: 450px) and (max-width: 1000px) {
-        max-width: 600px;
+        width: 600px;
     }
 
     @media (max-width: 450px) {
-        max-width: 100%;
+        width: 100%;
     }
 `;
 
