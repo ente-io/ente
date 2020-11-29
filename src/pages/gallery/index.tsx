@@ -72,6 +72,10 @@ const ListContainer = styled.div`
     }
 `;
 
+const DateContainer = styled.div`
+    padding: 0 4px;
+`;
+
 const PAGE_SIZE = 12;
 const COLUMNS = 3;
 
@@ -320,7 +324,7 @@ export default function Gallery() {
                                             <ListContainer>
                                                 {
                                                     timeStampList[index].itemType === ITEM_TYPE.TIME
-                                                        ? timeStampList[index].date
+                                                        ? <DateContainer>{timeStampList[index].date}</DateContainer>
                                                         : timeStampList[index].items.map((item, idx) =>{
                                                             return getThumbnail(filteredData, timeStampList[index].itemStartIndex + idx);
                                                         })
