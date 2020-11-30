@@ -31,19 +31,31 @@ final _logger = Logger("FileUtil");
 
 Future<void> deleteFilesFromEverywhere(List<File> files) async {
   final localIDs = List<String>();
-  bool hasUploadedFiles = false;
   for (final file in files) {
     if (file.localID != null) {
       localIDs.add(file.localID);
     }
-    if (file.uploadedFileID != null) {
+  }
+  final deletedIDs =
+      (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
+  bool hasUploadedFiles = false;
+  for (final file in files) {
+    if (file.localID != null) {
+      // Remove only those files that have been removed from disk
+      if (deletedIDs.contains(file.localID)) {
+        if (file.uploadedFileID != null) {
+          hasUploadedFiles = true;
+          await FilesDB.instance.markForDeletion(file.uploadedFileID);
+        } else {
+          await FilesDB.instance.deleteLocalFile(file.localID);
+        }
+      }
+    } else {
       hasUploadedFiles = true;
       await FilesDB.instance.markForDeletion(file.uploadedFileID);
-    } else {
-      await FilesDB.instance.deleteLocalFile(file.localID);
     }
   }
-  await PhotoManager.editor.deleteWithIds(localIDs);
+
   await FileRepository.instance.reloadFiles();
   if (hasUploadedFiles) {
     Bus.instance.fire(CollectionUpdatedEvent());
