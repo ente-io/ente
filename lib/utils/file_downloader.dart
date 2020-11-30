@@ -47,8 +47,13 @@ class DiffFetcher {
                     CollectionUpdatedEvent(collectionID: file.collectionID));
                 continue;
               }
-              file.ownerID = item["ownerID"];
               file.updationTime = item["updationTime"];
+              final existingFile = await FilesDB.instance
+                  .getUploadedFile(file.uploadedFileID, file.collectionID);
+              if (existingFile.updationTime == file.updationTime) {
+                continue;
+              }
+              file.ownerID = item["ownerID"];
               file.isEncrypted = true;
               file.encryptedKey = item["encryptedKey"];
               file.keyDecryptionNonce = item["keyDecryptionNonce"];
