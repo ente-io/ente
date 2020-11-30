@@ -38,7 +38,7 @@ EncryptionResult chachaEncryptFile(Map<String, dynamic> args) {
   logger.info("Encrypting file of size " + sourceFileLength.toString());
 
   final inputFile = sourceFile.openSync(mode: io.FileMode.read);
-  final key = Sodium.cryptoSecretstreamXchacha20poly1305Keygen();
+  final key = args["key"] ?? Sodium.cryptoSecretstreamXchacha20poly1305Keygen();
   final initPushResult =
       Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
   var bytesRead = 0;
@@ -155,11 +155,13 @@ class CryptoUtil {
 
   static Future<EncryptionResult> encryptFile(
     String sourceFilePath,
-    String destinationFilePath,
-  ) {
+    String destinationFilePath, {
+    Uint8List key,
+  }) {
     final args = Map<String, dynamic>();
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
+    args["key"] = key;
     return Computer().compute(chachaEncryptFile, param: args);
   }
 

@@ -4,13 +4,13 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/upload_url.dart';
@@ -152,13 +152,26 @@ class FileUploader {
     final encryptedThumbnailPath =
         tempDirectory + file.generatedID.toString() + "_thumbnail.encrypted";
     final sourceFile = (await (await file.getAsset()).originFile);
+
     try {
+      var key;
+      var isAlreadyUploadedFile = file.uploadedFileID != null;
+      if (isAlreadyUploadedFile) {
+        key = decryptFileKey(file);
+      } else {
+        key = null;
+      }
+
       if (io.File(encryptedFilePath).existsSync()) {
         io.File(encryptedFilePath).deleteSync();
       }
       final encryptedFile = io.File(encryptedFilePath);
-      final fileAttributes =
-          await CryptoUtil.encryptFile(sourceFile.path, encryptedFilePath);
+
+      final fileAttributes = await CryptoUtil.encryptFile(
+        sourceFile.path,
+        encryptedFilePath,
+        key: key,
+      );
 
       var thumbnailData = (await (await file.getAsset()).thumbDataWithSize(
         THUMBNAIL_LARGE_SIZE,
@@ -201,15 +214,6 @@ class FileUploader {
 
       final encryptedMetadataData = CryptoUtil.encryptChaCha(
           utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);
-
-      final encryptedFileKeyData = CryptoUtil.encryptSync(
-        fileAttributes.key,
-        CollectionsService.instance.getCollectionKey(collectionID),
-      );
-
-      final encryptedKey =
-          Sodium.bin2base64(encryptedFileKeyData.encryptedData);
-      final keyDecryptionNonce = Sodium.bin2base64(encryptedFileKeyData.nonce);
       final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
           Sodium.bin2base64(encryptedThumbnailData.header);
@@ -217,41 +221,29 @@ class FileUploader {
           Sodium.bin2base64(encryptedMetadataData.encryptedData);
       final metadataDecryptionHeader =
           Sodium.bin2base64(encryptedMetadataData.header);
-
-      final request = {
-        "collectionID": collectionID,
-        "encryptedKey": encryptedKey,
-        "keyDecryptionNonce": keyDecryptionNonce,
-        "file": {
-          "objectKey": fileObjectKey,
-          "decryptionHeader": fileDecryptionHeader,
-        },
-        "thumbnail": {
-          "objectKey": thumbnailObjectKey,
-          "decryptionHeader": thumbnailDecryptionHeader,
-        },
-        "metadata": {
-          "encryptedData": encryptedMetadata,
-          "decryptionHeader": metadataDecryptionHeader,
-        }
-      };
-      final response = await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/files",
-        options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-        data: request,
-      );
-      final data = response.data;
-      file.uploadedFileID = data["id"];
-      file.collectionID = collectionID;
-      file.updationTime = data["updationTime"];
-      file.ownerID = data["ownerID"];
-      file.encryptedKey = encryptedKey;
-      file.keyDecryptionNonce = keyDecryptionNonce;
-      file.fileDecryptionHeader = fileDecryptionHeader;
-      file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
-      file.metadataDecryptionHeader = metadataDecryptionHeader;
-      return file;
+      if (isAlreadyUploadedFile) {
+        return await _updateFile(
+          file,
+          fileObjectKey,
+          fileDecryptionHeader,
+          thumbnailObjectKey,
+          thumbnailDecryptionHeader,
+          encryptedMetadata,
+          metadataDecryptionHeader,
+        );
+      } else {
+        return await _uploadFile(
+          file,
+          collectionID,
+          fileAttributes,
+          fileObjectKey,
+          fileDecryptionHeader,
+          thumbnailObjectKey,
+          thumbnailDecryptionHeader,
+          encryptedMetadata,
+          metadataDecryptionHeader,
+        );
+      }
     } catch (e, s) {
       _logger.severe(
           "File upload failed for " + file.generatedID.toString(), e, s);
@@ -267,6 +259,99 @@ class FileUploader {
         io.File(encryptedThumbnailPath).deleteSync();
       }
     }
+  }
+
+  Future<File> _uploadFile(
+    File file,
+    int collectionID,
+    EncryptionResult fileAttributes,
+    String fileObjectKey,
+    String fileDecryptionHeader,
+    String thumbnailObjectKey,
+    String thumbnailDecryptionHeader,
+    String encryptedMetadata,
+    String metadataDecryptionHeader,
+  ) async {
+    final encryptedFileKeyData = CryptoUtil.encryptSync(
+      fileAttributes.key,
+      CollectionsService.instance.getCollectionKey(collectionID),
+    );
+    final encryptedKey = Sodium.bin2base64(encryptedFileKeyData.encryptedData);
+    final keyDecryptionNonce = Sodium.bin2base64(encryptedFileKeyData.nonce);
+    final request = {
+      "collectionID": collectionID,
+      "encryptedKey": encryptedKey,
+      "keyDecryptionNonce": keyDecryptionNonce,
+      "file": {
+        "objectKey": fileObjectKey,
+        "decryptionHeader": fileDecryptionHeader,
+      },
+      "thumbnail": {
+        "objectKey": thumbnailObjectKey,
+        "decryptionHeader": thumbnailDecryptionHeader,
+      },
+      "metadata": {
+        "encryptedData": encryptedMetadata,
+        "decryptionHeader": metadataDecryptionHeader,
+      }
+    };
+    final response = await _dio.post(
+      Configuration.instance.getHttpEndpoint() + "/files",
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      data: request,
+    );
+    final data = response.data;
+    file.uploadedFileID = data["id"];
+    file.collectionID = collectionID;
+    file.updationTime = data["updationTime"];
+    file.ownerID = data["ownerID"];
+    file.encryptedKey = encryptedKey;
+    file.keyDecryptionNonce = keyDecryptionNonce;
+    file.fileDecryptionHeader = fileDecryptionHeader;
+    file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
+    file.metadataDecryptionHeader = metadataDecryptionHeader;
+    return file;
+  }
+
+  Future<File> _updateFile(
+    File file,
+    String fileObjectKey,
+    String fileDecryptionHeader,
+    String thumbnailObjectKey,
+    String thumbnailDecryptionHeader,
+    String encryptedMetadata,
+    String metadataDecryptionHeader,
+  ) async {
+    final request = {
+      "id": file.uploadedFileID,
+      "file": {
+        "objectKey": fileObjectKey,
+        "decryptionHeader": fileDecryptionHeader,
+      },
+      "thumbnail": {
+        "objectKey": thumbnailObjectKey,
+        "decryptionHeader": thumbnailDecryptionHeader,
+      },
+      "metadata": {
+        "encryptedData": encryptedMetadata,
+        "decryptionHeader": metadataDecryptionHeader,
+      }
+    };
+    final response = await _dio.post(
+      Configuration.instance.getHttpEndpoint() + "/files",
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      data: request,
+    );
+    final data = response.data;
+    file.uploadedFileID = data["id"];
+    file.updationTime = data["updationTime"];
+    file.ownerID = data["ownerID"];
+    file.fileDecryptionHeader = fileDecryptionHeader;
+    file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
+    file.metadataDecryptionHeader = metadataDecryptionHeader;
+    return file;
   }
 
   Future<UploadURL> _getUploadURL() async {
