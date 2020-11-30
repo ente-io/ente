@@ -10,6 +10,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/repositories/file_repository.dart';
@@ -122,22 +123,23 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime));
     final collectionsWithThumbnail = List<CollectionWithThumbnail>();
     final collections = collectionsService.getCollections();
-    final ownedCollectionIDs = List<int>();
     for (final c in collections) {
       if (c.owner.id == userID) {
-        ownedCollectionIDs.add(c.id);
+        final thumbnail =
+            await FilesDB.instance.getLatestFileInCollection(c.id);
+        if (thumbnail == null) {
+          continue;
+        }
+        final lastUpdatedFile =
+            await FilesDB.instance.getLastModifiedFileInCollection(c.id);
+        collectionsWithThumbnail
+            .add(CollectionWithThumbnail(c, thumbnail, lastUpdatedFile));
       }
     }
-    final thumbnails =
-        await filesDB.getLastCreatedFilesInCollections(ownedCollectionIDs);
-    final lastUpdatedFiles =
-        await filesDB.getLastUpdatedFilesInCollections(ownedCollectionIDs);
-    for (final collectionID in thumbnails.keys) {
-      collectionsWithThumbnail.add(CollectionWithThumbnail(
-          collectionsService.getCollectionByID(collectionID),
-          thumbnails[collectionID],
-          lastUpdatedFiles[collectionID]));
-    }
+    collectionsWithThumbnail.sort((first, second) {
+      return second.lastUpdatedFile.updationTime
+          .compareTo(first.lastUpdatedFile.updationTime);
+    });
 
     return CollectionItems(folders, collectionsWithThumbnail);
   }
