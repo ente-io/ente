@@ -26,19 +26,6 @@ class File {
 
   File();
 
-  File.fromJson(Map<String, dynamic> json) {
-    uploadedFileID = json["id"];
-    ownerID = json["ownerID"];
-    collectionID = json["collectionID"];
-    localID = json["deviceFileID"];
-    deviceFolder = json["deviceFolder"];
-    title = json["title"];
-    fileType = getFileType(json["fileType"]);
-    creationTime = json["creationTime"];
-    modificationTime = json["modificationTime"];
-    updationTime = json["updationTime"];
-  }
-
   static Future<File> fromAsset(
       AssetPathEntity pathEntity, AssetEntity asset) async {
     File file = File();
