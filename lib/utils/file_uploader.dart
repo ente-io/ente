@@ -146,116 +146,125 @@ class FileUploader {
       throw WiFiUnavailableError();
     }
 
-    final encryptedFileName = file.generatedID.toString() + ".encrypted";
     final tempDirectory = Configuration.instance.getTempDirectory();
-    final encryptedFilePath = tempDirectory + encryptedFileName;
-
-    final sourceFile = (await (await file.getAsset()).originFile);
-    final encryptedFile = io.File(encryptedFilePath);
-    final fileAttributes =
-        await CryptoUtil.encryptFile(sourceFile.path, encryptedFilePath);
-
-    var thumbnailData = (await (await file.getAsset()).thumbDataWithSize(
-      THUMBNAIL_LARGE_SIZE,
-      THUMBNAIL_LARGE_SIZE,
-      quality: 50,
-    ));
-    if (thumbnailData == null) {
-      _logger.severe("Could not generate thumbnail for " + file.toString());
-      throw InvalidFileError();
-    }
-    final thumbnailSize = thumbnailData.length;
-    if (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
-      thumbnailData = await compressThumbnail(thumbnailData);
-      _logger.info("Thumbnail size " + thumbnailSize.toString());
-      _logger
-          .info("Compressed thumbnail size " + thumbnailData.length.toString());
-    }
-
-    final encryptedThumbnailName =
-        file.generatedID.toString() + "_thumbnail.encrypted";
-    final encryptedThumbnailPath = tempDirectory + encryptedThumbnailName;
-    final encryptedThumbnailData =
-        CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key);
-    final encryptedThumbnail = io.File(encryptedThumbnailPath);
-    encryptedThumbnail.writeAsBytesSync(encryptedThumbnailData.encryptedData);
-
-    final fileUploadURL = await _getUploadURL();
-    String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
-
-    final thumbnailUploadURL = await _getUploadURL();
-    String thumbnailObjectKey =
-        await _putFile(thumbnailUploadURL, encryptedThumbnail);
-
-    // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
-    if (file.location.latitude == 0 && file.location.longitude == 0) {
-      final latLong = await (await file.getAsset()).latlngAsync();
-      file.location = Location(latLong.latitude, latLong.longitude);
-    }
-
-    final encryptedMetadataData = CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);
-
-    final encryptedFileKeyData = CryptoUtil.encryptSync(
-      fileAttributes.key,
-      CollectionsService.instance.getCollectionKey(collectionID),
-    );
-
-    final encryptedKey = Sodium.bin2base64(encryptedFileKeyData.encryptedData);
-    final keyDecryptionNonce = Sodium.bin2base64(encryptedFileKeyData.nonce);
-    final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);
-    final thumbnailDecryptionHeader =
-        Sodium.bin2base64(encryptedThumbnailData.header);
-    final encryptedMetadata =
-        Sodium.bin2base64(encryptedMetadataData.encryptedData);
-    final metadataDecryptionHeader =
-        Sodium.bin2base64(encryptedMetadataData.header);
-
-    final request = {
-      "collectionID": collectionID,
-      "encryptedKey": encryptedKey,
-      "keyDecryptionNonce": keyDecryptionNonce,
-      "file": {
-        "objectKey": fileObjectKey,
-        "decryptionHeader": fileDecryptionHeader,
-      },
-      "thumbnail": {
-        "objectKey": thumbnailObjectKey,
-        "decryptionHeader": thumbnailDecryptionHeader,
-      },
-      "metadata": {
-        "encryptedData": encryptedMetadata,
-        "decryptionHeader": metadataDecryptionHeader,
-      }
-    };
-    var response;
+    final encryptedFilePath =
+        tempDirectory + file.generatedID.toString() + ".encrypted";
+    final encryptedThumbnailPath =
+        tempDirectory + file.generatedID.toString() + "_thumbnail.encrypted";
     try {
-      response = await _dio.post(
+      final sourceFile = (await (await file.getAsset()).originFile);
+      if (io.File(encryptedFilePath).existsSync()) {
+        io.File(encryptedFilePath).deleteSync();
+      }
+      final encryptedFile = io.File(encryptedFilePath);
+      final fileAttributes =
+          await CryptoUtil.encryptFile(sourceFile.path, encryptedFilePath);
+
+      var thumbnailData = (await (await file.getAsset()).thumbDataWithSize(
+        THUMBNAIL_LARGE_SIZE,
+        THUMBNAIL_LARGE_SIZE,
+        quality: 50,
+      ));
+      if (thumbnailData == null) {
+        _logger.severe("Could not generate thumbnail for " + file.toString());
+        throw InvalidFileError();
+      }
+      final thumbnailSize = thumbnailData.length;
+      if (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
+        thumbnailData = await compressThumbnail(thumbnailData);
+        _logger.info("Thumbnail size " + thumbnailSize.toString());
+        _logger.info(
+            "Compressed thumbnail size " + thumbnailData.length.toString());
+      }
+
+      final encryptedThumbnailData =
+          CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key);
+      if (io.File(encryptedThumbnailPath).existsSync()) {
+        io.File(encryptedThumbnailPath).deleteSync();
+      }
+      final encryptedThumbnailFile = io.File(encryptedThumbnailPath);
+      encryptedThumbnailFile
+          .writeAsBytesSync(encryptedThumbnailData.encryptedData);
+
+      final fileUploadURL = await _getUploadURL();
+      String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
+
+      final thumbnailUploadURL = await _getUploadURL();
+      String thumbnailObjectKey =
+          await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
+
+      // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
+      if (file.location.latitude == 0 && file.location.longitude == 0) {
+        final latLong = await (await file.getAsset()).latlngAsync();
+        file.location = Location(latLong.latitude, latLong.longitude);
+      }
+
+      final encryptedMetadataData = CryptoUtil.encryptChaCha(
+          utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);
+
+      final encryptedFileKeyData = CryptoUtil.encryptSync(
+        fileAttributes.key,
+        CollectionsService.instance.getCollectionKey(collectionID),
+      );
+
+      final encryptedKey =
+          Sodium.bin2base64(encryptedFileKeyData.encryptedData);
+      final keyDecryptionNonce = Sodium.bin2base64(encryptedFileKeyData.nonce);
+      final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);
+      final thumbnailDecryptionHeader =
+          Sodium.bin2base64(encryptedThumbnailData.header);
+      final encryptedMetadata =
+          Sodium.bin2base64(encryptedMetadataData.encryptedData);
+      final metadataDecryptionHeader =
+          Sodium.bin2base64(encryptedMetadataData.header);
+
+      final request = {
+        "collectionID": collectionID,
+        "encryptedKey": encryptedKey,
+        "keyDecryptionNonce": keyDecryptionNonce,
+        "file": {
+          "objectKey": fileObjectKey,
+          "decryptionHeader": fileDecryptionHeader,
+        },
+        "thumbnail": {
+          "objectKey": thumbnailObjectKey,
+          "decryptionHeader": thumbnailDecryptionHeader,
+        },
+        "metadata": {
+          "encryptedData": encryptedMetadata,
+          "decryptionHeader": metadataDecryptionHeader,
+        }
+      };
+      final response = await _dio.post(
         Configuration.instance.getHttpEndpoint() + "/files",
         options: Options(
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         data: request,
       );
+      encryptedFile.deleteSync();
+      encryptedThumbnailFile.deleteSync();
+      final data = response.data;
+      file.uploadedFileID = data["id"];
+      file.collectionID = collectionID;
+      file.updationTime = data["updationTime"];
+      file.ownerID = data["ownerID"];
+      file.encryptedKey = encryptedKey;
+      file.keyDecryptionNonce = keyDecryptionNonce;
+      file.fileDecryptionHeader = fileDecryptionHeader;
+      file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
+      file.metadataDecryptionHeader = metadataDecryptionHeader;
+      return file;
     } catch (e, s) {
       _logger.severe(
           "File upload failed for " + file.generatedID.toString(), e, s);
-      encryptedFile.deleteSync();
-      encryptedThumbnail.deleteSync();
+      if (io.File(encryptedFilePath).existsSync()) {
+        io.File(encryptedFilePath).deleteSync();
+      }
+      if (io.File(encryptedThumbnailPath).existsSync()) {
+        io.File(encryptedThumbnailPath).deleteSync();
+      }
       throw e;
     }
-    encryptedFile.deleteSync();
-    encryptedThumbnail.deleteSync();
-    final data = response.data;
-    file.uploadedFileID = data["id"];
-    file.collectionID = collectionID;
-    file.updationTime = data["updationTime"];
-    file.ownerID = data["ownerID"];
-    file.encryptedKey = encryptedKey;
-    file.keyDecryptionNonce = keyDecryptionNonce;
-    file.fileDecryptionHeader = fileDecryptionHeader;
-    file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
-    file.metadataDecryptionHeader = metadataDecryptionHeader;
-    return file;
   }
 
   Future<UploadURL> _getUploadURL() async {
