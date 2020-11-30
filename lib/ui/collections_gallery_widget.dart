@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -110,26 +109,17 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
 
   Future<CollectionItems> _getCollections() async {
     final filesDB = FilesDB.instance;
-    final filesRepo = FileRepository.instance;
     final collectionsService = CollectionsService.instance;
     final userID = Configuration.instance.getUserID();
     final folders = List<DeviceFolder>();
-    final files = filesRepo.hasLoadedFiles
-        ? filesRepo.files
-        : await filesRepo.loadFiles();
-    final thumbnailPathMap = Map<String, File>();
-    for (final file in files) {
-      final path = file.deviceFolder;
-      if (file.localID != null) {
-        if (thumbnailPathMap[path] == null) {
-          thumbnailPathMap[path] = file;
-        }
-      }
-    }
-    for (final path in thumbnailPathMap.keys) {
+    final paths = await filesDB.getLocalPaths();
+    for (final path in paths) {
       final folderName = p.basename(path);
-      folders.add(DeviceFolder(folderName, path, thumbnailPathMap[path]));
+      folders.add(DeviceFolder(
+          folderName, path, await filesDB.getLastCreatedFileInPath(path)));
     }
+    folders.sort((first, second) =>
+        second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime));
     final collectionsWithThumbnail = List<CollectionWithThumbnail>();
     final collections = collectionsService.getCollections();
     final ownedCollectionIDs = List<int>();

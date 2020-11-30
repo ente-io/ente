@@ -461,6 +461,7 @@ class FilesDB {
     final rows = await db.query(
       table,
       columns: [columnDeviceFolder],
+      where: '$columnLocalID IS NOT NULL',
       distinct: true,
     );
     List<String> result = List<String>();
@@ -476,6 +477,22 @@ class FilesDB {
       table,
       where: '$columnCollectionID = ? AND $columnIsDeleted = 0',
       whereArgs: [collectionID],
+      orderBy: '$columnCreationTime DESC',
+      limit: 1,
+    );
+    if (rows.isNotEmpty) {
+      return _getFileFromRow(rows[0]);
+    } else {
+      return null;
+    }
+  }
+
+  Future<File> getLastCreatedFileInPath(String path) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      where: '$columnDeviceFolder = ? AND $columnIsDeleted = 0',
+      whereArgs: [path],
       orderBy: '$columnCreationTime DESC',
       limit: 1,
     );
