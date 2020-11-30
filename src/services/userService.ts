@@ -5,7 +5,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 const ENDPOINT = getEndpoint();
 
 export const getOtt = (email: string) => {
-    return HTTPService.get(`${ENDPOINT}/users/ott`, { email })
+    return HTTPService.get(`${ENDPOINT}/users/ott`, { 'email': email, 'client': 'web' })
 }
 
 export const verifyOtt = (email: string, ott: string) => {
