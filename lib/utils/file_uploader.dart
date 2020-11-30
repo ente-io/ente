@@ -125,7 +125,6 @@ class FileUploader {
     _currentlyUploading++;
     try {
       final uploadedFile = await _tryToUpload(file, collectionID, forcedUpload);
-      await FilesDB.instance.update(uploadedFile);
       _queue.remove(file.generatedID).completer.complete(uploadedFile);
     } catch (e) {
       _queue.remove(file.generatedID).completer.completeError(e);
@@ -222,7 +221,7 @@ class FileUploader {
       final metadataDecryptionHeader =
           Sodium.bin2base64(encryptedMetadataData.header);
       if (isAlreadyUploadedFile) {
-        return await _updateFile(
+        final updatedFile = await _updateFile(
           file,
           fileObjectKey,
           fileDecryptionHeader,
@@ -231,8 +230,11 @@ class FileUploader {
           encryptedMetadata,
           metadataDecryptionHeader,
         );
+        // Update across all collections
+        await FilesDB.instance.updateUploadedFileAcrossCollections(updatedFile);
+        return updatedFile;
       } else {
-        return await _uploadFile(
+        final uploadedFile = await _uploadFile(
           file,
           collectionID,
           fileAttributes,
@@ -243,6 +245,8 @@ class FileUploader {
           encryptedMetadata,
           metadataDecryptionHeader,
         );
+        await FilesDB.instance.update(uploadedFile);
+        return uploadedFile;
       }
     } catch (e, s) {
       _logger.severe(

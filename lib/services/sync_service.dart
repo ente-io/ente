@@ -30,6 +30,7 @@ class SyncService {
   final _uploader = FileUploader.instance;
   final _collectionsService = CollectionsService.instance;
   final _downloader = DiffFetcher();
+  final _uploadedLocalFileIDs = Set<String>();
   bool _isSyncInProgress = false;
   bool _syncStopRequested = false;
   Future<void> _existingSync;
@@ -67,6 +68,7 @@ class SyncService {
   }
 
   Future<void> sync() async {
+    _uploadedLocalFileIDs.addAll(await _db.getUploadedLocalFileIDs());
     _syncStopRequested = false;
     if (_isSyncInProgress) {
       _logger.warning("Sync already in progress, skipping.");
@@ -147,7 +149,20 @@ class SyncService {
     final files = await getDeviceFiles(fromTime, toTime);
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
-      // Deal with file updates
+      final updatedFiles =
+          files.where((file) => _uploadedLocalFileIDs.contains(file.localID));
+      _logger.info(updatedFiles.length.toString() + " files were updated.");
+      for (final file in updatedFiles) {
+        await _db.updateUploadedFile(
+          file.localID,
+          file.title,
+          file.location,
+          file.creationTime,
+          file.modificationTime,
+          null,
+        );
+      }
+      files.removeWhere((file) => _uploadedLocalFileIDs.contains(file.localID));
       await _db.insertMultiple(files);
       _logger.info("Inserted " + files.length.toString() + " files.");
       await _prefs.setInt(_dbUpdationTimeKey, toTime);
@@ -201,30 +216,53 @@ class SyncService {
 
   Future<void> _uploadDiff() async {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
-    List<File> filesToBeUploaded =
+    final filesToBeUploaded =
         await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
     if (kDebugMode) {
-      filesToBeUploaded = filesToBeUploaded
-          .where((element) => element.fileType != FileType.video)
-          .toList();
+      filesToBeUploaded
+          .removeWhere((element) => element.fileType == FileType.video);
     }
     final futures = List<Future>();
-    for (int i = 0; i < filesToBeUploaded.length; i++) {
+
+    final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated();
+
+    int uploadCounter = 0;
+    final totalUploads = filesToBeUploaded.length + updatedFileIDs.length;
+
+    for (final uploadedFileID in updatedFileIDs) {
       if (_syncStopRequested) {
         _syncStopRequested = false;
         Bus.instance
             .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
         return;
       }
-      File file = filesToBeUploaded[i];
+      final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
+      final future = _uploader.upload(file, file.collectionID).then((value) {
+        uploadCounter++;
+        Bus.instance
+            .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
+            completed: uploadCounter, total: totalUploads));
+      });
+      futures.add(future);
+    }
+
+    for (final file in filesToBeUploaded) {
+      if (_syncStopRequested) {
+        _syncStopRequested = false;
+        Bus.instance
+            .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
+        return;
+      }
       final collectionID = (await CollectionsService.instance
               .getOrCreateForPath(file.deviceFolder))
           .id;
       final future = _uploader.upload(file, collectionID).then((value) {
+        uploadCounter++;
         Bus.instance
             .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
-            completed: i + 1, total: filesToBeUploaded.length));
+            completed: uploadCounter, total: totalUploads));
       });
       futures.add(future);
     }

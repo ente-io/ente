@@ -273,6 +273,79 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
+  Future<List<int>> getUploadedFileIDsToBeUpdated() async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      columns: [columnUploadedFileID],
+      where:
+          '($columnUploadedFileID IS NOT NULL AND $columnUpdationTime IS NULL AND $columnIsDeleted = 0)',
+      orderBy: '$columnCreationTime DESC',
+      distinct: true,
+    );
+    final uploadedFileIDs = List<int>();
+    for (final row in rows) {
+      uploadedFileIDs.add(row[columnUploadedFileID]);
+    }
+    return uploadedFileIDs;
+  }
+
+  Future<File> getUploadedFileInAnyCollection(int uploadedFileID) async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnUploadedFileID = ?',
+      whereArgs: [
+        uploadedFileID,
+      ],
+      limit: 1,
+    );
+    if (results.isEmpty) {
+      return null;
+    }
+    return _convertToFiles(results)[0];
+  }
+
+  Future<Set<String>> getUploadedLocalFileIDs() async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      columns: [columnLocalID],
+      distinct: true,
+      where:
+          '$columnLocalID IS NOT NULL AND $columnUploadedFileID IS NOT NULL AND $columnIsDeleted = 0',
+    );
+    final result = Set<String>();
+    for (final row in rows) {
+      result.add(row[columnLocalID]);
+    }
+    return result;
+  }
+
+  Future<int> updateUploadedFile(
+    String localID,
+    String title,
+    Location location,
+    int creationTime,
+    int modificationTime,
+    int updationTime,
+  ) async {
+    final db = await instance.database;
+    return await db.update(
+      table,
+      {
+        columnTitle: title,
+        columnLatitude: location.latitude,
+        columnLongitude: location.longitude,
+        columnCreationTime: creationTime,
+        columnModificationTime: modificationTime,
+        columnUpdationTime: updationTime,
+      },
+      where: '$columnLocalID = ?',
+      whereArgs: [localID],
+    );
+  }
+
   Future<Map<int, File>> getLastCreatedFilesInCollections(
       List<int> collectionIDs) async {
     final db = await instance.database;
@@ -395,6 +468,16 @@ class FilesDB {
       _getRowForFile(file),
       where: '$columnGeneratedID = ?',
       whereArgs: [file.generatedID],
+    );
+  }
+
+  Future<int> updateUploadedFileAcrossCollections(File file) async {
+    final db = await instance.database;
+    return await db.update(
+      table,
+      _getRowForFileWithoutCollection(file),
+      where: '$columnUploadedFileID = ?',
+      whereArgs: [file.uploadedFileID],
     );
   }
 
@@ -567,6 +650,37 @@ class FilesDB {
     row[columnUpdationTime] = file.updationTime;
     row[columnEncryptedKey] = file.encryptedKey;
     row[columnKeyDecryptionNonce] = file.keyDecryptionNonce;
+    row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
+    row[columnThumbnailDecryptionHeader] = file.thumbnailDecryptionHeader;
+    row[columnMetadataDecryptionHeader] = file.metadataDecryptionHeader;
+    return row;
+  }
+
+  Map<String, dynamic> _getRowForFileWithoutCollection(File file) {
+    final row = new Map<String, dynamic>();
+    row[columnLocalID] = file.localID;
+    row[columnUploadedFileID] = file.uploadedFileID;
+    row[columnOwnerID] = file.ownerID;
+    row[columnTitle] = file.title;
+    row[columnDeviceFolder] = file.deviceFolder;
+    if (file.location != null) {
+      row[columnLatitude] = file.location.latitude;
+      row[columnLongitude] = file.location.longitude;
+    }
+    switch (file.fileType) {
+      case FileType.image:
+        row[columnFileType] = 0;
+        break;
+      case FileType.video:
+        row[columnFileType] = 1;
+        break;
+      default:
+        row[columnFileType] = -1;
+    }
+    row[columnIsEncrypted] = file.isEncrypted ? 1 : 0;
+    row[columnCreationTime] = file.creationTime;
+    row[columnModificationTime] = file.modificationTime;
+    row[columnUpdationTime] = file.updationTime;
     row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
     row[columnThumbnailDecryptionHeader] = file.thumbnailDecryptionHeader;
     row[columnMetadataDecryptionHeader] = file.metadataDecryptionHeader;
