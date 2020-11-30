@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -58,6 +59,11 @@ class SyncService {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+    if (Platform.isIOS) {
+      _logger.info("Clearing file cache");
+      await PhotoManager.clearFileCache();
+      _logger.info("Cleared file cache");
+    }
   }
 
   Future<void> sync() async {
@@ -141,6 +147,7 @@ class SyncService {
     final files = await getDeviceFiles(fromTime, toTime);
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
+      // Deal with file updates
       await _db.insertMultiple(files);
       _logger.info("Inserted " + files.length.toString() + " files.");
       await _prefs.setInt(_dbUpdationTimeKey, toTime);

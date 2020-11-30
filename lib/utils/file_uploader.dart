@@ -151,8 +151,8 @@ class FileUploader {
         tempDirectory + file.generatedID.toString() + ".encrypted";
     final encryptedThumbnailPath =
         tempDirectory + file.generatedID.toString() + "_thumbnail.encrypted";
+    final sourceFile = (await (await file.getAsset()).originFile);
     try {
-      final sourceFile = (await (await file.getAsset()).originFile);
       if (io.File(encryptedFilePath).existsSync()) {
         io.File(encryptedFilePath).deleteSync();
       }
@@ -241,8 +241,6 @@ class FileUploader {
             headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         data: request,
       );
-      encryptedFile.deleteSync();
-      encryptedThumbnailFile.deleteSync();
       final data = response.data;
       file.uploadedFileID = data["id"];
       file.collectionID = collectionID;
@@ -257,13 +255,17 @@ class FileUploader {
     } catch (e, s) {
       _logger.severe(
           "File upload failed for " + file.generatedID.toString(), e, s);
+      throw e;
+    } finally {
+      if (io.Platform.isIOS) {
+        sourceFile.deleteSync();
+      }
       if (io.File(encryptedFilePath).existsSync()) {
         io.File(encryptedFilePath).deleteSync();
       }
       if (io.File(encryptedThumbnailPath).existsSync()) {
         io.File(encryptedThumbnailPath).deleteSync();
       }
-      throw e;
     }
   }
 
