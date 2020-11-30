@@ -40,6 +40,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return FutureBuilder<SharedCollections>(
       future:
           CollectionsDB.instance.getAllCollections().then((collections) async {
