@@ -50,7 +50,8 @@ class DiffFetcher {
               file.updationTime = item["updationTime"];
               final existingFile = await FilesDB.instance
                   .getUploadedFile(file.uploadedFileID, file.collectionID);
-              if (existingFile.updationTime == file.updationTime) {
+              if (existingFile != null &&
+                  existingFile.updationTime == file.updationTime) {
                 continue;
               }
               file.ownerID = item["ownerID"];
