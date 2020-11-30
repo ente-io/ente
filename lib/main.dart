@@ -19,6 +19,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SuperLogging.logDirPath = (await getTemporaryDirectory()).path + "/logs";
   SuperLogging.enableInDebugMode = true;
+  SuperLogging.maxLogFiles = 5;
   await SuperLogging.main(_main);
 }
 
