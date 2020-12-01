@@ -124,7 +124,7 @@ class SyncService {
     final lastDBUpdationTime = _prefs.getInt(_dbUpdationTimeKey);
     if (lastDBUpdationTime != null && lastDBUpdationTime != 0) {
       await _loadAndStorePhotos(
-          0, syncStartTime, existingLocalFileIDs);
+          lastDBUpdationTime, syncStartTime, existingLocalFileIDs);
     } else {
       // Load from 0 - 01.01.2010
       var startTime = 0;
