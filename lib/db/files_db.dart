@@ -279,7 +279,7 @@ class FilesDB {
       table,
       columns: [columnUploadedFileID],
       where:
-          '($columnUploadedFileID IS NOT NULL AND $columnUpdationTime IS NULL AND $columnIsDeleted = 0)',
+          '($columnLocalID IS NOT NULL AND $columnUploadedFileID IS NOT NULL AND $columnUpdationTime IS NOT NULL AND $columnIsDeleted = 0)',
       orderBy: '$columnCreationTime DESC',
       distinct: true,
     );
@@ -573,7 +573,8 @@ class FilesDB {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '$columnDeviceFolder = ? AND $columnIsDeleted = 0',
+      where:
+          '$columnDeviceFolder = ? AND $columnLocalID IS NOT NULL AND $columnIsDeleted = 0',
       whereArgs: [path],
       orderBy: '$columnCreationTime DESC',
       limit: 1,
