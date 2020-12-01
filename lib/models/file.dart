@@ -116,9 +116,8 @@ class File {
   @override
   String toString() {
     return '''File(generatedId: $generatedID, uploadedFileId: $uploadedFileID, 
-      ownerID: $ownerID, collectionID: $collectionID,
-      localId: $localID, title: $title, deviceFolder: $deviceFolder,
-      location: $location, fileType: $fileType, creationTime: $creationTime, 
+      localID: $localID, ownerID: $ownerID, collectionID: $collectionID,
+      fileType: $fileType, creationTime: $creationTime, 
       modificationTime: $modificationTime, updationTime: $updationTime)''';
   }
 
