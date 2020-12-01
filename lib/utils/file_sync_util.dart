@@ -34,6 +34,10 @@ Future<List<AssetPathEntity>> _getGalleryList(
     min: DateTime.fromMicrosecondsSinceEpoch(fromTime),
     max: DateTime.fromMicrosecondsSinceEpoch(toTime),
   );
+  filterOptionGroup.updateTimeCond = DateTimeCond(
+    min: DateTime.fromMicrosecondsSinceEpoch(fromTime),
+    max: DateTime.fromMicrosecondsSinceEpoch(toTime),
+  );
   final galleryList = await PhotoManager.getAssetPathList(
     hasAll: true,
     type: RequestType.common,
