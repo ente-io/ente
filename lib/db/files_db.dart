@@ -279,7 +279,7 @@ class FilesDB {
       table,
       columns: [columnUploadedFileID],
       where:
-          '($columnLocalID IS NOT NULL AND $columnUploadedFileID IS NOT NULL AND $columnUpdationTime IS NOT NULL AND $columnIsDeleted = 0)',
+          '($columnLocalID IS NOT NULL AND $columnUploadedFileID IS NOT NULL AND $columnUpdationTime IS NULL AND $columnIsDeleted = 0)',
       orderBy: '$columnCreationTime DESC',
       distinct: true,
     );
