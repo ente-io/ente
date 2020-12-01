@@ -130,15 +130,13 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         if (thumbnail == null) {
           continue;
         }
-        final lastUpdatedFile =
-            await FilesDB.instance.getLastModifiedFileInCollection(c.id);
         collectionsWithThumbnail
-            .add(CollectionWithThumbnail(c, thumbnail, lastUpdatedFile));
+            .add(CollectionWithThumbnail(c, thumbnail, null));
       }
     }
     collectionsWithThumbnail.sort((first, second) {
-      return second.lastUpdatedFile.updationTime
-          .compareTo(first.lastUpdatedFile.updationTime);
+      return second.thumbnail.updationTime
+          .compareTo(first.thumbnail.updationTime);
     });
 
     return CollectionItems(folders, collectionsWithThumbnail);
