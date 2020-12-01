@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/cache/thumbnail_cache_manager.dart';
+import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
@@ -305,6 +308,12 @@ class SyncService {
               foundMatchingCollection = true;
               file.generatedID = existingFile.generatedID;
               await _db.update(file);
+              if (file.fileType == FileType.video) {
+                VideoCacheManager().removeFile(file.getDownloadUrl());
+              } else {
+                DefaultCacheManager().removeFile(file.getDownloadUrl());
+              }
+              ThumbnailCacheManager().removeFile(file.getDownloadUrl());
               break;
             }
           }
