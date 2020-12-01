@@ -285,6 +285,19 @@ class _DetailPageState extends State<DetailPage> {
             ));
           }
         }
+        if (file.uploadedFileID != null) {
+          items.add(
+            Padding(padding: EdgeInsets.all(4)),
+          );
+          items.add(Row(
+            children: [
+              Icon(Icons.cloud_upload),
+              Padding(padding: EdgeInsets.all(4)),
+              Text(getFormattedTime(
+                  DateTime.fromMicrosecondsSinceEpoch(file.updationTime))),
+            ],
+          ));
+        }
         return AlertDialog(
           title: Text(file.title),
           content: SingleChildScrollView(
