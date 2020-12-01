@@ -261,26 +261,14 @@ class SupportSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            final dialog = createProgressDialog(context, "Preparing logs...");
-            await dialog.show();
-            final tempPath = (await getTemporaryDirectory()).path;
-            final zipFilePath = tempPath + "/logs.zip";
-            final logsDirectory = Directory(tempPath + "/logs");
-            var encoder = ZipFileEncoder();
-            encoder.create(zipFilePath);
-            encoder.addDirectory(logsDirectory);
-            encoder.close();
-            await dialog.hide();
             final Email email = Email(
-              recipients: ['support@ente.io'],
-              cc: ['vishnu@ente.io'],
-              attachmentPaths: [zipFilePath],
+              recipients: ['hey@ente.io'],
               isHTML: false,
             );
             try {
               await FlutterEmailSender.send(email);
             } catch (e) {
-              return ShareExtend.share(zipFilePath, "file");
+              showGenericErrorDialog(context);
             }
           },
           child: SettingsTextItem(text: "Email", icon: Icons.navigate_next),
@@ -298,6 +286,33 @@ class SupportSectionWidget extends StatelessWidget {
             );
           },
           child: SettingsTextItem(text: "Chat", icon: Icons.navigate_next),
+        ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            final dialog = createProgressDialog(context, "Preparing logs...");
+            await dialog.show();
+            final tempPath = (await getTemporaryDirectory()).path;
+            final zipFilePath = tempPath + "/logs.zip";
+            final logsDirectory = Directory(tempPath + "/logs");
+            var encoder = ZipFileEncoder();
+            encoder.create(zipFilePath);
+            encoder.addDirectory(logsDirectory);
+            encoder.close();
+            await dialog.hide();
+            final Email email = Email(
+              recipients: ['bug@ente.io'],
+              attachmentPaths: [zipFilePath],
+              isHTML: false,
+            );
+            try {
+              await FlutterEmailSender.send(email);
+            } catch (e) {
+              return ShareExtend.share(zipFilePath, "file");
+            }
+          },
+          child: SettingsTextItem(text: "Send Logs", icon: Icons.navigate_next),
         ),
       ]),
     );
@@ -333,19 +348,10 @@ class InfoSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            showAboutDialog(
-              context: context,
-              applicationName: "ente",
-              applicationIcon: Image.asset(
-                "assets/icon.png",
-                height: 32,
-                width: 32,
-              ),
-              applicationLegalese:
-                  "© Drizzle Technologies Private Limited, 2020",
-            );
+            launch("https://github.com/ente-io/frame");
           },
-          child: SettingsTextItem(text: "More Info", icon: Icons.navigate_next),
+          child:
+              SettingsTextItem(text: "Source Code", icon: Icons.navigate_next),
         ),
       ]),
     );
