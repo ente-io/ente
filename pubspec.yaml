@@ -11,7 +11,7 @@ description: ente photos application
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.0.12+12
+version: 0.0.14+14
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -71,9 +71,10 @@ dev_dependencies:
   flutter_launcher_icons: "0.8.0"
 
 flutter_icons:
-  android: "launcher_icon"
+  android: true
+  image_path_android: "assets/android_icon.png"
   ios: true
-  image_path: "assets/icon.png"
+  image_path_ios: "assets/ios_icon.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
