@@ -43,7 +43,7 @@
 			<true/>
 		</dict>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Photo Library Access Warning</string>
+		<string>Please grant access to your photos so that we can organize, encrypt and backup them up.</string>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>
