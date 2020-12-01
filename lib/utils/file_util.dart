@@ -2,6 +2,7 @@ import 'dart:io' as io;
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -24,12 +25,16 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/utils/dialog_util.dart';
 
 import 'crypto_util.dart';
 
 final _logger = Logger("FileUtil");
 
-Future<void> deleteFilesFromEverywhere(List<File> files) async {
+Future<void> deleteFilesFromEverywhere(
+    BuildContext context, List<File> files) async {
+  final dialog = createProgressDialog(context, "Deleting...");
+  await dialog.show();
   final localIDs = List<String>();
   for (final file in files) {
     if (file.localID != null) {
@@ -54,6 +59,7 @@ Future<void> deleteFilesFromEverywhere(List<File> files) async {
       hasUploadedFiles = true;
       await FilesDB.instance.markForDeletion(file.uploadedFileID);
     }
+    await dialog.hide();
   }
 
   await FileRepository.instance.reloadFiles();
@@ -62,6 +68,29 @@ Future<void> deleteFilesFromEverywhere(List<File> files) async {
     // TODO: Blocking call?
     SyncService.instance.deleteFilesOnServer();
   }
+}
+
+Future<void> deleteFilesOnDeviceOnly(
+    BuildContext context, List<File> files) async {
+  final dialog = createProgressDialog(context, "Deleting...");
+  await dialog.show();
+  final localIDs = List<String>();
+  for (final file in files) {
+    if (file.localID != null) {
+      localIDs.add(file.localID);
+    }
+  }
+  final deletedIDs =
+      (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
+  for (final file in files) {
+    // Remove only those files that have been removed from disk
+    if (deletedIDs.contains(file.localID)) {
+      file.localID = null;
+      FilesDB.instance.update(file);
+    }
+  }
+  await FileRepository.instance.reloadFiles();
+  await dialog.hide();
 }
 
 void preloadFile(File file) {

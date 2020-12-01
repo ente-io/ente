@@ -319,17 +319,41 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   void _showDeleteSheet() {
-    final action = CupertinoActionSheet(
-      title: Text("Delete file?"),
-      actions: <Widget>[
-        CupertinoActionSheetAction(
-          child: Text("Delete"),
+    final fileToBeDeleted = _files[_selectedIndex];
+    final actions = List<Widget>();
+    if (fileToBeDeleted.uploadedFileID == null) {
+      actions.add(CupertinoActionSheetAction(
+        child: Text("Everywhere"),
+        isDestructiveAction: true,
+        onPressed: () async {
+          await deleteFilesFromEverywhere(context, [fileToBeDeleted]);
+          _onFileDeleted();
+        },
+      ));
+    } else {
+      if (fileToBeDeleted.localID != null) {
+        actions.add(CupertinoActionSheetAction(
+          child: Text("On this device"),
           isDestructiveAction: true,
           onPressed: () async {
-            await _delete();
+            await deleteFilesOnDeviceOnly(context, [fileToBeDeleted]);
+            showToast("File deleted from device");
+            Navigator.of(context, rootNavigator: true).pop();
           },
-        ),
-      ],
+        ));
+      }
+      actions.add(CupertinoActionSheetAction(
+        child: Text("Everywhere"),
+        isDestructiveAction: true,
+        onPressed: () async {
+          await deleteFilesFromEverywhere(context, [fileToBeDeleted]);
+          _onFileDeleted();
+        },
+      ));
+    }
+    final action = CupertinoActionSheet(
+      title: Text("Delete file?"),
+      actions: actions,
       cancelButton: CupertinoActionSheetAction(
         child: Text("Cancel"),
         onPressed: () {
@@ -340,9 +364,8 @@ class _DetailPageState extends State<DetailPage> {
     showCupertinoModalPopup(context: context, builder: (_) => action);
   }
 
-  Future _delete() async {
+  Future _onFileDeleted() async {
     final file = _files[_selectedIndex];
-    await deleteFilesFromEverywhere([file]);
     final totalFiles = _files.length;
     if (totalFiles == 1) {
       // Deleted the only file

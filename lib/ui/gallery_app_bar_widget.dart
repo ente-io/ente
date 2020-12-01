@@ -15,6 +15,7 @@ import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/share_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 enum GalleryAppBarType {
   homepage,
@@ -284,20 +285,56 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   void _showDeleteSheet(BuildContext context) {
     final count = widget.selectedFiles.files.length;
+    bool containsUploadedFile = false;
+    for (final file in widget.selectedFiles.files) {
+      if (file.uploadedFileID != null) {
+        containsUploadedFile = true;
+      }
+    }
+    final actions = List<Widget>();
+    if (containsUploadedFile) {
+      actions.add(CupertinoActionSheetAction(
+        child: Text("This Device"),
+        isDestructiveAction: true,
+        onPressed: () async {
+          await deleteFilesOnDeviceOnly(
+              context, widget.selectedFiles.files.toList());
+          _clearSelectedFiles();
+          showToast("Files deleted from device");
+          Navigator.of(context, rootNavigator: true).pop();
+        },
+      ));
+      actions.add(CupertinoActionSheetAction(
+        child: Text("Everywhere"),
+        isDestructiveAction: true,
+        onPressed: () async {
+          await deleteFilesFromEverywhere(
+              context, widget.selectedFiles.files.toList());
+          _clearSelectedFiles();
+          showToast("Files deleted from everywhere");
+          Navigator.of(context, rootNavigator: true).pop();
+        },
+      ));
+    } else {
+      actions.add(CupertinoActionSheetAction(
+        child: Text("Delete forever"),
+        isDestructiveAction: true,
+        onPressed: () async {
+          await deleteFilesFromEverywhere(
+              context, widget.selectedFiles.files.toList());
+          _clearSelectedFiles();
+          showToast("Files deleted from everywhere");
+          Navigator.of(context, rootNavigator: true).pop();
+        },
+      ));
+    }
     final action = CupertinoActionSheet(
-      title: Text("Permanently delete " +
+      title: Text("Delete " +
           count.toString() +
           " file" +
-          (count == 1 ? "?" : "s?")),
-      actions: <Widget>[
-        CupertinoActionSheetAction(
-          child: Text("Delete"),
-          isDestructiveAction: true,
-          onPressed: () async {
-            await _deleteSelected();
-          },
-        ),
-      ],
+          (count == 1 ? "" : "s") +
+          (containsUploadedFile ? " from" : "?")),
+      actions: actions,
       cancelButton: CupertinoActionSheetAction(
         child: Text("Cancel"),
         onPressed: () {
@@ -306,15 +343,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       ),
     );
     showCupertinoModalPopup(context: context, builder: (_) => action);
-  }
-
-  _deleteSelected() async {
-    Navigator.of(context, rootNavigator: true).pop();
-    final dialog = createProgressDialog(context, "Deleting...");
-    await dialog.show();
-    await deleteFilesFromEverywhere(widget.selectedFiles.files.toList());
-    _clearSelectedFiles();
-    await dialog.hide();
   }
 
   void _clearSelectedFiles() {
