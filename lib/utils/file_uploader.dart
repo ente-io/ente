@@ -351,7 +351,6 @@ class FileUploader {
     final data = response.data;
     file.uploadedFileID = data["id"];
     file.updationTime = data["updationTime"];
-    file.ownerID = data["ownerID"];
     file.fileDecryptionHeader = fileDecryptionHeader;
     file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
     file.metadataDecryptionHeader = metadataDecryptionHeader;

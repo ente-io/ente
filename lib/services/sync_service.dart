@@ -30,7 +30,6 @@ class SyncService {
   final _uploader = FileUploader.instance;
   final _collectionsService = CollectionsService.instance;
   final _downloader = DiffFetcher();
-  final _uploadedLocalFileIDs = Set<String>();
   bool _isSyncInProgress = false;
   bool _syncStopRequested = false;
   Future<void> _existingSync;
@@ -68,7 +67,6 @@ class SyncService {
   }
 
   Future<void> sync() async {
-    _uploadedLocalFileIDs.addAll(await _db.getUploadedLocalFileIDs());
     _syncStopRequested = false;
     if (_isSyncInProgress) {
       _logger.warning("Sync already in progress, skipping.");
@@ -121,27 +119,30 @@ class SyncService {
     if (!result) {
       _logger.severe("Did not get permission");
     }
+    final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     final lastDBUpdationTime = _prefs.getInt(_dbUpdationTimeKey);
     if (lastDBUpdationTime != null && lastDBUpdationTime != 0) {
-      await _loadAndStorePhotos(lastDBUpdationTime, syncStartTime);
+      await _loadAndStorePhotos(
+          0, syncStartTime, existingLocalFileIDs);
     } else {
       // Load from 0 - 01.01.2010
       var startTime = 0;
       var toYear = 2010;
       var toTime = DateTime(toYear).microsecondsSinceEpoch;
       while (toTime < syncStartTime) {
-        await _loadAndStorePhotos(startTime, toTime);
+        await _loadAndStorePhotos(startTime, toTime, existingLocalFileIDs);
         startTime = toTime;
         toYear++;
         toTime = DateTime(toYear).microsecondsSinceEpoch;
       }
-      await _loadAndStorePhotos(startTime, syncStartTime);
+      await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
     }
     await syncWithRemote();
   }
 
-  Future<void> _loadAndStorePhotos(int fromTime, int toTime) async {
+  Future<void> _loadAndStorePhotos(
+      int fromTime, int toTime, Set<String> existingLocalFileIDs) async {
     _logger.info("Loading photos from " +
         getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(fromTime)) +
         " to " +
@@ -150,7 +151,7 @@ class SyncService {
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
       final updatedFiles =
-          files.where((file) => _uploadedLocalFileIDs.contains(file.localID));
+          files.where((file) => existingLocalFileIDs.contains(file.localID));
       _logger.info(updatedFiles.length.toString() + " files were updated.");
       for (final file in updatedFiles) {
         await _db.updateUploadedFile(
@@ -162,7 +163,7 @@ class SyncService {
           null,
         );
       }
-      files.removeWhere((file) => _uploadedLocalFileIDs.contains(file.localID));
+      files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
       await _db.insertMultiple(files);
       _logger.info("Inserted " + files.length.toString() + " files.");
       await _prefs.setInt(_dbUpdationTimeKey, toTime);

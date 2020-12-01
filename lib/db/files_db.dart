@@ -306,14 +306,13 @@ class FilesDB {
     return _convertToFiles(results)[0];
   }
 
-  Future<Set<String>> getUploadedLocalFileIDs() async {
+  Future<Set<String>> getExistingLocalFileIDs() async {
     final db = await instance.database;
     final rows = await db.query(
       table,
       columns: [columnLocalID],
       distinct: true,
-      where:
-          '$columnLocalID IS NOT NULL AND $columnUploadedFileID IS NOT NULL AND $columnIsDeleted = 0',
+      where: '$columnLocalID IS NOT NULL',
     );
     final result = Set<String>();
     for (final row in rows) {
