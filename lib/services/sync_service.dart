@@ -175,12 +175,12 @@ class SyncService {
     await _prefs.setInt(_dbUpdationTimeKey, toTime);
   }
 
-  Future<void> syncWithRemote() async {
+  Future<void> syncWithRemote({bool silently = false}) async {
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }
     final updatedCollections = await _collectionsService.sync();
-    if (updatedCollections.isNotEmpty) {
+    if (updatedCollections.isNotEmpty && !silently) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applying_remote_diff));
     }
     for (final collection in updatedCollections) {
@@ -189,10 +189,7 @@ class SyncService {
     await deleteFilesOnServer();
     bool hasUploadedFiles = await _uploadDiff();
     if (hasUploadedFiles) {
-      final updatedCollections = await _collectionsService.sync();
-      for (final collection in updatedCollections) {
-        await _fetchEncryptedFilesDiff(collection.id);
-      }
+      syncWithRemote(silently: true);
     }
   }
 

@@ -264,7 +264,7 @@ class CollectionsService {
         .then((value) async {
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
-      SyncService.instance.syncWithRemote();
+      SyncService.instance.syncWithRemote(silently: true);
     });
   }
 
@@ -285,7 +285,7 @@ class CollectionsService {
     );
     await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
     Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
-    SyncService.instance.syncWithRemote();
+    SyncService.instance.syncWithRemote(silently: true);
   }
 
   Future<Collection> createAndCacheCollection(Collection collection) async {

@@ -196,34 +196,30 @@ class _DetailPageState extends State<DetailPage> {
         final isLiked = !oldValue;
         bool hasError = false;
         if (isLiked) {
-          final dialog =
-              createProgressDialog(context, "Adding to favorites...");
-          await dialog.show();
+          final shouldBlockUser = file.uploadedFileID == null;
+          var dialog;
+          if (shouldBlockUser) {
+            dialog = createProgressDialog(context, "Adding to favorites...");
+            await dialog.show();
+          }
           try {
             await FavoritesService.instance.addToFavorites(file);
-            showToast("Added to favorites.");
           } catch (e, s) {
             _logger.severe(e, s);
-            await dialog.hide();
             hasError = true;
-            showGenericErrorDialog(context);
+            showToast("Sorry, could not add this to favorites!");
           } finally {
-            await dialog.hide();
+            if (shouldBlockUser) {
+              await dialog.hide();
+            }
           }
         } else {
-          final dialog =
-              createProgressDialog(context, "Removing from favorites...");
-          await dialog.show();
           try {
             await FavoritesService.instance.removeFromFavorites(file);
-            showToast("Removed from favorites.");
           } catch (e, s) {
             _logger.severe(e, s);
-            await dialog.hide();
             hasError = true;
-            showGenericErrorDialog(context);
-          } finally {
-            await dialog.hide();
+            showToast("Sorry, could not remove this from favorites!");
           }
         }
         return hasError ? oldValue : isLiked;
