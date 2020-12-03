@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/public_keys_db.dart';
@@ -75,7 +76,7 @@ class _SharingDialogState extends State<SharingDialog> {
         child: button(
           "Add",
           onPressed: () {
-            _addEmailToCollection(_email, null);
+            _addEmailToCollection(_email);
           },
         ),
       ));
@@ -98,47 +99,68 @@ class _SharingDialogState extends State<SharingDialog> {
   }
 
   Widget _getEmailField() {
-    return TypeAheadField(
-      textFieldConfiguration: TextFieldConfiguration(
-        keyboardType: TextInputType.emailAddress,
-        autofocus: true,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: "email@your-friend.com",
-        ),
-      ),
-      hideOnEmpty: true,
-      loadingBuilder: (context) {
-        return loadWidget;
-      },
-      suggestionsCallback: (pattern) async {
-        _email = pattern;
-        return PublicKeysDB.instance.searchByEmail(_email);
-      },
-      itemBuilder: (context, suggestion) {
-        return Container(
-          padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
-          child: Container(
-            child: Text(
-              suggestion.email,
-              overflow: TextOverflow.clip,
+    return Row(
+      children: [
+        Expanded(
+          child: TypeAheadField(
+            textFieldConfiguration: TextFieldConfiguration(
+              keyboardType: TextInputType.emailAddress,
+              autofocus: true,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "email@your-friend.com",
+              ),
             ),
+            hideOnEmpty: true,
+            loadingBuilder: (context) {
+              return loadWidget;
+            },
+            suggestionsCallback: (pattern) async {
+              _email = pattern;
+              return PublicKeysDB.instance.searchByEmail(_email);
+            },
+            itemBuilder: (context, suggestion) {
+              return Container(
+                padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+                child: Container(
+                  child: Text(
+                    suggestion.email,
+                    overflow: TextOverflow.clip,
+                  ),
+                ),
+              );
+            },
+            onSuggestionSelected: (PublicKey suggestion) {
+              _addEmailToCollection(suggestion.email,
+                  publicKey: suggestion.publicKey);
+            },
           ),
-        );
-      },
-      onSuggestionSelected: (PublicKey suggestion) {
-        _addEmailToCollection(suggestion.email, suggestion.publicKey);
-      },
+        ),
+        IconButton(
+            icon: Icon(Icons.attach_email_outlined),
+            onPressed: () async {
+              final emailContact = await FlutterContactPicker.pickEmailContact(
+                  askForPermission: true);
+              _addEmailToCollection(emailContact.email.email);
+            }),
+      ],
     );
   }
 
-  Future<void> _addEmailToCollection(String email, String publicKey) async {
+  Future<void> _addEmailToCollection(
+    String email, {
+    String publicKey,
+  }) async {
     if (!isValidEmail(email)) {
       showErrorDialog(context, "Invalid email address",
           "Please enter a valid email address.");
       return;
     } else if (email == Configuration.instance.getEmail()) {
       showErrorDialog(context, "Oops", "You cannot share with yourself.");
+      return;
+    } else if (widget.collection.sharees.any((user) => user.email == email)) {
+      showErrorDialog(
+          context, "Oops", "You're already sharing this with " + email + ".");
       return;
     }
     if (publicKey == null) {
