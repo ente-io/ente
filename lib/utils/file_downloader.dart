@@ -10,6 +10,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 
@@ -45,6 +46,7 @@ class DiffFetcher {
                     file.uploadedFileID, file.collectionID);
                 Bus.instance.fire(
                     CollectionUpdatedEvent(collectionID: file.collectionID));
+                FileRepository.instance.reloadFiles();
                 continue;
               }
               file.updationTime = item["updationTime"];

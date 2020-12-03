@@ -39,7 +39,6 @@ class SyncService {
   SharedPreferences _prefs;
   SyncStatusUpdate _lastSyncStatusEvent;
 
-  static final _collectionSyncTimeKeyPrefix = "collection_sync_time_";
   static final _dbUpdationTimeKey = "db_updation_time";
   static final _diffLimit = 100;
 
@@ -169,18 +168,17 @@ class SyncService {
       files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
       await _db.insertMultiple(files);
       _logger.info("Inserted " + files.length.toString() + " files.");
-      await _prefs.setInt(_dbUpdationTimeKey, toTime);
       await FileRepository.instance.reloadFiles();
     }
+    await _prefs.setInt(_dbUpdationTimeKey, toTime);
   }
 
   Future<void> syncWithRemote() async {
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }
-    await _collectionsService.sync();
-    final collections = _collectionsService.getCollections();
-    for (final collection in collections) {
+    final updatedCollections = await _collectionsService.sync();
+    for (final collection in updatedCollections) {
       await _fetchEncryptedFilesDiff(collection.id);
     }
     await deleteFilesOnServer();
@@ -190,7 +188,7 @@ class SyncService {
   Future<void> _fetchEncryptedFilesDiff(int collectionID) async {
     final diff = await _downloader.getEncryptedFilesDiff(
       collectionID,
-      _getCollectionSyncTime(collectionID),
+      _collectionsService.getCollectionSyncTime(collectionID),
       _diffLimit,
     );
     if (diff.isNotEmpty) {
@@ -202,20 +200,6 @@ class SyncService {
         return await _fetchEncryptedFilesDiff(collectionID);
       }
     }
-  }
-
-  int _getCollectionSyncTime(int collectionID) {
-    var syncTime =
-        _prefs.getInt(_collectionSyncTimeKeyPrefix + collectionID.toString());
-    if (syncTime == null) {
-      syncTime = 0;
-    }
-    return syncTime;
-  }
-
-  Future<void> _setCollectionSyncTime(int collectionID, int time) async {
-    return _prefs.setInt(
-        _collectionSyncTimeKeyPrefix + collectionID.toString(), time);
   }
 
   Future<void> _uploadDiff() async {
@@ -323,7 +307,8 @@ class SyncService {
           }
         }
       }
-      await _setCollectionSyncTime(collectionID, file.updationTime);
+      await _collectionsService.setCollectionSyncTime(
+          collectionID, file.updationTime);
     }
   }
 

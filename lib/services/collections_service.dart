@@ -15,16 +15,21 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionsService {
+  static final _collectionSyncTimeKeyPrefix = "collection_sync_time_";
+
   final _logger = Logger("CollectionsService");
 
   CollectionsDB _db;
   FilesDB _filesDB;
   Configuration _config;
+  SharedPreferences _prefs;
   final _dio = Network.instance.getDio();
   final _localCollections = Map<String, Collection>();
   final _collectionIDToCollections = Map<int, Collection>();
@@ -40,13 +45,14 @@ class CollectionsService {
       CollectionsService._privateConstructor();
 
   Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
     final collections = await _db.getAllCollections();
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
     }
   }
 
-  Future<void> sync() async {
+  Future<List<Collection>> sync() async {
     _logger.info("Syncing");
     final lastCollectionUpdationTime =
         await _db.getLastCollectionUpdationTime();
@@ -57,6 +63,8 @@ class CollectionsService {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
         await _db.deleteCollection(collection.id);
+        await setCollectionSyncTime(collection.id, null);
+        FileRepository.instance.reloadFiles();
       } else {
         updatedCollections.add(collection);
       }
@@ -70,6 +78,24 @@ class CollectionsService {
       _logger.info("Collections updated");
       Bus.instance.fire(CollectionUpdatedEvent());
     }
+    return updatedCollections;
+  }
+
+  int getCollectionSyncTime(int collectionID) {
+    var syncTime =
+        _prefs.getInt(_collectionSyncTimeKeyPrefix + collectionID.toString());
+    if (syncTime == null) {
+      syncTime = 0;
+    }
+    return syncTime;
+  }
+
+  Future<void> setCollectionSyncTime(int collectionID, int time) async {
+    final key = _collectionSyncTimeKeyPrefix + collectionID.toString();
+    if (time == null) {
+      return _prefs.remove(key);
+    }
+    return _prefs.setInt(key, time);
   }
 
   Collection getCollectionForPath(String path) {
@@ -103,18 +129,16 @@ class CollectionsService {
   Future<void> share(int collectionID, String email, String publicKey) {
     final encryptedKey = CryptoUtil.sealSync(
         getCollectionKey(collectionID), Sodium.base642bin(publicKey));
-    return _dio
-        .post(
-          Configuration.instance.getHttpEndpoint() + "/collections/share",
-          data: {
-            "collectionID": collectionID,
-            "email": email,
-            "encryptedKey": Sodium.bin2base64(encryptedKey),
-          },
-          options: Options(
-              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-        )
-        .then((value) => sync());
+    return _dio.post(
+      Configuration.instance.getHttpEndpoint() + "/collections/share",
+      data: {
+        "collectionID": collectionID,
+        "email": email,
+        "encryptedKey": Sodium.bin2base64(encryptedKey),
+      },
+      options:
+          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+    );
   }
 
   Future<void> unshare(int collectionID, String email) {
