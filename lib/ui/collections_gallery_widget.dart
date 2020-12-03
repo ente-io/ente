@@ -89,7 +89,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             ),
           ),
           Divider(height: 12),
-          SectionTitle("Saved Collections"),
+          SectionTitle("Uploaded Collections"),
           Padding(padding: EdgeInsets.all(6)),
           GridView.builder(
             shrinkWrap: true,
