@@ -129,28 +129,32 @@ class CollectionsService {
   Future<void> share(int collectionID, String email, String publicKey) {
     final encryptedKey = CryptoUtil.sealSync(
         getCollectionKey(collectionID), Sodium.base642bin(publicKey));
-    return _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/collections/share",
-      data: {
-        "collectionID": collectionID,
-        "email": email,
-        "encryptedKey": Sodium.bin2base64(encryptedKey),
-      },
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-    );
+    return _dio
+        .post(
+          Configuration.instance.getHttpEndpoint() + "/collections/share",
+          data: {
+            "collectionID": collectionID,
+            "email": email,
+            "encryptedKey": Sodium.bin2base64(encryptedKey),
+          },
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        )
+        .then((value) => SyncService.instance.syncWithRemote(silently: true));
   }
 
   Future<void> unshare(int collectionID, String email) {
-    return _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/collections/unshare",
-      data: {
-        "collectionID": collectionID,
-        "email": email,
-      },
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-    );
+    return _dio
+        .post(
+          Configuration.instance.getHttpEndpoint() + "/collections/unshare",
+          data: {
+            "collectionID": collectionID,
+            "email": email,
+          },
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        )
+        .then((value) => SyncService.instance.syncWithRemote(silently: true));
   }
 
   Uint8List getCollectionKey(int collectionID) {
