@@ -40,7 +40,7 @@ class SyncService {
   SyncStatusUpdate _lastSyncStatusEvent;
 
   static final _dbUpdationTimeKey = "db_updation_time";
-  static final _diffLimit = 100;
+  static final _diffLimit = 200;
 
   SyncService._privateConstructor() {
     Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
@@ -187,7 +187,13 @@ class SyncService {
       await _fetchEncryptedFilesDiff(collection.id);
     }
     await deleteFilesOnServer();
-    await _uploadDiff();
+    bool hasUploadedFiles = await _uploadDiff();
+    if (hasUploadedFiles) {
+      final updatedCollections = await _collectionsService.sync();
+      for (final collection in updatedCollections) {
+        await _fetchEncryptedFilesDiff(collection.id);
+      }
+    }
   }
 
   Future<void> _fetchEncryptedFilesDiff(int collectionID) async {
@@ -207,7 +213,7 @@ class SyncService {
     }
   }
 
-  Future<void> _uploadDiff() async {
+  Future<bool> _uploadDiff() async {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     final filesToBeUploaded =
         await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
@@ -231,7 +237,7 @@ class SyncService {
         _syncStopRequested = false;
         Bus.instance
             .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
-        return;
+        return false;
       }
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
       final future = _uploader.upload(file, file.collectionID).then((value) {
@@ -249,7 +255,7 @@ class SyncService {
         _syncStopRequested = false;
         Bus.instance
             .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
-        return;
+        return false;
       }
       final collectionID = (await CollectionsService.instance
               .getOrCreateForPath(file.deviceFolder))
@@ -274,6 +280,7 @@ class SyncService {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
       _logger.severe("Error in syncing files", e, s);
     }
+    return uploadCounter > 0;
   }
 
   Future _storeDiff(List<File> diff, int collectionID) async {
