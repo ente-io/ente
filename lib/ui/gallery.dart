@@ -121,7 +121,15 @@ class _GalleryState extends State<Gallery> {
 
   Widget _onDataLoaded() {
     if (_files.isEmpty) {
-      return nothingToSeeHere;
+      final children = List<Widget>();
+      if (widget.headerWidget != null) {
+        children.add(widget.headerWidget);
+      }
+      children.add(Expanded(child: nothingToSeeHere));
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: children,
+      );
     }
     _collateFiles();
     final itemCount =
