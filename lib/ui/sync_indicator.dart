@@ -16,7 +16,6 @@ class SyncIndicator extends StatefulWidget {
 class _SyncIndicatorState extends State<SyncIndicator> {
   SyncStatusUpdate _event;
   double _containerHeight = 48;
-  int _latestCompletedCount = 0;
   StreamSubscription<SyncStatusUpdate> _subscription;
 
   @override
@@ -24,10 +23,6 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
       setState(() {
         _event = event;
-        if (_event.status == SyncStatus.in_progress &&
-            _event.completed > _latestCompletedCount) {
-          _latestCompletedCount = _event.completed;
-        }
       });
     });
     _event = SyncService.instance.getLastSyncStatusEvent();
@@ -70,7 +65,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
         duration: Duration(milliseconds: 300),
         height: _containerHeight,
         width: double.infinity,
-        margin: EdgeInsets.all(8),
+        padding: EdgeInsets.all(8),
         alignment: Alignment.center,
         child: SingleChildScrollView(
           physics: NeverScrollableScrollPhysics(),
@@ -83,12 +78,12 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    width: 24,
-                    height: 24,
+                    width: 20,
+                    height: 20,
                     child: icon,
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 4, 0, 0),
+                    padding: const EdgeInsets.fromLTRB(12, 4, 0, 0),
                     child: Text(_getRefreshingText()),
                   ),
                 ],
@@ -104,27 +99,31 @@ class _SyncIndicatorState extends State<SyncIndicator> {
   }
 
   String _getRefreshingText() {
-    if (_event == null || _event.status == SyncStatus.not_started) {
+    if (_event == null ||
+        _event.status == SyncStatus.applying_local_diff ||
+        _event.status == SyncStatus.applying_remote_diff) {
       return "Syncing...";
-    } else {
-      var s;
-      if (_event.status == SyncStatus.error) {
-        s = "Upload failed.";
-      } else if (_event.status == SyncStatus.completed) {
-        if (_event.wasStopped) {
-          s = "Sync stopped.";
-        } else {
-          s = "All memories preserved.";
-        }
-      } else if (_event.status == SyncStatus.paused) {
-        s = _event.reason;
-      } else {
-        s = _latestCompletedCount.toString() +
-            "/" +
-            _event.total.toString() +
-            " memories preserved";
-      }
-      return s;
     }
+    if (_event.status == SyncStatus.preparing_for_upload) {
+      return "Preparing backup...";
+    }
+    if (_event.status == SyncStatus.in_progress) {
+      return _event.completed.toString() +
+          "/" +
+          _event.total.toString() +
+          " memories preserved.";
+    }
+    if (_event.status == SyncStatus.paused) {
+      return _event.reason;
+    }
+    if (_event.status == SyncStatus.completed) {
+      if (_event.wasStopped) {
+        return "Sync stopped.";
+      } else {
+        return "All memories preserved.";
+      }
+    }
+    // _event.status == SyncStatus.error)
+    return "Upload failed.";
   }
 }

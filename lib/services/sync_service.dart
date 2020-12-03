@@ -75,12 +75,13 @@ class SyncService {
       return _existingSync;
     }
     _isSyncInProgress = true;
-    Bus.instance.fire(SyncStatusUpdate(SyncStatus.not_started));
     _existingSync = Future<void>(() async {
       _logger.info("Syncing...");
       try {
         await _doSync();
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
+        if (_lastSyncStatusEvent != null) {
+          Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
+        }
       } on WiFiUnavailableError {
         _logger.warning("Not uploading over mobile data");
         Bus.instance.fire(
@@ -151,6 +152,7 @@ class SyncService {
         getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(toTime)));
     final files = await getDeviceFiles(fromTime, toTime);
     if (files.isNotEmpty) {
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applying_local_diff));
       _logger.info("Fetched " + files.length.toString() + " files.");
       final updatedFiles =
           files.where((file) => existingLocalFileIDs.contains(file.localID));
@@ -178,6 +180,9 @@ class SyncService {
       return Future.error("Account not configured yet");
     }
     final updatedCollections = await _collectionsService.sync();
+    if (updatedCollections.isNotEmpty) {
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applying_remote_diff));
+    }
     for (final collection in updatedCollections) {
       await _fetchEncryptedFilesDiff(collection.id);
     }
@@ -216,6 +221,10 @@ class SyncService {
 
     int uploadCounter = 0;
     final totalUploads = filesToBeUploaded.length + updatedFileIDs.length;
+
+    if (totalUploads > 0) {
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
+    }
 
     for (final uploadedFileID in updatedFileIDs) {
       if (_syncStopRequested) {
