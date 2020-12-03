@@ -19,9 +19,8 @@ import 'package:photos/utils/toast_util.dart';
 
 class SharingDialog extends StatefulWidget {
   final Collection collection;
-  final List<User> sharees;
 
-  SharingDialog(this.collection, this.sharees, {Key key}) : super(key: key);
+  SharingDialog(this.collection, {Key key}) : super(key: key);
 
   @override
   _SharingDialogState createState() => _SharingDialogState();
@@ -34,13 +33,17 @@ class _SharingDialogState extends State<SharingDialog> {
 
   @override
   Widget build(BuildContext context) {
-    _sharees = widget.sharees;
+    _sharees = widget.collection.sharees;
     final children = List<Widget>();
     if (!_showEntryField &&
         (widget.collection == null || _sharees.length == 0)) {
-      children.add(Text("Click the + button to share this " +
-          Collection.typeToString(widget.collection.type) +
-          "."));
+      if (widget.collection.type != CollectionType.favorites) {
+        children.add(Text("Click the + button to share this " +
+            Collection.typeToString(widget.collection.type) +
+            "."));
+      } else {
+        children.add(Text("Click the + button to share your favorites."));
+      }
     } else {
       for (final user in _sharees) {
         children.add(EmailItemWidget(widget.collection.id, user.email));
