@@ -74,7 +74,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   Widget build(BuildContext context) {
     if (widget.selectedFiles.files.isEmpty) {
       return AppBar(
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+          style: TextStyle(
+            fontFamily: widget.type == GalleryAppBarType.homepage
+                ? 'Montserrat'
+                : 'NunitoSans',
+          ),
+        ),
         actions: _getDefaultActions(context),
       );
     }
