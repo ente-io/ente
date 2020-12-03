@@ -36,15 +36,8 @@ class _SharingDialogState extends State<SharingDialog> {
   Widget build(BuildContext context) {
     _sharees = widget.collection.sharees;
     final children = List<Widget>();
-    if (!_showEntryField &&
-        (widget.collection == null || _sharees.length == 0)) {
-      if (widget.collection.type != CollectionType.favorites) {
-        children.add(Text("Click the + button to share this " +
-            Collection.typeToString(widget.collection.type) +
-            "."));
-      } else {
-        children.add(Text("Click the + button to share your favorites."));
-      }
+    if (!_showEntryField && _sharees.length == 0) {
+      _showEntryField = true;
     } else {
       for (final user in _sharees) {
         children.add(EmailItemWidget(widget.collection.id, user.email));
@@ -99,51 +92,55 @@ class _SharingDialogState extends State<SharingDialog> {
   }
 
   Widget _getEmailField() {
-    return Row(
-      children: [
-        Expanded(
-          child: TypeAheadField(
-            textFieldConfiguration: TextFieldConfiguration(
-              keyboardType: TextInputType.emailAddress,
-              autofocus: true,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: "email@your-friend.com",
-              ),
-            ),
-            hideOnEmpty: true,
-            loadingBuilder: (context) {
-              return loadWidget;
-            },
-            suggestionsCallback: (pattern) async {
-              _email = pattern;
-              return PublicKeysDB.instance.searchByEmail(_email);
-            },
-            itemBuilder: (context, suggestion) {
-              return Container(
-                padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
-                child: Container(
-                  child: Text(
-                    suggestion.email,
-                    overflow: TextOverflow.clip,
-                  ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TypeAheadField(
+              textFieldConfiguration: TextFieldConfiguration(
+                keyboardType: TextInputType.emailAddress,
+                autofocus: true,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: "email@your-friend.com",
                 ),
-              );
-            },
-            onSuggestionSelected: (PublicKey suggestion) {
-              _addEmailToCollection(suggestion.email,
-                  publicKey: suggestion.publicKey);
-            },
+              ),
+              hideOnEmpty: true,
+              loadingBuilder: (context) {
+                return loadWidget;
+              },
+              suggestionsCallback: (pattern) async {
+                _email = pattern;
+                return PublicKeysDB.instance.searchByEmail(_email);
+              },
+              itemBuilder: (context, suggestion) {
+                return Container(
+                  padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+                  child: Container(
+                    child: Text(
+                      suggestion.email,
+                      overflow: TextOverflow.clip,
+                    ),
+                  ),
+                );
+              },
+              onSuggestionSelected: (PublicKey suggestion) {
+                _addEmailToCollection(suggestion.email,
+                    publicKey: suggestion.publicKey);
+              },
+            ),
           ),
-        ),
-        IconButton(
-            icon: Icon(Icons.attach_email_outlined),
-            onPressed: () async {
-              final emailContact = await FlutterContactPicker.pickEmailContact(
-                  askForPermission: true);
-              _addEmailToCollection(emailContact.email.email);
-            }),
-      ],
+          IconButton(
+              icon: Icon(Icons.attach_email_outlined),
+              onPressed: () async {
+                final emailContact =
+                    await FlutterContactPicker.pickEmailContact(
+                        askForPermission: true);
+                _addEmailToCollection(emailContact.email.email);
+              }),
+        ],
+      ),
     );
   }
 
@@ -234,37 +231,36 @@ class EmailItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Text(
-                email,
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.delete_forever),
-              color: Colors.redAccent,
-              onPressed: () async {
-                final dialog = createProgressDialog(context, "Please wait...");
-                await dialog.show();
-                try {
-                  await CollectionsService.instance
-                      .unshare(collectionID, email);
-                  await dialog.hide();
-                  showToast("Stopped sharing with " + email + ".");
-                  Navigator.of(context).pop();
-                } catch (e, s) {
-                  Logger("EmailItemWidget").severe(e, s);
-                  await dialog.hide();
-                  showGenericErrorDialog(context);
-                }
-              },
-            ),
-          ],
-        ));
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+          child: Text(
+            email,
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+        Expanded(child: SizedBox()),
+        IconButton(
+          icon: Icon(Icons.delete_forever),
+          color: Colors.redAccent,
+          onPressed: () async {
+            final dialog = createProgressDialog(context, "Please wait...");
+            await dialog.show();
+            try {
+              await CollectionsService.instance.unshare(collectionID, email);
+              await dialog.hide();
+              showToast("Stopped sharing with " + email + ".");
+              Navigator.of(context).pop();
+            } catch (e, s) {
+              Logger("EmailItemWidget").severe(e, s);
+              await dialog.hide();
+              showGenericErrorDialog(context);
+            }
+          },
+        ),
+      ],
+    );
   }
 }
