@@ -242,8 +242,16 @@ class _GalleryState extends State<Gallery> {
   }
 
   Widget _getDay(int timestamp) {
-    var date = DateTime.fromMicrosecondsSinceEpoch(timestamp);
+    final date = DateTime.fromMicrosecondsSinceEpoch(timestamp);
+    final now = DateTime.now();
     var title = getDayAndMonth(date);
+    if (date.year == now.year && date.month == now.month) {
+      if (date.day == now.day) {
+        title = "Today";
+      } else if (date.day == now.day - 1) {
+        title = "Yesterday";
+      }
+    }
     if (date.year != DateTime.now().year) {
       title += " " + date.year.toString();
     }
