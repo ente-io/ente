@@ -105,7 +105,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       return "Syncing...";
     }
     if (_event.status == SyncStatus.preparing_for_upload) {
-      return "Preparing backup...";
+      return "Encrypting backup...";
     }
     if (_event.status == SyncStatus.in_progress) {
       return _event.completed.toString() +
