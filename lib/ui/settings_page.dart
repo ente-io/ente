@@ -261,6 +261,17 @@ class SupportSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
+            launch(Configuration.instance.getHttpEndpoint() +
+                "/users/feedback?token=" +
+                Configuration.instance.getToken());
+          },
+          child: SettingsTextItem(
+              text: "Request Feature", icon: Icons.navigate_next),
+        ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
             final Email email = Email(
               recipients: ['hey@ente.io'],
               isHTML: false,
