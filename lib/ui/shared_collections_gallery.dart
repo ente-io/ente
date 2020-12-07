@@ -107,8 +107,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   ),
                 )
               : nothingToSeeHere,
-          Padding(padding: EdgeInsets.all(8)),
-          Divider(height: 16),
+          Padding(padding: EdgeInsets.all(4)),
+          Divider(height: 4),
           SectionTitle("OUTGOING"),
           Padding(padding: EdgeInsets.all(8)),
           collections.outgoing.length > 0
