@@ -15,6 +15,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/toast_util.dart';
 import 'package:share_extend/share_extend.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -282,26 +283,8 @@ class SupportSectionWidget extends StatelessWidget {
               showGenericErrorDialog(context);
             }
           },
-          child: SettingsTextItem(text: "Email", icon: Icons.navigate_next),
-        ),
-        Divider(height: 4),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return CrispChatPage();
-                },
-              ),
-            );
-          },
-          child: SettingsTextItem(text: "Chat", icon: Icons.navigate_next),
-        ),
-        Divider(height: 4),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
+          onLongPress: () async {
+            showToast("Thanks for reporting a bug!");
             final dialog = createProgressDialog(context, "Preparing logs...");
             await dialog.show();
             final tempPath = (await getTemporaryDirectory()).path;
@@ -323,7 +306,21 @@ class SupportSectionWidget extends StatelessWidget {
               return ShareExtend.share(zipFilePath, "file");
             }
           },
-          child: SettingsTextItem(text: "Send Logs", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "Email", icon: Icons.navigate_next),
+        ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return CrispChatPage();
+                },
+              ),
+            );
+          },
+          child: SettingsTextItem(text: "Chat", icon: Icons.navigate_next),
         ),
       ]),
     );
@@ -339,6 +336,13 @@ class InfoSectionWidget extends StatelessWidget {
       child: Column(children: [
         Padding(padding: EdgeInsets.all(12)),
         SettingsSectionTitle("ABOUT"),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            launch("https://ente.io/faq");
+          },
+          child: SettingsTextItem(text: "FAQ", icon: Icons.navigate_next),
+        ),
         Divider(height: 4),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
