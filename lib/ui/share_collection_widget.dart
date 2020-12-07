@@ -179,7 +179,7 @@ class _SharingDialogState extends State<SharingDialog> {
             child: Text("Invite"),
             onPressed: () {
               shareText(
-                  "Hey, I have some really nice photos to share. Please install ente.io so that I can share them privately.");
+                  "Hey, I have some photos to show you. Please install https://ente.io/download so that I can share them privately.");
             },
           ),
         ],
