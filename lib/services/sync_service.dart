@@ -118,12 +118,15 @@ class SyncService {
   }
 
   Future<void> _doSync() async {
+    final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
+    final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     final result = await PhotoManager.requestPermission();
     if (!result) {
       _logger.severe("Did not get permission");
+      await _prefs.setInt(_dbUpdationTimeKey, syncStartTime);
+      await FileRepository.instance.reloadFiles();
+      return await syncWithRemote();
     }
-    final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
-    final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     final lastDBUpdationTime = _prefs.getInt(_dbUpdationTimeKey);
     if (lastDBUpdationTime != null && lastDBUpdationTime != 0) {
       await _loadAndStorePhotos(
@@ -141,6 +144,7 @@ class SyncService {
       }
       await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
     }
+    await FileRepository.instance.reloadFiles();
     await syncWithRemote();
   }
 
