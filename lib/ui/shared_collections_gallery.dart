@@ -130,6 +130,24 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
 
   Widget _buildOutgoingCollection(
       BuildContext context, CollectionWithThumbnail c) {
+    final sharees = List<String>();
+    for (int index = 0; index < c.collection.sharees.length; index++) {
+      if (index < 2) {
+        sharees.add(c.collection.sharees[index].name);
+      } else {
+        final remaining = c.collection.sharees.length - index;
+        if (remaining == 1) {
+          // If it's the last sharee
+          sharees.add(c.collection.sharees[index].name);
+        } else {
+          sharees.add("and " +
+              remaining.toString() +
+              " other" +
+              (remaining > 1 ? "s" : ""));
+        }
+        break;
+      }
+    }
     return GestureDetector(
       child: Container(
         margin: EdgeInsets.fromLTRB(16, 4, 8, 12),
@@ -160,10 +178,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 Padding(
                   padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
                   child: Text(
-                    "Shared with " +
-                        c.collection.sharees
-                            .map((u) => u.name.split(" ")[0])
-                            .join(", "),
+                    "Shared with " + sharees.join(", "),
                     style: TextStyle(
                       fontSize: 14,
                       color: Theme.of(context).primaryColorLight,
