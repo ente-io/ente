@@ -68,7 +68,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     return SingleChildScrollView(
       child: Column(
         children: [
-          SectionTitle("Device Folders"),
+          SectionTitle("DEVICE FOLDERS"),
           Container(
             height: 160,
             child: Align(
@@ -86,7 +86,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             ),
           ),
           Divider(height: 12),
-          SectionTitle("Uploaded Collections"),
+          SectionTitle("UPLOADED COLLECTIONS"),
           Padding(padding: EdgeInsets.all(6)),
           GridView.builder(
             shrinkWrap: true,
