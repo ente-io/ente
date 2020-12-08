@@ -21,6 +21,7 @@ class Network {
             object.toString() + "\n",
             encoding: Utf8Codec(allowMalformed: true),
             mode: FileMode.append,
+            flush: true,
           );
         }));
   }
