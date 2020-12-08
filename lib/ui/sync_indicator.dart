@@ -40,9 +40,11 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     if (Configuration.instance.hasConfiguredAccount() && _event != null) {
       if (_event.status == SyncStatus.completed) {
         Future.delayed(Duration(milliseconds: 3000), () {
-          setState(() {
-            _containerHeight = 0;
-          });
+          if (mounted) {
+            setState(() {
+              _containerHeight = 0;
+            });
+          }
         });
       } else {
         _containerHeight = 48;
