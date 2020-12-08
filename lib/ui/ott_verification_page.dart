@@ -52,7 +52,6 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                       style: TextStyle(
                         color: Theme.of(context).accentColor,
                       )),
-                  TextSpan(text: "."),
                 ],
               ),
               textAlign: TextAlign.center,
