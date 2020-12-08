@@ -30,8 +30,11 @@ dependencies:
   shared_preferences: ^0.5.6
   dio: ^3.0.9
   image: ^2.1.4
-  esys_flutter_share: ^1.0.2
+  esys_flutter_share:
+    git:
+      url: https://github.com/aeyrium/esys-flutter-share
   share_extend: ^1.1.9
+  share: ^0.6.5+4
   draggable_scrollbar: ^0.0.4
   photo_view: ^0.9.2
   visibility_detector: ^0.1.5
