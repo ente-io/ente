@@ -150,9 +150,11 @@ class FileUploader {
         tempDirectory + file.generatedID.toString() + ".encrypted";
     final encryptedThumbnailPath =
         tempDirectory + file.generatedID.toString() + "_thumbnail.encrypted";
-    final sourceFile = (await (await file.getAsset()).originFile);
+    var sourceFile;
 
     try {
+      // Placing this in the try-catch block to safe guard against: https://github.com/CaiJingLong/flutter_photo_manager/issues/405
+      sourceFile = (await (await file.getAsset()).originFile);
       var key;
       var isAlreadyUploadedFile = file.uploadedFileID != null;
       if (isAlreadyUploadedFile) {
@@ -253,7 +255,7 @@ class FileUploader {
           "File upload failed for " + file.generatedID.toString(), e, s);
       throw e;
     } finally {
-      if (io.Platform.isIOS) {
+      if (io.Platform.isIOS && sourceFile != null) {
         sourceFile.deleteSync();
       }
       if (io.File(encryptedFilePath).existsSync()) {
