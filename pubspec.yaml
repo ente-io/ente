@@ -48,7 +48,7 @@ dependencies:
   flutter_image_compress:
     path: thirdparty/flutter_image_compress
   flutter_typeahead: ^1.8.1
-  fluttertoast: ^4.0.1
+  fluttertoast: ^7.1.5
   video_player: ^0.10.11+1
   chewie: ^0.9.10
   cached_network_image: ^2.3.0-beta
