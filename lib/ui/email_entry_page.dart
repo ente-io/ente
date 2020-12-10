@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -32,13 +35,26 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sign Up"),
+        title: Text("Sign In"),
       ),
       body: _getBody(),
     );
   }
 
   Widget _getBody() {
+    final locale = Localizations.localeOf(context);
+    var amount = "\$4";
+    switch (locale.countryCode) {
+      case "IN":
+        amount = "₹249";
+        break;
+      case "US":
+        amount = "\$4";
+        break;
+      default:
+        amount = "€4";
+    }
+
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.all(8),
@@ -134,6 +150,31 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 UserService.instance.getOtt(context, _email);
               }),
             ),
+            Padding(padding: EdgeInsets.all(12)),
+            Container(
+              // width: double.infinity,
+              color: Colors.grey[900],
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text("ℹ️"),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(8, 0, 0, 0),
+                  ),
+                  Expanded(
+                    child: Text(
+                      "ente will be free to use until we have launched a stable web client. After that it will cost $amount/100GB monthly.",
+                      overflow: TextOverflow.visible,
+                    ),
+                  ),
+                ],
+              ),
+            )
           ],
         ),
       ),
