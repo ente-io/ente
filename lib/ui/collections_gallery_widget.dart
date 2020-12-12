@@ -14,6 +14,7 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/ui/collection_page.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/device_folder_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -64,50 +65,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     );
   }
 
-  Widget _getCollectionsGalleryWidget(CollectionItems items) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          SectionTitle("device folders"),
-          Padding(
-            padding: EdgeInsets.all(6),
-          ),
-          Container(
-            height: 160,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: ListView.builder(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
-                physics: ScrollPhysics(), // to disable GridView's scrolling
-                itemBuilder: (context, index) {
-                  return _buildFolder(context, items.folders[index]);
-                },
-                itemCount: items.folders.length,
-              ),
-            ),
-          ),
-          Divider(height: 12),
-          SectionTitle("uploaded collections"),
-          Padding(padding: EdgeInsets.all(16)),
-          GridView.builder(
-            shrinkWrap: true,
-            padding: EdgeInsets.only(bottom: 12),
-            physics: ScrollPhysics(), // to disable GridView's scrolling
-            itemBuilder: (context, index) {
-              return _buildCollection(context, items.collections, index);
-            },
-            itemCount: items.collections.length + 1, // To include the + button
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<CollectionItems> _getCollections() async {
     final filesDB = FilesDB.instance;
     final collectionsService = CollectionsService.instance;
@@ -120,7 +77,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
           folderName, path, await filesDB.getLastCreatedFileInPath(path)));
     }
     folders.sort((first, second) =>
-        second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime));
+        second.thumbnail.updationTime.compareTo(first.thumbnail.updationTime));
     final collectionsWithThumbnail = List<CollectionWithThumbnail>();
     final collections = collectionsService.getCollections();
     for (final c in collections) {
@@ -142,16 +99,65 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     return CollectionItems(folders, collectionsWithThumbnail);
   }
 
+  Widget _getCollectionsGalleryWidget(CollectionItems items) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SectionTitle("device folders"),
+          Padding(
+            padding: EdgeInsets.all(6),
+          ),
+          Container(
+            height: 160,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: items.folders.isEmpty
+                  ? nothingToSeeHere
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      physics:
+                          ScrollPhysics(), // to disable GridView's scrolling
+                      itemBuilder: (context, index) {
+                        return _buildFolder(context, items.folders[index]);
+                      },
+                      itemCount: items.folders.length,
+                    ),
+            ),
+          ),
+          Divider(),
+          Padding(padding: EdgeInsets.all(10)),
+          SectionTitle("preserved memories"),
+          Padding(padding: EdgeInsets.all(16)),
+          GridView.builder(
+            shrinkWrap: true,
+            padding: EdgeInsets.only(bottom: 12),
+            physics: ScrollPhysics(), // to disable GridView's scrolling
+            itemBuilder: (context, index) {
+              return _buildCollection(context, items.collections, index);
+            },
+            itemCount: items.collections.length + 1, // To include the + button
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFolder(BuildContext context, DeviceFolder folder) {
     return GestureDetector(
       child: Container(
         height: 110,
-        width: 140,
+        width: 132,
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
             ClipRRect(
-              borderRadius: BorderRadius.circular(32.0),
+              borderRadius: BorderRadius.circular(18.0),
               child: Container(
                 child: Hero(
                     tag:
@@ -188,12 +194,53 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
 
   Widget _buildCollection(BuildContext context,
       List<CollectionWithThumbnail> collections, int index) {
-    if (index == collections.length) {
+    if (index < collections.length) {
+      final c = collections[index];
+      return GestureDetector(
+        child: Column(
+          children: <Widget>[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(18.0),
+              child: Container(
+                child: Hero(
+                    tag: "collection" + c.thumbnail.tag(),
+                    child: ThumbnailWidget(c.thumbnail)),
+                height: 160,
+                width: 160,
+              ),
+            ),
+            Padding(padding: EdgeInsets.all(4)),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                child: Text(
+                  c.collection.name,
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ],
+        ),
+        onTap: () {
+          final page = CollectionPage(c.collection);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return page;
+              },
+            ),
+          );
+        },
+      );
+    } else {
       return Container(
-        padding: EdgeInsets.fromLTRB(28, 12, 28, 46),
+        padding: EdgeInsets.fromLTRB(0, 12, 28, 46),
         child: OutlineButton(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32.0),
+            borderRadius: BorderRadius.circular(18.0),
           ),
           child: Icon(
             Icons.add,
@@ -208,46 +255,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         ),
       );
     }
-    final c = collections[index];
-    return GestureDetector(
-      child: Column(
-        children: <Widget>[
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.0),
-            child: Container(
-              child: Hero(
-                  tag: "collection" + c.thumbnail.tag(),
-                  child: ThumbnailWidget(c.thumbnail)),
-              height: 150,
-              width: 150,
-            ),
-          ),
-          Padding(padding: EdgeInsets.all(2)),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-              child: Text(
-                c.collection.name,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-        ],
-      ),
-      onTap: () {
-        final page = CollectionPage(c.collection);
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return page;
-            },
-          ),
-        );
-      },
-    );
   }
 
   @override

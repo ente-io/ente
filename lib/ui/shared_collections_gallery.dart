@@ -107,21 +107,24 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   ),
                 )
               : nothingToSeeHere,
-          Padding(padding: EdgeInsets.all(16)),
+          Padding(padding: EdgeInsets.all(4)),
           Divider(height: 0),
           Padding(padding: EdgeInsets.all(14)),
           SectionTitle("outgoing"),
           Padding(padding: EdgeInsets.all(16)),
           collections.outgoing.length > 0
-              ? ListView.builder(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.only(bottom: 12),
-                  physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return _buildOutgoingCollection(
-                        context, collections.outgoing[index]);
-                  },
-                  itemCount: collections.outgoing.length,
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.only(bottom: 12),
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      return _buildOutgoingCollection(
+                          context, collections.outgoing[index]);
+                    },
+                    itemCount: collections.outgoing.length,
+                  ),
                 )
               : nothingToSeeHere,
         ],
@@ -151,11 +154,11 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
     }
     return GestureDetector(
       child: Container(
-        margin: EdgeInsets.fromLTRB(16, 4, 8, 12),
+        margin: EdgeInsets.fromLTRB(16, 12, 8, 12),
         child: Row(
           children: <Widget>[
             ClipRRect(
-              borderRadius: BorderRadius.circular(2.0),
+              borderRadius: BorderRadius.circular(8.0),
               child: Container(
                 child: Hero(
                     tag: "outgoing_collection" + c.thumbnail.tag(),
@@ -215,7 +218,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
       child: Column(
         children: <Widget>[
           ClipRRect(
-            borderRadius: BorderRadius.circular(4.0),
+            borderRadius: BorderRadius.circular(18.0),
             child: Container(
               child: Stack(
                 children: [
@@ -242,8 +245,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   ),
                 ],
               ),
-              height: 150,
-              width: 150,
+              height: 160,
+              width: 160,
             ),
           ),
           Padding(padding: EdgeInsets.all(2)),
