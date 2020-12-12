@@ -42,7 +42,10 @@ class _MemoriesWidgetState extends State<MemoriesWidget>
             snapshot.data.length == 0) {
           return Container();
         } else {
-          return _buildMemories(snapshot.data);
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _buildMemories(snapshot.data),
+          );
         }
       },
     );
@@ -115,7 +118,7 @@ class MemoryWidget extends StatelessWidget {
           child: Column(
             children: [
               _buildMemoryItem(context, index),
-              Padding(padding: EdgeInsets.all(2)),
+              Padding(padding: EdgeInsets.all(4)),
               Hero(
                 tag: title,
                 child: Material(
@@ -124,6 +127,7 @@ class MemoryWidget extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: 12,
+                      color: Colors.white60,
                     ),
                   ),
                 ),

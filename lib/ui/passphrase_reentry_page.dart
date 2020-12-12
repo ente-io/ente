@@ -54,6 +54,9 @@ class _PassphraseReentryPageState extends State<PassphraseReentryPage> {
                 hintText: "that thing you promised to never forget",
                 contentPadding: EdgeInsets.all(20),
               ),
+              style: TextStyle(
+                fontSize: 14,
+              ),
               controller: _passphraseController,
               autofocus: false,
               autocorrect: false,
@@ -64,8 +67,9 @@ class _PassphraseReentryPageState extends State<PassphraseReentryPage> {
             ),
             Padding(padding: EdgeInsets.all(12)),
             Container(
+                padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
                 width: double.infinity,
-                height: 44,
+                height: 64,
                 child: button(
                   "Verify Passphrase",
                   onPressed: _passphraseController.text.isNotEmpty

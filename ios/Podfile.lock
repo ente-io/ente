@@ -27,6 +27,7 @@ PODS:
     - Flutter
   - fluttertoast (0.0.2):
     - Flutter
+    - Toast
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
@@ -62,6 +63,7 @@ PODS:
   - sqflite (0.0.1):
     - Flutter
     - FMDB (~> 2.7.2)
+  - Toast (4.0.0)
   - uni_links (0.0.1):
     - Flutter
   - url_launcher (0.0.1):
@@ -105,6 +107,7 @@ SPEC REPOS:
     - Reachability
     - SDWebImage
     - SDWebImageWebPCoder
+    - Toast
 
 EXTERNAL SOURCES:
   connectivity:
@@ -169,7 +172,7 @@ SPEC CHECKSUMS:
   flutter_sodium: c84426b4de738514b5b66cfdeb8a06634e72fe0b
   flutter_webview_plugin: ed9e8a6a96baf0c867e90e1bce2673913eeac694
   fluttercontactpicker: 3a69f749dcc3fab94b816ad68fa838a6f0a1cf0f
-  fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
+  fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
   Mantle: 35238ae6f2e2b2d474fa7b67fee82a59fea71915
@@ -183,6 +186,7 @@ SPEC CHECKSUMS:
   share_extend: b6748dc53695587891126a89533b862b92548c7b
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
+  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e

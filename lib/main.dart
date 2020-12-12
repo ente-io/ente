@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
     return MaterialApp(
       title: _title,
       theme: ThemeData(
-        fontFamily: 'NunitoSans',
+        fontFamily: 'Ubuntu',
         brightness: Brightness.dark,
         hintColor: Colors.grey,
         accentColor: Colors.pink[400],

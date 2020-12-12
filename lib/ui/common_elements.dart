@@ -15,6 +15,7 @@ RaisedButton button(
         fontWeight: FontWeight.bold,
         fontSize: fontSize,
       ),
+      textAlign: TextAlign.center,
     ),
     onPressed: onPressed,
     shape: RoundedRectangleBorder(

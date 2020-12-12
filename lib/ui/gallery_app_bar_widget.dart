@@ -74,12 +74,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   Widget build(BuildContext context) {
     if (widget.selectedFiles.files.isEmpty) {
       return AppBar(
+        backgroundColor: Color(0x00000000),
+        elevation: 0,
         title: Text(
           widget.title,
           style: TextStyle(
             fontFamily: widget.type == GalleryAppBarType.homepage
                 ? 'Montserrat'
                 : 'NunitoSans',
+            color: widget.type == GalleryAppBarType.homepage
+                ? Colors.white.withOpacity(0.00)
+                : Colors.white.withOpacity(0.60),
           ),
         ),
         actions: _getDefaultActions(context),

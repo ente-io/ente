@@ -68,7 +68,10 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     return SingleChildScrollView(
       child: Column(
         children: [
-          SectionTitle("DEVICE FOLDERS"),
+          SectionTitle("device folders"),
+          Padding(
+            padding: EdgeInsets.all(6),
+          ),
           Container(
             height: 160,
             child: Align(
@@ -86,8 +89,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             ),
           ),
           Divider(height: 12),
-          SectionTitle("UPLOADED COLLECTIONS"),
-          Padding(padding: EdgeInsets.all(6)),
+          SectionTitle("uploaded collections"),
+          Padding(padding: EdgeInsets.all(16)),
           GridView.builder(
             shrinkWrap: true,
             padding: EdgeInsets.only(bottom: 12),
@@ -141,12 +144,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
 
   Widget _buildFolder(BuildContext context, DeviceFolder folder) {
     return GestureDetector(
-      child: Padding(
+      child: Container(
+        height: 110,
+        width: 140,
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
             ClipRRect(
-              borderRadius: BorderRadius.circular(4.0),
+              borderRadius: BorderRadius.circular(32.0),
               child: Container(
                 child: Hero(
                     tag:
@@ -161,7 +166,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               child: Text(
                 folder.name,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -187,6 +192,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       return Container(
         padding: EdgeInsets.fromLTRB(28, 12, 28, 46),
         child: OutlineButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32.0),
+          ),
           child: Icon(
             Icons.add,
           ),
@@ -205,7 +213,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       child: Column(
         children: <Widget>[
           ClipRRect(
-            borderRadius: BorderRadius.circular(4.0),
+            borderRadius: BorderRadius.circular(12.0),
             child: Container(
               child: Hero(
                   tag: "collection" + c.thumbnail.tag(),
@@ -260,7 +268,7 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: EdgeInsets.fromLTRB(12, 12, 0, 0),
+        margin: EdgeInsets.fromLTRB(24, 12, 0, 0),
         child: Column(children: [
           Align(
             alignment: Alignment.centerLeft,
@@ -269,6 +277,9 @@ class SectionTitle extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).primaryColorLight,
+                fontSize: 20,
+                fontFamily: 'Montserrat',
+                letterSpacing: 1,
               ),
             ),
           ),

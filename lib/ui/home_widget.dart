@@ -78,10 +78,13 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: GalleryAppBarWidget(
-        GalleryAppBarType.homepage,
-        widget.title,
-        _selectedFiles,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(20.0),
+        child: GalleryAppBarWidget(
+          GalleryAppBarType.homepage,
+          widget.title,
+          _selectedFiles,
+        ),
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
       body: ExtentsPageView(
@@ -177,15 +180,15 @@ class _HomeWidgetState extends State<HomeWidget> {
         items: [
           TabItem(
             icon: Icons.photo_library,
-            title: "Photos",
+            title: "photos",
           ),
           TabItem(
             icon: Icons.folder_special,
-            title: "Collections",
+            title: "collections",
           ),
           TabItem(
             icon: Icons.folder_shared,
-            title: "Shared",
+            title: "shared",
           ),
         ],
         onTap: (index) {

@@ -59,7 +59,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         content = Stack(
           children: [
             image,
-            Icon(Icons.play_circle_outline),
+            Container(
+              height: 64,
+              child: Icon(
+                Icons.play_circle_outline,
+                size: 40,
+                color: Colors.white70,
+              ),
+            ),
           ],
           fit: StackFit.expand,
         );

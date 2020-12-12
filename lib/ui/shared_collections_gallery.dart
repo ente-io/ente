@@ -91,8 +91,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
     return SingleChildScrollView(
       child: Column(
         children: [
-          SectionTitle("INCOMING"),
-          Padding(padding: EdgeInsets.all(8)),
+          SectionTitle("incoming"),
+          Padding(padding: EdgeInsets.all(16)),
           collections.incoming.length > 0
               ? GridView.builder(
                   shrinkWrap: true,
@@ -107,10 +107,11 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   ),
                 )
               : nothingToSeeHere,
-          Padding(padding: EdgeInsets.all(4)),
-          Divider(height: 4),
-          SectionTitle("OUTGOING"),
-          Padding(padding: EdgeInsets.all(8)),
+          Padding(padding: EdgeInsets.all(16)),
+          Divider(height: 0),
+          Padding(padding: EdgeInsets.all(14)),
+          SectionTitle("outgoing"),
+          Padding(padding: EdgeInsets.all(16)),
           collections.outgoing.length > 0
               ? ListView.builder(
                   shrinkWrap: true,

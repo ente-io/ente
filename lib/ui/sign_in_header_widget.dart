@@ -45,43 +45,48 @@ class _SignInHeaderState extends State<SignInHeader> {
       child: Column(
         children: [
           Text(
-            "Preserve Your Memories",
+            "preserve your memories",
             style: TextStyle(
               fontSize: 16,
             ),
           ),
-          Container(
-            width: double.infinity,
-            height: 64,
-            padding: EdgeInsets.all(8),
-            child: button(
-              "Sign In",
-              fontSize: 18,
-              onPressed: () {
-                var page;
-                if (Configuration.instance.getToken() == null) {
-                  page = EmailEntryPage();
-                } else {
-                  // No key
-                  if (Configuration.instance.getKeyAttributes() != null) {
-                    // Yet to set or decrypt the key
-                    page = PassphraseReentryPage();
+          Padding(
+            padding: EdgeInsets.all(10),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
+            child: Container(
+              width: double.infinity,
+              height: 64,
+              child: button(
+                "sign in",
+                fontSize: 18,
+                onPressed: () {
+                  var page;
+                  if (Configuration.instance.getToken() == null) {
+                    page = EmailEntryPage();
                   } else {
-                    // Never had a key
-                    page = PassphraseEntryPage();
+                    // No key
+                    if (Configuration.instance.getKeyAttributes() != null) {
+                      // Yet to set or decrypt the key
+                      page = PassphraseReentryPage();
+                    } else {
+                      // Never had a key
+                      page = PassphraseEntryPage();
+                    }
                   }
-                }
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return page;
-                    },
-                  ),
-                );
-              },
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return page;
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
           ),
-          Padding(padding: EdgeInsets.all(4)),
+          Padding(padding: EdgeInsets.all(10)),
           Divider(
             height: 2,
           ),

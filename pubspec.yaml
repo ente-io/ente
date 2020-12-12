@@ -92,6 +92,10 @@ flutter:
     fonts:
       - asset: fonts/NunitoSans-Regular.ttf
       - asset: fonts/NunitoSans-Bold.ttf
+  - family: Ubuntu
+    fonts:
+      - asset: fonts/Ubuntu-Regular.ttf
+      - asset: fonts/Ubuntu-Light.ttf
   - family: Montserrat
     fonts:
       - asset: fonts/Montserrat-Medium.ttf

@@ -21,7 +21,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Verify Email"),
+        title: Text("verify email"),
       ),
       body: _getBody(),
     );
@@ -42,54 +42,73 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               height: 220,
             ),
             Padding(padding: EdgeInsets.all(12)),
-            Text.rich(
-              TextSpan(
-                style: TextStyle(fontSize: 18),
-                children: <TextSpan>[
-                  TextSpan(text: "We've sent a mail to "),
-                  TextSpan(
-                      text: Configuration.instance.getEmail(),
-                      style: TextStyle(
-                        color: Theme.of(context).accentColor,
-                      )),
-                ],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            Padding(padding: EdgeInsets.all(12)),
             Text(
-              "Please check your inbox (and spam) to complete verification.",
-              textAlign: TextAlign.center,
+              "we've sent a mail to",
+              style: TextStyle(fontSize: 18),
             ),
-            Padding(padding: EdgeInsets.all(12)),
-            TextFormField(
-              decoration: InputDecoration(
-                hintText: 'Tap to enter verification code',
-                contentPadding: EdgeInsets.all(20),
+            Padding(padding: EdgeInsets.all(2)),
+            Text(
+              Configuration.instance.getEmail(),
+              style: TextStyle(
+                color: Theme.of(context).accentColor,
+                fontSize: 18,
               ),
-              controller: _verificationCodeController,
-              autofocus: false,
-              autocorrect: false,
-              keyboardType: TextInputType.visiblePassword,
-              textAlign: TextAlign.center,
-              onChanged: (_) {
-                setState(() {});
-              },
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            // Text.rich(
+            //   TextSpan(
+            //     style: TextStyle(fontSize: 18),
+            //     children: <TextSpan>[
+            //       TextSpan(text: "we've sent a mail to "),
+            //       TextSpan(
+            //           text: Configuration.instance.getEmail(),
+            //           style: TextStyle(
+            //             color: Theme.of(context).accentColor,
+            //           )),
+            //     ],
+            //   ),
+            //   textAlign: TextAlign.center,
+            // ),
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(
+                "please check your inbox (and spam) to complete verification.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(60, 0, 60, 32),
+              child: TextFormField(
+                decoration: InputDecoration(
+                  hintText: 'tap to enter code',
+                  contentPadding: EdgeInsets.all(12),
+                ),
+                controller: _verificationCodeController,
+                autofocus: false,
+                autocorrect: false,
+                keyboardType: TextInputType.visiblePassword,
+                textAlign: TextAlign.center,
+                onChanged: (_) {
+                  setState(() {});
+                },
+              ),
+            ),
             Container(
-                width: double.infinity,
-                height: 44,
-                child: button(
-                  "Verify",
-                  onPressed: _verificationCodeController.text == null ||
-                          _verificationCodeController.text.isEmpty
-                      ? null
-                      : () {
-                          UserService.instance.getCredentials(
-                              context, _verificationCodeController.text);
-                        },
-                )),
+              padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
+              width: double.infinity,
+              height: 64,
+              child: button(
+                "verify",
+                onPressed: _verificationCodeController.text == null ||
+                        _verificationCodeController.text.isEmpty
+                    ? null
+                    : () {
+                        UserService.instance.getCredentials(
+                            context, _verificationCodeController.text);
+                      },
+                fontSize: 18,
+              ),
+            ),
             Padding(padding: EdgeInsets.all(8)),
             FlatButton(
                 onPressed: () {
@@ -102,7 +121,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                   );
                 },
                 child: Text(
-                  "Did not get email?",
+                  "did not get email?",
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                     fontSize: 12,

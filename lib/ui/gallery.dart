@@ -257,7 +257,7 @@ class _GalleryState extends State<Gallery> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.fromLTRB(14, 8, 0, 8),
       alignment: Alignment.centerLeft,
       child: Text(
         title,
