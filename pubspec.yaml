@@ -68,6 +68,7 @@ dependencies:
   pretty_dio_logger: ^1.1.1
   url_launcher: ^5.7.10
   fluttercontactpicker: ^3.1.0
+  in_app_purchase: ^0.3.4+16
 
 dev_dependencies:
   flutter_test:
