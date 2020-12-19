@@ -54,8 +54,11 @@ const DeadCenter = styled.div`
     flex-direction: column;
 `;
 
-const ListContainer = styled.div`
-    display: flex;
+const ListContainer = styled.div<{columns: number}>`
+    display: grid;
+    grid-template-columns: repeat(${props => props.columns}, 1fr);
+    grid-column-gap: 8px;
+    padding: 0 8px;
     max-width: 100%;
     color: #fff;
 
@@ -70,10 +73,6 @@ const ListContainer = styled.div`
     @media (max-width: 450px) {
         width: 100%;
     }
-`;
-
-const DateContainer = styled.div`
-    padding: 0 4px;
 `;
 
 const PAGE_SIZE = 12;
@@ -322,10 +321,11 @@ export default function Gallery() {
                                 >
                                     {({ index, style }) => {
                                         return (<ListItem style={style}>
-                                            <ListContainer>
+                                            <ListContainer columns={timeStampList[index].itemType === ITEM_TYPE.TIME
+                                                ? 1 : columns}>
                                                 {
                                                     timeStampList[index].itemType === ITEM_TYPE.TIME
-                                                        ? <DateContainer>{timeStampList[index].date}</DateContainer>
+                                                        ? timeStampList[index].date
                                                         : timeStampList[index].items.map((item, idx) =>{
                                                             return getThumbnail(filteredData, timeStampList[index].itemStartIndex + idx);
                                                         })
