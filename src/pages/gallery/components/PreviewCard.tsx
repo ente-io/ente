@@ -13,10 +13,10 @@ interface IProps {
 
 const Cont = styled.div<{ disabled: boolean }>`
     background: #555 url(/image.svg) no-repeat center;
-    margin: 0 4px;
-    display: inline-block;
-    width: 192px;
+    display: block;
+    width: fit-content;
     height: 192px;
+    min-width: 100%;
     overflow: hidden;
     position: relative;
     cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
