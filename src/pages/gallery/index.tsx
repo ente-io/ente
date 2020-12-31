@@ -75,9 +75,6 @@ const ListContainer = styled.div<{columns: number}>`
     }
 `;
 
-const PAGE_SIZE = 12;
-const COLUMNS = 3;
-
 export default function Gallery() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);

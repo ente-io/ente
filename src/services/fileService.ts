@@ -161,14 +161,74 @@ export const getPreview = async (token: string, file: file) => {
 }
 
 export const getFile = async (token: string, file: file) => {
-    const resp = await HTTPService.get(
-        `${ENDPOINT}/files/download/${file.id}`,
-        { token }, null, { responseType: 'arraybuffer' },
-    );
     const worker = await new CryptoWorker();
-    const decrypted: any = await worker.decryptFile(
-        new Uint8Array(resp.data),
-        await worker.fromB64(file.file.decryptionHeader),
-        file.key);
-    return URL.createObjectURL(new Blob([decrypted]));
+    if (file.metadata.fileType === 0) {
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/files/download/${file.id}`,
+            { token }, null, { responseType: 'arraybuffer' },
+        );
+        const decrypted: any = await worker.decryptFile(
+            new Uint8Array(resp.data),
+            await worker.fromB64(file.file.decryptionHeader),
+            file.key,
+        );
+        return URL.createObjectURL(new Blob([decrypted]));
+    } else {
+        const source = new MediaSource();
+        source.addEventListener('sourceopen', async () => {
+            if (!source.sourceBuffers.length) {
+                const sourceBuffer = source.addSourceBuffer('video/mp4; codecs="avc1.64000d,mp4a.40.2"');
+                const resp = await fetch(`${ENDPOINT}/files/download/${file.id}?token=${token}`);
+                const reader = resp.body.getReader();
+                new ReadableStream({
+                    async start() {
+                        let { pullState, decryptionChunkSize, tag } = await worker.initDecryption(
+                            await worker.fromB64(file.file.decryptionHeader),
+                            file.key
+                        );
+                        console.log(pullState, decryptionChunkSize, tag);
+                        let data = new Uint8Array();
+                        // The following function handles each data chunk
+                        function push() {
+                            // "done" is a Boolean and value a "Uint8Array"
+                            reader.read().then(async ({ done, value }) => {
+                                // Is there more data to read?
+                                if (!done) {
+                                    const buffer = new Uint8Array(data.byteLength + value.byteLength);
+                                    buffer.set(new Uint8Array(data), 0);
+                                    buffer.set(new Uint8Array(value), data.byteLength);
+                                    if (buffer.length > decryptionChunkSize) {
+                                        const fileData = buffer.slice(0, decryptionChunkSize);
+                                        const { decryptedData, newTag } = await worker.decryptChunk(fileData, pullState);
+                                        sourceBuffer.appendBuffer(decryptedData);
+                                        tag = newTag;
+                                        data = buffer.slice(decryptionChunkSize);
+                                        console.log('>', decryptionChunkSize, data.length, tag);
+                                    } else {
+                                        data = buffer;
+                                        push();
+                                    }
+                                } else {
+                                    console.log('end', value.length);
+                                    source.endOfStream();
+                                }
+                            });
+                        };
+    
+                        sourceBuffer.addEventListener('updateend', () => {
+                            console.log('appended');
+                            push();
+                        });
+    
+                        push();
+                    }
+                });
+            }
+        });
+
+        source.addEventListener('sourceended', () => {
+            console.log('sourceend');
+        });
+        return URL.createObjectURL(source);
+    }
 }
