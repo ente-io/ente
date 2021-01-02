@@ -204,13 +204,21 @@ export const getFile = async (token: string, file: file) => {
                                         tag = newTag;
                                         data = buffer.slice(decryptionChunkSize);
                                         console.log('>', decryptionChunkSize, data.length, tag);
+                                        console.log();
                                     } else {
                                         data = buffer;
                                         push();
                                     }
                                 } else {
-                                    console.log('end', value.length);
-                                    source.endOfStream();
+                                    if (data) {
+                                        const { decryptedData } = await worker.decryptChunk(data, pullState);
+                                        sourceBuffer.appendBuffer(decryptedData);
+                                        data = null;
+                                    } else {
+                                        // console.log('end', value.length);
+                                        console.log(source);
+                                        // source.endOfStream();
+                                    }
                                 }
                             });
                         };
