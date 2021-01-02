@@ -222,9 +222,11 @@ class SyncService {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
     }
-    final futures = List<Future>();
+    _logger.info(
+        filesToBeUploaded.length.toString() + " new files to be uploaded.");
 
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated();
+    _logger.info(updatedFileIDs.length.toString() + " files updated.");
 
     int uploadCounter = 0;
     final totalUploads = filesToBeUploaded.length + updatedFileIDs.length;
@@ -233,6 +235,7 @@ class SyncService {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
     }
 
+    final futures = List<Future>();
     for (final uploadedFileID in updatedFileIDs) {
       if (_syncStopRequested) {
         _syncStopRequested = false;
