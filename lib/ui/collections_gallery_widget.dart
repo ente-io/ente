@@ -237,7 +237,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       );
     } else {
       return Container(
-        padding: EdgeInsets.fromLTRB(0, 12, 28, 46),
+        padding: EdgeInsets.fromLTRB(28, 12, 28, 46),
         child: OutlineButton(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),

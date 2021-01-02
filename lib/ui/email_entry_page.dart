@@ -127,12 +127,29 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         padding: EdgeInsets.fromLTRB(12, 0, 0, 0),
                       ),
                       Expanded(
-                        child: Text(
-                            "ente will be free to use until we have launched a stable web client. After that it will cost $amount/100GB monthly. We'll make sure it's worth it.",
-                            overflow: TextOverflow.visible,
-                            style: TextStyle(
-                              color: Colors.white70,
-                            )),
+                        child: Column(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "ente's pricing plans start at \$1.99.",
+                                overflow: TextOverflow.visible,
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ),
+                            Padding(padding: EdgeInsets.all(4)),
+                            Text(
+                              "your payment details will be requested in the following page.",
+                              overflow: TextOverflow.visible,
+                              style: TextStyle(
+                                color: Colors.white70,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -146,7 +163,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: "By clicking Sign In, I agree to the ",
+                      text: "by clicking sign in, I agree to the ",
                     ),
                     TextSpan(
                       text: "Terms of Service",
