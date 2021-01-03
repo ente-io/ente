@@ -119,7 +119,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: "by clicking sign up, I agree to the ",
+                      text: "by clicking sign up, you agree to the ",
                     ),
                     TextSpan(
                       text: "terms of service",
@@ -145,7 +145,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   ],
                   style: TextStyle(
                     height: 1.25,
-                    fontSize: 14,
+                    fontSize: 12,
                     fontFamily: 'Ubuntu',
                     color: Colors.white70,
                   ),
@@ -153,7 +153,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 textAlign: TextAlign.center,
               ),
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            Padding(padding: EdgeInsets.all(4)),
             Container(
               width: double.infinity,
               height: 64,
@@ -183,42 +183,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   showModalBottomSheet<void>(
                       context: context,
                       builder: (BuildContext context) {
-                        return Container(
-                          height: 200,
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                const Text(
-                                    'you can choose a pricing plan after signing up'),
-                                Padding(padding: EdgeInsets.all(8)),
-                                GestureDetector(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.close,
-                                        size: 12,
-                                        color: Colors.white38,
-                                      ),
-                                      Padding(padding: EdgeInsets.all(1)),
-                                      Text(
-                                        'close',
-                                        style: TextStyle(
-                                          color: Colors.white38,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  onTap: () => Navigator.pop(context),
-                                )
-                              ],
-                            ),
-                          ),
-                        );
+                        return PricingWidget();
                       });
                 },
                 child: Container(
@@ -234,6 +199,104 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     ],
                   ),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PricingWidget extends StatelessWidget {
+  const PricingWidget({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 280,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Text(
+            "pricing",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              PricingTierWidget("25 GB", "\$1.99 / month"),
+              PricingTierWidget("100 GB", "\$4.99 / month"),
+              PricingTierWidget("500 GB", "\$14.99 / month"),
+            ],
+          ),
+          const Text("we offer a 30 day free trial"),
+          GestureDetector(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.close,
+                  size: 12,
+                  color: Colors.white38,
+                ),
+                Padding(padding: EdgeInsets.all(1)),
+                Text(
+                  "close",
+                  style: TextStyle(
+                    color: Colors.white38,
+                  ),
+                ),
+              ],
+            ),
+            onTap: () => Navigator.pop(context),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class PricingTierWidget extends StatelessWidget {
+  final String tierName;
+  final String tierPrice;
+  const PricingTierWidget(
+    this.tierName,
+    this.tierPrice, {
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Container(
+        width: 100,
+        padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+        child: Column(
+          children: [
+            Text(
+              tierName,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(4),
+            ),
+            Text(
+              tierPrice,
+              style: TextStyle(
+                fontSize: 10,
               ),
             ),
           ],
