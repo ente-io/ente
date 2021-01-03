@@ -30,32 +30,37 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("sign in"),
+    final appBar = AppBar(
+      title: Hero(
+        tag: "sign_up_hero_text",
+        child: Material(
+          color: Colors.transparent,
+          child: Text(
+            "sign up",
+            style: TextStyle(
+              fontSize: 18,
+            ),
+          ),
+        ),
       ),
-      body: _getBody(),
+    );
+    return Scaffold(
+      appBar: appBar,
+      body: _getBody(appBar.preferredSize.height),
     );
   }
 
-  Widget _getBody() {
-    final locale = Localizations.localeOf(context);
-    var amount = "\$4";
-    switch (locale.countryCode) {
-      case "IN":
-        amount = "₹249";
-        break;
-      case "US":
-        amount = "\$4";
-        break;
-      default:
-        amount = "€4";
-    }
-
+  Widget _getBody(final appBarHeight) {
+    var _pageSize = MediaQuery.of(context).size.height;
+    var _notifySize = MediaQuery.of(context).padding.top;
+    var _appBarSize = appBarHeight;
     return SingleChildScrollView(
       child: Container(
+        height: _pageSize - (_appBarSize + _notifySize),
         padding: EdgeInsets.all(8),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.max,
           children: [
             // Image.asset(
             //   "assets/welcome.png",
@@ -80,7 +85,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     _name = value;
                   });
                 },
-                autofocus: true,
                 autocorrect: false,
                 keyboardType: TextInputType.text,
                 textCapitalization: TextCapitalization.words,
@@ -108,54 +112,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 initialValue: _email,
               ),
             ),
-            Padding(padding: EdgeInsets.all(20)),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  color: Colors.grey[700],
-                  padding: EdgeInsets.all(24),
-                  child: Row(
-                    // crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Icon(Icons.info),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(12, 0, 0, 0),
-                      ),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "ente's pricing plans start at \$1.99.",
-                                overflow: TextOverflow.visible,
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ),
-                            Padding(padding: EdgeInsets.all(4)),
-                            Text(
-                              "your payment details will be requested in the following page.",
-                              overflow: TextOverflow.visible,
-                              style: TextStyle(
-                                color: Colors.white70,
-                                height: 1.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
             Padding(padding: EdgeInsets.all(8)),
             Padding(
               padding: const EdgeInsets.all(12),
@@ -163,10 +119,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: "by clicking sign in, I agree to the ",
+                      text: "by clicking sign up, I agree to the ",
                     ),
                     TextSpan(
-                      text: "Terms of Service",
+                      text: "terms of service",
                       style: TextStyle(
                         color: Colors.blue,
                       ),
@@ -177,7 +133,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     ),
                     TextSpan(text: " and "),
                     TextSpan(
-                      text: "Privacy Policy",
+                      text: "privacy policy",
                       style: TextStyle(
                         color: Colors.blue,
                       ),
@@ -186,7 +142,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           launch("https://ente.io/privacy");
                         },
                     ),
-                    TextSpan(text: "."),
                   ],
                   style: TextStyle(
                     height: 1.25,
@@ -204,7 +159,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               height: 64,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: button(
-                "sign in",
+                "sign up",
                 onPressed: _email != null && _name != null
                     ? () {
                         if (!isValidEmail(_email)) {
@@ -218,6 +173,67 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       }
                     : null,
                 fontSize: 18,
+              ),
+            ),
+            Expanded(child: Container()),
+            Align(
+              alignment: Alignment.center,
+              child: GestureDetector(
+                onTap: () {
+                  showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          height: 200,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                const Text(
+                                    'you can choose a pricing plan after signing up'),
+                                Padding(padding: EdgeInsets.all(8)),
+                                GestureDetector(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.close,
+                                        size: 12,
+                                        color: Colors.white38,
+                                      ),
+                                      Padding(padding: EdgeInsets.all(1)),
+                                      Text(
+                                        'close',
+                                        style: TextStyle(
+                                          color: Colors.white38,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () => Navigator.pop(context),
+                                )
+                              ],
+                            ),
+                          ),
+                        );
+                      });
+                },
+                child: Container(
+                  padding: EdgeInsets.all(32),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "pricing",
+                      ),
+                      Icon(Icons.arrow_drop_up),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],

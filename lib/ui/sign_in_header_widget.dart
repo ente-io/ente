@@ -149,34 +149,49 @@ class _SignInHeaderState extends State<SignInHeader> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
-              child: Container(
-                width: double.infinity,
-                height: 64,
-                child: button(
-                  "sign in",
-                  fontSize: 18,
-                  onPressed: () {
-                    var page;
-                    if (Configuration.instance.getToken() == null) {
-                      page = EmailEntryPage();
-                    } else {
-                      // No key
-                      if (Configuration.instance.getKeyAttributes() != null) {
-                        // Yet to set or decrypt the key
-                        page = PassphraseReentryPage();
-                      } else {
-                        // Never had a key
-                        page = PassphraseEntryPage();
-                      }
-                    }
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return page;
-                        },
+            ),
+            Container(
+              width: double.infinity,
+              height: 64,
+              child: RaisedButton(
+                child: Hero(
+                  tag: "sign_up_hero_text",
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Text(
+                      "sign up",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
                       ),
-                    );
-                  },
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                onPressed: () {
+                  var page;
+                  if (Configuration.instance.getToken() == null) {
+                    page = EmailEntryPage();
+                  } else {
+                    // No key
+                    if (Configuration.instance.getKeyAttributes() != null) {
+                      // Yet to set or decrypt the key
+                      page = PassphraseReentryPage();
+                    } else {
+                      // Never had a key
+                      page = PassphraseEntryPage();
+                    }
+                  }
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return page;
+                      },
+                    ),
+                  );
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
               ),
             ),
