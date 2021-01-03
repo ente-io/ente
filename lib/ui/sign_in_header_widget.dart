@@ -9,6 +9,7 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/passphrase_entry_page.dart';
 import 'package:photos/ui/passphrase_reentry_page.dart';
+import 'package:expansion_card/expansion_card.dart';
 
 class SignInHeader extends StatefulWidget {
   const SignInHeader({Key key}) : super(key: key);
@@ -98,40 +99,37 @@ class _SignInHeaderState extends State<SignInHeader> {
             Padding(
               padding: EdgeInsets.all(10),
             ),
-            Card(
-              child: ExpansionTile(
-                title: Text('protected'),
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Text(
-                        'only visible to you as they are encrypted by your master key'),
-                  ),
-                ],
-              ),
+            ExpansionCard(
+              title: Text('protected'),
+              margin: EdgeInsets.all(0),
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Text(
+                      'only visible to you as they are encrypted by your master key'),
+                ),
+              ],
             ),
-            Card(
-              child: ExpansionTile(
-                title: Text('preserved'),
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Text(
-                        'stored in multiple locations including an underground fallout shelter'),
-                  ),
-                ],
-              ),
+            ExpansionCard(
+              title: Text('preserved'),
+              margin: EdgeInsets.all(0),
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Text(
+                      'stored in multiple locations including an underground fallout shelter'),
+                ),
+              ],
             ),
-            Card(
-              child: ExpansionTile(
-                title: Text('accessible'),
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Text('accessible across all your devices'),
-                  ),
-                ],
-              ),
+            ExpansionCard(
+              title: Text('accessible'),
+              margin: EdgeInsets.all(0),
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Text('accessible across all your devices'),
+                ),
+              ],
             ),
             Padding(
               padding: EdgeInsets.all(10),

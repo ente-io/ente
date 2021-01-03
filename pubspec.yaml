@@ -70,6 +70,7 @@ dependencies:
   url_launcher: ^5.7.10
   fluttercontactpicker: ^3.1.0
   in_app_purchase: ^0.3.4+16
+  expansion_card: ^0.1.0
 
 dev_dependencies:
   flutter_test:
