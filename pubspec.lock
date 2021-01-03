@@ -497,10 +497,10 @@ packages:
   photo_manager:
     dependency: "direct main"
     description:
-      name: photo_manager
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.6.0-dev.7"
+      path: "thirdparty/flutter_photo_manager"
+      relative: true
+    source: path
+    version: "0.6.0-dev.8"
   photo_view:
     dependency: "direct main"
     description:

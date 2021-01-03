@@ -425,18 +425,16 @@ class FilesDB {
     String title,
     String deviceFolder,
     int creationTime,
-    int modificationTime,
   ) async {
     final db = await instance.database;
     final rows = await db.query(
       table,
       where: '''$columnTitle=? AND $columnDeviceFolder=? AND 
-          $columnCreationTime=? AND $columnModificationTime=?''',
+          $columnCreationTime=?''',
       whereArgs: [
         title,
         deviceFolder,
         creationTime,
-        modificationTime,
       ],
     );
     if (rows.isNotEmpty) {

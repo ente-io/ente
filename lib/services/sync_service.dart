@@ -203,12 +203,15 @@ class SyncService {
       _collectionsService.getCollectionSyncTime(collectionID),
       _diffLimit,
     );
-    if (diff.isNotEmpty) {
-      await _storeDiff(diff, collectionID);
-      _logger.info("Updated files in collection " + collectionID.toString());
+    if (diff.updatedFiles.isNotEmpty) {
+      await _storeDiff(diff.updatedFiles, collectionID);
+      _logger.info("Updated " +
+          diff.updatedFiles.length.toString() +
+          " files in collection " +
+          collectionID.toString());
       FileRepository.instance.reloadFiles();
       Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
-      if (diff.length == _diffLimit) {
+      if (diff.fetchCount == _diffLimit) {
         return await _fetchEncryptedFilesDiff(collectionID);
       }
     }
@@ -222,9 +225,11 @@ class SyncService {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
     }
-    final futures = List<Future>();
+    _logger.info(
+        filesToBeUploaded.length.toString() + " new files to be uploaded.");
 
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated();
+    _logger.info(updatedFileIDs.length.toString() + " files updated.");
 
     int uploadCounter = 0;
     final totalUploads = filesToBeUploaded.length + updatedFileIDs.length;
@@ -233,6 +238,7 @@ class SyncService {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
     }
 
+    final futures = List<Future>();
     for (final uploadedFileID in updatedFileIDs) {
       if (_syncStopRequested) {
         _syncStopRequested = false;
@@ -286,10 +292,12 @@ class SyncService {
 
   Future _storeDiff(List<File> diff, int collectionID) async {
     for (File file in diff) {
-      final existingFiles = await _db.getMatchingFiles(file.title,
-          file.deviceFolder, file.creationTime, file.modificationTime);
+      final existingFiles = await _db.getMatchingFiles(
+          file.title, file.deviceFolder, file.creationTime);
       if (existingFiles == null) {
         // File uploaded from a different device
+        _logger.info("Could not find a matching file for " +
+            file.uploadedFileID.toString());
         file.localID = null;
         await _db.insert(file);
       } else {
@@ -300,6 +308,12 @@ class SyncService {
             existingFiles.length == 1 && existingFiles[0].collectionID == null;
         if (wasUploadedOnAPreviousInstallation) {
           file.generatedID = existingFiles[0].generatedID;
+          if (file.modificationTime != existingFiles[0].modificationTime) {
+            // File was updated since the app was uninstalled
+            _logger.info("Updated since last installation: " +
+                file.uploadedFileID.toString());
+            file.updationTime = null;
+          }
           await _db.update(file);
         } else {
           bool foundMatchingCollection = false;

@@ -18,7 +18,7 @@ class DiffFetcher {
   final _logger = Logger("FileDownloader");
   final _dio = Network.instance.getDio();
 
-  Future<List<File>> getEncryptedFilesDiff(
+  Future<Diff> getEncryptedFilesDiff(
       int collectionID, int sinceTime, int limit) async {
     return _dio
         .get(
@@ -75,10 +75,18 @@ class DiffFetcher {
               file.applyMetadata(metadata);
               files.add(file);
             }
+            return Diff(files, diff.length);
           } else {
             Bus.instance.fire(RemoteSyncEvent(false));
+            return Diff(List<File>(), 0);
           }
-          return files;
         });
   }
+}
+
+class Diff {
+  final List<File> updatedFiles;
+  final int fetchCount;
+
+  Diff(this.updatedFiles, this.fetchCount);
 }
