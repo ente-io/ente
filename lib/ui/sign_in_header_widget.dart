@@ -103,10 +103,14 @@ class _SignInHeaderState extends State<SignInHeader> {
               title: Text('protected'),
               margin: EdgeInsets.all(0),
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Text(
-                      'only visible to you as they are encrypted by your master key'),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Text(
+                      'only visible to you as they are encrypted by your master key',
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -114,10 +118,14 @@ class _SignInHeaderState extends State<SignInHeader> {
               title: Text('preserved'),
               margin: EdgeInsets.all(0),
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Text(
-                      'stored in multiple locations including an underground fallout shelter'),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Text(
+                      'stored in multiple locations including an underground fallout shelter',
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -125,9 +133,14 @@ class _SignInHeaderState extends State<SignInHeader> {
               title: Text('accessible'),
               margin: EdgeInsets.all(0),
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Text('accessible across all your devices'),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Text(
+                      'available on all your devices',
+                    ),
+                  ),
                 ),
               ],
             ),
