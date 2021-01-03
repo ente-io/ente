@@ -126,9 +126,16 @@ class _GalleryState extends State<Gallery> {
         children.add(widget.headerWidget);
       }
       children.add(Expanded(child: nothingToSeeHere));
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: children,
+      return CustomScrollView(
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: children,
+            ),
+          )
+        ],
       );
     }
     _collateFiles();

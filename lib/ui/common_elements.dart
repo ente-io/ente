@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 final nothingToSeeHere = Center(
-  child: Text(
-    "nothing to see here! 👀",
-    style: TextStyle(
-      color: Colors.white30,
+  child: Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Text(
+      "nothing to see here! 👀",
+      style: TextStyle(
+        color: Colors.white30,
+      ),
     ),
   ),
 );
