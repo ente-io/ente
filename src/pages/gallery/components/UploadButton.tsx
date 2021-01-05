@@ -1,9 +1,8 @@
 import CollectionSelector from 'pages/gallery/components/CollectionSelector';
 import React, { useRef } from 'react';
 import { Button } from 'react-bootstrap';
-import Dropzone from 'react-dropzone';
 
-const UploadButton = ({ modalView, closeModal, showModal }) => {
+const UploadButton = ({ modalView, closeModal, showModal, collections }) => {
   return (
     <>
       <Button variant='primary' onClick={showModal}>
@@ -13,6 +12,7 @@ const UploadButton = ({ modalView, closeModal, showModal }) => {
         modalView={modalView}
         closeModal={closeModal}
         showModal={showModal}
+        collections={collections}
       />
     </>
   );

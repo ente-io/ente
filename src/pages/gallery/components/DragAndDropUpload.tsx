@@ -37,6 +37,7 @@ const FileUpload = ({
   modalView,
   closeModal,
   showModal,
+  collections,
 }) => {
   return (
     <>
@@ -70,6 +71,7 @@ const FileUpload = ({
                   modalView={modalView}
                   closeModal={closeModal}
                   showModal={showModal}
+                  collections={collections}
                 />
               </DropDiv>
             </>
