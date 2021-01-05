@@ -20,7 +20,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
     return Scaffold(
       appBar: AppBar(
         leading: Icon(Icons.lock),
-        title: Text("Encryption Passphrase"),
+        title: Text("encryption password"),
       ),
       body: _getBody(),
     );
@@ -32,69 +32,75 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
         padding: EdgeInsets.fromLTRB(16, 40, 16, 16),
         child: Column(
           children: [
-            Image.asset(
-              "assets/vault.png",
-              width: 196,
-              height: 196,
-            ),
+            // Image.asset(
+            //   "assets/vault.png",
+            //   width: 196,
+            //   height: 196,
+            // ),
             Padding(padding: EdgeInsets.all(12)),
             Text(
-              "Please enter a passphrase that we can use to encrypt your data.",
+              "enter a password we can use to encrypt your data",
               textAlign: TextAlign.center,
+              style: TextStyle(
+                height: 1.3,
+              ),
             ),
-            Padding(padding: EdgeInsets.all(4)),
+            Padding(padding: EdgeInsets.all(8)),
+            Text("we don't store this password, so if you forget, "),
             Text.rich(
               TextSpan(
-                children: <TextSpan>[
-                  TextSpan(
-                      text:
-                          "We don't store your passphrase, so if you forget, "),
-                  TextSpan(
-                      text: "we will not be able to help you",
-                      style: TextStyle(
-                        decoration: TextDecoration.underline,
-                        fontWeight: FontWeight.bold,
-                      )),
-                  TextSpan(text: " recover your data."),
-                ],
+                  text: "we cannot decrypt your data",
+                  style: TextStyle(
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.bold,
+                  )),
+              style: TextStyle(
+                height: 1.3,
               ),
               textAlign: TextAlign.center,
             ),
             Padding(padding: EdgeInsets.all(12)),
-            TextFormField(
-              decoration: InputDecoration(
-                hintText: "enter your passphrase",
-                contentPadding: EdgeInsets.all(20),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+              child: TextFormField(
+                decoration: InputDecoration(
+                  hintText: "password",
+                  contentPadding: EdgeInsets.all(20),
+                ),
+                controller: _passphraseController1,
+                autofocus: false,
+                autocorrect: false,
+                keyboardType: TextInputType.visiblePassword,
+                onChanged: (_) {
+                  setState(() {});
+                },
               ),
-              controller: _passphraseController1,
-              autofocus: false,
-              autocorrect: false,
-              keyboardType: TextInputType.visiblePassword,
-              onChanged: (_) {
-                setState(() {});
-              },
             ),
             Padding(padding: EdgeInsets.all(8)),
-            TextFormField(
-              decoration: InputDecoration(
-                hintText: "reenter your passphrase",
-                contentPadding: EdgeInsets.all(20),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+              child: TextFormField(
+                decoration: InputDecoration(
+                  hintText: "password again",
+                  contentPadding: EdgeInsets.all(20),
+                ),
+                controller: _passphraseController2,
+                autofocus: false,
+                autocorrect: false,
+                obscureText: true,
+                keyboardType: TextInputType.visiblePassword,
+                onChanged: (_) {
+                  setState(() {});
+                },
               ),
-              controller: _passphraseController2,
-              autofocus: false,
-              autocorrect: false,
-              obscureText: true,
-              keyboardType: TextInputType.visiblePassword,
-              onChanged: (_) {
-                setState(() {});
-              },
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            Padding(padding: EdgeInsets.all(16)),
             Container(
                 width: double.infinity,
                 height: 44,
+                padding: EdgeInsets.fromLTRB(32, 0, 32, 0),
                 child: button(
-                  "Set Passphrase",
+                  "set password",
                   onPressed: _passphraseController1.text.isNotEmpty &&
                           _passphraseController2.text.isNotEmpty
                       ? () {
