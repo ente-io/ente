@@ -105,13 +105,14 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       },
                     ),
                   ),
-                  Padding(padding: EdgeInsets.all(16)),
+                  Padding(padding: EdgeInsets.all(20)),
                   Container(
                       width: double.infinity,
-                      height: 44,
-                      padding: EdgeInsets.fromLTRB(32, 0, 32, 0),
+                      height: 64,
+                      padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
                       child: button(
                         "set password",
+                        fontSize: 18,
                         onPressed: _passwordController1.text.isNotEmpty &&
                                 _passwordController2.text.isNotEmpty
                             ? () {
