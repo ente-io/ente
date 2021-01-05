@@ -13,7 +13,7 @@ import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-photoswipe/lib/photoswipe.css';
 import localForage from 'localforage';
-import UploadButton from 'components/UploadButton';
+import UploadButton from 'pages/gallery/components/UploadButton';
 
 localForage.config({
   driver: localForage.INDEXEDDB,
@@ -137,12 +137,9 @@ export default function App({ Component, pageProps }) {
           {constants.COMPANY_NAME}
         </FlexContainer>
         {user && (
-          <>
-            <UploadButton />
-            <Button variant='link' onClick={logout}>
-              <PowerSettings />
-            </Button>
-          </>
+          <Button variant='link' onClick={logout}>
+            <PowerSettings />
+          </Button>
         )}
       </Navbar>
       {loading ? (
