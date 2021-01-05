@@ -2,23 +2,38 @@ import React from 'react';
 import { Button, Card, Col, Container, Modal, Row } from 'react-bootstrap';
 import FileUpload from './DragAndDropUpload';
 
-function CollectionSelector({ modalView, closeModal, collections }) {
-  const CollectionIcons = collections.map((item) => (
-    <FileUpload closeModal={closeModal} collection={item} noDragEventsBubbling>
+function CollectionSelector({ modalView, closeModal, collectionLatestFile }) {
+
+  const CollectionIcons = collectionLatestFile.map((item) => (
+    <FileUpload
+      closeModal={closeModal}
+      collectionLatestFile={item}
+      noDragEventsBubbling
+    >
       <Card
         style={{
           margin: '5px',
           padding: '5px',
-          width: 'auto',
-          height: 'auto',
+          width: '95%',
+          height: '150px',
           position: 'relative',
           border: 'solid',
-          overflow: 'auto',
           float: 'left',
           cursor: 'pointer',
         }}
       >
-        <Card.Body>{item.name}</Card.Body>{' '}
+        <Card.Img
+          variant='top'
+          src={item.thumb}
+          style={{ width: '100%', height: '100%' }}
+        />
+        <Card.Body
+          style={{
+            padding: '5px',
+          }}
+        >
+          {item.collectionName}
+        </Card.Body>{' '}
       </Card>
     </FileUpload>
   ));

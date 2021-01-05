@@ -1,8 +1,6 @@
-import { close } from 'inspector';
 import React from 'react';
 import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
-import CollectionSelector from './CollectionSelector';
 
 const getColor = (props) => {
   if (props.isDragAccept) {
@@ -36,14 +34,14 @@ const FileUpload = ({
   noClick = null,
   closeModal = null,
   showModal = null,
-  collection = null,
-  noDragEventsBubbling,
+  collectionLatestFile = null,
+  noDragEventsBubbling = null,
 }) => {
   return (
     <>
       <Dropzone
         onDrop={(acceptedFiles) => {
-          console.log(collection.name);
+          console.log(collectionLatestFile.collectionName);
           closeModal();
         }}
         noClick={noClick}
