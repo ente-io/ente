@@ -71,6 +71,7 @@ dependencies:
   fluttercontactpicker: ^3.1.0
   in_app_purchase: ^0.3.4+16
   expansion_card: ^0.1.0
+  flutter_password_strength: ^0.1.4
 
 dev_dependencies:
   flutter_test:
