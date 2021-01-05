@@ -77,7 +77,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'your name',
+                  hintText: 'name',
                   hintStyle: TextStyle(
                     color: Colors.white30,
                   ),
@@ -99,7 +99,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'you@email.com',
+                  hintText: 'email',
                   hintStyle: TextStyle(
                     color: Colors.white30,
                   ),
@@ -122,7 +122,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: "by clicking sign up, you agree to the ",
+                      text: "by clicking sign up, I agree to the ",
                     ),
                     TextSpan(
                       text: "terms of service",
@@ -315,7 +315,7 @@ class PricingTierWidget extends StatelessWidget {
             Text(
               tierPrice,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 12,
               ),
             ),
           ],
