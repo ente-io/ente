@@ -14,7 +14,7 @@ class PasswordReentryPage extends StatefulWidget {
 }
 
 class _PasswordReentryPageState extends State<PasswordReentryPage> {
-  final _passphraseController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       appBar: AppBar(
         leading: Icon(Icons.lock),
         title: Text(
-          "Encryption Passphrase",
+          "encryption password",
         ),
       ),
       body: _getBody(),
@@ -41,29 +41,25 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
               height: 196,
             ),
             Padding(padding: EdgeInsets.all(20)),
-            Text(
-              "Please enter your passphrase.",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+              child: TextFormField(
+                decoration: InputDecoration(
+                  hintText: "enter your password",
+                  contentPadding: EdgeInsets.all(20),
+                ),
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+                controller: _passwordController,
+                autofocus: false,
+                autocorrect: false,
+                obscureText: true,
+                keyboardType: TextInputType.visiblePassword,
+                onChanged: (_) {
+                  setState(() {});
+                },
               ),
-            ),
-            Padding(padding: EdgeInsets.all(12)),
-            TextFormField(
-              decoration: InputDecoration(
-                hintText: "that thing you promised to never forget",
-                contentPadding: EdgeInsets.all(20),
-              ),
-              style: TextStyle(
-                fontSize: 14,
-              ),
-              controller: _passphraseController,
-              autofocus: false,
-              autocorrect: false,
-              keyboardType: TextInputType.visiblePassword,
-              onChanged: (_) {
-                setState(() {});
-              },
             ),
             Padding(padding: EdgeInsets.all(12)),
             Container(
@@ -71,20 +67,21 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                 width: double.infinity,
                 height: 64,
                 child: button(
-                  "Verify Passphrase",
-                  onPressed: _passphraseController.text.isNotEmpty
+                  "sign in",
+                  fontSize: 18,
+                  onPressed: _passwordController.text.isNotEmpty
                       ? () async {
                           final dialog =
-                              createProgressDialog(context, "Please wait...");
+                              createProgressDialog(context, "please wait...");
                           await dialog.show();
                           try {
                             await Configuration.instance.decryptAndSaveKey(
-                                _passphraseController.text,
+                                _passwordController.text,
                                 Configuration.instance.getKeyAttributes());
                           } catch (e) {
                             await dialog.hide();
-                            showErrorDialog(context, "Incorrect passphrase",
-                                "Please try again.");
+                            showErrorDialog(context, "incorrect password",
+                                "please try again");
                             return;
                           }
                           await dialog.hide();
