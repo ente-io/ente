@@ -1,6 +1,8 @@
+import { close } from 'inspector';
 import React from 'react';
 import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
+import CollectionSelector from './CollectionSelector';
 
 const getColor = (props) => {
   if (props.isDragAccept) {
@@ -29,7 +31,13 @@ const DropDiv = styled.div`
   transition: border 0.24s ease-in-out;
 `;
 
-const FileUpload = ({ children, noClick }) => {
+const FileUpload = ({
+  children,
+  noClick,
+  modalView,
+  closeModal,
+  showModal,
+}) => {
   return (
     <>
       <Dropzone
@@ -37,6 +45,8 @@ const FileUpload = ({ children, noClick }) => {
           console.log(acceptedFiles);
         }}
         noClick={noClick}
+        onDragOver={showModal}
+        onDragLeave={closeModal}
       >
         {({
           getRootProps,
@@ -56,6 +66,11 @@ const FileUpload = ({ children, noClick }) => {
               >
                 <input {...getInputProps()} />
                 {children}
+                <CollectionSelector
+                  modalView={modalView}
+                  closeModal={closeModal}
+                  showModal={showModal}
+                />
               </DropDiv>
             </>
           );
