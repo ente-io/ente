@@ -287,7 +287,7 @@ export default function Gallery() {
         selected={router.query.collection?.toString()}
         selectCollection={selectCollection}
       />
-      <FileUpload>
+      <FileUpload noClick>
         {filteredData.length ? (
           <Container>
             <AutoSizer>

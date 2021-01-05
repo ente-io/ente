@@ -29,13 +29,14 @@ const DropDiv = styled.div`
   transition: border 0.24s ease-in-out;
 `;
 
-const FileUpload = ({ children }) => {
+const FileUpload = ({ children, noClick }) => {
   return (
     <>
       <Dropzone
         onDrop={(acceptedFiles) => {
           console.log(acceptedFiles);
         }}
+        noClick={noClick}
       >
         {({
           getRootProps,
