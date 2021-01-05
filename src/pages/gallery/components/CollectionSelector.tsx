@@ -2,10 +2,9 @@ import React from 'react';
 import { Button, Card, Col, Container, Modal, Row } from 'react-bootstrap';
 
 function CollectionSelector({ modalView, closeModal, showModal, collections }) {
-  
-  const CollectionIcons = [1,2,3,4].map((item) => (
+  const CollectionIcons = collections.map((item) => (
     <Card style={{ width: '30%' }}>
-      <Card.Body>Blah Blah</Card.Body>{' '}
+      <Card.Body>{item.name}</Card.Body>{' '}
     </Card>
   ));
   console.log(CollectionIcons);
