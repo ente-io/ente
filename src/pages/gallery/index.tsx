@@ -25,6 +25,7 @@ import SadFace from 'components/SadFace';
 import FileUpload from './components/DragAndDropUpload';
 import UploadButton from 'pages/gallery/components/UploadButton';
 import CollectionSelector from './components/CollectionSelector';
+import { UploadProgress } from './components/UploadProgress';
 
 enum ITEM_TYPE {
   TIME = 'TIME',
@@ -110,6 +111,8 @@ export default function Gallery() {
 
   const closeModal = () => setModalView(false);
   const showModal = () => setModalView(true);
+
+  const [progressView, setProgressView] = useState(false);
 
   useEffect(() => {
     const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -305,11 +308,20 @@ export default function Gallery() {
         selectCollection={selectCollection}
       />
       <UploadButton showModal={showModal} />
-      <FileUpload noClick closeModal={closeModal} showModal={showModal}>
+      <FileUpload
+        noClick
+        closeModal={closeModal}
+        showModal={showModal}
+      >
         <CollectionSelector
           modalView={modalView}
           closeModal={closeModal}
           collectionLatestFile={collectionLatestFile}
+          showProgress={() => setProgressView(true)}
+        />
+        <UploadProgress
+          show={progressView}
+          onHide={() => setProgressView(false)}
         />
         {filteredData.length ? (
           <Container>
