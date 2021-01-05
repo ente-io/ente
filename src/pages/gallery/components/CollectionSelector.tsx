@@ -2,13 +2,18 @@ import React from 'react';
 import { Button, Card, Col, Container, Modal, Row } from 'react-bootstrap';
 import FileUpload from './DragAndDropUpload';
 
-function CollectionSelector({ modalView, closeModal, collectionLatestFile }) {
-
+function CollectionSelector({
+  modalView,
+  closeModal,
+  collectionLatestFile,
+  showProgress,
+}) {
   const CollectionIcons = collectionLatestFile.map((item) => (
     <FileUpload
       closeModal={closeModal}
       collectionLatestFile={item}
       noDragEventsBubbling
+      showProgress={showProgress}
     >
       <Card
         style={{

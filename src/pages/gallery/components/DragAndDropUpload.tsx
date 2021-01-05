@@ -36,6 +36,7 @@ const FileUpload = ({
   showModal = null,
   collectionLatestFile = null,
   noDragEventsBubbling = null,
+  showProgress = null,
 }) => {
   return (
     <>
@@ -43,6 +44,7 @@ const FileUpload = ({
         onDrop={(acceptedFiles) => {
           console.log(collectionLatestFile.collectionName);
           closeModal();
+          showProgress();
         }}
         noClick={noClick}
         onDragOver={showModal}
