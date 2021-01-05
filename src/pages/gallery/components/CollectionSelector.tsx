@@ -1,11 +1,25 @@
 import React from 'react';
 import { Button, Card, Col, Container, Modal, Row } from 'react-bootstrap';
+import FileUpload from './DragAndDropUpload';
 
-function CollectionSelector({ modalView, closeModal, showModal, collections }) {
+function CollectionSelector({ modalView, closeModal, collections }) {
   const CollectionIcons = collections.map((item) => (
-    <Card style={{ width: '30%' }}>
-      <Card.Body>{item.name}</Card.Body>{' '}
-    </Card>
+    <FileUpload>
+      <Card
+        style={{
+          margin: '5px',
+          padding: '5px',
+          width: 'auto',
+          height: 'auto',
+          position: 'relative',
+          border: 'solid',
+          overflow: 'auto',
+          float: 'left',
+        }}
+      >
+        <Card.Body>{item.name}</Card.Body>{' '}
+      </Card>
+    </FileUpload>
   ));
   console.log(CollectionIcons);
   return (
@@ -17,7 +31,7 @@ function CollectionSelector({ modalView, closeModal, showModal, collections }) {
     >
       <Modal.Header closeButton>
         <Modal.Title id='contained-modal-title-vcenter'>
-          Modal heading
+          Select/Click on Collection to upload
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
