@@ -59,7 +59,7 @@ export interface file {
   dataIndex: number;
 }
 
-export interface collectionLatestImage {
+export interface collectionLatestFile {
   collectionName: string;
   collectionID: number;
   thumb: string;
@@ -211,7 +211,7 @@ export const getFile = async (token: string, file: file) => {
 export const getCollectionLatestFile = async (
   collections: collection[],
   data: file[]
-): Promise<collectionLatestImage[]> => {
+): Promise<collectionLatestFile[]> => {
   let collectionIdSet = new Set();
   let collectionIdNameMap = new Object();
   collections.forEach((collection) => {
