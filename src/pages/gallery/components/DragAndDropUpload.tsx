@@ -33,11 +33,9 @@ const DropDiv = styled.div`
 
 const FileUpload = ({
   children,
-  noClick,
-  modalView,
-  closeModal,
-  showModal,
-  collections,
+  noClick = null,
+  closeModal = null,
+  showModal = null,
 }) => {
   return (
     <>
@@ -67,12 +65,6 @@ const FileUpload = ({
               >
                 <input {...getInputProps()} />
                 {children}
-                <CollectionSelector
-                  modalView={modalView}
-                  closeModal={closeModal}
-                  showModal={showModal}
-                  collections={collections}
-                />
               </DropDiv>
             </>
           );

@@ -22,6 +22,7 @@ import Collections from './components/Collections';
 import SadFace from 'components/SadFace';
 import FileUpload from './components/DragAndDropUpload';
 import UploadButton from 'pages/gallery/components/UploadButton';
+import CollectionSelector from './components/CollectionSelector';
 
 enum ITEM_TYPE {
   TIME = 'TIME',
@@ -293,19 +294,13 @@ export default function Gallery() {
         selected={router.query.collection?.toString()}
         selectCollection={selectCollection}
       />
-      <UploadButton
-        modalView={modalView}
-        closeModal={closeModal}
-        showModal={showModal}
-        collections={collections}
-      />
-      <FileUpload
-        noClick
-        modalView={modalView}
-        closeModal={closeModal}
-        showModal={showModal}
-        collections={collections}
-      >
+      <UploadButton showModal={showModal} />
+      <FileUpload noClick closeModal={closeModal} showModal={showModal}>
+        <CollectionSelector
+          modalView={modalView}
+          closeModal={closeModal}
+          collections={collections}
+        />
         {filteredData.length ? (
           <Container>
             <AutoSizer>
