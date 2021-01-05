@@ -6,9 +6,11 @@ import {
   collection,
   fetchCollections,
   file,
+  getCollectionLatestFile,
   getFile,
   getFiles,
   getPreview,
+  collectionLatestFile,
 } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
@@ -93,6 +95,9 @@ export default function Gallery() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [collections, setCollections] = useState<collection[]>([]);
+  const [collectionLatestFile, setCollectionLatestFile] = useState<
+    collectionLatestFile[]
+  >([]);
   const [data, setData] = useState<file[]>();
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<Options>({
@@ -132,6 +137,11 @@ export default function Gallery() {
           h: window.innerHeight,
         }))
       );
+      const collectionLatestFile = await getCollectionLatestFile(
+        collections,
+        resp
+      );
+      setCollectionLatestFile(collectionLatestFile);
     };
     main();
   }, []);
@@ -259,7 +269,7 @@ export default function Gallery() {
     router.push(href, undefined, { shallow: true });
   };
 
-  const idSet = new Set();
+  let idSet = new Set();
   const filteredData = data
     .map((item, index) => ({
       ...item,
@@ -299,7 +309,7 @@ export default function Gallery() {
         <CollectionSelector
           modalView={modalView}
           closeModal={closeModal}
-          collections={collections}
+          collectionLatestFile={collectionLatestFile}
         />
         {filteredData.length ? (
           <Container>
