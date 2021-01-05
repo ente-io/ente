@@ -3,8 +3,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/models/billing_plan.dart';
+import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -215,6 +218,26 @@ class PricingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<List<BillingPlan>>(
+      future: BillingService.instance.getBillingPlans(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          return _buildPlans(context, snapshot.data);
+        } else if (snapshot.hasError) {
+          return Text("Oops, something went wrong.");
+        } else {
+          return loadWidget;
+        }
+      },
+    );
+  }
+
+  Container _buildPlans(BuildContext context, List<BillingPlan> plans) {
+    final planWidgets = List<PricingTierWidget>();
+    for (final plan in plans) {
+      planWidgets.add(
+          PricingTierWidget(plan.storage, plan.price + " / " + plan.duration));
+    }
     return Container(
       height: 280,
       child: Column(
@@ -229,11 +252,7 @@ class PricingWidget extends StatelessWidget {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              PricingTierWidget("25 GB", "\$1.99 / month"),
-              PricingTierWidget("100 GB", "\$4.99 / month"),
-              PricingTierWidget("500 GB", "\$14.99 / month"),
-            ],
+            children: planWidgets,
           ),
           const Text("we offer a 30 day free trial"),
           GestureDetector(
