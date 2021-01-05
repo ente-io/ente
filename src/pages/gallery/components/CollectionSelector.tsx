@@ -1,28 +1,35 @@
 import React from 'react';
-import { Button, Modal } from 'react-bootstrap';
+import { Button, Card, Col, Container, Modal, Row } from 'react-bootstrap';
 
-function CollectionSelector({ modalView, closeModal, showModal }) {
+function CollectionSelector({ modalView, closeModal, showModal, collections }) {
+  
+  const CollectionIcons = [1,2,3,4].map((item) => (
+    <Card style={{ width: '30%' }}>
+      <Card.Body>Blah Blah</Card.Body>{' '}
+    </Card>
+  ));
+  console.log(CollectionIcons);
   return (
-    <>
-      {/* <Button variant='primary' onClick={showModal}>
-        Launch demo modal
-      </Button> */}
-
-      <Modal show={modalView} onHide={closeModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Modal heading</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
-        <Modal.Footer>
-          <Button variant='secondary' onClick={closeModal}>
-            Close
-          </Button>
-          <Button variant='primary' onClick={closeModal}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+    <Modal
+      show={modalView}
+      aria-labelledby='contained-modal-title-vcenter'
+      centered
+      onHide={closeModal}
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id='contained-modal-title-vcenter'>
+          Modal heading
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Container>
+          <Row>{CollectionIcons}</Row>
+        </Container>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={closeModal}>Close</Button>
+      </Modal.Footer>
+    </Modal>
   );
 }
 
