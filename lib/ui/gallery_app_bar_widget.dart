@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
@@ -109,14 +110,31 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (widget.type == GalleryAppBarType.homepage) {
         actions.add(IconButton(
           icon: Icon(Icons.settings),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return SettingsPage();
-                },
-              ),
-            );
+          onPressed: () async {
+            final dialog = createProgressDialog(context, "Please wait...");
+            await dialog.show();
+            // ignore: sdk_version_set_literal
+            const Set<String> _kIds = {' io.ente.storage.test.10gb.monthly'};
+            final ProductDetailsResponse response =
+                await InAppPurchaseConnection.instance
+                    .queryProductDetails(_kIds);
+            await dialog.hide();
+            if (response.notFoundIDs.isNotEmpty) {
+              // Handle the error.
+            }
+            List<ProductDetails> productDetails = response.productDetails;
+            final PurchaseParam purchaseParam =
+                PurchaseParam(productDetails: productDetails[0]);
+            await InAppPurchaseConnection.instance
+                .buyConsumable(purchaseParam: purchaseParam);
+
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(
+            //     builder: (BuildContext context) {
+            //       return SettingsPage();
+            //     },
+            //   ),
+            // );
           },
         ));
       } else if (widget.type == GalleryAppBarType.local_folder ||

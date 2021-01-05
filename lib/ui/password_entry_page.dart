@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_password_strength/flutter_password_strength.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/dialog_util.dart';
 
-class PassphraseEntryPage extends StatefulWidget {
-  PassphraseEntryPage({Key key}) : super(key: key);
+class PasswordEntryPage extends StatefulWidget {
+  PasswordEntryPage({Key key}) : super(key: key);
 
   @override
-  _PassphraseEntryPageState createState() => _PassphraseEntryPageState();
+  _PasswordEntryPageState createState() => _PasswordEntryPageState();
 }
 
-class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
-  final _passphraseController1 = TextEditingController(),
-      _passphraseController2 = TextEditingController();
+class _PasswordEntryPageState extends State<PasswordEntryPage> {
+  final _passwordController1 = TextEditingController(),
+      _passwordController2 = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +68,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
                   hintText: "password",
                   contentPadding: EdgeInsets.all(20),
                 ),
-                controller: _passphraseController1,
+                controller: _passwordController1,
                 autofocus: false,
                 autocorrect: false,
                 keyboardType: TextInputType.visiblePassword,
@@ -84,7 +85,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
                   hintText: "password again",
                   contentPadding: EdgeInsets.all(20),
                 ),
-                controller: _passphraseController2,
+                controller: _passwordController2,
                 autofocus: false,
                 autocorrect: false,
                 obscureText: true,
@@ -95,17 +96,23 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
               ),
             ),
             Padding(padding: EdgeInsets.all(16)),
+            FlutterPasswordStrength(
+                password: _passwordController1.text,
+                strengthCallback: (strength) {
+                  debugPrint(strength.toString());
+                }),
+            Padding(padding: EdgeInsets.all(16)),
             Container(
                 width: double.infinity,
                 height: 44,
                 padding: EdgeInsets.fromLTRB(32, 0, 32, 0),
                 child: button(
                   "set password",
-                  onPressed: _passphraseController1.text.isNotEmpty &&
-                          _passphraseController2.text.isNotEmpty
+                  onPressed: _passwordController1.text.isNotEmpty &&
+                          _passwordController2.text.isNotEmpty
                       ? () {
-                          if (_passphraseController1.text !=
-                              _passphraseController2.text) {
+                          if (_passwordController1.text !=
+                              _passwordController2.text) {
                             showErrorDialog(context, "Uhm...",
                                 "The passphrases you entered don't match.");
                           } else {
@@ -127,7 +134,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
         child: Column(children: [
           Text("The passphrase you are promising to never forget is"),
           Padding(padding: EdgeInsets.all(8)),
-          Text(_passphraseController1.text,
+          Text(_passwordController1.text,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 28,
@@ -146,7 +153,7 @@ class _PassphraseEntryPageState extends State<PassphraseEntryPage> {
           onPressed: () {
             Navigator.of(context).pop();
             UserService.instance
-                .setupAttributes(context, _passphraseController1.text);
+                .setupAttributes(context, _passwordController1.text);
           },
         ),
       ],

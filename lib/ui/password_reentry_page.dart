@@ -6,14 +6,14 @@ import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/dialog_util.dart';
 
-class PassphraseReentryPage extends StatefulWidget {
-  PassphraseReentryPage({Key key}) : super(key: key);
+class PasswordReentryPage extends StatefulWidget {
+  PasswordReentryPage({Key key}) : super(key: key);
 
   @override
-  _PassphraseReentryPageState createState() => _PassphraseReentryPageState();
+  _PasswordReentryPageState createState() => _PasswordReentryPageState();
 }
 
-class _PassphraseReentryPageState extends State<PassphraseReentryPage> {
+class _PasswordReentryPageState extends State<PasswordReentryPage> {
   final _passphraseController = TextEditingController();
 
   @override

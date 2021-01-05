@@ -52,19 +52,19 @@ class Configuration {
     _secretKey = await _secureStorage.read(key: secretKeyKey);
   }
 
-  Future<KeyGenResult> generateKey(String passphrase) async {
+  Future<KeyGenResult> generateKey(String password) async {
     // Create a master key
     final key = CryptoUtil.generateKey();
 
-    // Derive a key from the passphrase that will be used to encrypt and
+    // Derive a key from the password that will be used to encrypt and
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
-    final kek = CryptoUtil.deriveKey(utf8.encode(passphrase), kekSalt);
+    final kek = CryptoUtil.deriveKey(utf8.encode(password), kekSalt);
 
     // Encrypt the key with this derived key
     final encryptedKeyData = CryptoUtil.encryptSync(key, kek);
 
-    // Hash the passphrase so that its correctness can be compared later
+    // Hash the password so that its correctness can be compared later
     final kekHash = await CryptoUtil.hash(kek);
 
     // Generate a public-private keypair and encrypt the latter
@@ -86,13 +86,12 @@ class Configuration {
   }
 
   Future<void> decryptAndSaveKey(
-      String passphrase, KeyAttributes attributes) async {
+      String password, KeyAttributes attributes) async {
     final kek = CryptoUtil.deriveKey(
-        utf8.encode(passphrase), Sodium.base642bin(attributes.kekSalt));
-    bool correctPassphrase =
-        await CryptoUtil.verifyHash(kek, attributes.kekHash);
-    if (!correctPassphrase) {
-      throw Exception("Incorrect passphrase");
+        utf8.encode(password), Sodium.base642bin(attributes.kekSalt));
+    bool correctPassword = await CryptoUtil.verifyHash(kek, attributes.kekHash);
+    if (!correctPassword) {
+      throw Exception("Incorrect password");
     }
     final key = CryptoUtil.decryptSync(
         Sodium.base642bin(attributes.encryptedKey),

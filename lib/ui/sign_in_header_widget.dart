@@ -7,8 +7,8 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/email_entry_page.dart';
-import 'package:photos/ui/passphrase_entry_page.dart';
-import 'package:photos/ui/passphrase_reentry_page.dart';
+import 'package:photos/ui/password_entry_page.dart';
+import 'package:photos/ui/password_reentry_page.dart';
 import 'package:expansion_card/expansion_card.dart';
 
 class SignInHeader extends StatefulWidget {
@@ -176,10 +176,10 @@ class _SignInHeaderState extends State<SignInHeader> {
                     // No key
                     if (Configuration.instance.getKeyAttributes() != null) {
                       // Yet to set or decrypt the key
-                      page = PassphraseReentryPage();
+                      page = PasswordReentryPage();
                     } else {
                       // Never had a key
-                      page = PassphraseEntryPage();
+                      page = PasswordEntryPage();
                     }
                   }
                   Navigator.of(context).push(

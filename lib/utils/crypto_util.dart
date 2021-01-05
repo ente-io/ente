@@ -187,10 +187,10 @@ class CryptoUtil {
     return Sodium.randombytesBuf(Sodium.cryptoPwhashSaltbytes);
   }
 
-  static Uint8List deriveKey(Uint8List passphrase, Uint8List salt) {
+  static Uint8List deriveKey(Uint8List password, Uint8List salt) {
     return Sodium.cryptoPwhash(
         Sodium.cryptoSecretboxKeybytes,
-        passphrase,
+        password,
         salt,
         Sodium.cryptoPwhashOpslimitInteractive,
         Sodium.cryptoPwhashMemlimitInteractive,
