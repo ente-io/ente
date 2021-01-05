@@ -4,7 +4,7 @@ import FileUpload from './DragAndDropUpload';
 
 function CollectionSelector({ modalView, closeModal, collections }) {
   const CollectionIcons = collections.map((item) => (
-    <FileUpload>
+    <FileUpload closeModal={closeModal} collection={item} noDragEventsBubbling>
       <Card
         style={{
           margin: '5px',
@@ -15,13 +15,13 @@ function CollectionSelector({ modalView, closeModal, collections }) {
           border: 'solid',
           overflow: 'auto',
           float: 'left',
+          cursor: 'pointer',
         }}
       >
         <Card.Body>{item.name}</Card.Body>{' '}
       </Card>
     </FileUpload>
   ));
-  console.log(CollectionIcons);
   return (
     <Modal
       show={modalView}

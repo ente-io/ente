@@ -36,16 +36,20 @@ const FileUpload = ({
   noClick = null,
   closeModal = null,
   showModal = null,
+  collection = null,
+  noDragEventsBubbling,
 }) => {
   return (
     <>
       <Dropzone
         onDrop={(acceptedFiles) => {
-          console.log(acceptedFiles);
+          console.log(collection.name);
+          closeModal();
         }}
         noClick={noClick}
         onDragOver={showModal}
         onDragLeave={closeModal}
+        noDragEventsBubbling={noDragEventsBubbling}
       >
         {({
           getRootProps,
