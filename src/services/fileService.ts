@@ -212,17 +212,17 @@ export const getCollectionLatestFile = async (
   collections: collection[],
   data: file[]
 ): Promise<collectionLatestFile[]> => {
-  let collectionIdSet = new Set();
-  let collectionIdNameMap = new Object();
+  let collectionIdSet = new Set<number>();
+  let collectionIdNameMap = new Map<string, string>();
   collections.forEach((collection) => {
-    collectionIdNameMap[collection.id] = collection.name;
+    collectionIdNameMap.set(collection.id, collection.name);
+    collectionIdSet.add(parseInt(collection.id))
   });
-  console.log();
   return Promise.all(
     data
       .filter((item) => {
-        if (!collectionIdSet.has(item.collectionID)) {
-          collectionIdSet.add(item.collectionID);
+        if (collectionIdSet.size !== 0 && collectionIdSet.has(item.collectionID)) {
+          collectionIdSet.delete(item.collectionID);
           return true;
         }
         return false;
@@ -233,7 +233,7 @@ export const getCollectionLatestFile = async (
         return {
           thumb: url,
           collectionID: item.collectionID,
-          collectionName: collectionIdNameMap[item.collectionID].toString(),
+          collectionName: collectionIdNameMap.get(item.collectionID.toString()),
         };
       })
   );
