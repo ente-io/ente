@@ -14,7 +14,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-photoswipe/lib/photoswipe.css';
 import localForage from 'localforage';
 import UploadButton from 'pages/gallery/components/UploadButton';
-import FileUpload from './gallery/components/DragAndDropUpload';
+import FullScreenDropZone from 'components/FullScreenDropZone';
 
 localForage.config({
   driver: localForage.INDEXEDDB,
@@ -132,7 +132,7 @@ export default function App({ Component, pageProps }) {
 
   return (
     <>
-      <FileUpload
+      <FullScreenDropZone
         noClick
         closeModal={closeModal}
         showModal={showModal}
@@ -165,7 +165,7 @@ export default function App({ Component, pageProps }) {
             <Component modalView={modalView} closeModal={closeModal}
               showModal={showModal} />
           )}
-      </FileUpload>
+      </FullScreenDropZone>
     </>
   );
 }
