@@ -2,7 +2,7 @@ import Container from 'components/Container';
 import React from 'react';
 import { Alert, Button, Modal, ProgressBar } from 'react-bootstrap';
 
-export function UploadProgress(props) {
+export default function UploadProgress(props) {
   const now = 100;
   return (
     <Modal
@@ -21,8 +21,8 @@ export function UploadProgress(props) {
           {now == 100 ? (
             <Alert variant='success'>Upload Completed</Alert>
           ) : (
-            <ProgressBar animated now={now} label={`${now}%`} />
-          )}
+              <ProgressBar animated now={now} label={`${now}%`} />
+            )}
         </Container>
       </Modal.Body>
       <Modal.Footer>
