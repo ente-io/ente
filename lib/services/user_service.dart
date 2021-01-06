@@ -10,6 +10,8 @@ import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/public_key.dart';
+import 'package:photos/models/subscription.dart';
+import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/ott_verification_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
@@ -159,6 +161,11 @@ class UserService {
     if (keyAttributes != null) {
       await Configuration.instance
           .setKeyAttributes(KeyAttributes.fromMap(keyAttributes));
+    }
+    final subscription = response.data["subscription"];
+    if (subscription != null) {
+      await BillingService.instance
+          .setSubscription(Subscription.fromMap(subscription));
     }
   }
 }
