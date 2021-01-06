@@ -22,8 +22,6 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 import Collections from './components/Collections';
 import SadFace from 'components/SadFace';
-import FileUpload from './components/DragAndDropUpload';
-import UploadButton from 'pages/gallery/components/UploadButton';
 import CollectionSelector from './components/CollectionSelector';
 import UploadProgress from './components/UploadProgress';
 
@@ -306,7 +304,6 @@ export default function Gallery(props) {
       <CollectionSelector
         modalView={props.modalView}
         closeModal={props.closeModal}
-        showModal={props.showModal}
         collectionLatestFile={collectionLatestFile}
         showProgress={() => setProgressView(true)}
       />

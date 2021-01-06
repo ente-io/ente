@@ -19,24 +19,23 @@ const enableBorder = (props) => (props.isDragActive ? 'dashed' : 'none');
 const DropDiv = styled.div`
   flex: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
   border-width: 2px;
   border-radius: 2px;
+  height:10px;
+  width:30%;
   border-color: ${(props) => getColor(props)};
   border-style: ${(props) => enableBorder(props)};
   outline: none;
   transition: border 0.24s ease-in-out;
 `;
 
-const FileUpload = ({
+const CollectionDropZone = ({
   children,
-  noClick = null,
-  closeModal = null,
-  showModal = null,
-  collectionLatestFile = null,
-  noDragEventsBubbling = null,
-  showProgress = null,
+  closeModal,
+  collectionLatestFile,
+  noDragEventsBubbling,
+  showProgress,
 }) => {
   return (
     <>
@@ -46,9 +45,6 @@ const FileUpload = ({
           closeModal();
           showProgress();
         }}
-        noClick={noClick}
-        onDragOver={showModal}
-        onDragLeave={closeModal}
         noDragEventsBubbling={noDragEventsBubbling}
       >
         {({
@@ -78,4 +74,4 @@ const FileUpload = ({
   );
 };
 
-export default FileUpload;
+export default CollectionDropZone;

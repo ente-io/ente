@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button, Card, Col, Container, Modal, Row } from 'react-bootstrap';
-import FileUpload from './DragAndDropUpload';
+import { Button, Card, Modal } from 'react-bootstrap';
+import CollectionDropZone from './CollectionDropZone';
 
 function CollectionSelector({
   modalView,
@@ -9,38 +9,19 @@ function CollectionSelector({
   showProgress,
 }) {
   const CollectionIcons = collectionLatestFile.map((item) => (
-    <FileUpload
+    <CollectionDropZone key={item.collectionID}
       closeModal={closeModal}
       collectionLatestFile={item}
       noDragEventsBubbling
       showProgress={showProgress}
     >
-      <Card
-        style={{
-          margin: '5px',
-          padding: '5px',
-          width: '95%',
-          height: '150px',
-          position: 'relative',
-          border: 'solid',
-          float: 'left',
-          cursor: 'pointer',
-        }}
-      >
-        <Card.Img
-          variant='top'
-          src={item.thumb}
-          style={{ width: '100%', height: '100%' }}
-        />
-        <Card.Body
-          style={{
-            padding: '5px',
-          }}
-        >
-          {item.collectionName}
-        </Card.Body>{' '}
+      <Card style={{ maxHeight: "20%", cursor: 'pointer', border: 'solid', flexWrap: "nowrap" }}>
+        <Card.Img variant="top" src={item.thumb} />
+        <Card.Body>
+          <Card.Text>{item.collectionName}</Card.Text>
+        </Card.Body>
       </Card>
-    </FileUpload>
+    </CollectionDropZone>
   ));
   return (
     <Modal
@@ -54,10 +35,8 @@ function CollectionSelector({
           Select/Click on Collection to upload
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        <Container>
-          <Row>{CollectionIcons}</Row>
-        </Container>
+      <Modal.Body style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}>
+        {CollectionIcons}
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={closeModal}>Close</Button>
