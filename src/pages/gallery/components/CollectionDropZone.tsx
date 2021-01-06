@@ -22,8 +22,6 @@ const DropDiv = styled.div`
   flex-direction: row;
   border-width: 2px;
   border-radius: 2px;
-  height:10px;
-  width:30%;
   border-color: ${(props) => getColor(props)};
   border-style: ${(props) => enableBorder(props)};
   outline: none;

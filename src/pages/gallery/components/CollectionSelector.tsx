@@ -15,8 +15,10 @@ function CollectionSelector({
       noDragEventsBubbling
       showProgress={showProgress}
     >
-      <Card style={{ maxHeight: "20%", cursor: 'pointer', border: 'solid', flexWrap: "nowrap" }}>
-        <Card.Img variant="top" src={item.thumb} />
+      <Card style={{ cursor: 'pointer', border: 'solid', width: "95%" }}>
+        <Card.Img variant="top" src={item.thumb} style={{
+          width: "100%", height: "150px"
+        }} />
         <Card.Body>
           <Card.Text>{item.collectionName}</Card.Text>
         </Card.Body>
