@@ -53,13 +53,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     );
   }
 
-  Widget _getBody(final appBarHeight) {
-    var _pageSize = MediaQuery.of(context).size.height;
-    var _notifySize = MediaQuery.of(context).padding.top;
-    var _appBarSize = appBarHeight;
+  Widget _getBody(final appBarSize) {
+    final pageSize = MediaQuery.of(context).size.height;
+    final notifySize = MediaQuery.of(context).padding.top;
     return SingleChildScrollView(
       child: Container(
-        height: _pageSize - (_appBarSize + _notifySize),
+        height: pageSize - (appBarSize + notifySize),
         padding: EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -128,6 +127,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       text: "terms of service",
                       style: TextStyle(
                         color: Colors.blue,
+                        fontFamily: 'Ubuntu',
                       ),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
@@ -139,6 +139,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       text: "privacy policy",
                       style: TextStyle(
                         color: Colors.blue,
+                        fontFamily: 'Ubuntu',
                       ),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
@@ -301,7 +302,7 @@ class BillingPlanWidget extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              (plan.storageInMBs / 1024).toString() + " GB",
+              (plan.storageInMBs / 1024).round().toString() + " GB",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,

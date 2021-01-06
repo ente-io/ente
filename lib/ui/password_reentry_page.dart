@@ -3,7 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class PasswordReentryPage extends StatefulWidget {
@@ -85,7 +87,15 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                             return;
                           }
                           await dialog.hide();
-                          Bus.instance.fire(UserAuthenticatedEvent());
+                          if (BillingService.instance.hasActiveSubscription()) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (BuildContext context) {
+                                  return SubscriptionPage();
+                                },
+                              ),
+                            );
+                          }
                           Navigator.of(context)
                               .popUntil((route) => route.isFirst);
                         }

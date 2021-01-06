@@ -46,6 +46,12 @@ class BillingService {
     }
   }
 
+  bool hasActiveSubscription() {
+    final subscription = getSubscription();
+    return subscription != null &&
+        subscription.validTill > DateTime.now().microsecondsSinceEpoch;
+  }
+
   Future<void> setSubscription(Subscription subscription) async {
     await _prefs.setString(
         subscriptionKey, subscription == null ? null : subscription.toJson());

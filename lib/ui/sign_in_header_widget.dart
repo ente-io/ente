@@ -5,11 +5,12 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
-import 'package:photos/ui/common_elements.dart';
+import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
 import 'package:expansion_card/expansion_card.dart';
+import 'package:photos/ui/subscription_page.dart';
 
 class SignInHeader extends StatefulWidget {
   const SignInHeader({Key key}) : super(key: key);
@@ -38,7 +39,9 @@ class _SignInHeaderState extends State<SignInHeader> {
 
   @override
   Widget build(BuildContext context) {
-    if (Configuration.instance.hasConfiguredAccount()) {
+    var hasConfiguredAccount = Configuration.instance.hasConfiguredAccount();
+    var hasValidSubscription = BillingService.instance.hasActiveSubscription();
+    if (hasConfiguredAccount && hasValidSubscription) {
       return Container();
     }
     return SingleChildScrollView(
@@ -159,7 +162,7 @@ class _SignInHeaderState extends State<SignInHeader> {
                   child: Material(
                     color: Colors.transparent,
                     child: Text(
-                      "sign up",
+                      !hasConfiguredAccount ? "sign up" : "subscribe",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -174,12 +177,14 @@ class _SignInHeaderState extends State<SignInHeader> {
                     page = EmailEntryPage();
                   } else {
                     // No key
-                    if (Configuration.instance.getKeyAttributes() != null) {
-                      // Yet to set or decrypt the key
-                      page = PasswordReentryPage();
-                    } else {
+                    if (Configuration.instance.getKeyAttributes() == null) {
                       // Never had a key
                       page = PasswordEntryPage();
+                    } else if (Configuration.instance.getKey() == null) {
+                      // Yet to decrypt the key
+                      page = PasswordReentryPage();
+                    } else {
+                      page = SubscriptionPage();
                     }
                   }
                   Navigator.of(context).push(

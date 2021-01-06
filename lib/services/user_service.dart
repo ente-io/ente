@@ -15,6 +15,7 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/ott_verification_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
+import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -146,8 +147,14 @@ class UserService {
         await _config.setKey(result.privateKeyAttributes.key);
         await _config.setSecretKey(result.privateKeyAttributes.secretKey);
         await _config.setKeyAttributes(result.keyAttributes);
-        Bus.instance.fire(UserAuthenticatedEvent());
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return SubscriptionPage();
+            },
+          ),
+          (route) => route.isFirst,
+        );
       } else {
         showGenericErrorDialog(context);
       }

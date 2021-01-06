@@ -72,6 +72,7 @@ dependencies:
   in_app_purchase: ^0.3.4+16
   expansion_card: ^0.1.0
   flutter_password_strength: ^0.1.4
+  webview_flutter: ^1.0.7
 
 dev_dependencies:
   flutter_test:
