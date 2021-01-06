@@ -8,7 +8,7 @@ function CollectionSelector({
   collectionLatestFile,
   showProgress,
 }) {
-  const CollectionIcons = collectionLatestFile.map((item) => (
+  const CollectionIcons = collectionLatestFile?.map((item) => (
     <CollectionDropZone key={item.collectionID}
       closeModal={closeModal}
       collectionLatestFile={item}
