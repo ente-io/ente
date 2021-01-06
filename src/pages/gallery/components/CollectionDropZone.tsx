@@ -17,9 +17,7 @@ const getColor = (props) => {
 const enableBorder = (props) => (props.isDragActive ? 'dashed' : 'none');
 
 const DropDiv = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: row;
+  width:33%;
   border-width: 2px;
   border-radius: 2px;
   border-color: ${(props) => getColor(props)};
