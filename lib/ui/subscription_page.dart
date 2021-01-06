@@ -52,9 +52,9 @@ class SubscriptionPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(12, 20, 12, 12),
               child: Text(
-                "ente preserves your photos and videos, so they're always available, even if you lose your device.",
+                "ente preserves your photos and videos, so they're always available, even if you lose your device",
                 style: TextStyle(
                   color: Colors.white54,
                   height: 1.2,
