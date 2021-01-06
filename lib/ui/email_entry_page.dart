@@ -253,7 +253,7 @@ class PricingWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: planWidgets,
           ),
-          const Text("we offer a 30 day free trial"),
+          const Text("we offer a 14 day free trial"),
           GestureDetector(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
