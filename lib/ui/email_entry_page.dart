@@ -233,10 +233,9 @@ class PricingWidget extends StatelessWidget {
   }
 
   Container _buildPlans(BuildContext context, List<BillingPlan> plans) {
-    final planWidgets = List<PricingTierWidget>();
+    final planWidgets = List<BillingPlanWidget>();
     for (final plan in plans) {
-      planWidgets.add(
-          PricingTierWidget(plan.storage, plan.price + " / " + plan.duration));
+      planWidgets.add(BillingPlanWidget(plan));
     }
     return Container(
       height: 280,
@@ -282,12 +281,11 @@ class PricingWidget extends StatelessWidget {
   }
 }
 
-class PricingTierWidget extends StatelessWidget {
-  final String tierName;
-  final String tierPrice;
-  const PricingTierWidget(
-    this.tierName,
-    this.tierPrice, {
+class BillingPlanWidget extends StatelessWidget {
+  final BillingPlan plan;
+
+  const BillingPlanWidget(
+    this.plan, {
     Key key,
   }) : super(key: key);
 
@@ -303,7 +301,7 @@ class PricingTierWidget extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              tierName,
+              (plan.storageInMBs / 1024).toString() + " GB",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -313,7 +311,7 @@ class PricingTierWidget extends StatelessWidget {
               padding: EdgeInsets.all(4),
             ),
             Text(
-              tierPrice,
+              plan.price + " / " + plan.period,
               style: TextStyle(
                 fontSize: 12,
               ),

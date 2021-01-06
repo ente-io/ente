@@ -2,37 +2,47 @@ import 'dart:convert';
 
 class BillingPlan {
   final String id;
-  final String storage;
+  final String androidID;
+  final String iosID;
+  final int storageInMBs;
   final String price;
-  final String duration;
+  final String period;
 
   BillingPlan({
     this.id,
-    this.storage,
+    this.androidID,
+    this.iosID,
+    this.storageInMBs,
     this.price,
-    this.duration,
+    this.period,
   });
 
   BillingPlan copyWith({
     String id,
-    String storage,
+    String androidID,
+    String iosID,
+    int storageInMBs,
     String price,
-    String duration,
+    String period,
   }) {
     return BillingPlan(
       id: id ?? this.id,
-      storage: storage ?? this.storage,
+      androidID: androidID ?? this.androidID,
+      iosID: iosID ?? this.iosID,
+      storageInMBs: storageInMBs ?? this.storageInMBs,
       price: price ?? this.price,
-      duration: duration ?? this.duration,
+      period: period ?? this.period,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'storage': storage,
+      'androidID': androidID,
+      'iosID': iosID,
+      'storageInMBs': storageInMBs,
       'price': price,
-      'duration': duration,
+      'period': period,
     };
   }
 
@@ -41,9 +51,11 @@ class BillingPlan {
 
     return BillingPlan(
       id: map['id'],
-      storage: map['storage'],
+      androidID: map['androidID'],
+      iosID: map['iosID'],
+      storageInMBs: map['storageInMBs'],
       price: map['price'],
-      duration: map['duration'],
+      period: map['period'],
     );
   }
 
@@ -54,7 +66,7 @@ class BillingPlan {
 
   @override
   String toString() {
-    return 'BillingPlan(id: $id, storage: $storage, price: $price, duration: $duration)';
+    return 'BillingPlan(id: $id, androidID: $androidID, iosID: $iosID, storageInMBs: $storageInMBs, price: $price, period: $period)';
   }
 
   @override
@@ -63,13 +75,20 @@ class BillingPlan {
 
     return o is BillingPlan &&
         o.id == id &&
-        o.storage == storage &&
+        o.androidID == androidID &&
+        o.iosID == iosID &&
+        o.storageInMBs == storageInMBs &&
         o.price == price &&
-        o.duration == duration;
+        o.period == period;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^ storage.hashCode ^ price.hashCode ^ duration.hashCode;
+    return id.hashCode ^
+        androidID.hashCode ^
+        iosID.hashCode ^
+        storageInMBs.hashCode ^
+        price.hashCode ^
+        period.hashCode;
   }
 }
