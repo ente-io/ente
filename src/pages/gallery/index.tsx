@@ -25,7 +25,7 @@ import SadFace from 'components/SadFace';
 import FileUpload from './components/DragAndDropUpload';
 import UploadButton from 'pages/gallery/components/UploadButton';
 import CollectionSelector from './components/CollectionSelector';
-import { UploadProgress } from './components/UploadProgress';
+import UploadProgress from './components/UploadProgress';
 
 enum ITEM_TYPE {
   TIME = 'TIME',
@@ -397,18 +397,18 @@ export default function Gallery() {
                         <ListItem style={style}>
                           <ListContainer>
                             {timeStampList[index].itemType ===
-                            ITEM_TYPE.TIME ? (
-                              <DateContainer>
-                                {timeStampList[index].date}
-                              </DateContainer>
-                            ) : (
-                              timeStampList[index].items.map((item, idx) => {
-                                return getThumbnail(
-                                  filteredData,
-                                  timeStampList[index].itemStartIndex + idx
-                                );
-                              })
-                            )}
+                              ITEM_TYPE.TIME ? (
+                                <DateContainer>
+                                  {timeStampList[index].date}
+                                </DateContainer>
+                              ) : (
+                                timeStampList[index].items.map((item, idx) => {
+                                  return getThumbnail(
+                                    filteredData,
+                                    timeStampList[index].itemStartIndex + idx
+                                  );
+                                })
+                              )}
                           </ListContainer>
                         </ListItem>
                       );
@@ -426,11 +426,11 @@ export default function Gallery() {
             />
           </Container>
         ) : (
-          <DeadCenter>
-            <SadFace height={100} width={100} />
-            <div>No content found!</div>
-          </DeadCenter>
-        )}
+            <DeadCenter>
+              <SadFace height={100} width={100} />
+              <div>No content found!</div>
+            </DeadCenter>
+          )}
       </FileUpload>
     </>
   );
