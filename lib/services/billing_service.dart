@@ -36,6 +36,7 @@ class BillingService {
     return _future;
   }
 
+  // TODO: Fetch new subscription once the current one has expired?
   Subscription getSubscription() {
     final jsonValue = _prefs.getString(subscriptionKey);
     if (jsonValue == null) {
