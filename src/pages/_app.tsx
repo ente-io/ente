@@ -14,6 +14,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-photoswipe/lib/photoswipe.css';
 import localForage from 'localforage';
 import UploadButton from 'pages/gallery/components/UploadButton';
+import FileUpload from './gallery/components/DragAndDropUpload';
 
 localForage.config({
   driver: localForage.INDEXEDDB,
@@ -94,6 +95,10 @@ export default function App({ Component, pageProps }) {
   const router = useRouter();
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(false);
+  const [modalView, setModalView] = useState(false);
+
+  const closeModal = () => setModalView(false);
+  const showModal = () => setModalView(true);
 
   useEffect(() => {
     const user = getData(LS_KEYS.USER);
@@ -127,30 +132,40 @@ export default function App({ Component, pageProps }) {
 
   return (
     <>
-      <Head>
-        <title>ente.io | Privacy friendly alternative to Google Photos</title>
-      </Head>
-      <GlobalStyles />
-      <Navbar>
-        <FlexContainer>
-          <Image alt='logo' src='/icon.png' />
-          {constants.COMPANY_NAME}
-        </FlexContainer>
-        {user && (
-          <Button variant='link' onClick={logout}>
-            <PowerSettings />
-          </Button>
-        )}
-      </Navbar>
-      {loading ? (
-        <Container>
-          <Spinner animation='border' role='status' variant='primary'>
-            <span className='sr-only'>Loading...</span>
-          </Spinner>
-        </Container>
-      ) : (
-        <Component />
-      )}
+      <FileUpload
+        noClick
+        closeModal={closeModal}
+        showModal={showModal}
+      >
+        <Head>
+          <title>ente.io | Privacy friendly alternative to Google Photos</title>
+        </Head>
+        <GlobalStyles />
+        <Navbar>
+          <FlexContainer>
+            <Image alt='logo' src='/icon.png' />
+            {constants.COMPANY_NAME}
+          </FlexContainer>
+          {user && (
+            <>
+              <UploadButton showModal={showModal} />
+              <Button variant='link' onClick={logout}>
+                <PowerSettings />
+              </Button>
+            </>
+          )}
+        </Navbar>
+        {loading ? (
+          <Container>
+            <Spinner animation='border' role='status' variant='primary'>
+              <span className='sr-only'>Loading...</span>
+            </Spinner>
+          </Container>
+        ) : (
+            <Component modalView={modalView} closeModal={closeModal}
+              showModal={showModal} />
+          )}
+      </FileUpload>
     </>
   );
 }

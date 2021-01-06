@@ -92,7 +92,7 @@ const DateContainer = styled.div`
 const PAGE_SIZE = 12;
 const COLUMNS = 3;
 
-export default function Gallery() {
+export default function Gallery(props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [collections, setCollections] = useState<collection[]>([]);
@@ -107,10 +107,6 @@ export default function Gallery() {
   });
   const fetching: { [k: number]: boolean } = {};
 
-  const [modalView, setModalView] = useState(false);
-
-  const closeModal = () => setModalView(false);
-  const showModal = () => setModalView(true);
 
   const [progressView, setProgressView] = useState(false);
 
@@ -307,131 +303,125 @@ export default function Gallery() {
         selected={router.query.collection?.toString()}
         selectCollection={selectCollection}
       />
-      <UploadButton showModal={showModal} />
-      <FileUpload
-        noClick
-        closeModal={closeModal}
-        showModal={showModal}
-      >
-        <CollectionSelector
-          modalView={modalView}
-          closeModal={closeModal}
-          collectionLatestFile={collectionLatestFile}
-          showProgress={() => setProgressView(true)}
-        />
-        <UploadProgress
-          show={progressView}
-          onHide={() => setProgressView(false)}
-        />
-        {filteredData.length ? (
-          <Container>
-            <AutoSizer>
-              {({ height, width }) => {
-                let columns;
-                if (width >= 1000) {
-                  columns = 5;
-                } else if (width < 1000 && width >= 450) {
-                  columns = 3;
-                } else if (width < 450 && width >= 300) {
-                  columns = 2;
-                } else {
-                  columns = 1;
-                }
+      <CollectionSelector
+        modalView={props.modalView}
+        closeModal={props.closeModal}
+        showModal={props.showModal}
+        collectionLatestFile={collectionLatestFile}
+        showProgress={() => setProgressView(true)}
+      />
+      <UploadProgress
+        show={progressView}
+        onHide={() => setProgressView(false)}
+      />
+      {filteredData.length ? (
+        <Container>
+          <AutoSizer>
+            {({ height, width }) => {
+              let columns;
+              if (width >= 1000) {
+                columns = 5;
+              } else if (width < 1000 && width >= 450) {
+                columns = 3;
+              } else if (width < 450 && width >= 300) {
+                columns = 2;
+              } else {
+                columns = 1;
+              }
 
-                const timeStampList: TimeStampListItem[] = [];
-                let listItemIndex = 0;
-                let currentDate = -1;
-                filteredData.forEach((item, index) => {
-                  if (
-                    !isSameDay(
-                      new Date(item.metadata.creationTime / 1000),
-                      new Date(currentDate)
-                    )
-                  ) {
-                    currentDate = item.metadata.creationTime / 1000;
-                    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-                      weekday: 'short',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    });
-                    timeStampList.push({
-                      itemType: ITEM_TYPE.TIME,
-                      date: dateTimeFormat.format(currentDate),
-                    });
+              const timeStampList: TimeStampListItem[] = [];
+              let listItemIndex = 0;
+              let currentDate = -1;
+              filteredData.forEach((item, index) => {
+                if (
+                  !isSameDay(
+                    new Date(item.metadata.creationTime / 1000),
+                    new Date(currentDate)
+                  )
+                ) {
+                  currentDate = item.metadata.creationTime / 1000;
+                  const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  });
+                  timeStampList.push({
+                    itemType: ITEM_TYPE.TIME,
+                    date: dateTimeFormat.format(currentDate),
+                  });
+                  timeStampList.push({
+                    itemType: ITEM_TYPE.TILE,
+                    items: [item],
+                    itemStartIndex: index,
+                  });
+                  listItemIndex = 1;
+                } else {
+                  if (listItemIndex < columns) {
+                    timeStampList[timeStampList.length - 1].items.push(item);
+                    listItemIndex++;
+                  } else {
+                    listItemIndex = 1;
                     timeStampList.push({
                       itemType: ITEM_TYPE.TILE,
                       items: [item],
                       itemStartIndex: index,
                     });
-                    listItemIndex = 1;
-                  } else {
-                    if (listItemIndex < columns) {
-                      timeStampList[timeStampList.length - 1].items.push(item);
-                      listItemIndex++;
-                    } else {
-                      listItemIndex = 1;
-                      timeStampList.push({
-                        itemType: ITEM_TYPE.TILE,
-                        items: [item],
-                        itemStartIndex: index,
-                      });
-                    }
                   }
-                });
+                }
+              });
 
-                return (
-                  <List
-                    itemSize={(index) =>
-                      timeStampList[index].itemType === ITEM_TYPE.TIME
-                        ? 30
-                        : 200
-                    }
-                    height={height}
-                    width={width}
-                    itemCount={timeStampList.length}
-                    key={`${router.query.collection}-${columns}`}
-                  >
-                    {({ index, style }) => {
-                      return (
-                        <ListItem style={style}>
-                          <ListContainer>
-                            {timeStampList[index].itemType ===
-                              ITEM_TYPE.TIME ? (
-                                <DateContainer>
-                                  {timeStampList[index].date}
-                                </DateContainer>
-                              ) : (
-                                timeStampList[index].items.map((item, idx) => {
-                                  return getThumbnail(
-                                    filteredData,
-                                    timeStampList[index].itemStartIndex + idx
-                                  );
-                                })
-                              )}
-                          </ListContainer>
-                        </ListItem>
-                      );
-                    }}
-                  </List>
-                );
-              }}
-            </AutoSizer>
-            <PhotoSwipe
-              isOpen={open}
-              items={filteredData}
-              options={options}
-              onClose={handleClose}
-              gettingData={getSlideData}
-            />
-          </Container>
-        ) : (
-            <DeadCenter>
-              <SadFace height={100} width={100} />
-              <div>No content found!</div>
-            </DeadCenter>
-          )}
-      </FileUpload>
+              return (
+                <List
+                  itemSize={(index) =>
+                    timeStampList[index].itemType === ITEM_TYPE.TIME
+                      ? 30
+                      : 200
+                  }
+                  height={height}
+                  width={width}
+                  itemCount={timeStampList.length}
+                  key={`${router.query.collection}-${columns}`}
+                >
+                  {({ index, style }) => {
+                    return (
+                      <ListItem style={style}>
+                        <ListContainer>
+                          {timeStampList[index].itemType ===
+                            ITEM_TYPE.TIME ? (
+                              <DateContainer>
+                                {timeStampList[index].date}
+                              </DateContainer>
+                            ) : (
+                              timeStampList[index].items.map((item, idx) => {
+                                return getThumbnail(
+                                  filteredData,
+                                  timeStampList[index].itemStartIndex + idx
+                                );
+                              })
+                            )}
+                        </ListContainer>
+                      </ListItem>
+                    );
+                  }}
+                </List>
+              );
+            }}
+          </AutoSizer>
+          <PhotoSwipe
+            isOpen={open}
+            items={filteredData}
+            options={options}
+            onClose={handleClose}
+            gettingData={getSlideData}
+          />
+        </Container>
+      ) : (
+          <DeadCenter>
+            <SadFace height={100} width={100} />
+            <div>No content found!</div>
+          </DeadCenter>
+        )}
     </>
   );
 }
