@@ -1,10 +1,12 @@
-import 'package:flutter/gestures.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:photos/utils/dialog_util.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class SubscriptionPage extends StatelessWidget {
@@ -41,7 +43,34 @@ class SubscriptionPage extends StatelessWidget {
       BuildContext context, List<BillingPlan> plans, final appBarSize) {
     final planWidgets = List<Widget>();
     for (final plan in plans) {
-      planWidgets.add(SubscriptionPlanWidget(plan: plan));
+      planWidgets.add(
+        Material(
+          child: InkWell(
+            onTap: () async {
+              final dialog = createProgressDialog(context, "Please wait...");
+              await dialog.show();
+              // ignore: sdk_version_set_literal
+              Set<String> _kIds = {
+                Platform.isAndroid ? plan.androidID : plan.iosID
+              };
+              final ProductDetailsResponse response =
+                  await InAppPurchaseConnection.instance
+                      .queryProductDetails(_kIds);
+              await dialog.hide();
+              if (response.notFoundIDs.isNotEmpty) {
+                showGenericErrorDialog(context);
+                return;
+              }
+              List<ProductDetails> productDetails = response.productDetails;
+              final PurchaseParam purchaseParam =
+                  PurchaseParam(productDetails: productDetails[0]);
+              await InAppPurchaseConnection.instance
+                  .buyConsumable(purchaseParam: purchaseParam);
+            },
+            child: SubscriptionPlanWidget(plan: plan),
+          ),
+        ),
+      );
     }
     final pageSize = MediaQuery.of(context).size.height;
     final notifySize = MediaQuery.of(context).padding.top;
