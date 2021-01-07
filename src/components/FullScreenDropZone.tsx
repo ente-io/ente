@@ -14,13 +14,12 @@ const FullScreenDropZone = ({
   closeModal,
   showModal,
 }) => {
-  const blah = () => { console.log("qqqq"); closeModal() };
   return (
     <>
       <Dropzone
         noClick={noClick}
         onDragOver={showModal}
-        onDragLeave={blah}
+        onDragLeave={closeModal}
       >
         {({
           getRootProps,
