@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Card, Modal } from 'react-bootstrap';
 import CollectionDropZone from './CollectionDropZone';
+import PreviewCard from './PreviewCard';
 
 function CollectionSelector({
   modalView,
@@ -16,11 +17,9 @@ function CollectionSelector({
       showProgress={showProgress}
     >
       <Card style={{ cursor: 'pointer', border: 'solid', width: "95%", marginBottom: "5px", padding: "auto" }}>
-        <Card.Img variant="top" src={item.thumb} style={{
-          width: "100%", height: "150px"
-        }} />
+        <PreviewCard data={item.file} updateUrl={() => { }} onClick={() => { }} />
         <Card.Body>
-          <Card.Text>{item.collectionName}</Card.Text>
+          <Card.Text>{item.collection.name}</Card.Text>
         </Card.Body>
       </Card>
     </CollectionDropZone>
