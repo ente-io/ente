@@ -1,6 +1,8 @@
 import React from 'react';
 import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
+import { uploadFiles } from 'services/fileService';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 const getColor = (props) => {
   if (props.isDragAccept) {
@@ -33,13 +35,14 @@ const CollectionDropZone = ({
   noDragEventsBubbling,
   showProgress,
 }) => {
+  const token = getData(LS_KEYS.USER).token;
   return (
     <>
       <Dropzone
-        onDrop={(acceptedFiles) => {
-          console.log(collectionLatestFile.collectionName);
+        onDrop={async (acceptedFiles) => {
           closeModal();
           showProgress();
+          await uploadFiles(acceptedFiles, collectionLatestFile, token);
         }}
         noDragEventsBubbling={noDragEventsBubbling}
       >
