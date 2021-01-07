@@ -24,6 +24,10 @@ export class Crypto {
             key);
     }
 
+    async encryptFile(fileData, key) {
+        return libsodium.encryptChaCha(fileData, key);
+    }
+
     async encrypt(data, key) {
         return libsodium.encrypt(data, key);
     }
