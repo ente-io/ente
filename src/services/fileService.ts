@@ -60,9 +60,8 @@ export interface file {
 }
 
 export interface collectionLatestFile {
-  collectionName: string;
-  collectionID: number;
-  thumb: string;
+  collection: collection
+  file: file;
 }
 
 const getCollectionKey = async (collection: collection, key: Uint8Array) => {
@@ -213,10 +212,10 @@ export const getCollectionLatestFile = async (
   data: file[]
 ): Promise<collectionLatestFile[]> => {
   let collectionIdSet = new Set<number>();
-  let collectionIdNameMap = new Map<string, string>();
+  let collectionMap = new Map<number, collection>();
   collections.forEach((collection) => {
-    collectionIdNameMap.set(collection.id, collection.name);
-    collectionIdSet.add(parseInt(collection.id))
+    collectionMap.set(Number(collection.id), collection);
+    collectionIdSet.add(Number(collection.id))
   });
   return Promise.all(
     data
@@ -231,9 +230,8 @@ export const getCollectionLatestFile = async (
         const token = getData(LS_KEYS.USER).token;
         const url = await getPreview(token, item);
         return {
-          thumb: url,
-          collectionID: item.collectionID,
-          collectionName: collectionIdNameMap.get(item.collectionID.toString()),
+          file: item,
+          collection: collectionMap.get(item.collectionID),
         };
       })
   );
