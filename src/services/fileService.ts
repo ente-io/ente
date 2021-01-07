@@ -17,12 +17,16 @@ localForage.config({
 });
 
 export interface fileAttribute {
-  encryptedData: string;
+  encryptedData: Uint8Array;
   decryptionHeader: string;
   creationTime: number;
   fileType: number;
 }
 
+export interface encryptionResult {
+  file: fileAttribute,
+  key: Uint8Array
+}
 export interface user {
   id: number;
   name: string;
@@ -236,3 +240,51 @@ export const getCollectionLatestFile = async (
       })
   );
 };
+
+export const uploadFiles = async (acceptedFiles: any[], collectionLatestFile: collectionLatestFile, token) => {
+  return await Promise.all(
+    acceptedFiles.map(async (uploadedFile) => {
+      console.log(URL.createObjectURL(uploadedFile));
+      const fileData: Uint8Array = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+
+        reader.onabort = () => reject('file reading was aborted')
+        reader.onerror = () => reject('file reading has failed')
+        reader.onload = () => {
+          // Do whatever you want with the file contents
+          const result = typeof reader.result === "string" ? new TextEncoder().encode(reader.result) : new Uint8Array(reader.result);
+          resolve(result);
+        }
+        reader.readAsArrayBuffer(uploadedFile)
+      });
+
+      const worker = await new CryptoWorker();
+      const encryptResult = await worker.encryptFile(
+        fileData,
+        null
+      );
+      // console.log(encryptionResult);
+
+      const { key, file }: encryptionResult = encryptResult;
+
+      // console.log(file, key);
+
+      const reDecrypted: any = await worker.decryptFile(
+        file.encryptedData,
+        await worker.fromB64(file.decryptionHeader),
+        key
+      );
+      console.log(URL.createObjectURL(new Blob([reDecrypted])));
+
+      // const keyEncryptionResult = await worker.encryptToB64(key, collectionLatestFile.collection.key);
+
+      // const file = {
+      //   collectionID: Number(collection.id),
+      //   file: fileAttribute,
+      //   encryptedKey: keyEncryptionResult.encryptedData,
+      //   keyDecryptionNonce: keyEncryptionResult.nonce,
+      //   key
+      // }
+      return "done";
+    }));
+}
