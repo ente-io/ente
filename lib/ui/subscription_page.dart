@@ -1,13 +1,14 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 class SubscriptionPage extends StatelessWidget {
   const SubscriptionPage({Key key}) : super(key: key);
@@ -142,10 +143,17 @@ class SubscriptionPage extends StatelessWidget {
   }
 }
 
-class LearnMoreWidget extends StatelessWidget {
+class LearnMoreWidget extends StatefulWidget {
   const LearnMoreWidget({
     Key key,
   }) : super(key: key);
+
+  @override
+  _LearnMoreWidgetState createState() => _LearnMoreWidgetState();
+}
+
+class _LearnMoreWidgetState extends State<LearnMoreWidget> {
+  int _progress = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -159,23 +167,38 @@ class LearnMoreWidget extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: WebView(
+              child: InAppWebView(
                 initialUrl: 'https://ente.io/faq',
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-              child: FlatButton(
-                child: Text("close"),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                color: Colors.grey[850],
-                minWidth: double.infinity,
-                onPressed: () {
-                  Navigator.of(context).pop();
+                onProgressChanged: (c, progress) {
+                  setState(() {
+                    _progress = progress;
+                  });
                 },
               ),
+            ),
+            Column(
+              children: [
+                _progress < 100
+                    ? LinearProgressIndicator(
+                        value: _progress / 100,
+                        minHeight: 2,
+                      )
+                    : Container(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  child: FlatButton(
+                    child: Text("close"),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    color: Colors.grey[850],
+                    minWidth: double.infinity,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
