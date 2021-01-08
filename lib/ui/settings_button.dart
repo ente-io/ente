@@ -11,6 +11,7 @@ class SettingsButton extends StatelessWidget {
       alignment: Alignment.topRight,
       child: IconButton(
         icon: Icon(Icons.settings),
+        padding: EdgeInsets.fromLTRB(16, 18, 16, 18),
         onPressed: () async {
           Navigator.of(context).push(
             MaterialPageRoute(
