@@ -34,12 +34,13 @@ const CollectionDropZone = ({
     collectionLatestFile,
     noDragEventsBubbling,
     showProgress,
+    token
 }) => {
 
     const upload = async (acceptedFiles) => {
         closeModal();
         showProgress();
-        await UploadService.uploadFiles(acceptedFiles, collectionLatestFile);
+        await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token);
     }
     return (
         <Dropzone
