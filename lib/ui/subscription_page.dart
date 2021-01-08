@@ -117,18 +117,7 @@ class SubscriptionPage extends StatelessWidget {
                   showDialog(
                     context: context,
                     builder: (builder) {
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 40, 0, 0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                          ),
-                          child: WebView(
-                            initialUrl: 'https://ente.io/faq',
-                          ),
-                        ),
-                      );
+                      return LearnMoreWidget();
                     },
                   );
                 },
@@ -144,6 +133,48 @@ class SubscriptionPage extends StatelessWidget {
                     ),
                   ),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LearnMoreWidget extends StatelessWidget {
+  const LearnMoreWidget({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 40, 0, 0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: WebView(
+                initialUrl: 'https://ente.io/faq',
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: FlatButton(
+                child: Text("close"),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                color: Colors.grey[850],
+                minWidth: double.infinity,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               ),
             ),
           ],
