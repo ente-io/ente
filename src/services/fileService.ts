@@ -23,10 +23,6 @@ export interface fileAttribute {
     fileType: number;
 }
 
-export interface encryptionResult {
-    file: fileAttribute,
-    key: Uint8Array
-}
 export interface user {
     id: number;
     name: string;

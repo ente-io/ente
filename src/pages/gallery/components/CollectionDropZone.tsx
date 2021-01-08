@@ -1,19 +1,19 @@
 import React from 'react';
 import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
-import { uploadFiles } from 'services/fileService';
+import UploadService from 'services/uploadService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 const getColor = (props) => {
-  if (props.isDragAccept) {
-    return '#00e676';
-  }
-  if (props.isDragReject) {
-    return '#ff1744';
-  }
-  if (props.isDragActive) {
-    return '#2196f3';
-  }
+    if (props.isDragAccept) {
+        return '#00e676';
+    }
+    if (props.isDragReject) {
+        return '#ff1744';
+    }
+    if (props.isDragActive) {
+        return '#2196f3';
+    }
 };
 
 const enableBorder = (props) => (props.isDragActive ? 'dashed' : 'none');
@@ -29,43 +29,45 @@ const DropDiv = styled.div`
 `;
 
 const CollectionDropZone = ({
-  children,
-  closeModal,
-  collectionLatestFile,
-  noDragEventsBubbling,
-  showProgress,
+    children,
+    closeModal,
+    collectionLatestFile,
+    noDragEventsBubbling,
+    showProgress,
 }) => {
-  return (
-    <Dropzone
-      onDrop={async (acceptedFiles) => {
+
+    const upload = async (acceptedFiles) => {
         closeModal();
         showProgress();
-        await uploadFiles(acceptedFiles, collectionLatestFile);
-      }}
-      noDragEventsBubbling={noDragEventsBubbling}
-    >
-      {({
-        getRootProps,
-        getInputProps,
-        isDragActive,
-        isDragAccept,
-        isDragReject,
-      }) => {
-        return (
-          <DropDiv
-            {...getRootProps({
-              isDragActive,
-              isDragAccept,
-              isDragReject,
-            })}
-          >
-            <input {...getInputProps()} />
-            {children}
-          </DropDiv>
-        );
-      }}
-    </Dropzone>
-  );
+        await UploadService.uploadFiles(acceptedFiles, collectionLatestFile);
+    }
+    return (
+        <Dropzone
+            onDrop={upload}
+            noDragEventsBubbling={noDragEventsBubbling}
+        >
+            {({
+                getRootProps,
+                getInputProps,
+                isDragActive,
+                isDragAccept,
+                isDragReject,
+            }) => {
+                return (
+                    <DropDiv
+                        {...getRootProps({
+                            isDragActive,
+                            isDragAccept,
+                            isDragReject,
+                        })}
+                    >
+                        <input {...getInputProps()} />
+                        {children}
+                    </DropDiv>
+                );
+            }}
+        </Dropzone>
+    );
 };
 
 export default CollectionDropZone;
