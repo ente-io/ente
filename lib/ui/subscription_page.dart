@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -5,15 +6,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 
-class SubscriptionPage extends StatelessWidget {
+class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({Key key}) : super(key: key);
 
-  // TODO: Bus.instance.fire(UserAuthenticatedEvent());
+  @override
+  _SubscriptionPageState createState() => _SubscriptionPageState();
+}
+
+class _SubscriptionPageState extends State<SubscriptionPage> {
+  StreamSubscription _purchaseUpdateSubscription;
+
+  @override
+  void initState() {
+    _purchaseUpdateSubscription =
+        InAppPurchaseConnection.instance.purchaseUpdatedStream.listen((event) {
+      for (final e in event) {
+        if (e.status == PurchaseStatus.purchased) {
+          Logger("SubscriptionPage")
+              .info(e.verificationData.serverVerificationData);
+          // TODO: Send this to /billing/subscription/verify?data=
+        }
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _purchaseUpdateSubscription.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
@@ -48,7 +77,7 @@ class SubscriptionPage extends StatelessWidget {
         Material(
           child: InkWell(
             onTap: () async {
-              final dialog = createProgressDialog(context, "Please wait...");
+              final dialog = createProgressDialog(context, "please wait...");
               await dialog.show();
               // ignore: sdk_version_set_literal
               Set<String> _kIds = {
@@ -66,7 +95,7 @@ class SubscriptionPage extends StatelessWidget {
               final PurchaseParam purchaseParam =
                   PurchaseParam(productDetails: productDetails[0]);
               await InAppPurchaseConnection.instance
-                  .buyConsumable(purchaseParam: purchaseParam);
+                  .buyNonConsumable(purchaseParam: purchaseParam);
             },
             child: SubscriptionPlanWidget(plan: plan),
           ),
