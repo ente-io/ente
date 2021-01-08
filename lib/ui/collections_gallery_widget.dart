@@ -103,6 +103,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     return SingleChildScrollView(
       child: Column(
         children: [
+          Padding(padding: EdgeInsets.all(6)),
           SectionTitle("device folders"),
           Padding(
             padding: EdgeInsets.all(6),

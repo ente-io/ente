@@ -91,6 +91,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
     return SingleChildScrollView(
       child: Column(
         children: [
+          Padding(padding: EdgeInsets.all(6)),
           SectionTitle("incoming"),
           Padding(padding: EdgeInsets.all(16)),
           collections.incoming.length > 0
@@ -107,7 +108,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   ),
                 )
               : nothingToSeeHere,
-          Padding(padding: EdgeInsets.all(4)),
+          Padding(padding: EdgeInsets.all(16)),
           Divider(height: 0),
           Padding(padding: EdgeInsets.all(14)),
           SectionTitle("outgoing"),
