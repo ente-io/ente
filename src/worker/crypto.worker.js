@@ -27,10 +27,14 @@ export class Crypto {
     async encryptMetadata(metadata, key) {
         encodedMetadata = new TextEncoder().encode(JSON.stringify(metadata));
 
-        const EncryptedMetadata = await libsodium.toB64(await libsodium.encryptChaChaOneShot(
+        const EncryptedMetadata = await libsodium.encryptChaChaOneShot(
             encodedMetadata,
-            key));
-        return EncryptedMetadata;
+            key);
+        const { encryptedData, ...other } = EncryptedMetadata;
+        return {
+            encryptedData: await libsodium.toB64(EncryptedMetadata),
+            other
+        };
     }
 
     async encryptThumbnail(fileData, key) {
