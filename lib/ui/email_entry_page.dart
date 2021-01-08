@@ -181,8 +181,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 onPressed: _email != null && _name != null
                     ? () {
                         if (!isValidEmail(_email)) {
-                          showErrorDialog(context, "Invalid email address",
-                              "Please enter a valid email address.");
+                          showErrorDialog(context, "invalid email address",
+                              "please enter a valid email address.");
                           return;
                         }
                         _config.setEmail(_email);

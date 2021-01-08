@@ -27,7 +27,7 @@ void showErrorDialog(BuildContext context, String title, String content) {
     content: Text(content),
     actions: [
       FlatButton(
-        child: Text("OK"),
+        child: Text("ok"),
         onPressed: () {
           Navigator.of(context).pop();
         },
@@ -44,6 +44,5 @@ void showErrorDialog(BuildContext context, String title, String content) {
 }
 
 void showGenericErrorDialog(BuildContext context) {
-  showErrorDialog(
-      context, "Oops.", "Sorry, something went wrong. Please try again.");
+  showErrorDialog(context, "something went wrong", "please try again.");
 }

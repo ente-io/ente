@@ -118,8 +118,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                             ? () {
                                 if (_passwordController1.text !=
                                     _passwordController2.text) {
-                                  showErrorDialog(context, "Uhm...",
-                                      "The passwords you entered don't match.");
+                                  showErrorDialog(context, "uhm...",
+                                      "the passwords you entered don't match");
                                 } else {
                                   _showPasswordConfirmationDialog();
                                 }

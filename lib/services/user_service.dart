@@ -52,8 +52,8 @@ class UserService {
         } else if (response.statusCode == 403) {
           showErrorDialog(
             context,
-            "Please wait...",
-            "We are currently not accepting new registrations. You have been added to the waitlist and we will let you know once we are ready for you.",
+            "please wait...",
+            "we are currently not accepting new registrations. you have been added to the waitlist and we will let you know once we are ready for you.",
           );
         }
       } else {
@@ -114,7 +114,7 @@ class UserService {
         );
       } else {
         showErrorDialog(
-            context, "Oops.", "Verification failed, please try again.");
+            context, "oops", "verification failed, please try again");
       }
     });
   }
