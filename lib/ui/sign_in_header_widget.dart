@@ -46,7 +46,7 @@ class _SignInHeaderState extends State<SignInHeader> {
     }
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.all(8),
+        padding: EdgeInsets.fromLTRB(8, 20, 8, 8),
         child: Column(
           children: [
             Text.rich(
@@ -100,7 +100,7 @@ class _SignInHeaderState extends State<SignInHeader> {
               textAlign: TextAlign.center,
             ),
             Padding(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(8),
             ),
             ExpansionCard(
               title: Text('protected'),

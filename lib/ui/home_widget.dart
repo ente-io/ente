@@ -22,6 +22,7 @@ import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/settings_button.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ui/sign_in_header_widget.dart';
@@ -46,6 +47,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _memoriesWidget = MemoriesWidget();
   final _signInHeader = SignInHeader();
   final _syncIndicator = SyncIndicator();
+  final _settingsButton = SettingsButton();
   final PageController _pageController = PageController();
 
   GlobalKey<ConvexAppBarState> _appBarKey = GlobalKey<ConvexAppBarState>();
@@ -71,6 +73,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
       }
     });
+    _selectedFiles.addListener(() {
+      setState(() {});
+    });
     _initDeepLinks();
     super.initState();
   }
@@ -78,14 +83,16 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(20.0),
-        child: GalleryAppBarWidget(
-          GalleryAppBarType.homepage,
-          widget.title,
-          _selectedFiles,
-        ),
-      ),
+      appBar: _selectedFiles.files.isEmpty
+          ? PreferredSize(
+              preferredSize: Size.fromHeight(0),
+              child: Container(),
+            )
+          : GalleryAppBarWidget(
+              GalleryAppBarType.homepage,
+              widget.title,
+              _selectedFiles,
+            ),
       bottomNavigationBar: _buildBottomNavigationBar(),
       body: ExtentsPageView(
         children: [
@@ -148,6 +155,16 @@ class _HomeWidgetState extends State<HomeWidget> {
       future: FileRepository.instance.loadFiles(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          final headerWidgets = List<Widget>();
+          if (_selectedFiles.files.isEmpty &&
+              Configuration.instance.hasConfiguredAccount()) {
+            headerWidgets.add(_settingsButton);
+          }
+          headerWidgets.addAll([
+            _syncIndicator,
+            _signInHeader,
+            _memoriesWidget,
+          ]);
           return Gallery(
             syncLoader: () {
               return _getFilteredPhotos(FileRepository.instance.files);
@@ -156,11 +173,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             tagPrefix: "home_gallery",
             selectedFiles: _selectedFiles,
             headerWidget: Column(
-              children: [
-                _syncIndicator,
-                _signInHeader,
-                _memoriesWidget,
-              ],
+              children: headerWidgets,
             ),
           );
         } else if (snapshot.hasError) {

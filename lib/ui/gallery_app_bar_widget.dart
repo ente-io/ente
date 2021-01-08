@@ -10,7 +10,6 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
-import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -76,17 +75,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       return AppBar(
         backgroundColor: Color(0x00000000),
         elevation: 0,
-        title: Text(
-          widget.title,
-          style: TextStyle(
-            fontFamily: widget.type == GalleryAppBarType.homepage
-                ? 'Montserrat'
-                : 'NunitoSans',
-            color: widget.type == GalleryAppBarType.homepage
-                ? Colors.white.withOpacity(0.00)
-                : Colors.white.withOpacity(0.60),
-          ),
-        ),
+        title: widget.type == GalleryAppBarType.homepage
+            ? Container()
+            : Text(
+                widget.title,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.60),
+                ),
+              ),
         actions: _getDefaultActions(context),
       );
     }
@@ -105,29 +101,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getDefaultActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
-    if (Configuration.instance.hasConfiguredAccount()) {
-      if (widget.type == GalleryAppBarType.homepage) {
-        actions.add(IconButton(
-          icon: Icon(Icons.settings),
-          onPressed: () async {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return SettingsPage();
-                },
-              ),
-            );
-          },
-        ));
-      } else if (widget.type == GalleryAppBarType.local_folder ||
-          widget.type == GalleryAppBarType.collection) {
-        actions.add(IconButton(
-          icon: Icon(Icons.person_add),
-          onPressed: () {
-            _showShareCollectionDialog();
-          },
-        ));
-      }
+    if (Configuration.instance.hasConfiguredAccount() &&
+        (widget.type == GalleryAppBarType.local_folder ||
+            widget.type == GalleryAppBarType.collection)) {
+      actions.add(IconButton(
+        icon: Icon(Icons.person_add),
+        onPressed: () {
+          _showShareCollectionDialog();
+        },
+      ));
     }
     return actions;
   }
