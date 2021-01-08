@@ -44,8 +44,10 @@ const CollectionDropZone = ({
     }
     return (
         <Dropzone
-            onDrop={upload}
+            onDropAccepted={upload}
+            onDropRejected={closeModal}
             noDragEventsBubbling={noDragEventsBubbling}
+            accept="image/*, video/* "
         >
             {({
                 getRootProps,
