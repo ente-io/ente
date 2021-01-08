@@ -50,12 +50,14 @@ class GalleryAppBarWidget extends StatefulWidget
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   final _logger = Logger("GalleryAppBar");
   StreamSubscription _userAuthEventSubscription;
+  Function() _selectedFilesListener;
 
   @override
   void initState() {
-    widget.selectedFiles.addListener(() {
+    _selectedFilesListener = () {
       setState(() {});
-    });
+    };
+    widget.selectedFiles.addListener(_selectedFilesListener);
     _userAuthEventSubscription =
         Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
       setState(() {});
@@ -66,6 +68,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   @override
   void dispose() {
     _userAuthEventSubscription.cancel();
+    widget.selectedFiles.removeListener(_selectedFilesListener);
     super.dispose();
   }
 
