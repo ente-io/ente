@@ -35,9 +35,7 @@ export async function decryptChaCha(data: Uint8Array, header: Uint8Array, key: U
 
 export async function encryptChaChaOneShot(data: Uint8Array, key: Uint8Array) {
     await sodium.ready;
-
-    key = !key && sodium.crypto_secretstream_xchacha20poly1305_keygen();
-
+    key = key || sodium.crypto_secretstream_xchacha20poly1305_keygen();
     let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
     let [pushState, header] = [initPushResult.state, initPushResult.header];
 
@@ -55,7 +53,7 @@ export async function encryptChaChaOneShot(data: Uint8Array, key: Uint8Array) {
 export async function encryptChaCha(data: Uint8Array, key: Uint8Array) {
     await sodium.ready;
 
-    key = !key && sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    key = key || sodium.crypto_secretstream_xchacha20poly1305_keygen();
 
     let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
     let [pushState, header] = [initPushResult.state, initPushResult.header];
