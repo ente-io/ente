@@ -10,27 +10,46 @@ export async function decryptChaChaOneShot(data: Uint8Array, header: Uint8Array,
 }
 
 export async function decryptChaCha(data: Uint8Array, header: Uint8Array, key: Uint8Array) {
-        await sodium.ready;
-        const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(header, key);
-        const decryptionChunkSize =
-            encryptionChunkSize + sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
-        var bytesRead = 0;
-        var decryptedData = [];
-        var tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
-        while (tag != sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
-            var chunkSize = decryptionChunkSize;
-            if (bytesRead + chunkSize > data.length) {
-                chunkSize = data.length - bytesRead;
-            }
-            const buffer = data.slice(bytesRead, bytesRead + chunkSize);
-            const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(pullState, buffer);
-            for (var index = 0; index < pullResult.message.length; index++) {
-                decryptedData.push(pullResult.message[index]);
-            }
-            tag = pullResult.tag;
-            bytesRead += chunkSize;
+    await sodium.ready;
+    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(header, key);
+    const decryptionChunkSize =
+        encryptionChunkSize + sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
+    var bytesRead = 0;
+    var decryptedData = [];
+    var tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
+    while (tag != sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
+        var chunkSize = decryptionChunkSize;
+        if (bytesRead + chunkSize > data.length) {
+            chunkSize = data.length - bytesRead;
         }
-        return Uint8Array.from(decryptedData);
+        const buffer = data.slice(bytesRead, bytesRead + chunkSize);
+        const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(pullState, buffer);
+        for (var index = 0; index < pullResult.message.length; index++) {
+            decryptedData.push(pullResult.message[index]);
+        }
+        tag = pullResult.tag;
+        bytesRead += chunkSize;
+    }
+    return Uint8Array.from(decryptedData);
+}
+
+export async function encryptChaChaOneShot(data: Uint8Array, key: Uint8Array) {
+    await sodium.ready;
+
+    key = !key && sodium.crypto_secretstream_xchacha20poly1305_keygen();
+
+    let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
+    let [pushState, header] = [initPushResult.state, initPushResult.header];
+
+    const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(pushState, data, null, sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+    return {
+        key, file: {
+            encryptedData: pushResult,
+            decryptionHeader: await toB64(header),
+            creationTime: Date.now(),
+            fileType: 0
+        }
+    }
 }
 
 export async function encryptChaCha(data: Uint8Array, key: Uint8Array) {
