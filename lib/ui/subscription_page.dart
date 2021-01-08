@@ -164,7 +164,7 @@ class LearnMoreWidget extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
               child: FlatButton(
                 child: Text("close"),
                 shape: RoundedRectangleBorder(
@@ -225,7 +225,6 @@ class SubscriptionPlanWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              // Padding(padding: EdgeInsets.all(2)),
               Text(plan.price + " per " + plan.period),
             ],
           ),
