@@ -61,7 +61,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         if (_videoPlayerController.value.hasError) {
           _logger.warning(_videoPlayerController.value.errorDescription);
           showToast(
-              "The video has not been processed yet. Downloading the original one...",
+              "the video has not been processed yet. downloading the original one...",
               toastLength: Toast.LENGTH_SHORT);
           _setVideoPlayerController(url: widget.file.getDownloadUrl());
         }
@@ -73,7 +73,7 @@ class _VideoWidgetState extends State<VideoWidget> {
           setState(() {
             _progress = count / total;
             if (_progress == 1) {
-              showToast("Decrypting video...", toastLength: Toast.LENGTH_SHORT);
+              showToast("decrypting video...", toastLength: Toast.LENGTH_SHORT);
             }
           });
         },

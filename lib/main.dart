@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:computer/computer.dart';
 import 'package:flutter/material.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
@@ -29,6 +30,7 @@ void _main() async {
     workersCount: 4,
     areLogsEnabled: false,
   );
+  InAppPurchaseConnection.enablePendingPurchases();
   await Configuration.instance.init();
   await CollectionsService.instance.init();
   await SyncService.instance.init();

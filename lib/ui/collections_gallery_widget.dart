@@ -243,7 +243,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
           ),
           onPressed: () async {
             await showToast(
-                "Long press to select photos and click + to create an album.",
+                "long press to select photos and click + to create an album",
                 toastLength: Toast.LENGTH_LONG);
             Bus.instance.fire(
                 TabChangedEvent(0, TabChangedEventSource.collections_page));

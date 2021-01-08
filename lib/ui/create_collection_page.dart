@@ -32,7 +32,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Create album"),
+        title: Text("create album"),
       ),
       body: _getBody(context),
     );
@@ -48,7 +48,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: OutlineButton(
                   child: Text(
-                    "Create a new album",
+                    "create a new album",
                     style: Theme.of(context).textTheme.bodyText1,
                   ),
                   onPressed: () {
@@ -64,7 +64,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              "Add to an existing collection",
+              "add to an existing collection",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).primaryColorLight,
@@ -127,7 +127,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         ),
         onTap: () async {
           if (await _addToCollection(item.collection.id)) {
-            showToast("Added successfully to '" + item.collection.name);
+            showToast("added successfully to '" + item.collection.name);
             Navigator.pop(context);
             Navigator.push(
                 context,
@@ -170,7 +170,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   void _showNameAlbumDialog() async {
     AlertDialog alert = AlertDialog(
-      title: Text("Album title"),
+      title: Text("album title"),
       content: TextFormField(
         decoration: InputDecoration(
           hintText: "Christmas 2020 / Dinner at Alice's",
@@ -187,13 +187,13 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       ),
       actions: [
         FlatButton(
-          child: Text("OK"),
+          child: Text("ok"),
           onPressed: () async {
             Navigator.pop(context);
             final collection = await _createAlbum(_albumName);
             if (collection != null) {
               if (await _addToCollection(collection.id)) {
-                showToast("Album '" + _albumName + "' created.");
+                showToast("album '" + _albumName + "' created.");
                 Navigator.pop(context);
                 Navigator.push(
                     context,

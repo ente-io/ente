@@ -127,7 +127,7 @@ class _DetailPageState extends State<DetailPage> {
                 Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text("Share"),
+                Text("share"),
               ],
             ),
           ),
@@ -139,7 +139,7 @@ class _DetailPageState extends State<DetailPage> {
                 Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text("Info"),
+                Text("info"),
               ],
             ),
           ),
@@ -151,7 +151,7 @@ class _DetailPageState extends State<DetailPage> {
                 Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text("Delete"),
+                Text("delete"),
               ],
             ),
           )
@@ -207,7 +207,7 @@ class _DetailPageState extends State<DetailPage> {
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
-            showToast("Sorry, could not add this to favorites!");
+            showToast("sorry, could not add this to favorites!");
           } finally {
             if (shouldBlockUser) {
               await dialog.hide();
@@ -219,7 +219,7 @@ class _DetailPageState extends State<DetailPage> {
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
-            showToast("Sorry, could not remove this from favorites!");
+            showToast("sorry, could not remove this from favorites!");
           }
         }
         return hasError ? oldValue : isLiked;
@@ -303,7 +303,7 @@ class _DetailPageState extends State<DetailPage> {
           ),
           actions: <Widget>[
             FlatButton(
-              child: Text('Ok'),
+              child: Text('ok'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -319,7 +319,7 @@ class _DetailPageState extends State<DetailPage> {
     final actions = List<Widget>();
     if (fileToBeDeleted.uploadedFileID == null) {
       actions.add(CupertinoActionSheetAction(
-        child: Text("Everywhere"),
+        child: Text("everywhere"),
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromEverywhere(context, [fileToBeDeleted]);
@@ -329,17 +329,17 @@ class _DetailPageState extends State<DetailPage> {
     } else {
       if (fileToBeDeleted.localID != null) {
         actions.add(CupertinoActionSheetAction(
-          child: Text("On this device"),
+          child: Text("on this device"),
           isDestructiveAction: true,
           onPressed: () async {
             await deleteFilesOnDeviceOnly(context, [fileToBeDeleted]);
-            showToast("File deleted from device");
+            showToast("file deleted from device");
             Navigator.of(context, rootNavigator: true).pop();
           },
         ));
       }
       actions.add(CupertinoActionSheetAction(
-        child: Text("Everywhere"),
+        child: Text("everywhere"),
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromEverywhere(context, [fileToBeDeleted]);
@@ -348,10 +348,10 @@ class _DetailPageState extends State<DetailPage> {
       ));
     }
     final action = CupertinoActionSheet(
-      title: Text("Delete file?"),
+      title: Text("delete file?"),
       actions: actions,
       cancelButton: CupertinoActionSheetAction(
-        child: Text("Cancel"),
+        child: Text("cancel"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop();
         },

@@ -193,7 +193,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
-                  Text("Remove"),
+                  Text("remove"),
                 ],
               ),
             ),
@@ -205,7 +205,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
-                  Text("Delete"),
+                  Text("delete"),
                 ],
               ),
             )
@@ -239,7 +239,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           "?"),
       actions: <Widget>[
         CupertinoActionSheetAction(
-          child: Text("Remove"),
+          child: Text("remove"),
           isDestructiveAction: true,
           onPressed: () async {
             final dialog = createProgressDialog(context, "removing files...");
@@ -260,7 +260,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       ],
       cancelButton: CupertinoActionSheetAction(
-        child: Text("Cancel"),
+        child: Text("cancel"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop();
         },
@@ -280,49 +280,49 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final actions = List<Widget>();
     if (containsUploadedFile) {
       actions.add(CupertinoActionSheetAction(
-        child: Text("This Device"),
+        child: Text("this Device"),
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesOnDeviceOnly(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("Files deleted from device");
+          showToast("files deleted from device");
           Navigator.of(context, rootNavigator: true).pop();
         },
       ));
       actions.add(CupertinoActionSheetAction(
-        child: Text("Everywhere"),
+        child: Text("everywhere"),
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromEverywhere(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("Files deleted from everywhere");
+          showToast("files deleted from everywhere");
           Navigator.of(context, rootNavigator: true).pop();
         },
       ));
     } else {
       actions.add(CupertinoActionSheetAction(
-        child: Text("Delete forever"),
+        child: Text("delete forever"),
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesFromEverywhere(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("Files deleted from everywhere");
+          showToast("files deleted from everywhere");
           Navigator.of(context, rootNavigator: true).pop();
         },
       ));
     }
     final action = CupertinoActionSheet(
-      title: Text("Delete " +
+      title: Text("delete " +
           count.toString() +
           " file" +
           (count == 1 ? "" : "s") +
           (containsUploadedFile ? " from" : "?")),
       actions: actions,
       cancelButton: CupertinoActionSheetAction(
-        child: Text("Cancel"),
+        child: Text("cancel"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop();
         },

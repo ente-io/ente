@@ -97,7 +97,7 @@ class UserService {
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
         await _saveConfiguration(response);
-        showToast("Email verification successful!");
+        showToast("email verification successful!");
         var page;
         if (Configuration.instance.getKeyAttributes() != null) {
           page = PasswordReentryPage();

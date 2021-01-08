@@ -206,7 +206,7 @@ class _SharingDialogState extends State<SharingDialog> {
         await CollectionsService.instance
             .share(widget.collection.id, email, publicKey);
         await dialog.hide();
-        showToast("Shared successfully!");
+        showToast("shared successfully!");
         setState(() {
           _sharees.add(User(email: email));
           _showEntryField = false;
@@ -251,7 +251,7 @@ class EmailItemWidget extends StatelessWidget {
             try {
               await CollectionsService.instance.unshare(collectionID, email);
               await dialog.hide();
-              showToast("Stopped sharing with " + email + ".");
+              showToast("stopped sharing with " + email + ".");
               Navigator.of(context).pop();
             } catch (e, s) {
               Logger("EmailItemWidget").severe(e, s);
