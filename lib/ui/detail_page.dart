@@ -199,7 +199,7 @@ class _DetailPageState extends State<DetailPage> {
           final shouldBlockUser = file.uploadedFileID == null;
           var dialog;
           if (shouldBlockUser) {
-            dialog = createProgressDialog(context, "Adding to favorites...");
+            dialog = createProgressDialog(context, "adding to favorites...");
             await dialog.show();
           }
           try {

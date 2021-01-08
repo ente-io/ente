@@ -33,7 +33,7 @@ final _logger = Logger("FileUtil");
 
 Future<void> deleteFilesFromEverywhere(
     BuildContext context, List<File> files) async {
-  final dialog = createProgressDialog(context, "Deleting...");
+  final dialog = createProgressDialog(context, "deleting...");
   await dialog.show();
   final localIDs = List<String>();
   for (final file in files) {
@@ -72,7 +72,7 @@ Future<void> deleteFilesFromEverywhere(
 
 Future<void> deleteFilesOnDeviceOnly(
     BuildContext context, List<File> files) async {
-  final dialog = createProgressDialog(context, "Deleting...");
+  final dialog = createProgressDialog(context, "deleting...");
   await dialog.show();
   final localIDs = List<String>();
   for (final file in files) {

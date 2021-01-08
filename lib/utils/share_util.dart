@@ -9,7 +9,7 @@ import 'package:progress_dialog/progress_dialog.dart';
 import 'package:share_extend/share_extend.dart';
 
 Future<void> share(BuildContext context, File file) async {
-  final dialog = createProgressDialog(context, "Preparing...");
+  final dialog = createProgressDialog(context, "preparing...");
   if (file.fileType == FileType.image) {
     return _shareImage(dialog, file);
   } else {
@@ -21,7 +21,7 @@ Future<void> shareMultiple(BuildContext context, List<File> files) async {
   if (files.length == 1) {
     return share(context, files[0]);
   }
-  final dialog = createProgressDialog(context, "Preparing...");
+  final dialog = createProgressDialog(context, "preparing...");
   await dialog.show();
   final pathFutures = List<Future<String>>();
   for (File file in files) {

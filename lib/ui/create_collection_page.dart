@@ -218,7 +218,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<bool> _addToCollection(int collectionID) async {
-    final dialog = createProgressDialog(context, "Uploading files to album...");
+    final dialog = createProgressDialog(context, "uploading files to album...");
     await dialog.show();
     try {
       final files = List<File>();
@@ -246,7 +246,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   Future<Collection> _createAlbum(String albumName) async {
     var collection;
-    final dialog = createProgressDialog(context, "Creating album...");
+    final dialog = createProgressDialog(context, "creating album...");
     await dialog.show();
     try {
       collection = await CollectionsService.instance.createAlbum(albumName);

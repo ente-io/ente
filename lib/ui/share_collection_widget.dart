@@ -161,7 +161,7 @@ class _SharingDialogState extends State<SharingDialog> {
       return;
     }
     if (publicKey == null) {
-      final dialog = createProgressDialog(context, "Searching for user...");
+      final dialog = createProgressDialog(context, "searching for user...");
       await dialog.show();
 
       publicKey = await UserService.instance.getPublicKey(email);
@@ -191,7 +191,7 @@ class _SharingDialogState extends State<SharingDialog> {
         },
       );
     } else {
-      final dialog = createProgressDialog(context, "Sharing...");
+      final dialog = createProgressDialog(context, "sharing...");
       await dialog.show();
       final collection = widget.collection;
       if (collection.type == CollectionType.folder) {
@@ -246,7 +246,7 @@ class EmailItemWidget extends StatelessWidget {
           icon: Icon(Icons.delete_forever),
           color: Colors.redAccent,
           onPressed: () async {
-            final dialog = createProgressDialog(context, "Please wait...");
+            final dialog = createProgressDialog(context, "please wait...");
             await dialog.show();
             try {
               await CollectionsService.instance.unshare(collectionID, email);

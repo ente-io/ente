@@ -29,7 +29,7 @@ class UserService {
   static final UserService instance = UserService._privateConstructor();
 
   Future<void> getOtt(BuildContext context, String email) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     await _dio.get(
       _config.getHttpEndpoint() + "/users/ott",
@@ -83,7 +83,7 @@ class UserService {
   }
 
   Future<void> getCredentials(BuildContext context, String ott) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     await _dio.get(
       _config.getHttpEndpoint() + "/users/credentials",
@@ -120,7 +120,7 @@ class UserService {
   }
 
   Future<void> setupAttributes(BuildContext context, String password) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     final result = await _config.generateKey(password);
     final name = _config.getName();

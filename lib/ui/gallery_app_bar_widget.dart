@@ -124,7 +124,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         collection =
             CollectionsService.instance.getCollectionForPath(widget.path);
         if (collection == null) {
-          final dialog = createProgressDialog(context, "Please wait...");
+          final dialog = createProgressDialog(context, "please wait...");
           await dialog.show();
           try {
             collection = await CollectionsService.instance
@@ -242,7 +242,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           child: Text("Remove"),
           isDestructiveAction: true,
           onPressed: () async {
-            final dialog = createProgressDialog(context, "Removing files...");
+            final dialog = createProgressDialog(context, "removing files...");
             await dialog.show();
             try {
               CollectionsService.instance.removeFromCollection(
