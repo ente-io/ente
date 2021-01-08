@@ -164,7 +164,7 @@ class LearnMoreWidget extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
               child: FlatButton(
                 child: Text("close"),
                 shape: RoundedRectangleBorder(
