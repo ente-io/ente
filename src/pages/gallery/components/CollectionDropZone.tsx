@@ -35,41 +35,36 @@ const CollectionDropZone = ({
   noDragEventsBubbling,
   showProgress,
 }) => {
-  const token = getData(LS_KEYS.USER).token;
   return (
-    <>
-      <Dropzone
-        onDrop={async (acceptedFiles) => {
-          closeModal();
-          showProgress();
-          await uploadFiles(acceptedFiles, collectionLatestFile, token);
-        }}
-        noDragEventsBubbling={noDragEventsBubbling}
-      >
-        {({
-          getRootProps,
-          getInputProps,
-          isDragActive,
-          isDragAccept,
-          isDragReject,
-        }) => {
-          return (
-            <>
-              <DropDiv
-                {...getRootProps({
-                  isDragActive,
-                  isDragAccept,
-                  isDragReject,
-                })}
-              >
-                <input {...getInputProps()} />
-                {children}
-              </DropDiv>
-            </>
-          );
-        }}
-      </Dropzone>
-    </>
+    <Dropzone
+      onDrop={async (acceptedFiles) => {
+        closeModal();
+        showProgress();
+        await uploadFiles(acceptedFiles, collectionLatestFile);
+      }}
+      noDragEventsBubbling={noDragEventsBubbling}
+    >
+      {({
+        getRootProps,
+        getInputProps,
+        isDragActive,
+        isDragAccept,
+        isDragReject,
+      }) => {
+        return (
+          <DropDiv
+            {...getRootProps({
+              isDragActive,
+              isDragAccept,
+              isDragReject,
+            })}
+          >
+            <input {...getInputProps()} />
+            {children}
+          </DropDiv>
+        );
+      }}
+    </Dropzone>
   );
 };
 
