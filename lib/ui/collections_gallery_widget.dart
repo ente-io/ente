@@ -105,9 +105,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         children: [
           Padding(padding: EdgeInsets.all(6)),
           SectionTitle("device folders"),
-          Padding(
-            padding: EdgeInsets.all(6),
-          ),
+          Padding(padding: EdgeInsets.all(6)),
           Container(
             height: 160,
             child: Align(
@@ -117,7 +115,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   : ListView.builder(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
                       physics:
                           ScrollPhysics(), // to disable GridView's scrolling
                       itemBuilder: (context, index) {
@@ -128,12 +126,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             ),
           ),
           Divider(),
+          Padding(padding: EdgeInsets.all(6)),
+          SectionTitle("backed-up memories"),
           Padding(padding: EdgeInsets.all(10)),
-          SectionTitle("preserved memories"),
-          Padding(padding: EdgeInsets.all(16)),
           GridView.builder(
             shrinkWrap: true,
-            padding: EdgeInsets.only(bottom: 12),
+            padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
             physics: ScrollPhysics(), // to disable GridView's scrolling
             itemBuilder: (context, index) {
               return _buildCollection(context, items.collections, index);
@@ -206,21 +204,18 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                 child: Hero(
                     tag: "collection" + c.thumbnail.tag(),
                     child: ThumbnailWidget(c.thumbnail)),
-                height: 160,
-                width: 160,
+                height: 140,
+                width: 140,
               ),
             ),
             Padding(padding: EdgeInsets.all(4)),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                child: Text(
-                  c.collection.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+              child: Text(
+                c.collection.name,
+                style: TextStyle(
+                  fontSize: 16,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
