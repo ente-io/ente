@@ -14,6 +14,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share_extend/share_extend.dart';
@@ -26,7 +27,7 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Settings"),
+        title: Text("settings"),
       ),
       body: _getBody(),
     );
@@ -34,7 +35,7 @@ class SettingsPage extends StatelessWidget {
 
   Widget _getBody() {
     final contents = [
-      UsageWidget(),
+      BackupSettingsWidget(),
       SupportSectionWidget(),
       InfoSectionWidget(),
     ];
@@ -43,7 +44,7 @@ class SettingsPage extends StatelessWidget {
     }
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           children: contents,
         ),
@@ -52,14 +53,14 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-class UsageWidget extends StatefulWidget {
-  UsageWidget({Key key}) : super(key: key);
+class BackupSettingsWidget extends StatefulWidget {
+  BackupSettingsWidget({Key key}) : super(key: key);
 
   @override
-  UsageWidgetState createState() => UsageWidgetState();
+  BackupSettingsWidgetState createState() => BackupSettingsWidgetState();
 }
 
-class UsageWidgetState extends State<UsageWidget> {
+class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
   double _usageInGBs;
 
   @override
@@ -73,21 +74,21 @@ class UsageWidgetState extends State<UsageWidget> {
     return Container(
       child: Column(
         children: [
-          SettingsSectionTitle("BACKUP"),
+          SettingsSectionTitle("backup"),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () async {
               _showFoldersDialog(context);
             },
             child: SettingsTextItem(
-                text: "Backed up Folders", icon: Icons.navigate_next),
+                text: "backed up folders", icon: Icons.navigate_next),
           ),
           Divider(height: 4),
-          Padding(padding: EdgeInsets.all(4)),
+          Padding(padding: EdgeInsets.all(6)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Total data backed up"),
+              Text("total data backed up"),
               _usageInGBs == null
                   ? loadWidget
                   : Text(
@@ -95,14 +96,14 @@ class UsageWidgetState extends State<UsageWidget> {
                     ),
             ],
           ),
-          Padding(padding: EdgeInsets.all(4)),
+          Padding(padding: EdgeInsets.all(6)),
           Divider(height: 4),
           Container(
             height: 36,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Backup over mobile data"),
+                Text("backup over mobile data"),
                 Switch(
                   value: Configuration.instance.shouldBackupOverMobileData(),
                   onChanged: (value) async {
@@ -120,7 +121,7 @@ class UsageWidgetState extends State<UsageWidget> {
 
   void _showFoldersDialog(BuildContext context) async {
     AlertDialog alert = AlertDialog(
-      title: Text("Select folders to back up"),
+      title: Text("select folders to back up"),
       content: BackedUpFoldersWidget(),
       actions: [
         FlatButton(
@@ -241,6 +242,7 @@ class SettingsSectionTitle extends StatelessWidget {
           title,
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            fontSize: 16,
             color: Theme.of(context).accentColor,
           ),
         ),
@@ -258,16 +260,24 @@ class SupportSectionWidget extends StatelessWidget {
     return Container(
       child: Column(children: [
         Padding(padding: EdgeInsets.all(12)),
-        SettingsSectionTitle("SUPPORT"),
+        SettingsSectionTitle("support"),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            launch(Configuration.instance.getHttpEndpoint() +
-                "/users/feedback?token=" +
-                Configuration.instance.getToken());
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return WebPage(
+                      "request feature",
+                      Configuration.instance.getHttpEndpoint() +
+                          "/users/feedback?token=" +
+                          Configuration.instance.getToken());
+                },
+              ),
+            );
           },
           child: SettingsTextItem(
-              text: "Request Feature", icon: Icons.navigate_next),
+              text: "request feature", icon: Icons.navigate_next),
         ),
         Divider(height: 4),
         GestureDetector(
@@ -284,8 +294,8 @@ class SupportSectionWidget extends StatelessWidget {
             }
           },
           onLongPress: () async {
-            showToast("Thanks for reporting a bug!");
-            final dialog = createProgressDialog(context, "Preparing logs...");
+            showToast("thanks for reporting a bug!");
+            final dialog = createProgressDialog(context, "preparing logs...");
             await dialog.show();
             final tempPath = (await getTemporaryDirectory()).path;
             final zipFilePath = tempPath + "/logs.zip";
@@ -306,7 +316,7 @@ class SupportSectionWidget extends StatelessWidget {
               return ShareExtend.share(zipFilePath, "file");
             }
           },
-          child: SettingsTextItem(text: "Email", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "email", icon: Icons.navigate_next),
         ),
         Divider(height: 4),
         GestureDetector(
@@ -320,7 +330,7 @@ class SupportSectionWidget extends StatelessWidget {
               ),
             );
           },
-          child: SettingsTextItem(text: "Chat", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "chat", icon: Icons.navigate_next),
         ),
       ]),
     );
@@ -339,25 +349,43 @@ class InfoSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            launch("https://ente.io/faq");
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return WebPage("faq", "https://ente.io/faq");
+                },
+              ),
+            );
           },
-          child: SettingsTextItem(text: "FAQ", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "faq", icon: Icons.navigate_next),
         ),
         Divider(height: 4),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
-            launch("https://ente.io/terms");
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return WebPage("terms", "https://ente.io/terms");
+                },
+              ),
+            );
           },
-          child: SettingsTextItem(text: "Terms", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "terms", icon: Icons.navigate_next),
         ),
         Divider(height: 4),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () {
-            launch("https://ente.io/privacy");
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return WebPage("privacy", "https://ente.io/privacy");
+                },
+              ),
+            );
           },
-          child: SettingsTextItem(text: "Privacy", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "privacy", icon: Icons.navigate_next),
         ),
         Divider(height: 4),
         GestureDetector(
@@ -366,7 +394,7 @@ class InfoSectionWidget extends StatelessWidget {
             launch("https://github.com/ente-io/frame");
           },
           child:
-              SettingsTextItem(text: "Source Code", icon: Icons.navigate_next),
+              SettingsTextItem(text: "source code", icon: Icons.navigate_next),
         ),
       ]),
     );
@@ -381,7 +409,7 @@ class DebugWidget extends StatelessWidget {
     return Container(
       child: Column(children: [
         Padding(padding: EdgeInsets.all(12)),
-        SettingsSectionTitle("DEBUG"),
+        SettingsSectionTitle("debug"),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -397,7 +425,7 @@ class DebugWidget extends StatelessWidget {
   void _showKeyAttributesDialog(BuildContext context) {
     final keyAttributes = Configuration.instance.getKeyAttributes();
     AlertDialog alert = AlertDialog(
-      title: Text("Key Attributes"),
+      title: Text("key attributes"),
       content: SingleChildScrollView(
         child: Column(children: [
           Text("Key", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -450,7 +478,7 @@ class SettingsTextItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(padding: EdgeInsets.all(4)),
+        Padding(padding: EdgeInsets.all(6)),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -458,7 +486,7 @@ class SettingsTextItem extends StatelessWidget {
             Icon(icon),
           ],
         ),
-        Padding(padding: EdgeInsets.all(4)),
+        Padding(padding: EdgeInsets.all(6)),
       ],
     );
   }
@@ -491,7 +519,7 @@ class _CrispChatPageState extends State<CrispChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Support"),
+        title: Text("support chat"),
       ),
       body: CrispView(
         loadingWidget: loadWidget,
