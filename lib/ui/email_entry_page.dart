@@ -8,9 +8,9 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class EmailEntryPage extends StatefulWidget {
   EmailEntryPage({Key key}) : super(key: key);
@@ -131,7 +131,14 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       ),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          launch("https://ente.io/terms");
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return WebPage(
+                                    "terms", "https://ente.io/terms");
+                              },
+                            ),
+                          );
                         },
                     ),
                     TextSpan(text: " and "),
@@ -143,7 +150,14 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       ),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          launch("https://ente.io/privacy");
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return WebPage(
+                                    "privacy", "https://ente.io/privacy");
+                              },
+                            ),
+                          );
                         },
                     ),
                   ],
