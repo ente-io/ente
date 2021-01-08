@@ -253,6 +253,13 @@ packages:
       relative: true
     source: path
     version: "0.7.0"
+  flutter_inappwebview:
+    dependency: "direct main"
+    description:
+      name: flutter_inappwebview
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.0+4"
   flutter_keyboard_visibility:
     dependency: transitive
     description:
