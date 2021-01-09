@@ -19,7 +19,7 @@ interface encryptionResult {
     file: fileAttribute,
     key: Uint8Array
 }
-interface KeyEncryptionResult {
+interface keyEncryptionResult {
     encryptedData: string,
     key: Uint8Array,
     nonce: string,
@@ -32,14 +32,14 @@ interface uploadURL {
 
 interface formatedFile {
     filedata: Uint8Array,
-    metadata: string,
+    metadata: Object,
     thumbnail: Uint8Array
 }
 
 interface encryptedFile {
     filedata: fileAttribute;
     thumbnail: fileAttribute;
-    metadata: KeyEncryptionResult;
+    metadata: fileAttribute;
     encryptedKey: string;
     keyDecryptionNonce: string;
     key: Uint8Array;
@@ -59,7 +59,7 @@ interface uploadFile extends objectKeys {
     encryptedKey: string;
     keyDecryptionNonce: string;
     metadata: {
-        encryptedData: string,
+        encryptedData: string | Uint8Array,
         decryptionHeader: string
     }
 }
@@ -106,11 +106,11 @@ class UploadService {
         const filedata: Uint8Array = await this.getUint8ArrayView(recievedFile);
         return {
             filedata,
-            metadata: JSON.stringify({
+            metadata: {
                 name: recievedFile.name,
                 size: recievedFile.size,
                 type: recievedFile.type
-            }),
+            },
             thumbnail: await this.generateThumbnail(recievedFile)
         }
     }
@@ -126,9 +126,9 @@ class UploadService {
 
         const { file: encryptedThumbnail }: encryptionResult = await worker.encryptThumbnail(file.thumbnail, fileKey);
 
-        const encryptedMetadata: KeyEncryptionResult = await worker.encryptMetadata(file.metadata, fileKey)
+        const { file: encryptedMetadata }: encryptionResult = await worker.encryptMetadata(file.metadata, fileKey)
 
-        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: KeyEncryptionResult = await worker.encrypt(fileKey, encryptionKey);
+        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encrypt(fileKey, encryptionKey);
 
 
         const result: encryptedFile = {
@@ -160,13 +160,10 @@ class UploadService {
             collectionID: collectionLatestFile.collection.id,
             encryptedKey: encryptedFile.encryptedKey,
             keyDecryptionNonce: encryptedFile.encryptedKey,
-            metadata: {
-                encryptedData: encryptedFile.metadata.encryptedData,
-                decryptionHeader: encryptedFile.metadata.nonce
-
-            },
+            metadata: encryptedFile.metadata,
             ...objectKeys
         }
+        console.log(uploadFile);
 
 
         const response = await HTTPService.post(`${ENDPOINT}/files`, uploadFile, { token });
@@ -206,7 +203,6 @@ class UploadService {
                 });
             });
         }
-        console.log(canvas.toDataURL());
         const thumbnail: Uint8Array = await new Promise((resolve, reject) => {
             canvas.toBlob(async (blob) => {
                 console.log(URL.createObjectURL(blob));
@@ -252,7 +248,7 @@ class UploadService {
         return this.uploadURLFetchInProgress;
     }
 
-    private async putFile(fileUploadURL: uploadURL, file: Uint8Array): Promise<string> {
+    private async putFile(fileUploadURL: uploadURL, file: Uint8Array | string): Promise<string> {
         const fileSize = file.length.toString();
         await HTTPService.post(fileUploadURL.url, file, null, { contentLengthHeader: fileSize })
         return fileUploadURL.objectKey;
