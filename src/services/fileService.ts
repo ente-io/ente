@@ -17,7 +17,7 @@ localForage.config({
 });
 
 export interface fileAttribute {
-    encryptedData: Uint8Array;
+    encryptedData: Uint8Array | string;
     decryptionHeader: string;
     creationTime: number;
     fileType: number;
