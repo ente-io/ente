@@ -250,7 +250,7 @@ class UploadService {
 
     private async putFile(fileUploadURL: uploadURL, file: Uint8Array | string): Promise<string> {
         const fileSize = file.length.toString();
-        await HTTPService.post(fileUploadURL.url, file, null, { contentLengthHeader: fileSize })
+        await HTTPService.put(fileUploadURL.url, file, null, { contentLengthHeader: fileSize })
         return fileUploadURL.objectKey;
     }
 }
