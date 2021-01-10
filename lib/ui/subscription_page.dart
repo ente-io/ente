@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -31,6 +34,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           Logger("SubscriptionPage")
               .info(e.verificationData.serverVerificationData);
           // TODO: Send this to /billing/subscription/verify?data=
+          Bus.instance.fire(UserAuthenticatedEvent());
+          Navigator.pop(context);
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.SUCCES,
+            animType: AnimType.RIGHSLIDE,
+            title: '',
+            desc:
+                'your photos and videos will now be encrypted and backed up in the background',
+            btnOkOnPress: () {},
+            btnOkText: 'ok',
+            headerAnimationLoop: false,
+          )..show();
         }
       }
     });
@@ -285,6 +301,35 @@ class SubscriptionPlanWidget extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class SubsriptionSuccessfulDialog extends StatelessWidget {
+  const SubsriptionSuccessfulDialog({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text("success!",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          )),
+      content: SingleChildScrollView(
+        child: Column(children: [
+          Text("your photos and videos will now be backed up"),
+          Padding(padding: EdgeInsets.all(6)),
+          Text("the first sync might take a while, please bear with us"),
+        ]),
+      ),
+      actions: [
+        FlatButton(
+          child: Text("ok"),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }
