@@ -137,10 +137,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   void _showPasswordConfirmationDialog() {
     AlertDialog alert = AlertDialog(
-      title: Text("Confirmation"),
+      title: Text("confirmation"),
       content: SingleChildScrollView(
         child: Column(children: [
-          Text("The password you are promising to never forget is"),
+          Text("the password you are promising to never forget is"),
           Padding(padding: EdgeInsets.all(8)),
           Text(_passwordController1.text,
               style: TextStyle(
@@ -151,13 +151,13 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       ),
       actions: [
         FlatButton(
-          child: Text("Change"),
+          child: Text("change"),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         FlatButton(
-          child: Text("Confirm"),
+          child: Text("confirm"),
           onPressed: () {
             Navigator.of(context).pop();
             UserService.instance
