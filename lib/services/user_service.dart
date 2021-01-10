@@ -3,11 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/public_keys_db.dart';
-
-import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/models/subscription.dart';
