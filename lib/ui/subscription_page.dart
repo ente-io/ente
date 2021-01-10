@@ -27,13 +27,24 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   @override
   void initState() {
-    _purchaseUpdateSubscription =
-        InAppPurchaseConnection.instance.purchaseUpdatedStream.listen((event) {
+    _purchaseUpdateSubscription = InAppPurchaseConnection
+        .instance.purchaseUpdatedStream
+        .listen((event) async {
       for (final e in event) {
         if (e.status == PurchaseStatus.purchased) {
           Logger("SubscriptionPage")
               .info(e.verificationData.serverVerificationData);
-          // TODO: Send this to /billing/subscription/verify?data=
+          try {
+            await BillingService.instance
+                .loadSubscription(e.verificationData.serverVerificationData);
+          } catch (e) {
+            showErrorDialog(
+                context,
+                "payment failed",
+                "please talk to " +
+                    (Platform.isAndroid ? "PlayStore" : "AppStore") +
+                    " support if you were charged");
+          }
           Bus.instance.fire(UserAuthenticatedEvent());
           Navigator.pop(context);
           AwesomeDialog(
