@@ -128,6 +128,7 @@ export default function Gallery(props) {
       setCollectionLatestFile(collectionLatestFile);
     };
     main();
+    props.setUploadButtonView(true);
   }, []);
 
   if (!data || loading) {

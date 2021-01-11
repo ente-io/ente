@@ -95,6 +95,7 @@ export default function App({ Component, pageProps }) {
   const router = useRouter();
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(false);
+  const [uploadButtonView, setUploadButtonView] = useState(false);
   const [uploadModalView, setUploadModalView] = useState(false);
 
   const closeUploadModal = () => setUploadModalView(false);
@@ -125,6 +126,7 @@ export default function App({ Component, pageProps }) {
   const logout = async () => {
     clearKeys();
     clearData();
+    setUploadButtonView(false);
     localForage.clear();
     const cache = await caches.delete('thumbs');
     router.push('/');
@@ -146,14 +148,12 @@ export default function App({ Component, pageProps }) {
             <Image alt='logo' src='/icon.png' />
             {constants.COMPANY_NAME}
           </FlexContainer>
-          {user && (
-            <>
-              <UploadButton showModal={showUploadModal} />
+          {uploadButtonView &&<UploadButton showModal={showUploadModal} />}
+          {user &&
               <Button variant='link' onClick={logout}>
                 <PowerSettings />
               </Button>
-            </>
-          )}
+          }
         </Navbar>
         {loading ? (
           <Container>
@@ -162,7 +162,7 @@ export default function App({ Component, pageProps }) {
             </Spinner>
           </Container>
         ) : (
-            <Component uploadModalView={uploadModalView} closeUploadModal={closeUploadModal}/>
+            <Component uploadModalView={uploadModalView} closeUploadModal={closeUploadModal} setUploadButtonView={setUploadButtonView}/>
           )}
       </FullScreenDropZone>
     </>
