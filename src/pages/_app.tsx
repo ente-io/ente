@@ -95,10 +95,10 @@ export default function App({ Component, pageProps }) {
   const router = useRouter();
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(false);
-  const [modalView, setModalView] = useState(false);
+  const [uploadModalView, setUploadModalView] = useState(false);
 
-  const closeModal = () => setModalView(false);
-  const showModal = () => setModalView(true);
+  const closeUploadModal = () => setUploadModalView(false);
+  const showUploadModal = () => setUploadModalView(true);
 
   useEffect(() => {
     const user = getData(LS_KEYS.USER);
@@ -134,8 +134,8 @@ export default function App({ Component, pageProps }) {
     <>
       <FullScreenDropZone
         noClick
-        closeModal={closeModal}
-        showModal={showModal}
+        closeModal={closeUploadModal}
+        showModal={showUploadModal}
       >
         <Head>
           <title>ente.io | Privacy friendly alternative to Google Photos</title>
@@ -148,7 +148,7 @@ export default function App({ Component, pageProps }) {
           </FlexContainer>
           {user && (
             <>
-              <UploadButton showModal={showModal} />
+              <UploadButton showModal={showUploadModal} />
               <Button variant='link' onClick={logout}>
                 <PowerSettings />
               </Button>
@@ -162,8 +162,7 @@ export default function App({ Component, pageProps }) {
             </Spinner>
           </Container>
         ) : (
-            <Component modalView={modalView} closeModal={closeModal}
-              showModal={showModal} />
+            <Component uploadModalView={uploadModalView} closeUploadModal={closeUploadModal}/>
           )}
       </FullScreenDropZone>
     </>

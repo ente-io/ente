@@ -1,27 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Modal } from 'react-bootstrap';
+import { getActualKey } from 'utils/common/key';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import CollectionDropZone from './CollectionDropZone';
 import PreviewCard from './PreviewCard';
 
 function CollectionSelector({
-    modalView,
-    closeModal,
+    uploadModalView,
+    closeUploadModal,
     collectionLatestFile,
     showProgress,
+    setData
 }) {
 
     const [token, setToken] = useState(null);
+    const [encryptionKey, setEncryptionKey] = useState(null);
     useEffect(() => {
-        setToken(getData(LS_KEYS.USER).token);
+        (async () => {
+            setToken(getData(LS_KEYS.USER).token);
+            setEncryptionKey(await getActualKey());
+        })();
     });
     const CollectionIcons = collectionLatestFile?.map((item) => (
         <CollectionDropZone key={item.collectionID}
-            closeModal={closeModal}
+            closeModal={closeUploadModal}
             collectionLatestFile={item}
             noDragEventsBubbling
             showProgress={showProgress}
             token={token}
+            encryptionKey={encryptionKey}
+            setData={setData}
         >
             <Card style={{ cursor: 'pointer', border: 'solid', width: "95%", marginBottom: "5px", padding: "auto" }}>
                 <PreviewCard data={item.file} updateUrl={() => { }} onClick={() => { }} />
@@ -33,10 +41,10 @@ function CollectionSelector({
     ));
     return (
         <Modal
-            show={modalView}
+            show={uploadModalView}
             aria-labelledby='contained-modal-title-vcenter'
             centered
-            onHide={closeModal}
+            onHide={closeUploadModal}
         >
             <Modal.Header closeButton>
                 <Modal.Title id='contained-modal-title-vcenter'>
@@ -47,7 +55,7 @@ function CollectionSelector({
                 {CollectionIcons}
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={closeModal}>Close</Button>
+                <Button onClick={closeUploadModal}>Close</Button>
             </Modal.Footer>
         </Modal>
     );
