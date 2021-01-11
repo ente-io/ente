@@ -81,27 +81,40 @@ class UploadService {
 
     private uploadURLs = new Queue<uploadURL>();
     private uploadURLFetchInProgress: Promise<any> = null
-
-    public async uploadFiles(recievedFiles: File[], collectionLatestFile: collectionLatestFile, token) {
+    private increment
+    private currentPercent
+    public async uploadFiles(recievedFiles: File[], collectionLatestFile: collectionLatestFile, token, setPercentComplete) {
         try {
-            recievedFiles.map(async (recievedFile: File) => {
+            this.currentPercent = 0;
+            this.increment = 100 / (3 * recievedFiles.length);
+            const worker = await new CryptoWorker();
+            await Promise.all(recievedFiles.map(async (recievedFile: File) => {
                 const file = await this.formatData(recievedFile);
                 console.log(file);
 
-                const encryptedfile: encryptedFile = await this.encryptFiles(file, collectionLatestFile.collection.key);
+                const encryptedfile: encryptedFile = await this.encryptFiles(worker, file, collectionLatestFile.collection.key);
+                this.increasePercent(setPercentComplete)
 
                 const objectKeys = await this.uploadtoBucket(encryptedfile, token);
+                this.increasePercent(setPercentComplete)
 
                 const uploadedfile = await this.uploadFile(collectionLatestFile, encryptedfile, objectKeys, token);
+                this.increasePercent(setPercentComplete)
+
                 console.log(uploadedfile);
-            });
+            }));
+            setPercentComplete(100);
         }
         catch (e) {
             console.log(e);
         }
     }
 
-    public async formatData(recievedFile: File) {
+    private increasePercent(setPercentComplete) {
+        this.currentPercent += this.increment;
+        setPercentComplete(this.currentPercent);
+    }
+    private async formatData(recievedFile: File) {
         const filedata: Uint8Array = await this.getUint8ArrayView(recievedFile);
         return {
             filedata,
@@ -115,8 +128,8 @@ class UploadService {
             thumbnail: await this.generateThumbnail(recievedFile)
         }
     }
-    private async encryptFiles(file: formatedFile, encryptionKey: Uint8Array): Promise<encryptedFile> {
-        const worker = await new CryptoWorker();
+    private async encryptFiles(worker, file: formatedFile, encryptionKey: Uint8Array): Promise<encryptedFile> {
+
 
         const encryptFileResult = await worker.encryptFile(
             file.filedata,

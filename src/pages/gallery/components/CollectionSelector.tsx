@@ -10,7 +10,8 @@ function CollectionSelector({
     closeUploadModal,
     collectionLatestFile,
     showProgress,
-    setData
+    setData,
+    setPercentComplete,
 }) {
 
     const [token, setToken] = useState(null);
@@ -30,6 +31,7 @@ function CollectionSelector({
             token={token}
             encryptionKey={encryptionKey}
             setData={setData}
+            setPercentComplete={setPercentComplete}
         >
             <Card style={{ cursor: 'pointer', border: 'solid', width: "95%", marginBottom: "5px", padding: "auto" }}>
                 <PreviewCard data={item.file} updateUrl={() => { }} onClick={() => { }} />

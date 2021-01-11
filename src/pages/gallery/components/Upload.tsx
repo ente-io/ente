@@ -4,6 +4,12 @@ import UploadProgress from "./UploadProgress"
 
 export default function Upload({ uploadModalView, closeUploadModal, collectionLatestFile, setData }) {
     const [progressView, setProgressView] = useState(false);
+    const [percentComplete, setPercentComplete] = useState(0);
+
+    const init = () => {
+        setProgressView(false);
+        setPercentComplete(0);
+    }
     return (<>
         <CollectionSelector
             uploadModalView={uploadModalView}
@@ -11,10 +17,12 @@ export default function Upload({ uploadModalView, closeUploadModal, collectionLa
             collectionLatestFile={collectionLatestFile}
             showProgress={() => setProgressView(true)}
             setData={setData}
+            setPercentComplete={setPercentComplete}
         />
         <UploadProgress
+            now={percentComplete}
             show={progressView}
-            onHide={() => setProgressView(false)}
+            onHide={init}
         />
     </>
     )

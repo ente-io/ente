@@ -37,14 +37,15 @@ const CollectionDropZone = ({
     showProgress,
     token,
     encryptionKey,
+    setPercentComplete
 
 }) => {
 
     const upload = async (acceptedFiles) => {
         closeModal();
         showProgress();
-        await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token);
-        setData(fetchData(token, encryptionKey, collectionLatestFile.Collection));
+        await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token, setPercentComplete);
+        setData(await fetchData(token, encryptionKey, [collectionLatestFile.collection]));
     }
     return (
         <Dropzone
