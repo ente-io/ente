@@ -86,20 +86,15 @@ export async function encryptChaCha(data: Uint8Array, key: Uint8Array) {
     }
 }
 
-export async function encryptToB64(data: string, key: string) {
+export async function encryptToB64(data: Uint8Array, key: Uint8Array) {
     await sodium.ready;
-    var bKey: Uint8Array;
-    if (key == null) {
-        bKey = sodium.crypto_secretbox_keygen();
-    } else {
-        bKey = await fromB64(key)
-    }
-    const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, bKey);
+
+    const encrypted = await encrypt(data, key);
+    
     return {
-        encryptedData: await toB64(encryptedData),
-        key: await toB64(bKey),
-        nonce: await toB64(nonce),
+        encryptedData: await toB64(encrypted.encryptedData),
+        key: await toB64(encrypted.key),
+        nonce: await toB64(encrypted.nonce),
     }
 }
 
