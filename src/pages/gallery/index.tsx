@@ -11,6 +11,7 @@ import {
   getFiles,
   getPreview,
   collectionLatestFile,
+  fetchData,
 } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
@@ -22,8 +23,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 import Collections from './components/Collections';
 import SadFace from 'components/SadFace';
-import CollectionSelector from './components/CollectionSelector';
-import UploadProgress from './components/UploadProgress';
+import Upload from './components/Upload';
 
 enum ITEM_TYPE {
   TIME = 'TIME',
@@ -106,7 +106,6 @@ export default function Gallery(props) {
   const fetching: { [k: number]: boolean } = {};
 
 
-  const [progressView, setProgressView] = useState(false);
 
   useEffect(() => {
     const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -118,25 +117,13 @@ export default function Gallery(props) {
       setLoading(true);
       const encryptionKey = await getActualKey();
       const collections = await fetchCollections(token, encryptionKey);
-      const resp = await getFiles(
-        '0',
-        token,
-        '100',
-        encryptionKey,
-        collections
-      );
+      const data= await fetchData(token,encryptionKey,collections);
       setLoading(false);
       setCollections(collections);
-      setData(
-        resp.map((item) => ({
-          ...item,
-          w: window.innerWidth,
-          h: window.innerHeight,
-        }))
-      );
+      setData(data);
       const collectionLatestFile = await getCollectionLatestFile(
         collections,
-        resp
+        data
       );
       setCollectionLatestFile(collectionLatestFile);
     };
@@ -301,16 +288,12 @@ export default function Gallery(props) {
         selected={router.query.collection?.toString()}
         selectCollection={selectCollection}
       />
-      <CollectionSelector
-        modalView={props.modalView}
-        closeModal={props.closeModal}
-        collectionLatestFile={collectionLatestFile}
-        showProgress={() => setProgressView(true)}
-      />
-      <UploadProgress
-        show={progressView}
-        onHide={() => setProgressView(false)}
-      />
+      <Upload
+       uploadModalView={props.uploadModalView}
+       closeUploadModal={props.closeUploadModal}
+       collectionLatestFile={collectionLatestFile}
+       setData={setData}/>
+
       {filteredData.length ? (
         <Container>
           <AutoSizer>

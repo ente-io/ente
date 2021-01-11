@@ -32,7 +32,7 @@ export interface user {
 export interface collection {
     id: string;
     owner: user;
-    key: string;
+    key: Uint8Array;
     name: string;
     type: string;
     creationTime: number;
@@ -114,6 +114,24 @@ export const fetchCollections = async (token: string, key: string) => {
     return getCollections(token, '0', await worker.fromB64(key));
 };
 
+export const fetchData = async (token, encryptionKey,collections) => {
+    const resp = await getFiles(
+        '0',
+        token,
+        '100',
+        encryptionKey,
+        collections
+    );
+
+    return (
+        resp.map((item) => ({
+            ...item,
+            w: window.innerWidth,
+            h: window.innerHeight,
+        }))
+    );
+}
+
 export const getFiles = async (
     sinceTime: string,
     token: string,
@@ -139,7 +157,7 @@ export const getFiles = async (
                 token,
                 limit,
             });
-            const promises: Promise<file>[] = resp.data.diff.map(
+            const promises: Promise<file>[] = resp.data.diff.filter(file => !file.isDeleted).map(
                 async (file: file) => {
                     file.key = await worker.decrypt(
                         await worker.fromB64(file.encryptedKey),
@@ -160,7 +178,6 @@ export const getFiles = async (
         } while (resp.data.diff.length);
         await localForage.setItem(`${collection.id}-time`, time);
     }
-    files = files.filter((item) => !item.isDeleted);
     await localForage.setItem('files', files);
     return files;
 };
