@@ -2,7 +2,7 @@ import React from 'react';
 import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
 import UploadService from 'services/uploadService';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { fetchData } from 'services/fileService';
 
 const getColor = (props) => {
     if (props.isDragAccept) {
@@ -31,16 +31,20 @@ const DropDiv = styled.div`
 const CollectionDropZone = ({
     children,
     closeModal,
+    setData,
     collectionLatestFile,
     noDragEventsBubbling,
     showProgress,
-    token
+    token,
+    encryptionKey,
+
 }) => {
 
     const upload = async (acceptedFiles) => {
         closeModal();
         showProgress();
         await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token);
+        setData(fetchData(token, encryptionKey, collectionLatestFile.Collection));
     }
     return (
         <Dropzone
