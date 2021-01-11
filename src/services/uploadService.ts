@@ -46,7 +46,7 @@ interface encryptedFile {
 }
 
 interface objectKey {
-    objectId: string,
+    objectKey: string,
     decryptionHeader: string
 }
 interface objectKeys {
@@ -89,12 +89,11 @@ class UploadService {
                 console.log(file);
 
                 const encryptedfile: encryptedFile = await this.encryptFiles(file, collectionLatestFile.collection.key);
-                console.log(encryptedfile);
 
                 const objectKeys = await this.uploadtoBucket(encryptedfile, token);
-                console.log(objectKeys);
 
                 const uploadedfile = await this.uploadFile(collectionLatestFile, encryptedfile, objectKeys, token);
+                console.log(uploadedfile);
             });
         }
         catch (e) {
@@ -109,12 +108,14 @@ class UploadService {
             metadata: {
                 name: recievedFile.name,
                 size: recievedFile.size,
-                type: recievedFile.type
+                type: recievedFile.type,
+                creationTime: Number(Date.now()) * 1000,
+                lastModified: (recievedFile.lastModified) * 1000,
             },
             thumbnail: await this.generateThumbnail(recievedFile)
         }
     }
-    private async encryptFiles(file: formatedFile, encryptionKey: string): Promise<encryptedFile> {
+    private async encryptFiles(file: formatedFile, encryptionKey: Uint8Array): Promise<encryptedFile> {
         const worker = await new CryptoWorker();
 
         const encryptFileResult = await worker.encryptFile(
@@ -128,7 +129,7 @@ class UploadService {
 
         const { file: encryptedMetadata }: encryptionResult = await worker.encryptMetadata(file.metadata, fileKey)
 
-        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encrypt(fileKey, encryptionKey);
+        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(fileKey, encryptionKey);
 
 
         const result: encryptedFile = {
@@ -150,8 +151,8 @@ class UploadService {
         const thumbnailObjectKey = await this.putFile(thumbnailUploadURL, file.thumbnail.encryptedData)
 
         return {
-            file: { objectId: fileObjectKey, decryptionHeader: file.filedata.decryptionHeader },
-            thumbnail: { objectId: thumbnailObjectKey, decryptionHeader: file.thumbnail.decryptionHeader }
+            file: { objectKey: fileObjectKey, decryptionHeader: file.filedata.decryptionHeader },
+            thumbnail: { objectKey: thumbnailObjectKey, decryptionHeader: file.thumbnail.decryptionHeader }
         };
     }
 
@@ -159,8 +160,11 @@ class UploadService {
         const uploadFile: uploadFile = {
             collectionID: collectionLatestFile.collection.id,
             encryptedKey: encryptedFile.encryptedKey,
-            keyDecryptionNonce: encryptedFile.encryptedKey,
-            metadata: encryptedFile.metadata,
+            keyDecryptionNonce: encryptedFile.keyDecryptionNonce,
+            metadata: {
+                encryptedData: encryptedFile.metadata.encryptedData,
+                decryptionHeader: encryptedFile.metadata.decryptionHeader
+            },
             ...objectKeys
         }
         console.log(uploadFile);
