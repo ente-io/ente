@@ -93,33 +93,33 @@ class UploadService {
     private stepsCompleted: number
     private totalFilesCount: number
 
-    public async uploadFiles(recievedFiles: File[], collectionLatestFile: collectionLatestFile, token: string, uploadProgressProps) {
+    public async uploadFiles(recievedFiles: File[], collectionLatestFile: collectionLatestFile, token: string, progressBarProps) {
         try {
             const worker = await new CryptoWorker();
-            this.stepsCompleted = 1;
+            this.stepsCompleted = 0;
             this.totalFilesCount = recievedFiles.length;
             this.perStepProgress = 100 / (2 * recievedFiles.length);
 
-            uploadProgressProps.setUploadStage(UPLOAD_STAGES.ENCRYPTION);
+            progressBarProps.setUploadStage(UPLOAD_STAGES.ENCRYPTION);
             const encryptedFiles: encryptedFile[] = await Promise.all(recievedFiles.map(async (recievedFile: File, index) => {
                 const file = await this.formatData(recievedFile);
                 const encryptedFile = await this.encryptFiles(worker, file, collectionLatestFile.collection.key);
 
-                this.changeUploadProgressProps(uploadProgressProps);
+                this.changeUploadProgressProps(progressBarProps);
                 return encryptedFile;
             }));
 
-            uploadProgressProps.setUploadStage(UPLOAD_STAGES.UPLOAD);
+            progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOAD);
             await Promise.all(encryptedFiles.map(async (encryptedFile: encryptedFile, index) => {
 
                 const objectKeys = await this.uploadtoBucket(encryptedFile, token);
                 await this.uploadFile(collectionLatestFile, encryptedFile, objectKeys, token);
-                this.changeUploadProgressProps(uploadProgressProps);
+                this.changeUploadProgressProps(progressBarProps);
 
             }));
 
-            uploadProgressProps.setUploadStage(UPLOAD_STAGES.FINISH);
-            uploadProgressProps.setPercentComplete(0);
+            progressBarProps.setUploadStage(UPLOAD_STAGES.FINISH);
+            progressBarProps.setPercentComplete(100);
 
         }
         catch (e) {
@@ -130,7 +130,7 @@ class UploadService {
     private changeUploadProgressProps({ setPercentComplete, setFileCounter }) {
         this.stepsCompleted++;
         const fileCompleted = this.stepsCompleted % this.totalFilesCount;
-        setFileCounter({ current: fileCompleted, total: this.totalFilesCount });
+        setFileCounter({ current: fileCompleted + 1, total: this.totalFilesCount });
         setPercentComplete(this.perStepProgress * this.stepsCompleted);
     }
     private async formatData(recievedFile: File) {
@@ -210,7 +210,6 @@ class UploadService {
             },
             ...objectKeys
         }
-        console.log(uploadFile);
 
 
         const response = await HTTPService.post(`${ENDPOINT}/files`, uploadFile, { token });
@@ -222,19 +221,19 @@ class UploadService {
         let canvas = document.createElement("canvas");
         let canvas_CTX = canvas.getContext("2d");
         let type = file.type.split('/')[0];
-        console.log(type);
         if (type === "image") {
             let image = new Image();
             image.setAttribute("src", URL.createObjectURL(file));
             await new Promise((resolve, reject) => {
                 image.onload = () => {
-                    console.log(image);
                     canvas.width = image.width;
                     canvas.height = image.height;
+                    canvas_CTX.drawImage(image, 0, 0, image.width, image.height);
+                    image = undefined;
                     resolve(null);
                 }
             });
-            canvas_CTX.drawImage(image, 0, 0, image.width, image.height);
+
         }
         else {
             let video = document.createElement('video');
@@ -242,17 +241,16 @@ class UploadService {
 
             await new Promise((resolve, reject) => {
                 video.addEventListener('loadedmetadata', function () {
-                    console.log(video);
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
                     canvas_CTX.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                    video = undefined;
                     resolve(null);
                 });
             });
         }
         const thumbnail: Uint8Array = await new Promise((resolve, reject) => {
             canvas.toBlob(async (blob) => {
-                console.log(URL.createObjectURL(blob));
                 resolve(await this.getUint8ArrayView(blob));
             })
         });
