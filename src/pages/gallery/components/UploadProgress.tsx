@@ -1,4 +1,3 @@
-import Container from 'components/Container';
 import React from 'react';
 import { Alert, Button, Modal, ProgressBar } from 'react-bootstrap';
 
@@ -9,8 +8,9 @@ export default function UploadProgress(props) {
             size='lg'
             aria-labelledby='contained-modal-title-vcenter'
             centered
+            backdrop="static"
         >
-            <Modal.Header closeButton>
+            <Modal.Header>
                 <Modal.Title id='contained-modal-title-vcenter'>
                     Uploading Files
         </Modal.Title>
