@@ -101,18 +101,22 @@ class UploadService {
             this.stepsCompleted = 0;
             this.totalFilesCount = recievedFiles.length;
             this.perStepProgress = 100 / (2 * recievedFiles.length);
-
+            this.metadataMap = new Map<string, object>();
             progressBarProps.setUploadStage(UPLOAD_STAGES.ENCRYPTION);
-            const encryptedFiles: encryptedFile[] = await Promise.all(recievedFiles.map(async (recievedFile: File, index) => {
+            const encryptedFiles: encryptedFile[] = await Promise.all(recievedFiles.map(async (recievedFile: File) => {
+
+                if (recievedFile.type === "application/json") {
+                    this.updateMetadata(recievedFile)
+                    return;
+                }
                 const file = await this.formatData(recievedFile);
                 const encryptedFile = await this.encryptFiles(worker, file, collectionLatestFile.collection.key);
-
                 this.changeUploadProgressProps(progressBarProps);
                 return encryptedFile;
             }));
 
             progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOAD);
-            await Promise.all(encryptedFiles.map(async (encryptedFile: encryptedFile, index) => {
+            await Promise.all(encryptedFiles.map(async (encryptedFile: encryptedFile) => {
 
                 const objectKeys = await this.uploadtoBucket(encryptedFile, token);
                 await this.uploadFile(collectionLatestFile, encryptedFile, objectKeys, token);
@@ -135,6 +139,7 @@ class UploadService {
         setFileCounter({ current: fileCompleted + 1, total: this.totalFilesCount });
         setPercentComplete(this.perStepProgress * this.stepsCompleted);
     }
+
     private async formatData(recievedFile: File) {
         const filedata: Uint8Array = await this.getUint8ArrayView(recievedFile);
         let fileType;
@@ -222,6 +227,25 @@ class UploadService {
         return response.data;
     }
 
+    private async updateMetadata(recievedFile: File) {
+
+        const metadataJSON: object = await new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => {
+                var result = typeof reader.result !== "string" ? new TextDecoder().decode(reader.result) : reader.result
+                resolve(JSON.parse(result));
+            }
+            reader.readAsText(recievedFile)
+        });
+        const metaDataObject = this.metadataMap[metadataJSON['title']];
+
+        metaDataObject['creationTime'] = recievedFile['creationTime']['timestamp'] * 1000;
+        metaDataObject['modificationTime'] = recievedFile['modificationTime']['timestamp'] * 1000;
+        metaDataObject['latitude'] = recievedFile['geoData']['latitude'];
+        metaDataObject['longitude'] = recievedFile['geoData']['longitude'];
+
+    }
+
     private async generateThumbnail(file: File): Promise<Uint8Array> {
         let canvas = document.createElement("canvas");
         let canvas_CTX = canvas.getContext("2d");
@@ -261,6 +285,7 @@ class UploadService {
         });
         return thumbnail;
     }
+
     private async getUint8ArrayView(file): Promise<Uint8Array> {
         return await new Promise((resolve, reject) => {
             const reader = new FileReader()
