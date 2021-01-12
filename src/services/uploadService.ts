@@ -99,17 +99,31 @@ class UploadService {
         try {
             const worker = await new CryptoWorker();
             this.stepsCompleted = 0;
-            this.totalFilesCount = recievedFiles.length;
-            this.perStepProgress = 100 / (2 * recievedFiles.length);
             this.metadataMap = new Map<string, object>();
-            progressBarProps.setUploadStage(UPLOAD_STAGES.ENCRYPTION);
-            const encryptedFiles: encryptedFile[] = await Promise.all(recievedFiles.map(async (recievedFile: File) => {
 
-                if (recievedFile.type === "application/json") {
-                    this.updateMetadata(recievedFile)
-                    return;
-                }
+            let metadataFiles: File[] = [];
+            let actualFiles: File[] = [];
+            recievedFiles.forEach(file => {
+                if (file.type === "application/json")
+                    metadataFiles.push(file);
+                else
+                    actualFiles.push(file);
+            });
+            this.totalFilesCount = actualFiles.length;
+            this.perStepProgress = 100 / (2 * actualFiles.length);
+
+            let formatedFiles: formatedFile[] = await Promise.all(actualFiles.map(async (recievedFile: File) => {
                 const file = await this.formatData(recievedFile);
+                return file;
+            }));
+            await Promise.all(metadataFiles.map(async (recievedFile: File) => {
+                this.updateMetadata(recievedFile)
+                return;
+
+            }));
+
+            progressBarProps.setUploadStage(UPLOAD_STAGES.ENCRYPTION);
+            const encryptedFiles: encryptedFile[] = await Promise.all(formatedFiles.map(async (file: formatedFile) => {
                 const encryptedFile = await this.encryptFiles(worker, file, collectionLatestFile.collection.key);
                 this.changeUploadProgressProps(progressBarProps);
                 return encryptedFile;
@@ -154,17 +168,17 @@ class UploadService {
         }
 
         const location = await this.getLocation(recievedFile);
-        this.metadataMap[recievedFile.name] = {
+        this.metadataMap.set(recievedFile.name, {
             title: recievedFile.name,
             creationTime: Number(Date.now()) * 1000,
             modificationTime: (recievedFile.lastModified) * 1000,
             latitude: location.lat,
             longitude: location.lon,
             fileType,
-        }
+        });
         return {
             filedata,
-            metadata: this.metadataMap[recievedFile.name],
+            metadata: this.metadataMap.get(recievedFile.name),
             thumbnail: await this.generateThumbnail(recievedFile)
         }
     }
@@ -237,12 +251,13 @@ class UploadService {
             }
             reader.readAsText(recievedFile)
         });
-        const metaDataObject = this.metadataMap[metadataJSON['title']];
+        if (!this.metadataMap.has(metadataJSON['title']))
+            return;
 
-        metaDataObject['creationTime'] = recievedFile['creationTime']['timestamp'] * 1000;
-        metaDataObject['modificationTime'] = recievedFile['modificationTime']['timestamp'] * 1000;
-        metaDataObject['latitude'] = recievedFile['geoData']['latitude'];
-        metaDataObject['longitude'] = recievedFile['geoData']['longitude'];
+        const metaDataObject = this.metadataMap.get(metadataJSON['title']); metaDataObject['creationTime'] = metadataJSON['creationTime']['timestamp'] * 1000000;
+        metaDataObject['modificationTime'] = metadataJSON['modificationTime']['timestamp'] * 1000000;
+        metaDataObject['latitude'] = metadataJSON['geoData']['latitude'];
+        metaDataObject['longitude'] = metadataJSON['geoData']['longitude'];
 
     }
 
@@ -337,7 +352,7 @@ class UploadService {
             }
             reader.readAsArrayBuffer(recievedFile)
         });
-        if (!exifData)
+        if (!exifData || !exifData.GPSLatitude)
             return { lat: 0, lon: 0 };
         var latDegree = exifData.GPSLatitude[0].numerator;
         var latMinute = exifData.GPSLatitude[1].numerator;
