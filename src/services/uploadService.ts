@@ -2,7 +2,8 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
 import localForage from 'localforage';
-import { fileAttribute, collectionLatestFile, collection, file } from './fileService';
+import EXIF from "exif-js";
+import { fileAttribute, collectionLatestFile, } from './fileService';
 import { FILE_TYPE } from 'pages/gallery';
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
@@ -92,6 +93,7 @@ class UploadService {
     private perStepProgress: number
     private stepsCompleted: number
     private totalFilesCount: number
+    private metadataMap: Map<string, Object>;
 
     public async uploadFiles(recievedFiles: File[], collectionLatestFile: collectionLatestFile, token: string, progressBarProps) {
         try {
@@ -145,16 +147,19 @@ class UploadService {
             default:
                 fileType = FILE_TYPE.OTHERS;
         }
+
+        const location = await this.getLocation(recievedFile);
+        this.metadataMap[recievedFile.name] = {
+            title: recievedFile.name,
+            creationTime: Number(Date.now()) * 1000,
+            modificationTime: (recievedFile.lastModified) * 1000,
+            latitude: location.lat,
+            longitude: location.lon,
+            fileType,
+        }
         return {
             filedata,
-            metadata: {
-                title: recievedFile.name,
-                creationTime: Number(Date.now()) * 1000,
-                modificationTime: (recievedFile.lastModified) * 1000,
-                latitude: null,
-                longitude: null,
-                fileType,
-            },
+            metadata: this.metadataMap[recievedFile.name],
             thumbnail: await this.generateThumbnail(recievedFile)
         }
     }
@@ -297,6 +302,45 @@ class UploadService {
         const fileSize = file.length.toString();
         await HTTPService.put(fileUploadURL.url, file, null, { contentLengthHeader: fileSize })
         return fileUploadURL.objectKey;
+    }
+
+    private async getLocation(recievedFile) {
+        const exifData: any = await new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => {
+                resolve(EXIF.readFromBinaryFile(reader.result));
+            }
+            reader.readAsArrayBuffer(recievedFile)
+        });
+        if (!exifData)
+            return { lat: 0, lon: 0 };
+        var latDegree = exifData.GPSLatitude[0].numerator;
+        var latMinute = exifData.GPSLatitude[1].numerator;
+        var latSecond = exifData.GPSLatitude[2].numerator;
+        var latDirection = exifData.GPSLatitudeRef;
+
+        var latFinal = this.convertDMSToDD(latDegree, latMinute, latSecond, latDirection);
+
+        // Calculate longitude decimal
+        var lonDegree = exifData.GPSLongitude[0].numerator;
+        var lonMinute = exifData.GPSLongitude[1].numerator;
+        var lonSecond = exifData.GPSLongitude[2].numerator;
+        var lonDirection = exifData.GPSLongitudeRef;
+
+        var lonFinal = this.convertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
+
+        return { lat: latFinal, lon: lonFinal };
+    }
+
+    private convertDMSToDD(degrees, minutes, seconds, direction) {
+
+        var dd = degrees + (minutes / 60) + (seconds / 3600);
+
+        if (direction == "S" || direction == "W") {
+            dd = dd * -1;
+        }
+
+        return dd;
     }
 }
 
