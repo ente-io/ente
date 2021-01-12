@@ -3,7 +3,7 @@ import { UPLOAD_STAGES } from "services/uploadService";
 import CollectionSelector from "./CollectionSelector"
 import UploadProgress from "./UploadProgress"
 
-export default function Upload({ uploadModalView, closeUploadModal, collectionLatestFile, setData }) {
+export default function Upload(props) {
     const [progressView, setProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(UPLOAD_STAGES.START);
     const [fileCounter, setFileCounter] = useState({ current: 0, total: 0 });
@@ -16,11 +16,8 @@ export default function Upload({ uploadModalView, closeUploadModal, collectionLa
     }
     return (<>
         <CollectionSelector
-            uploadModalView={uploadModalView}
-            closeUploadModal={closeUploadModal}
-            collectionLatestFile={collectionLatestFile}
-            setProgressView={ setProgressView}
-            setData={setData}
+            {...props}
+            setProgressView={setProgressView}
             progressBarProps={{ setPercentComplete, setFileCounter, setUploadStage }}
         />
         <UploadProgress
