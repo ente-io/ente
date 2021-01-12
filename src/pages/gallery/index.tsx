@@ -29,6 +29,11 @@ enum ITEM_TYPE {
   TIME = 'TIME',
   TILE = 'TILE',
 }
+export enum FILE_TYPE {
+    IMAGE,
+    VIDEO,
+    OTHERS
+}
 
 interface TimeStampListItem {
   itemType: ITEM_TYPE;
@@ -146,7 +151,7 @@ export default function Gallery(props) {
       w: window.innerWidth,
       h: window.innerHeight,
     };
-    if (data[index].metadata.fileType === 1 && !data[index].html) {
+    if (data[index].metadata.fileType === FILE_TYPE.VIDEO && !data[index].html) {
       data[index].html = `
                 <div class="video-loading">
                     <img src="${url}" />
@@ -157,7 +162,7 @@ export default function Gallery(props) {
             `;
       delete data[index].src;
     }
-    if (data[index].metadata.fileType === 0 && !data[index].src) {
+    if (data[index].metadata.fileType === FILE_TYPE.IMAGE && !data[index].src) {
       data[index].src = url;
     }
     setData(data);
@@ -170,7 +175,7 @@ export default function Gallery(props) {
       w: window.innerWidth,
       h: window.innerHeight,
     };
-    if (data[index].metadata.fileType === 1) {
+    if (data[index].metadata.fileType === FILE_TYPE.VIDEO) {
       data[index].html = `
                 <video controls>
                     <source src="${url}" />
@@ -227,7 +232,7 @@ export default function Gallery(props) {
       fetching[item.dataIndex] = true;
       const url = await getFile(token, item);
       updateSrcUrl(item.dataIndex, url);
-      if (item.metadata.fileType === 1) {
+      if (item.metadata.fileType === FILE_TYPE.VIDEO) {
         item.html = `
                     <video width="320" height="240" controls>
                         <source src="${url}" />

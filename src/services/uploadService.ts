@@ -3,6 +3,7 @@ import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
 import localForage from 'localforage';
 import { fileAttribute, collectionLatestFile, collection, file } from './fileService';
+import { FILE_TYPE } from 'pages/gallery';
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
@@ -134,14 +135,25 @@ class UploadService {
     }
     private async formatData(recievedFile: File) {
         const filedata: Uint8Array = await this.getUint8ArrayView(recievedFile);
+        let fileType;
+        switch (recievedFile.type.split('/')[0]) {
+            case "image":
+                fileType = FILE_TYPE.IMAGE;
+                break;
+            case "video":
+                fileType = FILE_TYPE.VIDEO;
+            default:
+                fileType = FILE_TYPE.OTHERS;
+        }
         return {
             filedata,
             metadata: {
-                name: recievedFile.name,
-                size: recievedFile.size,
-                type: recievedFile.type,
+                title: recievedFile.name,
                 creationTime: Number(Date.now()) * 1000,
-                lastModified: (recievedFile.lastModified) * 1000,
+                modificationTime: (recievedFile.lastModified) * 1000,
+                latitude: null,
+                longitude: null,
+                fileType,
             },
             thumbnail: await this.generateThumbnail(recievedFile)
         }
