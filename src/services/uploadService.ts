@@ -77,42 +77,60 @@ class Queue<T> {
     }
 }
 
+export enum UPLOAD_STAGES {
+    START = "Preparing to upload",
+    ENCRYPTION = "Encryting your files",
+    UPLOAD = "Uploading your Files",
+    FINISH = "Files Uploaded Successfully !!!"
+}
+
 class UploadService {
 
     private uploadURLs = new Queue<uploadURL>();
     private uploadURLFetchInProgress: Promise<any> = null
-    private increment
-    private currentPercent
-    public async uploadFiles(recievedFiles: File[], collectionLatestFile: collectionLatestFile, token, setPercentComplete) {
+    private perStepProgress: number
+    private stepsCompleted: number
+    private totalFilesCount: number
+
+    public async uploadFiles(recievedFiles: File[], collectionLatestFile: collectionLatestFile, token: string, uploadProgressProps) {
         try {
-            this.currentPercent = 0;
-            this.increment = 100 / (3 * recievedFiles.length);
             const worker = await new CryptoWorker();
-            await Promise.all(recievedFiles.map(async (recievedFile: File) => {
+            this.stepsCompleted = 1;
+            this.totalFilesCount = recievedFiles.length;
+            this.perStepProgress = 100 / (2 * recievedFiles.length);
+
+            uploadProgressProps.setUploadStage(UPLOAD_STAGES.ENCRYPTION);
+            const encryptedFiles: encryptedFile[] = await Promise.all(recievedFiles.map(async (recievedFile: File, index) => {
                 const file = await this.formatData(recievedFile);
-                console.log(file);
+                const encryptedFile = await this.encryptFiles(worker, file, collectionLatestFile.collection.key);
 
-                const encryptedfile: encryptedFile = await this.encryptFiles(worker, file, collectionLatestFile.collection.key);
-                this.increasePercent(setPercentComplete)
-
-                const objectKeys = await this.uploadtoBucket(encryptedfile, token);
-                this.increasePercent(setPercentComplete)
-
-                const uploadedfile = await this.uploadFile(collectionLatestFile, encryptedfile, objectKeys, token);
-                this.increasePercent(setPercentComplete)
-
-                console.log(uploadedfile);
+                this.changeUploadProgressProps(uploadProgressProps);
+                return encryptedFile;
             }));
-            setPercentComplete(100);
+
+            uploadProgressProps.setUploadStage(UPLOAD_STAGES.UPLOAD);
+            await Promise.all(encryptedFiles.map(async (encryptedFile: encryptedFile, index) => {
+
+                const objectKeys = await this.uploadtoBucket(encryptedFile, token);
+                await this.uploadFile(collectionLatestFile, encryptedFile, objectKeys, token);
+                this.changeUploadProgressProps(uploadProgressProps);
+
+            }));
+
+            uploadProgressProps.setUploadStage(UPLOAD_STAGES.FINISH);
+            uploadProgressProps.setPercentComplete(0);
+
         }
         catch (e) {
             console.log(e);
         }
     }
 
-    private increasePercent(setPercentComplete) {
-        this.currentPercent += this.increment;
-        setPercentComplete(this.currentPercent);
+    private changeUploadProgressProps({ setPercentComplete, setFileCounter }) {
+        this.stepsCompleted++;
+        const fileCompleted = this.stepsCompleted % this.totalFilesCount;
+        setFileCounter({ current: fileCompleted, total: this.totalFilesCount });
+        setPercentComplete(this.perStepProgress * this.stepsCompleted);
     }
     private async formatData(recievedFile: File) {
         const filedata: Uint8Array = await this.getUint8ArrayView(recievedFile);

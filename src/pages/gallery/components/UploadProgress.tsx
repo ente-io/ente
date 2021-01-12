@@ -19,12 +19,12 @@ export default function UploadProgress(props) {
                 {props.now == 100 ? (
                     <Alert variant='success'>Upload Completed</Alert>
                 ) : (
-                        <ProgressBar animated now={props.now} />
+                        <>
+                            <Alert variant='info'>{props.uploadStage} {props.fileCounter.current} of {props.fileCounter.total}</Alert>
+                            <ProgressBar animated now={props.now} />
+                        </>
                     )}
             </Modal.Body>
-            <Modal.Footer>
-                <Button onClick={props.onHide}>Minimize</Button>
-            </Modal.Footer>
         </Modal>
     );
 }

@@ -9,9 +9,9 @@ function CollectionSelector({
     uploadModalView,
     closeUploadModal,
     collectionLatestFile,
-    showProgress,
+    setProgressView,
     setData,
-    setPercentComplete,
+    progressBarProps,
 }) {
 
     const [token, setToken] = useState(null);
@@ -27,11 +27,11 @@ function CollectionSelector({
             closeModal={closeUploadModal}
             collectionLatestFile={item}
             noDragEventsBubbling
-            showProgress={showProgress}
+            setProgressView={setProgressView}
             token={token}
             encryptionKey={encryptionKey}
             setData={setData}
-            setPercentComplete={setPercentComplete}
+            progressBarProps={progressBarProps}
         >
             <Card style={{ cursor: 'pointer', border: 'solid', width: "95%", marginBottom: "5px", padding: "auto" }}>
                 <PreviewCard data={item.file} updateUrl={() => { }} onClick={() => { }} />
