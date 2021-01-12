@@ -12,6 +12,7 @@
     "axios": "^0.20.0",
     "bootstrap": "^4.5.2",
     "comlink": "^4.3.0",
+    "exif-js": "^2.3.0",
     "formik": "^2.1.5",
     "http-proxy-middleware": "^1.0.5",
     "libsodium-wrappers": "^0.7.8",
