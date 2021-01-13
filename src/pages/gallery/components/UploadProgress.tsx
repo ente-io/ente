@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Button, Modal, ProgressBar } from 'react-bootstrap';
+import { Alert, Modal, ProgressBar } from 'react-bootstrap';
 
 export default function UploadProgress({ fileCounter, uploadStage, now, ...props }) {
     return (
@@ -16,11 +16,11 @@ export default function UploadProgress({ fileCounter, uploadStage, now, ...props
         </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {props.now == 100 ? (
+                {now == 100 ? (
                     <Alert variant='success'>Upload Completed</Alert>
                 ) : (
                         <>
-                            <Alert variant='info'>{uploadStage} {fileCounter.current} of {fileCounter.total}</Alert>
+                            <Alert variant='info'>{uploadStage} {fileCounter?.current} of {fileCounter?.total}</Alert>
                             <ProgressBar animated now={now} />
                         </>
                     )}
