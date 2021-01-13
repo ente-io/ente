@@ -241,7 +241,7 @@ class _DetailPageState extends State<DetailPage> {
     final isLocalFile = file.localID != null;
     if (isLocalFile) {
       asset = await file.getAsset();
-      fileSize = await (await asset.file).length();
+      fileSize = await (await asset.originFile).length();
     }
     return showDialog<void>(
       context: context,
@@ -295,9 +295,6 @@ class _DetailPageState extends State<DetailPage> {
           }
         }
         if (file.uploadedFileID != null) {
-          items.add(
-            Padding(padding: EdgeInsets.all(4)),
-          );
           items.add(Row(
             children: [
               Icon(Icons.cloud_upload_outlined),
