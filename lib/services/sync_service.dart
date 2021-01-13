@@ -86,6 +86,10 @@ class SyncService {
         _logger.warning("Not uploading over mobile data");
         Bus.instance.fire(
             SyncStatusUpdate(SyncStatus.paused, reason: "Waiting for WiFi..."));
+      } on SyncStopRequestedError {
+        _syncStopRequested = false;
+        Bus.instance
+            .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
       } catch (e, s) {
         _logger.severe(e, s);
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
@@ -240,12 +244,6 @@ class SyncService {
 
     final futures = List<Future>();
     for (final uploadedFileID in updatedFileIDs) {
-      if (_syncStopRequested) {
-        _syncStopRequested = false;
-        Bus.instance
-            .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
-        return false;
-      }
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
       final future = _uploader.upload(file, file.collectionID).then((value) {
         uploadCounter++;
@@ -258,12 +256,6 @@ class SyncService {
     }
 
     for (final file in filesToBeUploaded) {
-      if (_syncStopRequested) {
-        _syncStopRequested = false;
-        Bus.instance
-            .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
-        return false;
-      }
       final collectionID = (await CollectionsService.instance
               .getOrCreateForPath(file.deviceFolder))
           .id;
@@ -282,6 +274,8 @@ class SyncService {
       // Do nothing
     } on WiFiUnavailableError {
       throw WiFiUnavailableError();
+    } on SyncStopRequestedError {
+      throw SyncStopRequestedError();
     } catch (e, s) {
       _isSyncInProgress = false;
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));

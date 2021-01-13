@@ -15,6 +15,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 
@@ -106,6 +107,16 @@ class FileUploader {
   }
 
   void _pollQueue() {
+    if (SyncService.instance.shouldStopSync()) {
+      _queue.entries
+          .where((entry) => entry.value.status == UploadStatus.not_started)
+          .forEach((pendingUpload) {
+        _queue
+            .remove(pendingUpload.key)
+            .completer
+            .completeError(SyncStopRequestedError());
+      });
+    }
     if (_queue.length > 0 && _currentlyUploading < _maximumConcurrentUploads) {
       final firstPendingEntry = _queue.entries
           .firstWhere((entry) => entry.value.status == UploadStatus.not_started,
@@ -431,3 +442,5 @@ enum UploadStatus {
 class InvalidFileError extends Error {}
 
 class WiFiUnavailableError extends Error {}
+
+class SyncStopRequestedError extends Error {}
