@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import UploadService from 'services/uploadService';
 import { fetchData } from 'services/fileService';
 
-const getColor = (props) => {
+export const getColor = (props) => {
     if (props.isDragAccept) {
         return '#00e676';
     }
@@ -16,9 +16,9 @@ const getColor = (props) => {
     }
 };
 
-const enableBorder = (props) => (props.isDragActive ? 'dashed' : 'none');
+export const enableBorder = (props) => (props.isDragActive ? 'dashed' : 'none');
 
-const DropDiv = styled.div`
+export const DropDiv = styled.div`
   width:33%;
   border-width: 2px;
   border-radius: 2px;
@@ -33,10 +33,8 @@ const CollectionDropZone = ({
     closeModal,
     setData,
     collectionLatestFile,
-    noDragEventsBubbling,
     setProgressView,
     token,
-    encryptionKey,
     progressBarProps
 
 }) => {
@@ -47,14 +45,14 @@ const CollectionDropZone = ({
         setProgressView(true);
 
         await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token, progressBarProps);
-        setData(await fetchData(token, encryptionKey, [collectionLatestFile.collection]));
+        setData(await fetchData(token, [collectionLatestFile.collection]));
         setProgressView(false);
     }
     return (
         <Dropzone
             onDropAccepted={upload}
             onDropRejected={closeModal}
-            noDragEventsBubbling={noDragEventsBubbling}
+            noDragEventsBubbling
             accept="image/*, video/*, application/json "
         >
             {({
