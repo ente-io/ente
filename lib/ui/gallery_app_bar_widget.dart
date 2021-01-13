@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -92,7 +93,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     return AppBar(
       leading: IconButton(
-        icon: Icon(Icons.close),
+        icon: Icon(Platform.isAndroid ? Icons.clear : CupertinoIcons.clear),
         onPressed: () {
           _clearSelectedFiles();
         },
@@ -162,13 +163,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
     actions.add(IconButton(
-      icon: Icon(Icons.add),
+      icon: Icon(Platform.isAndroid ? Icons.add_outlined : CupertinoIcons.add),
       onPressed: () {
         _createAlbum();
       },
     ));
     actions.add(IconButton(
-      icon: Icon(Icons.share),
+      icon: Icon(
+          Platform.isAndroid ? Icons.share_outlined : CupertinoIcons.share),
       onPressed: () {
         _shareSelected(context);
       },
@@ -176,7 +178,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (widget.type == GalleryAppBarType.homepage ||
         widget.type == GalleryAppBarType.local_folder) {
       actions.add(IconButton(
-        icon: Icon(Icons.delete),
+        icon: Icon(
+            Platform.isAndroid ? Icons.delete_outline : CupertinoIcons.delete),
         onPressed: () {
           _showDeleteSheet(context);
         },
@@ -189,7 +192,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               value: 1,
               child: Row(
                 children: [
-                  Icon(Icons.remove_circle),
+                  Icon(Icons.remove_circle_outline_rounded),
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),
@@ -201,7 +204,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               value: 2,
               child: Row(
                 children: [
-                  Icon(Icons.delete),
+                  Icon(Platform.isAndroid
+                      ? Icons.delete_outline
+                      : CupertinoIcons.delete),
                   Padding(
                     padding: EdgeInsets.all(8),
                   ),

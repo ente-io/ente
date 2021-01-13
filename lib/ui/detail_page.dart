@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
@@ -124,7 +126,9 @@ class _DetailPageState extends State<DetailPage> {
             value: 1,
             child: Row(
               children: [
-                Icon(Icons.share),
+                Icon(Platform.isAndroid
+                    ? Icons.share_outlined
+                    : CupertinoIcons.share),
                 Padding(
                   padding: EdgeInsets.all(8),
                 ),
@@ -136,7 +140,9 @@ class _DetailPageState extends State<DetailPage> {
             value: 2,
             child: Row(
               children: [
-                Icon(Icons.info),
+                Icon(Platform.isAndroid
+                    ? Icons.info_outline
+                    : CupertinoIcons.info),
                 Padding(
                   padding: EdgeInsets.all(8),
                 ),
@@ -148,7 +154,9 @@ class _DetailPageState extends State<DetailPage> {
             value: 3,
             child: Row(
               children: [
-                Icon(Icons.delete),
+                Icon(Platform.isAndroid
+                    ? Icons.delete_outline
+                    : CupertinoIcons.delete),
                 Padding(
                   padding: EdgeInsets.all(8),
                 ),
