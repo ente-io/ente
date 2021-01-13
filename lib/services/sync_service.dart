@@ -13,6 +13,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/file_downloader.dart';
@@ -49,7 +50,10 @@ class SyncService {
 
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       _logger.info("Connectivity change detected " + result.toString());
-      sync(isAppInBackground: true);
+      if (Configuration.instance.hasConfiguredAccount() &&
+          BillingService.instance.hasActiveSubscription()) {
+        sync(isAppInBackground: true);
+      }
     });
 
     Bus.instance.on<SyncStatusUpdate>().listen((event) {

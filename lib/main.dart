@@ -54,10 +54,10 @@ Future _init() async {
   );
   InAppPurchaseConnection.enablePendingPurchases();
   await Configuration.instance.init();
+  await BillingService.instance.init();
   await CollectionsService.instance.init();
   await SyncService.instance.init();
   await MemoriesService.instance.init();
-  await BillingService.instance.init();
   _isInitialized = true;
 }
 
