@@ -132,7 +132,7 @@ Future<io.File> getNativeFile(File file) async {
   if (file.localID == null) {
     return getFileFromServer(file);
   } else {
-    return file.getAsset().then((asset) => asset.file);
+    return file.getAsset().then((asset) => asset.originFile);
   }
 }
 

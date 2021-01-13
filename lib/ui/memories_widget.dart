@@ -233,7 +233,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           IconButton(
             icon: Icon(Icons.share),
             onPressed: () {
-              share(context, file);
+              share(context, [file]);
             },
           ),
         ],

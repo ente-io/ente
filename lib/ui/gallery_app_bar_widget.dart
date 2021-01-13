@@ -224,7 +224,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _shareSelected(BuildContext context) {
-    shareMultiple(context, widget.selectedFiles.files.toList());
+    share(context, widget.selectedFiles.files.toList());
   }
 
   void _showRemoveFromCollectionSheet(BuildContext context) {

@@ -183,15 +183,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.0.4"
-  esys_flutter_share:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "53e5080ec3c2c23d62e5791e5b75bed889295726"
-      url: "https://github.com/aeyrium/esys-flutter-share"
-    source: git
-    version: "1.0.2"
   event_bus:
     dependency: "direct main"
     description:
