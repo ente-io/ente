@@ -49,7 +49,7 @@ class SyncService {
 
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       _logger.info("Connectivity change detected " + result.toString());
-      sync();
+      sync(isAppInBackground: true);
     });
 
     Bus.instance.on<SyncStatusUpdate>().listen((event) {
@@ -68,7 +68,7 @@ class SyncService {
     }
   }
 
-  Future<void> sync() async {
+  Future<void> sync({bool isAppInBackground = false}) async {
     _syncStopRequested = false;
     if (_isSyncInProgress) {
       _logger.warning("Sync already in progress, skipping.");
@@ -78,7 +78,7 @@ class SyncService {
     _existingSync = Future<void>(() async {
       _logger.info("Syncing...");
       try {
-        await _doSync();
+        await _doSync(isAppInBackground: isAppInBackground);
         if (_lastSyncStatusEvent != null) {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
         }
@@ -121,15 +121,19 @@ class SyncService {
     return _lastSyncStatusEvent;
   }
 
-  Future<void> _doSync() async {
+  Future<void> _doSync({bool isAppInBackground = false}) async {
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
-    final result = await PhotoManager.requestPermission();
-    if (!result) {
-      _logger.severe("Did not get permission");
-      await _prefs.setInt(_dbUpdationTimeKey, syncStartTime);
-      await FileRepository.instance.reloadFiles();
-      return await syncWithRemote();
+    if (isAppInBackground) {
+      await PhotoManager.setIgnorePermissionCheck(true);
+    } else {
+      final result = await PhotoManager.requestPermission();
+      if (!result) {
+        _logger.severe("Did not get permission");
+        await _prefs.setInt(_dbUpdationTimeKey, syncStartTime);
+        await FileRepository.instance.reloadFiles();
+        return await syncWithRemote();
+      }
     }
     final lastDBUpdationTime = _prefs.getInt(_dbUpdationTimeKey);
     if (lastDBUpdationTime != null && lastDBUpdationTime != 0) {
