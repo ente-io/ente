@@ -752,10 +752,10 @@ packages:
   super_logging:
     dependency: "direct main"
     description:
-      name: super_logging
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.1"
+      path: "thirdparty/super_logging"
+      relative: true
+    source: path
+    version: "1.3.4"
   supercharged:
     dependency: transitive
     description:

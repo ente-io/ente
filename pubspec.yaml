@@ -37,7 +37,8 @@ dependencies:
   visibility_detector: ^0.1.5
   event_bus: ^1.1.1
   sentry: ">=3.0.0 <4.0.0"
-  super_logging: ^2.0.1
+  super_logging:
+    path: thirdparty/super_logging
   archive: ^2.0.11
   flutter_email_sender: ^3.0.1
   like_button: ^0.2.0
