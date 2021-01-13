@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import Spinner from 'react-bootstrap/Spinner';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
-    collection,
     file,
     getCollectionLatestFile,
     getFile,
@@ -22,7 +21,7 @@ import { VariableSizeList as List } from 'react-window';
 import Collections from './components/Collections';
 import SadFace from 'components/SadFace';
 import Upload from './components/Upload';
-import { fetchCollections } from 'services/collectionService';
+import { collection, fetchCollections } from 'services/collectionService';
 
 enum ITEM_TYPE {
     TIME = 'TIME',
@@ -121,7 +120,7 @@ export default function Gallery(props) {
             setLoading(true);
             const encryptionKey = await getActualKey();
             const collections = await fetchCollections(token, encryptionKey);
-            const data = await fetchData(token, encryptionKey, collections);
+            const data = await fetchData(token, collections);
             setLoading(false);
             setCollections(collections);
             setData(data);
