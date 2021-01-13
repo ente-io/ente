@@ -121,11 +121,10 @@ class UploadService {
                 return;
 
             }));
-
             progressBarProps.setUploadStage(UPLOAD_STAGES.ENCRYPTION);
             const encryptedFiles: encryptedFile[] = await Promise.all(formatedFiles.map(async (file: formatedFile) => {
                 const encryptedFile = await this.encryptFiles(worker, file, collectionLatestFile.collection.key);
-                this.changeUploadProgressProps(progressBarProps);
+                this.changeProgressBarProps(progressBarProps);
                 return encryptedFile;
             }));
 
@@ -134,7 +133,7 @@ class UploadService {
 
                 const objectKeys = await this.uploadtoBucket(encryptedFile, token);
                 await this.uploadFile(collectionLatestFile, encryptedFile, objectKeys, token);
-                this.changeUploadProgressProps(progressBarProps);
+                this.changeProgressBarProps(progressBarProps);
 
             }));
 
@@ -147,7 +146,7 @@ class UploadService {
         }
     }
 
-    private changeUploadProgressProps({ setPercentComplete, setFileCounter }) {
+    private changeProgressBarProps({ setPercentComplete, setFileCounter }) {
         this.stepsCompleted++;
         const fileCompleted = this.stepsCompleted % this.totalFilesCount;
         setFileCounter({ current: fileCompleted + 1, total: this.totalFilesCount });
@@ -170,7 +169,7 @@ class UploadService {
         const location = await this.getLocation(recievedFile);
         this.metadataMap.set(recievedFile.name, {
             title: recievedFile.name,
-            creationTime: Number(Date.now()) * 1000,
+            creationTime: (recievedFile.lastModified) * 1000,
             modificationTime: (recievedFile.lastModified) * 1000,
             latitude: location.lat,
             longitude: location.lon,
@@ -254,10 +253,13 @@ class UploadService {
         if (!this.metadataMap.has(metadataJSON['title']))
             return;
 
-        const metaDataObject = this.metadataMap.get(metadataJSON['title']); metaDataObject['creationTime'] = metadataJSON['creationTime']['timestamp'] * 1000000;
+        const metaDataObject = this.metadataMap.get(metadataJSON['title']); 
+        metaDataObject['creationTime'] = metadataJSON['photoTakenTime']['timestamp'] * 1000000;
         metaDataObject['modificationTime'] = metadataJSON['modificationTime']['timestamp'] * 1000000;
-        metaDataObject['latitude'] = metadataJSON['geoData']['latitude'];
-        metaDataObject['longitude'] = metadataJSON['geoData']['longitude'];
+        if (!metaDataObject['latitude']) {
+            metaDataObject['latitude'] = metadataJSON['geoData']['latitude'];
+            metaDataObject['longitude'] = metadataJSON['geoData']['longitude'];
+        }
 
     }
 
@@ -353,7 +355,7 @@ class UploadService {
             reader.readAsArrayBuffer(recievedFile)
         });
         if (!exifData || !exifData.GPSLatitude)
-            return { lat: 0, lon: 0 };
+            return { lat: null, lon: null };
         var latDegree = exifData.GPSLatitude[0].numerator;
         var latMinute = exifData.GPSLatitude[1].numerator;
         var latSecond = exifData.GPSLatitude[2].numerator;
