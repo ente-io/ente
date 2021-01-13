@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/file.dart';
@@ -235,7 +236,7 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Future<void> _displayInfo(File file) async {
-    var asset;
+    AssetEntity asset;
     final isLocalFile = file.localID != null;
     if (isLocalFile) {
       asset = await file.getAsset();
@@ -276,7 +277,7 @@ class _DetailPageState extends State<DetailPage> {
               children: [
                 Icon(Icons.timer),
                 Padding(padding: EdgeInsets.all(4)),
-                Text(asset.videoDuration.toString()),
+                Text(asset.videoDuration.toString().split(".")[0]),
               ],
             ));
           }
