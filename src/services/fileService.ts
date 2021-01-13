@@ -1,8 +1,8 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import localForage from 'localforage';
+import { collection } from './collectionService';
 
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
@@ -29,17 +29,6 @@ export interface user {
     email: string;
 }
 
-export interface collection {
-    id: string;
-    owner: user;
-    key: string;
-    name: string;
-    type: string;
-    creationTime: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    isDeleted: boolean;
-}
 
 export interface file {
     id: number;
@@ -65,12 +54,11 @@ export interface collectionLatestFile {
 }
 
 
-export const fetchData = async (token, encryptionKey, collections) => {
+export const fetchData = async (token, collections) => {
     const resp = await getFiles(
         '0',
         token,
         '100',
-        encryptionKey,
         collections
     );
 
@@ -87,7 +75,6 @@ export const getFiles = async (
     sinceTime: string,
     token: string,
     limit: string,
-    key: string,
     collections: collection[]
 ) => {
     const worker = await new CryptoWorker();
