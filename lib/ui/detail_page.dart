@@ -237,9 +237,11 @@ class _DetailPageState extends State<DetailPage> {
 
   Future<void> _displayInfo(File file) async {
     AssetEntity asset;
+    int fileSize;
     final isLocalFile = file.localID != null;
     if (isLocalFile) {
       asset = await file.getAsset();
+      fileSize = await (await asset.file).length();
     }
     return showDialog<void>(
       context: context,
@@ -247,7 +249,7 @@ class _DetailPageState extends State<DetailPage> {
         var items = <Widget>[
           Row(
             children: [
-              Icon(Icons.timer),
+              Icon(Icons.calendar_today_outlined),
               Padding(padding: EdgeInsets.all(4)),
               Text(getFormattedTime(
                   DateTime.fromMicrosecondsSinceEpoch(file.creationTime))),
@@ -256,7 +258,7 @@ class _DetailPageState extends State<DetailPage> {
           Padding(padding: EdgeInsets.all(4)),
           Row(
             children: [
-              Icon(Icons.folder),
+              Icon(Icons.folder_outlined),
               Padding(padding: EdgeInsets.all(4)),
               Text(file.deviceFolder),
             ],
@@ -264,10 +266,20 @@ class _DetailPageState extends State<DetailPage> {
           Padding(padding: EdgeInsets.all(4)),
         ];
         if (isLocalFile) {
+          items.add(Row(
+            children: [
+              Icon(Icons.sd_storage_outlined),
+              Padding(padding: EdgeInsets.all(4)),
+              Text((fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB"),
+            ],
+          ));
+          items.add(
+            Padding(padding: EdgeInsets.all(4)),
+          );
           if (file.fileType == FileType.image) {
             items.add(Row(
               children: [
-                Icon(Icons.photo_size_select_actual),
+                Icon(Icons.photo_size_select_actual_outlined),
                 Padding(padding: EdgeInsets.all(4)),
                 Text(asset.width.toString() + " x " + asset.height.toString()),
               ],
@@ -275,7 +287,7 @@ class _DetailPageState extends State<DetailPage> {
           } else {
             items.add(Row(
               children: [
-                Icon(Icons.timer),
+                Icon(Icons.timer_outlined),
                 Padding(padding: EdgeInsets.all(4)),
                 Text(asset.videoDuration.toString().split(".")[0]),
               ],
@@ -288,7 +300,7 @@ class _DetailPageState extends State<DetailPage> {
           );
           items.add(Row(
             children: [
-              Icon(Icons.cloud_upload),
+              Icon(Icons.cloud_upload_outlined),
               Padding(padding: EdgeInsets.all(4)),
               Text(getFormattedTime(
                   DateTime.fromMicrosecondsSinceEpoch(file.updationTime))),
