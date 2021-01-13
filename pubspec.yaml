@@ -31,7 +31,6 @@ dependencies:
   shared_preferences: ^0.5.6
   dio: ^3.0.9
   image: ^2.1.4
-  share_extend: ^1.1.9
   share: ^0.6.5+4
   draggable_scrollbar: ^0.0.4
   photo_view: ^0.9.2

@@ -17,7 +17,7 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:share_extend/share_extend.dart';
+import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -313,7 +313,7 @@ class SupportSectionWidget extends StatelessWidget {
             try {
               await FlutterEmailSender.send(email);
             } catch (e) {
-              return ShareExtend.share(zipFilePath, "file");
+              return Share.shareFiles([zipFilePath]);
             }
           },
           child: SettingsTextItem(text: "email", icon: Icons.navigate_next),
