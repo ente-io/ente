@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:background_fetch/background_fetch.dart';
 import 'package:computer/computer.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -16,26 +17,15 @@ import 'package:super_logging/super_logging.dart';
 import 'package:logging/logging.dart';
 
 final _logger = Logger("main");
+bool _isInitialized = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SuperLogging.logDirPath = (await getTemporaryDirectory()).path + "/logs";
-  SuperLogging.enableInDebugMode = true;
-  SuperLogging.maxLogFiles = 5;
-  await SuperLogging.main(_main);
+  await _runWithLogs(_main);
 }
 
 void _main() async {
-  Computer().turnOn(
-    workersCount: 4,
-    areLogsEnabled: false,
-  );
-  InAppPurchaseConnection.enablePendingPurchases();
-  await Configuration.instance.init();
-  await CollectionsService.instance.init();
-  await SyncService.instance.init();
-  await MemoriesService.instance.init();
-  await BillingService.instance.init();
+  await _init();
   _sync();
 
   final SentryClient sentry = new SentryClient(dsn: SENTRY_DSN);
@@ -46,16 +36,58 @@ void _main() async {
   };
 
   runZoned(
-    () => runApp(MyApp()),
-    onError: (Object error, StackTrace stackTrace) =>
-        _sendErrorToSentry(sentry, error, stackTrace),
+    () {
+      runApp(MyApp());
+      BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+    },
+    onError: (Object error, StackTrace stackTrace) {
+      _sendErrorToSentry(sentry, error, stackTrace);
+    },
   );
 }
 
-void _sync() async {
-  SyncService.instance.sync().catchError((e, s) {
+Future _init() async {
+  _logger.info("Initializing...");
+  Computer().turnOn(
+    workersCount: 4,
+    areLogsEnabled: false,
+  );
+  InAppPurchaseConnection.enablePendingPurchases();
+  await Configuration.instance.init();
+  await CollectionsService.instance.init();
+  await SyncService.instance.init();
+  await MemoriesService.instance.init();
+  await BillingService.instance.init();
+  _isInitialized = true;
+}
+
+Future<void> _sync({bool isAppInBackground = false}) async {
+  try {
+    await SyncService.instance.sync(isAppInBackground: isAppInBackground);
+  } catch (e, s) {
     _logger.severe("Sync error", e, s);
+  }
+}
+
+/// This "Headless Task" is run when app is terminated.
+void backgroundFetchHeadlessTask(String taskId) async {
+  print("[BackgroundFetch] Headless event received: $taskId");
+  await _runWithLogs(() async {
+    if (!_isInitialized) {
+      await _init();
+    }
+    await _sync(isAppInBackground: true);
   });
+  BackgroundFetch.finish(taskId);
+}
+
+Future _runWithLogs(Function() function) async {
+  await SuperLogging.main(LogConfig(
+    body: function,
+    logDirPath: (await getTemporaryDirectory()).path + "/logs",
+    enableInDebugMode: true,
+    maxLogFiles: 5,
+  ));
 }
 
 void _sendErrorToSentry(SentryClient sentry, Object error, StackTrace stack) {
@@ -77,6 +109,29 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addObserver(this);
+
+    // Configure BackgroundFetch.
+    BackgroundFetch.configure(
+        BackgroundFetchConfig(
+          minimumFetchInterval: 15,
+          forceAlarmManager: false,
+          stopOnTerminate: false,
+          startOnBoot: true,
+          enableHeadless: true,
+          requiresBatteryNotLow: false,
+          requiresCharging: false,
+          requiresStorageNotLow: false,
+          requiresDeviceIdle: false,
+          requiredNetworkType: NetworkType.NONE,
+        ), (String taskId) async {
+      print("[BackgroundFetch] event received: $taskId");
+      await _sync(isAppInBackground: true);
+      BackgroundFetch.finish(taskId);
+    }).then((int status) {
+      print('[BackgroundFetch] configure success: $status');
+    }).catchError((e) {
+      print('[BackgroundFetch] configure ERROR: $e');
+    });
 
     return MaterialApp(
       title: _title,
