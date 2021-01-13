@@ -5,9 +5,12 @@ buildscript {
         jcenter()
     }
 
+    ext.appCompatVersion = '1.1.0' // for background_fetch
+
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:3.3.1' // for background_fetch
     }
 }
 
@@ -15,6 +18,9 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven {
+            url "${project(':background_fetch').projectDir}/libs" // for background_fetch
+        }
     }
 }
 
