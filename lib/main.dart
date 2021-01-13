@@ -72,12 +72,14 @@ Future<void> _sync({bool isAppInBackground = false}) async {
 /// This "Headless Task" is run when app is terminated.
 void backgroundFetchHeadlessTask(String taskId) async {
   print("[BackgroundFetch] Headless event received: $taskId");
-  await _runWithLogs(() async {
-    if (!_isInitialized) {
+  if (!_isInitialized) {
+    await _runWithLogs(() async {
       await _init();
-    }
+      await _sync(isAppInBackground: true);
+    });
+  } else {
     await _sync(isAppInBackground: true);
-  });
+  }
   BackgroundFetch.finish(taskId);
 }
 
