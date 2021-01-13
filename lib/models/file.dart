@@ -74,7 +74,11 @@ class File {
     modificationTime = metadata["modificationTime"];
     final latitude = metadata["latitude"];
     final longitude = metadata["longitude"];
-    location = Location(latitude, longitude);
+    if (latitude == null || longitude == null) {
+      location = null;
+    } else {
+      location = Location(latitude, longitude);
+    }
     fileType = getFileType(metadata["fileType"]);
   }
 
