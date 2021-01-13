@@ -8,8 +8,6 @@ PODS:
     - Flutter
   - device_info (0.0.1):
     - Flutter
-  - esys_flutter_share (0.0.1):
-    - Flutter
   - Flutter (1.0.0)
   - flutter_email_sender (0.0.1):
     - Flutter
@@ -27,7 +25,7 @@ PODS:
     - Flutter
   - flutter_webview_plugin (0.0.1):
     - Flutter
-  - fluttercontactpicker (3.1.0):
+  - fluttercontactpicker (3.1.1):
     - Flutter
   - fluttertoast (0.0.2):
     - Flutter
@@ -62,8 +60,6 @@ PODS:
     - SDWebImage/Core (~> 5.7)
   - share (0.0.1):
     - Flutter
-  - share_extend (0.0.1):
-    - Flutter
   - shared_preferences (0.0.1):
     - Flutter
   - sqflite (0.0.1):
@@ -84,7 +80,6 @@ DEPENDENCIES:
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
   - crisp (from `.symlinks/plugins/crisp/ios`)
   - device_info (from `.symlinks/plugins/device_info/ios`)
-  - esys_flutter_share (from `.symlinks/plugins/esys_flutter_share/ios`)
   - Flutter (from `Flutter`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
@@ -100,7 +95,6 @@ DEPENDENCIES:
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - share (from `.symlinks/plugins/share/ios`)
-  - share_extend (from `.symlinks/plugins/share_extend/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
@@ -127,8 +121,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/crisp/ios"
   device_info:
     :path: ".symlinks/plugins/device_info/ios"
-  esys_flutter_share:
-    :path: ".symlinks/plugins/esys_flutter_share/ios"
   Flutter:
     :path: Flutter
   flutter_email_sender:
@@ -159,8 +151,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/photo_manager/ios"
   share:
     :path: ".symlinks/plugins/share/ios"
-  share_extend:
-    :path: ".symlinks/plugins/share_extend/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
   sqflite:
@@ -179,7 +169,6 @@ SPEC CHECKSUMS:
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   crisp: 31665a818a3b0231a343d5a0d617a41d63b09646
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
-  esys_flutter_share: 403498dab005b36ce1f8d7aff377e81f0621b0b4
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_email_sender: f787522d0e82f50e5766c1213dbffff22fdcf009
   flutter_image_compress: 082f8daaf6c1b0c9fe798251c750ef0ecd98d7ae
@@ -188,7 +177,7 @@ SPEC CHECKSUMS:
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
   flutter_sodium: c84426b4de738514b5b66cfdeb8a06634e72fe0b
   flutter_webview_plugin: ed9e8a6a96baf0c867e90e1bce2673913eeac694
-  fluttercontactpicker: 3a69f749dcc3fab94b816ad68fa838a6f0a1cf0f
+  fluttercontactpicker: ff27c428495f982a1b04a6c3015052bfff25bb05
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   in_app_purchase: 3e2155afa9d03d4fa32d9e62d567885080ce97d6
@@ -201,7 +190,6 @@ SPEC CHECKSUMS:
   SDWebImage: 97351f6582ceca541ea294ba66a1fcb342a331c2
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
-  share_extend: b6748dc53695587891126a89533b862b92548c7b
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
