@@ -22,6 +22,7 @@ export const DropDiv = styled.div`
   width:200px;
   margin:5px;
   height:230px;
+  color:black;
   border-width: 2px;
   border-radius: 2px;
   border-color: ${(props) => getColor(props)};
