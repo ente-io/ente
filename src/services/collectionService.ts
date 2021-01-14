@@ -13,9 +13,9 @@ const ENDPOINT = getEndpoint();
 
 
 enum CollectionType {
-    folder,
-    favorites,
-    album,
+    folder = "folder",
+    favorites = "favorites",
+    album = "album",
 }
 
 export interface collection {
@@ -23,7 +23,7 @@ export interface collection {
     owner: user;
     key?: string;
     name: string;
-    type: number;
+    type: string;
     attributes: collectionAttributes
     sharees: user[];
     updationTime: number;
@@ -110,5 +110,5 @@ export const createAlbum = async (albumName: string, key: string, token: string)
 
 const createCollection = async (collectionData: collection, token: string): Promise<collection> => {
     const response = await HTTPService.post(`${ENDPOINT}/collections`, collectionData, { token });
-    return response.data
+    return response.data.collection;
 }
