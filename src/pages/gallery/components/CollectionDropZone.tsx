@@ -31,7 +31,7 @@ export const DropDiv = styled.div`
 const CollectionDropZone = ({
     children,
     closeModal,
-    setData,
+    refetchData,
     collectionLatestFile,
     setProgressView,
     token,
@@ -45,7 +45,7 @@ const CollectionDropZone = ({
         setProgressView(true);
 
         await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token, progressBarProps);
-        setData(await fetchData(token, [collectionLatestFile.collection]));
+        refetchData();
         setProgressView(false);
     }
     return (
