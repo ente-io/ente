@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Modal } from 'react-bootstrap';
-import { getActualKey } from 'utils/common/key';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import CollectionDropZone from './CollectionDropZone';
 import AddCollection from './AddCollection';
@@ -29,41 +28,37 @@ function CollectionSelector(props) {
             collectionLatestFile={item}
             token={token}
         >
-            <Card style={{ cursor: 'pointer', border: 'solid', width: "95%", marginBottom: "5px", padding: "auto" }}>
-                <Card.Body>
-                    <PreviewCard data={item.file} updateUrl={() => { }} onClick={() => { }} />
-
-                    <Card.Text>{item.collection.name}</Card.Text>
-                </Card.Body>
+            <Card>
+                <PreviewCard data={item.file} updateUrl={() => { }} onClick={() => { }} enabled={false} />
+                <Card.Text style={{ textAlign: 'center' }}>{item.collection.name}</Card.Text>
             </Card>
+
         </CollectionDropZone>
     ));
 
     return (
-        <>
-            <Modal
-                show={uploadModalView}
-                centered
-                onHide={closeUploadModal}
-            >
-                <Modal.Header closeButton>
-                    <Modal.Title >
-                        Select/Click on Collection to upload
+        <Modal
+            show={uploadModalView}
+            onHide={closeUploadModal}
+            dialogClassName="modal-90w"
+        >
+            <Modal.Header closeButton>
+                <Modal.Title >
+                    Select/Click on Collection to upload
                     </Modal.Title>
-                </Modal.Header>
-                <Modal.Body style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}>
-                    <AddCollection
-                        {...rest}
-                        closeUploadModal={closeUploadModal}
-                        token={token}
-                    />
-                    {CollectionIcons}
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button onClick={closeUploadModal}>Close</Button>
-                </Modal.Footer>
-            </Modal>
-        </>
+            </Modal.Header>
+            <Modal.Body style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap" }}>
+                <AddCollection
+                    {...rest}
+                    closeUploadModal={closeUploadModal}
+                    token={token}
+                />
+                {CollectionIcons}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button onClick={closeUploadModal}>Close</Button>
+            </Modal.Footer>
+        </Modal>
     );
 }
 

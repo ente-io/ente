@@ -72,7 +72,6 @@ export const fetchFiles = async (
     let files: Array<file> = (await localForage.getItem<file[]>('files')) || [];
     const fetchedFiles = await getFiles(collections, null, "100", token);
 
-    console.log(fetchedFiles);
     files.push(...fetchedFiles);
     files = files.sort(
         (a, b) => b.metadata.creationTime - a.metadata.creationTime

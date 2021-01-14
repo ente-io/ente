@@ -103,7 +103,6 @@ export const getCollectionLatestFile = async (
         collections.map(async collection => {
             const sinceTime: string = (Number(await localForage.getItem<string>(`${collection.id}-time`)) - 1).toString();
             const file: file[] = await getFiles([collection], sinceTime, "100", token);
-            console.log(file);
             return {
                 file: file[0],
                 collection,

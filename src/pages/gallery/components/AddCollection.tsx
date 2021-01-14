@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { Card } from "react-bootstrap";
 import Dropzone from "react-dropzone";
+import styled from "styled-components";
 import { DropDiv } from "./CollectionDropZone";
 import CreateCollection from "./CreateCollection";
+
+const Image = styled.img`
+  max-height: 190px;
+`;
 
 export default function AddCollection(props) {
 
@@ -40,10 +45,9 @@ export default function AddCollection(props) {
                             })}
                         >
                             <input {...getInputProps()} />
-                            <Card style={{ cursor: 'pointer', border: 'solid', width: "95%", marginBottom: "5px", padding: "auto" }}>
-                                <Card.Body>
-                                    <Card.Text>Create New Album</Card.Text>
-                                </Card.Body>
+                            <Card style={{ cursor: 'pointer' }}>
+                                <Image alt='logo' src='/plus-sign.png' />
+                                <Card.Text style={{ textAlign: "center" }}>Create New Album</Card.Text>
                             </Card>
                         </DropDiv>
                     );

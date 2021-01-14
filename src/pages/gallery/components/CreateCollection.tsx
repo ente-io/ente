@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Modal } from 'react-bootstrap';
+import { Button, Form, Modal } from 'react-bootstrap';
 import { createAlbum } from 'services/collectionService';
 import UploadService from 'services/uploadService';
-import { collectionLatestFile } from 'services/fileService'
+import { collectionLatestFile } from 'services/collectionService'
 import { getActualKey } from 'utils/common/key';
 
 export default function CreateCollection(props) {
@@ -58,13 +58,15 @@ export default function CreateCollection(props) {
         </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <form onSubmit={handleSubmit}>
-                    <label>
-                        Album Name:
-                    <input type="text" value={albumName} onChange={handleChange} />
-                    </label>
-                    <input type="submit" value="Submit" />
-                </form>
+                <Form onSubmit={handleSubmit}>
+                    <Form.Group controlId="formBasicEmail">
+                        <Form.Label>Album Name:</Form.Label>
+                        <Form.Control type="text" placeholder="Enter Album Name" value={albumName} onChange={handleChange} />
+                    </Form.Group>
+                    <Button variant="primary" type="submit">
+                        Submit
+                     </Button>
+                </Form>
             </Modal.Body>
         </Modal>
     );
