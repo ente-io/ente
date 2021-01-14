@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import { createAlbum } from 'services/collectionService';
 import UploadService from 'services/uploadService';
@@ -12,6 +12,20 @@ export default function CreateCollection(props) {
 
     const handleChange = (event) => { setAlbumName(event.target.value); }
 
+    useEffect(() => {
+        if (acceptedFiles == null)
+            return;
+        let commonPathPrefix: string = (() => {
+            const A: string[] = acceptedFiles.map(files => files.path);
+
+            let a1 = A[0], a2 = A[A.length - 1], L = a1.length, i = 0;
+            while (i < L && a1.charAt(i) === a2.charAt(i)) i++;
+            return a1.substring(0, i);
+        })();
+        if (commonPathPrefix)
+            commonPathPrefix = commonPathPrefix.substr(1, commonPathPrefix.lastIndexOf('/') - 1);
+        setAlbumName(commonPathPrefix);
+    }, [acceptedFiles]);
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -32,12 +46,13 @@ export default function CreateCollection(props) {
     return (
         <Modal
             show={modalView}
+            onHide={closeModal}
             size='lg'
             aria-labelledby='contained-modal-title-vcenter'
             centered
             backdrop="static"
         >
-            <Modal.Header>
+            <Modal.Header closeButton>
                 <Modal.Title id='contained-modal-title-vcenter'>
                     Create Collection
         </Modal.Title>
