@@ -4,10 +4,8 @@ import Spinner from 'react-bootstrap/Spinner';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     file,
-    getCollectionLatestFile,
     getFile,
     getPreview,
-    collectionLatestFile,
     fetchData,
 } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -21,7 +19,7 @@ import { VariableSizeList as List } from 'react-window';
 import Collections from './components/Collections';
 import SadFace from 'components/SadFace';
 import Upload from './components/Upload';
-import { collection, fetchCollections } from 'services/collectionService';
+import { collection, fetchCollections, collectionLatestFile, getCollectionLatestFile } from 'services/collectionService';
 
 enum ITEM_TYPE {
     TIME = 'TIME',
@@ -125,10 +123,7 @@ export default function Gallery(props) {
             setLoading(false);
             setCollections(collections);
             setData(data);
-            const collectionLatestFile = await getCollectionLatestFile(
-                collections,
-                data
-            );
+            const collectionLatestFile = await getCollectionLatestFile(collections, token);
             setCollectionLatestFile(collectionLatestFile);
         };
         main();

@@ -1,6 +1,8 @@
 import { getEndpoint } from "utils/common/apiUtil";
 import { getData, LS_KEYS } from "utils/storage/localStorage";
-import { user } from "./fileService";
+import { file, user, getFiles } from "./fileService";
+import localForage from 'localforage';
+
 import HTTPService from "./HTTPService";
 import * as Comlink from 'comlink';
 import { keyEncryptionResult } from "./uploadService";
@@ -36,6 +38,12 @@ interface collectionAttributes {
     encryptedPath?: string;
     pathDecryptionNonce?: string
 };
+
+export interface collectionLatestFile {
+    collection: collection
+    file: file;
+}
+
 
 const getCollectionKey = async (collection: collection, masterKey: string) => {
     const worker = await new CryptoWorker();
@@ -85,6 +93,22 @@ const getCollections = async (
 
 export const fetchCollections = async (token: string, key: string) => {
     return getCollections(token, '0', key);
+};
+
+export const getCollectionLatestFile = async (
+    collections: collection[],
+    token
+): Promise<collectionLatestFile[]> => {
+    return Promise.all(
+        collections.map(async collection => {
+            const sinceTime: string = (Number(await localForage.getItem<string>(`${collection.id}-time`)) - 1).toString();
+            const file: file[] = await getFiles([collection], sinceTime, "100", token);
+            console.log(file);
+            return {
+                file: file[0],
+                collection,
+            }
+        }))
 };
 
 export const createAlbum = async (albumName: string, key: string, token: string) => {

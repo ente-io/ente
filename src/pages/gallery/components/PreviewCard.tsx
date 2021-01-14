@@ -57,7 +57,7 @@ export default function PreviewCard(props: IProps) {
     }, [data]);
 
     const handleClick = () => {
-        if (data.msrc || imgSrc) {
+        if (data?.msrc || imgSrc) {
             onClick();
         }
     }

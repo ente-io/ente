@@ -48,17 +48,11 @@ export interface file {
     dataIndex: number;
 }
 
-export interface collectionLatestFile {
-    collection: collection
-    file: file;
-}
 
 
 export const fetchData = async (token, collections) => {
-    const resp = await getFiles(
-        '0',
+    const resp = await fetchFiles(
         token,
-        '100',
         collections
     );
 
@@ -71,14 +65,25 @@ export const fetchData = async (token, collections) => {
     );
 }
 
-export const getFiles = async (
-    sinceTime: string,
+export const fetchFiles = async (
     token: string,
-    limit: string,
     collections: collection[]
 ) => {
-    const worker = await new CryptoWorker();
     let files: Array<file> = (await localForage.getItem<file[]>('files')) || [];
+    const fetchedFiles = await getFiles(collections, null, "100", token);
+
+    console.log(fetchedFiles);
+    files.push(...fetchedFiles);
+    files = files.sort(
+        (a, b) => b.metadata.creationTime - a.metadata.creationTime
+    );
+    await localForage.setItem('files', files);
+    return files;
+};
+
+export const getFiles = async (collections: collection[], sinceTime: string, limit: string, token: string): Promise<file[]> => {
+    const worker = await new CryptoWorker();
+
     for (const index in collections) {
         const collection = collections[index];
         if (collection.isDeleted) {
@@ -86,8 +91,8 @@ export const getFiles = async (
             continue;
         }
         let time =
-            (await localForage.getItem<string>(`${collection.id}-time`)) || sinceTime;
-        let resp;
+            sinceTime || (await localForage.getItem<string>(`${collection.id}-time`)) || "0";
+        let resp, promises: Promise<file>[] = [];
         do {
             resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
                 collectionID: collection.id,
@@ -95,9 +100,8 @@ export const getFiles = async (
                 token,
                 limit,
             });
-            const promises: Promise<file>[] = resp.data.diff.filter(file => !file.isDeleted).map(
+            promises.push(...resp.data.diff.filter(file => !file.isDeleted).map(
                 async (file: file) => {
-                    console.log(file);
                     file.key = await worker.decryptB64(
                         file.encryptedKey,
                         file.keyDecryptionNonce,
@@ -106,21 +110,17 @@ export const getFiles = async (
                     file.metadata = await worker.decryptMetadata(file);
                     return file;
                 }
-            );
-            files.push(...(await Promise.all(promises)));
-            files = files.sort(
-                (a, b) => b.metadata.creationTime - a.metadata.creationTime
-            );
+            ));
+
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime.toString();
             }
         } while (resp.data.diff.length);
         await localForage.setItem(`${collection.id}-time`, time);
-    }
-    await localForage.setItem('files', files);
-    return files;
-};
 
+        return Promise.all(promises);
+    }
+}
 export const getPreview = async (token: string, file: file) => {
     const cache = await caches.open('thumbs');
     const cacheResp: Response = await cache.match(file.id.toString());
@@ -163,30 +163,3 @@ export const getFile = async (token: string, file: file) => {
     return URL.createObjectURL(new Blob([decrypted]));
 };
 
-export const getCollectionLatestFile = async (
-    collections: collection[],
-    data: file[]
-): Promise<collectionLatestFile[]> => {
-    let collectionIdSet = new Set<number>();
-    let collectionMap = new Map<number, collection>();
-    collections.forEach((collection) => {
-        collectionMap.set(Number(collection.id), collection);
-        collectionIdSet.add(Number(collection.id))
-    });
-    return Promise.all(
-        data
-            .filter((item) => {
-                if (collectionIdSet.size !== 0 && collectionIdSet.has(item.collectionID)) {
-                    collectionIdSet.delete(item.collectionID);
-                    return true;
-                }
-                return false;
-            })
-            .map(async (item) => {
-                return {
-                    file: item,
-                    collection: collectionMap.get(item.collectionID),
-                };
-            })
-    );
-};
