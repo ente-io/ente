@@ -2,7 +2,8 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
 import EXIF from "exif-js";
-import { fileAttribute, collectionLatestFile, } from './fileService';
+import { fileAttribute } from './fileService';
+import { collectionLatestFile } from "./collectionService"
 import { FILE_TYPE } from 'pages/gallery';
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
@@ -103,17 +104,19 @@ class UploadService {
                     metadataFiles.push(file);
             });
             this.totalFilesCount = actualFiles.length;
-            this.perStepProgress = 100 / (2 * actualFiles.length);
-
+            this.perStepProgress = 100 / (3 * actualFiles.length);
             let formatedFiles: formatedFile[] = await Promise.all(actualFiles.map(async (recievedFile: File) => {
                 const file = await this.formatData(recievedFile);
+                this.changeProgressBarProps(progressBarProps);
                 return file;
             }));
             await Promise.all(metadataFiles.map(async (recievedFile: File) => {
                 this.updateMetadata(recievedFile)
+                this.changeProgressBarProps(progressBarProps);
                 return;
 
             }));
+            console.log(formatedFiles);
             progressBarProps.setUploadStage(UPLOAD_STAGES.ENCRYPTION);
             const encryptedFiles: encryptedFile[] = await Promise.all(formatedFiles.map(async (file: formatedFile) => {
                 const encryptedFile = await this.encryptFiles(worker, file, collectionLatestFile.collection.key);
