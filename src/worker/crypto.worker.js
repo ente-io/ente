@@ -70,12 +70,12 @@ export class Crypto {
         return libsodium.deriveKey(passphrase, salt);
     }
 
-    async decryptToB64(encryptedKey, sessionNonce, sessionKey) {
-        return libsodium.decryptToB64(encryptedKey, sessionNonce, sessionKey)
+    async decryptB64(data, nonce, key) {
+        return libsodium.decryptB64(data, nonce, key)
     }
 
-    async encryptToB64(data, key){
-        return libsodium.encryptToB64(data,key);
+    async encryptToB64(data, key) {
+        return libsodium.encryptToB64(data, key);
     }
 
     async generateMasterKey() {

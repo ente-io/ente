@@ -2,16 +2,16 @@ import sodium from 'libsodium-wrappers';
 
 const encryptionChunkSize = 4 * 1024 * 1024;
 
-export async function decryptChaChaOneShot(data: Uint8Array, header: Uint8Array, key: Uint8Array) {
+export async function decryptChaChaOneShot(data: Uint8Array, header: Uint8Array, key: string) {
     await sodium.ready;
-    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(header, key);
+    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(header, await fromB64(key));
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(pullState, data, null);
     return pullResult.message;
 }
 
-export async function decryptChaCha(data: Uint8Array, header: Uint8Array, key: Uint8Array) {
+export async function decryptChaCha(data: Uint8Array, header: Uint8Array, key: string) {
     await sodium.ready;
-    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(header, key);
+    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(header, await fromB64(key));
     const decryptionChunkSize =
         encryptionChunkSize + sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
     var bytesRead = 0;
@@ -33,15 +33,16 @@ export async function decryptChaCha(data: Uint8Array, header: Uint8Array, key: U
     return Uint8Array.from(decryptedData);
 }
 
-export async function encryptChaChaOneShot(data: Uint8Array, key: Uint8Array) {
+export async function encryptChaChaOneShot(data: Uint8Array, key?: string) {
     await sodium.ready;
-    key = key || sodium.crypto_secretstream_xchacha20poly1305_keygen();
-    let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
+
+    const uintkey: Uint8Array = key ? await fromB64(key) : sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
     let [pushState, header] = [initPushResult.state, initPushResult.header];
 
     const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(pushState, data, null, sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL);
     return {
-        key, file: {
+        key: await toB64(uintkey), file: {
             encryptedData: pushResult,
             decryptionHeader: await toB64(header),
             creationTime: Date.now(),
@@ -50,12 +51,12 @@ export async function encryptChaChaOneShot(data: Uint8Array, key: Uint8Array) {
     }
 }
 
-export async function encryptChaCha(data: Uint8Array, key: Uint8Array) {
+export async function encryptChaCha(data: Uint8Array, key?: string) {
     await sodium.ready;
 
-    key = key || sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    const uintkey: Uint8Array = key ? await fromB64(key) : sodium.crypto_secretstream_xchacha20poly1305_keygen();
 
-    let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
+    let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
     let [pushState, header] = [initPushResult.state, initPushResult.header];
     let bytesRead = 0;
     let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
@@ -77,7 +78,7 @@ export async function encryptChaCha(data: Uint8Array, key: Uint8Array) {
         }
     }
     return {
-        key, file: {
+        key: await toB64(uintkey), file: {
             encryptedData: new Uint8Array(encryptedData),
             decryptionHeader: await toB64(header),
             creationTime: Date.now(),
@@ -86,11 +87,11 @@ export async function encryptChaCha(data: Uint8Array, key: Uint8Array) {
     }
 }
 
-export async function encryptToB64(data: Uint8Array, key: Uint8Array) {
+export async function encryptToB64(data: Uint8Array, key?: string) {
     await sodium.ready;
 
     const encrypted = await encrypt(data, key);
-    
+
     return {
         encryptedData: await toB64(encrypted.encryptedData),
         key: await toB64(encrypted.key),
@@ -98,24 +99,24 @@ export async function encryptToB64(data: Uint8Array, key: Uint8Array) {
     }
 }
 
-export async function decryptToB64(data: string, nonce: string, key: string) {
+export async function decryptB64(data: string, nonce: string, key: string) {
     await sodium.ready;
     const decrypted = await decrypt(await fromB64(data),
         await fromB64(nonce),
-        await fromB64(key))
+        await fromB64(key));
+
     return await toB64(decrypted);
 }
 
-export async function encrypt(data: Uint8Array, key?: Uint8Array) {
+export async function encrypt(data: Uint8Array, key?: string) {
     await sodium.ready;
-    if (key == null) {
-        key = sodium.crypto_secretbox_keygen();
-    }
+
+    const uintkey: Uint8Array = key ? await fromB64(key) : sodium.crypto_secretbox_keygen();
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, key);
+    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, uintkey);
     return {
         encryptedData: encryptedData,
-        key: key,
+        key: uintkey,
         nonce: nonce,
     }
 }
