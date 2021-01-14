@@ -96,6 +96,7 @@ const COLUMNS = 3;
 export default function Gallery(props) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [reload, setReload] = useState(0);
     const [collections, setCollections] = useState<collection[]>([]);
     const [collectionLatestFile, setCollectionLatestFile] = useState<
         collectionLatestFile[]
@@ -132,7 +133,7 @@ export default function Gallery(props) {
         };
         main();
         props.setUploadButtonView(true);
-    }, []);
+    }, [reload]);
 
     if (!data || loading) {
         return (
@@ -296,7 +297,7 @@ export default function Gallery(props) {
                 uploadModalView={props.uploadModalView}
                 closeUploadModal={props.closeUploadModal}
                 collectionLatestFile={collectionLatestFile}
-                setData={setData} />
+                refetchData={() => setReload(Math.random())} />
 
             {filteredData.length ? (
                 <Container>
