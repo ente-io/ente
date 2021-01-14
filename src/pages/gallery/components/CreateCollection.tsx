@@ -2,32 +2,36 @@ import React, { useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import { createAlbum } from 'services/collectionService';
 import UploadService from 'services/uploadService';
-import { collectionLatestFile, fetchData } from 'services/fileService'
+import { collectionLatestFile } from 'services/fileService'
+import { getActualKey } from 'utils/common/key';
 
 export default function CreateCollection(props) {
 
-    const { masterKey, token, closeModal, acceptedFiles, setData, setProgressView, progressBarProps } = props;
+    const { token, acceptedFiles, setProgressView, progressBarProps, refetchData, modalView, closeModal, closeUploadModal } = props;
     const [albumName, setAlbumName] = useState("");
 
     const handleChange = (event) => { setAlbumName(event.target.value); }
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        closeModal();
 
+        closeModal();
+        closeUploadModal();
+        const masterKey = await getActualKey();
         const collection = await createAlbum(albumName, masterKey, token);
 
         const collectionLatestFile: collectionLatestFile = { collection, file: null }
+
         progressBarProps.setPercentComplete(0);
         setProgressView(true);
 
         await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token, progressBarProps);
-        setData(await fetchData(token, [collectionLatestFile.collection]));
+        refetchData();
         setProgressView(false);
     }
     return (
         <Modal
-            {...props}
+            show={modalView}
             size='lg'
             aria-labelledby='contained-modal-title-vcenter'
             centered

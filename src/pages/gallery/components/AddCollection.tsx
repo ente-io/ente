@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Card } from "react-bootstrap";
 import Dropzone from "react-dropzone";
 import { DropDiv } from "./CollectionDropZone";
 import CreateCollection from "./CreateCollection";
@@ -8,10 +9,9 @@ export default function AddCollection(props) {
     const [acceptedFiles, setAcceptedFiles] = useState<File[]>();
     const [createCollectionView, setCreateCollectionView] = useState(false);
 
-    const { children, closeModal, ...rest } = props;
+    const { children, closeUploadModal, ...rest } = props;
 
     const createCollection = (acceptedFiles) => {
-        closeModal();
         setAcceptedFiles(acceptedFiles);
         setCreateCollectionView(true);
     };
@@ -20,7 +20,7 @@ export default function AddCollection(props) {
         <>
             <Dropzone
                 onDropAccepted={createCollection}
-                onDropRejected={props.closeUploadModal}
+                onDropRejected={closeUploadModal}
                 noDragEventsBubbling
                 accept="image/*, video/*, application/json "
             >
@@ -40,14 +40,19 @@ export default function AddCollection(props) {
                             })}
                         >
                             <input {...getInputProps()} />
-                            {children}
+                            <Card style={{ cursor: 'pointer', border: 'solid', width: "95%", marginBottom: "5px", padding: "auto" }}>
+                                <Card.Body>
+                                    <Card.Text>Create New Album</Card.Text>
+                                </Card.Body>
+                            </Card>
                         </DropDiv>
                     );
                 }}
             </Dropzone>
             <CreateCollection
                 {...rest}
-                show={createCollectionView}
+                modalView={createCollectionView}
+                closeUploadModal={closeUploadModal}
                 closeModal={() => setCreateCollectionView(false)}
                 acceptedFiles={acceptedFiles}
             />

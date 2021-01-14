@@ -15,12 +15,10 @@ function CollectionSelector(props) {
     } = props;
 
     const [token, setToken] = useState(null);
-    const [userMasterKey, setUserMasterKey] = useState(null);
 
     useEffect(() => {
         (async () => {
             setToken(getData(LS_KEYS.USER).token);
-            setUserMasterKey(await getActualKey());
         })();
     });
 
@@ -56,16 +54,9 @@ function CollectionSelector(props) {
                 <Modal.Body style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}>
                     <AddCollection
                         {...rest}
-                        closeModal={closeUploadModal}
+                        closeUploadModal={closeUploadModal}
                         token={token}
-                        userMasterKey={userMasterKey}
-                    >
-                        <Card style={{ cursor: 'pointer', border: 'solid', width: "95%", marginBottom: "5px", padding: "auto" }}>
-                            <Card.Body>
-                                <Card.Text>Create New Album</Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </AddCollection>
+                    />
                     {CollectionIcons}
                 </Modal.Body>
                 <Modal.Footer>
