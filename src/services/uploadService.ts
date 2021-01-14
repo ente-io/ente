@@ -131,7 +131,7 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOAD);
             await Promise.all(encryptedFiles.map(async (encryptedFile: encryptedFile) => {
 
-                const objectKeys = await this.uploadtoBucket(encryptedFile, token);
+                const objectKeys = await this.uploadtoBucket(encryptedFile, token, 2 * this.totalFilesCount);
                 await this.uploadFile(collectionLatestFile, encryptedFile, objectKeys, token);
                 this.changeProgressBarProps(progressBarProps);
 
@@ -209,11 +209,11 @@ class UploadService {
         return result;
     }
 
-    private async uploadtoBucket(file: encryptedFile, token): Promise<objectKeys> {
-        const fileUploadURL = await this.getUploadURL(token);
+    private async uploadtoBucket(file: encryptedFile, token, count: number): Promise<objectKeys> {
+        const fileUploadURL = await this.getUploadURL(token, count);
         const fileObjectKey = await this.putFile(fileUploadURL, file.filedata.encryptedData)
 
-        const thumbnailUploadURL = await this.getUploadURL(token);
+        const thumbnailUploadURL = await this.getUploadURL(token, count);
         const thumbnailObjectKey = await this.putFile(thumbnailUploadURL, file.thumbnail.encryptedData)
 
         return {
@@ -253,7 +253,7 @@ class UploadService {
         if (!this.metadataMap.has(metadataJSON['title']))
             return;
 
-        const metaDataObject = this.metadataMap.get(metadataJSON['title']); 
+        const metaDataObject = this.metadataMap.get(metadataJSON['title']);
         metaDataObject['creationTime'] = metadataJSON['photoTakenTime']['timestamp'] * 1000000;
         metaDataObject['modificationTime'] = metadataJSON['modificationTime']['timestamp'] * 1000000;
         if (!metaDataObject['latitude']) {
@@ -318,19 +318,19 @@ class UploadService {
         });
     }
 
-    private async getUploadURL(token) {
+    private async getUploadURL(token: string, count: number) {
         if (this.uploadURLs.isEmpty()) {
-            await this.fetchUploadURLs(token);
+            await this.fetchUploadURLs(token, count);
         }
         return this.uploadURLs.pop();
     }
 
-    private async fetchUploadURLs(token): Promise<void> {
+    private async fetchUploadURLs(token: string, count: number): Promise<void> {
         if (!this.uploadURLFetchInProgress) {
             this.uploadURLFetchInProgress = HTTPService.get(`${ENDPOINT}/files/upload-urls`,
                 {
                     token: token,
-                    count: "42"  //m4gic number
+                    count: Math.min(50, count).toString()  //m4gic number
                 })
             const response = await this.uploadURLFetchInProgress;
 
