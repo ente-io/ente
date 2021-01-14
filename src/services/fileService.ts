@@ -82,7 +82,7 @@ export const fetchFiles = async (
 
 export const getFiles = async (collections: collection[], sinceTime: string, limit: string, token: string): Promise<file[]> => {
     const worker = await new CryptoWorker();
-
+    let promises: Promise<file>[] = [];
     for (const index in collections) {
         const collection = collections[index];
         if (collection.isDeleted) {
@@ -91,7 +91,7 @@ export const getFiles = async (collections: collection[], sinceTime: string, lim
         }
         let time =
             sinceTime || (await localForage.getItem<string>(`${collection.id}-time`)) || "0";
-        let resp, promises: Promise<file>[] = [];
+        let resp;
         do {
             resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
                 collectionID: collection.id,
@@ -116,9 +116,8 @@ export const getFiles = async (collections: collection[], sinceTime: string, lim
             }
         } while (resp.data.diff.length);
         await localForage.setItem(`${collection.id}-time`, time);
-
-        return Promise.all(promises);
     }
+    return Promise.all(promises);
 }
 export const getPreview = async (token: string, file: file) => {
     const cache = await caches.open('thumbs');

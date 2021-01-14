@@ -29,7 +29,7 @@ function CollectionSelector(props) {
             token={token}
         >
             <Card>
-                <PreviewCard data={item.file} updateUrl={() => { }} onClick={() => { }} enabled={false} />
+                <PreviewCard data={item.file} updateUrl={() => { }} onClick={() => { }} />
                 <Card.Text style={{ textAlign: 'center' }}>{item.collection.name}</Card.Text>
             </Card>
 

@@ -82,7 +82,11 @@ const GlobalStyles = createGlobalStyle`
     }
     .modal-90w{
         width:90vw;
-        max-width:880px!important;
+        max-width:880px!important;  
+    }
+    .modal-content{
+        background-color:#303030 !important;
+        color:white;
     }
 `;
 
