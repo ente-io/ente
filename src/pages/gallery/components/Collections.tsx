@@ -1,5 +1,5 @@
 import React from 'react';
-import { collection } from 'services/fileService';
+import { collection } from 'services/collectionService';
 import styled from 'styled-components';
 
 interface CollectionProps {
