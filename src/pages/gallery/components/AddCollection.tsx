@@ -27,7 +27,7 @@ export default function AddCollection(props) {
                 onDropAccepted={createCollection}
                 onDropRejected={closeUploadModal}
                 noDragEventsBubbling
-                accept="image/*, video/*, application/json "
+                accept="image/*, video/*, application/json,"
             >
                 {({
                     getRootProps,
