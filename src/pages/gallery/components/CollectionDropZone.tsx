@@ -59,8 +59,8 @@ const CollectionDropZone = ({
             onDropAccepted={upload}
             onDragOver={showModal}
             onDropRejected={closeModal}
-            noDragEventsBubbling={noDragEventsBubbling}
-            accept="image/*, video/*, application/json "
+            noDragEventsBubbling
+            accept="image/*, video/*, application/json, "
         >
             {({
                 getRootProps,
