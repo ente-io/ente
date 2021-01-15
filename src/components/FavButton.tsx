@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 const HeartUI = styled.button.attrs(props => ({
     className: props.className,
+    isClick: props['isClick']
 }))`
   width: 100px;
   height: 100px;
@@ -12,14 +13,9 @@ const HeartUI = styled.button.attrs(props => ({
   ${({ isClick }) => isClick && `background-position: -2799px 2px;transition: background 1s steps(28);`}
 `;
 
-const SVGcontainer = styled.div`
-position:relative;
-    `;
 
 export default function FavButton({ isClick, onClick }) {
     return (
-        <SVGcontainer>
-            <HeartUI isClick={isClick} onClick={onClick} />
-        </SVGcontainer>
+        <HeartUI isClick={isClick} onClick={onClick} />
     );
 }
