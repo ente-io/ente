@@ -25,7 +25,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx", "src/pages/index.tsx"
-  ],
+, "src/components/PhotoSwipe/PhotoSwipe.js", "src/components/PhotoSwipe/events.js"  ],
   "exclude": [
     "node_modules"
   ]

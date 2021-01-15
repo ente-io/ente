@@ -12,7 +12,7 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
 import { getActualKey } from 'utils/common/key';
 import styled from 'styled-components';
-import { PhotoSwipe } from 'react-photoswipe';
+import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { Options } from 'photoswipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
