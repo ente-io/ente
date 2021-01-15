@@ -6,6 +6,7 @@ import localForage from 'localforage';
 import HTTPService from "./HTTPService";
 import * as Comlink from 'comlink';
 import { keyEncryptionResult } from "./uploadService";
+import { getActualKey, getToken } from "utils/common/key";
 
 
 const CryptoWorker: any =
@@ -92,7 +93,10 @@ const getCollections = async (
 };
 
 export const fetchCollections = async (token: string, key: string) => {
-    return getCollections(token, '0', key);
+    const collections = await getCollections(token, '0', key);
+    const favCollection = collections.filter(collection => collection.type === CollectionType.favorites);
+    await localForage.setItem('fav-collection', favCollection);
+    return collections;
 };
 
 export const getCollectionLatestFile = async (
@@ -110,28 +114,69 @@ export const getCollectionLatestFile = async (
         }))
 };
 
-export const createAlbum = async (albumName: string, key: string, token: string) => {
+export const createAlbum = async (albumName: string, type: CollectionType, key: string, token: string) => {
+    return AddCollection(albumName, CollectionType.album);
+}
+
+
+export const AddCollection = async (albumName: string, type: CollectionType) => {
     const worker = await new CryptoWorker();
+    const encryptionKey = await getActualKey();
+    const token = getToken();
     const collectionKey: Uint8Array = await worker.generateMasterKey();
-    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(collectionKey, key);
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(collectionKey, encryptionKey);
     const newCollection: collection = {
         id: null,
         owner: null,
         encryptedKey,
         keyDecryptionNonce,
         name: albumName,
-        type: CollectionType.album,
+        type,
         attributes: {},
         sharees: null,
         updationTime: null,
         isDeleted: false
     };
     let createdCollection: collection = await createCollection(newCollection, token);
-    createdCollection = await getCollectionKey(createdCollection, key);
+    createdCollection = await getCollectionKey(createdCollection, encryptionKey);
     return createdCollection;
 }
 
 const createCollection = async (collectionData: collection, token: string): Promise<collection> => {
     const response = await HTTPService.post(`${ENDPOINT}/collections`, collectionData, { token });
     return response.data.collection;
+}
+
+export const addToFavorites = async (file: file) => {
+    let favCollection: collection = (await localForage.getItem<collection>('fav-collection'))[0];
+    if (!favCollection) {
+        favCollection = await AddCollection("Favorites", CollectionType.favorites);
+        await localForage.setItem('fav-collection', favCollection);
+    }
+    await addtoCollection(favCollection, [file])
+}
+
+const addtoCollection = async (collection: collection, files: file[]) => {
+    console.log(collection, files);
+    const params = new Object();
+    const worker = await new CryptoWorker();
+    const token = getToken();
+    params["collectionID"] = collection.id;
+    const newFiles: file[] = await Promise.all(files.map(async file => {
+        file.collectionID = Number(collection.id);
+        const newEncryptedKey: keyEncryptionResult = await worker.encryptToB64(await worker.fromB64(file.key), collection.key);
+        file.encryptedKey = newEncryptedKey.encryptedData;
+        file.keyDecryptionNonce = newEncryptedKey.nonce;
+        if (params["files"] == undefined) {
+            params["files"] = [];
+        }
+        params["files"].push({
+            id: file.id,
+            encryptedKey: file.encryptedKey,
+            keyDecryptionNonce: file.keyDecryptionNonce
+        })
+        return file;
+    }));
+    await HTTPService.post(`${ENDPOINT}/collections/add-files`, params, { token });
+    
 }
