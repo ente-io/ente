@@ -114,7 +114,7 @@ export const getCollectionLatestFile = async (
         }))
 };
 
-export const createAlbum = async (albumName: string, type: CollectionType, key: string, token: string) => {
+export const createAlbum = async (albumName: string) => {
     return AddCollection(albumName, CollectionType.album);
 }
 
@@ -178,5 +178,5 @@ const addtoCollection = async (collection: collection, files: file[]) => {
         return file;
     }));
     await HTTPService.post(`${ENDPOINT}/collections/add-files`, params, { token });
-    
+
 }

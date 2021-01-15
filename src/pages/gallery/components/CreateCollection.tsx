@@ -3,11 +3,11 @@ import { Button, Form, Modal } from 'react-bootstrap';
 import { createAlbum } from 'services/collectionService';
 import UploadService from 'services/uploadService';
 import { collectionLatestFile } from 'services/collectionService'
-import { getActualKey } from 'utils/common/key';
+import { getToken } from 'utils/common/key';
 
 export default function CreateCollection(props) {
 
-    const { token, acceptedFiles, setProgressView, progressBarProps, refetchData, modalView, closeModal, closeUploadModal } = props;
+    const { acceptedFiles, setProgressView, progressBarProps, refetchData, modalView, closeModal, closeUploadModal } = props;
     const [albumName, setAlbumName] = useState("");
 
     const handleChange = (event) => { setAlbumName(event.target.value); }
@@ -27,12 +27,13 @@ export default function CreateCollection(props) {
         setAlbumName(commonPathPrefix);
     }, [acceptedFiles]);
     const handleSubmit = async (event) => {
+        const token = getToken();
         event.preventDefault();
 
         closeModal();
         closeUploadModal();
-        const masterKey = await getActualKey();
-        const collection = await createAlbum(albumName, masterKey, token);
+
+        const collection = await createAlbum(albumName);
 
         const collectionLatestFile: collectionLatestFile = { collection, file: null }
 

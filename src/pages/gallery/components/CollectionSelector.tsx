@@ -13,20 +13,12 @@ function CollectionSelector(props) {
         ...rest
     } = props;
 
-    const [token, setToken] = useState(null);
-
-    useEffect(() => {
-        (async () => {
-            setToken(getData(LS_KEYS.USER).token);
-        })();
-    });
 
     const CollectionIcons = collectionLatestFile?.map((item) => (
         <CollectionDropZone
             {...rest}
             closeModal={closeUploadModal}
             collectionLatestFile={item}
-            token={token}
         >
             <Card>
                 <PreviewCard data={item.file} updateUrl={() => { }} onClick={() => { }} />
@@ -51,7 +43,6 @@ function CollectionSelector(props) {
                 <AddCollection
                     {...rest}
                     closeUploadModal={closeUploadModal}
-                    token={token}
                 />
                 {CollectionIcons}
             </Modal.Body>

@@ -2,7 +2,7 @@ import React from 'react';
 import Dropzone from 'react-dropzone';
 import styled from 'styled-components';
 import UploadService from 'services/uploadService';
-import { fetchData } from 'services/fileService';
+import { getToken } from 'utils/common/key';
 
 export const getColor = (props) => {
     if (props.isDragAccept) {
@@ -37,12 +37,12 @@ const CollectionDropZone = ({
     refetchData,
     collectionLatestFile,
     setProgressView,
-    token,
     progressBarProps
 
 }) => {
 
     const upload = async (acceptedFiles) => {
+        const token = getToken();
         closeModal();
         progressBarProps.setPercentComplete(0);
         setProgressView(true);
