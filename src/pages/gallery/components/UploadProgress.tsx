@@ -16,7 +16,7 @@ export default function UploadProgress({ fileCounter, uploadStage, now, ...props
         </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {now == 100 ? (
+                {now === 100 ? (
                     <Alert variant='success'>Upload Completed</Alert>
                 ) : (
                         <>
