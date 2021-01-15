@@ -12,3 +12,7 @@ export const getActualKey = async () => {
     const key: string = await cryptoWorker.decryptB64(encryptedKey, session.sessionNonce, session.sessionKey);
     return key;
 }
+
+export const getToken = () => {
+    return getData(LS_KEYS.USER).token;
+}
