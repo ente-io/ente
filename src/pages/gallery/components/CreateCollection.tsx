@@ -47,13 +47,11 @@ export default function CreateCollection(props) {
         <Modal
             show={modalView}
             onHide={closeModal}
-            size='lg'
-            aria-labelledby='contained-modal-title-vcenter'
             centered
             backdrop="static"
         >
             <Modal.Header closeButton>
-                <Modal.Title id='contained-modal-title-vcenter'>
+                <Modal.Title>
                     Create Collection
         </Modal.Title>
             </Modal.Header>
@@ -63,7 +61,7 @@ export default function CreateCollection(props) {
                         <Form.Label>Album Name:</Form.Label>
                         <Form.Control type="text" placeholder="Enter Album Name" value={albumName} onChange={handleChange} />
                     </Form.Group>
-                    <Button variant="primary" type="submit">
+                    <Button variant="primary" type="submit" style={{ width: "100%" }}>
                         Submit
                      </Button>
                 </Form>
