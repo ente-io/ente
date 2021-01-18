@@ -298,8 +298,6 @@ class SyncService {
           file.title, file.deviceFolder, file.creationTime);
       if (existingFiles == null) {
         // File uploaded from a different device
-        _logger.info("Could not find a matching file for " +
-            file.uploadedFileID.toString());
         file.localID = null;
         await _db.insert(file);
       } else {
