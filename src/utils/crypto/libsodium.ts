@@ -87,10 +87,9 @@ export async function encryptChaCha(data: Uint8Array, key?: string) {
     }
 }
 
-export async function encryptToB64(data: Uint8Array, key?: string) {
+export async function encryptToB64(data: string, key?: string) {
     await sodium.ready;
-
-    const encrypted = await encrypt(data, key);
+    const encrypted = await encrypt(await fromB64(data), (key ? await fromB64(key) : null));
 
     return {
         encryptedData: await toB64(encrypted.encryptedData),
@@ -108,10 +107,9 @@ export async function decryptB64(data: string, nonce: string, key: string) {
     return await toB64(decrypted);
 }
 
-export async function encrypt(data: Uint8Array, key?: string) {
+export async function encrypt(data: Uint8Array, key?: Uint8Array) {
     await sodium.ready;
-
-    const uintkey: Uint8Array = key ? await fromB64(key) : sodium.crypto_secretbox_keygen();
+    const uintkey: Uint8Array = key ? key : sodium.crypto_secretbox_keygen();
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
     const encryptedData = sodium.crypto_secretbox_easy(data, nonce, uintkey);
     return {
@@ -126,7 +124,7 @@ export async function decrypt(data: Uint8Array, nonce: Uint8Array, key: Uint8Arr
     return sodium.crypto_secretbox_open_easy(data, nonce, key);
 }
 
-export async function verifyHash(hash: string, input: Uint8Array) {
+export async function verifyHash(hash: string, input: string) {
     await sodium.ready;
     return sodium.crypto_pwhash_str_verify(hash, input);
 }
@@ -140,36 +138,37 @@ export async function hash(input: string | Uint8Array) {
     );
 }
 
-export async function deriveKey(passphrase: Uint8Array, salt: Uint8Array) {
+export async function deriveKey(passphrase: string, salt: string) {
     await sodium.ready;
-    return sodium.crypto_pwhash(
+    return await toB64(sodium.crypto_pwhash(
         sodium.crypto_secretbox_KEYBYTES,
-        passphrase,
-        salt,
+        await fromString(passphrase),
+        await fromB64(salt),
         sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
         sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
         sodium.crypto_pwhash_ALG_DEFAULT,
-    );
+    ));
 }
 
 export async function generateMasterKey() {
     await sodium.ready;
-    return sodium.crypto_kdf_keygen();
+    return await toB64(sodium.crypto_kdf_keygen());
 }
 
 export async function generateSaltToDeriveKey() {
     await sodium.ready;
-    return sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
+    return await toB64(sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES));
 }
 
 export async function generateKeyPair() {
     await sodium.ready;
-    return sodium.crypto_box_keypair();
+    const keyPair: sodium.KeyPair = sodium.crypto_box_keypair();
+    return { privateKey: await toB64(keyPair.privateKey), publicKey: await toB64(keyPair.publicKey) }
 }
 
-export async function boxSealOpen(input: Uint8Array, publicKey: Uint8Array, secretKey: Uint8Array) {
+export async function boxSealOpen(input: string, publicKey: string, secretKey: string) {
     await sodium.ready;
-    return sodium.crypto_box_seal_open(input, publicKey, secretKey);
+    return await toB64(sodium.crypto_box_seal_open(input, await fromB64(publicKey), await fromB64(secretKey)));
 }
 
 export async function fromB64(input: string) {
