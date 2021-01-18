@@ -23,6 +23,7 @@ class SubscriptionPage extends StatefulWidget {
 }
 
 class _SubscriptionPageState extends State<SubscriptionPage> {
+  final _logger = Logger("SubscriptionPage");
   StreamSubscription _purchaseUpdateSubscription;
 
   @override
@@ -32,19 +33,24 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         .listen((event) async {
       for (final e in event) {
         if (e.status == PurchaseStatus.purchased) {
-          Logger("SubscriptionPage")
-              .info(e.verificationData.serverVerificationData);
+          final dialog = createProgressDialog(context, "verifying purchase...");
+          await dialog.show();
           try {
-            await BillingService.instance
-                .loadSubscription(e.verificationData.serverVerificationData);
+            await BillingService.instance.verifySubscription(
+                e.productID, e.verificationData.serverVerificationData);
           } catch (e) {
+            _logger.warning("Could not complete payment ", e);
             showErrorDialog(
                 context,
                 "payment failed",
                 "please talk to " +
                     (Platform.isAndroid ? "PlayStore" : "AppStore") +
                     " support if you were charged");
+            return;
+          } finally {
+            await dialog.hide();
           }
+          await InAppPurchaseConnection.instance.completePurchase(e);
           Bus.instance.fire(UserAuthenticatedEvent());
           Navigator.pop(context);
           AwesomeDialog(
@@ -54,10 +60,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             title: '',
             desc:
                 'your photos and videos will now be encrypted and backed up in the background',
-            btnOkOnPress: () {},
+            btnOkOnPress: () {
+              Navigator.pop(context);
+            },
             btnOkText: 'ok',
             headerAnimationLoop: false,
           )..show();
+        } else if (Platform.isIOS) {
+          await InAppPurchaseConnection.instance.completePurchase(e);
         }
       }
     });
