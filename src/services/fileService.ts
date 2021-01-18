@@ -49,7 +49,7 @@ export interface file {
     metadata: fileAttribute;
     encryptedKey: string;
     keyDecryptionNonce: string;
-    key: Uint8Array;
+    key: string;
     src: string;
     msrc: string;
     html: string;
@@ -159,9 +159,10 @@ export const getFiles = async (
             });
             const promises: Promise<file>[] = resp.data.diff.filter(file => !file.isDeleted).map(
                 async (file: file) => {
-                    file.key = await worker.decrypt(
-                        await worker.fromB64(file.encryptedKey),
-                        await worker.fromB64(file.keyDecryptionNonce),
+                    console.log(file);
+                    file.key = await worker.decryptB64(
+                        file.encryptedKey,
+                        file.keyDecryptionNonce,
                         collection.key
                     );
                     file.metadata = await worker.decryptMetadata(file);

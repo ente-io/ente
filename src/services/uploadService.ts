@@ -19,7 +19,7 @@ localForage.config({
 
 interface encryptionResult {
     file: fileAttribute,
-    key: Uint8Array
+    key: string
 }
 interface keyEncryptionResult {
     encryptedData: string,
@@ -44,7 +44,7 @@ interface encryptedFile {
     metadata: fileAttribute;
     encryptedKey: string;
     keyDecryptionNonce: string;
-    key: Uint8Array;
+    key: string;
 }
 
 interface objectKey {
@@ -181,21 +181,16 @@ class UploadService {
             thumbnail: await this.generateThumbnail(recievedFile)
         }
     }
-    private async encryptFiles(worker, file: formatedFile, encryptionKey: Uint8Array): Promise<encryptedFile> {
+    private async encryptFiles(worker, file: formatedFile, encryptionKey: string): Promise<encryptedFile> {
 
 
-        const encryptFileResult = await worker.encryptFile(
-            file.filedata,
-            null
-        );
-
-        const { key: fileKey, file: filedata }: encryptionResult = encryptFileResult;
+        const { key: fileKey, file: filedata }: encryptionResult = await worker.encryptFile(file.filedata);
 
         const { file: encryptedThumbnail }: encryptionResult = await worker.encryptThumbnail(file.thumbnail, fileKey);
 
         const { file: encryptedMetadata }: encryptionResult = await worker.encryptMetadata(file.metadata, fileKey)
 
-        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(fileKey, encryptionKey);
+        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(await worker.fromB64(fileKey), encryptionKey);
 
 
         const result: encryptedFile = {
