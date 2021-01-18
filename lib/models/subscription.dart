@@ -2,12 +2,12 @@ import 'dart:convert';
 
 class Subscription {
   final String id;
-  final String billingPlanID;
+  final int storageInMBs;
   final int validTill;
 
   Subscription({
     this.id,
-    this.billingPlanID,
+    this.storageInMBs,
     this.validTill,
   });
 
@@ -18,7 +18,7 @@ class Subscription {
   }) {
     return Subscription(
       id: id ?? this.id,
-      billingPlanID: billingPlanID ?? this.billingPlanID,
+      storageInMBs: storageInMBs ?? this.storageInMBs,
       validTill: validTill ?? this.validTill,
     );
   }
@@ -26,7 +26,7 @@ class Subscription {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'billingPlanID': billingPlanID,
+      'storageInMBs': storageInMBs,
       'validTill': validTill,
     };
   }
@@ -36,7 +36,7 @@ class Subscription {
 
     return Subscription(
       id: map['id'],
-      billingPlanID: map['billingPlanID'],
+      storageInMBs: map['storageInMBs'],
       validTill: map['validTill'],
     );
   }
@@ -48,7 +48,7 @@ class Subscription {
 
   @override
   String toString() =>
-      'Subscription(id: $id, billingPlanID: $billingPlanID, validTill: $validTill)';
+      'Subscription(id: $id, storageInMBs: $storageInMBs, validTill: $validTill)';
 
   @override
   bool operator ==(Object o) {
@@ -56,10 +56,10 @@ class Subscription {
 
     return o is Subscription &&
         o.id == id &&
-        o.billingPlanID == billingPlanID &&
+        o.storageInMBs == storageInMBs &&
         o.validTill == validTill;
   }
 
   @override
-  int get hashCode => id.hashCode ^ billingPlanID.hashCode ^ validTill.hashCode;
+  int get hashCode => id.hashCode ^ storageInMBs.hashCode ^ validTill.hashCode;
 }
