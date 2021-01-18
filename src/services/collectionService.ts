@@ -21,7 +21,7 @@ enum CollectionType {
 export interface collection {
     id: string;
     owner: user;
-    key?: Uint8Array;
+    key?: string;
     name: string;
     type: number;
     attributes: collectionAttributes
@@ -37,27 +37,28 @@ interface collectionAttributes {
     pathDecryptionNonce?: string
 };
 
-const getCollectionKey = async (collection: collection, key: Uint8Array) => {
+const getCollectionKey = async (collection: collection, masterKey: string) => {
     const worker = await new CryptoWorker();
     const userID = getData(LS_KEYS.USER).id;
-    var decryptedKey;
+    let decryptedKey: string;
+
     if (collection.owner.id == userID) {
-        decryptedKey = await worker.decrypt(
-            await worker.fromB64(collection.encryptedKey),
-            await worker.fromB64(collection.keyDecryptionNonce),
-            key
+        decryptedKey = await worker.decryptB64(
+            collection.encryptedKey,
+            collection.keyDecryptionNonce,
+            masterKey
         );
     } else {
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-        const secretKey = await worker.decrypt(
-            await worker.fromB64(keyAttributes.encryptedSecretKey),
-            await worker.fromB64(keyAttributes.secretKeyDecryptionNonce),
-            key
+        const secretKey = await worker.decryptB64(
+            keyAttributes.encryptedSecretKey,
+            keyAttributes.secretKeyDecryptionNonce,
+            masterKey
         );
         decryptedKey = await worker.boxSealOpen(
             await worker.fromB64(collection.encryptedKey),
             await worker.fromB64(keyAttributes.publicKey),
-            secretKey
+            await worker.fromB64(secretKey)
         );
     }
     return {
@@ -69,27 +70,26 @@ const getCollectionKey = async (collection: collection, key: Uint8Array) => {
 const getCollections = async (
     token: string,
     sinceTime: string,
-    key: Uint8Array
+    key: string
 ): Promise<collection[]> => {
     const resp = await HTTPService.get(`${ENDPOINT}/collections`, {
         token: token,
         sinceTime: sinceTime,
     });
-
-    const promises: Promise<collection>[] = resp.data.collections.map(
+    const ignore: Set<number> = new Set([206, 208]);
+    const promises: Promise<collection>[] = resp.data.collections.filter(collection => !ignore.has(collection.id)).map(
         (collection: collection) => getCollectionKey(collection, key)
     );
     return await Promise.all(promises);
 };
 
 export const fetchCollections = async (token: string, key: string) => {
-    const worker = await new CryptoWorker();
-    return getCollections(token, '0', await worker.fromB64(key));
+    return getCollections(token, '0', key);
 };
 
-export const createAlbum = async (albumName: string, key: Uint8Array, token: string) => {
+export const createAlbum = async (albumName: string, key: string, token: string) => {
     const worker = await new CryptoWorker();
-    const collectionKey = await worker.generateMasterKey();
+    const collectionKey: Uint8Array = await worker.generateMasterKey();
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(collectionKey, key);
     const newCollection: collection = {
         id: null,
