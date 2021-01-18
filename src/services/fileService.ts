@@ -32,7 +32,7 @@ export interface user {
 export interface collection {
     id: string;
     owner: user;
-    key: Uint8Array;
+    key: string;
     name: string;
     type: string;
     creationTime: number;
@@ -102,8 +102,8 @@ const getCollections = async (
         token: token,
         sinceTime: sinceTime,
     });
-
-    const promises: Promise<collection>[] = resp.data.collections.map(
+    const ignore: Set<number> = new Set([206, 208, 209]);
+    const promises: Promise<collection>[] = resp.data.collections.filter(collection => !ignore.has(collection.id)).map(
         (collection: collection) => getCollectionKey(collection, key)
     );
     return await Promise.all(promises);
@@ -114,7 +114,7 @@ export const fetchCollections = async (token: string, key: string) => {
     return getCollections(token, '0', await worker.fromB64(key));
 };
 
-export const fetchData = async (token, encryptionKey,collections) => {
+export const fetchData = async (token, encryptionKey, collections) => {
     const resp = await getFiles(
         '0',
         token,
