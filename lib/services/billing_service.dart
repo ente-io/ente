@@ -40,28 +40,28 @@ class BillingService {
     return _future;
   }
 
-  Future<Subscription> loadSubscription(String verificationData) async {
-    return _dio
-        .get(
-      _config.getHttpEndpoint() + "/billing/subscription",
-      queryParameters: {
-        "client": Platform.isAndroid ? "android" : "ios",
-        "verificationData": verificationData,
-      },
-      options: Options(
-        headers: {
-          "X-Auth-Token": _config.getToken(),
+  Future<Subscription> verifySubscription(
+      final subscriptionID, final verificationData) async {
+    try {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/billing/verify-subscription",
+        data: {
+          "paymentProvider": Platform.isAndroid ? "playstore" : "appstore",
+          "subscriptionID": subscriptionID,
+          "verificationData": verificationData,
         },
-      ),
-    )
-        .then((response) {
-      if (response == null || response.statusCode != 200) {
-        throw Exception(response);
-      }
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
       final subscription = Subscription.fromMap(response.data["subscription"]);
       setSubscription(subscription);
       return subscription;
-    });
+    } catch (e) {
+      throw e;
+    }
   }
 
   // TODO: Fetch new subscription once the current one has expired?
