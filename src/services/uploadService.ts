@@ -14,7 +14,7 @@ interface encryptionResult {
     file: fileAttribute,
     key: string
 }
-interface keyEncryptionResult {
+export interface keyEncryptionResult {
     encryptedData: string,
     key: string,
     nonce: string,
