@@ -57,7 +57,7 @@ class BillingService {
         ),
       );
       final subscription = Subscription.fromMap(response.data["subscription"]);
-      setSubscription(subscription);
+      await setSubscription(subscription);
       return subscription;
     } catch (e) {
       throw e;
@@ -77,7 +77,7 @@ class BillingService {
   bool hasActiveSubscription() {
     final subscription = getSubscription();
     return subscription != null &&
-        subscription.validTill > DateTime.now().microsecondsSinceEpoch;
+        subscription.expiryTime < DateTime.now().microsecondsSinceEpoch;
   }
 
   Future<void> setSubscription(Subscription subscription) async {
