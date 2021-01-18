@@ -159,13 +159,13 @@ class UploadService {
                 fileType = FILE_TYPE.OTHERS;
         }
 
-        const location = await this.getLocation(recievedFile);
+        const { location, creationTime } = await this.getExifData(recievedFile);
         this.metadataMap.set(recievedFile.name, {
             title: recievedFile.name,
-            creationTime: (recievedFile.lastModified) * 1000,
+            creationTime: creationTime || (recievedFile.lastModified) * 1000,
             modificationTime: (recievedFile.lastModified) * 1000,
-            latitude: location.lat,
-            longitude: location.lon,
+            latitude: location?.lat,
+            longitude: location?.lon,
             fileType,
         });
         return {
@@ -334,7 +334,7 @@ class UploadService {
         return fileUploadURL.objectKey;
     }
 
-    private async getLocation(recievedFile) {
+    private async getExifData(recievedFile) {
         const exifData: any = await new Promise((resolve, reject) => {
             const reader = new FileReader()
             reader.onload = () => {
@@ -342,9 +342,26 @@ class UploadService {
             }
             reader.readAsArrayBuffer(recievedFile)
         });
-        if (!exifData || !exifData.GPSLatitude)
+        if (!exifData)
+            return null;
+        return {
+            location: this.getLocation(exifData),
+            creationTime: this.getUNIXTime(exifData)
+        };
+    }
+    private getUNIXTime(exifData: any) {
+        if (!exifData.DateTimeOriginal)
+            return null;
+        let dateString: string = exifData.DateTimeOriginal;
+        var parts = dateString.split(' ')[0].split(":");
+        var date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        return date.getTime() * 1000;
+    }
+
+    private getLocation(exifData) {
+
+        if (!exifData.GPSLatitude)
             return { lat: null, lon: null };
-        console.log(exifData);
         var latDegree = exifData.GPSLatitude[0].numerator;
         var latMinute = exifData.GPSLatitude[1].numerator;
         var latSecond = exifData.GPSLatitude[2].numerator;
