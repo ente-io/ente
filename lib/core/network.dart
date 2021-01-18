@@ -17,12 +17,14 @@ class Network {
         responseBody: true,
         logPrint: (object) {
           log(object);
-          SuperLogging.logFile.writeAsString(
-            object.toString() + "\n",
-            encoding: Utf8Codec(allowMalformed: true),
-            mode: FileMode.append,
-            flush: true,
-          );
+          if (Platform.isAndroid) {
+            SuperLogging.logFile.writeAsString(
+              object.toString() + "\n",
+              encoding: Utf8Codec(allowMalformed: true),
+              mode: FileMode.append,
+              flush: true,
+            );
+          }
         }));
   }
   static Network instance = Network._privateConstructor();
