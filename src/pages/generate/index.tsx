@@ -12,6 +12,7 @@ import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import * as Comlink from "comlink";
+import { keyEncryptionResult } from 'services/uploadService';
 
 const CryptoWorker: any = typeof window !== 'undefined'
     && Comlink.wrap(new Worker("worker/crypto.worker.js", { type: 'module' }));
@@ -51,30 +52,30 @@ export default function Generate() {
             const { passphrase, confirm } = values;
             if (passphrase === confirm) {
                 const cryptoWorker = await new CryptoWorker();
-                const key = await cryptoWorker.generateMasterKey();
-                const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
-                const kek = await cryptoWorker.deriveKey(
-                    await cryptoWorker.fromString(passphrase), kekSalt);
-                const kekHash = await cryptoWorker.hash(kek);
-                const encryptedKeyAttributes = await cryptoWorker.encrypt(key, kek);
+                const key: string = await cryptoWorker.generateMasterKey();
+                const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
+                const kek: string = await cryptoWorker.deriveKey(passphrase, kekSalt);
+                const kekHash: string = await cryptoWorker.hash(kek);
+                const encryptedKeyAttributes: keyEncryptionResult = await cryptoWorker.encryptToB64(key, kek);
                 const keyPair = await cryptoWorker.generateKeyPair();
-                const encryptedKeyPairAttributes = await cryptoWorker.encrypt(keyPair.privateKey, key);
+                const encryptedKeyPairAttributes: keyEncryptionResult = await cryptoWorker.encryptToB64(keyPair.privateKey, key);
+
                 const keyAttributes = {
-                    kekSalt: await cryptoWorker.toB64(kekSalt),
+                    kekSalt,
                     kekHash: kekHash,
-                    encryptedKey: await cryptoWorker.toB64(encryptedKeyAttributes.encryptedData),
-                    keyDecryptionNonce: await cryptoWorker.toB64(encryptedKeyAttributes.nonce),
-                    publicKey: await cryptoWorker.toB64(keyPair.publicKey),
-                    encryptedSecretKey: await cryptoWorker.toB64(encryptedKeyPairAttributes.encryptedData),
-                    secretKeyDecryptionNonce: await cryptoWorker.toB64(encryptedKeyPairAttributes.nonce)
+                    encryptedKey: encryptedKeyAttributes.encryptedData,
+                    keyDecryptionNonce: encryptedKeyAttributes.nonce,
+                    publicKey: keyPair.publicKey,
+                    encryptedSecretKey: encryptedKeyPairAttributes.encryptedData,
+                    secretKeyDecryptionNonce: encryptedKeyPairAttributes.nonce
                 };
                 await putAttributes(token, getData(LS_KEYS.USER).name, keyAttributes);
                 setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
 
-                const sessionKeyAttributes = await cryptoWorker.encrypt(key);
-                const sessionKey = await cryptoWorker.toB64(sessionKeyAttributes.key);
-                const sessionNonce = await cryptoWorker.toB64(sessionKeyAttributes.nonce);
-                const encryptionKey = await cryptoWorker.toB64(sessionKeyAttributes.encryptedData);
+                const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
+                const sessionKey = sessionKeyAttributes.key;
+                const sessionNonce = sessionKeyAttributes.nonce;
+                const encryptionKey = sessionKeyAttributes.encryptedData;
                 setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
                 setData(LS_KEYS.SESSION, { sessionKey, sessionNonce });
                 router.push('/gallery');
