@@ -17,7 +17,7 @@ interface encryptionResult {
 }
 export interface keyEncryptionResult {
     encryptedData: string,
-    key: Uint8Array,
+    key: string,
     nonce: string,
 }
 
@@ -186,7 +186,7 @@ class UploadService {
 
         const { file: encryptedMetadata }: encryptionResult = await worker.encryptMetadata(file.metadata, fileKey)
 
-        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(await worker.fromB64(fileKey), encryptionKey);
+        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(fileKey, encryptionKey);
 
 
         const result: encryptedFile = {
