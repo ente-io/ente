@@ -51,7 +51,7 @@ class SyncService {
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       _logger.info("Connectivity change detected " + result.toString());
       if (Configuration.instance.hasConfiguredAccount() &&
-          BillingService.instance.hasActiveSubscription()) {
+          BillingService.instance.getSubscription() != null) {
         sync(isAppInBackground: true);
       }
     });
