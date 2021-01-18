@@ -1,7 +1,6 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
-import localForage from 'localforage';
 import EXIF from "exif-js";
 import { fileAttribute, collectionLatestFile, } from './fileService';
 import { FILE_TYPE } from 'pages/gallery';
@@ -10,12 +9,6 @@ const CryptoWorker: any =
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 const ENDPOINT = getEndpoint();
 
-localForage.config({
-    driver: localForage.INDEXEDDB,
-    name: 'ente-files',
-    version: 1.0,
-    storeName: 'files',
-});
 
 interface encryptionResult {
     file: fileAttribute,
@@ -104,10 +97,10 @@ class UploadService {
             let metadataFiles: File[] = [];
             let actualFiles: File[] = [];
             recievedFiles.forEach(file => {
-                if (file.type === "application/json")
-                    metadataFiles.push(file);
-                else
+                if (file.type.substr(0, 5) === "image" || file.type.substr(0, 5) === "video")
                     actualFiles.push(file);
+                if (file.name.slice(-4) == "json")
+                    metadataFiles.push(file);
             });
             this.totalFilesCount = actualFiles.length;
             this.perStepProgress = 100 / (2 * actualFiles.length);
@@ -351,6 +344,7 @@ class UploadService {
         });
         if (!exifData || !exifData.GPSLatitude)
             return { lat: null, lon: null };
+        console.log(exifData);
         var latDegree = exifData.GPSLatitude[0].numerator;
         var latMinute = exifData.GPSLatitude[1].numerator;
         var latSecond = exifData.GPSLatitude[2].numerator;
