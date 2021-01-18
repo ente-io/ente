@@ -66,7 +66,7 @@ dependencies:
   pretty_dio_logger: ^1.1.1
   url_launcher: ^5.7.10
   fluttercontactpicker: ^3.1.0
-  in_app_purchase: ^0.3.4+16
+  in_app_purchase: ^0.3.5+1
   expansion_card: ^0.1.0
   flutter_password_strength: ^0.1.4
   flutter_inappwebview: ^4.0.0+4
