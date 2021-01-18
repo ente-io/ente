@@ -1,25 +1,25 @@
 import 'dart:convert';
 
 class Subscription {
-  final String id;
+  final int id;
   final int storageInMBs;
-  final int validTill;
+  final int expiryTime;
 
   Subscription({
     this.id,
     this.storageInMBs,
-    this.validTill,
+    this.expiryTime,
   });
 
   Subscription copyWith({
-    String id,
-    String billingPlanID,
-    int validTill,
+    int id,
+    int storageInMBs,
+    int expiryTime,
   }) {
     return Subscription(
       id: id ?? this.id,
       storageInMBs: storageInMBs ?? this.storageInMBs,
-      validTill: validTill ?? this.validTill,
+      expiryTime: expiryTime ?? this.expiryTime,
     );
   }
 
@@ -27,7 +27,7 @@ class Subscription {
     return {
       'id': id,
       'storageInMBs': storageInMBs,
-      'validTill': validTill,
+      'expiryTime': expiryTime,
     };
   }
 
@@ -37,7 +37,7 @@ class Subscription {
     return Subscription(
       id: map['id'],
       storageInMBs: map['storageInMBs'],
-      validTill: map['validTill'],
+      expiryTime: map['expiryTime'],
     );
   }
 
@@ -48,7 +48,7 @@ class Subscription {
 
   @override
   String toString() =>
-      'Subscription(id: $id, storageInMBs: $storageInMBs, validTill: $validTill)';
+      'Subscription(id: $id, storageInMBs: $storageInMBs, expiryTime: $expiryTime)';
 
   @override
   bool operator ==(Object o) {
@@ -57,9 +57,9 @@ class Subscription {
     return o is Subscription &&
         o.id == id &&
         o.storageInMBs == storageInMBs &&
-        o.validTill == validTill;
+        o.expiryTime == expiryTime;
   }
 
   @override
-  int get hashCode => id.hashCode ^ storageInMBs.hashCode ^ validTill.hashCode;
+  int get hashCode => id.hashCode ^ storageInMBs.hashCode ^ expiryTime.hashCode;
 }
