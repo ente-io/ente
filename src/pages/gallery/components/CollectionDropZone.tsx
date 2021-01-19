@@ -18,8 +18,10 @@ const getColor = (props) => {
 
 const enableBorder = (props) => (props.isDragActive ? 'dashed' : 'none');
 
-const DropDiv = styled.div`
-  width:33%;
+export const DropDiv = styled.div`
+  width:200px;
+  margin:5px;
+  height:230px;
   border-width: 2px;
   border-radius: 2px;
   border-color: ${(props) => getColor(props)};

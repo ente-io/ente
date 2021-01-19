@@ -80,6 +80,10 @@ const GlobalStyles = createGlobalStyle`
     .pswp__img {
         object-fit: contain;
     }
+    .modal-90w{
+        width:90vw;
+        max-width:880px!important;
+    }
 `;
 
 const Image = styled.img`

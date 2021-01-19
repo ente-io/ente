@@ -35,27 +35,25 @@ function CollectionSelector({
             setData={setData}
             progressBarProps={progressBarProps}
         >
-            <Card style={{ cursor: 'pointer', border: 'solid', width: "95%", marginBottom: "5px", padding: "auto" }}>
+            <Card>
                 <PreviewCard data={item.file} updateUrl={() => { }} onClick={() => { }} />
-                <Card.Body>
-                    <Card.Text>{item.collection.name}</Card.Text>
-                </Card.Body>
+                <Card.Text style={{ textAlign: 'center' }}>{item.collection.name}</Card.Text>
             </Card>
+
         </CollectionDropZone>
     ));
     return (
         <Modal
             show={uploadModalView}
-            aria-labelledby='contained-modal-title-vcenter'
-            centered
             onHide={closeUploadModal}
+            dialogClassName="modal-90w"
         >
             <Modal.Header closeButton>
-                <Modal.Title id='contained-modal-title-vcenter'>
+                <Modal.Title >
                     Select/Click on Collection to upload
-        </Modal.Title>
+                    </Modal.Title>
             </Modal.Header>
-            <Modal.Body style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}>
+            <Modal.Body style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap" }}>
                 {CollectionIcons}
             </Modal.Body>
             <Modal.Footer>
