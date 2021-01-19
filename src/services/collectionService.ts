@@ -65,9 +65,9 @@ const getCollectionKey = async (collection: collection, masterKey: string) => {
             masterKey
         );
         decryptedKey = await worker.boxSealOpen(
-            await worker.fromB64(collection.encryptedKey),
-            await worker.fromB64(keyAttributes.publicKey),
-            await worker.fromB64(secretKey)
+            await collection.encryptedKey,
+            await keyAttributes.publicKey,
+            await secretKey
         );
     }
     return {
@@ -123,7 +123,7 @@ export const AddCollection = async (albumName: string, type: CollectionType) => 
     const worker = await new CryptoWorker();
     const encryptionKey = await getActualKey();
     const token = getToken();
-    const collectionKey: Uint8Array = await worker.generateMasterKey();
+    const collectionKey: string = await worker.generateMasterKey();
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(collectionKey, encryptionKey);
     const newCollection: collection = {
         id: null,
@@ -157,14 +157,13 @@ export const addToFavorites = async (file: file) => {
 }
 
 const addtoCollection = async (collection: collection, files: file[]) => {
-    console.log(collection, files);
     const params = new Object();
     const worker = await new CryptoWorker();
     const token = getToken();
     params["collectionID"] = collection.id;
     const newFiles: file[] = await Promise.all(files.map(async file => {
         file.collectionID = Number(collection.id);
-        const newEncryptedKey: keyEncryptionResult = await worker.encryptToB64(await worker.fromB64(file.key), collection.key);
+        const newEncryptedKey: keyEncryptionResult = await worker.encryptToB64(file.key, collection.key);
         file.encryptedKey = newEncryptedKey.encryptedData;
         file.keyDecryptionNonce = newEncryptedKey.nonce;
         if (params["files"] == undefined) {
