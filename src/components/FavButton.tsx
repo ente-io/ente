@@ -2,7 +2,6 @@ import React from "react";
 import styled from "styled-components";
 
 const HeartUI = styled.button.attrs(props => ({
-    className: props.className,
     isClick: props['isClick']
 }))`
   width: 100px;
