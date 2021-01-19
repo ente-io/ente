@@ -8,6 +8,7 @@ import PreviewCard from './PreviewCard';
 function CollectionSelector({
     uploadModalView,
     closeUploadModal,
+    showUploadModal,
     collectionLatestFile,
     setProgressView,
     setData,
@@ -25,6 +26,7 @@ function CollectionSelector({
     const CollectionIcons = collectionLatestFile?.map((item) => (
         <CollectionDropZone key={item.collectionID}
             closeModal={closeUploadModal}
+            showModal={showUploadModal}
             collectionLatestFile={item}
             noDragEventsBubbling
             setProgressView={setProgressView}

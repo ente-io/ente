@@ -296,6 +296,7 @@ export default function Gallery(props) {
       />
       <Upload
        uploadModalView={props.uploadModalView}
+       showUploadModal={props.showUploadModal}
        closeUploadModal={props.closeUploadModal}
        collectionLatestFile={collectionLatestFile}
        setData={setData}/>

@@ -32,6 +32,7 @@ const CollectionDropZone = ({
     children,
     closeModal,
     setData,
+    showModal,
     collectionLatestFile,
     noDragEventsBubbling,
     setProgressView,
@@ -53,6 +54,7 @@ const CollectionDropZone = ({
     return (
         <Dropzone
             onDropAccepted={upload}
+            onDragOver={showModal}
             onDropRejected={closeModal}
             noDragEventsBubbling={noDragEventsBubbling}
             accept="image/*, video/*, application/json "
