@@ -141,38 +141,36 @@ export default function App({ Component, pageProps }) {
     };
 
     return (
-        <>
-            <FullScreenDropZone
-                noClick
-                closeModal={closeUploadModal}
-                showModal={showUploadModal}
-            >
-                <Head>
-                    <title>ente.io | Privacy friendly alternative to Google Photos</title>
-                </Head>
-                <GlobalStyles />
-                <Navbar>
-                    <FlexContainer>
-                        <Image alt='logo' src='/icon.png' />
-                        {constants.COMPANY_NAME}
-                    </FlexContainer>
-                    {uploadButtonView && <UploadButton showModal={showUploadModal} />}
-                    {user &&
-                        <Button variant='link' onClick={logout}>
-                            <PowerSettings />
-                        </Button>
-                    }
-                </Navbar>
-                {loading ? (
-                    <Container>
-                        <Spinner animation='border' role='status' variant='primary'>
-                            <span className='sr-only'>Loading...</span>
-                        </Spinner>
-                    </Container>
-                ) : (
-                        <Component uploadModalView={uploadModalView} closeUploadModal={closeUploadModal} setUploadButtonView={setUploadButtonView} />
-                    )}
-            </FullScreenDropZone>
-        </>
+        <FullScreenDropZone
+            noClick
+            closeModal={closeUploadModal}
+            showModal={showUploadModal}
+        >
+            <Head>
+                <title>ente.io | Privacy friendly alternative to Google Photos</title>
+            </Head>
+            <GlobalStyles />
+            <Navbar>
+                <FlexContainer>
+                    <Image alt='logo' src='/icon.png' />
+                    {constants.COMPANY_NAME}
+                </FlexContainer>
+                {uploadButtonView && <UploadButton showModal={showUploadModal} />}
+                {user &&
+                    <Button variant='link' onClick={logout}>
+                        <PowerSettings />
+                    </Button>
+                }
+            </Navbar>
+            {loading ? (
+                <Container>
+                    <Spinner animation='border' role='status' variant='primary'>
+                        <span className='sr-only'>Loading...</span>
+                    </Spinner>
+                </Container>
+            ) : (
+                    <Component uploadModalView={uploadModalView} closeUploadModal={closeUploadModal} setUploadButtonView={setUploadButtonView} />
+                )}
+        </FullScreenDropZone>
     );
 }
