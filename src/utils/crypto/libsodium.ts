@@ -126,7 +126,7 @@ export async function decrypt(data: Uint8Array, nonce: Uint8Array, key: Uint8Arr
 
 export async function verifyHash(hash: string, input: string) {
     await sodium.ready;
-    return sodium.crypto_pwhash_str_verify(hash, input);
+    return sodium.crypto_pwhash_str_verify(hash, await fromB64(input));
 }
 
 export async function hash(input: string | Uint8Array) {
