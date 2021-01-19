@@ -134,6 +134,10 @@ class PhotoSwipe extends React.Component {
                             <div className="pswp__counter" />
 
                             <button
+                                className="pswp__button pswp__button--close"
+                                title="Share"
+                            />
+                            <button
                                 className="pswp__button pswp__button--share"
                                 title="Share"
                             />
@@ -142,7 +146,7 @@ class PhotoSwipe extends React.Component {
                                 title="Toggle fullscreen"
                             />
                             <button className="pswp__button pswp__button--zoom" title="Zoom in/out" />
-                            <FavButton className="pswp__button" isClick={this.state.isClick} onClick={() => { this.setState({ isClick: !this.state.isClick }); addToFavorites(this.photoSwipe.currItem) }} />
+                            <FavButton isClick={this.state.isClick} onClick={() => { this.setState({ isClick: !this.state.isClick }); addToFavorites(this.photoSwipe.currItem) }} />
                             <div className="pswp__preloader">
                                 <div className="pswp__preloader__icn">
                                     <div className="pswp__preloader__cut">
