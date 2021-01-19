@@ -3,7 +3,7 @@ import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
 import EXIF from "exif-js";
 import { fileAttribute } from './fileService';
-import { collectionLatestFile } from "./collectionService"
+import { collectionLatestFile } from "./fileService"
 import { FILE_TYPE } from 'pages/gallery';
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
