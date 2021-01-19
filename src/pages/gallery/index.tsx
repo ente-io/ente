@@ -291,6 +291,7 @@ export default function Gallery(props) {
             <Upload
                 uploadModalView={props.uploadModalView}
                 closeUploadModal={props.closeUploadModal}
+                showUploadModal={props.showUploadModal}
                 collectionLatestFile={collectionLatestFile}
                 refetchData={() => setReload(Math.random())} />
 

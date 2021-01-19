@@ -9,6 +9,7 @@ function CollectionSelector(props) {
     const {
         uploadModalView,
         closeUploadModal,
+        showUploadModal,
         collectionLatestFile,
         ...rest
     } = props;
@@ -18,6 +19,7 @@ function CollectionSelector(props) {
         <CollectionDropZone
             {...rest}
             closeModal={closeUploadModal}
+            showModal={showUploadModal}
             collectionLatestFile={item}
         >
             <Card>
@@ -42,6 +44,7 @@ function CollectionSelector(props) {
             <Modal.Body style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap" }}>
                 <AddCollection
                     {...rest}
+                    showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}
                 />
                 {CollectionIcons}

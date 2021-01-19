@@ -34,6 +34,7 @@ export const DropDiv = styled.div`
 const CollectionDropZone = ({
     children,
     closeModal,
+    showModal,
     refetchData,
     collectionLatestFile,
     setProgressView,
@@ -54,6 +55,7 @@ const CollectionDropZone = ({
     return (
         <Dropzone
             onDropAccepted={upload}
+            onDragOver={showModal}
             onDropRejected={closeModal}
             noDragEventsBubbling
             accept="image/*, video/*, application/json, "

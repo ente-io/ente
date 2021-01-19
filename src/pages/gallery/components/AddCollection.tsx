@@ -14,7 +14,7 @@ export default function AddCollection(props) {
     const [acceptedFiles, setAcceptedFiles] = useState<File[]>();
     const [createCollectionView, setCreateCollectionView] = useState(false);
 
-    const { children, closeUploadModal, ...rest } = props;
+    const { children, closeUploadModal, showUploadModal, ...rest } = props;
 
     const createCollection = (acceptedFiles) => {
         setAcceptedFiles(acceptedFiles);
@@ -26,6 +26,7 @@ export default function AddCollection(props) {
             <Dropzone
                 onDropAccepted={createCollection}
                 onDropRejected={closeUploadModal}
+                onDragOver={showUploadModal}
                 noDragEventsBubbling
                 accept="image/*, video/*, application/json,"
             >
