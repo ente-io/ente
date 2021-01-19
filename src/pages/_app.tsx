@@ -142,7 +142,6 @@ export default function App({ Component, pageProps }) {
 
     return (
         <FullScreenDropZone
-            noClick
             closeModal={closeUploadModal}
             showModal={showUploadModal}
         >
@@ -169,7 +168,7 @@ export default function App({ Component, pageProps }) {
                     </Spinner>
                 </Container>
             ) : (
-                    <Component uploadModalView={uploadModalView} closeUploadModal={closeUploadModal} setUploadButtonView={setUploadButtonView} />
+                    <Component uploadModalView={uploadModalView} showUploadModal={showUploadModal} closeUploadModal={closeUploadModal} setUploadButtonView={setUploadButtonView} />
                 )}
         </FullScreenDropZone>
     );
