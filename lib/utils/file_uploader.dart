@@ -219,7 +219,8 @@ class FileUploader {
           await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
 
       // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
-      if (file.location.latitude == 0 && file.location.longitude == 0) {
+      if (file.location == null ||
+          (file.location.latitude == 0 && file.location.longitude == 0)) {
         final latLong = await (await file.getAsset()).latlngAsync();
         file.location = Location(latLong.latitude, latLong.longitude);
       }

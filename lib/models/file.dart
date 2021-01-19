@@ -89,8 +89,12 @@ class File {
     metadata["deviceFolder"] = deviceFolder;
     metadata["creationTime"] = creationTime;
     metadata["modificationTime"] = modificationTime;
-    metadata["latitude"] = location.latitude;
-    metadata["longitude"] = location.longitude;
+    if (location != null &&
+        location.latitude != null &&
+        location.longitude != null) {
+      metadata["latitude"] = location.latitude;
+      metadata["longitude"] = location.longitude;
+    }
     metadata["fileType"] = fileType.index;
     return metadata;
   }
