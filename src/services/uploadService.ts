@@ -247,7 +247,7 @@ class UploadService {
         const metaDataObject = this.metadataMap.get(metadataJSON['title']);
         metaDataObject['creationTime'] = metadataJSON['photoTakenTime']['timestamp'] * 1000000;
         metaDataObject['modificationTime'] = metadataJSON['modificationTime']['timestamp'] * 1000000;
-        if (!metaDataObject['latitude']) {
+        if (!metaDataObject['latitude'] && metaDataObject['latitude'] != 0 && metaDataObject['longitude'] != 0) {
             metaDataObject['latitude'] = metadataJSON['geoData']['latitude'];
             metaDataObject['longitude'] = metadataJSON['geoData']['longitude'];
         }
@@ -346,7 +346,7 @@ class UploadService {
             reader.readAsArrayBuffer(recievedFile)
         });
         if (!exifData)
-            return null;
+            return { location: null, creationTime: null };
         return {
             location: this.getLocation(exifData),
             creationTime: this.getUNIXTime(exifData)
@@ -364,7 +364,7 @@ class UploadService {
     private getLocation(exifData) {
 
         if (!exifData.GPSLatitude)
-            return { lat: null, lon: null };
+            return null;
         var latDegree = exifData.GPSLatitude[0].numerator;
         var latMinute = exifData.GPSLatitude[1].numerator;
         var latSecond = exifData.GPSLatitude[2].numerator;
