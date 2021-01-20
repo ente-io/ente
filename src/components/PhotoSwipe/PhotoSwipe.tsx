@@ -17,7 +17,6 @@ interface Iprops {
     className?: string;
     favItemIds: Set<number>;
     setFavItemIds: (favItemIds: Set<number>) => void;
-    refetchData: () => void;
 };
 
 function PhotoSwipe(props: Iprops) {
@@ -110,7 +109,7 @@ function PhotoSwipe(props: Iprops) {
     }
 
     const onFavClick = async (file) => {
-        const { favItemIds, refetchData, setFavItemIds } = props;
+        const { favItemIds, setFavItemIds } = props;
         if (!isInFav(file)) {
             favItemIds.add(file.id);
             await addToFavorites(file);
