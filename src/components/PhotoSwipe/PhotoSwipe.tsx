@@ -4,7 +4,7 @@ import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
 import events from './events';
 import FavButton from 'components/FavButton';
-import { addToFavorites } from 'services/collectionService';
+import { addToFavorites, removeFromFavorites } from 'services/collectionService';
 import { file } from 'services/fileService';
 
 interface Iprops {
@@ -109,16 +109,18 @@ function PhotoSwipe(props: Iprops) {
             return false;
     }
 
-    const onFavClick = (file) => {
+    const onFavClick = async (file) => {
         const { favItemIds, refetchData, setFavItemIds } = props;
         if (!isInFav(file)) {
             favItemIds.add(file.id);
+            await addToFavorites(file);
             console.log("added to Favorites");
             setIsFav(true);
             setFavItemIds(favItemIds);
         }
         else {
             favItemIds.delete(file.id);
+            await removeFromFavorites(file)
             console.log("removed from Favorites");
             setIsFav(false);
             setFavItemIds(favItemIds);

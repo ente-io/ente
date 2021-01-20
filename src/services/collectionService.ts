@@ -119,7 +119,7 @@ export const getFavItemIds = async (files: file[]): Promise<Set<number>> => {
     let favCollection: collection = (await localForage.getItem<collection>('fav-collection'))[0];
     if (!favCollection)
         return new Set();
-        
+
     return new Set(files.filter(file => file.collectionID === Number(favCollection.id)).map((file): number => file.id));
 }
 
@@ -165,12 +165,17 @@ export const addToFavorites = async (file: file) => {
     await addtoCollection(favCollection, [file])
 }
 
+export const removeFromFavorites = async (file: file) => {
+    let favCollection: collection = (await localForage.getItem<collection>('fav-collection'))[0];
+    await removeFromCollection(favCollection, [file])
+}
+
 const addtoCollection = async (collection: collection, files: file[]) => {
     const params = new Object();
     const worker = await new CryptoWorker();
     const token = getToken();
     params["collectionID"] = collection.id;
-    const newFiles: file[] = await Promise.all(files.map(async file => {
+    await Promise.all(files.map(async file => {
         file.collectionID = Number(collection.id);
         const newEncryptedKey: keyEncryptionResult = await worker.encryptToB64(file.key, collection.key);
         file.encryptedKey = newEncryptedKey.encryptedData;
@@ -186,5 +191,17 @@ const addtoCollection = async (collection: collection, files: file[]) => {
         return file;
     }));
     await HTTPService.post(`${ENDPOINT}/collections/add-files`, params, { token });
-
 }
+const removeFromCollection = async (collection: collection, files: file[]) => {
+    const params = new Object();
+    const token = getToken();
+    params["collectionID"] = collection.id;
+    await Promise.all(files.map(async file => {
+        if (params["fileIDs"] == undefined) {
+            params["fileIDs"] = [];
+        }
+        params["fileIDs"].push(file.id);
+    }));
+    await HTTPService.post(`${ENDPOINT}/collections/remove-files`, params, { token });
+}
+
