@@ -46,6 +46,7 @@ export interface file {
     h: number;
     isDeleted: boolean;
     dataIndex: number;
+    updationTime: number;
 }
 
 
@@ -73,6 +74,18 @@ export const fetchFiles = async (
     const fetchedFiles = await getFiles(collections, null, "100", token);
 
     files.push(...fetchedFiles);
+    var latestFiles = new Map<string, file>();
+    files.forEach((file) => {
+        let uid = `${file.collectionID}-${file.id}`;
+        if (!latestFiles.has(uid) || latestFiles.get(uid).updationTime < file.updationTime) {
+            latestFiles.set(uid, file);
+        }
+    });
+    files = [];
+    for (const [_, file] of latestFiles.entries()) {
+        if (!file.isDeleted)
+            files.push(file);
+    }
     files = files.sort(
         (a, b) => b.metadata.creationTime - a.metadata.creationTime
     );
@@ -99,14 +112,17 @@ export const getFiles = async (collections: collection[], sinceTime: string, lim
                 token,
                 limit,
             });
-            promises.push(...resp.data.diff.filter(file => !file.isDeleted).map(
+            promises.push(...resp.data.diff.map(
                 async (file: file) => {
-                    file.key = await worker.decryptB64(
-                        file.encryptedKey,
-                        file.keyDecryptionNonce,
-                        collection.key
-                    );
-                    file.metadata = await worker.decryptMetadata(file);
+                    if (!file.isDeleted) {
+
+                        file.key = await worker.decryptB64(
+                            file.encryptedKey,
+                            file.keyDecryptionNonce,
+                            collection.key
+                        );
+                        file.metadata = await worker.decryptMetadata(file);
+                    }
                     return file;
                 }
             ));
