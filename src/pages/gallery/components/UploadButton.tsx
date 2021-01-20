@@ -2,7 +2,7 @@ import CollectionSelector from 'pages/gallery/components/CollectionSelector';
 import React, { useRef } from 'react';
 import { Button } from 'react-bootstrap';
 
-const UploadButton = ({ showModal }) => {
+function UploadButton({ showModal }) {
     return (
         <Button variant='primary' onClick={showModal}>
             Upload New Photos

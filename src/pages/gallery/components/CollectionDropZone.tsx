@@ -31,7 +31,7 @@ export const DropDiv = styled.div`
   transition: border 0.24s ease-in-out;
 `;
 
-const CollectionDropZone = ({
+function CollectionDropZone({
     children,
     closeModal,
     setData,
@@ -43,7 +43,7 @@ const CollectionDropZone = ({
     encryptionKey,
     progressBarProps
 
-}) => {
+}) {
 
     const upload = async (acceptedFiles) => {
         closeModal();
