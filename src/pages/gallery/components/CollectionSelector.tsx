@@ -19,7 +19,7 @@ function CollectionSelector({
     const [encryptionKey, setEncryptionKey] = useState(null);
     useEffect(() => {
         (async () => {
-            setToken(getData(LS_KEYS.USER).token);
+            setToken(getData(LS_KEYS.USER)?.token);
             setEncryptionKey(await getActualKey());
         })();
     });
