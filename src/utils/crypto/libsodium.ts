@@ -129,10 +129,10 @@ export async function verifyHash(hash: string, input: string) {
     return sodium.crypto_pwhash_str_verify(hash, await fromB64(input));
 }
 
-export async function hash(input: string | Uint8Array) {
+export async function hash(input: string) {
     await sodium.ready;
     return sodium.crypto_pwhash_str(
-        input,
+        await fromB64(input),
         sodium.crypto_pwhash_OPSLIMIT_SENSITIVE,
         sodium.crypto_pwhash_MEMLIMIT_MODERATE,
     );
