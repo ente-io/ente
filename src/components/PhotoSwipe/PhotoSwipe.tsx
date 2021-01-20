@@ -6,28 +6,29 @@ import classnames from 'classnames';
 import events from './events';
 import FavButton from 'components/FavButton';
 import { addToFavorites } from 'services/collectionService';
+import { file } from 'services/fileService';
 
-class PhotoSwipe extends React.Component {
-    static propTypes = {
-        isOpen: PropTypes.bool.isRequired,
-        items: PropTypes.array.isRequired,
-        options: PropTypes.object,
-        onClose: PropTypes.func,
-        id: PropTypes.string,
-        className: PropTypes.string
-    };
-
-    static defaultProps = {
-        options: {},
-        onClose: () => {
-        },
-        id: '',
-        className: ''
-    };
-
+interface Iprops {
+    isOpen: boolean
+    items: any[];
+    options?: Object;
+    onClose?: () => void;
+    gettingData?: (instance: any, index: number, item: file) => void;
+    id?: string;
+    className?: string;
+    favItemIds: Set<number>
+    setFavItemIds: React.Dispatch<React.SetStateAction<Set<number>>>
+};
+interface Istates {
+    isOpen: boolean;
+    favItemIds: Set<number>
+}
+class PhotoSwipe extends React.Component<Iprops, Istates> {
+    private pswpElement: any = null;
+    private photoSwipe: any = null;
     state = {
         isOpen: this.props.isOpen,
-        isClick: false,
+        favItemIds: this.props.favItemIds,
     };
 
     componentDidMount = () => {
@@ -106,6 +107,32 @@ class PhotoSwipe extends React.Component {
             }
         });
     };
+    isInFav = (file) => {
+        const { favItemIds } = this.state;
+        if (favItemIds && file) {
+            return favItemIds.has(file.id);
+        }
+    }
+    onFavClick = (file) => {
+        const { setFavItemIds } = this.props;
+        const { favItemIds } = this.state;
+
+        if (!favItemIds || !file)
+            return;
+        if (!this.isInFav(file)) {
+            favItemIds.add(file.id);
+            setFavItemIds(favItemIds);
+            console.log("added to Favorites");
+            this.setState(() => ({ favItemIds }));
+
+        }
+        else {
+            favItemIds.delete(file.id);
+            setFavItemIds(favItemIds);
+            this.setState(() => ({ favItemIds }));
+            console.log("removed from Favorites");
+        }
+    }
 
     render() {
         const { id } = this.props;
@@ -115,7 +142,7 @@ class PhotoSwipe extends React.Component {
             <div
                 id={id}
                 className={className}
-                tabIndex="-1"
+                tabIndex={Number("-1")}
                 role="dialog"
                 aria-hidden="true"
                 ref={(node) => {
@@ -146,7 +173,7 @@ class PhotoSwipe extends React.Component {
                                 title="Toggle fullscreen"
                             />
                             <button className="pswp__button pswp__button--zoom" title="Zoom in/out" />
-                            <FavButton isClick={this.state.isClick} onClick={() => { this.setState({ isClick: !this.state.isClick }); addToFavorites(this.photoSwipe.currItem) }} />
+                            <FavButton isClick={this.isInFav(this.photoSwipe?.currItem)} onClick={() => { console.log("dd"); this.onFavClick(this.photoSwipe?.currItem) }} />
                             <div className="pswp__preloader">
                                 <div className="pswp__preloader__icn">
                                     <div className="pswp__preloader__cut">
