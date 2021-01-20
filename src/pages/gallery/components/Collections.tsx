@@ -57,6 +57,7 @@ export default function Collections(props: CollectionProps) {
         <Wrapper>
             <Chip active={!selected} onClick={clickHandler()}>All</Chip>
             {collections?.map(item => <Chip
+                key={item.id}
                 active={selected === item.id.toString()}
                 onClick={clickHandler(item.id)}
             >{item.name}</Chip>)}

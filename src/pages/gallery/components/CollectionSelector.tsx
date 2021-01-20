@@ -16,7 +16,7 @@ function CollectionSelector(props) {
 
 
     const CollectionIcons = collectionLatestFile?.map((item) => (
-        <CollectionDropZone
+        <CollectionDropZone key={item.collection.id}
             {...rest}
             closeModal={closeUploadModal}
             showModal={showUploadModal}
