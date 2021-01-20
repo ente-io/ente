@@ -19,7 +19,7 @@ import { VariableSizeList as List } from 'react-window';
 import Collections from './components/Collections';
 import SadFace from 'components/SadFace';
 import Upload from './components/Upload';
-import { collection, fetchCollections, collectionLatestFile, getCollectionLatestFile } from 'services/collectionService';
+import { collection, fetchCollections, collectionLatestFile, getCollectionLatestFile, getFavItemIds } from 'services/collectionService';
 
 enum ITEM_TYPE {
     TIME = 'TIME',
@@ -100,6 +100,7 @@ export default function Gallery(props) {
         collectionLatestFile[]
     >([]);
     const [data, setData] = useState<file[]>();
+    const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState<Options>({
         history: false,
@@ -120,11 +121,13 @@ export default function Gallery(props) {
             const encryptionKey = await getActualKey();
             const collections = await fetchCollections(token, encryptionKey);
             const data = await fetchData(token, collections);
-            setLoading(false);
+            const collectionLatestFile = await getCollectionLatestFile(collections, token);
+            const favItemIds = await getFavItemIds(data);
             setCollections(collections);
             setData(data);
-            const collectionLatestFile = await getCollectionLatestFile(collections, token);
             setCollectionLatestFile(collectionLatestFile);
+            setFavItemIds(favItemIds);
+            setLoading(false);
         };
         main();
         props.setUploadButtonView(true);
@@ -395,6 +398,8 @@ export default function Gallery(props) {
                         options={options}
                         onClose={handleClose}
                         gettingData={getSlideData}
+                        favItemIds={favItemIds}
+                        setFavItemIds={setFavItemIds}
                     />
                 </Container>
             ) : (

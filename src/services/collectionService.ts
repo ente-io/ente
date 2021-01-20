@@ -114,6 +114,15 @@ export const getCollectionLatestFile = async (
         }))
 };
 
+export const getFavItemIds = async (files: file[]): Promise<Set<number>> => {
+
+    let favCollection: collection = (await localForage.getItem<collection>('fav-collection'))[0];
+    if (!favCollection)
+        return new Set();
+        
+    return new Set(files.filter(file => file.collectionID === Number(favCollection.id)).map((file): number => file.id));
+}
+
 export const createAlbum = async (albumName: string) => {
     return AddCollection(albumName, CollectionType.album);
 }
