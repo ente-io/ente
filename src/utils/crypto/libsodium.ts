@@ -107,6 +107,15 @@ export async function decryptB64(data: string, nonce: string, key: string) {
     return await toB64(decrypted);
 }
 
+export async function decryptString(data: string, nonce: string, key: string) {
+    await sodium.ready;
+    const decrypted = await decrypt(await fromB64(data),
+        await fromB64(nonce),
+        await fromB64(key));
+
+    return sodium.to_string(decrypted);
+}
+
 export async function encrypt(data: Uint8Array, key?: Uint8Array) {
     await sodium.ready;
     const uintkey: Uint8Array = key ? key : sodium.crypto_secretbox_keygen();
@@ -173,7 +182,16 @@ export async function boxSealOpen(input: string, publicKey: string, secretKey: s
 
 export async function fromB64(input: string) {
     await sodium.ready;
-    return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
+    let result;
+    try {
+        result = sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
+    } catch (e) {
+        result = await fromB64(await toB64(await fromString(input)));
+
+    }
+    finally {
+        return result;
+    }
 }
 
 export async function toB64(input: Uint8Array) {
