@@ -1,0 +1,10 @@
+#application-name: "flutter_image_compress_example" # Uncomment to modify this value.
+#executable-name: "flutter_image_compress_example" # Uncomment to modify this value. Only lowercase a-z, numbers, underscores and no spaces
+#package-name: "flutterimagecompressexample" # Uncomment to modify this value. Only lowercase a-z, numbers and no underscores or spaces
+license: "" # MANDATORY: Fill in your SPDX license name: https://spdx.org/licenses
+target: lib/main_desktop.dart
+branch: "" # Change to "@latest" to download the latest go-flutter version on every build
+# cache-path: "/home/YOURUSERNAME/.cache/" #  https://github.com/go-flutter-desktop/go-flutter/issues/184
+# opengl: "none" # Uncomment this line if you have trouble with your OpenGL driver (https://github.com/go-flutter-desktop/go-flutter/issues/272)
+docker: false
+engine-version: "" # change to a engine version commit
