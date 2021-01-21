@@ -25,7 +25,9 @@ export interface collection {
     id: string;
     owner: user;
     key?: string;
-    name: string;
+    name?: string;
+    encryptedName?: string;
+    nameDecryptionNonce?: string;
     type: string;
     attributes: collectionAttributes
     sharees: user[];
@@ -46,17 +48,21 @@ export interface collectionLatestFile {
 }
 
 
-const getCollectionKey = async (collection: collection, masterKey: string) => {
+const getCollectionSecrets = async (collection: collection, masterKey: string) => {
     const worker = await new CryptoWorker();
     const userID = getData(LS_KEYS.USER).id;
     let decryptedKey: string;
-
+    let decryptedName: string;
     if (collection.owner.id == userID) {
         decryptedKey = await worker.decryptB64(
             collection.encryptedKey,
             collection.keyDecryptionNonce,
             masterKey
         );
+        decryptedName = collection.name || await worker.decryptString(
+            collection.encryptedName,
+            collection.nameDecryptionNonce,
+            masterKey);
     } else {
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const secretKey = await worker.decryptB64(
@@ -65,14 +71,19 @@ const getCollectionKey = async (collection: collection, masterKey: string) => {
             masterKey
         );
         decryptedKey = await worker.boxSealOpen(
-            await collection.encryptedKey,
-            await keyAttributes.publicKey,
-            await secretKey
+            collection.encryptedKey,
+            keyAttributes.publicKey,
+            secretKey
         );
+        decryptedName = collection.name || await worker.decryptString(
+            collection.encryptedName,
+            collection.nameDecryptionNonce,
+            secretKey);
     }
     return {
         ...collection,
         key: decryptedKey,
+        name: decryptedName
     };
 };
 
@@ -87,7 +98,7 @@ const getCollections = async (
     });
     const ignore: Set<number> = new Set([206, 208]);
     const promises: Promise<collection>[] = resp.data.collections.filter(collection => !ignore.has(collection.id)).map(
-        (collection: collection) => getCollectionKey(collection, key)
+        (collection: collection) => getCollectionSecrets(collection, key)
     );
     return await Promise.all(promises);
 };
@@ -128,18 +139,20 @@ export const createAlbum = async (albumName: string) => {
 }
 
 
-export const AddCollection = async (albumName: string, type: CollectionType) => {
+export const AddCollection = async (collectionName: string, type: CollectionType) => {
     const worker = await new CryptoWorker();
     const encryptionKey = await getActualKey();
     const token = getToken();
     const collectionKey: string = await worker.generateMasterKey();
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(collectionKey, encryptionKey);
+    const { encryptedData: encryptedName, nonce: nameDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(collectionName, encryptionKey);
     const newCollection: collection = {
         id: null,
         owner: null,
         encryptedKey,
         keyDecryptionNonce,
-        name: albumName,
+        encryptedName,
+        nameDecryptionNonce,
         type,
         attributes: {},
         sharees: null,
@@ -147,7 +160,7 @@ export const AddCollection = async (albumName: string, type: CollectionType) => 
         isDeleted: false
     };
     let createdCollection: collection = await createCollection(newCollection, token);
-    createdCollection = await getCollectionKey(createdCollection, encryptionKey);
+    createdCollection = await getCollectionSecrets(createdCollection, encryptionKey);
     return createdCollection;
 }
 
