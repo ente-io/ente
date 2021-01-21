@@ -59,10 +59,7 @@ const getCollectionSecrets = async (collection: collection, masterKey: string) =
             collection.keyDecryptionNonce,
             masterKey
         );
-        decryptedName = collection.name || await worker.decryptString(
-            collection.encryptedName,
-            collection.nameDecryptionNonce,
-            masterKey);
+
     } else {
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const secretKey = await worker.decryptB64(
@@ -75,11 +72,11 @@ const getCollectionSecrets = async (collection: collection, masterKey: string) =
             keyAttributes.publicKey,
             secretKey
         );
-        decryptedName = collection.name || await worker.decryptString(
-            collection.encryptedName,
-            collection.nameDecryptionNonce,
-            secretKey);
     }
+    decryptedName = collection.name || await worker.decryptString(
+        collection.encryptedName,
+        collection.nameDecryptionNonce,
+        decryptedKey);
     return {
         ...collection,
         key: decryptedKey,
@@ -145,7 +142,7 @@ export const AddCollection = async (collectionName: string, type: CollectionType
     const token = getToken();
     const collectionKey: string = await worker.generateMasterKey();
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(collectionKey, encryptionKey);
-    const { encryptedData: encryptedName, nonce: nameDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(collectionName, encryptionKey);
+    const { encryptedData: encryptedName, nonce: nameDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(collectionName, collectionKey);
     const newCollection: collection = {
         id: null,
         owner: null,
