@@ -226,8 +226,7 @@ class CollectionsService {
     }
     final key = CryptoUtil.generateKey();
     final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
-    final encryptedPath =
-        CryptoUtil.encryptSync(utf8.encode(path), _config.getKey());
+    final encryptedPath = CryptoUtil.encryptSync(utf8.encode(path), key);
     final collection = await createAndCacheCollection(Collection(
       null,
       null,
@@ -239,7 +238,8 @@ class CollectionsService {
       CollectionType.folder,
       CollectionAttributes(
           encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData),
-          pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce)),
+          pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce),
+          version: 1),
       null,
       null,
     ));
