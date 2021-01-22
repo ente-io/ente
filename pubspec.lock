@@ -667,6 +667,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2+1"
+  sqflite_migration:
+    dependency: "direct main"
+    description:
+      name: sqflite_migration
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
   stack_trace:
     dependency: transitive
     description:
