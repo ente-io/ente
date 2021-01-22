@@ -320,9 +320,12 @@ class CollectionsService {
   }
 
   String decryptCollectionPath(Collection collection) {
+    final key = collection.attributes.version != null
+        ? getCollectionKey(collection.id)
+        : _config.getKey();
     return utf8.decode(CryptoUtil.decryptSync(
         Sodium.base642bin(collection.attributes.encryptedPath),
-        _config.getKey(),
+        key,
         Sodium.base642bin(collection.attributes.pathDecryptionNonce)));
   }
 }
