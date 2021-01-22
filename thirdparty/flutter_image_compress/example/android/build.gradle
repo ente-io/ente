@@ -1,0 +1,66 @@
+import groovy.json.JsonSlurper
+
+buildscript {
+    ext.kotlin_version = '1.3.72'
+    def isChina = false
+    try {
+        def connection = new URL('https://api.ip.sb/geoip').openConnection()
+        connection.setRequestMethod('GET')
+        def reader = new BufferedReader(new InputStreamReader(connection.inputStream))
+        def text = reader.readLine()
+
+        def slurper = new JsonSlurper()
+        def states = slurper.parseText(text)
+        def country = states['country']
+        isChina = country == 'China'
+    } catch (e) {
+        println(e)
+    }
+
+    ext.isChina = isChina
+
+    repositories {
+        if (isChina) {
+            maven { url 'https://maven.aliyun.com/repository/google' }
+            maven { url 'https://maven.aliyun.com/repository/jcenter' }
+            maven {
+                url 'https://storage.flutter-io.cn/download.flutter.io'
+            }
+        } else {
+            google()
+            jcenter()
+        }
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+
+allprojects {
+    repositories {
+        if (isChina) {
+            maven { url 'https://maven.aliyun.com/repository/google' }
+            maven { url 'https://maven.aliyun.com/repository/jcenter' }
+            maven {
+                url 'https://storage.flutter-io.cn/download.flutter.io'
+            }
+        } else {
+            google()
+            jcenter()
+        }
+    }
+}
+
+rootProject.buildDir = '../build'
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}

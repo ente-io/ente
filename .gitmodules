@@ -1,0 +1,4 @@
+[submodule "thirdparty/flutter_photo_manager"]
+	path = thirdparty/flutter_photo_manager
+	url = https://github.com/vishnukvmd/flutter_photo_manager
+	branch = master
