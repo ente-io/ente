@@ -66,7 +66,8 @@ class CollectionsService {
         await setCollectionSyncTime(collection.id, null);
         FileRepository.instance.reloadFiles();
       } else {
-        updatedCollections.add(collection);
+        final updatedCollection = getcollectionWithDecryptedName(collection);
+        updatedCollections.add(updatedCollection);
       }
     }
     await _db.insert(updatedCollections);
@@ -307,7 +308,8 @@ class CollectionsService {
     )
         .then((response) {
       final collection = Collection.fromMap(response.data["collection"]);
-      _cacheCollectionAttributes(collection);
+      final updatedCollection = getcollectionWithDecryptedName(collection);
+      _cacheCollectionAttributes(updatedCollection);
       return collection;
     });
   }
@@ -327,6 +329,27 @@ class CollectionsService {
         Sodium.base642bin(collection.attributes.encryptedPath),
         key,
         Sodium.base642bin(collection.attributes.pathDecryptionNonce)));
+  }
+
+  Collection getcollectionWithDecryptedName(Collection collection) {
+    final name = utf8.decode(CryptoUtil.decryptSync(
+        Sodium.base642bin(collection.encryptedName),
+        getCollectionKey(collection.id),
+        Sodium.base642bin(collection.nameDecryptionNonce)));
+
+    return Collection(
+      collection.id,
+      collection.owner,
+      collection.encryptedKey,
+      collection.keyDecryptionNonce,
+      name,
+      collection.encryptedName,
+      collection.nameDecryptionNonce,
+      collection.type,
+      collection.attributes,
+      collection.sharees,
+      collection.updationTime,
+    );
   }
 }
 
