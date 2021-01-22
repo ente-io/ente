@@ -5,11 +5,10 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/collection.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_migration/sqflite_migration.dart';
 
 class CollectionsDB {
   static final _databaseName = "ente.collections.db";
-  static final _databaseVersion = 1;
-
   static final collectionsTable = 'collections';
 
   static final columnID = 'collection_id';
@@ -17,11 +16,19 @@ class CollectionsDB {
   static final columnEncryptedKey = 'encrypted_key';
   static final columnKeyDecryptionNonce = 'key_decryption_nonce';
   static final columnName = 'name';
+  static final columnEncryptedName = 'encrypted_name';
+  static final columnNameDecryptionNonce = 'name_decryption_nonce';
   static final columnType = 'type';
   static final columnEncryptedPath = 'encrypted_path';
   static final columnPathDecryptionNonce = 'path_decryption_nonce';
   static final columnSharees = 'sharees';
   static final columnUpdationTime = 'updation_time';
+
+  static final intitialScript = [onCreate];
+  static final migrationScripts = [alterNameToAllowNULL, addEncryptedName];
+
+  final dbConfig = MigrationConfig(
+      initializationScript: intitialScript, migrationScripts: migrationScripts);
 
   CollectionsDB._privateConstructor();
   static final CollectionsDB instance = CollectionsDB._privateConstructor();
@@ -36,29 +43,53 @@ class CollectionsDB {
   _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
-    return await openDatabase(
-      path,
-      version: _databaseVersion,
-      onCreate: _onCreate,
-    );
+    return await openDatabaseWithMigration(path, dbConfig);
   }
 
-  Future _onCreate(Database db, int version) async {
-    await db.execute('''
-                CREATE TABLE $collectionsTable (
-                  $columnID INTEGER PRIMARY KEY NOT NULL,
-                  $columnOwner TEXT NOT NULL,
-                  $columnEncryptedKey TEXT NOT NULL,
-                  $columnKeyDecryptionNonce TEXT,
-                  $columnName TEXT NOT NULL,
-                  $columnType TEXT NOT NULL,
-                  $columnEncryptedPath TEXT,
-                  $columnPathDecryptionNonce TEXT,
-                  $columnSharees TEXT,
-                  $columnUpdationTime TEXT NOT NULL
-                )
-                ''');
-  }
+  static final onCreate = '''
+				CREATE TABLE $collectionsTable (
+					$columnID INTEGER PRIMARY KEY NOT NULL,
+					$columnOwner TEXT NOT NULL,
+					$columnEncryptedKey TEXT NOT NULL,
+					$columnKeyDecryptionNonce TEXT,
+					$columnName TEXT,
+					$columnType TEXT NOT NULL,
+					$columnEncryptedPath TEXT,
+					$columnPathDecryptionNonce TEXT,
+					$columnSharees TEXT,
+					$columnUpdationTime TEXT NOT NULL
+				);
+		''';
+
+  static final alterNameToAllowNULL = '''
+				CREATE TABLE $collectionsTable-copy  (
+					$columnID INTEGER PRIMARY KEY NOT NULL,
+					$columnOwner TEXT NOT NULL,
+					$columnEncryptedKey TEXT NOT NULL,
+					$columnKeyDecryptionNonce TEXT,
+					$columnName TEXT,
+					$columnType TEXT NOT NULL,
+					$columnEncryptedPath TEXT,
+					$columnPathDecryptionNonce TEXT,
+					$columnSharees TEXT,
+					$columnUpdationTime TEXT NOT NULL
+				);
+
+				INSERT INTO $collectionsTable-copy
+				SELECT *
+				FROM $collectionsTable;
+				DROP TABLE $collectionsTable;
+
+				ALTER TABLE $collectionsTable-copy 
+				RENAME TO $collectionsTable;
+    ''';
+
+  static String addEncryptedName = '''
+				ALTER TABLE $collectionsTable
+				ADD COLUMN $columnEncryptedName TEXT 
+				ADD COLUMN $columnNameDecryptionNonce TEXT
+			''';
+
 
   Future<List<dynamic>> insert(List<Collection> collections) async {
     final db = await instance.database;
@@ -126,6 +157,8 @@ class CollectionsDB {
       row[columnEncryptedKey],
       row[columnKeyDecryptionNonce],
       row[columnName],
+      row[columnEncryptedName],
+      row[columnNameDecryptionNonce],
       Collection.typeFromString(row[columnType]),
       CollectionAttributes(
           encryptedPath: row[columnEncryptedPath],
