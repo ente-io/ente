@@ -203,12 +203,15 @@ class CollectionsService {
   Future<Collection> createAlbum(String albumName) async {
     final key = CryptoUtil.generateKey();
     final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
+    final encryptedName = CryptoUtil.encryptSync(utf8.encode(albumName), key);
     final collection = await createAndCacheCollection(Collection(
       null,
       null,
       Sodium.bin2base64(encryptedKeyData.encryptedData),
       Sodium.bin2base64(encryptedKeyData.nonce),
-      albumName,
+      null,
+      Sodium.bin2base64(encryptedName.encryptedData),
+      Sodium.bin2base64(encryptedName.nonce),
       CollectionType.album,
       CollectionAttributes(),
       null,
@@ -230,7 +233,9 @@ class CollectionsService {
       null,
       Sodium.bin2base64(encryptedKeyData.encryptedData),
       Sodium.bin2base64(encryptedKeyData.nonce),
-      path,
+      null,
+      Sodium.bin2base64(encryptedPath.encryptedData),
+      Sodium.bin2base64(encryptedPath.nonce),
       CollectionType.folder,
       CollectionAttributes(
           encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData),
