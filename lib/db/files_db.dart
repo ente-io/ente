@@ -38,8 +38,8 @@ class FilesDB {
   static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static final columnMetadataDecryptionHeader = 'metadata_decryption_header';
 
-  static final intitialScript = [onCreate(table)];
-  static final migrationScripts = [alterDeviceFolderToAllowNULL()];
+  static final intitialScript = [...onCreate(table)];
+  static final migrationScripts = [...alterDeviceFolderToAllowNULL()];
 
   final dbConfig = MigrationConfig(
       initializationScript: intitialScript, migrationScripts: migrationScripts);
@@ -64,8 +64,9 @@ class FilesDB {
   }
 
   // SQL code to create the database table
-  static String onCreate(String tablename) {
-    return '''
+  static List<String> onCreate(String tablename) {
+    return [
+      '''
           CREATE TABLE $tablename (
             $columnGeneratedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             $columnLocalID TEXT,
@@ -88,27 +89,32 @@ class FilesDB {
             $columnCreationTime TEXT NOT NULL,
             $columnUpdationTime TEXT,
             UNIQUE($columnUploadedFileID, $columnCollectionID)
-          );
-
+          );''',
+      '''
           CREATE INDEX collection_id_index ON $table($columnCollectionID);
           CREATE INDEX device_folder_index ON $table($columnDeviceFolder);
           CREATE INDEX creation_time_index ON $table($columnCreationTime);
           CREATE INDEX updation_time_index ON $table($columnUpdationTime);
-          ''';
+      '''
+    ];
   }
 
-  static String alterDeviceFolderToAllowNULL() {
-    return onCreate(tableCopy) +
-        '''
+  static List<String> alterDeviceFolderToAllowNULL() {
+    return [
+      ...onCreate(tableCopy),
+      '''
         INSERT INTO $tableCopy
 				SELECT *
 				FROM $table;
-
+      ''',
+      '''
 				DROP TABLE $table;
-
+      ''',
+      '''
 				ALTER TABLE $tableCopy 
 				RENAME TO $table;
-    ''';
+    '''
+    ];
   }
 
   Future<int> insert(File file) async {
