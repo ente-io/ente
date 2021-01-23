@@ -66,6 +66,7 @@ class CollectionsService {
         await setCollectionSyncTime(collection.id, null);
         FileRepository.instance.reloadFiles();
       } else {
+        _cacheCollectionAttributes(collection);
         final updatedCollection = getcollectionWithDecryptedName(collection);
         updatedCollections.add(updatedCollection);
       }
@@ -308,6 +309,7 @@ class CollectionsService {
     )
         .then((response) {
       final collection = Collection.fromMap(response.data["collection"]);
+      _cacheCollectionAttributes(collection);
       final updatedCollection = getcollectionWithDecryptedName(collection);
       _cacheCollectionAttributes(updatedCollection);
       return collection;
@@ -332,24 +334,27 @@ class CollectionsService {
   }
 
   Collection getcollectionWithDecryptedName(Collection collection) {
-    final name = utf8.decode(CryptoUtil.decryptSync(
-        Sodium.base642bin(collection.encryptedName),
-        getCollectionKey(collection.id),
-        Sodium.base642bin(collection.nameDecryptionNonce)));
-
-    return Collection(
-      collection.id,
-      collection.owner,
-      collection.encryptedKey,
-      collection.keyDecryptionNonce,
-      name,
-      collection.encryptedName,
-      collection.nameDecryptionNonce,
-      collection.type,
-      collection.attributes,
-      collection.sharees,
-      collection.updationTime,
-    );
+    var name;
+    if (collection.encryptedName != "") {
+      name = utf8.decode(CryptoUtil.decryptSync(
+          Sodium.base642bin(collection.encryptedName),
+          getCollectionKey(collection.id),
+          Sodium.base642bin(collection.nameDecryptionNonce)));
+      return Collection(
+        collection.id,
+        collection.owner,
+        collection.encryptedKey,
+        collection.keyDecryptionNonce,
+        name,
+        collection.encryptedName,
+        collection.nameDecryptionNonce,
+        collection.type,
+        collection.attributes,
+        collection.sharees,
+        collection.updationTime,
+      );
+    } else
+      return collection;
   }
 }
 
