@@ -7,14 +7,15 @@ import 'package:photos/models/file.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite_migration/sqflite_migration.dart';
 
 class FilesDB {
   static final _databaseName = "ente.files.db";
-  static final _databaseVersion = 1;
 
   static final Logger _logger = Logger("FilesDB");
 
   static final table = 'files';
+  static final tableCopy = 'files_copy';
 
   static final columnGeneratedID = '_id';
   static final columnUploadedFileID = 'uploaded_file_id';
@@ -37,6 +38,11 @@ class FilesDB {
   static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static final columnMetadataDecryptionHeader = 'metadata_decryption_header';
 
+  static final intitialScript = [onCreate(table)];
+  static final migrationScripts = [alterDeviceFolderToAllowNULL()];
+
+  final dbConfig = MigrationConfig(
+      initializationScript: intitialScript, migrationScripts: migrationScripts);
   // make this a singleton class
   FilesDB._privateConstructor();
   static final FilesDB instance = FilesDB._privateConstructor();
@@ -54,21 +60,20 @@ class FilesDB {
   _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
-    return await openDatabase(path,
-        version: _databaseVersion, onCreate: _onCreate);
+    return await openDatabaseWithMigration(path, dbConfig);
   }
 
   // SQL code to create the database table
-  Future _onCreate(Database db, int version) async {
-    await db.execute('''
-          CREATE TABLE $table (
+  static String onCreate(String tablename) {
+    return '''
+          CREATE TABLE $tablename (
             $columnGeneratedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             $columnLocalID TEXT,
             $columnUploadedFileID INTEGER,
             $columnOwnerID INTEGER,
             $columnCollectionID INTEGER,
             $columnTitle TEXT NOT NULL,
-            $columnDeviceFolder TEXT NOT NULL,
+            $columnDeviceFolder TEXT,
             $columnLatitude REAL,
             $columnLongitude REAL,
             $columnFileType INTEGER,
@@ -89,7 +94,21 @@ class FilesDB {
           CREATE INDEX device_folder_index ON $table($columnDeviceFolder);
           CREATE INDEX creation_time_index ON $table($columnCreationTime);
           CREATE INDEX updation_time_index ON $table($columnUpdationTime);
-          ''');
+          ''';
+  }
+
+  static String alterDeviceFolderToAllowNULL() {
+    return onCreate(tableCopy) +
+        '''
+        INSERT INTO $tableCopy
+				SELECT *
+				FROM $table;
+
+				DROP TABLE $table;
+
+				ALTER TABLE $tableCopy 
+				RENAME TO $table;
+    ''';
   }
 
   Future<int> insert(File file) async {
@@ -433,7 +452,7 @@ class FilesDB {
           $columnCreationTime=?''',
       whereArgs: [
         title,
-        deviceFolder,
+        deviceFolder ?? "",
         creationTime,
       ],
     );
