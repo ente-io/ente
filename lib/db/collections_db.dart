@@ -25,8 +25,12 @@ class CollectionsDB {
   static final columnSharees = 'sharees';
   static final columnUpdationTime = 'updation_time';
 
-  static final intitialScript = [onCreate];
-  static final migrationScripts = [alterNameToAllowNULL, addEncryptedName];
+  static final intitialScript = [onCreate(collectionsTable)];
+  static final migrationScripts = [
+    alterNameToAllowNULL(),
+    addEncryptedName(),
+    addnameDecryptionNonce(),
+  ];
 
   final dbConfig = MigrationConfig(
       initializationScript: intitialScript, migrationScripts: migrationScripts);
@@ -47,8 +51,9 @@ class CollectionsDB {
     return await openDatabaseWithMigration(path, dbConfig);
   }
 
-  static final onCreate = '''
-				CREATE TABLE $collectionsTable (
+  static String onCreate(String tableName) {
+    return '''
+				CREATE TABLE $tableName (
 					$columnID INTEGER PRIMARY KEY NOT NULL,
 					$columnOwner TEXT NOT NULL,
 					$columnEncryptedKey TEXT NOT NULL,
@@ -61,35 +66,33 @@ class CollectionsDB {
 					$columnUpdationTime TEXT NOT NULL
 				);
 		''';
+  }
 
-  static final alterNameToAllowNULL = '''
-				CREATE TABLE $collectionsTableCopy  (
-					$columnID INTEGER PRIMARY KEY NOT NULL,
-					$columnOwner TEXT NOT NULL,
-					$columnEncryptedKey TEXT NOT NULL,
-					$columnKeyDecryptionNonce TEXT,
-					$columnName TEXT,
-					$columnType TEXT NOT NULL,
-					$columnEncryptedPath TEXT,
-					$columnPathDecryptionNonce TEXT,
-					$columnSharees TEXT,
-					$columnUpdationTime TEXT NOT NULL
-				);
-
+  static String alterNameToAllowNULL() {
+    return onCreate(collectionsTableCopy) +
+        '''
 				INSERT INTO $collectionsTableCopy
 				SELECT *
 				FROM $collectionsTable;
 				DROP TABLE $collectionsTable;
 
-				ALTER TABLE $collectionsTable-copy 
+				ALTER TABLE $collectionsTableCopy 
 				RENAME TO $collectionsTable;
     ''';
+  }
 
-  static String addEncryptedName = '''
+  static String addEncryptedName() {
+    return '''
 				ALTER TABLE $collectionsTable
-				ADD COLUMN $columnEncryptedName TEXT 
-				ADD COLUMN $columnNameDecryptionNonce TEXT
+				ADD COLUMN $columnEncryptedName TEXT;
+            ''';
+  }
+
+  static String addnameDecryptionNonce() {
+    return '''ALTER TABLE $collectionsTable
+				ADD COLUMN $columnNameDecryptionNonce TEXT;
 			''';
+  }
 
   Future<List<dynamic>> insert(List<Collection> collections) async {
     final db = await instance.database;
@@ -141,6 +144,8 @@ class CollectionsDB {
     row[columnEncryptedKey] = collection.encryptedKey;
     row[columnKeyDecryptionNonce] = collection.keyDecryptionNonce;
     row[columnName] = collection.name;
+    row[columnEncryptedName] = collection.encryptedName;
+    row[columnNameDecryptionNonce] = collection.nameDecryptionNonce;
     row[columnType] = Collection.typeToString(collection.type);
     row[columnEncryptedPath] = collection.attributes.encryptedPath;
     row[columnPathDecryptionNonce] = collection.attributes.pathDecryptionNonce;
