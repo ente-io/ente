@@ -32,7 +32,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         .instance.purchaseUpdatedStream
         .listen((event) async {
       for (final e in event) {
-        if (e.status == PurchaseStatus.purchased) {
+        if (e.status == PurchaseStatus.purchased && e.pendingCompletePurchase) {
           final dialog = createProgressDialog(context, "verifying purchase...");
           await dialog.show();
           try {
@@ -40,6 +40,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 e.productID, e.verificationData.serverVerificationData);
           } catch (e) {
             _logger.warning("Could not complete payment ", e);
+            await dialog.hide();
             showErrorDialog(
                 context,
                 "payment failed",
@@ -47,11 +48,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     (Platform.isAndroid ? "PlayStore" : "AppStore") +
                     " support if you were charged");
             return;
-          } finally {
-            await dialog.hide();
           }
           await InAppPurchaseConnection.instance.completePurchase(e);
           Bus.instance.fire(UserAuthenticatedEvent());
+          await dialog.hide();
           Navigator.pop(context);
           AwesomeDialog(
             context: context,
@@ -123,8 +123,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               final ProductDetailsResponse response =
                   await InAppPurchaseConnection.instance
                       .queryProductDetails(_kIds);
-              await dialog.hide();
               if (response.notFoundIDs.isNotEmpty) {
+                await dialog.hide();
                 showGenericErrorDialog(context);
                 return;
               }
@@ -133,6 +133,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   PurchaseParam(productDetails: productDetails[0]);
               await InAppPurchaseConnection.instance
                   .buyNonConsumable(purchaseParam: purchaseParam);
+              await dialog.hide();
             },
             child: SubscriptionPlanWidget(plan: plan),
           ),
