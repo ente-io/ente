@@ -77,7 +77,7 @@ class BillingService {
   bool hasActiveSubscription() {
     final subscription = getSubscription();
     return subscription != null &&
-        subscription.expiryTime < DateTime.now().microsecondsSinceEpoch;
+        subscription.expiryTime > DateTime.now().microsecondsSinceEpoch;
   }
 
   Future<void> setSubscription(Subscription subscription) async {
