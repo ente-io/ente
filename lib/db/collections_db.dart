@@ -10,6 +10,7 @@ import 'package:sqflite_migration/sqflite_migration.dart';
 class CollectionsDB {
   static final _databaseName = "ente.collections.db";
   static final collectionsTable = 'collections';
+  static final collectionsTableCopy = 'collections_copy';
 
   static final columnID = 'collection_id';
   static final columnOwner = 'owner';
@@ -62,7 +63,7 @@ class CollectionsDB {
 		''';
 
   static final alterNameToAllowNULL = '''
-				CREATE TABLE $collectionsTable-copy  (
+				CREATE TABLE $collectionsTableCopy  (
 					$columnID INTEGER PRIMARY KEY NOT NULL,
 					$columnOwner TEXT NOT NULL,
 					$columnEncryptedKey TEXT NOT NULL,
@@ -75,7 +76,7 @@ class CollectionsDB {
 					$columnUpdationTime TEXT NOT NULL
 				);
 
-				INSERT INTO $collectionsTable-copy
+				INSERT INTO $collectionsTableCopy
 				SELECT *
 				FROM $collectionsTable;
 				DROP TABLE $collectionsTable;
@@ -89,7 +90,6 @@ class CollectionsDB {
 				ADD COLUMN $columnEncryptedName TEXT 
 				ADD COLUMN $columnNameDecryptionNonce TEXT
 			''';
-
 
   Future<List<dynamic>> insert(List<Collection> collections) async {
     final db = await instance.database;
