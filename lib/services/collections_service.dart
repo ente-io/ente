@@ -313,6 +313,7 @@ class CollectionsService {
   }
 
   void _cacheCollectionAttributes(Collection collection) {
+    _collectionIDToCollections[collection.id] = collection;
     final updatedCollection = getCollectionWithDecryptedName(collection);
     if (collection.attributes.encryptedPath != null) {
       _localCollections[decryptCollectionPath(collection)] = updatedCollection;
