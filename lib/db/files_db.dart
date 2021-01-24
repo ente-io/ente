@@ -104,15 +104,15 @@ class FilesDB {
       ...onCreate(tableCopy),
       '''
         INSERT INTO $tableCopy
-				SELECT *
-				FROM $table;
+        SELECT *
+        FROM $table;
       ''',
       '''
-				DROP TABLE $table;
+        DROP TABLE $table;
       ''',
       '''
-				ALTER TABLE $tableCopy 
-				RENAME TO $table;
+        ALTER TABLE $tableCopy 
+        RENAME TO $table;
     '''
     ];
   }

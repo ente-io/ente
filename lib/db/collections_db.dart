@@ -53,19 +53,19 @@ class CollectionsDB {
   static List<String> onCreate(String tableName) {
     return [
       '''
-				CREATE TABLE $tableName (
-					$columnID INTEGER PRIMARY KEY NOT NULL,
-					$columnOwner TEXT NOT NULL,
-					$columnEncryptedKey TEXT NOT NULL,
-					$columnKeyDecryptionNonce TEXT,
-					$columnName TEXT,
-					$columnType TEXT NOT NULL,
-					$columnEncryptedPath TEXT,
-					$columnPathDecryptionNonce TEXT,
-					$columnSharees TEXT,
-					$columnUpdationTime TEXT NOT NULL
-				);
-		'''
+        CREATE TABLE $tableName (
+          $columnID INTEGER PRIMARY KEY NOT NULL,
+          $columnOwner TEXT NOT NULL,
+          $columnEncryptedKey TEXT NOT NULL,
+          $columnKeyDecryptionNonce TEXT,
+          $columnName TEXT,
+          $columnType TEXT NOT NULL,
+          $columnEncryptedPath TEXT,
+          $columnPathDecryptionNonce TEXT,
+          $columnSharees TEXT,
+          $columnUpdationTime TEXT NOT NULL
+        );
+    '''
     ];
   }
 
@@ -73,16 +73,16 @@ class CollectionsDB {
     return [
       ...onCreate(collectionsTableCopy),
       '''
-				INSERT INTO $collectionsTableCopy
-				SELECT *
-				FROM $collectionsTable;
+        INSERT INTO $collectionsTableCopy
+        SELECT *
+        FROM $collectionsTable;
       ''',
       '''
-				DROP TABLE $collectionsTable;
+        DROP TABLE $collectionsTable;
       ''',
       '''
-				ALTER TABLE $collectionsTableCopy 
-				RENAME TO $collectionsTable;
+        ALTER TABLE $collectionsTableCopy 
+        RENAME TO $collectionsTable;
     '''
     ];
   }
@@ -90,12 +90,12 @@ class CollectionsDB {
   static List<String> addEncryptedName() {
     return [
       '''
-				ALTER TABLE $collectionsTable
-				ADD COLUMN $columnEncryptedName TEXT;
+        ALTER TABLE $collectionsTable
+        ADD COLUMN $columnEncryptedName TEXT;
       ''',
       '''ALTER TABLE $collectionsTable
-				ADD COLUMN $columnNameDecryptionNonce TEXT;
-			'''
+        ADD COLUMN $columnNameDecryptionNonce TEXT;
+      '''
     ];
   }
 
