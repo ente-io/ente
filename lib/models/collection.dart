@@ -176,10 +176,11 @@ class CollectionAttributes {
   final String encryptedPath;
   final String pathDecryptionNonce;
   final int version;
+
   CollectionAttributes({
     this.encryptedPath,
     this.pathDecryptionNonce,
-    this.version,
+    this.version = 0,
   });
 
   CollectionAttributes copyWith({

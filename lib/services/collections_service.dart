@@ -324,7 +324,7 @@ class CollectionsService {
   }
 
   String decryptCollectionPath(Collection collection) {
-    final key = collection.attributes.version != null
+    final key = collection.attributes.version == 0
         ? getCollectionKey(collection.id)
         : _config.getKey();
     return utf8.decode(CryptoUtil.decryptSync(
