@@ -180,7 +180,7 @@ class CollectionAttributes {
   CollectionAttributes({
     this.encryptedPath,
     this.pathDecryptionNonce,
-    this.version = 0,
+    this.version,
   });
 
   CollectionAttributes copyWith({
@@ -203,6 +203,7 @@ class CollectionAttributes {
     if (pathDecryptionNonce != null) {
       map['pathDecryptionNonce'] = pathDecryptionNonce;
     }
+    if (version != null) map['version'] = version;
     return map;
   }
 
@@ -212,7 +213,7 @@ class CollectionAttributes {
     return CollectionAttributes(
       encryptedPath: map['encryptedPath'],
       pathDecryptionNonce: map['pathDecryptionNonce'],
-      version: map['version'],
+      version: map['version'] ?? 0,
     );
   }
 
