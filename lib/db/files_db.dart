@@ -15,7 +15,7 @@ class FilesDB {
   static final Logger _logger = Logger("FilesDB");
 
   static final table = 'files';
-  static final tableCopy = 'files_copy';
+  static final temptable = 'temp_files';
 
   static final columnGeneratedID = '_id';
   static final columnUploadedFileID = 'uploaded_file_id';
@@ -67,56 +67,55 @@ class FilesDB {
   static List<String> createTable(String tablename) {
     return [
       '''
-          CREATE TABLE $tablename (
-            $columnGeneratedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-            $columnLocalID TEXT,
-            $columnUploadedFileID INTEGER,
-            $columnOwnerID INTEGER,
-            $columnCollectionID INTEGER,
-            $columnTitle TEXT NOT NULL,
-            $columnDeviceFolder TEXT,
-            $columnLatitude REAL,
-            $columnLongitude REAL,
-            $columnFileType INTEGER,
-            $columnIsEncrypted INTEGER DEFAULT 1,
-            $columnModificationTime TEXT NOT NULL,
-            $columnEncryptedKey TEXT,
-            $columnKeyDecryptionNonce TEXT,
-            $columnFileDecryptionHeader TEXT,
-            $columnThumbnailDecryptionHeader TEXT,
-            $columnMetadataDecryptionHeader TEXT,
-            $columnIsDeleted INTEGER DEFAULT 0,
-            $columnCreationTime TEXT NOT NULL,
-            $columnUpdationTime TEXT,
-            UNIQUE($columnUploadedFileID, $columnCollectionID)
-          );''',
+        CREATE TABLE $tablename (
+          $columnGeneratedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          $columnLocalID TEXT,
+          $columnUploadedFileID INTEGER,
+          $columnOwnerID INTEGER,
+          $columnCollectionID INTEGER,
+          $columnTitle TEXT NOT NULL,
+          $columnDeviceFolder TEXT,
+          $columnLatitude REAL,
+          $columnLongitude REAL,
+          $columnFileType INTEGER,
+          $columnIsEncrypted INTEGER DEFAULT 1,
+          $columnModificationTime TEXT NOT NULL,
+          $columnEncryptedKey TEXT,
+          $columnKeyDecryptionNonce TEXT,
+          $columnFileDecryptionHeader TEXT,
+          $columnThumbnailDecryptionHeader TEXT,
+          $columnMetadataDecryptionHeader TEXT,
+          $columnIsDeleted INTEGER DEFAULT 0,
+          $columnCreationTime TEXT NOT NULL,
+          $columnUpdationTime TEXT,
+          UNIQUE($columnUploadedFileID, $columnCollectionID)
+        );
+      ''',
     ];
   }
 
   static List<String> addIndex() {
     return [
       '''
-          CREATE INDEX collection_id_index ON $table($columnCollectionID);
-          CREATE INDEX device_folder_index ON $table($columnDeviceFolder);
-          CREATE INDEX creation_time_index ON $table($columnCreationTime);
-          CREATE INDEX updation_time_index ON $table($columnUpdationTime);
+        CREATE INDEX collection_id_index ON $table($columnCollectionID);
+        CREATE INDEX device_folder_index ON $table($columnDeviceFolder);
+        CREATE INDEX creation_time_index ON $table($columnCreationTime);
+        CREATE INDEX updation_time_index ON $table($columnUpdationTime);
       '''
     ];
   }
 
   static List<String> alterDeviceFolderToAllowNULL() {
     return [
-      ...createTable(tableCopy),
+      ...createTable(table),
       '''
-        INSERT INTO $tableCopy
+        INSERT INTO $temptable
         SELECT *
         FROM $table;
-      ''',
-      '''
+
         DROP TABLE $table;
-      ''',
-      '''
-        ALTER TABLE $tableCopy 
+        
+        ALTER TABLE $temptable 
         RENAME TO $table;
     '''
     ];
@@ -457,26 +456,30 @@ class FilesDB {
     int creationTime,
   ) async {
     final db = await instance.database;
-    final rows = await (deviceFolder != null
-        ? db.query(
-            table,
-            where: '''$columnTitle=? AND $columnDeviceFolder=? AND 
+    var query;
+    if (deviceFolder != null) {
+      query = db.query(
+        table,
+        where: '''$columnTitle=? AND $columnDeviceFolder=? AND 
           $columnCreationTime=?''',
-            whereArgs: [
-              title,
-              deviceFolder,
-              creationTime,
-            ],
-          )
-        : db.query(
-            table,
-            where: '''$columnTitle=? AND 
+        whereArgs: [
+          title,
+          deviceFolder,
+          creationTime,
+        ],
+      );
+    } else {
+      query = db.query(
+        table,
+        where: '''$columnTitle=? AND 
           $columnCreationTime=?''',
-            whereArgs: [
-              title,
-              creationTime,
-            ],
-          ));
+        whereArgs: [
+          title,
+          creationTime,
+        ],
+      );
+    }
+    final rows = await query;
     if (rows.isNotEmpty) {
       return _convertToFiles(rows);
     } else {
