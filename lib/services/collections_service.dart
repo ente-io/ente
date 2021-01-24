@@ -333,7 +333,7 @@ class CollectionsService {
 
   Collection getCollectionWithDecryptedName(Collection collection) {
     var name;
-    if (collection.encryptedName != "") {
+    if (collection.encryptedName != null && collection.encryptedName != "") {
       name = utf8.decode(CryptoUtil.decryptSync(
           Sodium.base642bin(collection.encryptedName),
           getCollectionKey(collection.id),
