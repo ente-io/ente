@@ -39,57 +39,54 @@ interface TimeStampListItem {
 }
 
 const Container = styled.div`
-  display: block;
-  flex: 1;
-  width: 100%;
-  flex-wrap: wrap;
-  margin: 0 auto;
+    display: block;
+    flex: 1;
+    width: 100%;
+    flex-wrap: wrap;
+    margin: 0 auto;
 
-  .pswp-thumbnail {
-    display: inline-block;
-    cursor: pointer;
-  }
+    .pswp-thumbnail {
+        display: inline-block;
+        cursor: pointer;
+    }
 `;
 
 const ListItem = styled.div`
-  display: flex;
-  justify-content: center;
+    display: flex;
+    justify-content: center;
 `;
 
 const DeadCenter = styled.div`
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  text-align: center;
-  flex-direction: column;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    text-align: center;
+    flex-direction: column;
 `;
 
 const ListContainer = styled.div`
-  display: flex;
-  max-width: 100%;
-  color: #fff;
+    display: flex;
+    max-width: 100%;
+    color: #fff;
 
-  @media (min-width: 1000px) {
-    width: 1000px;
-  }
+    @media (min-width: 1000px) {
+        width: 1000px;
+    }
 
-  @media (min-width: 450px) and (max-width: 1000px) {
-    width: 600px;
-  }
+    @media (min-width: 450px) and (max-width: 1000px) {
+        width: 600px;
+    }
 
-  @media (max-width: 450px) {
-    width: 100%;
-  }
+    @media (max-width: 450px) {
+        width: 100%;
+    }
 `;
 
 const DateContainer = styled.div`
-  padding: 0 4px;
+    padding: 0 4px;
 `;
-
-const PAGE_SIZE = 12;
-const COLUMNS = 3;
 
 export default function Gallery(props) {
     const router = useRouter();
@@ -297,8 +294,9 @@ export default function Gallery(props) {
                 closeUploadModal={props.closeUploadModal}
                 showUploadModal={props.showUploadModal}
                 collectionLatestFile={collectionLatestFile}
-                refetchData={() => setReload(Math.random())} />
-
+                refetchData={() => setReload(Math.random())}
+                
+            />
             {filteredData.length ? (
                 <Container>
                     <AutoSizer>

@@ -82,11 +82,28 @@ const GlobalStyles = createGlobalStyle`
     }
     .modal-90w{
         width:90vw;
-        max-width:880px!important;  
+        max-width:880px!important;
+    }
+    .modal .modal-header, .modal  .modal-footer {
+        border-color: #444 !important;
+    }
+    .modal .modal-header .close {
+        color: #aaa;
+        text-shadow: none;
+    }
+    .modal .card {
+        background-color: #303030;
+        border: none;
+        color: #aaa;
+    }
+    .modal .card > div {
+        border-radius: 30px;
+        overflow: hidden;
+        margin: 0 0 5px 0;
     }
     .modal-content{
         background-color:#303030 !important;
-        color:white;
+        color:#aaa;
     }
 `;
 
@@ -144,6 +161,7 @@ export default function App({ Component, pageProps }) {
         <FullScreenDropZone
             closeModal={closeUploadModal}
             showModal={showUploadModal}
+            uploadModalView={uploadModalView}
         >
             <Head>
                 <title>ente.io | Privacy friendly alternative to Google Photos</title>
@@ -168,7 +186,12 @@ export default function App({ Component, pageProps }) {
                     </Spinner>
                 </Container>
             ) : (
-                    <Component uploadModalView={uploadModalView} showUploadModal={showUploadModal} closeUploadModal={closeUploadModal} setUploadButtonView={setUploadButtonView} />
+                    <Component
+                        uploadModalView={uploadModalView}
+                        showUploadModal={showUploadModal}
+                        closeUploadModal={closeUploadModal}
+                        setUploadButtonView={setUploadButtonView}
+                    />
                 )}
         </FullScreenDropZone>
     );

@@ -7,7 +7,7 @@ import PlayCircleOutline from 'components/PlayCircleOutline';
 interface IProps {
     data: file,
     updateUrl: (url: string) => void,
-    onClick: () => void,
+    onClick?: () => void,
 }
 
 const Cont = styled.div<{ disabled: boolean }>`
@@ -58,7 +58,7 @@ export default function PreviewCard(props: IProps) {
 
     const handleClick = () => {
         if (data?.msrc || imgSrc) {
-            onClick();
+            onClick?.();
         }
     }
 

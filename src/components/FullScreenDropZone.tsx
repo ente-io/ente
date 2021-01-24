@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 
 const DropDiv = styled.div`
@@ -7,21 +7,25 @@ const DropDiv = styled.div`
   flex-direction: column;
 `;
 
-const FullScreenDropZone = ({
-    children,
-    closeModal,
-    showModal,
-}) =>
-(
-    <DropDiv onDragOver={(ev) => {
-        ev.preventDefault();
-        showModal();
-    }} onDragLeave={(ev) => {
-        ev.preventDefault();
-        closeModal();
-    }}>
-        {children}
-    </DropDiv>
-);
+type Props = React.PropsWithChildren<{
+    showModal: () => void;
+    closeModal: () => void;
+}>;
 
-export default FullScreenDropZone;
+export default function FullScreenDropZone({ children, showModal, closeModal }: Props) {
+    const closeTimer = useRef<number>();
+    return (
+        <DropDiv onDragOver={(ev) => {
+            // ev.preventDefault();
+            if (closeTimer.current) {
+                clearTimeout(closeTimer.current);
+            }
+            showModal();
+        }} onDragLeave={(ev) => {
+            // ev.preventDefault();
+            closeTimer.current = setTimeout(closeModal, 300);
+        }}>
+            {children}
+        </DropDiv>
+    );
+};

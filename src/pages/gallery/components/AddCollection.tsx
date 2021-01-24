@@ -5,8 +5,18 @@ import styled from "styled-components";
 import { DropDiv } from "./CollectionDropZone";
 import CreateCollection from "./CreateCollection";
 
-const Image = styled.img`
-  max-height: 190px;
+const ImageContainer = styled.div`
+    min-height: 192px;
+    max-width: 192px;
+    border: 1px solid #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+`;
+
+const StyledCard = styled(Card)`
+    cursor: pointer;
 `;
 
 export default function AddCollection(props) {
@@ -28,7 +38,7 @@ export default function AddCollection(props) {
                 onDropRejected={closeUploadModal}
                 onDragOver={showUploadModal}
                 noDragEventsBubbling
-                accept="image/*, video/*, application/json,"
+                accept="image/*, video/*"
             >
                 {({
                     getRootProps,
@@ -46,10 +56,10 @@ export default function AddCollection(props) {
                             })}
                         >
                             <input {...getInputProps()} />
-                            <Card style={{ cursor: 'pointer' }}>
-                                <Image alt='logo' src='/plus-sign.png' />
+                            <StyledCard>
+                                <ImageContainer>+</ImageContainer>
                                 <Card.Text style={{ textAlign: "center" }}>Create New Album</Card.Text>
-                            </Card>
+                            </StyledCard>
                         </DropDiv>
                     );
                 }}
