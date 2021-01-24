@@ -14,17 +14,27 @@ type Props = React.PropsWithChildren<{
 
 export default function FullScreenDropZone({ children, showModal, closeModal }: Props) {
     const closeTimer = useRef<number>();
+    
+    const clearTimer = () => {
+        if (closeTimer.current) {
+            clearTimeout(closeTimer.current);
+        }
+    }
+
+    const onDragOver = (e) => {
+        e.preventDefault();
+        clearTimer();
+        showModal();
+    }
+
+    const onDragLeave = (e) => {
+        e.preventDefault();
+        clearTimer();
+        closeTimer.current = setTimeout(closeModal, 1000);
+    }
+
     return (
-        <DropDiv onDragOver={(ev) => {
-            // ev.preventDefault();
-            if (closeTimer.current) {
-                clearTimeout(closeTimer.current);
-            }
-            showModal();
-        }} onDragLeave={(ev) => {
-            // ev.preventDefault();
-            closeTimer.current = setTimeout(closeModal, 300);
-        }}>
+        <DropDiv onDragOver={onDragOver} onDragLeave={onDragLeave}>
             {children}
         </DropDiv>
     );
