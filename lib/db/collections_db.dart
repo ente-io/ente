@@ -9,8 +9,8 @@ import 'package:sqflite_migration/sqflite_migration.dart';
 
 class CollectionsDB {
   static final _databaseName = "ente.collections.db";
-  static final collectionsTable = 'collections';
-  static final collectionsTableCopy = 'collections_copy';
+  static final table = 'collections';
+  static final tempTable = 'temp_collections';
 
   static final columnID = 'collection_id';
   static final columnOwner = 'owner';
@@ -25,7 +25,7 @@ class CollectionsDB {
   static final columnSharees = 'sharees';
   static final columnUpdationTime = 'updation_time';
 
-  static final intitialScript = [...onCreate(collectionsTable)];
+  static final intitialScript = [...createTable(table)];
   static final migrationScripts = [
     ...alterNameToAllowNULL(),
     ...addEncryptedName(),
@@ -50,7 +50,7 @@ class CollectionsDB {
     return await openDatabaseWithMigration(path, dbConfig);
   }
 
-  static List<String> onCreate(String tableName) {
+  static List<String> createTable(String tableName) {
     return [
       '''
         CREATE TABLE $tableName (
@@ -71,18 +71,16 @@ class CollectionsDB {
 
   static List<String> alterNameToAllowNULL() {
     return [
-      ...onCreate(collectionsTableCopy),
+      ...createTable(tempTable),
       '''
-        INSERT INTO $collectionsTableCopy
+        INSERT INTO $tempTable
         SELECT *
-        FROM $collectionsTable;
-      ''',
-      '''
-        DROP TABLE $collectionsTable;
-      ''',
-      '''
-        ALTER TABLE $collectionsTableCopy 
-        RENAME TO $collectionsTable;
+        FROM $table;
+
+        DROP TABLE $table;
+        
+        ALTER TABLE $tempTable 
+        RENAME TO $table;
     '''
     ];
   }
@@ -90,10 +88,10 @@ class CollectionsDB {
   static List<String> addEncryptedName() {
     return [
       '''
-        ALTER TABLE $collectionsTable
+        ALTER TABLE $table
         ADD COLUMN $columnEncryptedName TEXT;
       ''',
-      '''ALTER TABLE $collectionsTable
+      '''ALTER TABLE $table
         ADD COLUMN $columnNameDecryptionNonce TEXT;
       '''
     ];
@@ -103,7 +101,7 @@ class CollectionsDB {
     final db = await instance.database;
     var batch = db.batch();
     for (final collection in collections) {
-      batch.insert(collectionsTable, _getRowForCollection(collection),
+      batch.insert(table, _getRowForCollection(collection),
           conflictAlgorithm: ConflictAlgorithm.replace);
     }
     return await batch.commit();
@@ -111,7 +109,7 @@ class CollectionsDB {
 
   Future<List<Collection>> getAllCollections() async {
     final db = await instance.database;
-    final rows = await db.query(collectionsTable);
+    final rows = await db.query(table);
     final collections = List<Collection>();
     for (final row in rows) {
       collections.add(_convertToCollection(row));
@@ -122,7 +120,7 @@ class CollectionsDB {
   Future<int> getLastCollectionUpdationTime() async {
     final db = await instance.database;
     final rows = await db.query(
-      collectionsTable,
+      table,
       orderBy: '$columnUpdationTime DESC',
       limit: 1,
     );
@@ -136,7 +134,7 @@ class CollectionsDB {
   Future<int> deleteCollection(int collectionID) async {
     final db = await instance.database;
     return db.delete(
-      collectionsTable,
+      table,
       where: '$columnID = ?',
       whereArgs: [collectionID],
     );
