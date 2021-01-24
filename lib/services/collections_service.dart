@@ -314,11 +314,13 @@ class CollectionsService {
 
   void _cacheCollectionAttributes(Collection collection) {
     _collectionIDToCollections[collection.id] = collection;
-    final updatedCollection = getCollectionWithDecryptedName(collection);
+    final collectionWithDecryptedName =
+        _getCollectionWithDecryptedName(collection);
     if (collection.attributes.encryptedPath != null) {
-      _localCollections[decryptCollectionPath(collection)] = updatedCollection;
+      _localCollections[decryptCollectionPath(collection)] =
+          collectionWithDecryptedName;
     }
-    _collectionIDToCollections[collection.id] = updatedCollection;
+    _collectionIDToCollections[collection.id] = collectionWithDecryptedName;
   }
 
   String decryptCollectionPath(Collection collection) {
@@ -331,9 +333,10 @@ class CollectionsService {
         Sodium.base642bin(collection.attributes.pathDecryptionNonce)));
   }
 
-  Collection getCollectionWithDecryptedName(Collection collection) {
+  Collection _getCollectionWithDecryptedName(Collection collection) {
     var name;
-    if (collection.encryptedName != null && collection.encryptedName != "") {
+    if (collection.encryptedName != null &&
+        collection.encryptedName.isNotEmpty) {
       name = utf8.decode(CryptoUtil.decryptSync(
           Sodium.base642bin(collection.encryptedName),
           getCollectionKey(collection.id),
