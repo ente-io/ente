@@ -177,7 +177,7 @@ export async function generateKeyPair() {
 
 export async function boxSealOpen(input: string, publicKey: string, secretKey: string) {
     await sodium.ready;
-    return await toB64(sodium.crypto_box_seal_open(input, await fromB64(publicKey), await fromB64(secretKey)));
+    return await toB64(sodium.crypto_box_seal_open(await fromB64(input), await fromB64(publicKey), await fromB64(secretKey)));
 }
 
 export async function fromB64(input: string) {
