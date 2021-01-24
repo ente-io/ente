@@ -452,16 +452,26 @@ class FilesDB {
     int creationTime,
   ) async {
     final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '''$columnTitle=? AND $columnDeviceFolder=? AND 
+    final rows = await (deviceFolder != null
+        ? db.query(
+            table,
+            where: '''$columnTitle=? AND $columnDeviceFolder=? AND 
           $columnCreationTime=?''',
-      whereArgs: [
-        title,
-        deviceFolder ?? "",
-        creationTime,
-      ],
-    );
+            whereArgs: [
+              title,
+              deviceFolder,
+              creationTime,
+            ],
+          )
+        : db.query(
+            table,
+            where: '''$columnTitle=? AND 
+          $columnCreationTime=?''',
+            whereArgs: [
+              title,
+              creationTime,
+            ],
+          ));
     if (rows.isNotEmpty) {
       return _convertToFiles(rows);
     } else {
