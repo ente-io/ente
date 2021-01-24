@@ -38,7 +38,7 @@ class FilesDB {
   static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static final columnMetadataDecryptionHeader = 'metadata_decryption_header';
 
-  static final intitialScript = [...onCreate(table)];
+  static final intitialScript = [...createTable(table), ...addIndex()];
   static final migrationScripts = [...alterDeviceFolderToAllowNULL()];
 
   final dbConfig = MigrationConfig(
@@ -64,7 +64,7 @@ class FilesDB {
   }
 
   // SQL code to create the database table
-  static List<String> onCreate(String tablename) {
+  static List<String> createTable(String tablename) {
     return [
       '''
           CREATE TABLE $tablename (
@@ -90,6 +90,11 @@ class FilesDB {
             $columnUpdationTime TEXT,
             UNIQUE($columnUploadedFileID, $columnCollectionID)
           );''',
+    ];
+  }
+
+  static List<String> addIndex() {
+    return [
       '''
           CREATE INDEX collection_id_index ON $table($columnCollectionID);
           CREATE INDEX device_folder_index ON $table($columnDeviceFolder);
@@ -101,7 +106,7 @@ class FilesDB {
 
   static List<String> alterDeviceFolderToAllowNULL() {
     return [
-      ...onCreate(tableCopy),
+      ...createTable(tableCopy),
       '''
         INSERT INTO $tableCopy
         SELECT *
