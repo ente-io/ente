@@ -20,6 +20,7 @@ import Collections from './components/Collections';
 import SadFace from 'components/SadFace';
 import Upload from './components/Upload';
 import { collection, fetchCollections, collectionLatestFile, getCollectionLatestFile, getFavItemIds } from 'services/collectionService';
+import constants from 'utils/strings/constants';
 
 enum ITEM_TYPE {
     TIME = 'TIME',
@@ -403,8 +404,7 @@ export default function Gallery(props) {
                 </Container>
             ) : (
                     <DeadCenter>
-                        <SadFace height={100} width={100} />
-                        <div>No content found!</div>
+                        <div>{constants.NOTHING_HERE}</div>
                     </DeadCenter>
                 )}
         </>

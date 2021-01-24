@@ -43,7 +43,8 @@ const englishConstants = {
     CONSOLE_WARNING_STOP: 'STOP!',
     CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. If someone told you to copy-paste something here to enable a feature or "hack" someone's account, it is a scam and will give them access to your account.`,
     SELECT_COLLECTION: `Select/Click on Collection to upload`,
-    CLOSE: 'Close'
+    CLOSE: 'Close',
+    NOTHING_HERE: `nothing to see here! 👀`,
 };
 
 export default englishConstants;
