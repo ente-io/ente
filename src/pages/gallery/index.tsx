@@ -183,7 +183,7 @@ export default function Gallery(props) {
 
     const handleClose = () => {
         setOpen(false);
-        setReload(Math.random());
+        // setReload(Math.random());
     };
 
     const onThumbnailClick = (index: number) => () => {

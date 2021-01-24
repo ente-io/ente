@@ -164,7 +164,7 @@ function PhotoSwipe(props: Iprops) {
                             title="Toggle fullscreen"
                         />
                         <button className="pswp__button pswp__button--zoom" title="Zoom in/out" />
-                        <FavButton isClick={isFav} onClick={() => { onFavClick(photoSwipe?.currItem) }} />
+                        <FavButton size={44} isClick={isFav} onClick={() => { onFavClick(photoSwipe?.currItem) }} />
                         <div className="pswp__preloader">
                             <div className="pswp__preloader__icn">
                                 <div className="pswp__preloader__cut">
