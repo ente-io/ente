@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -53,19 +52,29 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           Bus.instance.fire(UserAuthenticatedEvent());
           await dialog.hide();
           Navigator.pop(context);
-          AwesomeDialog(
+          AlertDialog alert = AlertDialog(
+            title: Text("success"),
+            content: Column(
+              children: [
+                Text("thank you, your photos and videos will now be backed up"),
+              ],
+            ),
+            actions: [
+              FlatButton(
+                child: Text("ok"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+
+          showDialog(
             context: context,
-            dialogType: DialogType.SUCCES,
-            animType: AnimType.RIGHSLIDE,
-            title: '',
-            desc:
-                'your photos and videos will now be encrypted and backed up in the background',
-            btnOkOnPress: () {
-              Navigator.pop(context);
+            builder: (BuildContext context) {
+              return alert;
             },
-            btnOkText: 'ok',
-            headerAnimationLoop: false,
-          )..show();
+          );
         } else if (Platform.isIOS) {
           await InAppPurchaseConnection.instance.completePurchase(e);
         }

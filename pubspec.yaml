@@ -71,7 +71,6 @@ dependencies:
   expansion_card: ^0.1.0
   flutter_password_strength: ^0.1.4
   flutter_inappwebview: ^4.0.0+4
-  awesome_dialog: ^1.3.0
   background_fetch: ^0.5.1
 
 dev_dependencies:
