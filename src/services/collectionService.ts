@@ -52,7 +52,6 @@ const getCollectionSecrets = async (collection: collection, masterKey: string) =
     const worker = await new CryptoWorker();
     const userID = getData(LS_KEYS.USER).id;
     let decryptedKey: string;
-    let decryptedName: string;
     if (collection.owner.id == userID) {
         decryptedKey = await worker.decryptB64(
             collection.encryptedKey,
@@ -73,14 +72,13 @@ const getCollectionSecrets = async (collection: collection, masterKey: string) =
             secretKey
         );
     }
-    decryptedName = collection.name || await worker.decryptString(
+    collection.name = collection.name || await worker.decryptString(
         collection.encryptedName,
         collection.nameDecryptionNonce,
         decryptedKey);
     return {
         ...collection,
         key: decryptedKey,
-        name: decryptedName
     };
 };
 
@@ -94,8 +92,7 @@ const getCollections = async (
             token: token,
             sinceTime: sinceTime,
         });
-        const ignore: Set<number> = new Set([206, 208]);
-        const promises: Promise<collection>[] = resp.data.collections.filter(collection => !ignore.has(collection.id)).map(
+        const promises: Promise<collection>[] = resp.data.collections.map(
             (collection: collection) => getCollectionSecrets(collection, key)
         );
         return await Promise.all(promises);
