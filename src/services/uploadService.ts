@@ -3,7 +3,7 @@ import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
 import EXIF from "exif-js";
 import { fileAttribute } from './fileService';
-import { collectionLatestFile } from "./collectionService"
+import { collection, collectionLatestFile } from "./collectionService"
 import { FILE_TYPE } from 'pages/gallery';
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
@@ -26,19 +26,17 @@ interface uploadURL {
     objectKey: string
 }
 
-interface formatedFile {
+interface FileinMemory {
     filedata: Uint8Array,
-    metadata: Object,
-    thumbnail: Uint8Array
+    thumbnail: Uint8Array,
+    filename: string
 }
+
 
 interface encryptedFile {
     filedata: fileAttribute;
     thumbnail: fileAttribute;
-    metadata: fileAttribute;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    key: string;
+    fileKey: keyEncryptionResult;
 }
 
 interface objectKey {
@@ -54,23 +52,16 @@ interface uploadFile extends objectKeys {
     collectionID: string,
     encryptedKey: string;
     keyDecryptionNonce: string;
-    metadata: {
+    metadata?: {
         encryptedData: string | Uint8Array,
         decryptionHeader: string
     }
 }
 
-class Queue<T> {
-    _store: T[] = [];
-    push(vals: T[]): void {
-        vals.forEach((val) => this._store.push(val));
-    }
-    pop(): T {
-        return this._store.shift();
-    }
-    isEmpty(): boolean {
-        return this._store.length == 0;
-    }
+interface UploadFileWithoutMetaData {
+    tempUploadFile: uploadFile,
+    encryptedFileKey: keyEncryptionResult,
+    fileName: string
 }
 
 export enum UPLOAD_STAGES {
@@ -82,8 +73,8 @@ export enum UPLOAD_STAGES {
 
 class UploadService {
 
-    private uploadURLs = new Queue<uploadURL>();
-    private uploadURLFetchInProgress: Promise<any> = null
+    private uploadURLs: uploadURL[];
+    private uploadURLFetchInProgress: Promise<any>;
     private perStepProgress: number
     private stepsCompleted: number
     private totalFilesCount: number
@@ -94,6 +85,8 @@ class UploadService {
             const worker = await new CryptoWorker();
             this.stepsCompleted = 0;
             this.metadataMap = new Map<string, object>();
+            this.uploadURLs = [];
+            this.uploadURLFetchInProgress = null;
 
             let metadataFiles: File[] = [];
             let actualFiles: File[] = [];
@@ -105,37 +98,65 @@ class UploadService {
             });
             this.totalFilesCount = actualFiles.length;
             this.perStepProgress = 100 / (3 * actualFiles.length);
-            let formatedFiles: formatedFile[] = await Promise.all(actualFiles.map(async (recievedFile: File) => {
-                const file = await this.formatData(recievedFile);
-                this.changeProgressBarProps(progressBarProps);
-                return file;
-            }));
-            await Promise.all(metadataFiles.map(async (recievedFile: File) => {
-                this.updateMetadata(recievedFile)
-                this.changeProgressBarProps(progressBarProps);
-                return;
 
-            }));
-            console.log(formatedFiles);
+            progressBarProps.setUploadStage(UPLOAD_STAGES.START);
+            this.changeProgressBarProps(progressBarProps);
+
+            const uploadFilesWithoutMetaData: UploadFileWithoutMetaData[] = [];
+
+            while (actualFiles.length > 0) {
+                var promises = [];
+                for (var i = 0; i < 5 && actualFiles.length > 0; i++)
+                    promises.push(this.uploadHelper(progressBarProps, actualFiles.pop(), collectionLatestFile.collection, token));
+                uploadFilesWithoutMetaData.push(...await Promise.all(promises));
+            }
+
+            for await (const rawFile of metadataFiles) {
+                await this.updateMetadata(rawFile)
+            };
+
             progressBarProps.setUploadStage(UPLOAD_STAGES.ENCRYPTION);
-            const encryptedFiles: encryptedFile[] = await Promise.all(formatedFiles.map(async (file: formatedFile) => {
-                const encryptedFile = await this.encryptFiles(worker, file, collectionLatestFile.collection.key);
+            const completeUploadFiles: uploadFile[] = await Promise.all(uploadFilesWithoutMetaData.map(async (file: UploadFileWithoutMetaData) => {
+                const { file: encryptedMetaData } = await this.encryptMetadata(worker, file.fileName, file.encryptedFileKey);
+                const completeUploadFile = {
+                    ...file.tempUploadFile,
+                    metadata: {
+                        encryptedData: encryptedMetaData.encryptedData,
+                        decryptionHeader: encryptedMetaData.decryptionHeader
+                    }
+                }
                 this.changeProgressBarProps(progressBarProps);
-                return encryptedFile;
+                return completeUploadFile;
             }));
 
             progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOAD);
-            await Promise.all(encryptedFiles.map(async (encryptedFile: encryptedFile) => {
+            await Promise.all(completeUploadFiles.map(async (uploadFile: uploadFile) => {
 
-                const objectKeys = await this.uploadtoBucket(encryptedFile, token, 2 * this.totalFilesCount);
-                await this.uploadFile(collectionLatestFile, encryptedFile, objectKeys, token);
+                await this.uploadFile(uploadFile, token);
                 this.changeProgressBarProps(progressBarProps);
-
             }));
 
             progressBarProps.setUploadStage(UPLOAD_STAGES.FINISH);
             progressBarProps.setPercentComplete(100);
 
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    private async uploadHelper(progressBarProps, rawFile, collection, token) {
+        try {
+            const worker = await new CryptoWorker();
+            let file: FileinMemory = await this.readFile(rawFile);
+            let encryptedFile: encryptedFile = await this.encryptFile(worker, file, collection.key);
+            let objectKeys = await this.uploadtoBucket(encryptedFile, token, 2 * this.totalFilesCount);
+            let uploadFileWithoutMetaData: uploadFile = this.getuploadFile(collection, encryptedFile.fileKey, objectKeys);
+            this.changeProgressBarProps(progressBarProps);
+
+            return {
+                tempUploadFile: uploadFileWithoutMetaData,
+                encryptedFileKey: encryptedFile.fileKey,
+                fileName: file.filename
+            };
         }
         catch (e) {
             console.log(e);
@@ -145,11 +166,11 @@ class UploadService {
     private changeProgressBarProps({ setPercentComplete, setFileCounter }) {
         this.stepsCompleted++;
         const fileCompleted = this.stepsCompleted % this.totalFilesCount;
-        setFileCounter({ current: fileCompleted + 1, total: this.totalFilesCount });
+        setFileCounter({ current: fileCompleted, total: this.totalFilesCount });
         setPercentComplete(this.perStepProgress * this.stepsCompleted);
     }
 
-    private async formatData(recievedFile: File) {
+    private async readFile(recievedFile: File) {
         try {
             const filedata: Uint8Array = await this.getUint8ArrayView(recievedFile);
             let fileType;
@@ -174,38 +195,40 @@ class UploadService {
             });
             return {
                 filedata,
-                metadata: this.metadataMap.get(recievedFile.name),
+                filename: recievedFile.name,
                 thumbnail: await this.generateThumbnail(recievedFile)
             }
         } catch (e) {
             console.log("error reading files " + e);
         }
     }
-    private async encryptFiles(worker, file: formatedFile, encryptionKey: string): Promise<encryptedFile> {
+    private async encryptFile(worker, file: FileinMemory, encryptionKey: string): Promise<encryptedFile> {
         try {
 
-            const { key: fileKey, file: filedata }: encryptionResult = await worker.encryptFile(file.filedata);
+            const { key: fileKey, file: encryptedFiledata }: encryptionResult = await worker.encryptFile(file.filedata);
 
             const { file: encryptedThumbnail }: encryptionResult = await worker.encryptThumbnail(file.thumbnail, fileKey);
 
-            const { file: encryptedMetadata }: encryptionResult = await worker.encryptMetadata(file.metadata, fileKey)
-
-            const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(fileKey, encryptionKey);
+            const encryptedKey: keyEncryptionResult = await worker.encryptToB64(fileKey, encryptionKey);
 
 
             const result: encryptedFile = {
-                key: fileKey,
-                filedata: filedata,
+                filedata: encryptedFiledata,
                 thumbnail: encryptedThumbnail,
-                metadata: encryptedMetadata,
-                encryptedKey,
-                keyDecryptionNonce,
+                fileKey: encryptedKey
             };
             return result;
         }
         catch (e) {
             console.log("Error encrypting files " + e);
         }
+    }
+
+    private async encryptMetadata(worker: any, fileName: string, encryptedFileKey: keyEncryptionResult) {
+        const metaData = this.metadataMap.get(fileName);
+        const fileKey = await worker.decryptB64(encryptedFileKey.encryptedData, encryptedFileKey.nonce, encryptedFileKey.key);
+        const encryptedMetaData = await worker.encryptMetadata(metaData, fileKey);
+        return encryptedMetaData;
     }
 
     private async uploadtoBucket(file: encryptedFile, token, count: number): Promise<objectKeys> {
@@ -225,20 +248,18 @@ class UploadService {
         }
     }
 
-    private async uploadFile(collectionLatestFile: collectionLatestFile, encryptedFile: encryptedFile, objectKeys: objectKeys, token) {
+    private getuploadFile(collection: collection, encryptedKey: keyEncryptionResult, objectKeys: objectKeys): uploadFile {
+        const uploadFile: uploadFile = {
+            collectionID: collection.id,
+            encryptedKey: encryptedKey.encryptedData,
+            keyDecryptionNonce: encryptedKey.nonce,
+            ...objectKeys
+        }
+        return uploadFile;
+    }
+
+    private async uploadFile(uploadFile: uploadFile, token) {
         try {
-            const uploadFile: uploadFile = {
-                collectionID: collectionLatestFile.collection.id,
-                encryptedKey: encryptedFile.encryptedKey,
-                keyDecryptionNonce: encryptedFile.keyDecryptionNonce,
-                metadata: {
-                    encryptedData: encryptedFile.metadata.encryptedData,
-                    decryptionHeader: encryptedFile.metadata.decryptionHeader
-                },
-                ...objectKeys
-            }
-
-
             const response = await HTTPService.post(`${ENDPOINT}/files`, uploadFile, { token });
 
             return response.data;
@@ -347,7 +368,7 @@ class UploadService {
     }
 
     private async getUploadURL(token: string, count: number) {
-        if (this.uploadURLs.isEmpty()) {
+        if (this.uploadURLs.length == 0) {
             await this.fetchUploadURLs(token, count);
         }
         return this.uploadURLs.pop();
@@ -364,7 +385,7 @@ class UploadService {
                 const response = await this.uploadURLFetchInProgress;
 
                 this.uploadURLFetchInProgress = null;
-                this.uploadURLs.push(response.data["urls"]);
+                this.uploadURLs.push(...response.data["urls"]);
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
@@ -431,7 +452,7 @@ class UploadService {
 
         var lonFinal = this.convertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
 
-        return { latitude: latFinal, longitude: lonFinal };
+        return { latitude: latFinal * 1.0, longitude: lonFinal * 1.0 };
     }
 
     private convertDMSToDD(degrees, minutes, seconds, direction) {
