@@ -8,6 +8,8 @@ class Collection {
   final String encryptedKey;
   final String keyDecryptionNonce;
   final String name;
+  final String encryptedName;
+  final String nameDecryptionNonce;
   final CollectionType type;
   final CollectionAttributes attributes;
   final List<User> sharees;
@@ -20,6 +22,8 @@ class Collection {
     this.encryptedKey,
     this.keyDecryptionNonce,
     this.name,
+    this.encryptedName,
+    this.nameDecryptionNonce,
     this.type,
     this.attributes,
     this.sharees,
@@ -54,6 +58,8 @@ class Collection {
     String encryptedKey,
     String keyDecryptionNonce,
     String name,
+    String encryptedName,
+    String nameDecryptionNonce,
     CollectionType type,
     CollectionAttributes attributes,
     List<User> sharees,
@@ -66,6 +72,8 @@ class Collection {
       encryptedKey ?? this.encryptedKey,
       keyDecryptionNonce ?? this.keyDecryptionNonce,
       name ?? this.name,
+      encryptedName ?? this.encryptedName,
+      nameDecryptionNonce ?? this.nameDecryptionNonce,
       type ?? this.type,
       attributes ?? this.attributes,
       sharees ?? this.sharees,
@@ -81,6 +89,8 @@ class Collection {
       'encryptedKey': encryptedKey,
       'keyDecryptionNonce': keyDecryptionNonce,
       'name': name,
+      'encryptedName': encryptedName,
+      'nameDecryptionNonce': nameDecryptionNonce,
       'type': typeToString(type),
       'attributes': attributes?.toMap(),
       'sharees': sharees?.map((x) => x?.toMap())?.toList(),
@@ -100,6 +110,8 @@ class Collection {
       map['encryptedKey'],
       map['keyDecryptionNonce'],
       map['name'],
+      map['encryptedName'],
+      map['nameDecryptionNonce'],
       typeFromString(map['type']),
       CollectionAttributes.fromMap(map['attributes']),
       sharees,
@@ -115,7 +127,7 @@ class Collection {
 
   @override
   String toString() {
-    return 'Collection(id: $id, owner: $owner, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, type: $type, attributes: $attributes, sharees: $sharees, updationTime: $updationTime, isDeleted: $isDeleted)';
+    return 'Collection(id: $id, owner: $owner, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, name: $name, encryptedName: $encryptedName, nameDecryptionNonce: $nameDecryptionNonce, type: $type, attributes: $attributes, sharees: $sharees, updationTime: $updationTime, isDeleted: $isDeleted)';
   }
 
   @override
@@ -128,6 +140,8 @@ class Collection {
         o.encryptedKey == encryptedKey &&
         o.keyDecryptionNonce == keyDecryptionNonce &&
         o.name == name &&
+        o.encryptedName == encryptedName &&
+        o.nameDecryptionNonce == nameDecryptionNonce &&
         o.type == type &&
         o.attributes == attributes &&
         listEquals(o.sharees, sharees) &&
@@ -142,6 +156,8 @@ class Collection {
         encryptedKey.hashCode ^
         keyDecryptionNonce.hashCode ^
         name.hashCode ^
+        encryptedName.hashCode ^
+        nameDecryptionNonce.hashCode ^
         type.hashCode ^
         attributes.hashCode ^
         sharees.hashCode ^
@@ -159,19 +175,23 @@ enum CollectionType {
 class CollectionAttributes {
   final String encryptedPath;
   final String pathDecryptionNonce;
+  final int version;
 
   CollectionAttributes({
     this.encryptedPath,
     this.pathDecryptionNonce,
+    this.version,
   });
 
   CollectionAttributes copyWith({
     String encryptedPath,
     String pathDecryptionNonce,
+    int version,
   }) {
     return CollectionAttributes(
       encryptedPath: encryptedPath ?? this.encryptedPath,
       pathDecryptionNonce: pathDecryptionNonce ?? this.pathDecryptionNonce,
+      version: version ?? this.version,
     );
   }
 
@@ -183,6 +203,7 @@ class CollectionAttributes {
     if (pathDecryptionNonce != null) {
       map['pathDecryptionNonce'] = pathDecryptionNonce;
     }
+    if (version != null) map['version'] = version;
     return map;
   }
 
@@ -192,6 +213,7 @@ class CollectionAttributes {
     return CollectionAttributes(
       encryptedPath: map['encryptedPath'],
       pathDecryptionNonce: map['pathDecryptionNonce'],
+      version: map['version'] ?? 0,
     );
   }
 
@@ -202,7 +224,7 @@ class CollectionAttributes {
 
   @override
   String toString() =>
-      'CollectionAttributes(encryptedPath: $encryptedPath, pathDecryptionNonce: $pathDecryptionNonce)';
+      'CollectionAttributes(encryptedPath: $encryptedPath, pathDecryptionNonce: $pathDecryptionNonce, version: $version)';
 
   @override
   bool operator ==(Object o) {
@@ -210,11 +232,13 @@ class CollectionAttributes {
 
     return o is CollectionAttributes &&
         o.encryptedPath == encryptedPath &&
-        o.pathDecryptionNonce == pathDecryptionNonce;
+        o.pathDecryptionNonce == pathDecryptionNonce &&
+        o.version == version;
   }
 
   @override
-  int get hashCode => encryptedPath.hashCode ^ pathDecryptionNonce.hashCode;
+  int get hashCode =>
+      encryptedPath.hashCode ^ pathDecryptionNonce.hashCode ^ version.hashCode;
 }
 
 class User {
