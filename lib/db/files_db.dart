@@ -64,10 +64,10 @@ class FilesDB {
   }
 
   // SQL code to create the database table
-  static List<String> createTable(String tablename) {
+  static List<String> createTable(String tableName) {
     return [
       '''
-        CREATE TABLE $tablename (
+        CREATE TABLE $tableName (
           $columnGeneratedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           $columnLocalID TEXT,
           $columnUploadedFileID INTEGER,
@@ -107,7 +107,7 @@ class FilesDB {
 
   static List<String> alterDeviceFolderToAllowNULL() {
     return [
-      ...createTable(table),
+      ...createTable(tempTable),
       '''
         INSERT INTO $tempTable
         SELECT *
