@@ -160,18 +160,22 @@ class CollectionsService {
   Uint8List getCollectionKey(int collectionID) {
     if (!_cachedKeys.containsKey(collectionID)) {
       final collection = _collectionIDToCollections[collectionID];
-      final encryptedKey = Sodium.base642bin(collection.encryptedKey);
-      if (collection.owner.id == _config.getUserID()) {
-        _cachedKeys[collectionID] = CryptoUtil.decryptSync(encryptedKey,
-            _config.getKey(), Sodium.base642bin(collection.keyDecryptionNonce));
-      } else {
-        _cachedKeys[collectionID] = CryptoUtil.openSealSync(
-            encryptedKey,
-            Sodium.base642bin(_config.getKeyAttributes().publicKey),
-            _config.getSecretKey());
-      }
+      _cachedKeys[collectionID] = _getDecryptedKey(collection);
     }
     return _cachedKeys[collectionID];
+  }
+
+  Uint8List _getDecryptedKey(Collection collection) {
+    final encryptedKey = Sodium.base642bin(collection.encryptedKey);
+    if (collection.owner.id == _config.getUserID()) {
+      return CryptoUtil.decryptSync(encryptedKey, _config.getKey(),
+          Sodium.base642bin(collection.keyDecryptionNonce));
+    } else {
+      return CryptoUtil.openSealSync(
+          encryptedKey,
+          Sodium.base642bin(_config.getKeyAttributes().publicKey),
+          _config.getSecretKey());
+    }
   }
 
   Future<List<Collection>> _fetchCollections(int sinceTime) {
@@ -313,7 +317,6 @@ class CollectionsService {
   }
 
   void _cacheCollectionAttributes(Collection collection) {
-    _collectionIDToCollections[collection.id] = collection;
     final collectionWithDecryptedName =
         _getCollectionWithDecryptedName(collection);
     if (collection.attributes.encryptedPath != null) {
@@ -339,7 +342,7 @@ class CollectionsService {
         collection.encryptedName.isNotEmpty) {
       name = utf8.decode(CryptoUtil.decryptSync(
           Sodium.base642bin(collection.encryptedName),
-          getCollectionKey(collection.id),
+          _getDecryptedKey(collection),
           Sodium.base642bin(collection.nameDecryptionNonce)));
       return Collection(
         collection.id,
