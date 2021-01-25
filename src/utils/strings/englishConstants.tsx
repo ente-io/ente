@@ -45,6 +45,13 @@ const englishConstants = {
     SELECT_COLLECTION: `Select/Click on Collection to upload`,
     CLOSE: 'Close',
     NOTHING_HERE: `nothing to see here! 👀`,
+    UPLOAD: {
+        0: "Preparing to upload",
+        1: "Encryting your files",
+        2: "Uploading your Files",
+        3: "Files Uploaded Successfully !!!"
+    },
+    OF: 'of'
 };
 
 export default englishConstants;

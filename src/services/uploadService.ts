@@ -74,10 +74,10 @@ class Queue<T> {
 }
 
 export enum UPLOAD_STAGES {
-    START = "Preparing to upload",
-    ENCRYPTION = "Encryting your files",
-    UPLOAD = "Uploading your Files",
-    FINISH = "Files Uploaded Successfully !!!"
+    START,
+    ENCRYPTION,
+    UPLOAD,
+    FINISH
 }
 
 class UploadService {
