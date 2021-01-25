@@ -160,18 +160,22 @@ class CollectionsService {
   Uint8List getCollectionKey(int collectionID) {
     if (!_cachedKeys.containsKey(collectionID)) {
       final collection = _collectionIDToCollections[collectionID];
-      final encryptedKey = Sodium.base642bin(collection.encryptedKey);
-      if (collection.owner.id == _config.getUserID()) {
-        _cachedKeys[collectionID] = CryptoUtil.decryptSync(encryptedKey,
-            _config.getKey(), Sodium.base642bin(collection.keyDecryptionNonce));
-      } else {
-        _cachedKeys[collectionID] = CryptoUtil.openSealSync(
-            encryptedKey,
-            Sodium.base642bin(_config.getKeyAttributes().publicKey),
-            _config.getSecretKey());
-      }
+      _cachedKeys[collectionID] = _getDecryptedKey(collection);
     }
     return _cachedKeys[collectionID];
+  }
+
+  Uint8List _getDecryptedKey(Collection collection) {
+    final encryptedKey = Sodium.base642bin(collection.encryptedKey);
+    if (collection.owner.id == _config.getUserID()) {
+      return CryptoUtil.decryptSync(encryptedKey, _config.getKey(),
+          Sodium.base642bin(collection.keyDecryptionNonce));
+    } else {
+      return CryptoUtil.openSealSync(
+          encryptedKey,
+          Sodium.base642bin(_config.getKeyAttributes().publicKey),
+          _config.getSecretKey());
+    }
   }
 
   Future<List<Collection>> _fetchCollections(int sinceTime) {
@@ -203,12 +207,15 @@ class CollectionsService {
   Future<Collection> createAlbum(String albumName) async {
     final key = CryptoUtil.generateKey();
     final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
+    final encryptedName = CryptoUtil.encryptSync(utf8.encode(albumName), key);
     final collection = await createAndCacheCollection(Collection(
       null,
       null,
       Sodium.bin2base64(encryptedKeyData.encryptedData),
       Sodium.bin2base64(encryptedKeyData.nonce),
-      albumName,
+      null,
+      Sodium.bin2base64(encryptedName.encryptedData),
+      Sodium.bin2base64(encryptedName.nonce),
       CollectionType.album,
       CollectionAttributes(),
       null,
@@ -223,18 +230,20 @@ class CollectionsService {
     }
     final key = CryptoUtil.generateKey();
     final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
-    final encryptedPath =
-        CryptoUtil.encryptSync(utf8.encode(path), _config.getKey());
+    final encryptedPath = CryptoUtil.encryptSync(utf8.encode(path), key);
     final collection = await createAndCacheCollection(Collection(
       null,
       null,
       Sodium.bin2base64(encryptedKeyData.encryptedData),
       Sodium.bin2base64(encryptedKeyData.nonce),
-      path,
+      null,
+      Sodium.bin2base64(encryptedPath.encryptedData),
+      Sodium.bin2base64(encryptedPath.nonce),
       CollectionType.folder,
       CollectionAttributes(
           encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData),
-          pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce)),
+          pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce),
+          version: 1),
       null,
       null,
     ));
@@ -308,17 +317,48 @@ class CollectionsService {
   }
 
   void _cacheCollectionAttributes(Collection collection) {
+    final collectionWithDecryptedName =
+        _getCollectionWithDecryptedName(collection);
     if (collection.attributes.encryptedPath != null) {
-      _localCollections[decryptCollectionPath(collection)] = collection;
+      _localCollections[decryptCollectionPath(collection)] =
+          collectionWithDecryptedName;
     }
-    _collectionIDToCollections[collection.id] = collection;
+    _collectionIDToCollections[collection.id] = collectionWithDecryptedName;
   }
 
   String decryptCollectionPath(Collection collection) {
+    final key = collection.attributes.version == 1
+        ? getCollectionKey(collection.id)
+        : _config.getKey();
     return utf8.decode(CryptoUtil.decryptSync(
         Sodium.base642bin(collection.attributes.encryptedPath),
-        _config.getKey(),
+        key,
         Sodium.base642bin(collection.attributes.pathDecryptionNonce)));
+  }
+
+  Collection _getCollectionWithDecryptedName(Collection collection) {
+    var name;
+    if (collection.encryptedName != null &&
+        collection.encryptedName.isNotEmpty) {
+      name = utf8.decode(CryptoUtil.decryptSync(
+          Sodium.base642bin(collection.encryptedName),
+          _getDecryptedKey(collection),
+          Sodium.base642bin(collection.nameDecryptionNonce)));
+      return Collection(
+        collection.id,
+        collection.owner,
+        collection.encryptedKey,
+        collection.keyDecryptionNonce,
+        name,
+        collection.encryptedName,
+        collection.nameDecryptionNonce,
+        collection.type,
+        collection.attributes,
+        collection.sharees,
+        collection.updationTime,
+      );
+    } else
+      return collection;
   }
 }
 

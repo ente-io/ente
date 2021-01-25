@@ -5,23 +5,34 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/collection.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_migration/sqflite_migration.dart';
 
 class CollectionsDB {
   static final _databaseName = "ente.collections.db";
-  static final _databaseVersion = 1;
-
-  static final collectionsTable = 'collections';
+  static final table = 'collections';
+  static final tempTable = 'temp_collections';
 
   static final columnID = 'collection_id';
   static final columnOwner = 'owner';
   static final columnEncryptedKey = 'encrypted_key';
   static final columnKeyDecryptionNonce = 'key_decryption_nonce';
   static final columnName = 'name';
+  static final columnEncryptedName = 'encrypted_name';
+  static final columnNameDecryptionNonce = 'name_decryption_nonce';
   static final columnType = 'type';
   static final columnEncryptedPath = 'encrypted_path';
   static final columnPathDecryptionNonce = 'path_decryption_nonce';
   static final columnSharees = 'sharees';
   static final columnUpdationTime = 'updation_time';
+
+  static final intitialScript = [...createTable(table)];
+  static final migrationScripts = [
+    ...alterNameToAllowNULL(),
+    ...addEncryptedName(),
+  ];
+
+  final dbConfig = MigrationConfig(
+      initializationScript: intitialScript, migrationScripts: migrationScripts);
 
   CollectionsDB._privateConstructor();
   static final CollectionsDB instance = CollectionsDB._privateConstructor();
@@ -36,35 +47,61 @@ class CollectionsDB {
   _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
-    return await openDatabase(
-      path,
-      version: _databaseVersion,
-      onCreate: _onCreate,
-    );
+    return await openDatabaseWithMigration(path, dbConfig);
   }
 
-  Future _onCreate(Database db, int version) async {
-    await db.execute('''
-                CREATE TABLE $collectionsTable (
-                  $columnID INTEGER PRIMARY KEY NOT NULL,
-                  $columnOwner TEXT NOT NULL,
-                  $columnEncryptedKey TEXT NOT NULL,
-                  $columnKeyDecryptionNonce TEXT,
-                  $columnName TEXT NOT NULL,
-                  $columnType TEXT NOT NULL,
-                  $columnEncryptedPath TEXT,
-                  $columnPathDecryptionNonce TEXT,
-                  $columnSharees TEXT,
-                  $columnUpdationTime TEXT NOT NULL
-                )
-                ''');
+  static List<String> createTable(String tableName) {
+    return [
+      '''
+        CREATE TABLE $tableName (
+          $columnID INTEGER PRIMARY KEY NOT NULL,
+          $columnOwner TEXT NOT NULL,
+          $columnEncryptedKey TEXT NOT NULL,
+          $columnKeyDecryptionNonce TEXT,
+          $columnName TEXT,
+          $columnType TEXT NOT NULL,
+          $columnEncryptedPath TEXT,
+          $columnPathDecryptionNonce TEXT,
+          $columnSharees TEXT,
+          $columnUpdationTime TEXT NOT NULL
+        );
+    '''
+    ];
+  }
+
+  static List<String> alterNameToAllowNULL() {
+    return [
+      ...createTable(tempTable),
+      '''
+        INSERT INTO $tempTable
+        SELECT *
+        FROM $table;
+
+        DROP TABLE $table;
+        
+        ALTER TABLE $tempTable 
+        RENAME TO $table;
+    '''
+    ];
+  }
+
+  static List<String> addEncryptedName() {
+    return [
+      '''
+        ALTER TABLE $table
+        ADD COLUMN $columnEncryptedName TEXT;
+      ''',
+      '''ALTER TABLE $table
+        ADD COLUMN $columnNameDecryptionNonce TEXT;
+      '''
+    ];
   }
 
   Future<List<dynamic>> insert(List<Collection> collections) async {
     final db = await instance.database;
     var batch = db.batch();
     for (final collection in collections) {
-      batch.insert(collectionsTable, _getRowForCollection(collection),
+      batch.insert(table, _getRowForCollection(collection),
           conflictAlgorithm: ConflictAlgorithm.replace);
     }
     return await batch.commit();
@@ -72,7 +109,7 @@ class CollectionsDB {
 
   Future<List<Collection>> getAllCollections() async {
     final db = await instance.database;
-    final rows = await db.query(collectionsTable);
+    final rows = await db.query(table);
     final collections = List<Collection>();
     for (final row in rows) {
       collections.add(_convertToCollection(row));
@@ -83,7 +120,7 @@ class CollectionsDB {
   Future<int> getLastCollectionUpdationTime() async {
     final db = await instance.database;
     final rows = await db.query(
-      collectionsTable,
+      table,
       orderBy: '$columnUpdationTime DESC',
       limit: 1,
     );
@@ -97,7 +134,7 @@ class CollectionsDB {
   Future<int> deleteCollection(int collectionID) async {
     final db = await instance.database;
     return db.delete(
-      collectionsTable,
+      table,
       where: '$columnID = ?',
       whereArgs: [collectionID],
     );
@@ -110,6 +147,8 @@ class CollectionsDB {
     row[columnEncryptedKey] = collection.encryptedKey;
     row[columnKeyDecryptionNonce] = collection.keyDecryptionNonce;
     row[columnName] = collection.name;
+    row[columnEncryptedName] = collection.encryptedName;
+    row[columnNameDecryptionNonce] = collection.nameDecryptionNonce;
     row[columnType] = Collection.typeToString(collection.type);
     row[columnEncryptedPath] = collection.attributes.encryptedPath;
     row[columnPathDecryptionNonce] = collection.attributes.pathDecryptionNonce;
@@ -126,6 +165,8 @@ class CollectionsDB {
       row[columnEncryptedKey],
       row[columnKeyDecryptionNonce],
       row[columnName],
+      row[columnEncryptedName],
+      row[columnNameDecryptionNonce],
       Collection.typeFromString(row[columnType]),
       CollectionAttributes(
           encryptedPath: row[columnEncryptedPath],

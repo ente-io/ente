@@ -7,14 +7,15 @@ import 'package:photos/models/file.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite_migration/sqflite_migration.dart';
 
 class FilesDB {
   static final _databaseName = "ente.files.db";
-  static final _databaseVersion = 1;
 
   static final Logger _logger = Logger("FilesDB");
 
   static final table = 'files';
+  static final tempTable = 'temp_files';
 
   static final columnGeneratedID = '_id';
   static final columnUploadedFileID = 'uploaded_file_id';
@@ -37,6 +38,11 @@ class FilesDB {
   static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static final columnMetadataDecryptionHeader = 'metadata_decryption_header';
 
+  static final intitialScript = [...createTable(table), ...addIndex()];
+  static final migrationScripts = [...alterDeviceFolderToAllowNULL()];
+
+  final dbConfig = MigrationConfig(
+      initializationScript: intitialScript, migrationScripts: migrationScripts);
   // make this a singleton class
   FilesDB._privateConstructor();
   static final FilesDB instance = FilesDB._privateConstructor();
@@ -54,42 +60,65 @@ class FilesDB {
   _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
-    return await openDatabase(path,
-        version: _databaseVersion, onCreate: _onCreate);
+    return await openDatabaseWithMigration(path, dbConfig);
   }
 
   // SQL code to create the database table
-  Future _onCreate(Database db, int version) async {
-    await db.execute('''
-          CREATE TABLE $table (
-            $columnGeneratedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-            $columnLocalID TEXT,
-            $columnUploadedFileID INTEGER,
-            $columnOwnerID INTEGER,
-            $columnCollectionID INTEGER,
-            $columnTitle TEXT NOT NULL,
-            $columnDeviceFolder TEXT NOT NULL,
-            $columnLatitude REAL,
-            $columnLongitude REAL,
-            $columnFileType INTEGER,
-            $columnIsEncrypted INTEGER DEFAULT 1,
-            $columnModificationTime TEXT NOT NULL,
-            $columnEncryptedKey TEXT,
-            $columnKeyDecryptionNonce TEXT,
-            $columnFileDecryptionHeader TEXT,
-            $columnThumbnailDecryptionHeader TEXT,
-            $columnMetadataDecryptionHeader TEXT,
-            $columnIsDeleted INTEGER DEFAULT 0,
-            $columnCreationTime TEXT NOT NULL,
-            $columnUpdationTime TEXT,
-            UNIQUE($columnUploadedFileID, $columnCollectionID)
-          );
+  static List<String> createTable(String tableName) {
+    return [
+      '''
+        CREATE TABLE $tableName (
+          $columnGeneratedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          $columnLocalID TEXT,
+          $columnUploadedFileID INTEGER,
+          $columnOwnerID INTEGER,
+          $columnCollectionID INTEGER,
+          $columnTitle TEXT NOT NULL,
+          $columnDeviceFolder TEXT,
+          $columnLatitude REAL,
+          $columnLongitude REAL,
+          $columnFileType INTEGER,
+          $columnIsEncrypted INTEGER DEFAULT 1,
+          $columnModificationTime TEXT NOT NULL,
+          $columnEncryptedKey TEXT,
+          $columnKeyDecryptionNonce TEXT,
+          $columnFileDecryptionHeader TEXT,
+          $columnThumbnailDecryptionHeader TEXT,
+          $columnMetadataDecryptionHeader TEXT,
+          $columnIsDeleted INTEGER DEFAULT 0,
+          $columnCreationTime TEXT NOT NULL,
+          $columnUpdationTime TEXT,
+          UNIQUE($columnUploadedFileID, $columnCollectionID)
+        );
+      ''',
+    ];
+  }
 
-          CREATE INDEX collection_id_index ON $table($columnCollectionID);
-          CREATE INDEX device_folder_index ON $table($columnDeviceFolder);
-          CREATE INDEX creation_time_index ON $table($columnCreationTime);
-          CREATE INDEX updation_time_index ON $table($columnUpdationTime);
-          ''');
+  static List<String> addIndex() {
+    return [
+      '''
+        CREATE INDEX collection_id_index ON $table($columnCollectionID);
+        CREATE INDEX device_folder_index ON $table($columnDeviceFolder);
+        CREATE INDEX creation_time_index ON $table($columnCreationTime);
+        CREATE INDEX updation_time_index ON $table($columnUpdationTime);
+      '''
+    ];
+  }
+
+  static List<String> alterDeviceFolderToAllowNULL() {
+    return [
+      ...createTable(tempTable),
+      '''
+        INSERT INTO $tempTable
+        SELECT *
+        FROM $table;
+
+        DROP TABLE $table;
+        
+        ALTER TABLE $tempTable 
+        RENAME TO $table;
+    '''
+    ];
   }
 
   Future<int> insert(File file) async {
@@ -427,16 +456,30 @@ class FilesDB {
     int creationTime,
   ) async {
     final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '''$columnTitle=? AND $columnDeviceFolder=? AND 
+    var query;
+    if (deviceFolder != null) {
+      query = db.query(
+        table,
+        where: '''$columnTitle=? AND $columnDeviceFolder=? AND 
           $columnCreationTime=?''',
-      whereArgs: [
-        title,
-        deviceFolder,
-        creationTime,
-      ],
-    );
+        whereArgs: [
+          title,
+          deviceFolder,
+          creationTime,
+        ],
+      );
+    } else {
+      query = db.query(
+        table,
+        where: '''$columnTitle=? AND 
+          $columnCreationTime=?''',
+        whereArgs: [
+          title,
+          creationTime,
+        ],
+      );
+    }
+    final rows = await query;
     if (rows.isNotEmpty) {
       return _convertToFiles(rows);
     } else {
