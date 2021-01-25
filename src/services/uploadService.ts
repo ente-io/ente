@@ -167,8 +167,8 @@ class UploadService {
             title: recievedFile.name,
             creationTime: creationTime || (recievedFile.lastModified) * 1000,
             modificationTime: (recievedFile.lastModified) * 1000,
-            latitude: location?.lat,
-            longitude: location?.lon,
+            latitude: location?.latitude,
+            longitude: location?.latitude,
             fileType,
         });
         return {
@@ -247,13 +247,21 @@ class UploadService {
         const metaDataObject = this.metadataMap.get(metadataJSON['title']);
         metaDataObject['creationTime'] = metadataJSON['photoTakenTime']['timestamp'] * 1000000;
         metaDataObject['modificationTime'] = metadataJSON['modificationTime']['timestamp'] * 1000000;
-        if (!metaDataObject['latitude'] && metaDataObject['latitude'] != 0 && metaDataObject['longitude'] != 0) {
-            metaDataObject['latitude'] = metadataJSON['geoData']['latitude'];
-            metaDataObject['longitude'] = metadataJSON['geoData']['longitude'];
+
+        if (metaDataObject['latitude'] == null || (metaDataObject['latitude'] == 0.0 && metaDataObject['longitude'] == 0.0)) {
+            var locationData = null;
+            if (metadataJSON['geoData']['latitude'] != 0.0 || metadataJSON['geoData']['longitude'] != 0.0) {
+                locationData = metadataJSON['geoData'];
+            }
+            else if (metadataJSON['geoDataExif']['latitude'] != 0.0 || metadataJSON['geoDataExif']['longitude'] != 0.0) {
+                locationData = metadataJSON['geoDataExif'];
+            }
+            if (locationData != null) {
+                metaDataObject['latitude'] = locationData['latitide'];
+                metaDataObject['longitude'] = locationData['longitude'];
+            }
         }
-
     }
-
     private async generateThumbnail(file: File): Promise<Uint8Array> {
         let canvas = document.createElement("canvas");
         let canvas_CTX = canvas.getContext("2d");
@@ -380,7 +388,7 @@ class UploadService {
 
         var lonFinal = this.convertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
 
-        return { lat: latFinal, lon: lonFinal };
+        return { latitude: latFinal, longitude: lonFinal };
     }
 
     private convertDMSToDD(degrees, minutes, seconds, direction) {
