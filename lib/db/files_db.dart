@@ -15,7 +15,7 @@ class FilesDB {
   static final Logger _logger = Logger("FilesDB");
 
   static final table = 'files';
-  static final temptable = 'temp_files';
+  static final tempTable = 'temp_files';
 
   static final columnGeneratedID = '_id';
   static final columnUploadedFileID = 'uploaded_file_id';
@@ -109,13 +109,13 @@ class FilesDB {
     return [
       ...createTable(table),
       '''
-        INSERT INTO $temptable
+        INSERT INTO $tempTable
         SELECT *
         FROM $table;
 
         DROP TABLE $table;
         
-        ALTER TABLE $temptable 
+        ALTER TABLE $tempTable 
         RENAME TO $table;
     '''
     ];
