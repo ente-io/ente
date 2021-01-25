@@ -150,171 +150,200 @@ class UploadService {
     }
 
     private async formatData(recievedFile: File) {
-        const filedata: Uint8Array = await this.getUint8ArrayView(recievedFile);
-        let fileType;
-        switch (recievedFile.type.split('/')[0]) {
-            case "image":
-                fileType = FILE_TYPE.IMAGE;
-                break;
-            case "video":
-                fileType = FILE_TYPE.VIDEO;
-            default:
-                fileType = FILE_TYPE.OTHERS;
-        }
+        try {
+            const filedata: Uint8Array = await this.getUint8ArrayView(recievedFile);
+            let fileType;
+            switch (recievedFile.type.split('/')[0]) {
+                case "image":
+                    fileType = FILE_TYPE.IMAGE;
+                    break;
+                case "video":
+                    fileType = FILE_TYPE.VIDEO;
+                default:
+                    fileType = FILE_TYPE.OTHERS;
+            }
 
-        const { location, creationTime } = await this.getExifData(recievedFile);
-        this.metadataMap.set(recievedFile.name, {
-            title: recievedFile.name,
-            creationTime: creationTime || (recievedFile.lastModified) * 1000,
-            modificationTime: (recievedFile.lastModified) * 1000,
-            latitude: location?.latitude,
-            longitude: location?.latitude,
-            fileType,
-        });
-        return {
-            filedata,
-            metadata: this.metadataMap.get(recievedFile.name),
-            thumbnail: await this.generateThumbnail(recievedFile)
+            const { location, creationTime } = await this.getExifData(recievedFile);
+            this.metadataMap.set(recievedFile.name, {
+                title: recievedFile.name,
+                creationTime: creationTime || (recievedFile.lastModified) * 1000,
+                modificationTime: (recievedFile.lastModified) * 1000,
+                latitude: location?.latitude,
+                longitude: location?.latitude,
+                fileType,
+            });
+            return {
+                filedata,
+                metadata: this.metadataMap.get(recievedFile.name),
+                thumbnail: await this.generateThumbnail(recievedFile)
+            }
+        } catch (e) {
+            console.log("error reading files " + e);
         }
     }
     private async encryptFiles(worker, file: formatedFile, encryptionKey: string): Promise<encryptedFile> {
+        try {
+
+            const { key: fileKey, file: filedata }: encryptionResult = await worker.encryptFile(file.filedata);
+
+            const { file: encryptedThumbnail }: encryptionResult = await worker.encryptThumbnail(file.thumbnail, fileKey);
+
+            const { file: encryptedMetadata }: encryptionResult = await worker.encryptMetadata(file.metadata, fileKey)
+
+            const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(fileKey, encryptionKey);
 
 
-        const { key: fileKey, file: filedata }: encryptionResult = await worker.encryptFile(file.filedata);
-
-        const { file: encryptedThumbnail }: encryptionResult = await worker.encryptThumbnail(file.thumbnail, fileKey);
-
-        const { file: encryptedMetadata }: encryptionResult = await worker.encryptMetadata(file.metadata, fileKey)
-
-        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce }: keyEncryptionResult = await worker.encryptToB64(fileKey, encryptionKey);
-
-
-        const result: encryptedFile = {
-            key: fileKey,
-            filedata: filedata,
-            thumbnail: encryptedThumbnail,
-            metadata: encryptedMetadata,
-            encryptedKey,
-            keyDecryptionNonce,
-        };
-        return result;
+            const result: encryptedFile = {
+                key: fileKey,
+                filedata: filedata,
+                thumbnail: encryptedThumbnail,
+                metadata: encryptedMetadata,
+                encryptedKey,
+                keyDecryptionNonce,
+            };
+            return result;
+        }
+        catch (e) {
+            console.log("Error encrypting files " + e);
+        }
     }
 
     private async uploadtoBucket(file: encryptedFile, token, count: number): Promise<objectKeys> {
-        const fileUploadURL = await this.getUploadURL(token, count);
-        const fileObjectKey = await this.putFile(fileUploadURL, file.filedata.encryptedData)
+        try {
+            const fileUploadURL = await this.getUploadURL(token, count);
+            const fileObjectKey = await this.putFile(fileUploadURL, file.filedata.encryptedData)
 
-        const thumbnailUploadURL = await this.getUploadURL(token, count);
-        const thumbnailObjectKey = await this.putFile(thumbnailUploadURL, file.thumbnail.encryptedData)
+            const thumbnailUploadURL = await this.getUploadURL(token, count);
+            const thumbnailObjectKey = await this.putFile(thumbnailUploadURL, file.thumbnail.encryptedData)
 
-        return {
-            file: { objectKey: fileObjectKey, decryptionHeader: file.filedata.decryptionHeader },
-            thumbnail: { objectKey: thumbnailObjectKey, decryptionHeader: file.thumbnail.decryptionHeader }
-        };
+            return {
+                file: { objectKey: fileObjectKey, decryptionHeader: file.filedata.decryptionHeader },
+                thumbnail: { objectKey: thumbnailObjectKey, decryptionHeader: file.thumbnail.decryptionHeader }
+            };
+        } catch (e) {
+            console.log("error uploading to bucket " + e);
+        }
     }
 
     private async uploadFile(collectionLatestFile: collectionLatestFile, encryptedFile: encryptedFile, objectKeys: objectKeys, token) {
-        const uploadFile: uploadFile = {
-            collectionID: collectionLatestFile.collection.id,
-            encryptedKey: encryptedFile.encryptedKey,
-            keyDecryptionNonce: encryptedFile.keyDecryptionNonce,
-            metadata: {
-                encryptedData: encryptedFile.metadata.encryptedData,
-                decryptionHeader: encryptedFile.metadata.decryptionHeader
-            },
-            ...objectKeys
+        try {
+            const uploadFile: uploadFile = {
+                collectionID: collectionLatestFile.collection.id,
+                encryptedKey: encryptedFile.encryptedKey,
+                keyDecryptionNonce: encryptedFile.keyDecryptionNonce,
+                metadata: {
+                    encryptedData: encryptedFile.metadata.encryptedData,
+                    decryptionHeader: encryptedFile.metadata.decryptionHeader
+                },
+                ...objectKeys
+            }
+
+
+            const response = await HTTPService.post(`${ENDPOINT}/files`, uploadFile, { token });
+
+            return response.data;
+        } catch (e) {
+            console.log("upload Files Failed " + e);
         }
-
-
-        const response = await HTTPService.post(`${ENDPOINT}/files`, uploadFile, { token });
-
-        return response.data;
     }
 
     private async updateMetadata(recievedFile: File) {
+        try {
+            const metadataJSON: object = await new Promise((resolve, reject) => {
+                const reader = new FileReader()
+                reader.onload = () => {
+                    var result = typeof reader.result !== "string" ? new TextDecoder().decode(reader.result) : reader.result
+                    resolve(JSON.parse(result));
+                }
+                reader.readAsText(recievedFile)
+            });
+            if (!this.metadataMap.has(metadataJSON['title']))
+                return;
 
-        const metadataJSON: object = await new Promise((resolve, reject) => {
-            const reader = new FileReader()
-            reader.onload = () => {
-                var result = typeof reader.result !== "string" ? new TextDecoder().decode(reader.result) : reader.result
-                resolve(JSON.parse(result));
-            }
-            reader.readAsText(recievedFile)
-        });
-        if (!this.metadataMap.has(metadataJSON['title']))
-            return;
+            const metaDataObject = this.metadataMap.get(metadataJSON['title']);
+            metaDataObject['creationTime'] = metadataJSON['photoTakenTime']['timestamp'] * 1000000;
+            metaDataObject['modificationTime'] = metadataJSON['modificationTime']['timestamp'] * 1000000;
 
-        const metaDataObject = this.metadataMap.get(metadataJSON['title']);
-        metaDataObject['creationTime'] = metadataJSON['photoTakenTime']['timestamp'] * 1000000;
-        metaDataObject['modificationTime'] = metadataJSON['modificationTime']['timestamp'] * 1000000;
+            if (metaDataObject['latitude'] == null || (metaDataObject['latitude'] == 0.0 && metaDataObject['longitude'] == 0.0)) {
+                var locationData = null;
+                if (metadataJSON['geoData']['latitude'] != 0.0 || metadataJSON['geoData']['longitude'] != 0.0) {
+                    locationData = metadataJSON['geoData'];
+                }
+                else if (metadataJSON['geoDataExif']['latitude'] != 0.0 || metadataJSON['geoDataExif']['longitude'] != 0.0) {
+                    locationData = metadataJSON['geoDataExif'];
+                }
+                if (locationData != null) {
+                    metaDataObject['latitude'] = locationData['latitide'];
+                    metaDataObject['longitude'] = locationData['longitude'];
+                }
+            }
+        } catch (e) {
+            console.log("error reading metaData Files " + e);
 
-        if (metaDataObject['latitude'] == null || (metaDataObject['latitude'] == 0.0 && metaDataObject['longitude'] == 0.0)) {
-            var locationData = null;
-            if (metadataJSON['geoData']['latitude'] != 0.0 || metadataJSON['geoData']['longitude'] != 0.0) {
-                locationData = metadataJSON['geoData'];
-            }
-            else if (metadataJSON['geoDataExif']['latitude'] != 0.0 || metadataJSON['geoDataExif']['longitude'] != 0.0) {
-                locationData = metadataJSON['geoDataExif'];
-            }
-            if (locationData != null) {
-                metaDataObject['latitude'] = locationData['latitide'];
-                metaDataObject['longitude'] = locationData['longitude'];
-            }
         }
     }
     private async generateThumbnail(file: File): Promise<Uint8Array> {
-        let canvas = document.createElement("canvas");
-        let canvas_CTX = canvas.getContext("2d");
-        let type = file.type.split('/')[0];
-        if (type === "image") {
-            let image = new Image();
-            image.setAttribute("src", URL.createObjectURL(file));
-            await new Promise((resolve, reject) => {
-                image.onload = () => {
-                    canvas.width = image.width;
-                    canvas.height = image.height;
-                    canvas_CTX.drawImage(image, 0, 0, image.width, image.height);
-                    image = undefined;
-                    resolve(null);
-                }
-            });
-
-        }
-        else {
-            let video = document.createElement('video');
-            video.setAttribute("src", URL.createObjectURL(file));
-
-            await new Promise((resolve, reject) => {
-                video.addEventListener('loadedmetadata', function () {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    canvas_CTX.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-                    video = undefined;
-                    resolve(null);
+        try {
+            let canvas = document.createElement("canvas");
+            let canvas_CTX = canvas.getContext("2d");
+            let type = file.type.split('/')[0];
+            if (type === "image") {
+                let image = new Image();
+                image.setAttribute("src", URL.createObjectURL(file));
+                await new Promise((resolve, reject) => {
+                    image.onload = () => {
+                        canvas.width = image.width;
+                        canvas.height = image.height;
+                        canvas_CTX.drawImage(image, 0, 0, image.width, image.height);
+                        image = undefined;
+                        resolve(null);
+                    }
                 });
+
+            }
+            else {
+                let video = document.createElement('video');
+                video.setAttribute("src", URL.createObjectURL(file));
+
+                await new Promise((resolve, reject) => {
+                    video.addEventListener('loadedmetadata', function () {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        canvas_CTX.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                        video = undefined;
+                        resolve(null);
+                    });
+                });
+            }
+            const thumbnail: Uint8Array = await new Promise((resolve, reject) => {
+                canvas.toBlob(async (blob) => {
+                    resolve(await this.getUint8ArrayView(blob));
+                })
             });
+            return thumbnail;
+        } catch (e) {
+            console.log("Error generatin thumbnail " + e);
         }
-        const thumbnail: Uint8Array = await new Promise((resolve, reject) => {
-            canvas.toBlob(async (blob) => {
-                resolve(await this.getUint8ArrayView(blob));
-            })
-        });
-        return thumbnail;
     }
 
     private async getUint8ArrayView(file): Promise<Uint8Array> {
-        return await new Promise((resolve, reject) => {
-            const reader = new FileReader()
+        try {
+            return await new Promise((resolve, reject) => {
+                const reader = new FileReader()
 
-            reader.onabort = () => reject('file reading was aborted')
-            reader.onerror = () => reject('file reading has failed')
-            reader.onload = () => {
-                // Do whatever you want with the file contents
-                const result = typeof reader.result === "string" ? new TextEncoder().encode(reader.result) : new Uint8Array(reader.result);
-                resolve(result);
-            }
-            reader.readAsArrayBuffer(file)
-        });
+                reader.onabort = () => reject('file reading was aborted')
+                reader.onerror = () => reject('file reading has failed')
+                reader.onload = () => {
+                    // Do whatever you want with the file contents
+                    const result = typeof reader.result === "string" ? new TextEncoder().encode(reader.result) : new Uint8Array(reader.result);
+                    resolve(result);
+                }
+                reader.readAsArrayBuffer(file)
+            });
+        } catch (e) {
+            console.log("error readinf file to bytearray " + e);
+            throw e;
+        }
     }
 
     private async getUploadURL(token: string, count: number) {
@@ -325,40 +354,54 @@ class UploadService {
     }
 
     private async fetchUploadURLs(token: string, count: number): Promise<void> {
-        if (!this.uploadURLFetchInProgress) {
-            this.uploadURLFetchInProgress = HTTPService.get(`${ENDPOINT}/files/upload-urls`,
-                {
-                    token: token,
-                    count: Math.min(50, count).toString()  //m4gic number
-                })
-            const response = await this.uploadURLFetchInProgress;
+        try {
+            if (!this.uploadURLFetchInProgress) {
+                this.uploadURLFetchInProgress = HTTPService.get(`${ENDPOINT}/files/upload-urls`,
+                    {
+                        token: token,
+                        count: Math.min(50, count).toString()  //m4gic number
+                    })
+                const response = await this.uploadURLFetchInProgress;
 
-            this.uploadURLFetchInProgress = null;
-            this.uploadURLs.push(response.data["urls"]);
+                this.uploadURLFetchInProgress = null;
+                this.uploadURLs.push(response.data["urls"]);
+            }
+            return this.uploadURLFetchInProgress;
+        } catch (e) {
+            console.log("fetch upload-url failed " + e);
+            throw e;
         }
-        return this.uploadURLFetchInProgress;
     }
 
     private async putFile(fileUploadURL: uploadURL, file: Uint8Array | string): Promise<string> {
-        const fileSize = file.length.toString();
-        await HTTPService.put(fileUploadURL.url, file, null, { contentLengthHeader: fileSize })
-        return fileUploadURL.objectKey;
+        try {
+            const fileSize = file.length.toString();
+            await HTTPService.put(fileUploadURL.url, file, null, { contentLengthHeader: fileSize })
+            return fileUploadURL.objectKey;
+        } catch (e) {
+            console.log('putFile to dataStore failed ' + e);
+            throw e;
+        }
     }
 
     private async getExifData(recievedFile) {
-        const exifData: any = await new Promise((resolve, reject) => {
-            const reader = new FileReader()
-            reader.onload = () => {
-                resolve(EXIF.readFromBinaryFile(reader.result));
-            }
-            reader.readAsArrayBuffer(recievedFile)
-        });
-        if (!exifData)
-            return { location: null, creationTime: null };
-        return {
-            location: this.getLocation(exifData),
-            creationTime: this.getUNIXTime(exifData)
-        };
+        try {
+            const exifData: any = await new Promise((resolve, reject) => {
+                const reader = new FileReader()
+                reader.onload = () => {
+                    resolve(EXIF.readFromBinaryFile(reader.result));
+                }
+                reader.readAsArrayBuffer(recievedFile)
+            });
+            if (!exifData)
+                return { location: null, creationTime: null };
+            return {
+                location: this.getLocation(exifData),
+                creationTime: this.getUNIXTime(exifData)
+            };
+        } catch (e) {
+            console.log("error reading exif data");
+        }
     }
     private getUNIXTime(exifData: any) {
         if (!exifData.DateTimeOriginal)

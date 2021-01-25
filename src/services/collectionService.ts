@@ -89,15 +89,20 @@ const getCollections = async (
     sinceTime: string,
     key: string
 ): Promise<collection[]> => {
-    const resp = await HTTPService.get(`${ENDPOINT}/collections`, {
-        token: token,
-        sinceTime: sinceTime,
-    });
-    const ignore: Set<number> = new Set([206, 208]);
-    const promises: Promise<collection>[] = resp.data.collections.filter(collection => !ignore.has(collection.id)).map(
-        (collection: collection) => getCollectionSecrets(collection, key)
-    );
-    return await Promise.all(promises);
+    try {
+        const resp = await HTTPService.get(`${ENDPOINT}/collections`, {
+            token: token,
+            sinceTime: sinceTime,
+        });
+        const ignore: Set<number> = new Set([206, 208]);
+        const promises: Promise<collection>[] = resp.data.collections.filter(collection => !ignore.has(collection.id)).map(
+            (collection: collection) => getCollectionSecrets(collection, key)
+        );
+        return await Promise.all(promises);
+    }
+    catch (e) {
+        console.log("getCollections falied- " + e);
+    }
 };
 
 export const fetchCollections = async (token: string, key: string) => {
@@ -162,8 +167,12 @@ export const AddCollection = async (collectionName: string, type: CollectionType
 }
 
 const createCollection = async (collectionData: collection, token: string): Promise<collection> => {
-    const response = await HTTPService.post(`${ENDPOINT}/collections`, collectionData, { token });
-    return response.data.collection;
+    try {
+        const response = await HTTPService.post(`${ENDPOINT}/collections`, collectionData, { token });
+        return response.data.collection;
+    } catch (e) {
+        console.log("create Collection failed " + e);
+    }
 }
 
 export const addToFavorites = async (file: file) => {
@@ -181,37 +190,45 @@ export const removeFromFavorites = async (file: file) => {
 }
 
 const addtoCollection = async (collection: collection, files: file[]) => {
-    const params = new Object();
-    const worker = await new CryptoWorker();
-    const token = getToken();
-    params["collectionID"] = collection.id;
-    await Promise.all(files.map(async file => {
-        file.collectionID = Number(collection.id);
-        const newEncryptedKey: keyEncryptionResult = await worker.encryptToB64(file.key, collection.key);
-        file.encryptedKey = newEncryptedKey.encryptedData;
-        file.keyDecryptionNonce = newEncryptedKey.nonce;
-        if (params["files"] == undefined) {
-            params["files"] = [];
-        }
-        params["files"].push({
-            id: file.id,
-            encryptedKey: file.encryptedKey,
-            keyDecryptionNonce: file.keyDecryptionNonce
-        })
-        return file;
-    }));
-    await HTTPService.post(`${ENDPOINT}/collections/add-files`, params, { token });
+    try {
+        const params = new Object();
+        const worker = await new CryptoWorker();
+        const token = getToken();
+        params["collectionID"] = collection.id;
+        await Promise.all(files.map(async file => {
+            file.collectionID = Number(collection.id);
+            const newEncryptedKey: keyEncryptionResult = await worker.encryptToB64(file.key, collection.key);
+            file.encryptedKey = newEncryptedKey.encryptedData;
+            file.keyDecryptionNonce = newEncryptedKey.nonce;
+            if (params["files"] == undefined) {
+                params["files"] = [];
+            }
+            params["files"].push({
+                id: file.id,
+                encryptedKey: file.encryptedKey,
+                keyDecryptionNonce: file.keyDecryptionNonce
+            })
+            return file;
+        }));
+        await HTTPService.post(`${ENDPOINT}/collections/add-files`, params, { token });
+    } catch (e) {
+        console.log("Add to collection Failed " + e);
+    }
 }
 const removeFromCollection = async (collection: collection, files: file[]) => {
-    const params = new Object();
-    const token = getToken();
-    params["collectionID"] = collection.id;
-    await Promise.all(files.map(async file => {
-        if (params["fileIDs"] == undefined) {
-            params["fileIDs"] = [];
-        }
-        params["fileIDs"].push(file.id);
-    }));
-    await HTTPService.post(`${ENDPOINT}/collections/remove-files`, params, { token });
+    try {
+        const params = new Object();
+        const token = getToken();
+        params["collectionID"] = collection.id;
+        await Promise.all(files.map(async file => {
+            if (params["fileIDs"] == undefined) {
+                params["fileIDs"] = [];
+            }
+            params["fileIDs"].push(file.id);
+        }));
+        await HTTPService.post(`${ENDPOINT}/collections/remove-files`, params, { token });
+    } catch (e) {
+        console.log("remove from collection failed " + e);
+    }
 }
 
