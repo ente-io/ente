@@ -40,13 +40,13 @@ class _SignInHeaderState extends State<SignInHeader> {
   @override
   Widget build(BuildContext context) {
     var hasConfiguredAccount = Configuration.instance.hasConfiguredAccount();
-    var hasSubscribed = BillingService.instance.getSubscription() != null;
+    var hasSubscribed = BillingService.instance.hasActiveSubscription();
     if (hasConfiguredAccount && hasSubscribed) {
       return Container();
     }
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.fromLTRB(8, 20, 8, 8),
+        padding: EdgeInsets.fromLTRB(8, 24, 8, 8),
         child: Column(
           children: [
             Text.rich(
@@ -71,7 +71,7 @@ class _SignInHeaderState extends State<SignInHeader> {
               textAlign: TextAlign.center,
             ),
             Padding(
-              padding: EdgeInsets.all(6),
+              padding: EdgeInsets.all(2),
             ),
             Text.rich(
               TextSpan(
@@ -156,20 +156,15 @@ class _SignInHeaderState extends State<SignInHeader> {
             Container(
               width: double.infinity,
               height: 64,
+              padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: RaisedButton(
-                child: Hero(
-                  tag: "sign_up_hero_text",
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Text(
-                      !hasConfiguredAccount ? "sign up" : "subscribe",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                child: Text(
+                  "subscribe",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 onPressed: () {
                   var page;

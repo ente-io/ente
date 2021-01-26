@@ -34,16 +34,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
-      title: Hero(
-        tag: "sign_up_hero_text",
-        child: Material(
-          color: Colors.transparent,
-          child: Text(
-            "sign up",
-            style: TextStyle(
-              fontSize: 18,
-            ),
-          ),
+      title: Text(
+        "sign up",
+        style: TextStyle(
+          fontSize: 18,
         ),
       ),
     );
@@ -62,15 +56,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         padding: EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
-            // Image.asset(
-            //   "assets/welcome.png",
-            //   width: 300,
-            //   height: 200,
-            // ),
             Padding(
-              padding: EdgeInsets.all(32),
+              padding: EdgeInsets.all(60),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
