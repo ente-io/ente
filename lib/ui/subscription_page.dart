@@ -31,7 +31,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         .instance.purchaseUpdatedStream
         .listen((event) async {
       for (final e in event) {
-        if (e.status == PurchaseStatus.purchased && e.pendingCompletePurchase) {
+        if (e.status == PurchaseStatus.purchased) {
           final dialog = createProgressDialog(context, "verifying purchase...");
           await dialog.show();
           try {
@@ -51,14 +51,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           await InAppPurchaseConnection.instance.completePurchase(e);
           Bus.instance.fire(UserAuthenticatedEvent());
           await dialog.hide();
-          Navigator.pop(context);
           AlertDialog alert = AlertDialog(
-            title: Text("success"),
-            content: Column(
-              children: [
-                Text("thank you, your photos and videos will now be backed up"),
-              ],
-            ),
+            title: Text("thank you"),
+            content: Text("your photos and videos will now be backed up"),
             actions: [
               FlatButton(
                 child: Text("ok"),
@@ -68,6 +63,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               ),
             ],
           );
+          Navigator.pop(context);
 
           showDialog(
             context: context,
@@ -75,7 +71,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               return alert;
             },
           );
-        } else if (Platform.isIOS) {
+        } else if (Platform.isIOS && e.pendingCompletePurchase) {
           await InAppPurchaseConnection.instance.completePurchase(e);
         }
       }
@@ -180,7 +176,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 child: Text(
                   "we offer a 14 day free trial, you can cancel anytime",
                   style: TextStyle(
-                    color: Colors.white54,
+                    color: Colors.white,
                     height: 1.2,
                   ),
                 ),
