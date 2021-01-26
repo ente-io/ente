@@ -48,10 +48,7 @@ void _main() async {
 
 Future _init() async {
   _logger.info("Initializing...");
-  Computer().turnOn(
-    workersCount: 4,
-    areLogsEnabled: false,
-  );
+  Computer().turnOn(workersCount: 4);
   InAppPurchaseConnection.enablePendingPurchases();
   await Configuration.instance.init();
   await BillingService.instance.init();
