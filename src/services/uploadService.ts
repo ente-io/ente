@@ -261,7 +261,7 @@ class UploadService {
 
     private async uploadFile(uploadFile: uploadFile, token) {
         try {
-            const response = await HTTPService.post(`${ENDPOINT}/files`, uploadFile, { token });
+            const response = await HTTPService.post(`${ENDPOINT}/files`, uploadFile, null, { 'X-Auth-Token': token });
 
             return response.data;
         } catch (e) {
@@ -404,9 +404,8 @@ class UploadService {
             if (!this.uploadURLFetchInProgress) {
                 this.uploadURLFetchInProgress = HTTPService.get(`${ENDPOINT}/files/upload-urls`,
                     {
-                        token: token,
                         count: Math.min(50, count).toString()  //m4gic number
-                    })
+                    }, { 'X-Auth-Token': token })
                 const response = await this.uploadURLFetchInProgress;
 
                 this.uploadURLFetchInProgress = null;

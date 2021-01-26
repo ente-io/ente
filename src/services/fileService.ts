@@ -110,9 +110,11 @@ export const getFiles = async (collections: collection[], sinceTime: string, lim
                 resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
                     collectionID: collection.id,
                     sinceTime: time,
-                    token,
                     limit,
-                });
+                },
+                    {
+                        'X-Auth-Token': token
+                    });
                 promises.push(...resp.data.diff.map(
                     async (file: file) => {
                         if (!file.isDeleted) {
@@ -148,8 +150,8 @@ export const getPreview = async (token: string, file: file) => {
         }
         const resp = await HTTPService.get(
             `${ENDPOINT}/files/preview/${file.id}`,
-            { token },
             null,
+            { 'X-Auth-Token': token },
             { responseType: 'arraybuffer' }
         );
         const worker = await new CryptoWorker();
@@ -173,8 +175,8 @@ export const getFile = async (token: string, file: file) => {
     try {
         const resp = await HTTPService.get(
             `${ENDPOINT}/files/download/${file.id}`,
-            { token },
             null,
+            { 'X-Auth-Token': token },
             { responseType: 'arraybuffer' }
         );
         const worker = await new CryptoWorker();

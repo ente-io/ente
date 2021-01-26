@@ -89,9 +89,8 @@ const getCollections = async (
 ): Promise<collection[]> => {
     try {
         const resp = await HTTPService.get(`${ENDPOINT}/collections`, {
-            token: token,
             sinceTime: sinceTime,
-        });
+        }, { 'X-Auth-Token': token, });
         const promises: Promise<collection>[] = resp.data.collections.map(
             (collection: collection) => getCollectionSecrets(collection, key)
         );
@@ -165,7 +164,7 @@ export const AddCollection = async (collectionName: string, type: CollectionType
 
 const createCollection = async (collectionData: collection, token: string): Promise<collection> => {
     try {
-        const response = await HTTPService.post(`${ENDPOINT}/collections`, collectionData, { token });
+        const response = await HTTPService.post(`${ENDPOINT}/collections`, collectionData, null, { 'X-Auth-Token': token });
         return response.data.collection;
     } catch (e) {
         console.log("create Collection failed " + e);
@@ -207,7 +206,7 @@ const addtoCollection = async (collection: collection, files: file[]) => {
             })
             return file;
         }));
-        await HTTPService.post(`${ENDPOINT}/collections/add-files`, params, { token });
+        await HTTPService.post(`${ENDPOINT}/collections/add-files`, params, null, { 'X-Auth-Token': token });
     } catch (e) {
         console.log("Add to collection Failed " + e);
     }
@@ -223,7 +222,7 @@ const removeFromCollection = async (collection: collection, files: file[]) => {
             }
             params["fileIDs"].push(file.id);
         }));
-        await HTTPService.post(`${ENDPOINT}/collections/remove-files`, params, { token });
+        await HTTPService.post(`${ENDPOINT}/collections/remove-files`, params, null, { 'X-Auth-Token': token });
     } catch (e) {
         console.log("remove from collection failed " + e);
     }
