@@ -28,106 +28,88 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   }
 
   Widget _getBody() {
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Image.asset(
-              "assets/email_sent.png",
-              width: 220,
-              height: 220,
-            ),
-            Padding(padding: EdgeInsets.all(12)),
-            Text(
-              "we've sent a mail to",
-              style: TextStyle(fontSize: 18),
-            ),
-            Padding(padding: EdgeInsets.all(2)),
-            Text(
-              Configuration.instance.getEmail(),
-              style: TextStyle(
-                color: Theme.of(context).accentColor,
-                fontSize: 18,
+    return Center(
+      child: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "we've sent a mail to",
+                style: TextStyle(fontSize: 18),
               ),
-            ),
-            // Text.rich(
-            //   TextSpan(
-            //     style: TextStyle(fontSize: 18),
-            //     children: <TextSpan>[
-            //       TextSpan(text: "we've sent a mail to "),
-            //       TextSpan(
-            //           text: Configuration.instance.getEmail(),
-            //           style: TextStyle(
-            //             color: Theme.of(context).accentColor,
-            //           )),
-            //     ],
-            //   ),
-            //   textAlign: TextAlign.center,
-            // ),
-            Padding(
-              padding: const EdgeInsets.all(32),
-              child: Text(
-                "please check your inbox (and spam) to complete verification.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(60, 0, 60, 32),
-              child: TextFormField(
-                decoration: InputDecoration(
-                  hintText: 'tap to enter code',
-                  contentPadding: EdgeInsets.all(12),
+              Padding(padding: EdgeInsets.all(2)),
+              Text(
+                Configuration.instance.getEmail(),
+                style: TextStyle(
+                  color: Theme.of(context).accentColor,
+                  fontSize: 18,
                 ),
-                controller: _verificationCodeController,
-                autofocus: false,
-                autocorrect: false,
-                keyboardType: TextInputType.visiblePassword,
-                textAlign: TextAlign.center,
-                onChanged: (_) {
-                  setState(() {});
-                },
               ),
-            ),
-            Container(
-              padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
-              width: double.infinity,
-              height: 64,
-              child: button(
-                "verify",
-                onPressed: _verificationCodeController.text == null ||
-                        _verificationCodeController.text.isEmpty
-                    ? null
-                    : () {
-                        UserService.instance.getCredentials(
-                            context, _verificationCodeController.text);
-                      },
-                fontSize: 18,
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-            FlatButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) {
-                        return EmailEntryPage();
-                      },
-                    ),
-                  );
-                },
+              Padding(
+                padding: const EdgeInsets.all(32),
                 child: Text(
-                  "did not get email?",
-                  style: TextStyle(
-                    decoration: TextDecoration.underline,
-                    fontSize: 12,
+                  "please check your inbox (and spam) to complete verification.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(60, 0, 60, 32),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    hintText: 'tap to enter code',
+                    contentPadding: EdgeInsets.all(12),
                   ),
-                )),
-          ],
+                  controller: _verificationCodeController,
+                  autofocus: false,
+                  autocorrect: false,
+                  keyboardType: TextInputType.visiblePassword,
+                  textAlign: TextAlign.center,
+                  onChanged: (_) {
+                    setState(() {});
+                  },
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
+                width: double.infinity,
+                height: 64,
+                child: button(
+                  "verify",
+                  onPressed: _verificationCodeController.text == null ||
+                          _verificationCodeController.text.isEmpty
+                      ? null
+                      : () {
+                          UserService.instance.getCredentials(
+                              context, _verificationCodeController.text);
+                        },
+                  fontSize: 18,
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(8)),
+              FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return EmailEntryPage();
+                        },
+                      ),
+                    );
+                  },
+                  child: Text(
+                    "did not get email?",
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      fontSize: 12,
+                    ),
+                  )),
+            ],
+          ),
         ),
       ),
     );
