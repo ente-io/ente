@@ -180,6 +180,7 @@ class UploadService {
                     break;
                 case "video":
                     fileType = FILE_TYPE.VIDEO;
+                    break;
                 default:
                     fileType = FILE_TYPE.OTHERS;
             }
@@ -307,11 +308,12 @@ class UploadService {
         try {
             let canvas = document.createElement("canvas");
             let canvas_CTX = canvas.getContext("2d");
-            let type = file.type.split('/')[0];
-            if (type === "image") {
+            let imageURL = null;
+            if (file.type.match("image")) {
                 let image = new Image();
-                image.setAttribute("src", URL.createObjectURL(file));
-                await new Promise((resolve, reject) => {
+                imageURL = URL.createObjectURL(file);
+                image.setAttribute("src", imageURL);
+                await new Promise((resolve) => {
                     image.onload = () => {
                         canvas.width = image.width;
                         canvas.height = image.height;
@@ -323,24 +325,47 @@ class UploadService {
 
             }
             else {
-                let video = document.createElement('video');
-                video.setAttribute("src", URL.createObjectURL(file));
-
-                await new Promise((resolve, reject) => {
-                    video.addEventListener('loadedmetadata', function () {
+                await new Promise(async (resolve) => {
+                    let video = document.createElement('video');
+                    imageURL = URL.createObjectURL(file);
+                    var timeupdate = function () {
+                        if (snapImage()) {
+                            video.removeEventListener('timeupdate', timeupdate);
+                            video.pause();
+                            resolve(null);
+                        }
+                    };
+                    video.addEventListener('loadeddata', function () {
+                        if (snapImage()) {
+                            video.removeEventListener('timeupdate', timeupdate);
+                            resolve(null);
+                        }
+                    });
+                    var snapImage = function () {
                         canvas.width = video.videoWidth;
                         canvas.height = video.videoHeight;
-                        canvas_CTX.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-                        video = undefined;
-                        resolve(null);
-                    });
+                        canvas_CTX.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        var image = canvas.toDataURL();
+                        var success = image.length > 100000;
+                        return success;
+                    };
+                    video.addEventListener('timeupdate', timeupdate);
+                    video.preload = 'metadata';
+                    video.src = imageURL;
+                    // Load video in Safari / IE11
+                    video.muted = true;
+                    video.playsInline = true;
+                    video.play();
                 });
             }
-            const thumbnail: Uint8Array = await new Promise((resolve, reject) => {
-                canvas.toBlob(async (blob) => {
-                    resolve(await this.getUint8ArrayView(blob));
-                })
+            URL.revokeObjectURL(imageURL);
+            var thumbnailBlob = await new Promise(resolve => {
+                canvas.toBlob(function (blob) {
+                    resolve(blob);
+                }), 'image/jpeg', 0.4
             });
+            console.log(URL.createObjectURL(thumbnailBlob));
+            const thumbnail = this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
         } catch (e) {
             console.log("Error generatin thumbnail " + e);
