@@ -96,6 +96,12 @@ void chachaDecrypt(Map<String, dynamic> args) {
 }
 
 class CryptoUtil {
+  static Computer _computer = Computer();
+
+  static init() {
+    _computer.turnOn(workersCount: 4);
+  }
+
   static EncryptionResult encryptSync(Uint8List source, Uint8List key) {
     final nonce = Sodium.randombytesBuf(Sodium.cryptoSecretboxNoncebytes);
 
@@ -117,7 +123,7 @@ class CryptoUtil {
     args["cipher"] = cipher;
     args["nonce"] = nonce;
     args["key"] = key;
-    return Computer().compute(cryptoSecretboxOpenEasy, param: args);
+    return _computer.compute(cryptoSecretboxOpenEasy, param: args);
   }
 
   static Uint8List decryptSync(
@@ -162,7 +168,7 @@ class CryptoUtil {
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
     args["key"] = key;
-    return Computer().compute(chachaEncryptFile, param: args);
+    return _computer.compute(chachaEncryptFile, param: args);
   }
 
   static Future<void> decryptFile(
@@ -176,7 +182,7 @@ class CryptoUtil {
     args["destinationFilePath"] = destinationFilePath;
     args["header"] = header;
     args["key"] = key;
-    return Computer().compute(chachaDecrypt, param: args);
+    return _computer.compute(chachaDecrypt, param: args);
   }
 
   static Uint8List generateKey() {
@@ -203,14 +209,14 @@ class CryptoUtil {
     args["input"] = input;
     args["opsLimit"] = Sodium.cryptoPwhashOpslimitSensitive;
     args["memLimit"] = Sodium.cryptoPwhashMemlimitModerate;
-    return utf8.decode(await Computer().compute(cryptoPwhashStr, param: args));
+    return utf8.decode(await _computer.compute(cryptoPwhashStr, param: args));
   }
 
   static Future<bool> verifyHash(Uint8List input, String hash) async {
     final args = Map<String, dynamic>();
     args["input"] = input;
     args["hash"] = utf8.encode(hash);
-    return await Computer().compute(cryptoPwhashStrVerify, param: args);
+    return await _computer.compute(cryptoPwhashStrVerify, param: args);
   }
 
   static Future<KeyPair> generateKeyPair() async {

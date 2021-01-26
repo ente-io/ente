@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:background_fetch/background_fetch.dart';
-import 'package:computer/computer.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:path_provider/path_provider.dart';
@@ -12,6 +11,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/home_widget.dart';
+import 'package:photos/utils/crypto_util.dart';
 import 'package:sentry/sentry.dart';
 import 'package:super_logging/super_logging.dart';
 import 'package:logging/logging.dart';
@@ -48,8 +48,8 @@ void _main() async {
 
 Future _init() async {
   _logger.info("Initializing...");
-  Computer().turnOn(workersCount: 4);
   InAppPurchaseConnection.enablePendingPurchases();
+  CryptoUtil.init();
   await Configuration.instance.init();
   await BillingService.instance.init();
   await CollectionsService.instance.init();
