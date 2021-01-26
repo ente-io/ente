@@ -23,7 +23,7 @@ function CollectionSelector(props) {
             collectionLatestFile={item}
         >
             <Card>
-                <PreviewCard data={item.file} updateUrl={() => { }}/>
+                <PreviewCard data={item.file} updateUrl={() => { }} forcedEnable />
                 <Card.Text className="text-center">{item.collection.name}</Card.Text>
             </Card>
 
