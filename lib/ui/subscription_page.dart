@@ -27,6 +27,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   @override
   void initState() {
+    InAppPurchaseConnection.enablePendingPurchases();
     _purchaseUpdateSubscription = InAppPurchaseConnection
         .instance.purchaseUpdatedStream
         .listen((event) async {
@@ -58,13 +59,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               FlatButton(
                 child: Text("ok"),
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 },
               ),
             ],
           );
-          Navigator.pop(context);
-
           showDialog(
             context: context,
             builder: (BuildContext context) {
