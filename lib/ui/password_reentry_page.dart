@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/subscription_page.dart';
@@ -81,13 +80,15 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                                 _passwordController.text,
                                 Configuration.instance.getKeyAttributes());
                           } catch (e) {
+                            Logger("PRP").warning(e);
                             await dialog.hide();
                             showErrorDialog(context, "incorrect password",
                                 "please try again");
                             return;
                           }
                           await dialog.hide();
-                          if (BillingService.instance.hasActiveSubscription()) {
+                          if (!BillingService.instance
+                              .hasActiveSubscription()) {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (BuildContext context) {
@@ -95,9 +96,10 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                                 },
                               ),
                             );
+                          } else {
+                            Navigator.of(context)
+                                .popUntil((route) => route.isFirst);
                           }
-                          Navigator.of(context)
-                              .popUntil((route) => route.isFirst);
                         }
                       : null,
                 )),
