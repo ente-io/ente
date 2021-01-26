@@ -91,7 +91,7 @@ packages:
       name: computer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.2"
+    version: "1.1.1"
   connectivity:
     dependency: "direct main"
     description:
@@ -610,7 +610,7 @@ packages:
       name: scrollable_positioned_list
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.8"
+    version: "0.1.9"
   sentry:
     dependency: "direct main"
     description:
@@ -666,7 +666,7 @@ packages:
       name: shared_preferences_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.1+3"
+    version: "0.0.2+2"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -692,7 +692,7 @@ packages:
       name: sqflite_common
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.3"
+    version: "1.0.3+1"
   sqflite_migration:
     dependency: "direct main"
     description:
