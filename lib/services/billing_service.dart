@@ -33,16 +33,15 @@ class BillingService {
       }
       for (final e in event) {
         if (e.status == PurchaseStatus.purchased) {
-          try {
-            await verifySubscription(
-                e.productID, e.verificationData.serverVerificationData);
-          } catch (e) {
-            _logger.warning("Could not complete payment ", e);
-            return;
-          }
-          await InAppPurchaseConnection.instance.completePurchase(e);
+          verifySubscription(
+                  e.productID, e.verificationData.serverVerificationData)
+              .then((response) {
+            if (response != null) {
+              InAppPurchaseConnection.instance.completePurchase(e);
+            }
+          });
         } else if (Platform.isIOS && e.pendingCompletePurchase) {
-          await InAppPurchaseConnection.instance.completePurchase(e);
+          InAppPurchaseConnection.instance.completePurchase(e);
         }
       }
     });
@@ -64,13 +63,13 @@ class BillingService {
   }
 
   Future<Subscription> verifySubscription(
-      final subscriptionID, final verificationData) async {
+      final productID, final verificationData) async {
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/billing/verify-subscription",
         data: {
           "paymentProvider": Platform.isAndroid ? "playstore" : "appstore",
-          "subscriptionID": subscriptionID,
+          "productID": productID,
           "verificationData": verificationData,
         },
         options: Options(
