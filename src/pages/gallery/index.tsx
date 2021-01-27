@@ -7,6 +7,7 @@ import {
     getFile,
     getPreview,
     fetchData,
+    localFiles,
 } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
@@ -16,8 +17,8 @@ import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { Options } from 'photoswipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
+import LoadingBar from 'react-top-loading-bar'
 import Collections from './components/Collections';
-import SadFace from 'components/SadFace';
 import Upload from './components/Upload';
 import { collection, fetchCollections, collectionLatestFile, getCollectionLatestFile, getFavItemIds } from 'services/collectionService';
 import constants from 'utils/strings/constants';
@@ -106,7 +107,7 @@ export default function Gallery(props) {
     });
     const fetching: { [k: number]: boolean } = {};
 
-
+    const [progress, setProgress] = useState(0)
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -116,6 +117,22 @@ export default function Gallery(props) {
         }
         const main = async () => {
             setLoading(true);
+            const data = await localFiles();
+            setData(data);
+            setLoading(false);
+        };
+        main();
+        props.setUploadButtonView(true);
+    }, []);
+
+    useEffect(() => {
+        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const token = getData(LS_KEYS.USER).token;
+        if (!key) {
+            router.push('/');
+        }
+        const main = async () => {
+            setProgress(80);
             const encryptionKey = await getActualKey();
             const collections = await fetchCollections(token, encryptionKey);
             const data = await fetchData(token, collections);
@@ -125,7 +142,7 @@ export default function Gallery(props) {
             setData(data);
             setCollectionLatestFile(collectionLatestFile);
             setFavItemIds(favItemIds);
-            setLoading(false);
+            setProgress(100);
         };
         main();
         props.setUploadButtonView(true);
@@ -285,6 +302,11 @@ export default function Gallery(props) {
 
     return (
         <>
+            <LoadingBar
+                color='#f11946'
+                progress={progress}
+                onLoaderFinished={() => setProgress(0)}
+            />
             <Collections
                 collections={collections}
                 selected={router.query.collection?.toString()}
@@ -296,7 +318,7 @@ export default function Gallery(props) {
                 showUploadModal={props.showUploadModal}
                 collectionLatestFile={collectionLatestFile}
                 refetchData={() => setReload(Math.random())}
-                
+
             />
             {filteredData.length ? (
                 <Container>

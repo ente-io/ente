@@ -66,11 +66,16 @@ export const fetchData = async (token, collections) => {
     );
 }
 
+export const localFiles = async () => {
+    let files: Array<file> = (await localForage.getItem<file[]>('files')) || [];
+    return files;
+}
+
 export const fetchFiles = async (
     token: string,
     collections: collection[]
 ) => {
-    let files: Array<file> = (await localForage.getItem<file[]>('files')) || [];
+    let files = await localFiles();
     const fetchedFiles = await getFiles(collections, null, "100", token);
 
     files.push(...fetchedFiles);
