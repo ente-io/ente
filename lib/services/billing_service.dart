@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
@@ -9,7 +10,7 @@ import 'package:photos/models/subscription.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BillingService {
-  BillingService._privateConstructor() {}
+  BillingService._privateConstructor();
 
   static final BillingService instance = BillingService._privateConstructor();
   static const subscriptionKey = "subscription";
@@ -18,11 +19,33 @@ class BillingService {
   final _dio = Network.instance.getDio();
   final _config = Configuration.instance;
 
+  bool _isOnSubscriptionPage = false;
+
   SharedPreferences _prefs;
   Future<List<BillingPlan>> _future;
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+    InAppPurchaseConnection.instance.purchaseUpdatedStream
+        .listen((event) async {
+      if (_isOnSubscriptionPage) {
+        return;
+      }
+      for (final e in event) {
+        if (e.status == PurchaseStatus.purchased) {
+          try {
+            await verifySubscription(
+                e.productID, e.verificationData.serverVerificationData);
+          } catch (e) {
+            _logger.warning("Could not complete payment ", e);
+            return;
+          }
+          await InAppPurchaseConnection.instance.completePurchase(e);
+        } else if (Platform.isIOS && e.pendingCompletePurchase) {
+          await InAppPurchaseConnection.instance.completePurchase(e);
+        }
+      }
+    });
   }
 
   Future<List<BillingPlan>> getBillingPlans() {
@@ -83,5 +106,9 @@ class BillingService {
   Future<void> setSubscription(Subscription subscription) async {
     await _prefs.setString(
         subscriptionKey, subscription == null ? null : subscription.toJson());
+  }
+
+  void setIsOnSubscriptionPage(bool isOnSubscriptionPage) {
+    _isOnSubscriptionPage = isOnSubscriptionPage;
   }
 }

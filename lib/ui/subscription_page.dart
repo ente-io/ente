@@ -27,7 +27,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   @override
   void initState() {
-    InAppPurchaseConnection.enablePendingPurchases();
+    BillingService.instance.setIsOnSubscriptionPage(true);
     _purchaseUpdateSubscription = InAppPurchaseConnection
         .instance.purchaseUpdatedStream
         .listen((event) async {
@@ -81,6 +81,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   void dispose() {
     _purchaseUpdateSubscription.cancel();
+    BillingService.instance.setIsOnSubscriptionPage(false);
     super.dispose();
   }
 
