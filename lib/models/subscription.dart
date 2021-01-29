@@ -2,23 +2,36 @@ import 'dart:convert';
 
 class Subscription {
   final int id;
+  final String productID;
   final int storageInMBs;
+  final String originalTransactionID;
+  final String paymentProvider;
   final int expiryTime;
 
   Subscription({
     this.id,
+    this.productID,
     this.storageInMBs,
+    this.originalTransactionID,
+    this.paymentProvider,
     this.expiryTime,
   });
 
   Subscription copyWith({
     int id,
+    int productID,
     int storageInMBs,
+    int originalTransactionID,
+    int paymentProvider,
     int expiryTime,
   }) {
     return Subscription(
       id: id ?? this.id,
+      productID: productID ?? this.productID,
       storageInMBs: storageInMBs ?? this.storageInMBs,
+      originalTransactionID:
+          originalTransactionID ?? this.originalTransactionID,
+      paymentProvider: paymentProvider ?? this.paymentProvider,
       expiryTime: expiryTime ?? this.expiryTime,
     );
   }
@@ -26,7 +39,10 @@ class Subscription {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'productID': productID,
       'storageInMBs': storageInMBs,
+      'originalTransactionID': originalTransactionID,
+      'paymentProvider': paymentProvider,
       'expiryTime': expiryTime,
     };
   }
@@ -36,7 +52,10 @@ class Subscription {
 
     return Subscription(
       id: map['id'],
+      productID: map['productID'],
       storageInMBs: map['storageInMBs'],
+      originalTransactionID: map['originalTransactionID'],
+      paymentProvider: map['paymentProvider'],
       expiryTime: map['expiryTime'],
     );
   }
@@ -47,8 +66,9 @@ class Subscription {
       Subscription.fromMap(json.decode(source));
 
   @override
-  String toString() =>
-      'Subscription(id: $id, storageInMBs: $storageInMBs, expiryTime: $expiryTime)';
+  String toString() {
+    return 'Subscription(id: $id, productID: $productID, storageInMBs: $storageInMBs, originalTransactionID: $originalTransactionID, paymentProvider: $paymentProvider, expiryTime: $expiryTime)';
+  }
 
   @override
   bool operator ==(Object o) {
@@ -56,10 +76,20 @@ class Subscription {
 
     return o is Subscription &&
         o.id == id &&
+        o.productID == productID &&
         o.storageInMBs == storageInMBs &&
+        o.originalTransactionID == originalTransactionID &&
+        o.paymentProvider == paymentProvider &&
         o.expiryTime == expiryTime;
   }
 
   @override
-  int get hashCode => id.hashCode ^ storageInMBs.hashCode ^ expiryTime.hashCode;
+  int get hashCode {
+    return id.hashCode ^
+        productID.hashCode ^
+        storageInMBs.hashCode ^
+        originalTransactionID.hashCode ^
+        paymentProvider.hashCode ^
+        expiryTime.hashCode;
+  }
 }
