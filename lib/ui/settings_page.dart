@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -78,13 +79,22 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () async {
-              _showFoldersDialog(context);
+              if (BillingService.instance.hasActiveSubscription()) {
+                launch(
+                    "https://play.google.com/store/account/subscriptions?sku=" +
+                        BillingService.instance.getSubscription().productID +
+                        "&package=io.ente.photos");
+                Logger("settings").info("taking to " +
+                    BillingService.instance.getSubscription().productID);
+              } else {
+                launch("https://play.google.com/store/account/subscriptions");
+              }
             },
             child: SettingsTextItem(
-                text: "backed up folders", icon: Icons.navigate_next),
+                text: "subscription plan", icon: Icons.navigate_next),
           ),
           Divider(height: 4),
-          Padding(padding: EdgeInsets.all(6)),
+          Padding(padding: EdgeInsets.all(8)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -96,8 +106,18 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
                     ),
             ],
           ),
-          Padding(padding: EdgeInsets.all(6)),
+          Padding(padding: EdgeInsets.all(8)),
           Divider(height: 4),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () async {
+              _showFoldersDialog(context);
+            },
+            child: SettingsTextItem(
+                text: "backed up folders", icon: Icons.navigate_next),
+          ),
+          Divider(height: 4),
+          Padding(padding: EdgeInsets.all(4)),
           Container(
             height: 36,
             child: Row(
