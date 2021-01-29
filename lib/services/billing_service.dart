@@ -45,6 +45,9 @@ class BillingService {
         }
       }
     });
+    if (_config.hasConfiguredAccount() && !hasActiveSubscription()) {
+      fetchSubscription();
+    }
   }
 
   Future<List<BillingPlan>> getBillingPlans() {
@@ -86,7 +89,24 @@ class BillingService {
     }
   }
 
-  // TODO: Fetch new subscription once the current one has expired?
+  Future<Subscription> fetchSubscription() async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/billing/subscription",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      final subscription = Subscription.fromMap(response.data["subscription"]);
+      await setSubscription(subscription);
+      return subscription;
+    } catch (e) {
+      throw e;
+    }
+  }
+
   Subscription getSubscription() {
     final jsonValue = _prefs.getString(subscriptionKey);
     if (jsonValue == null) {
