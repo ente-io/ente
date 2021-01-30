@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
 import 'package:photos/models/billing_plan.dart';
+import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -24,12 +25,17 @@ class SubscriptionPage extends StatefulWidget {
 
 class _SubscriptionPageState extends State<SubscriptionPage> {
   final _logger = Logger("SubscriptionPage");
+  final _billingService = BillingService.instance;
+  Subscription _currentSubscription;
   StreamSubscription _purchaseUpdateSubscription;
   ProgressDialog _dialog;
 
   @override
   void initState() {
-    BillingService.instance.setIsOnSubscriptionPage(true);
+    _billingService.setIsOnSubscriptionPage(true);
+    if (_billingService.hasActiveSubscription()) {
+      _currentSubscription = _billingService.getSubscription();
+    }
 
     _dialog = createProgressDialog(context, "please wait...");
 
@@ -37,14 +43,24 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         FlutterInappPurchase.purchaseUpdated.listen((item) async {
       await _dialog.show();
       try {
-        await BillingService.instance.verifySubscription(item.productId,
+        final newSubscription = await _billingService.verifySubscription(
+            item.productId,
             Platform.isAndroid ? item.purchaseToken : item.transactionReceipt);
         await FlutterInappPurchase.instance.finishTransaction(item);
-        await _dialog.hide();
         Bus.instance.fire(UserAuthenticatedEvent());
+        final isUpgrade = _currentSubscription != null &&
+            newSubscription.storageInMBs > _currentSubscription.storageInMBs;
+        final isDowngrade = _currentSubscription != null &&
+            newSubscription.storageInMBs < _currentSubscription.storageInMBs;
+        String text = "your photos and videos will now be backed up";
+        if (isUpgrade) {
+          text = "your plan was successfully upgraded";
+        } else if (isDowngrade) {
+          text = "your plan was successfully downgraded";
+        }
         AlertDialog alert = AlertDialog(
           title: Text("thank you"),
-          content: Text("your photos and videos will now be backed up"),
+          content: Text(text),
           actions: [
             FlatButton(
               child: Text("ok"),
@@ -54,6 +70,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             ),
           ],
         );
+        await _dialog.hide();
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -78,7 +95,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   void dispose() {
     _purchaseUpdateSubscription.cancel();
-    BillingService.instance.setIsOnSubscriptionPage(false);
+    _billingService.setIsOnSubscriptionPage(false);
     super.dispose();
   }
 
@@ -95,7 +112,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget _getBody(final appBarSize) {
     return FutureBuilder<List<BillingPlan>>(
-      future: BillingService.instance.getBillingPlans(),
+      future: _billingService.getBillingPlans(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           return _buildPlans(context, snapshot.data, appBarSize);
@@ -110,7 +127,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget _buildPlans(
       BuildContext context, List<BillingPlan> plans, final appBarSize) {
-    final subscription = BillingService.instance.getSubscription();
+    final subscription = _billingService.getSubscription();
     final planWidgets = List<Widget>();
     for (final plan in plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
@@ -136,7 +153,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 await _dialog.hide();
               });
               await FlutterInappPurchase.instance
-                  .requestSubscription(items[0].productId);
+                  .requestSubscription(productID);
               await _dialog.hide();
             },
             child: SubscriptionPlanWidget(
