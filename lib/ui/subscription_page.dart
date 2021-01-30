@@ -88,7 +88,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
-      title: Text("choose plan"),
+      title: Text("subscription"),
     );
     return Scaffold(
       appBar: appBar,

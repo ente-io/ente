@@ -15,6 +15,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -79,16 +80,13 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () async {
-              if (BillingService.instance.hasActiveSubscription()) {
-                launch(
-                    "https://play.google.com/store/account/subscriptions?sku=" +
-                        BillingService.instance.getSubscription().productID +
-                        "&package=io.ente.photos");
-                Logger("settings").info("taking to " +
-                    BillingService.instance.getSubscription().productID);
-              } else {
-                launch("https://play.google.com/store/account/subscriptions");
-              }
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return SubscriptionPage();
+                  },
+                ),
+              );
             },
             child: SettingsTextItem(
                 text: "subscription plan", icon: Icons.navigate_next),
