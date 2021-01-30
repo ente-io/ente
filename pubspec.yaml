@@ -72,6 +72,7 @@ dependencies:
   flutter_password_strength: ^0.1.4
   flutter_inappwebview: ^4.0.0+4
   background_fetch: ^0.5.1
+  flutter_inapp_purchase: ^3.0.1
 
 dev_dependencies:
   flutter_test:

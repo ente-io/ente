@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
@@ -26,24 +27,21 @@ class BillingService {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
-    InAppPurchaseConnection.instance.purchaseUpdatedStream
-        .listen((event) async {
+    await FlutterInappPurchase.instance.initConnection;
+    if (kDebugMode) {
+      FlutterInappPurchase.instance.clearTransactionIOS();
+    }
+    FlutterInappPurchase.purchaseUpdated.listen((item) {
       if (_isOnSubscriptionPage) {
         return;
       }
-      for (final e in event) {
-        if (e.status == PurchaseStatus.purchased) {
-          verifySubscription(
-                  e.productID, e.verificationData.serverVerificationData)
-              .then((response) {
-            if (response != null) {
-              InAppPurchaseConnection.instance.completePurchase(e);
-            }
-          });
-        } else if (Platform.isIOS && e.pendingCompletePurchase) {
-          InAppPurchaseConnection.instance.completePurchase(e);
+      verifySubscription(item.productId,
+              Platform.isAndroid ? item.purchaseToken : item.transactionReceipt)
+          .then((response) {
+        if (response != null) {
+          FlutterInappPurchase.instance.finishTransaction(item);
         }
-      }
+      });
     });
     if (_config.hasConfiguredAccount() && !hasActiveSubscription()) {
       fetchSubscription();

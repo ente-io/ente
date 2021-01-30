@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
@@ -28,51 +28,45 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   void initState() {
     BillingService.instance.setIsOnSubscriptionPage(true);
-    _purchaseUpdateSubscription = InAppPurchaseConnection
-        .instance.purchaseUpdatedStream
-        .listen((event) async {
-      for (final e in event) {
-        if (e.status == PurchaseStatus.purchased) {
-          final dialog = createProgressDialog(context, "verifying purchase...");
-          await dialog.show();
-          try {
-            await BillingService.instance.verifySubscription(
-                e.productID, e.verificationData.serverVerificationData);
-          } catch (e) {
-            _logger.warning("Could not complete payment ", e);
-            await dialog.hide();
-            showErrorDialog(
-                context,
-                "payment failed",
-                "please talk to " +
-                    (Platform.isAndroid ? "PlayStore" : "AppStore") +
-                    " support if you were charged");
-            return;
-          }
-          await InAppPurchaseConnection.instance.completePurchase(e);
-          Bus.instance.fire(UserAuthenticatedEvent());
-          await dialog.hide();
-          AlertDialog alert = AlertDialog(
-            title: Text("thank you"),
-            content: Text("your photos and videos will now be backed up"),
-            actions: [
-              FlatButton(
-                child: Text("ok"),
-                onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-              ),
-            ],
-          );
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return alert;
-            },
-          );
-        } else if (Platform.isIOS && e.pendingCompletePurchase) {
-          await InAppPurchaseConnection.instance.completePurchase(e);
-        }
+
+    _purchaseUpdateSubscription =
+        FlutterInappPurchase.purchaseUpdated.listen((item) async {
+      final dialog = createProgressDialog(context, "verifying purchase...");
+      await dialog.show();
+      try {
+        await BillingService.instance.verifySubscription(item.productId,
+            Platform.isAndroid ? item.purchaseToken : item.transactionReceipt);
+        await FlutterInappPurchase.instance.finishTransaction(item);
+        await dialog.hide();
+        Bus.instance.fire(UserAuthenticatedEvent());
+        AlertDialog alert = AlertDialog(
+          title: Text("thank you"),
+          content: Text("your photos and videos will now be backed up"),
+          actions: [
+            FlatButton(
+              child: Text("ok"),
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+            ),
+          ],
+        );
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return alert;
+          },
+        );
+      } catch (e) {
+        _logger.warning("Could not complete payment ", e);
+        await dialog.hide();
+        showErrorDialog(
+            context,
+            "payment failed",
+            "please talk to " +
+                (Platform.isAndroid ? "PlayStore" : "AppStore") +
+                " support if you were charged");
+        return;
       }
     });
     super.initState();
@@ -121,23 +115,22 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             onTap: () async {
               final dialog = createProgressDialog(context, "please wait...");
               await dialog.show();
-              // ignore: sdk_version_set_literal
-              Set<String> _kIds = {
+              List<String> _kIds = [
                 Platform.isAndroid ? plan.androidID : plan.iosID
-              };
-              final ProductDetailsResponse response =
-                  await InAppPurchaseConnection.instance
-                      .queryProductDetails(_kIds);
-              if (response.notFoundIDs.isNotEmpty) {
+              ];
+              final items =
+                  await FlutterInappPurchase.instance.getProducts(_kIds);
+              if (items.isEmpty) {
                 await dialog.hide();
                 showGenericErrorDialog(context);
                 return;
               }
-              List<ProductDetails> productDetails = response.productDetails;
-              final PurchaseParam purchaseParam =
-                  PurchaseParam(productDetails: productDetails[0]);
-              await InAppPurchaseConnection.instance
-                  .buyNonConsumable(purchaseParam: purchaseParam);
+              FlutterInappPurchase.purchaseError.listen((event) async {
+                _logger.info("Purchase error: " + event.toString());
+                await dialog.hide();
+              });
+              await FlutterInappPurchase.instance
+                  .requestSubscription(items[0].productId);
               await dialog.hide();
             },
             child: SubscriptionPlanWidget(plan: plan),
