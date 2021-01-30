@@ -13,6 +13,7 @@ import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({Key key}) : super(key: key);
@@ -24,6 +25,7 @@ class SubscriptionPage extends StatefulWidget {
 class _SubscriptionPageState extends State<SubscriptionPage> {
   final _logger = Logger("SubscriptionPage");
   StreamSubscription _purchaseUpdateSubscription;
+  ProgressDialog _dialog;
 
   @override
   void initState() {
@@ -31,13 +33,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
     _purchaseUpdateSubscription =
         FlutterInappPurchase.purchaseUpdated.listen((item) async {
-      final dialog = createProgressDialog(context, "verifying purchase...");
-      await dialog.show();
+      await _dialog.show();
       try {
         await BillingService.instance.verifySubscription(item.productId,
             Platform.isAndroid ? item.purchaseToken : item.transactionReceipt);
         await FlutterInappPurchase.instance.finishTransaction(item);
-        await dialog.hide();
+        await _dialog.hide();
         Bus.instance.fire(UserAuthenticatedEvent());
         AlertDialog alert = AlertDialog(
           title: Text("thank you"),
@@ -59,7 +60,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         );
       } catch (e) {
         _logger.warning("Could not complete payment ", e);
-        await dialog.hide();
+        await _dialog.hide();
         showErrorDialog(
             context,
             "payment failed",
@@ -107,33 +108,40 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget _buildPlans(
       BuildContext context, List<BillingPlan> plans, final appBarSize) {
+    final subscription = BillingService.instance.getSubscription();
     final planWidgets = List<Widget>();
     for (final plan in plans) {
+      final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
+      final isActive =
+          subscription != null && subscription.productID == productID;
       planWidgets.add(
         Material(
           child: InkWell(
             onTap: () async {
-              final dialog = createProgressDialog(context, "please wait...");
-              await dialog.show();
-              List<String> _kIds = [
-                Platform.isAndroid ? plan.androidID : plan.iosID
-              ];
+              if (isActive) {
+                return;
+              }
+              _dialog = createProgressDialog(context, "please wait...");
+              await _dialog.show();
               final items =
-                  await FlutterInappPurchase.instance.getProducts(_kIds);
+                  await FlutterInappPurchase.instance.getProducts([productID]);
               if (items.isEmpty) {
-                await dialog.hide();
+                await _dialog.hide();
                 showGenericErrorDialog(context);
                 return;
               }
               FlutterInappPurchase.purchaseError.listen((event) async {
                 _logger.info("Purchase error: " + event.toString());
-                await dialog.hide();
+                await _dialog.hide();
               });
               await FlutterInappPurchase.instance
                   .requestSubscription(items[0].productId);
-              await dialog.hide();
+              await _dialog.hide();
             },
-            child: SubscriptionPlanWidget(plan: plan),
+            child: SubscriptionPlanWidget(
+              plan: plan,
+              isActive: isActive,
+            ),
           ),
         ),
       );
@@ -276,9 +284,11 @@ class SubscriptionPlanWidget extends StatelessWidget {
   const SubscriptionPlanWidget({
     Key key,
     @required this.plan,
+    this.isActive = false,
   }) : super(key: key);
 
   final BillingPlan plan;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
@@ -314,6 +324,14 @@ class SubscriptionPlanWidget extends StatelessWidget {
                 ),
               ),
               Text(plan.price + " per " + plan.period),
+              isActive
+                  ? Expanded(
+                      child: Icon(
+                        Icons.check_circle,
+                        color: Colors.cyan[700],
+                      ),
+                    )
+                  : Container(),
             ],
           ),
           Divider(
