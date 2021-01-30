@@ -31,6 +31,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   void initState() {
     BillingService.instance.setIsOnSubscriptionPage(true);
 
+    _dialog = createProgressDialog(context, "please wait...");
+
     _purchaseUpdateSubscription =
         FlutterInappPurchase.purchaseUpdated.listen((item) async {
       await _dialog.show();
@@ -121,7 +123,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (isActive) {
                 return;
               }
-              _dialog = createProgressDialog(context, "please wait...");
               await _dialog.show();
               final items =
                   await FlutterInappPurchase.instance.getProducts([productID]);
