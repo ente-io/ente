@@ -28,7 +28,7 @@ class BillingService {
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     await FlutterInappPurchase.instance.initConnection;
-    if (kDebugMode) {
+    if (kDebugMode && Platform.isIOS) {
       FlutterInappPurchase.instance.clearTransactionIOS();
     }
     FlutterInappPurchase.purchaseUpdated.listen((item) {
