@@ -221,21 +221,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ),
         ),
       ]);
-    } else {
-      widgets.add(
-        Padding(
-          padding: EdgeInsets.all(12),
-          child: Text(
-            "your next billing date is " +
-                getFormattedDate(DateTime.fromMicrosecondsSinceEpoch(
-                    _currentSubscription.expiryTime)),
-            style: TextStyle(
-              color: Colors.white,
-              height: 1.2,
-            ),
-          ),
-        ),
-      );
     }
     widgets.addAll([
       Expanded(child: Container()),
