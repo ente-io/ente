@@ -13,6 +13,7 @@ import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -202,19 +203,41 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         children: planWidgets,
       ),
       Padding(padding: EdgeInsets.all(8)),
-      Align(
-        alignment: Alignment.topLeft,
-        child: Padding(
+    ]);
+
+    if (_currentSubscription == null) {
+      widgets.addAll([
+        Align(
+          alignment: Alignment.topLeft,
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: Text(
+              "we offer a 14 day free trial, you can cancel anytime",
+              style: TextStyle(
+                color: Colors.white,
+                height: 1.2,
+              ),
+            ),
+          ),
+        ),
+      ]);
+    } else {
+      widgets.add(
+        Padding(
           padding: EdgeInsets.all(12),
           child: Text(
-            "we offer a 14 day free trial, you can cancel anytime",
+            "your next billing date is " +
+                getFormattedDate(DateTime.fromMicrosecondsSinceEpoch(
+                    _currentSubscription.expiryTime)),
             style: TextStyle(
               color: Colors.white,
               height: 1.2,
             ),
           ),
         ),
-      ),
+      );
+    }
+    widgets.addAll([
       Expanded(child: Container()),
       Align(
         alignment: Alignment.center,
@@ -228,7 +251,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             );
           },
           child: Container(
-            padding: EdgeInsets.all(40),
+            padding: EdgeInsets.all(80),
             child: RichText(
               text: TextSpan(
                 text: "learn more",
