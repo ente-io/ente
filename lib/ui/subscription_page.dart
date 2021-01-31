@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/user_authenticated_event.dart';
@@ -14,6 +14,7 @@ import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/toast_util.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 class SubscriptionPage extends StatefulWidget {
@@ -39,54 +40,47 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
     _dialog = createProgressDialog(context, "please wait...");
 
-    _purchaseUpdateSubscription =
-        FlutterInappPurchase.purchaseUpdated.listen((item) async {
-      await _dialog.show();
-      try {
-        final newSubscription = await _billingService.verifySubscription(
-            item.productId,
-            Platform.isAndroid ? item.purchaseToken : item.transactionReceipt);
-        await FlutterInappPurchase.instance.finishTransaction(item);
-        Bus.instance.fire(UserAuthenticatedEvent());
-        final isUpgrade = _currentSubscription != null &&
-            newSubscription.storageInMBs > _currentSubscription.storageInMBs;
-        final isDowngrade = _currentSubscription != null &&
-            newSubscription.storageInMBs < _currentSubscription.storageInMBs;
-        String text = "your photos and videos will now be backed up";
-        if (isUpgrade) {
-          text = "your plan was successfully upgraded";
-        } else if (isDowngrade) {
-          text = "your plan was successfully downgraded";
+    _purchaseUpdateSubscription = InAppPurchaseConnection
+        .instance.purchaseUpdatedStream
+        .listen((purchases) async {
+      for (final purchase in purchases) {
+        if (purchase.status == PurchaseStatus.purchased) {
+          try {
+            final newSubscription = await _billingService.verifySubscription(
+                purchase.productID,
+                purchase.verificationData.serverVerificationData);
+            await InAppPurchaseConnection.instance.completePurchase(purchase);
+            Bus.instance.fire(UserAuthenticatedEvent());
+            final isUpgrade = _currentSubscription != null &&
+                newSubscription.storageInMBs >
+                    _currentSubscription.storageInMBs;
+            final isDowngrade = _currentSubscription != null &&
+                newSubscription.storageInMBs <
+                    _currentSubscription.storageInMBs;
+            String text = "your photos and videos will now be backed up";
+            if (isUpgrade) {
+              text = "your plan was successfully upgraded";
+            } else if (isDowngrade) {
+              text = "your plan was successfully downgraded";
+            }
+            await _dialog.hide();
+            showToast(text);
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          } catch (e) {
+            _logger.warning("Could not complete payment ", e);
+            await _dialog.hide();
+            showErrorDialog(
+                context,
+                "payment failed",
+                "please talk to " +
+                    (Platform.isAndroid ? "PlayStore" : "AppStore") +
+                    " support if you were charged");
+            return;
+          }
+        } else if (Platform.isIOS && purchase.pendingCompletePurchase) {
+          await InAppPurchaseConnection.instance.completePurchase(purchase);
+          await _dialog.hide();
         }
-        AlertDialog alert = AlertDialog(
-          title: Text("thank you"),
-          content: Text(text),
-          actions: [
-            FlatButton(
-              child: Text("ok"),
-              onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-            ),
-          ],
-        );
-        await _dialog.hide();
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return alert;
-          },
-        );
-      } catch (e) {
-        _logger.warning("Could not complete payment ", e);
-        await _dialog.hide();
-        showErrorDialog(
-            context,
-            "payment failed",
-            "please talk to " +
-                (Platform.isAndroid ? "PlayStore" : "AppStore") +
-                " support if you were charged");
-        return;
       }
     });
     super.initState();
@@ -140,20 +134,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 return;
               }
               await _dialog.show();
-              final items =
-                  await FlutterInappPurchase.instance.getProducts([productID]);
-              if (items.isEmpty) {
+              final ProductDetailsResponse response =
+                  await InAppPurchaseConnection.instance
+                      .queryProductDetails([productID].toSet());
+              if (response.notFoundIDs.isNotEmpty) {
                 await _dialog.hide();
                 showGenericErrorDialog(context);
                 return;
               }
-              FlutterInappPurchase.purchaseError.listen((event) async {
-                _logger.info("Purchase error: " + event.toString());
-                await _dialog.hide();
-              });
-              await FlutterInappPurchase.instance
-                  .requestSubscription(productID);
-              await _dialog.hide();
+              await InAppPurchaseConnection.instance.buyConsumable(
+                  purchaseParam: PurchaseParam(
+                      productDetails: response.productDetails[0]));
+              // await _dialog.hide();
             },
             child: SubscriptionPlanWidget(
               plan: plan,
