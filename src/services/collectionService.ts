@@ -102,9 +102,11 @@ const getCollections = async (
 };
 
 export const fetchCollections = async (token: string, key: string) => {
-    const collections = await getCollections(token, '0', key);
-    const favCollection = collections.filter(collection => collection.type === CollectionType.favorites);
+    const collectionUpdateTime = await localForage.getItem('collection-update-time') as string;
+    const collections = await getCollections(token, collectionUpdateTime ?? '0', key);
+    const favCollection = await localForage.getItem('fav-collection') as collection[] ?? collections.filter(collection => collection.type === CollectionType.favorites);
     await localForage.setItem('fav-collection', favCollection);
+    await localForage.setItem('collection-update-time', Date.now() * 1000);
     return collections;
 };
 
