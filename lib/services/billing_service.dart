@@ -113,7 +113,7 @@ class BillingService {
     }
   }
 
-  Future<double> getUsageInGBs() async {
+  Future<double> fetchUsageInGBs() async {
     try {
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/billing/usage",

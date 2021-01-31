@@ -157,7 +157,7 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
   }
 
   void _getUsage() {
-    BillingService.instance.getUsageInGBs().then((usage) async {
+    BillingService.instance.fetchUsageInGBs().then((usage) async {
       if (mounted) {
         setState(() {
           _usageInGBs = usage;
