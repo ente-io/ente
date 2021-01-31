@@ -101,14 +101,26 @@ const getCollections = async (
     }
 };
 
-export const fetchCollections = async (token: string, key: string) => {
+export const getLocalCollections = async (): Promise<collection[]> => {
+    const collections = await localForage.getItem('collections') as collection[] ?? [];
+    return collections;
+}
+export const fetchUpdatedCollections = async (token: string, key: string) => {
     const collectionUpdateTime = await localForage.getItem('collection-update-time') as string;
-    const collections = await getCollections(token, collectionUpdateTime ?? '0', key);
-    const favCollection = await localForage.getItem('fav-collection') as collection[] ?? collections.filter(collection => collection.type === CollectionType.favorites);
+    const updatedCollections = await getCollections(token, collectionUpdateTime ?? '0', key);
+    const favCollection = await localForage.getItem('fav-collection') as collection[] ?? updatedCollections.filter(collection => collection.type === CollectionType.favorites);
+    const localCollections = await getLocalCollections();
+
     await localForage.setItem('fav-collection', favCollection);
     await localForage.setItem('collection-update-time', Date.now() * 1000);
-    return collections;
+    await localForage.setItem('collections', [...localCollections, ...updatedCollections]);
+    return updatedCollections;
 };
+
+export const getAllCollections = async () => {
+    const collections = await localForage.setItem('collection-update-time', Date.now() * 1000);
+    return collections;
+}
 
 export const getCollectionLatestFile = async (
     collections: collection[],
