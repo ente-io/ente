@@ -34,9 +34,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
-    if (_billingService.hasActiveSubscription()) {
-      _currentSubscription = _billingService.getSubscription();
-    }
+    _currentSubscription = _billingService.getSubscription();
 
     _dialog = createProgressDialog(context, "please wait...");
 
@@ -52,9 +50,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             await InAppPurchaseConnection.instance.completePurchase(purchase);
             Bus.instance.fire(UserAuthenticatedEvent());
             final isUpgrade = _currentSubscription != null &&
+                _currentSubscription.isValid() &&
                 newSubscription.storageInMBs >
                     _currentSubscription.storageInMBs;
             final isDowngrade = _currentSubscription != null &&
+                _currentSubscription.isValid() &&
                 newSubscription.storageInMBs <
                     _currentSubscription.storageInMBs;
             String text = "your photos and videos will now be backed up";
@@ -125,6 +125,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     for (final plan in plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
       final isActive = _currentSubscription != null &&
+          _currentSubscription.isValid() &&
           _currentSubscription.productID == productID;
       planWidgets.add(
         Material(
@@ -157,68 +158,93 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
     final pageSize = MediaQuery.of(context).size.height;
     final notifySize = MediaQuery.of(context).padding.top;
+    final widgets = List<Widget>();
+    if (_currentSubscription == null) {
+      widgets.add(Padding(
+        padding: const EdgeInsets.fromLTRB(12, 20, 12, 24),
+        child: Text(
+          "ente preserves your photos and videos, so they're always available, even if you lose your device",
+          style: TextStyle(
+            color: Colors.white54,
+            height: 1.2,
+          ),
+        ),
+      ));
+    } else {
+      // TODO: Show usage
+      widgets.add(FutureBuilder(
+        future: _billingService.fetchUsageInGBs(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child:
+                  Text("current usage is " + snapshot.data.toString() + " GB"),
+            );
+          } else if (snapshot.hasError) {
+            return Container();
+          } else {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: loadWidget,
+            );
+          }
+        },
+      ));
+      // TODO: Show current plan details (next billing date)
+    }
+    widgets.addAll([
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: planWidgets,
+      ),
+      Padding(padding: EdgeInsets.all(8)),
+      Align(
+        alignment: Alignment.topLeft,
+        child: Padding(
+          padding: EdgeInsets.all(12),
+          child: Text(
+            "we offer a 14 day free trial, you can cancel anytime",
+            style: TextStyle(
+              color: Colors.white,
+              height: 1.2,
+            ),
+          ),
+        ),
+      ),
+      Expanded(child: Container()),
+      Align(
+        alignment: Alignment.center,
+        child: GestureDetector(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (builder) {
+                return LearnMoreWidget();
+              },
+            );
+          },
+          child: Container(
+            padding: EdgeInsets.all(40),
+            child: RichText(
+              text: TextSpan(
+                text: "learn more",
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontFamily: 'Ubuntu',
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ]);
     return SingleChildScrollView(
       child: Container(
         height: pageSize - (appBarSize + notifySize),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 20, 12, 12),
-              child: Text(
-                "ente preserves your photos and videos, so they're always available, even if you lose your device",
-                style: TextStyle(
-                  color: Colors.white54,
-                  height: 1.2,
-                ),
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(12)),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: planWidgets,
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Text(
-                  "we offer a 14 day free trial, you can cancel anytime",
-                  style: TextStyle(
-                    color: Colors.white,
-                    height: 1.2,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(child: Container()),
-            Align(
-              alignment: Alignment.center,
-              child: GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (builder) {
-                      return LearnMoreWidget();
-                    },
-                  );
-                },
-                child: Container(
-                  padding: EdgeInsets.all(40),
-                  child: RichText(
-                    text: TextSpan(
-                      text: "learn more",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontFamily: 'Ubuntu',
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          children: widgets,
         ),
       ),
     );

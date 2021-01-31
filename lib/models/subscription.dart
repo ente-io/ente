@@ -17,6 +17,10 @@ class Subscription {
     this.expiryTime,
   });
 
+  bool isValid() {
+    return expiryTime > DateTime.now().microsecondsSinceEpoch;
+  }
+
   Subscription copyWith({
     int id,
     int productID,
