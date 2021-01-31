@@ -11,7 +11,7 @@ import {
 } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
-import { getActualKey } from 'utils/common/key';
+import { getActualKey, getToken } from 'utils/common/key';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { Options } from 'photoswipe';
@@ -20,7 +20,14 @@ import { VariableSizeList as List } from 'react-window';
 import LoadingBar from 'react-top-loading-bar'
 import Collections from './components/Collections';
 import Upload from './components/Upload';
-import { collection, fetchCollections, collectionLatestFile, getCollectionLatestFile, getFavItemIds } from 'services/collectionService';
+import {
+    collection,
+    fetchUpdatedCollections,
+    collectionLatestFile,
+    getCollectionLatestFile,
+    getFavItemIds,
+    getLocalCollections
+} from 'services/collectionService';
 import constants from 'utils/strings/constants';
 
 enum ITEM_TYPE {
@@ -110,15 +117,12 @@ export default function Gallery(props) {
     const [progress, setProgress] = useState(0)
 
     useEffect(() => {
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        const token = getData(LS_KEYS.USER).token;
-        if (!key) {
-            router.push('/');
-        }
         const main = async () => {
             setLoading(true);
             const data = await localFiles();
+            const collections = await getLocalCollections();
             setData(data);
+            setCollections(collections);
             setLoading(false);
         };
         main();
@@ -127,15 +131,16 @@ export default function Gallery(props) {
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        const token = getData(LS_KEYS.USER).token;
-        if (!key) {
+        const token = getToken();
+        if (!key && token) {
             router.push('/');
         }
         const main = async () => {
             setProgress(80);
             const encryptionKey = await getActualKey();
-            const collections = await fetchCollections(token, encryptionKey);
-            const data = await fetchData(token, collections);
+            const updatedCollections = await fetchUpdatedCollections(token, encryptionKey);
+            const data = await fetchData(token, updatedCollections);
+            const collections = await getLocalCollections();
             const collectionLatestFile = await getCollectionLatestFile(collections, token);
             const favItemIds = await getFavItemIds(data);
             setCollections(collections);
