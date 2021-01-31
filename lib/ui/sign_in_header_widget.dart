@@ -43,7 +43,26 @@ class _SignInHeaderState extends State<SignInHeader> {
     var hasSubscribed = BillingService.instance.hasActiveSubscription();
     if (hasConfiguredAccount && hasSubscribed) {
       return Container();
+    } else if (!hasConfiguredAccount) {
+      return _getBody(context);
+    } else {
+      return FutureBuilder(
+        future: BillingService.instance.fetchSubscription(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            if (BillingService.instance.hasActiveSubscription()) {
+              return Container();
+            }
+            return _getBody(context);
+          } else {
+            return Container();
+          }
+        },
+      );
     }
+  }
+
+  SingleChildScrollView _getBody(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.fromLTRB(8, 24, 8, 8),
@@ -179,6 +198,7 @@ class _SignInHeaderState extends State<SignInHeader> {
                       // Yet to decrypt the key
                       page = PasswordReentryPage();
                     } else {
+                      // All is well, user just has not subscribed
                       page = SubscriptionPage();
                     }
                   }
