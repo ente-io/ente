@@ -2,17 +2,15 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:crisp/crisp.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
-import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/ui/web_page.dart';
@@ -159,29 +157,11 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
   }
 
   void _getUsage() {
-    Network.instance
-        .getDio()
-        .get(
-          Configuration.instance.getHttpEndpoint() + "/billing/usage",
-          queryParameters: {
-            "startTime": 0,
-            "endTime": DateTime.now().microsecondsSinceEpoch,
-          },
-          options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()},
-          ),
-        )
-        .catchError((e) async {
-      Logger("Settings").severe(e);
-    }).then((response) async {
-      if (response != null && response.statusCode == 200) {
-        final usageInBytes = response.data["usage"];
-        if (mounted) {
-          setState(() {
-            _usageInGBs = double.parse(
-                (usageInBytes / (1024 * 1024 * 1024)).toStringAsFixed(2));
-          });
-        }
+    BillingService.instance.getUsageInGBs().then((usage) async {
+      if (mounted) {
+        setState(() {
+          _usageInGBs = usage;
+        });
       }
     });
   }

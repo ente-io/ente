@@ -113,6 +113,28 @@ class BillingService {
     }
   }
 
+  Future<double> getUsageInGBs() async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/billing/usage",
+        queryParameters: {
+          "startTime": 0,
+          "endTime": DateTime.now().microsecondsSinceEpoch,
+        },
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      final usageInBytes = response.data["usage"];
+      return double.parse(
+          (usageInBytes / (1024 * 1024 * 1024)).toStringAsFixed(2));
+    } catch (e) {
+      throw e;
+    }
+  }
+
   Subscription getSubscription() {
     final jsonValue = _prefs.getString(subscriptionKey);
     if (jsonValue == null) {
