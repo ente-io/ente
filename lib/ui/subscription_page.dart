@@ -172,24 +172,27 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       ));
     } else {
       // TODO: Show usage
-      widgets.add(FutureBuilder(
-        future: _billingService.fetchUsageInGBs(),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child:
-                  Text("current usage is " + snapshot.data.toString() + " GB"),
-            );
-          } else if (snapshot.hasError) {
-            return Container();
-          } else {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: loadWidget,
-            );
-          }
-        },
+      widgets.add(Container(
+        height: 50,
+        child: FutureBuilder(
+          future: _billingService.fetchUsageInGBs(),
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.hasData) {
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                    "current usage is " + snapshot.data.toString() + " GB"),
+              );
+            } else if (snapshot.hasError) {
+              return Container();
+            } else {
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: loadWidget,
+              );
+            }
+          },
+        ),
       ));
       // TODO: Show current plan details (next billing date)
     }
