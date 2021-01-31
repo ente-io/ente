@@ -127,12 +127,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget _buildPlans(
       BuildContext context, List<BillingPlan> plans, final appBarSize) {
-    final subscription = _billingService.getSubscription();
     final planWidgets = List<Widget>();
     for (final plan in plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      final isActive =
-          subscription != null && subscription.productID == productID;
+      final isActive = _currentSubscription != null &&
+          _currentSubscription.productID == productID;
       planWidgets.add(
         Material(
           child: InkWell(
