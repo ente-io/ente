@@ -94,11 +94,14 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("total data backed up"),
-              _usageInGBs == null
-                  ? loadWidget
-                  : Text(
-                      _usageInGBs.toString() + " GB",
-                    ),
+              Container(
+                height: 20,
+                child: _usageInGBs == null
+                    ? loadWidget
+                    : Text(
+                        _usageInGBs.toString() + " GB",
+                      ),
+              ),
             ],
           ),
           Padding(padding: EdgeInsets.all(8)),
