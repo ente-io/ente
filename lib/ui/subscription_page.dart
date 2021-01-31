@@ -172,7 +172,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       ));
     } else {
-      // TODO: Show usage
       widgets.add(Container(
         height: 50,
         child: FutureBuilder(
@@ -195,7 +194,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           },
         ),
       ));
-      // TODO: Show current plan details (next billing date)
     }
     widgets.addAll([
       Column(
