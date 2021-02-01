@@ -14,6 +14,7 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/ui/web_page.dart';
+import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share/share.dart';
@@ -160,10 +161,10 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
   }
 
   void _getUsage() {
-    BillingService.instance.fetchUsageInGBs().then((usage) async {
+    BillingService.instance.fetchUsage().then((usage) async {
       if (mounted) {
         setState(() {
-          _usageInGBs = usage;
+          _usageInGBs = convertBytesToGBs(usage);
         });
       }
     });

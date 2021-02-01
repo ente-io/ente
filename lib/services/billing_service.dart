@@ -117,7 +117,7 @@ class BillingService {
     }
   }
 
-  Future<double> fetchUsageInGBs() async {
+  Future<int> fetchUsage() async {
     try {
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/billing/usage",
@@ -131,7 +131,7 @@ class BillingService {
           },
         ),
       );
-      return convertBytesToGBs(response.data["usage"]);
+      return response.data["usage"];
     } catch (e) {
       throw e;
     }

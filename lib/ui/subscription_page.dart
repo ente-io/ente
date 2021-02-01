@@ -13,6 +13,7 @@ import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -31,11 +32,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Subscription _currentSubscription;
   StreamSubscription _purchaseUpdateSubscription;
   ProgressDialog _dialog;
+  Future<int> _usageFuture;
+  bool _hasActiveSubscription;
 
   @override
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
     _currentSubscription = _billingService.getSubscription();
+    _hasActiveSubscription =
+        _currentSubscription != null && _currentSubscription.isValid();
+    if (_hasActiveSubscription) {
+      _usageFuture = _billingService.fetchUsage();
+    }
 
     _dialog = createProgressDialog(context, "please wait...");
 
@@ -50,11 +58,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 purchase.verificationData.serverVerificationData);
             await InAppPurchaseConnection.instance.completePurchase(purchase);
             Bus.instance.fire(UserAuthenticatedEvent());
-            final isUpgrade = _currentSubscription != null &&
-                _currentSubscription.isValid() &&
+            final isUpgrade = _hasActiveSubscription &&
                 newSubscription.storage > _currentSubscription.storage;
-            final isDowngrade = _currentSubscription != null &&
-                _currentSubscription.isValid() &&
+            final isDowngrade = _hasActiveSubscription &&
                 newSubscription.storage < _currentSubscription.storage;
             String text = "your photos and videos will now be backed up";
             if (isUpgrade) {
@@ -123,9 +129,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final planWidgets = List<Widget>();
     for (final plan in plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      final isActive = _currentSubscription != null &&
-          _currentSubscription.isValid() &&
-          _currentSubscription.productID == productID;
+      final isActive =
+          _hasActiveSubscription && _currentSubscription.productID == productID;
       planWidgets.add(
         Material(
           child: InkWell(
@@ -134,6 +139,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 return;
               }
               await _dialog.show();
+              if (_usageFuture != null) {
+                final usage = await _usageFuture;
+                if (usage > plan.storage) {
+                  await _dialog.hide();
+                  showErrorDialog(
+                      context, "sorry", "you cannot downgrade to this plan");
+                  return;
+                }
+              }
               final ProductDetailsResponse response =
                   await InAppPurchaseConnection.instance
                       .queryProductDetails([productID].toSet());
@@ -173,13 +187,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       widgets.add(Container(
         height: 50,
         child: FutureBuilder(
-          future: _billingService.fetchUsageInGBs(),
+          future: _usageFuture,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
               return Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Text(
-                    "current usage is " + snapshot.data.toString() + " GB"),
+                child: Text("current usage is " +
+                    convertBytesToGBs(snapshot.data).toString() +
+                    " GB"),
               );
             } else if (snapshot.hasError) {
               return Container();
