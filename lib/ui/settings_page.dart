@@ -345,7 +345,7 @@ class InfoSectionWidget extends StatelessWidget {
     return Container(
       child: Column(children: [
         Padding(padding: EdgeInsets.all(12)),
-        SettingsSectionTitle("ABOUT"),
+        SettingsSectionTitle("about"),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
