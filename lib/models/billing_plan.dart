@@ -21,7 +21,7 @@ class BillingPlan {
     String id,
     String androidID,
     String iosID,
-    int storageInMBs,
+    int storage,
     String price,
     String period,
   }) {
@@ -29,7 +29,7 @@ class BillingPlan {
       id: id ?? this.id,
       androidID: androidID ?? this.androidID,
       iosID: iosID ?? this.iosID,
-      storage: storageInMBs ?? this.storage,
+      storage: storage ?? this.storage,
       price: price ?? this.price,
       period: period ?? this.period,
     );
