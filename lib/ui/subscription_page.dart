@@ -13,7 +13,6 @@ import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -385,7 +384,10 @@ class SubscriptionPlanWidget extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          (plan.storageInMBs / 1024).round().toString() + " GB",
+                          (plan.storage / (1024 * 1024 * 1024))
+                                  .round()
+                                  .toString() +
+                              " GB",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,

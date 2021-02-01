@@ -306,7 +306,7 @@ class BillingPlanWidget extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              (plan.storageInMBs / 1024).round().toString() + " GB",
+              (plan.storage / (1024 * 1024 * 1024)).round().toString() + " GB",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
