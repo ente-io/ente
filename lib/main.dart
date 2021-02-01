@@ -144,6 +144,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
           buttonColor: Color(0xFF2954a3),
         ),
         toggleableActiveColor: Colors.blue[400],
+        scaffoldBackgroundColor: Colors.black,
       ),
       home: HomeWidget(_title),
     );
