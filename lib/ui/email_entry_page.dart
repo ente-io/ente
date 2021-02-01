@@ -9,6 +9,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/web_page.dart';
+import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 
@@ -306,7 +307,7 @@ class BillingPlanWidget extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              (plan.storage / (1024 * 1024 * 1024)).round().toString() + " GB",
+              convertBytesToGBs(plan.storage, precision: 0).toString() + " GB",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,

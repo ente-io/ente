@@ -9,6 +9,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
+import 'package:photos/utils/data_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BillingService {
@@ -130,9 +131,7 @@ class BillingService {
           },
         ),
       );
-      final usageInBytes = response.data["usage"];
-      return double.parse(
-          (usageInBytes / (1024 * 1024 * 1024)).toStringAsFixed(2));
+      return convertBytesToGBs(response.data["usage"]);
     } catch (e) {
       throw e;
     }
