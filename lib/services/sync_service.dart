@@ -157,7 +157,7 @@ class SyncService {
       await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
     }
     await FileRepository.instance.reloadFiles();
-    // await syncWithRemote();
+    await syncWithRemote();
   }
 
   Future<void> _loadAndStorePhotos(
