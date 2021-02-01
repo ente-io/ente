@@ -50,12 +50,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     _purchaseUpdateSubscription = InAppPurchaseConnection
         .instance.purchaseUpdatedStream
         .listen((purchases) async {
+      if (!_dialog.isShowing()) {
+        await _dialog.show();
+      }
       for (final purchase in purchases) {
+        _logger.info("Purchase status " + purchase.status.toString());
         if (purchase.status == PurchaseStatus.purchased) {
           try {
             final newSubscription = await _billingService.verifySubscription(
-                purchase.productID,
-                purchase.verificationData.serverVerificationData);
+              purchase.productID,
+              purchase.verificationData.serverVerificationData,
+            );
             await InAppPurchaseConnection.instance.completePurchase(purchase);
             Bus.instance.fire(UserAuthenticatedEvent());
             final isUpgrade = _hasActiveSubscription &&
@@ -68,9 +73,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             } else if (isDowngrade) {
               text = "your plan was successfully downgraded";
             }
-            await _dialog.hide();
             showToast(text);
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            if (_hasActiveSubscription) {
+              _currentSubscription = _billingService.getSubscription();
+              _hasActiveSubscription = _currentSubscription != null &&
+                  _currentSubscription.isValid();
+              setState(() {});
+            } else {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }
           } catch (e) {
             _logger.warning("Could not complete payment ", e);
             await _dialog.hide();
@@ -84,9 +95,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           }
         } else if (Platform.isIOS && purchase.pendingCompletePurchase) {
           await InAppPurchaseConnection.instance.completePurchase(purchase);
-          await _dialog.hide();
         }
       }
+      await _dialog.hide();
     });
     super.initState();
   }
@@ -159,10 +170,38 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 showGenericErrorDialog(context);
                 return;
               }
-              await InAppPurchaseConnection.instance.buyConsumable(
+              if (Platform.isAndroid &&
+                  _hasActiveSubscription &&
+                  _currentSubscription.productID != plan.androidID) {
+                final existingProductDetailsResponse =
+                    await InAppPurchaseConnection.instance.queryProductDetails(
+                        [_currentSubscription.productID].toSet());
+                if (existingProductDetailsResponse.notFoundIDs.isNotEmpty) {
+                  await _dialog.hide();
+                  showGenericErrorDialog(context);
+                  return;
+                }
+                final subscriptionChangeParam = ChangeSubscriptionParam(
+                  oldPurchaseDetails: PurchaseDetails(
+                    purchaseID: null,
+                    productID: _currentSubscription.productID,
+                    verificationData: null,
+                    transactionDate: null,
+                  ),
+                );
+                await InAppPurchaseConnection.instance.buyNonConsumable(
                   purchaseParam: PurchaseParam(
-                      productDetails: response.productDetails[0]));
-              // await _dialog.hide();
+                    productDetails: response.productDetails[0],
+                    changeSubscriptionParam: subscriptionChangeParam,
+                  ),
+                );
+              } else {
+                await InAppPurchaseConnection.instance.buyNonConsumable(
+                  purchaseParam: PurchaseParam(
+                    productDetails: response.productDetails[0],
+                  ),
+                );
+              }
             },
             child: SubscriptionPlanWidget(
               plan: plan,

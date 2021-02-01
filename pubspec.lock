@@ -251,13 +251,6 @@ packages:
       relative: true
     source: path
     version: "0.7.0"
-  flutter_inapp_purchase:
-    dependency: "direct main"
-    description:
-      name: flutter_inapp_purchase
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.0.1"
   flutter_inappwebview:
     dependency: "direct main"
     description:
@@ -376,10 +369,10 @@ packages:
   in_app_purchase:
     dependency: "direct main"
     description:
-      name: in_app_purchase
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.5+1"
+      path: "thirdparty/in_app_purchase"
+      relative: true
+    source: path
+    version: "0.3.6"
   intl:
     dependency: transitive
     description:

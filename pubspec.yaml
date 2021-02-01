@@ -67,12 +67,13 @@ dependencies:
   pretty_dio_logger: ^1.1.1
   url_launcher: ^5.7.10
   fluttercontactpicker: ^3.1.0
-  in_app_purchase: ^0.3.5+1
+  in_app_purchase:
+    path: thirdparty/in_app_purchase
   expansion_card: ^0.1.0
   flutter_password_strength: ^0.1.4
   flutter_inappwebview: ^4.0.0+4
   background_fetch: ^0.5.1
-  flutter_inapp_purchase: ^3.0.1
+  # flutter_inapp_purchase: ^3.0.1
 
 dev_dependencies:
   flutter_test:

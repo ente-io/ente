@@ -1,0 +1,21 @@
+name: integration_test_macos
+description: Desktop implementation of integration_test plugin
+version: 0.0.1+1
+author: Flutter Team <flutter-dev@googlegroups.com>
+homepage: https://github.com/flutter/plugins/tree/master/packages/integration_test/integration_test_macos
+
+flutter:
+  plugin:
+    platforms:
+      macos:
+        pluginClass: IntegrationTestPlugin
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  pedantic: ^1.8.0
