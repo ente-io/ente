@@ -129,6 +129,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final planWidgets = List<Widget>();
     for (final plan in plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
+      if (productID == null || productID.isEmpty) {
+        continue;
+      }
       final isActive =
           _hasActiveSubscription && _currentSubscription.productID == productID;
       planWidgets.add(
