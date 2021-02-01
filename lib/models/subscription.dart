@@ -3,7 +3,7 @@ import 'dart:convert';
 class Subscription {
   final int id;
   final String productID;
-  final int storageInMBs;
+  final int storage;
   final String originalTransactionID;
   final String paymentProvider;
   final int expiryTime;
@@ -11,7 +11,7 @@ class Subscription {
   Subscription({
     this.id,
     this.productID,
-    this.storageInMBs,
+    this.storage,
     this.originalTransactionID,
     this.paymentProvider,
     this.expiryTime,
@@ -24,7 +24,7 @@ class Subscription {
   Subscription copyWith({
     int id,
     int productID,
-    int storageInMBs,
+    int storage,
     int originalTransactionID,
     int paymentProvider,
     int expiryTime,
@@ -32,7 +32,7 @@ class Subscription {
     return Subscription(
       id: id ?? this.id,
       productID: productID ?? this.productID,
-      storageInMBs: storageInMBs ?? this.storageInMBs,
+      storage: storage ?? this.storage,
       originalTransactionID:
           originalTransactionID ?? this.originalTransactionID,
       paymentProvider: paymentProvider ?? this.paymentProvider,
@@ -44,7 +44,7 @@ class Subscription {
     return {
       'id': id,
       'productID': productID,
-      'storageInMBs': storageInMBs,
+      'storage': storage,
       'originalTransactionID': originalTransactionID,
       'paymentProvider': paymentProvider,
       'expiryTime': expiryTime,
@@ -57,7 +57,7 @@ class Subscription {
     return Subscription(
       id: map['id'],
       productID: map['productID'],
-      storageInMBs: map['storageInMBs'],
+      storage: map['storage'],
       originalTransactionID: map['originalTransactionID'],
       paymentProvider: map['paymentProvider'],
       expiryTime: map['expiryTime'],
@@ -71,7 +71,7 @@ class Subscription {
 
   @override
   String toString() {
-    return 'Subscription(id: $id, productID: $productID, storageInMBs: $storageInMBs, originalTransactionID: $originalTransactionID, paymentProvider: $paymentProvider, expiryTime: $expiryTime)';
+    return 'Subscription(id: $id, productID: $productID, storage: $storage, originalTransactionID: $originalTransactionID, paymentProvider: $paymentProvider, expiryTime: $expiryTime)';
   }
 
   @override
@@ -81,7 +81,7 @@ class Subscription {
     return o is Subscription &&
         o.id == id &&
         o.productID == productID &&
-        o.storageInMBs == storageInMBs &&
+        o.storage == storage &&
         o.originalTransactionID == originalTransactionID &&
         o.paymentProvider == paymentProvider &&
         o.expiryTime == expiryTime;
@@ -91,7 +91,7 @@ class Subscription {
   int get hashCode {
     return id.hashCode ^
         productID.hashCode ^
-        storageInMBs.hashCode ^
+        storage.hashCode ^
         originalTransactionID.hashCode ^
         paymentProvider.hashCode ^
         expiryTime.hashCode;

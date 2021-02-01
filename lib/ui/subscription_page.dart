@@ -52,12 +52,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             Bus.instance.fire(UserAuthenticatedEvent());
             final isUpgrade = _currentSubscription != null &&
                 _currentSubscription.isValid() &&
-                newSubscription.storageInMBs >
-                    _currentSubscription.storageInMBs;
+                newSubscription.storage > _currentSubscription.storage;
             final isDowngrade = _currentSubscription != null &&
                 _currentSubscription.isValid() &&
-                newSubscription.storageInMBs <
-                    _currentSubscription.storageInMBs;
+                newSubscription.storage < _currentSubscription.storage;
             String text = "your photos and videos will now be backed up";
             if (isUpgrade) {
               text = "your plan was successfully upgraded";

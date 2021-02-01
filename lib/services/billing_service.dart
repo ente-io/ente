@@ -108,7 +108,10 @@ class BillingService {
       final subscription = Subscription.fromMap(response.data["subscription"]);
       await setSubscription(subscription);
       return subscription;
-    } catch (e) {
+    } on DioError catch (e) {
+      if (e.response.statusCode == 404) {
+        _prefs.remove(subscriptionKey);
+      }
       throw e;
     }
   }

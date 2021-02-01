@@ -49,7 +49,7 @@ class _SignInHeaderState extends State<SignInHeader> {
       return FutureBuilder(
         future: BillingService.instance.fetchSubscription(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.hasData || snapshot.hasError) {
             if (BillingService.instance.hasActiveSubscription()) {
               return Container();
             }
