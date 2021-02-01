@@ -17,6 +17,7 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({Key key}) : super(key: key);
@@ -218,36 +219,65 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             ),
           ),
         ),
-      ]);
-    }
-    widgets.addAll([
-      Expanded(child: Container()),
-      Align(
-        alignment: Alignment.center,
-        child: GestureDetector(
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (builder) {
-                return LearnMoreWidget();
-              },
-            );
-          },
-          child: Container(
-            padding: EdgeInsets.all(80),
-            child: RichText(
-              text: TextSpan(
-                text: "learn more",
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontFamily: 'Ubuntu',
+        Expanded(child: Container()),
+        Align(
+          alignment: Alignment.center,
+          child: GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (builder) {
+                  return LearnMoreWidget();
+                },
+              );
+            },
+            child: Container(
+              padding: EdgeInsets.all(80),
+              child: RichText(
+                text: TextSpan(
+                  text: "learn more",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontFamily: 'Ubuntu',
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    ]);
+      ]);
+    } else {
+      widgets.addAll([
+        Expanded(child: Container()),
+        Align(
+          alignment: Alignment.center,
+          child: GestureDetector(
+            onTap: () {
+              if (Platform.isAndroid) {
+                launch(
+                    "https://play.google.com/store/account/subscriptions?sku=" +
+                        _currentSubscription.productID +
+                        "&package=io.ente.photos");
+              } else {
+                launch("https://apps.apple.com/account/billing");
+              }
+            },
+            child: Container(
+              padding: EdgeInsets.all(80),
+              child: RichText(
+                text: TextSpan(
+                  text: "payment details",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontFamily: 'Ubuntu',
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ]);
+    }
     return SingleChildScrollView(
       child: Container(
         height: pageSize - (appBarSize + notifySize),
