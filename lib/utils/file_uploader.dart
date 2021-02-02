@@ -106,17 +106,21 @@ class FileUploader {
     }
   }
 
+  void clearQueue() {
+    final uploadsToBeRemoved = List<int>();
+    _queue.entries
+        .where((entry) => entry.value.status == UploadStatus.not_started)
+        .forEach((pendingUpload) {
+      uploadsToBeRemoved.add(pendingUpload.key);
+    });
+    for (final id in uploadsToBeRemoved) {
+      _queue.remove(id).completer.completeError(SyncStopRequestedError());
+    }
+  }
+
   void _pollQueue() {
     if (SyncService.instance.shouldStopSync()) {
-      final uploadsToBeRemoved = List<int>();
-      _queue.entries
-          .where((entry) => entry.value.status == UploadStatus.not_started)
-          .forEach((pendingUpload) {
-        uploadsToBeRemoved.add(pendingUpload.key);
-      });
-      for (final id in uploadsToBeRemoved) {
-        _queue.remove(id).completer.completeError(SyncStopRequestedError());
-      }
+      clearQueue();
     }
     if (_queue.length > 0 && _currentlyUploading < _maximumConcurrentUploads) {
       final firstPendingEntry = _queue.entries

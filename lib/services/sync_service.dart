@@ -45,6 +45,7 @@ class SyncService {
 
   SyncService._privateConstructor() {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
+      _uploader.clearQueue();
       sync();
     });
 
