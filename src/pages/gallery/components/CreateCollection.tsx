@@ -43,11 +43,14 @@ export default function CreateCollection(props) {
 
             await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token, progressBarProps);
             refetchData();
-            setProgressView(false);
+
         }
         catch (err) {
             if (err.response)
                 setErrorCode(err.response.status);
+        }
+        finally {
+            setProgressView(false);
         }
     }
     return (
