@@ -138,6 +138,41 @@ class _SyncIndicatorState extends State<SyncIndicator> {
           ],
         ),
       );
+    } else if (_event.error is StorageLimitExceededError) {
+      return Container(
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Theme.of(context).accentColor,
+                ),
+                Padding(padding: EdgeInsets.all(4)),
+                Text("storage quota exceeded, backups paused"),
+              ],
+            ),
+            Padding(padding: EdgeInsets.all(6)),
+            Container(
+              width: double.infinity,
+              height: 64,
+              padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+              child: button("upgrade", onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return SubscriptionPage();
+                    },
+                  ),
+                );
+              }),
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+          ],
+        ),
+      );
     } else {
       return Container(
         child: Column(

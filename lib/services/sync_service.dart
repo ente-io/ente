@@ -98,6 +98,9 @@ class SyncService {
       } on NoActiveSubscriptionError {
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
             error: NoActiveSubscriptionError()));
+      } on StorageLimitExceededError {
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
+            error: StorageLimitExceededError()));
       } catch (e, s) {
         _logger.severe(e, s);
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
@@ -287,7 +290,7 @@ class SyncService {
       futures.add(future);
     }
     try {
-      await Future.wait(futures);
+      await Future.wait(futures, eagerError: true);
     } on InvalidFileError {
       // Do nothing
     } catch (e, s) {

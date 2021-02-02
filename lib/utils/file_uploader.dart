@@ -319,23 +319,30 @@ class FileUploader {
         "decryptionHeader": metadataDecryptionHeader,
       }
     };
-    final response = await _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/files",
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      data: request,
-    );
-    final data = response.data;
-    file.uploadedFileID = data["id"];
-    file.collectionID = collectionID;
-    file.updationTime = data["updationTime"];
-    file.ownerID = data["ownerID"];
-    file.encryptedKey = encryptedKey;
-    file.keyDecryptionNonce = keyDecryptionNonce;
-    file.fileDecryptionHeader = fileDecryptionHeader;
-    file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
-    file.metadataDecryptionHeader = metadataDecryptionHeader;
-    return file;
+    try {
+      final response = await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/files",
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        data: request,
+      );
+      final data = response.data;
+      file.uploadedFileID = data["id"];
+      file.collectionID = collectionID;
+      file.updationTime = data["updationTime"];
+      file.ownerID = data["ownerID"];
+      file.encryptedKey = encryptedKey;
+      file.keyDecryptionNonce = keyDecryptionNonce;
+      file.fileDecryptionHeader = fileDecryptionHeader;
+      file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
+      file.metadataDecryptionHeader = metadataDecryptionHeader;
+      return file;
+    } on DioError catch (e) {
+      if (e.response.statusCode == 426) {
+        throw StorageLimitExceededError();
+      }
+      throw e;
+    }
   }
 
   Future<File> _updateFile(
@@ -362,19 +369,26 @@ class FileUploader {
         "decryptionHeader": metadataDecryptionHeader,
       }
     };
-    final response = await _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/files",
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      data: request,
-    );
-    final data = response.data;
-    file.uploadedFileID = data["id"];
-    file.updationTime = data["updationTime"];
-    file.fileDecryptionHeader = fileDecryptionHeader;
-    file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
-    file.metadataDecryptionHeader = metadataDecryptionHeader;
-    return file;
+    try {
+      final response = await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/files",
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        data: request,
+      );
+      final data = response.data;
+      file.uploadedFileID = data["id"];
+      file.updationTime = data["updationTime"];
+      file.fileDecryptionHeader = fileDecryptionHeader;
+      file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
+      file.metadataDecryptionHeader = metadataDecryptionHeader;
+      return file;
+    } on DioError catch (e) {
+      if (e.response.statusCode == 426) {
+        throw StorageLimitExceededError();
+      }
+      throw e;
+    }
   }
 
   Future<UploadURL> _getUploadURL() async {
@@ -460,3 +474,5 @@ class WiFiUnavailableError extends Error {}
 class SyncStopRequestedError extends Error {}
 
 class NoActiveSubscriptionError extends Error {}
+
+class StorageLimitExceededError extends Error {}
