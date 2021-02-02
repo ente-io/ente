@@ -139,14 +139,24 @@ class _SyncIndicatorState extends State<SyncIndicator> {
         ),
       );
     } else {
-      return Row(
-        children: [
-          Icon(
-            Icons.error_outline,
-            color: Theme.of(context).accentColor,
-          ),
-          Text(_event.reason ?? "upload failed"),
-        ],
+      return Container(
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Theme.of(context).accentColor,
+                ),
+                Padding(padding: EdgeInsets.all(4)),
+                Text(_event.reason ?? "upload failed"),
+              ],
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+          ],
+        ),
       );
     }
   }
