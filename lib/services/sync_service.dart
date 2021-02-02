@@ -286,7 +286,7 @@ class SyncService {
       futures.add(future);
     }
     try {
-      await Future.wait(futures, eagerError: true);
+      await Future.wait(futures);
     } on InvalidFileError {
       // Do nothing
     } catch (e, s) {
