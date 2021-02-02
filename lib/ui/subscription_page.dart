@@ -74,7 +74,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               text = "your plan was successfully downgraded";
             }
             showToast(text);
-            if (_hasActiveSubscription) {
+            if (_currentSubscription != null) {
               _currentSubscription = _billingService.getSubscription();
               _hasActiveSubscription = _currentSubscription != null &&
                   _currentSubscription.isValid();
@@ -82,6 +82,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             } else {
               Navigator.of(context).popUntil((route) => route.isFirst);
             }
+            await _dialog.hide();
           } catch (e) {
             _logger.warning("Could not complete payment ", e);
             await _dialog.hide();
@@ -95,9 +96,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           }
         } else if (Platform.isIOS && purchase.pendingCompletePurchase) {
           await InAppPurchaseConnection.instance.completePurchase(purchase);
+          await _dialog.hide();
         }
       }
-      await _dialog.hide();
     });
     super.initState();
   }
