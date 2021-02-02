@@ -5,6 +5,9 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/subscription_page.dart';
+import 'package:photos/utils/file_uploader.dart';
 
 class SyncIndicator extends StatefulWidget {
   const SyncIndicator({Key key}) : super(key: key);
@@ -49,55 +52,103 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       } else {
         _containerHeight = 48;
       }
-      var icon;
-      if (_event.status == SyncStatus.completed) {
-        icon = Icon(
-          Icons.cloud_done_outlined,
-          color: Theme.of(context).accentColor,
-        );
-      } else if (_event.status == SyncStatus.error) {
-        icon = Icon(
-          Icons.error_outline,
-          color: Theme.of(context).accentColor,
+      if (_event.status != SyncStatus.error) {
+        var icon;
+        if (_event.status == SyncStatus.completed) {
+          icon = Icon(
+            Icons.cloud_done_outlined,
+            color: Theme.of(context).accentColor,
+          );
+        } else {
+          icon = CircularProgressIndicator(strokeWidth: 2);
+        }
+        return AnimatedContainer(
+          duration: Duration(milliseconds: 300),
+          height: _containerHeight,
+          width: double.infinity,
+          padding: EdgeInsets.all(8),
+          alignment: Alignment.center,
+          child: SingleChildScrollView(
+            physics: NeverScrollableScrollPhysics(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 20,
+                      height: 20,
+                      child: icon,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 4, 0, 0),
+                      child: Text(_getRefreshingText()),
+                    ),
+                  ],
+                ),
+                Padding(padding: EdgeInsets.all(4)),
+                Divider(),
+              ],
+            ),
+          ),
         );
       } else {
-        icon = CircularProgressIndicator(strokeWidth: 2);
+        return _getErrorWidget();
       }
-      return AnimatedContainer(
-        duration: Duration(milliseconds: 300),
-        height: _containerHeight,
-        width: double.infinity,
-        padding: EdgeInsets.all(8),
-        alignment: Alignment.center,
-        child: SingleChildScrollView(
-          physics: NeverScrollableScrollPhysics(),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 20,
-                    height: 20,
-                    child: icon,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 4, 0, 0),
-                    child: Text(_getRefreshingText()),
-                  ),
-                ],
-              ),
-              Padding(padding: EdgeInsets.all(4)),
-              Divider(),
-            ],
-          ),
-        ),
-      );
     }
     return Container();
+  }
+
+  Widget _getErrorWidget() {
+    if (_event.error is NoActiveSubscriptionError) {
+      return Container(
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Theme.of(context).accentColor,
+                ),
+                Padding(padding: EdgeInsets.all(4)),
+                Text("your subscription has expired"),
+              ],
+            ),
+            Padding(padding: EdgeInsets.all(6)),
+            Container(
+              width: double.infinity,
+              height: 64,
+              padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+              child: button("subscribe", onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return SubscriptionPage();
+                    },
+                  ),
+                );
+              }),
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+          ],
+        ),
+      );
+    } else {
+      return Row(
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: Theme.of(context).accentColor,
+          ),
+          Text(_event.reason ?? "upload failed"),
+        ],
+      );
+    }
   }
 
   String _getRefreshingText() {
@@ -125,7 +176,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
         return "all memories preserved";
       }
     }
-    // _event.status == SyncStatus.error)
+    // _event.status == SyncStatus.error
     return _event.reason ?? "upload failed";
   }
 }

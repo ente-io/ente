@@ -96,7 +96,7 @@ class SyncService {
             .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
       } on NoActiveSubscriptionError {
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
-            reason: "your subscription has expired"));
+            error: NoActiveSubscriptionError()));
       } catch (e, s) {
         _logger.severe(e, s);
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
@@ -289,16 +289,9 @@ class SyncService {
       await Future.wait(futures, eagerError: true);
     } on InvalidFileError {
       // Do nothing
-    } on WiFiUnavailableError {
-      throw WiFiUnavailableError();
-    } on SyncStopRequestedError {
-      throw SyncStopRequestedError();
-    } on NoActiveSubscriptionError {
-      throw NoActiveSubscriptionError();
     } catch (e, s) {
-      _isSyncInProgress = false;
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
       _logger.severe("Error in syncing files", e, s);
+      throw e;
     }
     return uploadCounter > 0;
   }

@@ -6,6 +6,7 @@ class SyncStatusUpdate extends Event {
   final bool wasStopped;
   final SyncStatus status;
   final String reason;
+  final Error error;
 
   SyncStatusUpdate(
     this.status, {
@@ -13,6 +14,7 @@ class SyncStatusUpdate extends Event {
     this.total,
     this.wasStopped = false,
     this.reason = "",
+    this.error,
   });
 }
 
