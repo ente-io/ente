@@ -132,7 +132,6 @@ class FileUploader {
 
   Future<File> _encryptAndUploadFileToCollection(File file, int collectionID,
       {bool forcedUpload = false}) async {
-    _logger.info("Uploading " + file.toString());
     _currentlyUploading++;
     try {
       final uploadedFile = await _tryToUpload(file, collectionID, forcedUpload);
