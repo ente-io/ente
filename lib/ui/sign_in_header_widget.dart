@@ -40,8 +40,8 @@ class _SignInHeaderState extends State<SignInHeader> {
   @override
   Widget build(BuildContext context) {
     var hasConfiguredAccount = Configuration.instance.hasConfiguredAccount();
-    var hasSubscribed = BillingService.instance.hasActiveSubscription();
-    if (hasConfiguredAccount && hasSubscribed) {
+    var hasSubscription = BillingService.instance.getSubscription() != null;
+    if (hasConfiguredAccount && hasSubscription) {
       return Container();
     } else if (!hasConfiguredAccount) {
       return _getBody(context);
