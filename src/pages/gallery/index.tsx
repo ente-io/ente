@@ -21,6 +21,7 @@ import SadFace from 'components/SadFace';
 import Upload from './components/Upload';
 import { collection, fetchCollections, collectionLatestFile, getCollectionLatestFile, getFavItemIds } from 'services/collectionService';
 import constants from 'utils/strings/constants';
+import { ErrorAlert } from './components/ErrorAlert';
 
 enum ITEM_TYPE {
     TIME = 'TIME',
@@ -105,7 +106,7 @@ export default function Gallery(props) {
         maxSpreadZoom: 5,
     });
     const fetching: { [k: number]: boolean } = {};
-
+    const [errorCode, setErrorCode] = useState<number>(null);
 
 
     useEffect(() => {
@@ -285,6 +286,7 @@ export default function Gallery(props) {
 
     return (
         <>
+            <ErrorAlert errorCode={errorCode} />
             <Collections
                 collections={collections}
                 selected={router.query.collection?.toString()}
@@ -296,7 +298,8 @@ export default function Gallery(props) {
                 showUploadModal={props.showUploadModal}
                 collectionLatestFile={collectionLatestFile}
                 refetchData={() => setReload(Math.random())}
-                
+                setErrorCode={setErrorCode}
+
             />
             {filteredData.length ? (
                 <Container>
