@@ -194,13 +194,12 @@ class FileUploader {
         _logger.severe("Could not generate thumbnail for " + file.toString());
         throw InvalidFileError();
       }
-      var thumbnailSize = thumbnailData.length;
-      while (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
+      final thumbnailSize = thumbnailData.length;
+      if (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
         thumbnailData = await compressThumbnail(thumbnailData);
         _logger.info("Thumbnail size " + thumbnailSize.toString());
         _logger.info(
             "Compressed thumbnail size " + thumbnailData.length.toString());
-        thumbnailSize = thumbnailData.length;
       }
 
       final encryptedThumbnailData =
