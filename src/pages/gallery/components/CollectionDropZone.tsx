@@ -31,26 +31,30 @@ export const DropDiv = styled.div`
   transition: border 0.24s ease-in-out;
 `;
 
-function CollectionDropZone({
-    children,
-    closeModal,
-    showModal,
-    refetchData,
-    collectionLatestFile,
-    setProgressView,
-    progressBarProps
-
-}) {
-
+function CollectionDropZone(props) {
+    const { children,
+        closeModal,
+        showModal,
+        refetchData,
+        collectionLatestFile,
+        setProgressView,
+        progressBarProps, setErrorCode } = props
     const upload = async (acceptedFiles) => {
-        const token = getToken();
-        closeModal();
-        progressBarProps.setPercentComplete(0);
-        setProgressView(true);
+        try {
+            const token = getToken();
+            closeModal();
+            progressBarProps.setPercentComplete(0);
+            setProgressView(true);
 
-        await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token, progressBarProps);
-        refetchData();
-        setProgressView(false);
+            await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token, progressBarProps);
+            refetchData();
+        } catch (err) {
+            if (err.response)
+                setErrorCode(err.response.status);
+        }
+        finally {
+            setProgressView(false);
+        }
     }
     return (
         <Dropzone
