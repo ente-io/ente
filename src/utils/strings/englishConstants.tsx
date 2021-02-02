@@ -51,7 +51,9 @@ const englishConstants = {
         2: "Uploading your Files",
         3: "Files Uploaded Successfully !!!"
     },
-    OF: 'of'
+    OF: 'of',
+    SUBSCRIPTION_EXPIRED: 'You don\'t have a active subscription plan!!, Please get one in the mobile app',
+    STORAGE_QUOTA_EXCEEDED:'You have exceeded your designated storage Quota, please upgrade your plan to add more files',
 };
 
 export default englishConstants;
