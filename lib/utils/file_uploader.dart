@@ -108,14 +108,15 @@ class FileUploader {
 
   void _pollQueue() {
     if (SyncService.instance.shouldStopSync()) {
+      final uploadsToBeRemoved = List<int>();
       _queue.entries
           .where((entry) => entry.value.status == UploadStatus.not_started)
           .forEach((pendingUpload) {
-        _queue
-            .remove(pendingUpload.key)
-            .completer
-            .completeError(SyncStopRequestedError());
+        uploadsToBeRemoved.add(pendingUpload.key);
       });
+      for (final id in uploadsToBeRemoved) {
+        _queue.remove(id).completer.completeError(SyncStopRequestedError());
+      }
     }
     if (_queue.length > 0 && _currentlyUploading < _maximumConcurrentUploads) {
       final firstPendingEntry = _queue.entries
@@ -262,8 +263,10 @@ class FileUploader {
         return uploadedFile;
       }
     } catch (e, s) {
-      _logger.severe(
-          "File upload failed for " + file.generatedID.toString(), e, s);
+      if (!(e is NoActiveSubscriptionError)) {
+        _logger.severe(
+            "File upload failed for " + file.generatedID.toString(), e, s);
+      }
       throw e;
     } finally {
       if (io.Platform.isIOS && sourceFile != null) {
@@ -379,24 +382,31 @@ class FileUploader {
 
   Future<void> _uploadURLFetchInProgress;
 
-  Future<void> _fetchUploadURLs() {
+  Future<void> _fetchUploadURLs() async {
     if (_uploadURLFetchInProgress == null) {
-      _uploadURLFetchInProgress = _dio
-          .get(
-        Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
-        queryParameters: {
-          "count": 42, // m4gic number
-        },
-        options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-      )
-          .then((response) {
-        _uploadURLFetchInProgress = null;
+      final completer = Completer<void>();
+      _uploadURLFetchInProgress = completer.future;
+      try {
+        final response = await _dio.get(
+          Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
+          queryParameters: {
+            "count": 42, // m4gic number
+          },
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        );
         final urls = (response.data["urls"] as List)
             .map((e) => UploadURL.fromMap(e))
             .toList();
         _uploadURLs.addAll(urls);
-      });
+      } on DioError catch (e) {
+        if (e.response.statusCode == 402) {
+          throw NoActiveSubscriptionError();
+        }
+        throw e;
+      }
+      _uploadURLFetchInProgress = null;
+      completer.complete();
     }
     return _uploadURLFetchInProgress;
   }
@@ -444,3 +454,5 @@ class InvalidFileError extends Error {}
 class WiFiUnavailableError extends Error {}
 
 class SyncStopRequestedError extends Error {}
+
+class NoActiveSubscriptionError extends Error {}

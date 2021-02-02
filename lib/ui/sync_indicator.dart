@@ -126,6 +126,6 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       }
     }
     // _event.status == SyncStatus.error)
-    return "upload failed";
+    return _event.reason ?? "upload failed";
   }
 }

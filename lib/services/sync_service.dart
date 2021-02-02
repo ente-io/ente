@@ -11,7 +11,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -44,7 +44,7 @@ class SyncService {
   static final _diffLimit = 200;
 
   SyncService._privateConstructor() {
-    Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
+    Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       sync();
     });
 
@@ -94,6 +94,9 @@ class SyncService {
         _syncStopRequested = false;
         Bus.instance
             .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
+      } on NoActiveSubscriptionError {
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
+            reason: "your subscription has expired"));
       } catch (e, s) {
         _logger.severe(e, s);
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
@@ -230,6 +233,12 @@ class SyncService {
   }
 
   Future<bool> _uploadDiff() async {
+    if (!BillingService.instance.hasActiveSubscription()) {
+      await BillingService.instance.fetchSubscription();
+      if (!BillingService.instance.hasActiveSubscription()) {
+        throw NoActiveSubscriptionError();
+      }
+    }
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     final filesToBeUploaded =
         await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
@@ -277,13 +286,15 @@ class SyncService {
       futures.add(future);
     }
     try {
-      await Future.wait(futures);
+      await Future.wait(futures, eagerError: true);
     } on InvalidFileError {
       // Do nothing
     } on WiFiUnavailableError {
       throw WiFiUnavailableError();
     } on SyncStopRequestedError {
       throw SyncStopRequestedError();
+    } on NoActiveSubscriptionError {
+      throw NoActiveSubscriptionError();
     } catch (e, s) {
       _isSyncInProgress = false;
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));

@@ -8,7 +8,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
@@ -41,7 +41,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     _currentSubscription = _billingService.getSubscription();
     _hasActiveSubscription =
         _currentSubscription != null && _currentSubscription.isValid();
-    if (_hasActiveSubscription) {
+    if (_currentSubscription != null) {
       _usageFuture = _billingService.fetchUsage();
     }
 
@@ -62,7 +62,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               purchase.verificationData.serverVerificationData,
             );
             await InAppPurchaseConnection.instance.completePurchase(purchase);
-            Bus.instance.fire(UserAuthenticatedEvent());
+            Bus.instance.fire(SubscriptionPurchasedEvent());
             final isUpgrade = _hasActiveSubscription &&
                 newSubscription.storage > _currentSubscription.storage;
             final isDowngrade = _hasActiveSubscription &&
@@ -170,9 +170,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 showGenericErrorDialog(context);
                 return;
               }
-              if (Platform.isAndroid &&
+              final isCrossGradingOnAndroid = Platform.isAndroid &&
                   _hasActiveSubscription &&
-                  _currentSubscription.productID != plan.androidID) {
+                  _currentSubscription.productID != plan.androidID;
+              if (isCrossGradingOnAndroid) {
                 final existingProductDetailsResponse =
                     await InAppPurchaseConnection.instance.queryProductDetails(
                         [_currentSubscription.productID].toSet());

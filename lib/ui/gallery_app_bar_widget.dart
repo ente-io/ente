@@ -6,7 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
@@ -60,7 +60,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     };
     widget.selectedFiles.addListener(_selectedFilesListener);
     _userAuthEventSubscription =
-        Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
+        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
     super.initState();

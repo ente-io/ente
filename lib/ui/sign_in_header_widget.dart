@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/user_authenticated_event.dart';
+import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
@@ -25,7 +25,7 @@ class _SignInHeaderState extends State<SignInHeader> {
   @override
   void initState() {
     _userAuthEventSubscription =
-        Bus.instance.on<UserAuthenticatedEvent>().listen((event) {
+        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
     super.initState();
@@ -43,22 +43,8 @@ class _SignInHeaderState extends State<SignInHeader> {
     var hasSubscription = BillingService.instance.getSubscription() != null;
     if (hasConfiguredAccount && hasSubscription) {
       return Container();
-    } else if (!hasConfiguredAccount) {
-      return _getBody(context);
     } else {
-      return FutureBuilder(
-        future: BillingService.instance.fetchSubscription(),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData || snapshot.hasError) {
-            if (BillingService.instance.hasActiveSubscription()) {
-              return Container();
-            }
-            return _getBody(context);
-          } else {
-            return Container();
-          }
-        },
-      );
+      return _getBody(context);
     }
   }
 
