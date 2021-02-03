@@ -1,13 +1,19 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:expansion_card/expansion_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
+import 'package:progress_dialog/progress_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/core/network.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
@@ -16,8 +22,6 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:progress_dialog/progress_dialog.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({Key key}) : super(key: key);
@@ -260,49 +264,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       Padding(padding: EdgeInsets.all(8)),
     ]);
 
-    if (_currentSubscription == null) {
-      widgets.addAll([
-        Align(
-          alignment: Alignment.topLeft,
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: Text(
-              "we offer a 14 day free trial, you can cancel anytime",
-              style: TextStyle(
-                color: Colors.white,
-                height: 1.2,
-              ),
-            ),
-          ),
-        ),
-        Expanded(child: Container()),
-        Align(
-          alignment: Alignment.center,
-          child: GestureDetector(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (builder) {
-                  return LearnMoreWidget();
-                },
-              );
-            },
-            child: Container(
-              padding: EdgeInsets.all(80),
-              child: RichText(
-                text: TextSpan(
-                  text: "learn more",
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontFamily: 'Ubuntu',
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ]);
-    } else {
+    if (_hasActiveSubscription) {
       widgets.addAll([
         Expanded(child: Container()),
         Align(
@@ -333,6 +295,51 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ),
         ),
       ]);
+    } else {
+      widgets.addAll([
+        Align(
+          alignment: Alignment.topLeft,
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: Text(
+              "we offer a 14 day free trial, you can cancel anytime",
+              style: TextStyle(
+                color: Colors.white,
+                height: 1.2,
+              ),
+            ),
+          ),
+        ),
+        Expanded(child: Container()),
+        Align(
+          alignment: Alignment.center,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              showModalBottomSheet<void>(
+                backgroundColor: Colors.grey[900],
+                barrierColor: Colors.black87,
+                context: context,
+                builder: (context) {
+                  return BillingQuestionsWidget();
+                },
+              );
+            },
+            child: Container(
+              padding: EdgeInsets.all(80),
+              child: RichText(
+                text: TextSpan(
+                  text: "questions?",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontFamily: 'Ubuntu',
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ]);
     }
     return SingleChildScrollView(
       child: Container(
@@ -346,68 +353,128 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 }
 
-class LearnMoreWidget extends StatefulWidget {
-  const LearnMoreWidget({
+class BillingQuestionsWidget extends StatefulWidget {
+  const BillingQuestionsWidget({
     Key key,
   }) : super(key: key);
 
   @override
-  _LearnMoreWidgetState createState() => _LearnMoreWidgetState();
+  _BillingQuestionsWidgetState createState() => _BillingQuestionsWidgetState();
 }
 
-class _LearnMoreWidgetState extends State<LearnMoreWidget> {
-  int _progress = 0;
-
+class _BillingQuestionsWidgetState extends State<BillingQuestionsWidget> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 40, 0, 0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: InAppWebView(
-                initialUrl: 'https://ente.io/faq',
-                onProgressChanged: (c, progress) {
-                  setState(() {
-                    _progress = progress;
-                  });
-                },
+    return FutureBuilder(
+      future: Network.instance
+          .getDio()
+          .get("https://static.ente.io/faq.json")
+          .then((response) {
+        final faqItems = List<FaqItem>();
+        for (final item in response.data as List) {
+          faqItems.add(FaqItem.fromMap(item));
+        }
+        return faqItems;
+      }),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          final faqs = List<Widget>();
+          faqs.add(Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              "faqs",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            Column(
+          ));
+          for (final faq in snapshot.data) {
+            faqs.add(ExpansionCard(
+              margin: EdgeInsets.only(bottom: 2),
+              title: Text(faq.q),
               children: [
-                _progress < 100
-                    ? LinearProgressIndicator(
-                        value: _progress / 100,
-                        minHeight: 2,
-                      )
-                    : Container(),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                  child: FlatButton(
-                    child: Text("close"),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                  padding: const EdgeInsets.only(left: 16, right: 16),
+                  child: Text(
+                    faq.a,
+                    style: TextStyle(
+                      height: 1.5,
                     ),
-                    color: Colors.grey[850],
-                    minWidth: double.infinity,
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
                   ),
-                ),
+                )
               ],
+            ));
+          }
+          faqs.add(Padding(
+            padding: EdgeInsets.all(16),
+          ));
+          return Container(
+            child: SingleChildScrollView(
+              child: Column(
+                children: faqs,
+              ),
             ),
-          ],
-        ),
-      ),
+          );
+        } else {
+          return loadWidget;
+        }
+      },
     );
   }
+}
+
+class FaqItem {
+  final String q;
+  final String a;
+  FaqItem({
+    this.q,
+    this.a,
+  });
+
+  FaqItem copyWith({
+    String q,
+    String a,
+  }) {
+    return FaqItem(
+      q: q ?? this.q,
+      a: a ?? this.a,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'q': q,
+      'a': a,
+    };
+  }
+
+  factory FaqItem.fromMap(Map<String, dynamic> map) {
+    if (map == null) return null;
+
+    return FaqItem(
+      q: map['q'],
+      a: map['a'],
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory FaqItem.fromJson(String source) =>
+      FaqItem.fromMap(json.decode(source));
+
+  @override
+  String toString() => 'FaqItem(q: $q, a: $a)';
+
+  @override
+  bool operator ==(Object o) {
+    if (identical(this, o)) return true;
+
+    return o is FaqItem && o.q == q && o.a == a;
+  }
+
+  @override
+  int get hashCode => q.hashCode ^ a.hashCode;
 }
 
 class SubscriptionPlanWidget extends StatelessWidget {
