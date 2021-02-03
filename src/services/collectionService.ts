@@ -128,11 +128,6 @@ export const fetchUpdatedCollections = async (token: string, key: string) => {
     return updatedCollections;
 };
 
-export const getAllCollections = async () => {
-    const collections = await localForage.setItem('collection-update-time', Date.now() * 1000);
-    return collections;
-}
-
 export const getCollectionLatestFile = async (
     collections: collection[],
     token
