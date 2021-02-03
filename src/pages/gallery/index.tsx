@@ -146,9 +146,9 @@ export default function Gallery(props) {
             if (updatedCollections.length > 0) {
                 setCollections(collections);
                 setData(data);
-                setCollectionLatestFile(collectionLatestFile);
-                setFavItemIds(favItemIds);
             }
+            setCollectionLatestFile(collectionLatestFile);
+            setFavItemIds(favItemIds);
             setProgress(100);
         };
         main();
@@ -325,7 +325,7 @@ export default function Gallery(props) {
                 showUploadModal={props.showUploadModal}
                 collectionLatestFile={collectionLatestFile}
                 refetchData={() => setReload(Math.random())}
-
+                
             />
             {filteredData.length ? (
                 <Container>
