@@ -132,7 +132,7 @@ export default function Gallery(props) {
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         const token = getToken();
-        if (!key && token) {
+        if (!key || !token) {
             router.push('/');
         }
         const main = async () => {
@@ -143,10 +143,12 @@ export default function Gallery(props) {
             const collections = await getLocalCollections();
             const collectionLatestFile = await getCollectionLatestFile(collections, token);
             const favItemIds = await getFavItemIds(data);
-            setCollections(collections);
-            setData(data);
-            setCollectionLatestFile(collectionLatestFile);
-            setFavItemIds(favItemIds);
+            if (updatedCollections.length > 0) {
+                setCollections(collections);
+                setData(data);
+                setCollectionLatestFile(collectionLatestFile);
+                setFavItemIds(favItemIds);
+            }
             setProgress(100);
         };
         main();
