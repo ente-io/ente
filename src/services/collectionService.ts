@@ -97,7 +97,7 @@ const getCollections = async (
         return await Promise.all(promises);
     }
     catch (e) {
-        console.log("getCollections falied- " + e);
+        console.log("getCollections failed- " + e);
     }
 };
 
@@ -107,13 +107,24 @@ export const getLocalCollections = async (): Promise<collection[]> => {
 }
 export const fetchUpdatedCollections = async (token: string, key: string) => {
     const collectionUpdateTime = await localForage.getItem('collection-update-time') as string;
-    const updatedCollections = await getCollections(token, collectionUpdateTime ?? '0', key);
+    const updatedCollections = await getCollections(token, collectionUpdateTime ?? '0', key) || [];
     const favCollection = await localForage.getItem('fav-collection') as collection[] ?? updatedCollections.filter(collection => collection.type === CollectionType.favorites);
     const localCollections = await getLocalCollections();
-
+    const allCollectionsInstances = [...localCollections, ...updatedCollections];
+    var latestCollectionsInstances = new Map<string, collection>();
+    allCollectionsInstances.forEach((collection) => {
+        if (!latestCollectionsInstances.has(collection.id) || latestCollectionsInstances.get(collection.id).updationTime < collection.updationTime) {
+            latestCollectionsInstances.set(collection.id, collection);
+        }
+    });
+    let collections = [], updationTime = 0;
+    for (const [_, collection] of latestCollectionsInstances) {
+        collections.push(collection);
+        updationTime = Math.max(updationTime, collection.updationTime);
+    }
     await localForage.setItem('fav-collection', favCollection);
-    await localForage.setItem('collection-update-time', Date.now() * 1000);
-    await localForage.setItem('collections', [...localCollections, ...updatedCollections]);
+    await localForage.setItem('collection-update-time', updationTime);
+    await localForage.setItem('collections', collections);
     return updatedCollections;
 };
 

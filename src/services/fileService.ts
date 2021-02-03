@@ -87,7 +87,7 @@ export const fetchFiles = async (
         }
     });
     files = [];
-    for (const [_, file] of latestFiles.entries()) {
+    for (const [_, file] of latestFiles) {
         if (!file.isDeleted)
             files.push(file);
     }
