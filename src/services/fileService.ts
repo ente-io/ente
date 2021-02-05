@@ -76,7 +76,7 @@ export const fetchFiles = async (
     collections: collection[]
 ) => {
     let files = await localFiles();
-    const fetchedFiles = await getFiles(collections, null, "100", token);
+    const fetchedFiles = await getFiles(collections, null, 100, token);
 
     files.push(...fetchedFiles);
     var latestFiles = new Map<string, file>();
@@ -98,7 +98,7 @@ export const fetchFiles = async (
     return files;
 };
 
-export const getFiles = async (collections: collection[], sinceTime: string, limit: string, token: string): Promise<file[]> => {
+export const getFiles = async (collections: collection[], sinceTime: string, limit: number, token: string): Promise<file[]> => {
     try {
         const worker = await new CryptoWorker();
         let promises: Promise<file>[] = [];
@@ -115,7 +115,7 @@ export const getFiles = async (collections: collection[], sinceTime: string, lim
                 resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
                     collectionID: collection.id,
                     sinceTime: time,
-                    limit,
+                    limit: limit.toString(),
                 },
                     {
                         'X-Auth-Token': token
@@ -138,7 +138,7 @@ export const getFiles = async (collections: collection[], sinceTime: string, lim
                 if (resp.data.diff.length) {
                     time = resp.data.diff.slice(-1)[0].updationTime.toString();
                 }
-            } while (resp.data.diff.length);
+            } while (resp.data.diff.length === limit);
             await localForage.setItem(`${collection.id}-time`, time);
         }
         return Promise.all(promises);
