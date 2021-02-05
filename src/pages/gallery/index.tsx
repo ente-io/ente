@@ -110,27 +110,30 @@ export default function Gallery(props) {
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        const token = getData(LS_KEYS.USER).token;
         if (!key) {
             router.push('/');
         }
         const main = async () => {
             setLoading(true);
-            const encryptionKey = await getActualKey();
-            const collections = await fetchCollections(token, encryptionKey);
-            const data = await fetchData(token, collections);
-            const collectionLatestFile = await getCollectionLatestFile(collections, data);
-            const favItemIds = await getFavItemIds(data);
-            setCollections(collections);
-            setData(data);
-            setCollectionLatestFile(collectionLatestFile);
-            setFavItemIds(favItemIds);
+            await syncWithRemote();
             setLoading(false);
         };
         main();
         props.setUploadButtonView(true);
-    }, [reload]);
+    }, []);
 
+    const syncWithRemote = async () => {
+        const token = getData(LS_KEYS.USER).token;
+        const encryptionKey = await getActualKey();
+        const collections = await fetchCollections(token, encryptionKey);
+        const data = await fetchData(token, collections);
+        const collectionLatestFile = await getCollectionLatestFile(collections, data);
+        const favItemIds = await getFavItemIds(data);
+        setCollections(collections);
+        setData(data);
+        setCollectionLatestFile(collectionLatestFile);
+        setFavItemIds(favItemIds);
+    }
     if (!data || loading) {
         return (
             <div className='text-center'>
@@ -184,7 +187,7 @@ export default function Gallery(props) {
 
     const handleClose = () => {
         setOpen(false);
-        // setReload(Math.random());
+        // syncWithRemote();
     };
 
     const onThumbnailClick = (index: number) => () => {
@@ -295,7 +298,7 @@ export default function Gallery(props) {
                 closeUploadModal={props.closeUploadModal}
                 showUploadModal={props.showUploadModal}
                 collectionLatestFile={collectionLatestFile}
-                refetchData={() => setReload(Math.random())}
+                refetchData={syncWithRemote}
 
             />
             {filteredData.length ? (
