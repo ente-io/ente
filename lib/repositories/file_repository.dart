@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -37,7 +38,6 @@ class FileRepository {
   Future<void> reloadFiles() async {
     _logger.info("Reloading...");
     await loadFiles();
-    Bus.instance.fire(LocalPhotosUpdatedEvent());
   }
 
   Future<List<File>> _loadFiles() async {
@@ -55,8 +55,11 @@ class FileRepository {
       }
       deduplicatedFiles.add(files[index]);
     }
-    _files.clear();
-    _files.addAll(deduplicatedFiles);
+    if (!listEquals(_files, deduplicatedFiles)) {
+      _files.clear();
+      _files.addAll(deduplicatedFiles);
+      Bus.instance.fire(LocalPhotosUpdatedEvent());
+    }
     return _files;
   }
 }
