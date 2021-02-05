@@ -156,15 +156,23 @@ class _HomeWidgetState extends State<HomeWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final headerWidgets = List<Widget>();
-          if (_selectedFiles.files.isEmpty &&
-              Configuration.instance.hasConfiguredAccount()) {
-            headerWidgets.add(_settingsButton);
-          }
           headerWidgets.addAll([
             _syncIndicator,
             _signInHeader,
             _memoriesWidget,
           ]);
+          var header;
+          if (_selectedFiles.files.isEmpty &&
+              Configuration.instance.hasConfiguredAccount()) {
+            header = Container(
+              margin: EdgeInsets.only(top: 12),
+              child: Stack(
+                children: [_settingsButton, Column(children: headerWidgets)],
+              ),
+            );
+          } else {
+            header = Column(children: headerWidgets);
+          }
           return Gallery(
             syncLoader: () {
               return _getFilteredPhotos(FileRepository.instance.files);
@@ -172,9 +180,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
             tagPrefix: "home_gallery",
             selectedFiles: _selectedFiles,
-            headerWidget: Column(
-              children: headerWidgets,
-            ),
+            headerWidget: header,
           );
         } else if (snapshot.hasError) {
           return Center(child: Text(snapshot.error.toString()));

@@ -10,8 +10,11 @@ class SettingsButton extends StatelessWidget {
     return Align(
       alignment: Alignment.topRight,
       child: IconButton(
-        icon: Icon(Icons.settings),
-        padding: EdgeInsets.fromLTRB(16, 18, 16, 18),
+        icon: Icon(
+          Icons.settings,
+          color: Colors.white60,
+        ),
+        padding: EdgeInsets.fromLTRB(16, 4, 16, 18),
         onPressed: () async {
           Navigator.of(context).push(
             MaterialPageRoute(
