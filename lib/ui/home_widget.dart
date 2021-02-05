@@ -44,11 +44,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _deviceFolderGalleryWidget = CollectionsGalleryWidget();
   final _sharedCollectionGallery = SharedCollectionGallery();
   final _selectedFiles = SelectedFiles();
-  final _memoriesWidget = MemoriesWidget();
-  final _signInHeader = SignInHeader();
-  final _syncIndicator = SyncIndicator();
   final _settingsButton = SettingsButton();
+  static const _headerWidget = HeaderWidget();
   final PageController _pageController = PageController();
+  final _future = FileRepository.instance.loadFiles();
 
   GlobalKey<ConvexAppBarState> _appBarKey = GlobalKey<ConvexAppBarState>();
   StreamSubscription<LocalPhotosUpdatedEvent> _photosUpdatedEvent;
@@ -56,8 +55,10 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   void initState() {
+    _logger.info("Building initstate");
     _photosUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      _logger.info("Building because local photos updated");
       setState(() {});
     });
     _tabChangedEventSubscription =
@@ -74,6 +75,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
     });
     _selectedFiles.addListener(() {
+      _logger.info("Building because selected files updated");
       setState(() {});
     });
     _initDeepLinks();
@@ -82,6 +84,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    _logger.info("Building home_Widget");
     return Scaffold(
       appBar: _selectedFiles.files.isEmpty
           ? PreferredSize(
@@ -152,26 +155,20 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _getMainGalleryWidget() {
     return FutureBuilder(
-      future: FileRepository.instance.loadFiles(),
+      future: _future,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final headerWidgets = List<Widget>();
-          headerWidgets.addAll([
-            _syncIndicator,
-            _signInHeader,
-            _memoriesWidget,
-          ]);
           var header;
           if (_selectedFiles.files.isEmpty &&
               Configuration.instance.hasConfiguredAccount()) {
             header = Container(
               margin: EdgeInsets.only(top: 12),
               child: Stack(
-                children: [_settingsButton, Column(children: headerWidgets)],
+                children: [_settingsButton, _headerWidget],
               ),
             );
           } else {
-            header = Column(children: headerWidgets);
+            header = _headerWidget;
           }
           return Gallery(
             syncLoader: () {
@@ -241,6 +238,27 @@ class _HomeWidgetState extends State<HomeWidget> {
     _tabChangedEventSubscription.cancel();
     _photosUpdatedEvent.cancel();
     super.dispose();
+  }
+}
+
+class HeaderWidget extends StatelessWidget {
+  static const _memoriesWidget = const MemoriesWidget();
+  static const _signInHeader = const SignInHeader();
+  static const _syncIndicator = const SyncIndicator();
+
+  const HeaderWidget({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    Logger("Header").info("Building header widget");
+    const list = [
+      _syncIndicator,
+      _signInHeader,
+      _memoriesWidget,
+    ];
+    return Column(children: list);
   }
 }
 
