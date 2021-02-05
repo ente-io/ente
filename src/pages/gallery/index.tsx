@@ -117,6 +117,10 @@ export default function Gallery(props) {
     const [progress, setProgress] = useState(0)
 
     useEffect(() => {
+        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        if (!key) {
+            router.push('/');
+        }
         const main = async () => {
             setLoading(true);
             const data = await localFiles();
@@ -124,37 +128,31 @@ export default function Gallery(props) {
             setData(data);
             setCollections(collections);
             setLoading(false);
+            setProgress(80);
+            await loadData();
+            setProgress(100);
         };
         main();
         props.setUploadButtonView(true);
     }, []);
 
-    useEffect(() => {
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+    const loadData = async () => {
         const token = getToken();
-        if (!key || !token) {
-            router.push('/');
+        const encryptionKey = await getActualKey();
+        const updatedCollections = await fetchUpdatedCollections(token, encryptionKey);
+        const data = await fetchData(token, updatedCollections);
+        const collections = await getLocalCollections();
+        const collectionLatestFile = await getCollectionLatestFile(collections, token);
+        const favItemIds = await getFavItemIds(data);
+        if (updatedCollections.length > 0) {
+            setCollections(collections);
+            setData(data);
         }
-        const main = async () => {
-            setProgress(80);
-            const encryptionKey = await getActualKey();
-            const updatedCollections = await fetchUpdatedCollections(token, encryptionKey);
-            const data = await fetchData(token, updatedCollections);
-            const collections = await getLocalCollections();
-            const collectionLatestFile = await getCollectionLatestFile(collections, token);
-            const favItemIds = await getFavItemIds(data);
-            if (updatedCollections.length > 0) {
-                setCollections(collections);
-                setData(data);
-            }
-            setCollectionLatestFile(collectionLatestFile);
-            setFavItemIds(favItemIds);
-            setProgress(100);
-        };
-        main();
+        setCollectionLatestFile(collectionLatestFile);
+        setFavItemIds(favItemIds);
+       
         props.setUploadButtonView(true);
-    }, [reload]);
-
+    }
     if (!data || loading) {
         return (
             <div className='text-center'>
@@ -324,8 +322,8 @@ export default function Gallery(props) {
                 closeUploadModal={props.closeUploadModal}
                 showUploadModal={props.showUploadModal}
                 collectionLatestFile={collectionLatestFile}
-                refetchData={() => setReload(Math.random())}
-                
+                refetchData={loadData}
+
             />
             {filteredData.length ? (
                 <Container>
