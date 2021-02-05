@@ -108,21 +108,25 @@ export const fetchCollections = async (token: string, key: string) => {
     return collections;
 };
 
-export const getCollectionLatestFile = async (
+export const getCollectionLatestFile = (
     collections: collection[],
-    token
-): Promise<collectionLatestFile[]> => {
-    return Promise.all(
-        collections.map(async collection => {
-            const sinceTime: string = (Number(await localForage.getItem<string>(`${collection.id}-time`)) - 1).toString();
-            const files: file[] = await getFiles([collection], sinceTime, "1", token) || [];
+    files: file[]
+): collectionLatestFile[] => {
+    const latestFile = new Map<number, file>();
+    const collectionMap = new Map<number, collection>();
 
-            return {
-                file: files[0],
-                collection,
-            }
-        }))
-};
+    collections.forEach(collection => collectionMap.set(Number(collection.id), collection));
+    files.forEach(file => {
+        if (!latestFile.has(file.collectionID)) {
+            latestFile.set(file.collectionID, file)
+        }
+    });
+    let allCollectionLatestFile: collectionLatestFile[] = [];
+    for (const [collectionID, file] of latestFile) {
+        allCollectionLatestFile.push({ collection: collectionMap.get(collectionID), file });
+    }
+    return allCollectionLatestFile;
+}
 
 export const getFavItemIds = async (files: file[]): Promise<Set<number>> => {
 

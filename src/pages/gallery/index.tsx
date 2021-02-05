@@ -119,7 +119,7 @@ export default function Gallery(props) {
             const encryptionKey = await getActualKey();
             const collections = await fetchCollections(token, encryptionKey);
             const data = await fetchData(token, collections);
-            const collectionLatestFile = await getCollectionLatestFile(collections, token);
+            const collectionLatestFile = await getCollectionLatestFile(collections, data);
             const favItemIds = await getFavItemIds(data);
             setCollections(collections);
             setData(data);
@@ -296,7 +296,7 @@ export default function Gallery(props) {
                 showUploadModal={props.showUploadModal}
                 collectionLatestFile={collectionLatestFile}
                 refetchData={() => setReload(Math.random())}
-                
+
             />
             {filteredData.length ? (
                 <Container>
