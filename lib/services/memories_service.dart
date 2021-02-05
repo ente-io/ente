@@ -11,6 +11,7 @@ class MemoriesService extends ChangeNotifier {
   final _logger = Logger("MemoryService");
   final _memoriesDB = MemoriesDB.instance;
   final _filesDB = FilesDB.instance;
+  final _cachedMemories = List<Memory>();
   static final microSecondsInADay = 86400000000;
   static final daysInAYear = 365;
   static final yearsBefore = 30;
@@ -27,6 +28,9 @@ class MemoriesService extends ChangeNotifier {
   }
 
   Future<List<Memory>> getMemories() async {
+    if (_cachedMemories.isNotEmpty) {
+      return _cachedMemories;
+    }
     final filter = ImportantItemsFilter();
     final files = List<File>();
     final presentTime = DateTime.now();
@@ -62,6 +66,8 @@ class MemoriesService extends ChangeNotifier {
       }
     }
     _logger.info("Number of memories: " + memories.length.toString());
+    _cachedMemories.clear();
+    _cachedMemories.addAll(memories);
     return memories;
   }
 
