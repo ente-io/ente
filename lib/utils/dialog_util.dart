@@ -12,7 +12,7 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
   dialog.style(
     message: message,
     messageTextStyle: TextStyle(color: Colors.white),
-    backgroundColor: Colors.grey[850],
+    backgroundColor: Theme.of(context).cardColor,
     progressWidget: loadWidget,
     borderRadius: 4.0,
     elevation: 10.0,
