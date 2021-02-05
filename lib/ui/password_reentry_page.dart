@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/subscription_page.dart';
@@ -97,6 +99,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                               ),
                             );
                           } else {
+                            Bus.instance.fire(SubscriptionPurchasedEvent());
                             Navigator.of(context)
                                 .popUntil((route) => route.isFirst);
                           }
