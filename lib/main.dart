@@ -150,6 +150,9 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
           color: Color.fromRGBO(20, 20, 20, 1.0),
         ),
         cardColor: Color.fromRGBO(25, 25, 25, 1.0),
+        dialogTheme: DialogTheme().copyWith(
+          backgroundColor: Color.fromRGBO(20, 20, 20, 1.0),
+        ),
       ),
       home: HomeWidget(_title),
     );
