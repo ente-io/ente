@@ -74,10 +74,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
       }
     });
-    _selectedFiles.addListener(() {
-      _logger.info("Building because selected files updated");
-      setState(() {});
-    });
     _initDeepLinks();
     super.initState();
   }
@@ -86,16 +82,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget");
     return Scaffold(
-      appBar: _selectedFiles.files.isEmpty
-          ? PreferredSize(
-              preferredSize: Size.fromHeight(0),
-              child: Container(),
-            )
-          : GalleryAppBarWidget(
-              GalleryAppBarType.homepage,
-              widget.title,
-              _selectedFiles,
-            ),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(0),
+        child: Container(),
+      ),
       bottomNavigationBar: _buildBottomNavigationBar(),
       body: ExtentsPageView(
         children: [
@@ -178,6 +168,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             tagPrefix: "home_gallery",
             selectedFiles: _selectedFiles,
             headerWidget: header,
+            isHomePageGallery: true,
           );
         } else if (snapshot.hasError) {
           return Center(child: Text(snapshot.error.toString()));

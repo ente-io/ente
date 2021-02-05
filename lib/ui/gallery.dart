@@ -11,6 +11,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/draggable_scrollbar.dart';
+import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -24,6 +25,7 @@ class Gallery extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final String tagPrefix;
   final Widget headerWidget;
+  final bool isHomePageGallery;
 
   Gallery({
     this.syncLoader,
@@ -33,6 +35,7 @@ class Gallery extends StatefulWidget {
     this.headerWidget,
     @required this.selectedFiles,
     @required this.tagPrefix,
+    this.isHomePageGallery,
   });
 
   @override
@@ -145,17 +148,19 @@ class _GalleryState extends State<Gallery> {
     final itemCount =
         _collatedFiles.length + (widget.headerWidget == null ? 1 : 2);
     _hasDraggableScrollbar = itemCount > 25 || _files.length > 50;
+    var gallery;
     if (!_hasDraggableScrollbar) {
       _scrollController = ScrollController(initialScrollOffset: _scrollOffset);
-      return ListView.builder(
+      gallery = ListView.builder(
         itemCount: itemCount,
         itemBuilder: _buildListItem,
         controller: _scrollController,
         cacheExtent: 1500,
         addAutomaticKeepAlives: true,
       );
+      return gallery;
     }
-    return DraggableScrollbar.semicircle(
+    gallery = DraggableScrollbar.semicircle(
       key: _scrollKey,
       initialScrollIndex: _lastIndex,
       labelTextBuilder: (position) {
@@ -193,6 +198,21 @@ class _GalleryState extends State<Gallery> {
       ),
       itemCount: itemCount,
     );
+    if (widget.selectedFiles.files.isNotEmpty && widget.isHomePageGallery) {
+      return Stack(children: [
+        gallery,
+        Container(
+          height: 60,
+          child: GalleryAppBarWidget(
+            GalleryAppBarType.homepage,
+            null,
+            widget.selectedFiles,
+          ),
+        ),
+      ]);
+    } else {
+      return gallery;
+    }
   }
 
   Widget _buildListItem(BuildContext context, int index) {
