@@ -212,7 +212,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         },
         style: TabStyle.reactCircle,
         height: 52,
-        backgroundColor: Colors.grey[900],
+        backgroundColor: Theme.of(context).appBarTheme.color,
         top: -24,
       ),
     );
