@@ -7,9 +7,9 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/email_entry_page.dart';
+import 'package:photos/ui/expansion_card.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
-import 'package:expansion_card/expansion_card.dart';
 import 'package:photos/ui/subscription_page.dart';
 
 class SignInHeader extends StatefulWidget {
@@ -109,6 +109,7 @@ class _SignInHeaderState extends State<SignInHeader> {
             ),
             ExpansionCard(
               title: Text('protected'),
+              color: Theme.of(context).accentColor,
               margin: EdgeInsets.all(0),
               children: <Widget>[
                 Align(
@@ -124,6 +125,7 @@ class _SignInHeaderState extends State<SignInHeader> {
             ),
             ExpansionCard(
               title: Text('preserved'),
+              color: Theme.of(context).accentColor,
               margin: EdgeInsets.all(0),
               children: <Widget>[
                 Align(
@@ -139,6 +141,7 @@ class _SignInHeaderState extends State<SignInHeader> {
             ),
             ExpansionCard(
               title: Text('accessible'),
+              color: Theme.of(context).accentColor,
               margin: EdgeInsets.all(0),
               children: <Widget>[
                 Align(
