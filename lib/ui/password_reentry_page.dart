@@ -89,7 +89,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                           await dialog.hide();
                           if (!BillingService.instance
                               .hasActiveSubscription()) {
-                            Navigator.of(context).push(
+                            Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
                                 builder: (BuildContext context) {
                                   return SubscriptionPage();
