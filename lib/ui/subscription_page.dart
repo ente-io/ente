@@ -2,13 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:expansion_card/expansion_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/ui/expansion_card.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -296,20 +295,24 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       ]);
     } else {
-      widgets.addAll([
-        Align(
-          alignment: Alignment.topLeft,
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: Text(
-              "we offer a 14 day free trial, you can cancel anytime",
-              style: TextStyle(
-                color: Colors.white,
-                height: 1.2,
+      if (_currentSubscription == null) {
+        widgets.addAll([
+          Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Text(
+                "we offer a 14 day free trial, you can cancel anytime",
+                style: TextStyle(
+                  color: Colors.white,
+                  height: 1.2,
+                ),
               ),
             ),
           ),
-        ),
+        ]);
+      }
+      widgets.addAll([
         Expanded(child: Container()),
         Align(
           alignment: Alignment.center,
@@ -390,21 +393,7 @@ class _BillingQuestionsWidgetState extends State<BillingQuestionsWidget> {
             ),
           ));
           for (final faq in snapshot.data) {
-            faqs.add(ExpansionCard(
-              margin: EdgeInsets.only(bottom: 2),
-              title: Text(faq.q),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16),
-                  child: Text(
-                    faq.a,
-                    style: TextStyle(
-                      height: 1.5,
-                    ),
-                  ),
-                )
-              ],
-            ));
+            faqs.add(FaqWidget(faq: faq));
           }
           faqs.add(Padding(
             padding: EdgeInsets.all(16),
@@ -420,6 +409,34 @@ class _BillingQuestionsWidgetState extends State<BillingQuestionsWidget> {
           return loadWidget;
         }
       },
+    );
+  }
+}
+
+class FaqWidget extends StatelessWidget {
+  const FaqWidget({
+    Key key,
+    @required this.faq,
+  }) : super(key: key);
+
+  final faq;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionCard(
+      title: Text(faq.q),
+      color: Theme.of(context).accentColor,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          child: Text(
+            faq.a,
+            style: TextStyle(
+              height: 1.5,
+            ),
+          ),
+        )
+      ],
     );
   }
 }
