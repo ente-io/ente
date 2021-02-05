@@ -65,6 +65,7 @@ class _GalleryState extends State<Gallery> {
     _requiresLoad = true;
     if (widget.reloadEvent != null) {
       widget.reloadEvent.listen((event) {
+        _logger.info("Building gallery because reload event fired updated");
         if (mounted) {
           setState(() {
             _requiresLoad = true;
@@ -73,11 +74,15 @@ class _GalleryState extends State<Gallery> {
       });
     }
     widget.selectedFiles.addListener(() {
-      setState(() {
-        if (!_hasDraggableScrollbar) {
-          _saveScrollPosition();
-        }
-      });
+      if (widget.tagPrefix != "home_gallery") {
+        _logger.info("Building gallery because selected files updated");
+        setState(() {
+          _requiresLoad = false;
+          if (!_hasDraggableScrollbar) {
+            _saveScrollPosition();
+          }
+        });
+      }
     });
     if (widget.asyncLoader == null || widget.shouldLoadAll) {
       _hasLoadedAll = true;
