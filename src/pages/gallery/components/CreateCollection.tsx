@@ -16,11 +16,11 @@ export default function CreateCollection(props) {
         if (acceptedFiles == null)
             return;
         let commonPathPrefix: string = (() => {
-            const A: string[] = acceptedFiles.map(files => files.path);
-
-            let a1 = A[0], a2 = A[A.length - 1], L = a1.length, i = 0;
-            while (i < L && a1.charAt(i) === a2.charAt(i)) i++;
-            return a1.substring(0, i);
+            const paths: string[] = acceptedFiles.map(files => files.path);
+            paths.sort();
+            let firstPath = paths[0], lastPath = paths[paths.length - 1], L = firstPath.length, i = 0;
+            while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
+            return firstPath.substring(0, i);
         })();
         if (commonPathPrefix)
             commonPathPrefix = commonPathPrefix.substr(1, commonPathPrefix.lastIndexOf('/') - 1);
