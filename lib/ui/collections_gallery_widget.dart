@@ -281,7 +281,6 @@ class SectionTitle extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).primaryColorLight,
                 fontSize: 20,
-                fontFamily: 'Montserrat',
                 letterSpacing: 1,
               ),
             ),
