@@ -138,13 +138,18 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
         fontFamily: 'Ubuntu',
         brightness: Brightness.dark,
         hintColor: Colors.grey,
-        accentColor: Colors.blue[400],
-        buttonColor: Color(0xFF2954a3),
+        accentColor: Color.fromRGBO(45, 194, 98, 1.0),
+        buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
         buttonTheme: ButtonThemeData().copyWith(
-          buttonColor: Color(0xFF2954a3),
+          buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
         ),
-        toggleableActiveColor: Colors.blue[400],
+        toggleableActiveColor: Colors.green[400],
         scaffoldBackgroundColor: Colors.black,
+        backgroundColor: Colors.black,
+        appBarTheme: AppBarTheme().copyWith(
+          color: Color.fromRGBO(20, 20, 20, 1.0),
+        ),
+        cardColor: Color.fromRGBO(25, 25, 25, 1.0),
       ),
       home: HomeWidget(_title),
     );
