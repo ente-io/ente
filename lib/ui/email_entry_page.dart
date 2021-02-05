@@ -169,7 +169,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: button(
                 "sign up",
-                onPressed: _email != null && _name != null
+                onPressed: _email != null &&
+                        _email.isNotEmpty &&
+                        _name != null &&
+                        _name.isNotEmpty
                     ? () {
                         if (!isValidEmail(_email)) {
                           showErrorDialog(context, "invalid email address",
@@ -245,6 +248,7 @@ class PricingWidget extends StatelessWidget {
     }
     return Container(
       height: 280,
+      color: Color.fromRGBO(20, 20, 20, 1.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
@@ -297,32 +301,37 @@ class BillingPlanWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Container(
-        width: 100,
-        padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
-        child: Column(
-          children: [
-            Text(
-              convertBytesToGBs(plan.storage, precision: 0).toString() + " GB",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        color: Colors.grey[850],
+        child: Container(
+          width: 100,
+          padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+          child: Column(
+            children: [
+              Text(
+                convertBytesToGBs(plan.storage, precision: 0).toString() +
+                    " GB",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(4),
-            ),
-            Text(
-              plan.price + " / " + plan.period,
-              style: TextStyle(
-                fontSize: 12,
+              Padding(
+                padding: EdgeInsets.all(4),
               ),
-            ),
-          ],
+              Text(
+                plan.price + " / " + plan.period,
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
