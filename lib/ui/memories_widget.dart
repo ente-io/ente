@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -14,16 +15,21 @@ import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 class MemoriesWidget extends StatefulWidget {
+  const MemoriesWidget({Key key}) : super(key: key);
   @override
   _MemoriesWidgetState createState() => _MemoriesWidgetState();
 }
 
 class _MemoriesWidgetState extends State<MemoriesWidget>
     with AutomaticKeepAliveClientMixin {
+  final _logger = Logger("MemoriesWidget");
+
   @override
   void initState() {
     MemoriesService.instance.addListener(() {
-      setState(() {});
+      setState(() {
+        _logger.info("Building because memories listener fired");
+      });
     });
     super.initState();
   }
@@ -33,6 +39,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget>
 
   @override
   Widget build(BuildContext context) {
+    _logger.info("Building memories");
     super.build(context);
     return FutureBuilder<List<Memory>>(
       future: MemoriesService.instance.getMemories(),
