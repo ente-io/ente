@@ -117,13 +117,11 @@ export const fetchUpdatedCollections = async (token: string, key: string) => {
             latestCollectionsInstances.set(collection.id, collection);
         }
     });
-    let collections = [], updationTime = 0;
+    let collections = [];
     for (const [_, collection] of latestCollectionsInstances) {
         collections.push(collection);
-        updationTime = Math.max(updationTime, collection.updationTime);
     }
     await localForage.setItem('fav-collection', favCollection);
-    await localForage.setItem('collection-update-time', updationTime);
     await localForage.setItem('collections', collections);
     return updatedCollections;
 };

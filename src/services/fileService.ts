@@ -103,6 +103,11 @@ export const fetchFiles = async (
     for (let [collectionID, updationTime] of collectionUpdationTime) {
         await localForage.setItem(`${collectionID}-time`, updationTime);
     }
+    let updationTime = await localForage.getItem('collection-update-time') as number;
+    for (let collection of collections) {
+        updationTime = Math.max(updationTime, collection.updationTime);
+    }
+    await localForage.setItem('collection-update-time', updationTime);
     return files;
 };
 
