@@ -74,15 +74,13 @@ class _GalleryState extends State<Gallery> {
       });
     }
     widget.selectedFiles.addListener(() {
-      if (widget.tagPrefix != "home_gallery") {
-        _logger.info("Building gallery because selected files updated");
-        setState(() {
-          _requiresLoad = false;
-          if (!_hasDraggableScrollbar) {
-            _saveScrollPosition();
-          }
-        });
-      }
+      _logger.info("Building gallery because selected files updated");
+      setState(() {
+        _requiresLoad = false;
+        if (!_hasDraggableScrollbar) {
+          _saveScrollPosition();
+        }
+      });
     });
     if (widget.asyncLoader == null || widget.shouldLoadAll) {
       _hasLoadedAll = true;
@@ -311,7 +309,10 @@ class _GalleryState extends State<Gallery> {
         margin: const EdgeInsets.all(2.0),
         decoration: BoxDecoration(
           border: widget.selectedFiles.files.contains(file)
-              ? Border.all(width: 4.0, color: Colors.blue)
+              ? Border.all(
+                  width: 4.0,
+                  color: Theme.of(context).accentColor,
+                )
               : null,
         ),
         child: Hero(
