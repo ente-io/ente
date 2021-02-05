@@ -105,6 +105,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
   Widget _getErrorWidget() {
     if (_event.error is NoActiveSubscriptionError) {
       return Container(
+        margin: EdgeInsets.only(top: 8),
         child: Column(
           children: [
             Row(
@@ -140,6 +141,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       );
     } else if (_event.error is StorageLimitExceededError) {
       return Container(
+        margin: EdgeInsets.only(top: 8),
         child: Column(
           children: [
             Row(
@@ -151,7 +153,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                   color: Theme.of(context).accentColor,
                 ),
                 Padding(padding: EdgeInsets.all(4)),
-                Text("storage quota exceeded, backups paused"),
+                Text("storage quota exceeded"),
               ],
             ),
             Padding(padding: EdgeInsets.all(6)),
