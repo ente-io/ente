@@ -129,20 +129,20 @@ export default function Gallery(props) {
             setCollections(collections);
             setLoading(false);
             setProgress(80);
-            await loadData();
+            await syncWithRemote();
             setProgress(100);
         };
         main();
         props.setUploadButtonView(true);
     }, []);
 
-    const loadData = async () => {
+    const syncWithRemote = async () => {
         const token = getToken();
         const encryptionKey = await getActualKey();
         const updatedCollections = await fetchUpdatedCollections(token, encryptionKey);
         const data = await fetchData(token, updatedCollections);
         const collections = await getLocalCollections();
-        const collectionLatestFile = await getCollectionLatestFile(collections, token);
+        const collectionLatestFile = await getCollectionLatestFile(collections, data);
         const favItemIds = await getFavItemIds(data);
         if (updatedCollections.length > 0) {
             setCollections(collections);
@@ -150,7 +150,7 @@ export default function Gallery(props) {
         }
         setCollectionLatestFile(collectionLatestFile);
         setFavItemIds(favItemIds);
-       
+
         props.setUploadButtonView(true);
     }
     if (!data || loading) {
@@ -206,7 +206,7 @@ export default function Gallery(props) {
 
     const handleClose = () => {
         setOpen(false);
-        // setReload(Math.random());
+        // syncWithRemote();
     };
 
     const onThumbnailClick = (index: number) => () => {
@@ -322,7 +322,7 @@ export default function Gallery(props) {
                 closeUploadModal={props.closeUploadModal}
                 showUploadModal={props.showUploadModal}
                 collectionLatestFile={collectionLatestFile}
-                refetchData={loadData}
+                refetchData={syncWithRemote}
 
             />
             {filteredData.length ? (
