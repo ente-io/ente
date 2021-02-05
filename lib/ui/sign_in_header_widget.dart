@@ -168,6 +168,7 @@ class _SignInHeaderState extends State<SignInHeader> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
+                    letterSpacing: 1.0,
                   ),
                   textAlign: TextAlign.center,
                 ),
