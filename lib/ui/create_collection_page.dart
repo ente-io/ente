@@ -45,8 +45,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
           children: [
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.only(
+                    top: 16, bottom: 12, left: 24, right: 24),
                 child: OutlineButton(
+                  padding: EdgeInsets.all(20),
                   child: Text(
                     "create a new album",
                     style: Theme.of(context).textTheme.bodyText1,
@@ -60,11 +62,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
           ],
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
+          padding: const EdgeInsets.fromLTRB(24, 12, 8, 16),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              "add to an existing collection",
+              "add to an existing album",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).primaryColorLight,
@@ -102,7 +104,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   Widget _buildCollectionItem(CollectionWithThumbnail item) {
     return Container(
-      padding: EdgeInsets.all(8),
+      padding: EdgeInsets.only(left: 24, bottom: 16),
       child: GestureDetector(
         child: Row(
           children: <Widget>[
