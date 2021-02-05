@@ -191,9 +191,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             Align(
               alignment: Alignment.center,
               child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () {
                   showModalBottomSheet<void>(
                       context: context,
+                      backgroundColor: Theme.of(context).cardColor,
                       builder: (BuildContext context) {
                         return PricingWidget();
                       });
@@ -234,9 +236,8 @@ class PricingWidget extends StatelessWidget {
           return _buildPlans(context, snapshot.data);
         } else if (snapshot.hasError) {
           return Text("Oops, something went wrong.");
-        } else {
-          return loadWidget;
         }
+        return loadWidget;
       },
     );
   }
@@ -248,7 +249,7 @@ class PricingWidget extends StatelessWidget {
     }
     return Container(
       height: 280,
-      color: Color.fromRGBO(20, 20, 20, 1.0),
+      color: Theme.of(context).cardColor,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
@@ -302,15 +303,14 @@ class BillingPlanWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(2.0),
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
         color: Colors.grey[850],
         child: Container(
-          width: 100,
-          padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+          padding: EdgeInsets.fromLTRB(12, 20, 12, 20),
           child: Column(
             children: [
               Text(
@@ -328,6 +328,7 @@ class BillingPlanWidget extends StatelessWidget {
                 plan.price + " / " + plan.period,
                 style: TextStyle(
                   fontSize: 12,
+                  color: Colors.white70,
                 ),
               ),
             ],
