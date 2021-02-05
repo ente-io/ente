@@ -32,7 +32,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("create album"),
+        title: Text("add memories"),
       ),
       body: _getBody(context),
     );
@@ -47,10 +47,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
               child: Padding(
                 padding: const EdgeInsets.only(
                     top: 16, bottom: 12, left: 24, right: 24),
-                child: OutlineButton(
+                child: OutlineButton.icon(
                   padding: EdgeInsets.all(20),
-                  child: Text(
-                    "create a new album",
+                  icon: Icon(Icons.create_new_folder_outlined),
+                  label: Text(
+                    "to a new album",
                     style: Theme.of(context).textTheme.bodyText1,
                   ),
                   onPressed: () {
@@ -66,7 +67,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              "add to an existing album",
+              "to an existing album",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).primaryColorLight,
