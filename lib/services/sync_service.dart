@@ -85,7 +85,8 @@ class SyncService {
       _logger.info("Syncing...");
       try {
         await _doSync(isAppInBackground: isAppInBackground);
-        if (_lastSyncStatusEvent != null) {
+        if (_lastSyncStatusEvent != null &&
+            _lastSyncStatusEvent.status != SyncStatus.applying_local_diff) {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
         }
       } on WiFiUnavailableError {
