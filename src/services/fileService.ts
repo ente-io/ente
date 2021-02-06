@@ -78,7 +78,11 @@ export const fetchFiles = async (
     let files = await localFiles();
     const collectionUpdationTime = new Map<string, string>();
     let fetchedFiles = [];
+    let deletedCollection = new Set<string>();
     for (let collection of collections) {
+        if (collection.isDeleted) {
+            deletedCollection.add(collection.id);
+        }
         const files = await getFiles(collection, null, 100, token);
         fetchedFiles.push(...files);
         collectionUpdationTime.set(collection.id, files.length > 0 ? files.slice(-1)[0].updationTime.toString() : "0");
@@ -93,8 +97,9 @@ export const fetchFiles = async (
     });
     files = [];
     for (const [_, file] of latestFiles) {
-        if (!file.isDeleted)
+        if (!(file.isDeleted || deletedCollection.has(file.collectionID.toString()))) {
             files.push(file);
+        }
     }
     files = files.sort(
         (a, b) => b.metadata.creationTime - a.metadata.creationTime
