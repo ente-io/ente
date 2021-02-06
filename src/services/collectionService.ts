@@ -119,7 +119,8 @@ export const fetchUpdatedCollections = async (token: string, key: string) => {
     });
     let collections = [];
     for (const [_, collection] of latestCollectionsInstances) {
-        collections.push(collection);
+        if (!collection.isDeleted)
+            collections.push(collection);
     }
     await localForage.setItem('fav-collection', favCollection);
     await localForage.setItem('collections', collections);
