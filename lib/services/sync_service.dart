@@ -105,8 +105,12 @@ class SyncService {
             error: StorageLimitExceededError()));
       } catch (e, s) {
         _logger.severe(e, s);
-        Bus.instance
-            .fire(SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
+        if (e is InvalidFileError) {
+          // Do n0thing, encountered a corrupt file
+        } else {
+          Bus.instance.fire(
+              SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
+        }
       } finally {
         _isSyncInProgress = false;
       }

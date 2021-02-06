@@ -196,6 +196,7 @@ class FileUploader {
       ));
       if (thumbnailData == null) {
         _logger.severe("Could not generate thumbnail for " + file.toString());
+        await FilesDB.instance.deleteLocalFile(file.localID);
         throw InvalidFileError();
       }
       final thumbnailSize = thumbnailData.length;
