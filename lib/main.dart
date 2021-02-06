@@ -56,6 +56,7 @@ Future _init() async {
   await SyncService.instance.init();
   await MemoriesService.instance.init();
   _isInitialized = true;
+  _logger.info("Initialization done");
 }
 
 Future<void> _sync({bool isAppInBackground = false}) async {

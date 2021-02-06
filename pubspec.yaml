@@ -79,12 +79,20 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: "0.8.0"
+  flutter_native_splash: ^0.2.9
 
 flutter_icons:
   android: true
   image_path_android: "assets/android_icon.png"
   ios: true
   image_path_ios: "assets/ios_icon.png"
+
+flutter_native_splash:
+  color: "#000000"
+  image: assets/ios_icon.png
+  android_gravity: center
+  ios_content_mode: center
+  android_fullscreen: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
