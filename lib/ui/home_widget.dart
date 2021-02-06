@@ -87,7 +87,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         preferredSize: Size.fromHeight(0),
         child: Container(),
       ),
-      // bottomNavigationBar: _buildBottomNavigationBar(),
       body: Stack(
         children: [
           ExtentsPageView(
@@ -192,21 +191,19 @@ class _HomeWidgetState extends State<HomeWidget> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.90),
-        // boxShadow: [
-        //   BoxShadow(blurRadius: 20, color: Colors.green.withOpacity(.1)),
-        // ],
       ),
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
           child: GNav(
-              rippleColor: Colors.green[300],
-              hoverColor: Colors.grey[100],
+              rippleColor: Theme.of(context).buttonColor.withOpacity(0.20),
+              hoverColor: Theme.of(context).buttonColor.withOpacity(0.20),
               gap: 8,
               activeColor: Theme.of(context).buttonColor.withOpacity(0.75),
               iconSize: 24,
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               duration: Duration(milliseconds: 400),
+              tabMargin: EdgeInsets.only(left: 8, right: 8),
               tabBackgroundColor:
                   Theme.of(context).appBarTheme.color.withOpacity(0.7),
               haptic: false,
