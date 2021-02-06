@@ -12,7 +12,7 @@ class SettingsButton extends StatelessWidget {
       child: IconButton(
         icon: Icon(
           Icons.settings,
-          color: Colors.white60,
+          color: Colors.white.withOpacity(0.4),
         ),
         padding: EdgeInsets.fromLTRB(16, 4, 16, 18),
         onPressed: () async {
