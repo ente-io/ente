@@ -79,8 +79,9 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      width: 20,
-                      height: 20,
+                      padding: EdgeInsets.all(2),
+                      width: 22,
+                      height: 22,
                       child: icon,
                     ),
                     Padding(
