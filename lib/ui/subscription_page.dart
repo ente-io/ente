@@ -541,11 +541,12 @@ class SubscriptionPlanWidget extends StatelessWidget {
                 ),
               ),
               Text(plan.price + " per " + plan.period),
+              Expanded(child: Container()),
               isActive
                   ? Expanded(
                       child: Icon(
                         Icons.check_circle,
-                        color: Colors.cyan[700],
+                        color: Theme.of(context).accentColor,
                       ),
                     )
                   : Container(),
