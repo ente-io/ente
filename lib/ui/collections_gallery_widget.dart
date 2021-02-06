@@ -279,7 +279,7 @@ class SectionTitle extends StatelessWidget {
               title,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColorLight,
+                color: Theme.of(context).buttonColor.withOpacity(0.8),
                 fontSize: 20,
                 letterSpacing: 1,
               ),
