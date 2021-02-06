@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -17,7 +17,6 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
-import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
@@ -48,8 +47,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   static const _headerWidget = HeaderWidget();
   final PageController _pageController = PageController();
   final _future = FileRepository.instance.loadFiles();
+  int _selectedTabIndex = 0;
 
-  GlobalKey<ConvexAppBarState> _appBarKey = GlobalKey<ConvexAppBarState>();
   StreamSubscription<LocalPhotosUpdatedEvent> _photosUpdatedEvent;
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
 
@@ -64,7 +63,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source != TabChangedEventSource.tab_bar) {
-        _appBarKey.currentState.animateTo(event.selectedIndex);
+        setState(() {
+          _selectedTabIndex = event.selectedIndex;
+        });
       }
       if (event.source != TabChangedEventSource.page_view) {
         _pageController.animateToPage(
@@ -86,22 +87,30 @@ class _HomeWidgetState extends State<HomeWidget> {
         preferredSize: Size.fromHeight(0),
         child: Container(),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-      body: ExtentsPageView(
+      // bottomNavigationBar: _buildBottomNavigationBar(),
+      body: Stack(
         children: [
-          SyncService.instance.hasScannedDisk()
-              ? _getMainGalleryWidget()
-              : LoadingPhotosWidget(),
-          _deviceFolderGalleryWidget,
-          _sharedCollectionGallery,
+          ExtentsPageView(
+            children: [
+              SyncService.instance.hasScannedDisk()
+                  ? _getMainGalleryWidget()
+                  : LoadingPhotosWidget(),
+              _deviceFolderGalleryWidget,
+              _sharedCollectionGallery,
+            ],
+            onPageChanged: (page) {
+              Bus.instance.fire(TabChangedEvent(
+                page,
+                TabChangedEventSource.page_view,
+              ));
+            },
+            controller: _pageController,
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: _buildBottomNavigationBar(),
+          ),
         ],
-        onPageChanged: (page) {
-          Bus.instance.fire(TabChangedEvent(
-            page,
-            TabChangedEventSource.page_view,
-          ));
-        },
-        controller: _pageController,
       ),
     );
   }
@@ -180,34 +189,51 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _buildBottomNavigationBar() {
-    return StyleProvider(
-      style: BottomNavBarStyle(),
-      child: ConvexAppBar(
-        key: _appBarKey,
-        items: [
-          TabItem(
-            icon: Icons.photo_library,
-            title: "photos",
-          ),
-          TabItem(
-            icon: Icons.folder_special,
-            title: "collections",
-          ),
-          TabItem(
-            icon: Icons.folder_shared,
-            title: "shared",
-          ),
-        ],
-        onTap: (index) {
-          Bus.instance.fire(TabChangedEvent(
-            index,
-            TabChangedEventSource.tab_bar,
-          ));
-        },
-        style: TabStyle.reactCircle,
-        height: 52,
-        backgroundColor: Theme.of(context).appBarTheme.color,
-        top: -24,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.90),
+        // boxShadow: [
+        //   BoxShadow(blurRadius: 20, color: Colors.green.withOpacity(.1)),
+        // ],
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+          child: GNav(
+              rippleColor: Colors.green[300],
+              hoverColor: Colors.grey[100],
+              gap: 8,
+              activeColor: Theme.of(context).buttonColor.withOpacity(0.75),
+              iconSize: 24,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              duration: Duration(milliseconds: 400),
+              tabBackgroundColor:
+                  Theme.of(context).appBarTheme.color.withOpacity(0.7),
+              haptic: false,
+              tabs: [
+                GButton(
+                  icon: Icons.photo_library_outlined,
+                  text: 'photos',
+                ),
+                GButton(
+                  icon: Icons.folder_special_outlined,
+                  text: 'albums',
+                ),
+                GButton(
+                  icon: Icons.folder_shared_outlined,
+                  text: 'shared',
+                ),
+              ],
+              selectedIndex: _selectedTabIndex,
+              onTabChange: (index) {
+                setState(() {
+                  Bus.instance.fire(TabChangedEvent(
+                    index,
+                    TabChangedEventSource.tab_bar,
+                  ));
+                });
+              }),
+        ),
       ),
     );
   }
@@ -250,24 +276,5 @@ class HeaderWidget extends StatelessWidget {
       _memoriesWidget,
     ];
     return Column(children: list);
-  }
-}
-
-class BottomNavBarStyle extends StyleHook {
-  @override
-  double get activeIconSize => 32;
-
-  @override
-  double get activeIconMargin => 6;
-
-  @override
-  double get iconSize => 20;
-
-  @override
-  TextStyle textStyle(Color color) {
-    return TextStyle(
-      color: color,
-      fontSize: 12,
-    );
   }
 }

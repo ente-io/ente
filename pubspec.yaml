@@ -61,7 +61,6 @@ dependencies:
   flutter_sodium: ^0.1.8
   pedantic: ^1.9.2
   page_transition: "^1.1.7+2"
-  convex_bottom_bar: ^2.6.0
   scrollable_positioned_list: ^0.1.8
   connectivity: ^2.0.1
   pretty_dio_logger: ^1.1.1
@@ -74,6 +73,7 @@ dependencies:
   flutter_inappwebview: ^4.0.0+4
   background_fetch: ^0.5.1
   flutter_inapp_purchase: ^3.0.1
+  google_nav_bar: ^4.0.2
 
 dev_dependencies:
   flutter_test:
