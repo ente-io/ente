@@ -4,4 +4,4 @@ const int THUMBNAIL_LARGE_SIZE = 512;
 const int COMPRESSED_THUMBNAIL_RESOLUTION = 1080;
 const int THUMBNAIL_DATA_LIMIT = 100 * 1024;
 const String SENTRY_DSN =
-    "http://96780dc0b00f4c69a16c02e90d379996@3.211.17.56/2";
+    "https://1e4a7745cb3848f1a304002f990dd801@errors.ente.io/2";
