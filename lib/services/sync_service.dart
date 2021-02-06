@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -12,6 +13,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -203,12 +205,17 @@ class SyncService {
     if (!Configuration.instance.hasConfiguredAccount()) {
       return Future.error("Account not configured yet");
     }
-    final updatedCollections = await _collectionsService.sync();
+    await _collectionsService.sync();
+    final updatedCollections =
+        await _collectionsService.getCollectionsToBeSynced();
+
     if (updatedCollections.isNotEmpty && !silently) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applying_remote_diff));
     }
-    for (final collection in updatedCollections) {
-      await _fetchEncryptedFilesDiff(collection.id);
+    for (final c in updatedCollections) {
+      await _syncCollectionDiff(c.id);
+      _collectionsService.setCollectionSyncTime(c.id,
+          max(c.updationTime, _collectionsService.getCollectionSyncTime(c.id)));
     }
     await deleteFilesOnServer();
     bool hasUploadedFiles = await _uploadDiff();
@@ -217,7 +224,7 @@ class SyncService {
     }
   }
 
-  Future<void> _fetchEncryptedFilesDiff(int collectionID) async {
+  Future<void> _syncCollectionDiff(int collectionID) async {
     final diff = await _downloader.getEncryptedFilesDiff(
       collectionID,
       _collectionsService.getCollectionSyncTime(collectionID),
@@ -232,7 +239,7 @@ class SyncService {
       FileRepository.instance.reloadFiles();
       Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
       if (diff.fetchCount == _diffLimit) {
-        return await _fetchEncryptedFilesDiff(collectionID);
+        return await _syncCollectionDiff(collectionID);
       }
     }
   }

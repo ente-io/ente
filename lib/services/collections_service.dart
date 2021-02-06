@@ -56,6 +56,7 @@ class CollectionsService {
     _logger.info("Syncing");
     final lastCollectionUpdationTime =
         await _db.getLastCollectionUpdationTime();
+    // Might not have synced the collection fully
     final fetchedCollections =
         await _fetchCollections(lastCollectionUpdationTime ?? 0);
     final updatedCollections = List<Collection>();
@@ -77,6 +78,17 @@ class CollectionsService {
     if (fetchedCollections.isNotEmpty) {
       _logger.info("Collections updated");
       Bus.instance.fire(CollectionUpdatedEvent());
+    }
+    return collections;
+  }
+
+  Future<List<Collection>> getCollectionsToBeSynced() async {
+    final collections = await _db.getAllCollections();
+    final updatedCollections = List<Collection>();
+    for (final c in collections) {
+      if (c.updationTime > getCollectionSyncTime(c.id)) {
+        updatedCollections.add(c);
+      }
     }
     return updatedCollections;
   }
