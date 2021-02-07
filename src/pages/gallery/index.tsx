@@ -7,19 +7,27 @@ import {
     getFile,
     getPreview,
     fetchData,
+    localFiles,
 } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
-import { getActualKey } from 'utils/common/key';
+import { getActualKey, getToken } from 'utils/common/key';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { Options } from 'photoswipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
+import LoadingBar from 'react-top-loading-bar'
 import Collections from './components/Collections';
-import SadFace from 'components/SadFace';
 import Upload from './components/Upload';
-import { collection, fetchCollections, collectionLatestFile, getCollectionLatestFile, getFavItemIds } from 'services/collectionService';
+import {
+    collection,
+    fetchUpdatedCollections,
+    collectionLatestFile,
+    getCollectionLatestFile,
+    getFavItemIds,
+    getLocalCollections
+} from 'services/collectionService';
 import constants from 'utils/strings/constants';
 
 enum ITEM_TYPE {
@@ -106,7 +114,7 @@ export default function Gallery(props) {
     });
     const fetching: { [k: number]: boolean } = {};
 
-
+    const [progress, setProgress] = useState(0)
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -115,24 +123,35 @@ export default function Gallery(props) {
         }
         const main = async () => {
             setLoading(true);
-            await syncWithRemote();
+            const data = await localFiles();
+            const collections = await getLocalCollections();
+            setData(data);
+            setCollections(collections);
             setLoading(false);
+            setProgress(80);
+            await syncWithRemote();
+            setProgress(100);
         };
         main();
         props.setUploadButtonView(true);
     }, []);
 
     const syncWithRemote = async () => {
-        const token = getData(LS_KEYS.USER).token;
+        const token = getToken();
         const encryptionKey = await getActualKey();
-        const collections = await fetchCollections(token, encryptionKey);
-        const data = await fetchData(token, collections);
+        const updatedCollections = await fetchUpdatedCollections(token, encryptionKey);
+        const data = await fetchData(token, updatedCollections);
+        const collections = await getLocalCollections();
         const collectionLatestFile = await getCollectionLatestFile(collections, data);
         const favItemIds = await getFavItemIds(data);
-        setCollections(collections);
-        setData(data);
+        if (updatedCollections.length > 0) {
+            setCollections(collections);
+            setData(data);
+        }
         setCollectionLatestFile(collectionLatestFile);
         setFavItemIds(favItemIds);
+
+        props.setUploadButtonView(true);
     }
     if (!data || loading) {
         return (
@@ -288,6 +307,11 @@ export default function Gallery(props) {
 
     return (
         <>
+            <LoadingBar
+                color='#f11946'
+                progress={progress}
+                onLoaderFinished={() => setProgress(0)}
+            />
             <Collections
                 collections={collections}
                 selected={router.query.collection?.toString()}
