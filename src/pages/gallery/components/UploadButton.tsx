@@ -1,5 +1,4 @@
-import CollectionSelector from 'pages/gallery/components/CollectionSelector';
-import React, { useRef } from 'react';
+import React from 'react';
 import { Button } from 'react-bootstrap';
 
 function UploadButton({ showModal }) {

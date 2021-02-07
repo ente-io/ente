@@ -41,7 +41,17 @@ const englishConstants = {
     PASSPHRASE_CONFIRM: 'Please repeat it once more',
     PASSPHRASE_MATCH_ERROR: `Passphrase didn't match`,
     CONSOLE_WARNING_STOP: 'STOP!',
-    CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. If someone told you to copy-paste something here to enable a feature or "hack" someone's account, it is a scam and will give them access to your account.`
+    CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. If someone told you to copy-paste something here to enable a feature or "hack" someone's account, it is a scam and will give them access to your account.`,
+    SELECT_COLLECTION: `Select/Click on Collection to upload`,
+    CLOSE: 'Close',
+    NOTHING_HERE: `nothing to see here! 👀`,
+    UPLOAD: {
+        0: "Preparing to upload",
+        1: "Encryting your files",
+        2: "Uploading your Files",
+        3: "Files Uploaded Successfully !!!"
+    },
+    OF: 'of'
 };
 
 export default englishConstants;

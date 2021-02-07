@@ -7,7 +7,8 @@ import PlayCircleOutline from 'components/PlayCircleOutline';
 interface IProps {
     data: file,
     updateUrl: (url: string) => void,
-    onClick: () => void,
+    onClick?: () => void,
+    forcedEnable?: boolean,
 }
 
 const Cont = styled.div<{ disabled: boolean }>`
@@ -41,7 +42,7 @@ const Cont = styled.div<{ disabled: boolean }>`
 
 export default function PreviewCard(props: IProps) {
     const [imgSrc, setImgSrc] = useState<string>();
-    const { data, onClick, updateUrl } = props;
+    const { data, onClick, updateUrl, forcedEnable } = props;
 
     useEffect(() => {
         if (data && !data.msrc) {
@@ -57,12 +58,12 @@ export default function PreviewCard(props: IProps) {
     }, [data]);
 
     const handleClick = () => {
-        if (data.msrc || imgSrc) {
-            onClick();
+        if (data?.msrc || imgSrc) {
+            onClick?.();
         }
     }
 
-    return <Cont onClick={handleClick} disabled={!data?.msrc && !imgSrc}>
+    return <Cont onClick={handleClick} disabled={!forcedEnable && !data?.msrc && !imgSrc}>
         <img src={data?.msrc || imgSrc} />
         {data?.metadata.fileType === 1 && <PlayCircleOutline />}
     </Cont>;

@@ -1,47 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Modal } from 'react-bootstrap';
-import { getActualKey } from 'utils/common/key';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import CollectionDropZone from './CollectionDropZone';
+import AddCollection from './AddCollection';
 import PreviewCard from './PreviewCard';
+import constants from 'utils/strings/constants';
 
-function CollectionSelector({
-    uploadModalView,
-    closeUploadModal,
-    showUploadModal,
-    collectionLatestFile,
-    setProgressView,
-    setData,
-    progressBarProps,
-}) {
+function CollectionSelector(props) {
+    const {
+        uploadModalView,
+        closeUploadModal,
+        showUploadModal,
+        collectionLatestFile,
+        ...rest
+    } = props;
 
-    const [token, setToken] = useState(null);
-    const [encryptionKey, setEncryptionKey] = useState(null);
-    useEffect(() => {
-        (async () => {
-            setToken(getData(LS_KEYS.USER)?.token);
-            setEncryptionKey(await getActualKey());
-        })();
-    });
+
     const CollectionIcons = collectionLatestFile?.map((item) => (
-        <CollectionDropZone key={item.collectionID}
+        <CollectionDropZone key={item.collection.id}
+            {...rest}
             closeModal={closeUploadModal}
             showModal={showUploadModal}
             collectionLatestFile={item}
-            noDragEventsBubbling
-            setProgressView={setProgressView}
-            token={token}
-            encryptionKey={encryptionKey}
-            setData={setData}
-            progressBarProps={progressBarProps}
         >
             <Card>
-                <PreviewCard data={item.file} updateUrl={() => { }} onClick={() => { }} />
-                <Card.Text style={{ textAlign: 'center' }}>{item.collection.name}</Card.Text>
+                <PreviewCard data={item.file} updateUrl={() => { }} forcedEnable />
+                <Card.Text className="text-center">{item.collection.name}</Card.Text>
             </Card>
 
         </CollectionDropZone>
     ));
+
     return (
         <Modal
             show={uploadModalView}
@@ -50,15 +38,17 @@ function CollectionSelector({
         >
             <Modal.Header closeButton>
                 <Modal.Title >
-                    Select/Click on Collection to upload
-                    </Modal.Title>
+                    {constants.SELECT_COLLECTION}
+                </Modal.Title>
             </Modal.Header>
-            <Modal.Body style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap" }}>
+            <Modal.Body style={{ display: "flex", justifyContent: "flex-start", flexWrap: "wrap" }}>
+                <AddCollection
+                    {...rest}
+                    showUploadModal={showUploadModal}
+                    closeUploadModal={closeUploadModal}
+                />
                 {CollectionIcons}
             </Modal.Body>
-            <Modal.Footer>
-                <Button onClick={closeUploadModal}>Close</Button>
-            </Modal.Footer>
         </Modal>
     );
 }
