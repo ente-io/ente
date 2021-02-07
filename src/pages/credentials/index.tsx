@@ -52,18 +52,14 @@ export default function Credentials() {
         try {
             const cryptoWorker = await new CryptoWorker();
             const { passphrase } = values;
-            const kek = await cryptoWorker.deriveKey(await cryptoWorker.fromString(passphrase),
-                await cryptoWorker.fromB64(keyAttributes.kekSalt));
+            const kek: string = await cryptoWorker.deriveKey(passphrase, keyAttributes.kekSalt);
 
             if (await cryptoWorker.verifyHash(keyAttributes.kekHash, kek)) {
-                const key = await cryptoWorker.decrypt(
-                    await cryptoWorker.fromB64(keyAttributes.encryptedKey),
-                    await cryptoWorker.fromB64(keyAttributes.keyDecryptionNonce),
-                    kek);
-                const sessionKeyAttributes = await cryptoWorker.encrypt(key);
-                const sessionKey = await cryptoWorker.toB64(sessionKeyAttributes.key);
-                const sessionNonce = await cryptoWorker.toB64(sessionKeyAttributes.nonce);
-                const encryptionKey = await cryptoWorker.toB64(sessionKeyAttributes.encryptedData);
+                const key: string = await cryptoWorker.decryptB64(keyAttributes.encryptedKey, keyAttributes.keyDecryptionNonce, kek);
+                const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
+                const sessionKey = sessionKeyAttributes.key;
+                const sessionNonce = sessionKeyAttributes.nonce;
+                const encryptionKey = sessionKeyAttributes.encryptedData;
                 setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
                 setData(LS_KEYS.SESSION, { sessionKey, sessionNonce });
                 router.push('/gallery');

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import styled, {createGlobalStyle } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
 import Button from 'react-bootstrap/Button';
@@ -13,6 +13,8 @@ import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-photoswipe/lib/photoswipe.css';
 import localForage from 'localforage';
+import UploadButton from 'pages/gallery/components/UploadButton';
+import FullScreenDropZone from 'components/FullScreenDropZone';
 
 localForage.config({
     driver: localForage.INDEXEDDB,
@@ -78,26 +80,59 @@ const GlobalStyles = createGlobalStyle`
     .pswp__img {
         object-fit: contain;
     }
+    .modal-90w{
+        width:90vw;
+        max-width:880px!important;
+    }
+    .modal .modal-header, .modal  .modal-footer {
+        border-color: #444 !important;
+    }
+    .modal .modal-header .close {
+        color: #aaa;
+        text-shadow: none;
+    }
+    .modal .card {
+        background-color: #303030;
+        border: none;
+        color: #aaa;
+    }
+    .modal .card > div {
+        border-radius: 30px;
+        overflow: hidden;
+        margin: 0 0 5px 0;
+    }
+    .modal-content{
+        background-color:#303030 !important;
+        color:#aaa;
+    }
 `;
 
 const Image = styled.img`
-    max-height: 28px;
-    margin-right: 5px;
+  max-height: 28px;
+  margin-right: 5px;
 `;
 
 const FlexContainer = styled.div`
-    flex: 1;
+  flex: 1;
 `;
 
 export default function App({ Component, pageProps }) {
     const router = useRouter();
     const [user, setUser] = useState();
     const [loading, setLoading] = useState(false);
+    const [uploadButtonView, setUploadButtonView] = useState(false);
+    const [uploadModalView, setUploadModalView] = useState(false);
+
+    const closeUploadModal = () => setUploadModalView(false);
+    const showUploadModal = () => setUploadModalView(true);
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         setUser(user);
-        console.log(`%c${constants.CONSOLE_WARNING_STOP}`, 'color: red; font-size: 52px;');
+        console.log(
+            `%c${constants.CONSOLE_WARNING_STOP}`,
+            'color: red; font-size: 52px;'
+        );
         console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
 
         router.events.on('routeChangeStart', (url: string) => {
@@ -116,34 +151,47 @@ export default function App({ Component, pageProps }) {
     const logout = async () => {
         clearKeys();
         clearData();
+        setUploadButtonView(false);
         localForage.clear();
         const cache = await caches.delete('thumbs');
-        router.push("/");
-    }
+        router.push('/');
+    };
 
     return (
-        <>
+        <FullScreenDropZone
+            closeModal={closeUploadModal}
+            showModal={showUploadModal}
+        >
             <Head>
                 <title>ente.io | Privacy friendly alternative to Google Photos</title>
             </Head>
             <GlobalStyles />
             <Navbar>
                 <FlexContainer>
-                    <Image alt='logo' src="/icon.png" />
+                    <Image alt='logo' src='/icon.png' />
                     {constants.COMPANY_NAME}
                 </FlexContainer>
-                {user && <Button variant='link' onClick={logout}>
-                    <PowerSettings />
-                </Button>}
+                {uploadButtonView && <UploadButton showModal={showUploadModal} />}
+                {user &&
+                    <Button variant='link' onClick={logout}>
+                        <PowerSettings />
+                    </Button>
+                }
             </Navbar>
-            {loading
-                ? <Container>
-                    <Spinner animation="border" role="status" variant="primary">
-                        <span className="sr-only">Loading...</span>
+            {loading ? (
+                <Container>
+                    <Spinner animation='border' role='status' variant='primary'>
+                        <span className='sr-only'>Loading...</span>
                     </Spinner>
                 </Container>
-                : <Component />
-            }
-        </>
+            ) : (
+                    <Component
+                        uploadModalView={uploadModalView}
+                        showUploadModal={showUploadModal}
+                        closeUploadModal={closeUploadModal}
+                        setUploadButtonView={setUploadButtonView}
+                    />
+                )}
+        </FullScreenDropZone>
     );
 }

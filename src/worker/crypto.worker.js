@@ -24,6 +24,32 @@ export class Crypto {
             key);
     }
 
+    async encryptMetadata(metadata, key) {
+        const encodedMetadata = new TextEncoder().encode(JSON.stringify(metadata));
+
+        const { file: encryptedMetadata } = await libsodium.encryptChaChaOneShot(
+            encodedMetadata,
+            key);
+        const { encryptedData, ...other } = encryptedMetadata
+        return {
+            file: {
+                encryptedData: await libsodium.toB64(encryptedData),
+                ...other
+            },
+            key
+        };
+    }
+
+    async encryptThumbnail(fileData, key) {
+        return libsodium.encryptChaChaOneShot(
+            fileData,
+            key);
+    }
+
+    async encryptFile(fileData, key) {
+        return libsodium.encryptChaCha(fileData, key);
+    }
+
     async encrypt(data, key) {
         return libsodium.encrypt(data, key);
     }
@@ -44,8 +70,16 @@ export class Crypto {
         return libsodium.deriveKey(passphrase, salt);
     }
 
-    async decryptToB64(encryptedKey, sessionNonce, sessionKey) {
-        return libsodium.decryptToB64(encryptedKey, sessionNonce, sessionKey)
+    async decryptB64(data, nonce, key) {
+        return libsodium.decryptB64(data, nonce, key)
+    }
+
+    async decryptString(data, nonce, key) {
+        return libsodium.decryptString(data, nonce, key)
+    }
+
+    async encryptToB64(data, key) {
+        return libsodium.encryptToB64(data, key);
     }
 
     async generateMasterKey() {

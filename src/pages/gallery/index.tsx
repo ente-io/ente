@@ -2,28 +2,41 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Spinner from 'react-bootstrap/Spinner';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { collection, fetchCollections, file, getFile, getFiles, getPreview } from 'services/fileService';
+import {
+    file,
+    getFile,
+    getPreview,
+    fetchData,
+} from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
 import { getActualKey } from 'utils/common/key';
 import styled from 'styled-components';
-import { PhotoSwipe } from 'react-photoswipe';
+import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { Options } from 'photoswipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 import Collections from './components/Collections';
 import SadFace from 'components/SadFace';
+import Upload from './components/Upload';
+import { collection, fetchCollections, collectionLatestFile, getCollectionLatestFile, getFavItemIds } from 'services/collectionService';
+import constants from 'utils/strings/constants';
 
 enum ITEM_TYPE {
-    TIME='TIME',
-    TILE='TILE'
+    TIME = 'TIME',
+    TILE = 'TILE',
+}
+export enum FILE_TYPE {
+    IMAGE,
+    VIDEO,
+    OTHERS
 }
 
 interface TimeStampListItem {
-    itemType: ITEM_TYPE,
-    items?: file[],
-    itemStartIndex?: number,
-    date?: string,
+    itemType: ITEM_TYPE;
+    items?: file[];
+    itemStartIndex?: number;
+    date?: string;
 }
 
 const Container = styled.div`
@@ -76,47 +89,57 @@ const DateContainer = styled.div`
     padding: 0 4px;
 `;
 
-const PAGE_SIZE = 12;
-const COLUMNS = 3;
-
-export default function Gallery() {
+export default function Gallery(props) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [collections, setCollections] = useState<collection[]>([])
+    const [reload, setReload] = useState(0);
+    const [collections, setCollections] = useState<collection[]>([]);
+    const [collectionLatestFile, setCollectionLatestFile] = useState<
+        collectionLatestFile[]
+    >([]);
     const [data, setData] = useState<file[]>();
+    const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState<Options>({
         history: false,
         maxSpreadZoom: 5,
     });
-    const fetching: { [k: number]: boolean }  = {};
+    const fetching: { [k: number]: boolean } = {};
+
+
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        const token = getData(LS_KEYS.USER).token;
         if (!key) {
-            router.push("/");
+            router.push('/');
         }
         const main = async () => {
             setLoading(true);
-            const encryptionKey = await getActualKey();
-            const collections = await fetchCollections(token, encryptionKey);
-            const resp = await getFiles("0", token, "100", encryptionKey, collections);
+            await syncWithRemote();
             setLoading(false);
-            setCollections(collections);
-            setData(resp.map(item => ({
-                ...item,
-                w: window.innerWidth,
-                h: window.innerHeight,
-            })));
         };
-        main(); 
+        main();
+        props.setUploadButtonView(true);
     }, []);
 
+    const syncWithRemote = async () => {
+        const token = getData(LS_KEYS.USER).token;
+        const encryptionKey = await getActualKey();
+        const collections = await fetchCollections(token, encryptionKey);
+        const data = await fetchData(token, collections);
+        const collectionLatestFile = await getCollectionLatestFile(collections, data);
+        const favItemIds = await getFavItemIds(data);
+        setCollections(collections);
+        setData(data);
+        setCollectionLatestFile(collectionLatestFile);
+        setFavItemIds(favItemIds);
+    }
     if (!data || loading) {
-        return <div className="text-center">
-            <Spinner animation="border" variant="primary" />
-        </div>
+        return (
+            <div className='text-center'>
+                <Spinner animation='border' variant='primary' />
+            </div>
+        );
     }
 
     const updateUrl = (index: number) => (url: string) => {
@@ -125,8 +148,8 @@ export default function Gallery() {
             msrc: url,
             w: window.innerWidth,
             h: window.innerHeight,
-        }
-        if (data[index].metadata.fileType === 1 && !data[index].html) {
+        };
+        if (data[index].metadata.fileType === FILE_TYPE.VIDEO && !data[index].html) {
             data[index].html = `
                 <div class="video-loading">
                     <img src="${url}" />
@@ -137,11 +160,11 @@ export default function Gallery() {
             `;
             delete data[index].src;
         }
-        if (data[index].metadata.fileType === 0 && !data[index].src) {
+        if (data[index].metadata.fileType === FILE_TYPE.IMAGE && !data[index].src) {
             data[index].src = url;
         }
         setData(data);
-    }
+    };
 
     const updateSrcUrl = (index: number, url: string) => {
         data[index] = {
@@ -149,8 +172,8 @@ export default function Gallery() {
             src: url,
             w: window.innerWidth,
             h: window.innerHeight,
-        }
-        if (data[index].metadata.fileType === 1) {
+        };
+        if (data[index].metadata.fileType === FILE_TYPE.VIDEO) {
             data[index].html = `
                 <video controls>
                     <source src="${url}" />
@@ -160,11 +183,12 @@ export default function Gallery() {
             delete data[index].src;
         }
         setData(data);
-    }
+    };
 
     const handleClose = () => {
         setOpen(false);
-    }
+        // syncWithRemote();
+    };
 
     const onThumbnailClick = (index: number) => () => {
         setOptions({
@@ -172,16 +196,18 @@ export default function Gallery() {
             index,
         });
         setOpen(true);
-    }
+    };
 
     const getThumbnail = (file: file[], index: number) => {
-        return (<PreviewCard
-            key={`tile-${file[index].id}`}
-            data={file[index]}
-            updateUrl={updateUrl(file[index].dataIndex)}
-            onClick={onThumbnailClick(index)}
-        />);
-    }
+        return (
+            <PreviewCard
+                key={`tile-${file[index].id}`}
+                data={file[index]}
+                updateUrl={updateUrl(file[index].dataIndex)}
+                onClick={onThumbnailClick(index)}
+            />
+        );
+    };
 
     const getSlideData = async (instance: any, index: number, item: file) => {
         const token = getData(LS_KEYS.USER).token;
@@ -205,7 +231,7 @@ export default function Gallery() {
             fetching[item.dataIndex] = true;
             const url = await getFile(token, item);
             updateSrcUrl(item.dataIndex, url);
-            if (item.metadata.fileType === 1) {
+            if (item.metadata.fileType === FILE_TYPE.VIDEO) {
                 item.html = `
                     <video width="320" height="240" controls>
                         <source src="${url}" />
@@ -225,43 +251,58 @@ export default function Gallery() {
                 // ignore
             }
         }
-    }
+    };
 
     const selectCollection = (id?: string) => {
         const href = `/gallery?collection=${id || ''}`;
         router.push(href, undefined, { shallow: true });
-    }
+    };
 
-    const idSet = new Set();
-    const filteredData = data.map((item, index) => ({
-        ...item,
-        dataIndex: index,
-    })).filter(item => {
-        if (!idSet.has(item.id)) {
-            if (!router.query.collection || router.query.collection === item.collectionID.toString()) {
-                idSet.add(item.id);
-                return true;
+    let idSet = new Set();
+    const filteredData = data
+        .map((item, index) => ({
+            ...item,
+            dataIndex: index,
+        }))
+        .filter((item) => {
+            if (!idSet.has(item.id)) {
+                if (
+                    !router.query.collection ||
+                    router.query.collection === item.collectionID.toString()
+                ) {
+                    idSet.add(item.id);
+                    return true;
+                }
+                return false;
             }
             return false;
-        }
-        return false;
-    });
+        });
 
     const isSameDay = (first, second) => {
-        return first.getFullYear() === second.getFullYear() &&
+        return (
+            first.getFullYear() === second.getFullYear() &&
             first.getMonth() === second.getMonth() &&
-            first.getDate() === second.getDate();
-    }
+            first.getDate() === second.getDate()
+        );
+    };
 
-    return (<>
-        <Collections
-            collections={collections}
-            selected={router.query.collection?.toString()}
-            selectCollection={selectCollection}
-        />
-        {
-            filteredData.length
-                ? <Container>
+    return (
+        <>
+            <Collections
+                collections={collections}
+                selected={router.query.collection?.toString()}
+                selectCollection={selectCollection}
+            />
+            <Upload
+                uploadModalView={props.uploadModalView}
+                closeUploadModal={props.closeUploadModal}
+                showUploadModal={props.showUploadModal}
+                collectionLatestFile={collectionLatestFile}
+                refetchData={syncWithRemote}
+
+            />
+            {filteredData.length ? (
+                <Container>
                     <AutoSizer>
                         {({ height, width }) => {
                             let columns;
@@ -279,13 +320,18 @@ export default function Gallery() {
                             let listItemIndex = 0;
                             let currentDate = -1;
                             filteredData.forEach((item, index) => {
-                                if (!isSameDay(new Date(item.metadata.creationTime/1000), new Date(currentDate))) {
-                                    currentDate = item.metadata.creationTime/1000;
+                                if (
+                                    !isSameDay(
+                                        new Date(item.metadata.creationTime / 1000),
+                                        new Date(currentDate)
+                                    )
+                                ) {
+                                    currentDate = item.metadata.creationTime / 1000;
                                     const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
                                         weekday: 'short',
                                         year: 'numeric',
                                         month: 'long',
-                                        day: 'numeric'
+                                        day: 'numeric',
                                     });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TIME,
@@ -307,34 +353,46 @@ export default function Gallery() {
                                             itemType: ITEM_TYPE.TILE,
                                             items: [item],
                                             itemStartIndex: index,
-                                        })
+                                        });
                                     }
                                 }
                             });
 
                             return (
                                 <List
-                                    itemSize={(index) => timeStampList[index].itemType === ITEM_TYPE.TIME ? 30 : 200}
+                                    itemSize={(index) =>
+                                        timeStampList[index].itemType === ITEM_TYPE.TIME
+                                            ? 30
+                                            : 200
+                                    }
                                     height={height}
                                     width={width}
                                     itemCount={timeStampList.length}
                                     key={`${router.query.collection}-${columns}`}
                                 >
                                     {({ index, style }) => {
-                                        return (<ListItem style={style}>
-                                            <ListContainer>
-                                                {
-                                                    timeStampList[index].itemType === ITEM_TYPE.TIME
-                                                        ? <DateContainer>{timeStampList[index].date}</DateContainer>
-                                                        : timeStampList[index].items.map((item, idx) =>{
-                                                            return getThumbnail(filteredData, timeStampList[index].itemStartIndex + idx);
-                                                        })
-                                                }
-                                            </ListContainer>
-                                        </ListItem>);
+                                        return (
+                                            <ListItem style={style}>
+                                                <ListContainer>
+                                                    {timeStampList[index].itemType ===
+                                                        ITEM_TYPE.TIME ? (
+                                                            <DateContainer>
+                                                                {timeStampList[index].date}
+                                                            </DateContainer>
+                                                        ) : (
+                                                            timeStampList[index].items.map((item, idx) => {
+                                                                return getThumbnail(
+                                                                    filteredData,
+                                                                    timeStampList[index].itemStartIndex + idx
+                                                                );
+                                                            })
+                                                        )}
+                                                </ListContainer>
+                                            </ListItem>
+                                        );
                                     }}
                                 </List>
-                            )
+                            );
                         }}
                     </AutoSizer>
                     <PhotoSwipe
@@ -343,12 +401,15 @@ export default function Gallery() {
                         options={options}
                         onClose={handleClose}
                         gettingData={getSlideData}
+                        favItemIds={favItemIds}
+                        setFavItemIds={setFavItemIds}
                     />
                 </Container>
-                : <DeadCenter>
-                    <SadFace height={100} width={100} />
-                    <div>No content found!</div>
-                </DeadCenter>
-        }
-    </>);
+            ) : (
+                    <DeadCenter>
+                        <div>{constants.NOTHING_HERE}</div>
+                    </DeadCenter>
+                )}
+        </>
+    );
 }
