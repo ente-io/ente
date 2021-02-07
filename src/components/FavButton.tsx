@@ -17,6 +17,6 @@ const HeartUI = styled.button<{
 
 export default function FavButton({ isClick, onClick, size }) {
     return (
-        <HeartUI className="pswp__button" isClick={isClick} onClick={onClick} size={size}/>
+        <HeartUI isClick={isClick} onClick={onClick} size={size}/>
     );
 }
