@@ -161,7 +161,6 @@ export default function App({ Component, pageProps }) {
         <FullScreenDropZone
             closeModal={closeUploadModal}
             showModal={showUploadModal}
-            uploadModalView={uploadModalView}
         >
             <Head>
                 <title>ente.io | Privacy friendly alternative to Google Photos</title>

@@ -75,8 +75,11 @@ const DeadCenter = styled.div`
     flex-direction: column;
 `;
 
-const ListContainer = styled.div`
-    display: flex;
+const ListContainer = styled.div<{columns: number}>`
+    display: grid;
+    grid-template-columns: repeat(${props => props.columns}, 1fr);
+    grid-column-gap: 8px;
+    padding: 0 8px;
     max-width: 100%;
     color: #fff;
 
@@ -94,13 +97,12 @@ const ListContainer = styled.div`
 `;
 
 const DateContainer = styled.div`
-    padding: 0 4px;
+    padding-top: 15px;
 `;
 
 export default function Gallery(props) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [reload, setReload] = useState(0);
     const [collections, setCollections] = useState<collection[]>([]);
     const [collectionLatestFile, setCollectionLatestFile] = useState<
         collectionLatestFile[]
@@ -113,6 +115,7 @@ export default function Gallery(props) {
         maxSpreadZoom: 5,
     });
     const fetching: { [k: number]: boolean } = {};
+    const [sinceTime, setSinceTime] = useState(0);
 
     const [progress, setProgress] = useState(0)
 
@@ -150,15 +153,8 @@ export default function Gallery(props) {
         }
         setCollectionLatestFile(collectionLatestFile);
         setFavItemIds(favItemIds);
-
+        setSinceTime((new Date()).getTime());
         props.setUploadButtonView(true);
-    }
-    if (!data || loading) {
-        return (
-            <div className='text-center'>
-                <Spinner animation='border' variant='primary' />
-            </div>
-        );
     }
 
     const updateUrl = (index: number) => (url: string) => {
@@ -272,6 +268,14 @@ export default function Gallery(props) {
         }
     };
 
+    if (!data || loading) {
+        return (
+            <div className='text-center'>
+                <Spinner animation='border' variant='primary' />
+            </div>
+        );
+    }
+
     const selectCollection = (id?: string) => {
         const href = `/gallery?collection=${id || ''}`;
         router.push(href, undefined, { shallow: true });
@@ -308,7 +312,7 @@ export default function Gallery(props) {
     return (
         <>
             <LoadingBar
-                color='#f11946'
+                color='#007bff'
                 progress={progress}
                 onLoaderFinished={() => setProgress(0)}
             />
@@ -386,34 +390,27 @@ export default function Gallery(props) {
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType === ITEM_TYPE.TIME
-                                            ? 30
+                                            ? 45
                                             : 200
                                     }
                                     height={height}
                                     width={width}
                                     itemCount={timeStampList.length}
-                                    key={`${router.query.collection}-${columns}`}
+                                    key={`${router.query.collection}-${columns}-${sinceTime}`}
                                 >
                                     {({ index, style }) => {
-                                        return (
-                                            <ListItem style={style}>
-                                                <ListContainer>
-                                                    {timeStampList[index].itemType ===
-                                                        ITEM_TYPE.TIME ? (
-                                                            <DateContainer>
-                                                                {timeStampList[index].date}
-                                                            </DateContainer>
-                                                        ) : (
-                                                            timeStampList[index].items.map((item, idx) => {
-                                                                return getThumbnail(
-                                                                    filteredData,
-                                                                    timeStampList[index].itemStartIndex + idx
-                                                                );
-                                                            })
-                                                        )}
-                                                </ListContainer>
-                                            </ListItem>
-                                        );
+                                        return (<ListItem style={style}>
+                                            <ListContainer columns={timeStampList[index].itemType === ITEM_TYPE.TIME
+                                                ? 1 : columns}>
+                                                {
+                                                    timeStampList[index].itemType === ITEM_TYPE.TIME
+                                                        ? <DateContainer>{timeStampList[index].date}</DateContainer>
+                                                        : timeStampList[index].items.map((item, idx) =>{
+                                                            return getThumbnail(filteredData, timeStampList[index].itemStartIndex + idx);
+                                                        })
+                                                }
+                                            </ListContainer>
+                                        </ListItem>);
                                     }}
                                 </List>
                             );

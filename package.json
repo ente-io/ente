@@ -45,7 +45,7 @@
     "@types/yup": "^0.29.7",
     "babel-plugin-styled-components": "^1.11.1",
     "next-on-netlify": "^2.4.0",
-    "typescript": "^4.0.2",
+    "typescript": "^4.1.3",
     "worker-plugin": "^5.0.0"
   },
   "standard": {
