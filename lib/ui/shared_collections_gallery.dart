@@ -89,46 +89,49 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          Padding(padding: EdgeInsets.all(6)),
-          SectionTitle("incoming"),
-          Padding(padding: EdgeInsets.all(16)),
-          collections.incoming.length > 0
-              ? GridView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return _buildIncomingCollection(
-                        context, collections.incoming[index]);
-                  },
-                  itemCount: collections.incoming.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                  ),
-                )
-              : nothingToSeeHere,
-          Padding(padding: EdgeInsets.all(16)),
-          Divider(height: 0),
-          Padding(padding: EdgeInsets.all(14)),
-          SectionTitle("outgoing"),
-          Padding(padding: EdgeInsets.all(16)),
-          collections.outgoing.length > 0
-              ? Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
-                  child: ListView.builder(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 50),
+        child: Column(
+          children: [
+            Padding(padding: EdgeInsets.all(6)),
+            SectionTitle("incoming"),
+            Padding(padding: EdgeInsets.all(16)),
+            collections.incoming.length > 0
+                ? GridView.builder(
                     shrinkWrap: true,
-                    padding: EdgeInsets.only(bottom: 12),
                     physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
-                      return _buildOutgoingCollection(
-                          context, collections.outgoing[index]);
+                      return _buildIncomingCollection(
+                          context, collections.incoming[index]);
                     },
-                    itemCount: collections.outgoing.length,
-                  ),
-                )
-              : nothingToSeeHere,
-        ],
+                    itemCount: collections.incoming.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                    ),
+                  )
+                : nothingToSeeHere,
+            Padding(padding: EdgeInsets.all(16)),
+            Divider(height: 0),
+            Padding(padding: EdgeInsets.all(14)),
+            SectionTitle("outgoing"),
+            Padding(padding: EdgeInsets.all(16)),
+            collections.outgoing.length > 0
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.only(bottom: 12),
+                      physics: NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        return _buildOutgoingCollection(
+                            context, collections.outgoing[index]);
+                      },
+                      itemCount: collections.outgoing.length,
+                    ),
+                  )
+                : nothingToSeeHere,
+          ],
+        ),
       ),
     );
   }

@@ -27,7 +27,6 @@ class FilesDB {
   static final columnLatitude = 'latitude';
   static final columnLongitude = 'longitude';
   static final columnFileType = 'file_type';
-  static final columnIsEncrypted = 'is_encrypted';
   static final columnIsDeleted = 'is_deleted';
   static final columnCreationTime = 'creation_time';
   static final columnModificationTime = 'modification_time';
@@ -78,7 +77,6 @@ class FilesDB {
           $columnLatitude REAL,
           $columnLongitude REAL,
           $columnFileType INTEGER,
-          $columnIsEncrypted INTEGER DEFAULT 1,
           $columnModificationTime TEXT NOT NULL,
           $columnEncryptedKey TEXT,
           $columnKeyDecryptionNonce TEXT,
@@ -389,7 +387,6 @@ class FilesDB {
         $columnLatitude,
         $columnLongitude,
         $columnFileType,
-        $columnIsEncrypted,
         $columnModificationTime,
         $columnEncryptedKey,
         $columnKeyDecryptionNonce,
@@ -427,7 +424,6 @@ class FilesDB {
         $columnLatitude,
         $columnLongitude,
         $columnFileType,
-        $columnIsEncrypted,
         $columnModificationTime,
         $columnEncryptedKey,
         $columnKeyDecryptionNonce,
@@ -685,7 +681,6 @@ class FilesDB {
       default:
         row[columnFileType] = -1;
     }
-    row[columnIsEncrypted] = file.isEncrypted ? 1 : 0;
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
@@ -718,7 +713,6 @@ class FilesDB {
       default:
         row[columnFileType] = -1;
     }
-    row[columnIsEncrypted] = file.isEncrypted ? 1 : 0;
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
@@ -741,7 +735,6 @@ class FilesDB {
       file.location = Location(row[columnLatitude], row[columnLongitude]);
     }
     file.fileType = getFileType(row[columnFileType]);
-    file.isEncrypted = row[columnIsEncrypted] == 1;
     file.creationTime = int.parse(row[columnCreationTime]);
     file.modificationTime = int.parse(row[columnModificationTime]);
     file.updationTime = row[columnUpdationTime] == null

@@ -198,21 +198,26 @@ class _GalleryState extends State<Gallery> {
       ),
       itemCount: itemCount,
     );
-    if (widget.selectedFiles.files.isNotEmpty && widget.isHomePageGallery) {
-      return Stack(children: [
-        gallery,
-        Container(
-          height: 60,
-          child: GalleryAppBarWidget(
-            GalleryAppBarType.homepage,
-            null,
-            widget.selectedFiles,
+    if (widget.isHomePageGallery) {
+      gallery = Container(
+        margin: const EdgeInsets.only(bottom: 50),
+        child: gallery,
+      );
+      if (widget.selectedFiles.files.isNotEmpty) {
+        gallery = Stack(children: [
+          gallery,
+          Container(
+            height: 60,
+            child: GalleryAppBarWidget(
+              GalleryAppBarType.homepage,
+              null,
+              widget.selectedFiles,
+            ),
           ),
-        ),
-      ]);
-    } else {
-      return gallery;
+        ]);
+      }
     }
+    return gallery;
   }
 
   Widget _buildListItem(BuildContext context, int index) {

@@ -101,48 +101,52 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
 
   Widget _getCollectionsGalleryWidget(CollectionItems items) {
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          Padding(padding: EdgeInsets.all(6)),
-          SectionTitle("device folders"),
-          Padding(padding: EdgeInsets.all(6)),
-          Container(
-            height: 160,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: items.folders.isEmpty
-                  ? nothingToSeeHere
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-                      physics:
-                          ScrollPhysics(), // to disable GridView's scrolling
-                      itemBuilder: (context, index) {
-                        return _buildFolder(context, items.folders[index]);
-                      },
-                      itemCount: items.folders.length,
-                    ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 50),
+        child: Column(
+          children: [
+            Padding(padding: EdgeInsets.all(6)),
+            SectionTitle("device folders"),
+            Padding(padding: EdgeInsets.all(6)),
+            Container(
+              height: 160,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: items.folders.isEmpty
+                    ? nothingToSeeHere
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+                        physics:
+                            ScrollPhysics(), // to disable GridView's scrolling
+                        itemBuilder: (context, index) {
+                          return _buildFolder(context, items.folders[index]);
+                        },
+                        itemCount: items.folders.length,
+                      ),
+              ),
             ),
-          ),
-          Divider(),
-          Padding(padding: EdgeInsets.all(6)),
-          SectionTitle("backed-up memories"),
-          Padding(padding: EdgeInsets.all(10)),
-          GridView.builder(
-            shrinkWrap: true,
-            padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-            physics: ScrollPhysics(), // to disable GridView's scrolling
-            itemBuilder: (context, index) {
-              return _buildCollection(context, items.collections, index);
-            },
-            itemCount: items.collections.length + 1, // To include the + button
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
+            Divider(),
+            Padding(padding: EdgeInsets.all(6)),
+            SectionTitle("backed-up memories"),
+            Padding(padding: EdgeInsets.all(10)),
+            GridView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+              physics: ScrollPhysics(), // to disable GridView's scrolling
+              itemBuilder: (context, index) {
+                return _buildCollection(context, items.collections, index);
+              },
+              itemCount:
+                  items.collections.length + 1, // To include the + button
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
