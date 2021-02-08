@@ -23,6 +23,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionsService {
   static final _collectionSyncTimeKeyPrefix = "collection_sync_time_";
+  static final _collectionsSyncTimeKey = "collections_sync_time";
 
   final _logger = Logger("CollectionsService");
 
@@ -55,11 +56,13 @@ class CollectionsService {
   Future<List<Collection>> sync() async {
     _logger.info("Syncing");
     final lastCollectionUpdationTime =
-        await _db.getLastCollectionUpdationTime();
+        _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
+
     // Might not have synced the collection fully
     final fetchedCollections =
         await _fetchCollections(lastCollectionUpdationTime ?? 0);
     final updatedCollections = List<Collection>();
+    int maxUpdationTime = lastCollectionUpdationTime;
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
@@ -69,8 +72,12 @@ class CollectionsService {
       } else {
         updatedCollections.add(collection);
       }
+      maxUpdationTime = collection.updationTime > maxUpdationTime
+          ? collection.updationTime
+          : maxUpdationTime;
     }
     await _db.insert(updatedCollections);
+    _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
     final collections = await _db.getAllCollections();
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
