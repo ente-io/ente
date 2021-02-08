@@ -55,32 +55,19 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   void _loadNetworkVideo() {
-    if (!widget.file.isEncrypted) {
-      _setVideoPlayerController(url: widget.file.getStreamUrl());
-      _videoPlayerController.addListener(() {
-        if (_videoPlayerController.value.hasError) {
-          _logger.warning(_videoPlayerController.value.errorDescription);
-          showToast(
-              "the video has not been processed yet. downloading the original one...",
-              toastLength: Toast.LENGTH_SHORT);
-          _setVideoPlayerController(url: widget.file.getDownloadUrl());
-        }
-      });
-    } else {
-      getFileFromServer(
-        widget.file,
-        progressCallback: (count, total) {
-          setState(() {
-            _progress = count / total;
-            if (_progress == 1) {
-              showToast("decrypting video...", toastLength: Toast.LENGTH_SHORT);
-            }
-          });
-        },
-      ).then((file) {
-        _setVideoPlayerController(file: file);
-      });
-    }
+    getFileFromServer(
+      widget.file,
+      progressCallback: (count, total) {
+        setState(() {
+          _progress = count / total;
+          if (_progress == 1) {
+            showToast("decrypting video...", toastLength: Toast.LENGTH_SHORT);
+          }
+        });
+      },
+    ).then((file) {
+      _setVideoPlayerController(file: file);
+    });
   }
 
   @override

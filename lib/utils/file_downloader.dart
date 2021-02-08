@@ -57,7 +57,6 @@ class DiffFetcher {
                 continue;
               }
               file.ownerID = item["ownerID"];
-              file.isEncrypted = true;
               file.encryptedKey = item["encryptedKey"];
               file.keyDecryptionNonce = item["keyDecryptionNonce"];
               file.fileDecryptionHeader = item["file"]["decryptionHeader"];

@@ -169,53 +169,40 @@ Future<io.File> getFileFromServer(File file,
   final cacheManager = file.fileType == FileType.video
       ? VideoCacheManager()
       : DefaultCacheManager();
-  if (!file.isEncrypted) {
-    return cacheManager.getSingleFile(file.getDownloadUrl());
-  } else {
-    return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
-      if (info == null) {
-        if (!fileDownloadsInProgress.containsKey(file.uploadedFileID)) {
-          fileDownloadsInProgress[file.uploadedFileID] = _downloadAndDecrypt(
-            file,
-            cacheManager,
-            progressCallback: progressCallback,
-          );
-        }
-        return fileDownloadsInProgress[file.uploadedFileID];
-      } else {
-        return info.file;
+  return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
+    if (info == null) {
+      if (!fileDownloadsInProgress.containsKey(file.uploadedFileID)) {
+        fileDownloadsInProgress[file.uploadedFileID] = _downloadAndDecrypt(
+          file,
+          cacheManager,
+          progressCallback: progressCallback,
+        );
       }
-    });
-  }
+      return fileDownloadsInProgress[file.uploadedFileID];
+    } else {
+      return info.file;
+    }
+  });
 }
 
 Future<io.File> getThumbnailFromServer(File file) async {
-  if (!file.isEncrypted) {
-    return ThumbnailCacheManager()
-        .getSingleFile(file.getThumbnailUrl())
-        .then((data) {
-      ThumbnailFileLruCache.put(file, data);
-      return data;
-    });
-  } else {
-    return ThumbnailCacheManager()
-        .getFileFromCache(file.getThumbnailUrl())
-        .then((info) {
-      if (info == null) {
-        if (!thumbnailDownloadsInProgress.containsKey(file.uploadedFileID)) {
-          thumbnailDownloadsInProgress[file.uploadedFileID] =
-              _downloadAndDecryptThumbnail(file).then((data) {
-            ThumbnailFileLruCache.put(file, data);
-            return data;
-          });
-        }
-        return thumbnailDownloadsInProgress[file.uploadedFileID];
-      } else {
-        ThumbnailFileLruCache.put(file, info.file);
-        return info.file;
+  return ThumbnailCacheManager()
+      .getFileFromCache(file.getThumbnailUrl())
+      .then((info) {
+    if (info == null) {
+      if (!thumbnailDownloadsInProgress.containsKey(file.uploadedFileID)) {
+        thumbnailDownloadsInProgress[file.uploadedFileID] =
+            _downloadAndDecryptThumbnail(file).then((data) {
+          ThumbnailFileLruCache.put(file, data);
+          return data;
+        });
       }
-    });
-  }
+      return thumbnailDownloadsInProgress[file.uploadedFileID];
+    } else {
+      ThumbnailFileLruCache.put(file, info.file);
+      return info.file;
+    }
+  });
 }
 
 Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
