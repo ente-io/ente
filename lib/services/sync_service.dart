@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -170,7 +169,6 @@ class SyncService {
       }
       await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
     }
-    await FileRepository.instance.reloadFiles();
     await syncWithRemote();
   }
 
@@ -218,8 +216,7 @@ class SyncService {
     }
     for (final c in updatedCollections) {
       await _syncCollectionDiff(c.id);
-      _collectionsService.setCollectionSyncTime(c.id,
-          max(c.updationTime, _collectionsService.getCollectionSyncTime(c.id)));
+      _collectionsService.setCollectionSyncTime(c.id, c.updationTime);
     }
     await deleteFilesOnServer();
     bool hasUploadedFiles = await _uploadDiff();
