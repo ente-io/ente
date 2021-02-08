@@ -22,7 +22,7 @@ import Collections from './components/Collections';
 import Upload from './components/Upload';
 import {
     collection,
-    fetchUpdatedCollections,
+    getLatestCollections,
     collectionLatestFile,
     getCollectionLatestFile,
     getFavItemIds,
@@ -142,12 +142,11 @@ export default function Gallery(props) {
     const syncWithRemote = async () => {
         const token = getToken();
         const encryptionKey = await getActualKey();
-        const updatedCollections = await fetchUpdatedCollections(token, encryptionKey);
-        const data = await fetchData(token, updatedCollections);
-        const collections = await getLocalCollections();
+        const {isUpdated, collections} = await getLatestCollections(token, encryptionKey);
+        const data = await fetchData(token, collections);
         const collectionLatestFile = await getCollectionLatestFile(collections, data);
         const favItemIds = await getFavItemIds(data);
-        if (updatedCollections.length > 0) {
+        if (isUpdated) {
             setCollections(collections);
             setData(data);
         }
