@@ -105,11 +105,15 @@ export const getLocalCollections = async (): Promise<collection[]> => {
     const collections = await localForage.getItem('collections') as collection[] ?? [];
     return collections;
 }
-export const fetchUpdatedCollections = async (token: string, key: string) => {
-    const collectionUpdateTime = await localForage.getItem('collection-update-time') as string;
-    const updatedCollections = await getCollections(token, collectionUpdateTime ?? '0', key) || [];
-    const favCollection = await localForage.getItem('fav-collection') as collection[] ?? updatedCollections.filter(collection => collection.type === CollectionType.favorites);
+export const getLatestCollections = async (token: string, key: string) => {
     const localCollections = await getLocalCollections();
+    const lastCollectionUpdateTime = await localForage.getItem<string>('collection-update-time')??"0";
+    const updatedCollections = await getCollections(token, lastCollectionUpdateTime, key) || [];
+    
+    if(updatedCollections.length==0){
+        return {isUpdated:false,collections:localCollections};
+    }
+    const favCollection = await localForage.getItem('fav-collection') as collection[] ?? updatedCollections.filter(collection => collection.type === CollectionType.favorites);
     const allCollectionsInstances = [...localCollections, ...updatedCollections];
     var latestCollectionsInstances = new Map<number, collection>();
     allCollectionsInstances.forEach((collection) => {
@@ -117,15 +121,18 @@ export const fetchUpdatedCollections = async (token: string, key: string) => {
             latestCollectionsInstances.set(collection.id, collection);
         }
     });
-    let collections = [];
+
+    let collections = [],updationTime= await localForage.getItem<number>('collection-update-time');
     for (const [_, collection] of latestCollectionsInstances) {
         if (!collection.isDeleted){
             collections.push(collection);
+            updationTime=Math.max(updationTime,collection.updationTime);
         }
     }
     await localForage.setItem('fav-collection', favCollection);
+    await localForage.setItem('collection-update-time',updationTime);
     await localForage.setItem('collections', collections);
-    return updatedCollections;
+    return {isUpdated:true,collections:collections};
 };
 
 export const getCollectionLatestFile = (
