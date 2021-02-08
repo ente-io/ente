@@ -158,6 +158,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
       }
     }
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       child: Container(
         margin: EdgeInsets.fromLTRB(16, 12, 8, 12),
         child: Row(
