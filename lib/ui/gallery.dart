@@ -35,7 +35,7 @@ class Gallery extends StatefulWidget {
     this.headerWidget,
     @required this.selectedFiles,
     @required this.tagPrefix,
-    this.isHomePageGallery,
+    this.isHomePageGallery = false,
   });
 
   @override
