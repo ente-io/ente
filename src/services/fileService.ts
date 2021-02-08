@@ -69,19 +69,17 @@ export const localFiles = async () => {
 export const syncFiles = async (token: string, collections: collection[]) => {
     let files = await localFiles();
     let isUpdated = false;
-    await removeDeletedCollectionFiles(collections);
-    const collectionsUpdateTime = await localForage.getItem<string>(
-        'collection-update-time'
-    );
+    await removeDeletedCollectionFiles(collections, files);
     for (let collection of collections) {
-        const lastSyncTime = await localForage.getItem<string>(
-            `${collection.id}-time`
-        );
-        if (collectionsUpdateTime === lastSyncTime) {
+        const lastSyncTime =
+            (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
+        if (collection.updationTime === lastSyncTime) {
             continue;
         }
         isUpdated = true;
-        let fetchedFiles = (await getFiles(collection, null, 100, token)) ?? [];
+        let fetchedFiles =
+            (await getFiles(collection, lastSyncTime.toString(), 100, token)) ??
+            [];
         files.push(...fetchedFiles);
         var latestVersionFiles = new Map<number, file>();
         files.forEach((file) => {
@@ -105,7 +103,7 @@ export const syncFiles = async (token: string, collections: collection[]) => {
         await localForage.setItem('files', files);
         await localForage.setItem(
             `${collection.id}-time`,
-            collectionsUpdateTime
+            collection.updationTime
         );
     }
     return { files, isUpdated };
@@ -213,12 +211,14 @@ export const getFile = async (token: string, file: file) => {
     }
 };
 
-const removeDeletedCollectionFiles = async (collections: collection[]) => {
+const removeDeletedCollectionFiles = async (
+    collections: collection[],
+    files: file[]
+) => {
     const syncedCollectionIds = new Set<number>();
     for (let collection of collections) {
         syncedCollectionIds.add(collection.id);
     }
-    let files = await localFiles();
     files = files.filter((file) => syncedCollectionIds.has(file.collectionID));
     await localForage.setItem('files', files);
 };
