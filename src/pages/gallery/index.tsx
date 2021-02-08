@@ -312,7 +312,7 @@ export default function Gallery(props) {
     return (
         <>
             <LoadingBar
-                color='##007bff'
+                color='#007bff'
                 progress={progress}
                 onLoaderFinished={() => setProgress(0)}
             />
