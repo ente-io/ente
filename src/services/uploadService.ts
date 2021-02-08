@@ -49,7 +49,7 @@ interface objectKeys {
 }
 
 interface uploadFile extends objectKeys {
-    collectionID: string,
+    collectionID: number,
     encryptedKey: string;
     keyDecryptionNonce: string;
     metadata?: {

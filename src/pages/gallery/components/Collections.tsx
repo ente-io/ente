@@ -5,7 +5,7 @@ import styled from 'styled-components';
 interface CollectionProps {
     collections: collection[];
     selected?: string;
-    selectCollection: (id?: string) => void;
+    selectCollection: (id?: number) => void;
 }
 
 const Container = styled.div`
@@ -51,7 +51,7 @@ const Chip = styled.button<{ active: boolean }>`
 
 export default function Collections(props: CollectionProps) {
     const { selected, collections, selectCollection } = props;
-    const clickHandler = (id?: string) => () => selectCollection(id);
+    const clickHandler = (id?: number) => () => selectCollection(id);
 
     return <Container>
         <Wrapper>

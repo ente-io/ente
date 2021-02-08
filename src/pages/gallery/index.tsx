@@ -276,7 +276,7 @@ export default function Gallery(props) {
         );
     }
 
-    const selectCollection = (id?: string) => {
+    const selectCollection = (id?: number) => {
         const href = `/gallery?collection=${id || ''}`;
         router.push(href, undefined, { shallow: true });
     };
