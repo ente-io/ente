@@ -76,45 +76,37 @@ export const fetchFiles = async (
     collections: collection[]
 ) => {
     let files = await localFiles();
-    const collectionUpdationTime = new Map<number, number>();
-    let fetchedFiles = [];
     let deletedCollection = new Set<number>();
+    const collectionsUpdateTime=await localForage.getItem<string>('collection-update-time');
     for (let collection of collections) {
         if (collection.isDeleted) {
             deletedCollection.add(collection.id);
             continue;
         }
-        const files = await getFiles(collection, null, 100, token);
-        fetchedFiles.push(...files);
-        collectionUpdationTime.set(collection.id, files.length > 0 ? files.slice(-1)[0].updationTime : 0);
-    }
-    files.push(...fetchedFiles);
-    var latestFiles = new Map<string, file>();
-    files.forEach((file) => {
-        let uid = `${file.collectionID}-${file.id}`;
-        if (!latestFiles.has(uid) || latestFiles.get(uid).updationTime < file.updationTime) {
-            latestFiles.set(uid, file);
-        }
-    });
-    files = [];
-    for (const [_, file] of latestFiles) {
-        if (file.isDeleted || deletedCollection.has(file.collectionID)) {
+        const thisCollectionUpdateTime=await localForage.getItem<string>(`${collection.id}-time`);
+        if(collectionsUpdateTime===thisCollectionUpdateTime)
             continue;
+        let fetchedFiles = await getFiles(collection, null, 100, token)??[];
+        files.push(...fetchedFiles);
+        var latestVersionFiles = new Map<number, file>();
+        files.forEach((file) => {
+            if (!latestVersionFiles.has(file.id) || latestVersionFiles.get(file.id).updationTime < file.updationTime) {
+                latestVersionFiles.set(file.id, file);
+            }
+        });
+        files = [];
+        for (const [_, file] of latestVersionFiles) {
+            if (file.isDeleted || deletedCollection.has(file.collectionID)) {
+                continue;
+            }
+            files.push(file);
         }
-        files.push(file);
+        files = files.sort(
+            (a, b) => b.metadata.creationTime - a.metadata.creationTime
+        );
+        await localForage.setItem('files', files);
+            await localForage.setItem(`${collection.id}-time`, collectionsUpdateTime);
     }
-    files = files.sort(
-        (a, b) => b.metadata.creationTime - a.metadata.creationTime
-    );
-    await localForage.setItem('files', files);
-    for (let [collectionID, updationTime] of collectionUpdationTime) {
-        await localForage.setItem(`${collectionID}-time`, updationTime);
-    }
-    let updationTime = await localForage.getItem('collection-update-time') as number;
-    for (let collection of collections) {
-        updationTime = Math.max(updationTime, collection.updationTime);
-    }
-    await localForage.setItem('collection-update-time', updationTime);
     return files;
 };
 
@@ -122,12 +114,8 @@ export const getFiles = async (collection: collection, sinceTime: string, limit:
     try {
         const worker = await new CryptoWorker();
         let promises: Promise<file>[] = [];
-        if (collection.isDeleted) {
-            // TODO: Remove files in this collection from localForage and cache
-            return;
-        }
         let time =
-            sinceTime || (await localForage.getItem<string>(`${collection.id}-time`)) || "0";
+        sinceTime || (await localForage.getItem<string>(`${collection.id}-time`)) || "0";
         let resp;
         do {
             resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
