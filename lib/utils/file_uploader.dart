@@ -8,8 +8,10 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
@@ -27,7 +29,11 @@ class FileUploader {
   int _currentlyUploading = 0;
   final _uploadURLs = Queue<UploadURL>();
 
-  FileUploader._privateConstructor();
+  FileUploader._privateConstructor() {
+    Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
+      _uploadURLFetchInProgress = null;
+    });
+  }
   static FileUploader instance = FileUploader._privateConstructor();
 
   Future<File> upload(File file, int collectionID) {
