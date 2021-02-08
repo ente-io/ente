@@ -385,7 +385,7 @@ export default function Gallery(props) {
                                     }
                                 }
                             });
-
+                            const extraRowsToRender=Math.ceil(2*height/200);
                             return (
                                 <List
                                     itemSize={(index) =>
@@ -397,6 +397,7 @@ export default function Gallery(props) {
                                     width={width}
                                     itemCount={timeStampList.length}
                                     key={`${router.query.collection}-${columns}-${sinceTime}`}
+                                    overscanCount={extraRowsToRender}
                                 >
                                     {({ index, style }) => {
                                         return (<ListItem style={style}>
