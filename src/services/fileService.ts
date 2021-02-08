@@ -76,16 +76,16 @@ export const fetchFiles = async (
     collections: collection[]
 ) => {
     let files = await localFiles();
-    const collectionUpdationTime = new Map<string, string>();
+    const collectionUpdationTime = new Map<number, number>();
     let fetchedFiles = [];
-    let deletedCollection = new Set<string>();
+    let deletedCollection = new Set<number>();
     for (let collection of collections) {
         if (collection.isDeleted) {
             deletedCollection.add(collection.id);
         }
         const files = await getFiles(collection, null, 100, token);
         fetchedFiles.push(...files);
-        collectionUpdationTime.set(collection.id, files.length > 0 ? files.slice(-1)[0].updationTime.toString() : "0");
+        collectionUpdationTime.set(collection.id, files.length > 0 ? files.slice(-1)[0].updationTime : 0);
     }
     files.push(...fetchedFiles);
     var latestFiles = new Map<string, file>();
@@ -97,9 +97,10 @@ export const fetchFiles = async (
     });
     files = [];
     for (const [_, file] of latestFiles) {
-        if (!(file.isDeleted || deletedCollection.has(file.collectionID.toString()))) {
-            files.push(file);
+        if (file.isDeleted || deletedCollection.has(file.collectionID)) {
+            continue;
         }
+        files.push(file);
     }
     files = files.sort(
         (a, b) => b.metadata.creationTime - a.metadata.creationTime
@@ -129,7 +130,7 @@ export const getFiles = async (collection: collection, sinceTime: string, limit:
         let resp;
         do {
             resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
-                collectionID: collection.id,
+                collectionID: collection.id.toString(),
                 sinceTime: time,
                 limit: limit.toString(),
             },

@@ -22,7 +22,7 @@ enum CollectionType {
 }
 
 export interface collection {
-    id: string;
+    id: number;
     owner: user;
     key?: string;
     name?: string;
@@ -111,7 +111,7 @@ export const fetchUpdatedCollections = async (token: string, key: string) => {
     const favCollection = await localForage.getItem('fav-collection') as collection[] ?? updatedCollections.filter(collection => collection.type === CollectionType.favorites);
     const localCollections = await getLocalCollections();
     const allCollectionsInstances = [...localCollections, ...updatedCollections];
-    var latestCollectionsInstances = new Map<string, collection>();
+    var latestCollectionsInstances = new Map<number, collection>();
     allCollectionsInstances.forEach((collection) => {
         if (!latestCollectionsInstances.has(collection.id) || latestCollectionsInstances.get(collection.id).updationTime < collection.updationTime) {
             latestCollectionsInstances.set(collection.id, collection);
@@ -119,8 +119,9 @@ export const fetchUpdatedCollections = async (token: string, key: string) => {
     });
     let collections = [];
     for (const [_, collection] of latestCollectionsInstances) {
-        if (!collection.isDeleted)
+        if (!collection.isDeleted){
             collections.push(collection);
+        }
     }
     await localForage.setItem('fav-collection', favCollection);
     await localForage.setItem('collections', collections);
