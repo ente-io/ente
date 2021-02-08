@@ -82,6 +82,7 @@ export const fetchFiles = async (
     for (let collection of collections) {
         if (collection.isDeleted) {
             deletedCollection.add(collection.id);
+            continue;
         }
         const files = await getFiles(collection, null, 100, token);
         fetchedFiles.push(...files);
