@@ -32,7 +32,7 @@ import constants from 'utils/strings/constants';
 
 const DATE_CONTAINER_HEIGHT = 30;
 const IMAGE_CONTAINER_HEIGHT = 200;
-const No_OF_PAGES = 2;
+const NO_OF_PAGES = 2;
 
 enum ITEM_TYPE {
     TIME = 'TIME',
@@ -414,7 +414,7 @@ export default function Gallery(props) {
                                 }
                             });
                             const extraRowsToRender = Math.ceil(
-                                (No_OF_PAGES * height) / IMAGE_CONTAINER_HEIGHT
+                                (NO_OF_PAGES * height) / IMAGE_CONTAINER_HEIGHT
                             );
                             return (
                                 <List
