@@ -116,7 +116,7 @@ export const getFiles = async (collection: collection, sinceTime: string, limit:
         const worker = await new CryptoWorker();
         let promises: Promise<file>[] = [];
         let time =
-        sinceTime || (await localForage.getItem<string>(`${collection.id}-time`)) || "0";
+            sinceTime || (await localForage.getItem<string>(`${collection.id}-time`)) || "0";
         let resp;
         do {
             resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
