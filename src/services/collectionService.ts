@@ -105,13 +105,13 @@ export const getLocalCollections = async (): Promise<collection[]> => {
     const collections = await localForage.getItem('collections') as collection[] ?? [];
     return collections;
 }
-export const getLatestCollections = async (token: string, key: string) => {
+export const syncCollections = async (token: string, key: string) => {
     const localCollections = await getLocalCollections();
     const lastCollectionUpdateTime = await localForage.getItem<string>('collection-update-time')??"0";
     const updatedCollections = await getCollections(token, lastCollectionUpdateTime, key) || [];
     
     if(updatedCollections.length==0){
-        return {isUpdated:false,collections:localCollections};
+        return localCollections;
     }
     const favCollection = await localForage.getItem('fav-collection') as collection[] ?? updatedCollections.filter(collection => collection.type === CollectionType.favorites);
     const allCollectionsInstances = [...localCollections, ...updatedCollections];
@@ -132,7 +132,7 @@ export const getLatestCollections = async (token: string, key: string) => {
     await localForage.setItem('fav-collection', favCollection);
     await localForage.setItem('collection-update-time',updationTime);
     await localForage.setItem('collections', collections);
-    return {isUpdated:true,collections:collections};
+    return collections;
 };
 
 export const getCollectionLatestFile = (
