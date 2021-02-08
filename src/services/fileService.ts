@@ -84,8 +84,9 @@ export const fetchFiles = async (
             continue;
         }
         const thisCollectionUpdateTime=await localForage.getItem<string>(`${collection.id}-time`);
-        if(collectionsUpdateTime===thisCollectionUpdateTime)
+        if(collectionsUpdateTime===thisCollectionUpdateTime){
             continue;
+        }
         let fetchedFiles = await getFiles(collection, null, 100, token)??[];
         files.push(...fetchedFiles);
         var latestVersionFiles = new Map<number, file>();
