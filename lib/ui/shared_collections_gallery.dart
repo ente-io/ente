@@ -10,6 +10,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/collection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common_elements.dart';
@@ -42,8 +43,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder<SharedCollections>(
-      future:
-          CollectionsDB.instance.getAllCollections().then((collections) async {
+      future: Future.value(CollectionsService.instance.getCollections())
+          .then((collections) async {
         final outgoing = List<CollectionWithThumbnail>();
         final incoming = List<CollectionWithThumbnail>();
         for (final collection in collections) {
