@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { createAlbum } from 'services/collectionService';
 import UploadService from 'services/uploadService';
-import { collectionLatestFile } from 'services/collectionService'
+import { CollectionAndItsLatestFile } from 'services/collectionService'
 import { getToken } from 'utils/common/key';
 
 export default function CreateCollection(props) {
@@ -35,12 +35,12 @@ export default function CreateCollection(props) {
 
         const collection = await createAlbum(albumName);
 
-        const collectionLatestFile: collectionLatestFile = { collection, file: null }
+        const collectionAndItsLatestFile: CollectionAndItsLatestFile = { collection, file: null }
 
         progressBarProps.setPercentComplete(0);
         setProgressView(true);
 
-        await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token, progressBarProps);
+        await UploadService.uploadFiles(acceptedFiles, collectionAndItsLatestFile, token, progressBarProps);
         refetchData();
         setProgressView(false);
     }
