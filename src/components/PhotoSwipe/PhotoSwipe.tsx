@@ -4,11 +4,14 @@ import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
 import events from './events';
 import FavButton from 'components/FavButton';
-import { addToFavorites, removeFromFavorites } from 'services/collectionService';
+import {
+    addToFavorites,
+    removeFromFavorites,
+} from 'services/collectionService';
 import { file } from 'services/fileService';
 
 interface Iprops {
-    isOpen: boolean
+    isOpen: boolean;
     items: any[];
     options?: Object;
     onClose?: () => void;
@@ -17,28 +20,26 @@ interface Iprops {
     className?: string;
     favItemIds: Set<number>;
     setFavItemIds: (favItemIds: Set<number>) => void;
-};
+}
 
 function PhotoSwipe(props: Iprops) {
-
     let pswpElement;
     const [photoSwipe, setPhotoSwipe] = useState<Photoswipe<any>>();
 
     const { isOpen } = props;
-    const [isFav, setIsFav] = useState(false)
-
+    const [isFav, setIsFav] = useState(false);
 
     useEffect(() => {
-        if (!pswpElement)
+        if (!pswpElement) {
             return;
-        if (isOpen)
+        }
+        if (isOpen) {
             openPhotoSwipe();
-
+        }
     }, [pswpElement]);
 
     useEffect(() => {
-        if (!pswpElement)
-            return;
+        if (!pswpElement) return;
         if (isOpen) {
             openPhotoSwipe();
         }
@@ -47,17 +48,21 @@ function PhotoSwipe(props: Iprops) {
         }
         return () => {
             closePhotoSwipe();
-        }
+        };
     }, [isOpen]);
 
     function updateFavButton() {
         setIsFav(isInFav(this?.currItem));
     }
 
-
     const openPhotoSwipe = () => {
         const { items, options } = props;
-        let photoSwipe = new Photoswipe(pswpElement, PhotoswipeUIDefault, items, options);
+        let photoSwipe = new Photoswipe(
+            pswpElement,
+            PhotoswipeUIDefault,
+            items,
+            options
+        );
         events.forEach((event) => {
             const callback = props[event];
             if (callback || event === 'destroy') {
@@ -75,7 +80,6 @@ function PhotoSwipe(props: Iprops) {
         photoSwipe.listen('beforeChange', updateFavButton);
         photoSwipe.init();
         setPhotoSwipe(photoSwipe);
-
     };
 
     const updateItems = (items = []) => {
@@ -88,8 +92,7 @@ function PhotoSwipe(props: Iprops) {
     };
 
     const closePhotoSwipe = () => {
-        if (photoSwipe)
-            photoSwipe.close();
+        if (photoSwipe) photoSwipe.close();
     };
 
     const handleClose = () => {
@@ -102,10 +105,8 @@ function PhotoSwipe(props: Iprops) {
         const { favItemIds } = props;
         if (favItemIds && file) {
             return favItemIds.has(file.id);
-        }
-        else
-            return false;
-    }
+        } else return false;
+    };
 
     const onFavClick = async (file) => {
         const { favItemIds, setFavItemIds } = props;
@@ -114,15 +115,13 @@ function PhotoSwipe(props: Iprops) {
             await addToFavorites(file);
             setIsFav(true);
             setFavItemIds(favItemIds);
-        }
-        else {
+        } else {
             favItemIds.delete(file.id);
-            await removeFromFavorites(file)
+            await removeFromFavorites(file);
             setIsFav(false);
             setFavItemIds(favItemIds);
-
         }
-    }
+    };
     const { id } = props;
     let { className } = props;
     className = classnames(['pswp', className]).trim();
@@ -130,7 +129,7 @@ function PhotoSwipe(props: Iprops) {
         <div
             id={id}
             className={className}
-            tabIndex={Number("-1")}
+            tabIndex={Number('-1')}
             role="dialog"
             aria-hidden="true"
             ref={(node) => {
@@ -160,8 +159,17 @@ function PhotoSwipe(props: Iprops) {
                             className="pswp__button pswp__button--fs"
                             title="Toggle fullscreen"
                         />
-                        <button className="pswp__button pswp__button--zoom" title="Zoom in/out" />
-                        <FavButton size={44} isClick={isFav} onClick={() => { onFavClick(photoSwipe?.currItem) }} />
+                        <button
+                            className="pswp__button pswp__button--zoom"
+                            title="Zoom in/out"
+                        />
+                        <FavButton
+                            size={44}
+                            isClick={isFav}
+                            onClick={() => {
+                                onFavClick(photoSwipe?.currItem);
+                            }}
+                        />
                         <div className="pswp__preloader">
                             <div className="pswp__preloader__icn">
                                 <div className="pswp__preloader__cut">

@@ -6,44 +6,39 @@ export class Crypto {
         const encodedMetadata = await libsodium.decryptChaChaOneShot(
             await libsodium.fromB64(file.metadata.encryptedData),
             await libsodium.fromB64(file.metadata.decryptionHeader),
-            file.key);
+            file.key
+        );
         return JSON.parse(new TextDecoder().decode(encodedMetadata));
     }
 
     async decryptThumbnail(fileData, header, key) {
-        return libsodium.decryptChaChaOneShot(
-            fileData,
-            header,
-            key);
+        return libsodium.decryptChaChaOneShot(fileData, header, key);
     }
 
     async decryptFile(fileData, header, key) {
-        return libsodium.decryptChaCha(
-            fileData,
-            header,
-            key);
+        return libsodium.decryptChaCha(fileData, header, key);
     }
 
     async encryptMetadata(metadata, key) {
-        const encodedMetadata = new TextEncoder().encode(JSON.stringify(metadata));
+        const encodedMetadata = new TextEncoder().encode(
+            JSON.stringify(metadata)
+        );
 
-        const { file: encryptedMetadata } = await libsodium.encryptChaChaOneShot(
-            encodedMetadata,
-            key);
-        const { encryptedData, ...other } = encryptedMetadata
+        const {
+            file: encryptedMetadata,
+        } = await libsodium.encryptChaChaOneShot(encodedMetadata, key);
+        const { encryptedData, ...other } = encryptedMetadata;
         return {
             file: {
                 encryptedData: await libsodium.toB64(encryptedData),
-                ...other
+                ...other,
             },
-            key
+            key,
         };
     }
 
     async encryptThumbnail(fileData, key) {
-        return libsodium.encryptChaChaOneShot(
-            fileData,
-            key);
+        return libsodium.encryptChaChaOneShot(fileData, key);
     }
 
     async encryptFile(fileData, key) {
@@ -71,11 +66,11 @@ export class Crypto {
     }
 
     async decryptB64(data, nonce, key) {
-        return libsodium.decryptB64(data, nonce, key)
+        return libsodium.decryptB64(data, nonce, key);
     }
 
     async decryptString(data, nonce, key) {
-        return libsodium.decryptString(data, nonce, key)
+        return libsodium.decryptString(data, nonce, key);
     }
 
     async encryptToB64(data, key) {
@@ -99,7 +94,7 @@ export class Crypto {
     }
 
     async boxSealOpen(input, publicKey, secretKey) {
-        return libsodium.boxSealOpen(input, publicKey, secretKey)
+        return libsodium.boxSealOpen(input, publicKey, secretKey);
     }
 
     async fromString(string) {

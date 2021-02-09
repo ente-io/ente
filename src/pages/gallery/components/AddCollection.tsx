@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Card } from "react-bootstrap";
-import styled from "styled-components";
-import CreateCollection from "./CreateCollection";
-import DropzoneWrapper from "./DropzoneWrapper";
+import React, { useState } from 'react';
+import { Card } from 'react-bootstrap';
+import styled from 'styled-components';
+import CreateCollection from './CreateCollection';
+import DropzoneWrapper from './DropzoneWrapper';
 
 const ImageContainer = styled.div`
     min-height: 192px;
@@ -19,7 +19,6 @@ const StyledCard = styled(Card)`
 `;
 
 export default function AddCollection(props) {
-
     const [acceptedFiles, setAcceptedFiles] = useState<File[]>();
     const [createCollectionView, setCreateCollectionView] = useState(false);
 
@@ -32,7 +31,9 @@ export default function AddCollection(props) {
     const children = (
         <StyledCard>
             <ImageContainer>+</ImageContainer>
-            <Card.Text style={{ textAlign: "center" }}>Create New Album</Card.Text>
+            <Card.Text style={{ textAlign: 'center' }}>
+                Create New Album
+            </Card.Text>
         </StyledCard>
     );
     return (
@@ -51,5 +52,5 @@ export default function AddCollection(props) {
                 acceptedFiles={acceptedFiles}
             />
         </>
-    )
+    );
 }

@@ -11,10 +11,11 @@ import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import { keyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
-import * as Comlink from "comlink";
+import * as Comlink from 'comlink';
 
-const CryptoWorker: any = typeof window !== 'undefined'
-    && Comlink.wrap(new Worker("worker/crypto.worker.js", { type: 'module' }));
+const CryptoWorker: any =
+    typeof window !== 'undefined' &&
+    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 
 const Image = styled.img`
     width: 200px;
@@ -41,22 +42,34 @@ export default function Credentials() {
         } else if (!keyAttributes) {
             router.push('/generate');
         } else if (key) {
-            router.push('/gallery')
+            router.push('/gallery');
         } else {
             setKeyAttributes(keyAttributes);
         }
     }, []);
 
-    const verifyPassphrase = async (values: formValues, { setFieldError }: FormikHelpers<formValues>) => {
+    const verifyPassphrase = async (
+        values: formValues,
+        { setFieldError }: FormikHelpers<formValues>
+    ) => {
         setLoading(true);
         try {
             const cryptoWorker = await new CryptoWorker();
             const { passphrase } = values;
-            const kek: string = await cryptoWorker.deriveKey(passphrase, keyAttributes.kekSalt);
+            const kek: string = await cryptoWorker.deriveKey(
+                passphrase,
+                keyAttributes.kekSalt
+            );
 
             if (await cryptoWorker.verifyHash(keyAttributes.kekHash, kek)) {
-                const key: string = await cryptoWorker.decryptB64(keyAttributes.encryptedKey, keyAttributes.keyDecryptionNonce, kek);
-                const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
+                const key: string = await cryptoWorker.decryptB64(
+                    keyAttributes.encryptedKey,
+                    keyAttributes.keyDecryptionNonce,
+                    kek
+                );
+                const sessionKeyAttributes = await cryptoWorker.encryptToB64(
+                    key
+                );
                 const sessionKey = sessionKeyAttributes.key;
                 const sessionNonce = sessionKeyAttributes.nonce;
                 const encryptionKey = sessionKeyAttributes.encryptedData;
@@ -67,44 +80,65 @@ export default function Credentials() {
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
             }
         } catch (e) {
-            setFieldError('passphrase', `${constants.UNKNOWN_ERROR} ${e.message}`);
+            setFieldError(
+                'passphrase',
+                `${constants.UNKNOWN_ERROR} ${e.message}`
+            );
         }
         setLoading(false);
-    }
+    };
 
-    return (<Container>
-        <Image alt='vault' src='/vault.svg' />
-        <Card style={{ minWidth: '300px' }}>
-            <Card.Body>
-                <p className="text-center">{constants.ENTER_PASSPHRASE}</p>
-                <Formik<formValues>
-                    initialValues={{ passphrase: '' }}
-                    onSubmit={verifyPassphrase}
-                    validationSchema={Yup.object().shape({
-                        passphrase: Yup.string().required(constants.REQUIRED),
-                    })}
-                >
-                    {({ values, touched, errors, handleChange, handleBlur, handleSubmit }) => (
-                        <Form noValidate onSubmit={handleSubmit}>
-                            <Form.Group>
-                                <Form.Control
-                                    type="password"
-                                    placeholder={constants.RETURN_PASSPHRASE_HINT}
-                                    value={values.passphrase}
-                                    onChange={handleChange('passphrase')}
-                                    onBlur={handleBlur('passphrase')}
-                                    isInvalid={Boolean(touched.passphrase && errors.passphrase)}
-                                    disabled={loading}
-                                />
-                                <Form.Control.Feedback type="invalid">
-                                    {errors.passphrase}
-                                </Form.Control.Feedback>
-                            </Form.Group>
-                            <Button block type='submit' disabled={loading}>{constants.VERIFY_PASSPHRASE}</Button>
-                        </Form>
-                    )}
-                </Formik>
-            </Card.Body>
-        </Card>
-    </Container>)
+    return (
+        <Container>
+            <Image alt="vault" src="/vault.svg" />
+            <Card style={{ minWidth: '300px' }}>
+                <Card.Body>
+                    <p className="text-center">{constants.ENTER_PASSPHRASE}</p>
+                    <Formik<formValues>
+                        initialValues={{ passphrase: '' }}
+                        onSubmit={verifyPassphrase}
+                        validationSchema={Yup.object().shape({
+                            passphrase: Yup.string().required(
+                                constants.REQUIRED
+                            ),
+                        })}
+                    >
+                        {({
+                            values,
+                            touched,
+                            errors,
+                            handleChange,
+                            handleBlur,
+                            handleSubmit,
+                        }) => (
+                            <Form noValidate onSubmit={handleSubmit}>
+                                <Form.Group>
+                                    <Form.Control
+                                        type="password"
+                                        placeholder={
+                                            constants.RETURN_PASSPHRASE_HINT
+                                        }
+                                        value={values.passphrase}
+                                        onChange={handleChange('passphrase')}
+                                        onBlur={handleBlur('passphrase')}
+                                        isInvalid={Boolean(
+                                            touched.passphrase &&
+                                                errors.passphrase
+                                        )}
+                                        disabled={loading}
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        {errors.passphrase}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+                                <Button block type="submit" disabled={loading}>
+                                    {constants.VERIFY_PASSPHRASE}
+                                </Button>
+                            </Form>
+                        )}
+                    </Formik>
+                </Card.Body>
+            </Card>
+        </Container>
+    );
 }

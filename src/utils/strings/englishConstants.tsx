@@ -1,4 +1,4 @@
-import { template } from "./vernacularStrings";
+import { template } from './vernacularStrings';
 
 /**
  * Global English constants.
@@ -16,7 +16,11 @@ const englishConstants = {
     EMAIL_ERROR: 'Enter a valid email address',
     REQUIRED: 'Required',
     VERIFY_EMAIL: 'Verify Email',
-    EMAIL_SENT: ({ email }) => (<p>We have sent a mail to <b>{email}</b>.</p>),
+    EMAIL_SENT: ({ email }) => (
+        <p>
+            We have sent a mail to <b>{email}</b>.
+        </p>
+    ),
     CHECK_INBOX: 'Please check your inbox (and spam) to complete verification.',
     ENTER_OTT: 'Enter verification code here',
     RESEND_MAIL: 'Did not get email?',
@@ -30,7 +34,8 @@ const englishConstants = {
     SET_PASSPHRASE: 'Set Passphrase',
     VERIFY_PASSPHRASE: 'Verify Passphrase',
     INCORRECT_PASSPHRASE: 'Incorrect Passphrase',
-    ENTER_ENC_PASSPHRASE: 'Please enter a passphrase that we can use to encrypt your data.',
+    ENTER_ENC_PASSPHRASE:
+        'Please enter a passphrase that we can use to encrypt your data.',
     PASSPHRASE_DISCLAIMER: () => (
         <p>
             We don't store your passphrase, so if you forget,
@@ -46,14 +51,16 @@ const englishConstants = {
     CLOSE: 'Close',
     NOTHING_HERE: `nothing to see here! 👀`,
     UPLOAD: {
-        0: "Preparing to upload",
-        1: "Encryting your files",
-        2: "Uploading your Files",
-        3: "Files Uploaded Successfully !!!"
+        0: 'Preparing to upload',
+        1: 'Encryting your files',
+        2: 'Uploading your Files',
+        3: 'Files Uploaded Successfully !!!',
     },
     OF: 'of',
-    SUBSCRIPTION_EXPIRED: 'You don\'t have a active subscription plan!! Please get one in the mobile app',
-    STORAGE_QUOTA_EXCEEDED:'You have exceeded your designated storage Quota, please upgrade your plan to add more files',
+    SUBSCRIPTION_EXPIRED:
+        "You don't have a active subscription plan!! Please get one in the mobile app",
+    STORAGE_QUOTA_EXCEEDED:
+        'You have exceeded your designated storage Quota, please upgrade your plan to add more files',
 };
 
 export default englishConstants;

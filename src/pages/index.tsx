@@ -28,7 +28,10 @@ export default function Home() {
         }
     }, []);
 
-    const loginUser = async ({ email }: formValues, { setFieldError }: FormikHelpers<formValues>) => {
+    const loginUser = async (
+        { email }: formValues,
+        { setFieldError }: FormikHelpers<formValues>
+    ) => {
         try {
             setLoading(true);
             await getOtt(email);
@@ -38,27 +41,36 @@ export default function Home() {
             setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
         }
         setLoading(false);
-    }
+    };
 
     const register = () => {
         router.push('/signup');
-    }
+    };
 
     return (
         <Container>
             <Card style={{ minWidth: '300px' }} className="text-center">
                 <Card.Body>
-                    <Card.Title style={{ marginBottom: '20px' }}>{constants.LOGIN}</Card.Title>
+                    <Card.Title style={{ marginBottom: '20px' }}>
+                        {constants.LOGIN}
+                    </Card.Title>
                     <Formik<formValues>
                         initialValues={{ email: '' }}
                         validationSchema={Yup.object().shape({
                             email: Yup.string()
                                 .email(constants.EMAIL_ERROR)
-                                .required(constants.REQUIRED)
+                                .required(constants.REQUIRED),
                         })}
                         onSubmit={loginUser}
                     >
-                        {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
+                        {({
+                            values,
+                            errors,
+                            touched,
+                            handleChange,
+                            handleBlur,
+                            handleSubmit,
+                        }) => (
                             <Form noValidate onSubmit={handleSubmit}>
                                 <Form.Group controlId="formBasicEmail">
                                     <Form.Control
@@ -67,7 +79,9 @@ export default function Home() {
                                         value={values.email}
                                         onChange={handleChange('email')}
                                         onBlur={handleBlur('email')}
-                                        isInvalid={Boolean(touched.email && errors.email)}
+                                        isInvalid={Boolean(
+                                            touched.email && errors.email
+                                        )}
                                         disabled={loading}
                                     />
                                     <FormControl.Feedback type="invalid">
@@ -75,7 +89,9 @@ export default function Home() {
                                     </FormControl.Feedback>
                                 </Form.Group>
                                 <Button
-                                    variant="primary" type="submit" block
+                                    variant="primary"
+                                    type="submit"
+                                    block
                                     disabled={loading}
                                     style={{ marginBottom: '12px' }}
                                 >
@@ -84,9 +100,15 @@ export default function Home() {
                             </Form>
                         )}
                     </Formik>
-                    <Card.Link href="#" onClick={register} style={{ fontSize: '14px' }}>Don't have an account?</Card.Link>
+                    <Card.Link
+                        href="#"
+                        onClick={register}
+                        style={{ fontSize: '14px' }}
+                    >
+                        Don't have an account?
+                    </Card.Link>
                 </Card.Body>
             </Card>
         </Container>
-    )
+    );
 }

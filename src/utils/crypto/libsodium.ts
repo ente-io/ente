@@ -2,18 +2,37 @@ import sodium from 'libsodium-wrappers';
 
 const encryptionChunkSize = 4 * 1024 * 1024;
 
-export async function decryptChaChaOneShot(data: Uint8Array, header: Uint8Array, key: string) {
+export async function decryptChaChaOneShot(
+    data: Uint8Array,
+    header: Uint8Array,
+    key: string
+) {
     await sodium.ready;
-    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(header, await fromB64(key));
-    const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(pullState, data, null);
+    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
+        header,
+        await fromB64(key)
+    );
+    const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
+        pullState,
+        data,
+        null
+    );
     return pullResult.message;
 }
 
-export async function decryptChaCha(data: Uint8Array, header: Uint8Array, key: string) {
+export async function decryptChaCha(
+    data: Uint8Array,
+    header: Uint8Array,
+    key: string
+) {
     await sodium.ready;
-    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(header, await fromB64(key));
+    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
+        header,
+        await fromB64(key)
+    );
     const decryptionChunkSize =
-        encryptionChunkSize + sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
+        encryptionChunkSize +
+        sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
     var bytesRead = 0;
     var decryptedData = [];
     var tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
@@ -23,7 +42,10 @@ export async function decryptChaCha(data: Uint8Array, header: Uint8Array, key: s
             chunkSize = data.length - bytesRead;
         }
         const buffer = data.slice(bytesRead, bytesRead + chunkSize);
-        const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(pullState, buffer);
+        const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
+            pullState,
+            buffer
+        );
         for (var index = 0; index < pullResult.message.length; index++) {
             decryptedData.push(pullResult.message[index]);
         }
@@ -36,27 +58,41 @@ export async function decryptChaCha(data: Uint8Array, header: Uint8Array, key: s
 export async function encryptChaChaOneShot(data: Uint8Array, key?: string) {
     await sodium.ready;
 
-    const uintkey: Uint8Array = key ? await fromB64(key) : sodium.crypto_secretstream_xchacha20poly1305_keygen();
-    let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
+    const uintkey: Uint8Array = key
+        ? await fromB64(key)
+        : sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(
+        uintkey
+    );
     let [pushState, header] = [initPushResult.state, initPushResult.header];
 
-    const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(pushState, data, null, sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+    const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
+        pushState,
+        data,
+        null,
+        sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL
+    );
     return {
-        key: await toB64(uintkey), file: {
+        key: await toB64(uintkey),
+        file: {
             encryptedData: pushResult,
             decryptionHeader: await toB64(header),
             creationTime: Date.now(),
-            fileType: 0
-        }
-    }
+            fileType: 0,
+        },
+    };
 }
 
 export async function encryptChaCha(data: Uint8Array, key?: string) {
     await sodium.ready;
 
-    const uintkey: Uint8Array = key ? await fromB64(key) : sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    const uintkey: Uint8Array = key
+        ? await fromB64(key)
+        : sodium.crypto_secretstream_xchacha20poly1305_keygen();
 
-    let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
+    let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(
+        uintkey
+    );
     let [pushState, header] = [initPushResult.state, initPushResult.header];
     let bytesRead = 0;
     let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
@@ -72,46 +108,59 @@ export async function encryptChaCha(data: Uint8Array, key?: string) {
 
         const buffer = data.slice(bytesRead, bytesRead + chunkSize);
         bytesRead += chunkSize;
-        const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(pushState, buffer, null, tag);
+        const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
+            pushState,
+            buffer,
+            null,
+            tag
+        );
         for (var index = 0; index < pushResult.length; index++) {
             encryptedData.push(pushResult[index]);
         }
     }
     return {
-        key: await toB64(uintkey), file: {
+        key: await toB64(uintkey),
+        file: {
             encryptedData: new Uint8Array(encryptedData),
             decryptionHeader: await toB64(header),
             creationTime: Date.now(),
-            fileType: 0
-        }
-    }
+            fileType: 0,
+        },
+    };
 }
 
 export async function encryptToB64(data: string, key?: string) {
     await sodium.ready;
-    const encrypted = await encrypt(await fromB64(data), (key ? await fromB64(key) : null));
+    const encrypted = await encrypt(
+        await fromB64(data),
+        key ? await fromB64(key) : null
+    );
 
     return {
         encryptedData: await toB64(encrypted.encryptedData),
         key: await toB64(encrypted.key),
         nonce: await toB64(encrypted.nonce),
-    }
+    };
 }
 
 export async function decryptB64(data: string, nonce: string, key: string) {
     await sodium.ready;
-    const decrypted = await decrypt(await fromB64(data),
+    const decrypted = await decrypt(
+        await fromB64(data),
         await fromB64(nonce),
-        await fromB64(key));
+        await fromB64(key)
+    );
 
     return await toB64(decrypted);
 }
 
 export async function decryptString(data: string, nonce: string, key: string) {
     await sodium.ready;
-    const decrypted = await decrypt(await fromB64(data),
+    const decrypted = await decrypt(
+        await fromB64(data),
         await fromB64(nonce),
-        await fromB64(key));
+        await fromB64(key)
+    );
 
     return sodium.to_string(decrypted);
 }
@@ -125,10 +174,14 @@ export async function encrypt(data: Uint8Array, key?: Uint8Array) {
         encryptedData: encryptedData,
         key: uintkey,
         nonce: nonce,
-    }
+    };
 }
 
-export async function decrypt(data: Uint8Array, nonce: Uint8Array, key: Uint8Array) {
+export async function decrypt(
+    data: Uint8Array,
+    nonce: Uint8Array,
+    key: Uint8Array
+) {
     await sodium.ready;
     return sodium.crypto_secretbox_open_easy(data, nonce, key);
 }
@@ -143,20 +196,22 @@ export async function hash(input: string) {
     return sodium.crypto_pwhash_str(
         await fromB64(input),
         sodium.crypto_pwhash_OPSLIMIT_SENSITIVE,
-        sodium.crypto_pwhash_MEMLIMIT_MODERATE,
+        sodium.crypto_pwhash_MEMLIMIT_MODERATE
     );
 }
 
 export async function deriveKey(passphrase: string, salt: string) {
     await sodium.ready;
-    return await toB64(sodium.crypto_pwhash(
-        sodium.crypto_secretbox_KEYBYTES,
-        await fromString(passphrase),
-        await fromB64(salt),
-        sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
-        sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
-        sodium.crypto_pwhash_ALG_DEFAULT,
-    ));
+    return await toB64(
+        sodium.crypto_pwhash(
+            sodium.crypto_secretbox_KEYBYTES,
+            await fromString(passphrase),
+            await fromB64(salt),
+            sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
+            sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
+            sodium.crypto_pwhash_ALG_DEFAULT
+        )
+    );
 }
 
 export async function generateMasterKey() {
@@ -172,12 +227,25 @@ export async function generateSaltToDeriveKey() {
 export async function generateKeyPair() {
     await sodium.ready;
     const keyPair: sodium.KeyPair = sodium.crypto_box_keypair();
-    return { privateKey: await toB64(keyPair.privateKey), publicKey: await toB64(keyPair.publicKey) }
+    return {
+        privateKey: await toB64(keyPair.privateKey),
+        publicKey: await toB64(keyPair.publicKey),
+    };
 }
 
-export async function boxSealOpen(input: string, publicKey: string, secretKey: string) {
+export async function boxSealOpen(
+    input: string,
+    publicKey: string,
+    secretKey: string
+) {
     await sodium.ready;
-    return await toB64(sodium.crypto_box_seal_open(await fromB64(input), await fromB64(publicKey), await fromB64(secretKey)));
+    return await toB64(
+        sodium.crypto_box_seal_open(
+            await fromB64(input),
+            await fromB64(publicKey),
+            await fromB64(secretKey)
+        )
+    );
 }
 
 export async function fromB64(input: string) {
@@ -187,9 +255,7 @@ export async function fromB64(input: string) {
         result = sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
     } catch (e) {
         result = await fromB64(await toB64(await fromString(input)));
-
-    }
-    finally {
+    } finally {
         return result;
     }
 }

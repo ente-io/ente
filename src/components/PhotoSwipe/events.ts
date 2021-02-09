@@ -15,5 +15,5 @@ export default [
     'destroy',
     'updateScrollOffset',
     'preventDragEvent',
-    'shareLinkClick'
-  ];
+    'shareLinkClick',
+];
