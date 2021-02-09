@@ -74,7 +74,8 @@ dependencies:
   background_fetch: ^0.5.1
   flutter_inapp_purchase: ^3.0.1
   google_nav_bar: ^4.0.2
-  huge_listview: ^1.0.1
+  huge_listview:
+    git: https://github.com/deakjahn/huge_listview.git
 
 dev_dependencies:
   flutter_test:
