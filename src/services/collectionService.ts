@@ -111,8 +111,8 @@ const getCollections = async (
 };
 
 export const getLocalCollections = async (): Promise<collection[]> => {
-    const collections =
-        ((await localForage.getItem(COLLECTIONS)) as collection[]) ?? [];
+    const collections: collection[] =
+        (await localForage.getItem(COLLECTIONS)) ?? [];
     return collections;
 };
 
