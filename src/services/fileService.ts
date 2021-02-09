@@ -16,6 +16,8 @@ localForage.config({
     storeName: 'files',
 });
 
+const FILES = 'files';
+
 export interface fileAttribute {
     encryptedData: Uint8Array | string;
     decryptionHeader: string;
@@ -62,7 +64,7 @@ export const syncData = async (token, collections) => {
 };
 
 export const localFiles = async () => {
-    let files: Array<file> = (await localForage.getItem<file[]>('files')) || [];
+    let files: Array<file> = (await localForage.getItem<file[]>(FILES)) || [];
     return files;
 };
 
