@@ -11,19 +11,26 @@ function CollectionDropZone({
     refetchData,
     collectionAndItsLatestFile,
     setProgressView,
-    progressBarProps
-
+    progressBarProps,
+    setErrorCode
 }) {
 
     const upload = async (acceptedFiles) => {
-        const token = getToken();
-        closeModal();
-        progressBarProps.setPercentComplete(0);
-        setProgressView(true);
+        try {
+            const token = getToken();
+            closeModal();
+            progressBarProps.setPercentComplete(0);
+            setProgressView(true);
 
-        await UploadService.uploadFiles(acceptedFiles, collectionAndItsLatestFile, token, progressBarProps);
-        refetchData();
-        setProgressView(false);
+            await UploadService.uploadFiles(acceptedFiles, collectionAndItsLatestFile, token, progressBarProps);
+            refetchData();
+        } catch (err) {
+            if (err.response)
+                setErrorCode(err.response.status);
+        }
+        finally {
+            setProgressView(false);
+        }
     }
     return (
         <DropzoneWrapper

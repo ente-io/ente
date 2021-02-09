@@ -7,7 +7,7 @@ import { getToken } from 'utils/common/key';
 
 export default function CreateCollection(props) {
 
-    const { acceptedFiles, setProgressView, progressBarProps, refetchData, modalView, closeModal, closeUploadModal } = props;
+    const { acceptedFiles, setProgressView, progressBarProps, refetchData, modalView, closeModal, closeUploadModal, setErrorCode } = props;
     const [albumName, setAlbumName] = useState("");
 
     const handleChange = (event) => { setAlbumName(event.target.value); }
@@ -27,22 +27,31 @@ export default function CreateCollection(props) {
         setAlbumName(commonPathPrefix);
     }, [acceptedFiles]);
     const handleSubmit = async (event) => {
-        const token = getToken();
-        event.preventDefault();
+        try {
+            const token = getToken();
+            event.preventDefault();
 
-        closeModal();
-        closeUploadModal();
+            closeModal();
+            closeUploadModal();
 
-        const collection = await createAlbum(albumName);
+            const collection = await createAlbum(albumName);
 
-        const collectionAndItsLatestFile: CollectionAndItsLatestFile = { collection, file: null }
+            const collectionAndItsLatestFile: CollectionAndItsLatestFile = { collection, file: null }
 
-        progressBarProps.setPercentComplete(0);
-        setProgressView(true);
+            progressBarProps.setPercentComplete(0);
+            setProgressView(true);
 
-        await UploadService.uploadFiles(acceptedFiles, collectionAndItsLatestFile, token, progressBarProps);
-        refetchData();
-        setProgressView(false);
+            await UploadService.uploadFiles(acceptedFiles, collectionAndItsLatestFile, token, progressBarProps);
+            refetchData();
+
+        }
+        catch (err) {
+            if (err.response)
+                setErrorCode(err.response.status);
+        }
+        finally {
+            setProgressView(false);
+        }
     }
     return (
         <Modal

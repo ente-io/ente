@@ -29,6 +29,7 @@ import {
     getLocalCollections,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
+import ErrorAlert from './components/ErrorAlert';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -120,6 +121,8 @@ export default function Gallery(props) {
         maxSpreadZoom: 5,
     });
     const fetching: { [k: number]: boolean } = {};
+    const [errorCode, setErrorCode] = useState<number>(null);
+
     const [sinceTime, setSinceTime] = useState(0);
 
     const [progress, setProgress] = useState(0);
@@ -335,6 +338,7 @@ export default function Gallery(props) {
 
     return (
         <>
+            <ErrorAlert errorCode={errorCode} />
             <LoadingBar
                 color="#007bff"
                 progress={progress}
@@ -351,6 +355,7 @@ export default function Gallery(props) {
                 showUploadModal={props.showUploadModal}
                 collectionAndItsLatestFile={collectionAndItsLatestFile}
                 refetchData={syncWithRemote}
+                setErrorCode={setErrorCode}
             />
             {filteredData.length ? (
                 <Container>

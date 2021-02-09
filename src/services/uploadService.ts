@@ -141,6 +141,7 @@ class UploadService {
 
         } catch (e) {
             console.log(e);
+            throw e;
         }
     }
     private async uploadHelper(progressBarProps, rawFile, collection, token) {
@@ -160,6 +161,7 @@ class UploadService {
         }
         catch (e) {
             console.log(e);
+            throw e;
         }
     }
 
@@ -246,6 +248,7 @@ class UploadService {
             };
         } catch (e) {
             console.log("error uploading to bucket " + e);
+            throw e;
         }
     }
 
