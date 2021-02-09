@@ -39,6 +39,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   @override
+  void dispose() {
+    removePendingGetThumbnailRequestIfAny(widget.file);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.file.localID == null) {
       _loadNetworkImage();
