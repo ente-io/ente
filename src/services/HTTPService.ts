@@ -69,7 +69,12 @@ class HTTPService {
     /**
      * Get request.
      */
-    public get(url: string, params?: IQueryPrams, headers?: IHTTPHeaders, customConfig?: any) {
+    public get(
+        url: string,
+        params?: IQueryPrams,
+        headers?: IHTTPHeaders,
+        customConfig?: any
+    ) {
         return this.request(
             {
                 headers,
@@ -77,15 +82,20 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig,
+            customConfig
         );
     }
 
     /**
      * Post request
      */
-    public post(url: string, data?: any, params?: IQueryPrams,
-        headers?: IHTTPHeaders, customConfig?: any) {
+    public post(
+        url: string,
+        data?: any,
+        params?: IQueryPrams,
+        headers?: IHTTPHeaders,
+        customConfig?: any
+    ) {
         return this.request(
             {
                 data,
@@ -94,15 +104,20 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig,
+            customConfig
         );
     }
 
     /**
      * Put request
      */
-    public put(url: string, data: any, params?: IQueryPrams,
-        headers?: IHTTPHeaders, customConfig?: any) {
+    public put(
+        url: string,
+        data: any,
+        params?: IQueryPrams,
+        headers?: IHTTPHeaders,
+        customConfig?: any
+    ) {
         return this.request(
             {
                 data,
@@ -111,15 +126,20 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig,
+            customConfig
         );
     }
 
     /**
      * Delete request
      */
-    public delete(url: string, data: any, params?: IQueryPrams,
-        headers?: IHTTPHeaders, customConfig?: any) {
+    public delete(
+        url: string,
+        data: any,
+        params?: IQueryPrams,
+        headers?: IHTTPHeaders,
+        customConfig?: any
+    ) {
         return this.request(
             {
                 data,
@@ -128,7 +148,7 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig,
+            customConfig
         );
     }
 }

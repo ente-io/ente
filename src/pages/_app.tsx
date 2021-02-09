@@ -108,12 +108,12 @@ const GlobalStyles = createGlobalStyle`
 `;
 
 const Image = styled.img`
-  max-height: 28px;
-  margin-right: 5px;
+    max-height: 28px;
+    margin-right: 5px;
 `;
 
 const FlexContainer = styled.div`
-  flex: 1;
+    flex: 1;
 `;
 
 export default function App({ Component, pageProps }) {
@@ -163,35 +163,39 @@ export default function App({ Component, pageProps }) {
             showModal={showUploadModal}
         >
             <Head>
-                <title>ente.io | Privacy friendly alternative to Google Photos</title>
+                <title>
+                    ente.io | Privacy friendly alternative to Google Photos
+                </title>
             </Head>
             <GlobalStyles />
             <Navbar>
                 <FlexContainer>
-                    <Image alt='logo' src='/icon.png' />
+                    <Image alt="logo" src="/icon.png" />
                     {constants.COMPANY_NAME}
                 </FlexContainer>
-                {uploadButtonView && <UploadButton showModal={showUploadModal} />}
-                {user &&
-                    <Button variant='link' onClick={logout}>
+                {uploadButtonView && (
+                    <UploadButton showModal={showUploadModal} />
+                )}
+                {user && (
+                    <Button variant="link" onClick={logout}>
                         <PowerSettings />
                     </Button>
-                }
+                )}
             </Navbar>
             {loading ? (
                 <Container>
-                    <Spinner animation='border' role='status' variant='primary'>
-                        <span className='sr-only'>Loading...</span>
+                    <Spinner animation="border" role="status" variant="primary">
+                        <span className="sr-only">Loading...</span>
                     </Spinner>
                 </Container>
             ) : (
-                    <Component
-                        uploadModalView={uploadModalView}
-                        showUploadModal={showUploadModal}
-                        closeUploadModal={closeUploadModal}
-                        setUploadButtonView={setUploadButtonView}
-                    />
-                )}
+                <Component
+                    uploadModalView={uploadModalView}
+                    showUploadModal={showUploadModal}
+                    closeUploadModal={closeUploadModal}
+                    setUploadButtonView={setUploadButtonView}
+                />
+            )}
         </FullScreenDropZone>
     );
 }

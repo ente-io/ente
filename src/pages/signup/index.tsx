@@ -17,7 +17,6 @@ interface FormValues {
     email: string;
 }
 
-
 export default function Home() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -30,7 +29,10 @@ export default function Home() {
         }
     }, []);
 
-    const registerUser = async ({ name, email }: FormValues, { setFieldError }: FormikHelpers<FormValues>) => {
+    const registerUser = async (
+        { name, email }: FormValues,
+        { setFieldError }: FormikHelpers<FormValues>
+    ) => {
         try {
             setLoading(true);
             setData(LS_KEYS.USER, { name, email });
@@ -40,25 +42,33 @@ export default function Home() {
             setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
         }
         setLoading(false);
-    }
+    };
 
     return (
         <Container>
-            <Card style={{ minWidth: '300px' }} className="text-center" >
+            <Card style={{ minWidth: '300px' }} className="text-center">
                 <Card.Body>
-                    <Card.Title style={{ marginBottom: '20px' }}>{constants.SIGN_UP}</Card.Title>
+                    <Card.Title style={{ marginBottom: '20px' }}>
+                        {constants.SIGN_UP}
+                    </Card.Title>
                     <Formik<FormValues>
                         initialValues={{ name: '', email: '' }}
                         validationSchema={Yup.object().shape({
-                            name: Yup.string()
-                                .required(constants.REQUIRED),
+                            name: Yup.string().required(constants.REQUIRED),
                             email: Yup.string()
                                 .email(constants.EMAIL_ERROR)
-                                .required(constants.REQUIRED)
+                                .required(constants.REQUIRED),
                         })}
                         onSubmit={registerUser}
                     >
-                        {({ values, errors, touched, handleChange, handleBlur, handleSubmit }): JSX.Element => (
+                        {({
+                            values,
+                            errors,
+                            touched,
+                            handleChange,
+                            handleBlur,
+                            handleSubmit,
+                        }): JSX.Element => (
                             <Form noValidate onSubmit={handleSubmit}>
                                 <Form.Group controlId="registrationForm.name">
                                     <Form.Control
@@ -67,7 +77,9 @@ export default function Home() {
                                         value={values.name}
                                         onChange={handleChange('name')}
                                         onBlur={handleBlur('name')}
-                                        isInvalid={Boolean(touched.name && errors.name)}
+                                        isInvalid={Boolean(
+                                            touched.name && errors.name
+                                        )}
                                         disabled={loading}
                                     />
                                     <FormControl.Feedback type="invalid">
@@ -81,7 +93,9 @@ export default function Home() {
                                         value={values.email}
                                         onChange={handleChange('email')}
                                         onBlur={handleBlur('email')}
-                                        isInvalid={Boolean(touched.email && errors.email)}
+                                        isInvalid={Boolean(
+                                            touched.email && errors.email
+                                        )}
                                         disabled={loading}
                                     />
                                     <FormControl.Feedback type="invalid">
@@ -92,7 +106,9 @@ export default function Home() {
                                     {constants.DATA_DISCLAIMER}
                                 </DisclaimerContainer>
                                 <Button
-                                    variant="primary" type="submit" block
+                                    variant="primary"
+                                    type="submit"
+                                    block
                                     disabled={loading}
                                 >
                                     {constants.SUBMIT}
@@ -103,5 +119,5 @@ export default function Home() {
                 </Card.Body>
             </Card>
         </Container>
-    )
+    );
 }

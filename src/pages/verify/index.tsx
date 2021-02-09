@@ -32,15 +32,18 @@ export default function Verify() {
         router.prefetch('/generate');
         const user = getData(LS_KEYS.USER);
         if (!user?.email) {
-            router.push("/");
+            router.push('/');
         } else if (user.token) {
-            router.push("/credentials")
+            router.push('/credentials');
         } else {
             setEmail(user.email);
         }
     }, []);
 
-    const onSubmit = async ({ ott }: formValues, { setFieldError }: FormikHelpers<formValues>) => {
+    const onSubmit = async (
+        { ott }: formValues,
+        { setFieldError }: FormikHelpers<formValues>
+    ) => {
         try {
             setLoading(true);
             const resp = await verifyOtt(email, ott);
@@ -52,9 +55,9 @@ export default function Verify() {
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, resp.data.keyAttributes);
             if (resp.data.keyAttributes?.encryptedKey) {
-                router.push("/credentials");
+                router.push('/credentials');
             } else {
-                router.push("/generate");
+                router.push('/generate');
             }
         } catch (e) {
             if (e?.response?.status === 401) {
@@ -64,60 +67,80 @@ export default function Verify() {
             }
         }
         setLoading(false);
-    }
+    };
 
     const resendEmail = async () => {
         setResend(1);
         const resp = await getOtt(email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
-    }
+    };
 
     if (!email) {
         return null;
     }
 
-    return (<Container>
-        <Image alt='Email Sent' src='/email_sent.svg' />
-        <Card style={{ minWidth: '300px' }} className="text-center">
-            <Card.Body>
-                <Card.Title>{constants.VERIFY_EMAIL}</Card.Title>
-                {constants.EMAIL_SENT({ email })}
-                {constants.CHECK_INBOX}<br />
-                <br />
-                <Formik<formValues>
-                    initialValues={{ ott: '' }}
-                    validationSchema={Yup.object().shape({
-                        ott: Yup.string().required(constants.REQUIRED),
-                    })}
-                    onSubmit={onSubmit}
-                >
-                    {({ values, touched, errors, handleChange, handleBlur, handleSubmit }) => (
-                        <Form noValidate onSubmit={handleSubmit}>
-                            <Form.Group>
-                                <Form.Control
-                                    className="text-center"
-                                    type='text'
-                                    value={values.ott}
-                                    onChange={handleChange('ott')}
-                                    onBlur={handleBlur('ott')}
-                                    isInvalid={Boolean(touched.ott && errors.ott)}
-                                    placeholder={constants.ENTER_OTT}
-                                    disabled={loading}
-                                />
-                                <Form.Control.Feedback type='invalid'>
-                                    {errors.ott}
-                                </Form.Control.Feedback>
-                            </Form.Group>
-                            <Button type="submit" block disabled={loading}>{constants.VERIFY}</Button>
-                            <br />
-                            {resend === 0 && <a href="#" onClick={resendEmail}>{constants.RESEND_MAIL}</a>}
-                            {resend === 1 && <span>{constants.SENDING}</span>}
-                            {resend === 2 && <span>{constants.SENT}</span>}
-                        </Form>
-                    )}
-                </Formik>
-            </Card.Body>
-        </Card>
-    </Container>)
+    return (
+        <Container>
+            <Image alt="Email Sent" src="/email_sent.svg" />
+            <Card style={{ minWidth: '300px' }} className="text-center">
+                <Card.Body>
+                    <Card.Title>{constants.VERIFY_EMAIL}</Card.Title>
+                    {constants.EMAIL_SENT({ email })}
+                    {constants.CHECK_INBOX}
+                    <br />
+                    <br />
+                    <Formik<formValues>
+                        initialValues={{ ott: '' }}
+                        validationSchema={Yup.object().shape({
+                            ott: Yup.string().required(constants.REQUIRED),
+                        })}
+                        onSubmit={onSubmit}
+                    >
+                        {({
+                            values,
+                            touched,
+                            errors,
+                            handleChange,
+                            handleBlur,
+                            handleSubmit,
+                        }) => (
+                            <Form noValidate onSubmit={handleSubmit}>
+                                <Form.Group>
+                                    <Form.Control
+                                        className="text-center"
+                                        type="text"
+                                        value={values.ott}
+                                        onChange={handleChange('ott')}
+                                        onBlur={handleBlur('ott')}
+                                        isInvalid={Boolean(
+                                            touched.ott && errors.ott
+                                        )}
+                                        placeholder={constants.ENTER_OTT}
+                                        disabled={loading}
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        {errors.ott}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+                                <Button type="submit" block disabled={loading}>
+                                    {constants.VERIFY}
+                                </Button>
+                                <br />
+                                {resend === 0 && (
+                                    <a href="#" onClick={resendEmail}>
+                                        {constants.RESEND_MAIL}
+                                    </a>
+                                )}
+                                {resend === 1 && (
+                                    <span>{constants.SENDING}</span>
+                                )}
+                                {resend === 2 && <span>{constants.SENT}</span>}
+                            </Form>
+                        )}
+                    </Formik>
+                </Card.Body>
+            </Card>
+        </Container>
+    );
 }

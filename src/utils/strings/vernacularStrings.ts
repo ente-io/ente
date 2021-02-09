@@ -2,8 +2,8 @@ import englishConstants from './englishConstants';
 
 /** Enums of supported locale */
 export enum locale {
-    en='en',
-    hi='hi',
+    en = 'en',
+    hi = 'hi',
 }
 
 /**
@@ -16,7 +16,7 @@ export enum locale {
  * @param keys
  */
 export function template(strings: TemplateStringsArray, ...keys: string[]) {
-    return ((...values: any[]) => {
+    return (...values: any[]) => {
         const dict = values[values.length - 1] || {};
         const result = [strings[0]];
         keys.forEach((key, i) => {
@@ -24,16 +24,16 @@ export function template(strings: TemplateStringsArray, ...keys: string[]) {
             result.push(value, strings[i + 1]);
         });
         return result.join('');
-    });
+    };
 }
 
 /** Type for vernacular string constants */
 export type VernacularConstants<T> = {
-    [locale.en]: T,
+    [locale.en]: T;
     [locale.hi]?: {
         [x in keyof T]?: string | ReturnType<typeof template>;
-    },
-}
+    };
+};
 
 /**
  * Returns a valid locale from string and defaults
@@ -43,10 +43,10 @@ export type VernacularConstants<T> = {
  */
 export const getLocale = (lang: string) => {
     switch (lang) {
-    case locale.hi:
-        return locale.hi;
-    default:
-        return locale.en;
+        case locale.hi:
+            return locale.hi;
+        default:
+            return locale.en;
     }
 };
 
@@ -62,7 +62,8 @@ const globalConstants: VernacularConstants<typeof englishConstants> = {
  * @param localConstants
  */
 export function getConstantValue<T>(localConstants?: VernacularConstants<T>) {
-    const searchParam = typeof window !== 'undefined' ? window.location.search : '';
+    const searchParam =
+        typeof window !== 'undefined' ? window.location.search : '';
     const query = new URLSearchParams(searchParam);
     const currLocale = getLocale(query.get('lang'));
 
