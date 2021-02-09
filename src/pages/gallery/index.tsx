@@ -140,6 +140,9 @@ export default function Gallery(props) {
             setData(data);
             setCollections(collections);
             setCollectionAndItsLatestFile(collectionAndItsLatestFile);
+            const favItemIds = await getFavItemIds(data);
+            setFavItemIds(favItemIds);
+
             setLoading(false);
             setProgress(80);
             await syncWithRemote();
