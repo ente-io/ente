@@ -271,7 +271,7 @@ export const addToFavorites = async (file: file) => {
         );
         await localForage.setItem(FAV_COLLECTION, favCollection);
     }
-    await addtoCollection(favCollection, [file]);
+    await addToCollection(favCollection, [file]);
 };
 
 export const removeFromFavorites = async (file: file) => {
@@ -281,7 +281,7 @@ export const removeFromFavorites = async (file: file) => {
     await removeFromCollection(favCollection, [file]);
 };
 
-const addtoCollection = async (collection: collection, files: file[]) => {
+const addToCollection = async (collection: collection, files: file[]) => {
     try {
         const params = new Object();
         const worker = await new CryptoWorker();
