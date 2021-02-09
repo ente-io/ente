@@ -285,7 +285,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final actions = List<Widget>();
     if (containsUploadedFile) {
       actions.add(CupertinoActionSheetAction(
-        child: Text("this Device"),
+        child: Text("this device"),
         isDestructiveAction: true,
         onPressed: () async {
           await deleteFilesOnDeviceOnly(
