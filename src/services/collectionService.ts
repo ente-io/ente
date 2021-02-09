@@ -165,7 +165,7 @@ export const getCollectionLatestFile = (
     const collectionMap = new Map<number, collection>();
 
     collections.forEach((collection) =>
-        collectionMap.set(Number(collection.id), collection)
+        collectionMap.set(collection.id, collection)
     );
     files.forEach((file) => {
         if (!latestFile.has(file.collectionID)) {
@@ -188,7 +188,7 @@ export const getFavItemIds = async (files: file[]): Promise<Set<number>> => {
 
     return new Set(
         files
-            .filter((file) => file.collectionID === Number(favCollection.id))
+            .filter((file) => file.collectionID === favCollection.id)
             .map((file): number => file.id)
     );
 };
@@ -275,7 +275,9 @@ export const addToFavorites = async (file: file) => {
 };
 
 export const removeFromFavorites = async (file: file) => {
-    let favCollection: collection = await localForage.getItem<collection>(FAV_COLLECTION);
+    let favCollection: collection = await localForage.getItem<collection>(
+        FAV_COLLECTION
+    );
     await removeFromCollection(favCollection, [file]);
 };
 
@@ -287,7 +289,7 @@ const addtoCollection = async (collection: collection, files: file[]) => {
         params['collectionID'] = collection.id;
         await Promise.all(
             files.map(async (file) => {
-                file.collectionID = Number(collection.id);
+                file.collectionID = collection.id;
                 const newEncryptedKey: keyEncryptionResult = await worker.encryptToB64(
                     file.key,
                     collection.key
@@ -341,10 +343,13 @@ const removeFromCollection = async (collection: collection, files: file[]) => {
 
 const setLocalFavoriteCollection = async (collections: collection[]) => {
     const localFavCollection = await localForage.getItem(FAV_COLLECTION);
-    if (localFavCollection) return;
+    if (localFavCollection) {
+        return;
+    }
     const favCollection = collections.filter(
         (collection) => collection.type == CollectionType.favorites
     );
-    if (favCollection.length > 0)
+    if (favCollection.length > 0) {
         await localForage.setItem(FAV_COLLECTION, favCollection[0]);
+    }
 };
