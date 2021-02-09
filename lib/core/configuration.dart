@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
@@ -17,6 +18,7 @@ import 'package:photos/utils/crypto_util.dart';
 class Configuration {
   Configuration._privateConstructor();
   static final Configuration instance = Configuration._privateConstructor();
+  static final _logger = Logger("Configuration");
 
   static const endpointKey = "endpoint";
   static const userIDKey = "user_id";
@@ -44,8 +46,12 @@ class Configuration {
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
     _tempDirectory = _documentsDirectory + "/temp/";
     final tempDirectory = new io.Directory(_tempDirectory);
-    if (tempDirectory.existsSync()) {
-      tempDirectory.deleteSync(recursive: true);
+    try {
+      if (tempDirectory.existsSync()) {
+        tempDirectory.deleteSync(recursive: true);
+      }
+    } catch (e) {
+      _logger.warning(e);
     }
     tempDirectory.createSync(recursive: true);
     _key = await _secureStorage.read(key: keyKey);
