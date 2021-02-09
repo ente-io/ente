@@ -9,7 +9,7 @@ function CollectionDropZone({
     closeModal,
     showModal,
     refetchData,
-    collectionLatestFile,
+    collectionAndItsLatestFile,
     setProgressView,
     progressBarProps
 
@@ -21,7 +21,7 @@ function CollectionDropZone({
         progressBarProps.setPercentComplete(0);
         setProgressView(true);
 
-        await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token, progressBarProps);
+        await UploadService.uploadFiles(acceptedFiles, collectionAndItsLatestFile, token, progressBarProps);
         refetchData();
         setProgressView(false);
     }

@@ -44,7 +44,7 @@ interface collectionAttributes {
     pathDecryptionNonce?: string;
 }
 
-export interface collectionLatestFile {
+export interface CollectionAndItsLatestFile {
     collection: collection;
     file: file;
 }
@@ -157,10 +157,10 @@ export const syncCollections = async (token: string, key: string) => {
     return collections;
 };
 
-export const getCollectionLatestFile = (
+export const getCollectionAndItsLatestFile = (
     collections: collection[],
     files: file[]
-): collectionLatestFile[] => {
+): CollectionAndItsLatestFile[] => {
     const latestFile = new Map<number, file>();
     const collectionMap = new Map<number, collection>();
 
@@ -172,14 +172,14 @@ export const getCollectionLatestFile = (
             latestFile.set(file.collectionID, file);
         }
     });
-    let allCollectionLatestFile: collectionLatestFile[] = [];
+    let allCollectionAndItsLatestFile: CollectionAndItsLatestFile[] = [];
     for (const [collectionID, file] of latestFile) {
-        allCollectionLatestFile.push({
+        allCollectionAndItsLatestFile.push({
             collection: collectionMap.get(collectionID),
             file,
         });
     }
-    return allCollectionLatestFile;
+    return allCollectionAndItsLatestFile;
 };
 
 export const getFavItemIds = async (files: file[]): Promise<Set<number>> => {

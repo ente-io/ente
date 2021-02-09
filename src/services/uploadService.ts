@@ -3,7 +3,7 @@ import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
 import EXIF from "exif-js";
 import { fileAttribute } from './fileService';
-import { collection, collectionLatestFile } from "./collectionService"
+import { collection, CollectionAndItsLatestFile } from "./collectionService"
 import { FILE_TYPE } from 'pages/gallery';
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
@@ -80,7 +80,7 @@ class UploadService {
     private totalFilesCount: number
     private metadataMap: Map<string, Object>;
 
-    public async uploadFiles(recievedFiles: File[], collectionLatestFile: collectionLatestFile, token: string, progressBarProps) {
+    public async uploadFiles(recievedFiles: File[], collectionAndItsLatestFile: CollectionAndItsLatestFile, token: string, progressBarProps) {
         try {
             const worker = await new CryptoWorker();
             this.stepsCompleted = 0;
@@ -107,7 +107,7 @@ class UploadService {
             while (actualFiles.length > 0) {
                 var promises = [];
                 for (var i = 0; i < 5 && actualFiles.length > 0; i++)
-                    promises.push(this.uploadHelper(progressBarProps, actualFiles.pop(), collectionLatestFile.collection, token));
+                    promises.push(this.uploadHelper(progressBarProps, actualFiles.pop(), collectionAndItsLatestFile.collection, token));
                 uploadFilesWithoutMetaData.push(...await Promise.all(promises));
             }
 

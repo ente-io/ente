@@ -23,14 +23,14 @@ import Upload from './components/Upload';
 import {
     collection,
     syncCollections,
-    collectionLatestFile,
-    getCollectionLatestFile,
+    CollectionAndItsLatestFile,
+    getCollectionAndItsLatestFile,
     getFavItemIds,
     getLocalCollections,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 
-const DATE_CONTAINER_HEIGHT = 30;
+const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
 
@@ -108,9 +108,10 @@ export default function Gallery(props) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [collections, setCollections] = useState<collection[]>([]);
-    const [collectionLatestFile, setCollectionLatestFile] = useState<
-        collectionLatestFile[]
-    >([]);
+    const [
+        collectionAndItsLatestFile,
+        setCollectionAndItsLatestFile,
+    ] = useState<CollectionAndItsLatestFile[]>([]);
     const [data, setData] = useState<file[]>();
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [open, setOpen] = useState(false);
@@ -132,8 +133,13 @@ export default function Gallery(props) {
             setLoading(true);
             const data = await localFiles();
             const collections = await getLocalCollections();
+            const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
+                collections,
+                data
+            );
             setData(data);
             setCollections(collections);
+            setCollectionAndItsLatestFile(collectionAndItsLatestFile);
             setLoading(false);
             setProgress(80);
             await syncWithRemote();
@@ -148,7 +154,7 @@ export default function Gallery(props) {
         const encryptionKey = await getActualKey();
         const collections = await syncCollections(token, encryptionKey);
         const { data, isUpdated } = await syncData(token, collections);
-        const collectionLatestFile = await getCollectionLatestFile(
+        const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
             collections,
             data
         );
@@ -157,7 +163,7 @@ export default function Gallery(props) {
         if (isUpdated) {
             setData(data);
         }
-        setCollectionLatestFile(collectionLatestFile);
+        setCollectionAndItsLatestFile(collectionAndItsLatestFile);
         setFavItemIds(favItemIds);
         setSinceTime(new Date().getTime());
         props.setUploadButtonView(true);
@@ -340,7 +346,7 @@ export default function Gallery(props) {
                 uploadModalView={props.uploadModalView}
                 closeUploadModal={props.closeUploadModal}
                 showUploadModal={props.showUploadModal}
-                collectionLatestFile={collectionLatestFile}
+                collectionAndItsLatestFile={collectionAndItsLatestFile}
                 refetchData={syncWithRemote}
             />
             {filteredData.length ? (

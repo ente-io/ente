@@ -10,17 +10,16 @@ function CollectionSelector(props) {
         uploadModalView,
         closeUploadModal,
         showUploadModal,
-        collectionLatestFile,
+        collectionAndItsLatestFile,
         ...rest
     } = props;
 
-
-    const CollectionIcons = collectionLatestFile?.map((item) => (
+    const CollectionIcons = collectionAndItsLatestFile?.map((item) => (
         <CollectionDropZone key={item.collection.id}
             {...rest}
             closeModal={closeUploadModal}
             showModal={showUploadModal}
-            collectionLatestFile={item}
+            collectionAndItsLatestFile={item}
         >
             <Card>
                 <PreviewCard data={item.file} updateUrl={() => { }} forcedEnable />
