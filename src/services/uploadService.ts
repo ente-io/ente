@@ -364,7 +364,6 @@ class UploadService {
                     resolve(blob);
                 }), 'image/jpeg', 0.4
             });
-            console.log(URL.createObjectURL(thumbnailBlob));
             const thumbnail = this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
         } catch (e) {

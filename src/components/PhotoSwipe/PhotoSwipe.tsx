@@ -51,7 +51,6 @@ function PhotoSwipe(props: Iprops) {
     }, [isOpen]);
 
     function updateFavButton() {
-        console.log(this.currItem.id, props.favItemIds)
         setIsFav(isInFav(this?.currItem));
     }
 
@@ -113,14 +112,12 @@ function PhotoSwipe(props: Iprops) {
         if (!isInFav(file)) {
             favItemIds.add(file.id);
             await addToFavorites(file);
-            console.log("added to Favorites");
             setIsFav(true);
             setFavItemIds(favItemIds);
         }
         else {
             favItemIds.delete(file.id);
             await removeFromFavorites(file)
-            console.log("removed from Favorites");
             setIsFav(false);
             setFavItemIds(favItemIds);
 
