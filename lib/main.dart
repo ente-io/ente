@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:background_fetch/background_fetch.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:path_provider/path_provider.dart';
@@ -25,7 +26,8 @@ void main() async {
 }
 
 void _main() {
-  final SentryClient sentry = new SentryClient(dsn: SENTRY_DSN);
+  final SentryClient sentry =
+      new SentryClient(dsn: kDebugMode ? SENTRY_DEBUG_DSN : SENTRY_DSN);
 
   FlutterError.onError = (FlutterErrorDetails details) async {
     FlutterError.dumpErrorToConsole(details, forceReport: true);
