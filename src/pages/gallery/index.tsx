@@ -30,7 +30,7 @@ import {
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 
-const DATE_CONTAINER_HEIGHT = 30;
+const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
 
