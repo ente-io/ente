@@ -30,6 +30,10 @@ import {
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 
+const DATE_CONTAINER_HEIGHT = 30;
+const IMAGE_CONTAINER_HEIGHT = 200;
+const NO_OF_PAGES = 2;
+
 enum ITEM_TYPE {
     TIME = 'TIME',
     TILE = 'TILE',
@@ -405,19 +409,22 @@ export default function Gallery(props) {
                                     }
                                 }
                             });
-
+                            const extraRowsToRender = Math.ceil(
+                                (NO_OF_PAGES * height) / IMAGE_CONTAINER_HEIGHT
+                            );
                             return (
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
                                         ITEM_TYPE.TIME
-                                            ? 45
-                                            : 200
+                                            ? DATE_CONTAINER_HEIGHT
+                                            : IMAGE_CONTAINER_HEIGHT
                                     }
                                     height={height}
                                     width={width}
                                     itemCount={timeStampList.length}
                                     key={`${router.query.collection}-${columns}-${sinceTime}`}
+                                    overscanCount={extraRowsToRender}
                                 >
                                     {({ index, style }) => {
                                         return (
