@@ -29,7 +29,7 @@ import {
     getLocalCollections,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import { ErrorAlert } from './components/ErrorAlert';
+import  ErrorAlert  from './components/ErrorAlert';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;

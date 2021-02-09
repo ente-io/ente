@@ -2,7 +2,7 @@ import React from "react";
 import { Alert } from "react-bootstrap";
 import constants from "utils/strings/constants";
 
-export function ErrorAlert({ errorCode }) {
+export default function ErrorAlert({ errorCode }) {
     let errorMessage;
     switch (errorCode) {
         case 402:
