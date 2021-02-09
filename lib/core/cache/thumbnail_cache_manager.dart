@@ -12,7 +12,7 @@ class ThumbnailCacheManager extends BaseCacheManager {
     return _instance;
   }
 
-  ThumbnailCacheManager._() : super(key, maxNrOfCacheObjects: 2000);
+  ThumbnailCacheManager._() : super(key, maxNrOfCacheObjects: 2500);
 
   @override
   Future<String> getFilePath() async {
