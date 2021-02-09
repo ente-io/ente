@@ -4,14 +4,17 @@ import { getToken } from 'utils/common/key';
 import DropzoneWrapper from './DropzoneWrapper';
 
 
-function CollectionDropZone(props) {
-    const { children,
-        closeModal,
-        showModal,
-        refetchData,
-        collectionLatestFile,
-        setProgressView,
-        progressBarProps, setErrorCode } = props
+function CollectionDropZone({
+    children,
+    closeModal,
+    showModal,
+    refetchData,
+    collectionAndItsLatestFile,
+    setProgressView,
+    progressBarProps,
+    setErrorCode
+}) {
+
     const upload = async (acceptedFiles) => {
         try {
             const token = getToken();
@@ -19,7 +22,7 @@ function CollectionDropZone(props) {
             progressBarProps.setPercentComplete(0);
             setProgressView(true);
 
-            await UploadService.uploadFiles(acceptedFiles, collectionLatestFile, token, progressBarProps);
+            await UploadService.uploadFiles(acceptedFiles, collectionAndItsLatestFile, token, progressBarProps);
             refetchData();
         } catch (err) {
             if (err.response)

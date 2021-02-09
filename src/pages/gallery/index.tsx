@@ -6,7 +6,7 @@ import {
     file,
     getFile,
     getPreview,
-    fetchData,
+    syncData,
     localFiles,
 } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -22,9 +22,9 @@ import Collections from './components/Collections';
 import Upload from './components/Upload';
 import {
     collection,
-    fetchUpdatedCollections,
-    collectionLatestFile,
-    getCollectionLatestFile,
+    syncCollections,
+    CollectionAndItsLatestFile,
+    getCollectionAndItsLatestFile,
     getFavItemIds,
     getLocalCollections,
 } from 'services/collectionService';
@@ -109,9 +109,10 @@ export default function Gallery(props) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [collections, setCollections] = useState<collection[]>([]);
-    const [collectionLatestFile, setCollectionLatestFile] = useState<
-        collectionLatestFile[]
-    >([]);
+    const [
+        collectionAndItsLatestFile,
+        setCollectionAndItsLatestFile,
+    ] = useState<CollectionAndItsLatestFile[]>([]);
     const [data, setData] = useState<file[]>();
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [open, setOpen] = useState(false);
@@ -135,8 +136,16 @@ export default function Gallery(props) {
             setLoading(true);
             const data = await localFiles();
             const collections = await getLocalCollections();
+            const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
+                collections,
+                data
+            );
             setData(data);
             setCollections(collections);
+            setCollectionAndItsLatestFile(collectionAndItsLatestFile);
+            const favItemIds = await getFavItemIds(data);
+            setFavItemIds(favItemIds);
+
             setLoading(false);
             setProgress(80);
             await syncWithRemote();
@@ -149,22 +158,18 @@ export default function Gallery(props) {
     const syncWithRemote = async () => {
         const token = getToken();
         const encryptionKey = await getActualKey();
-        const updatedCollections = await fetchUpdatedCollections(
-            token,
-            encryptionKey
-        );
-        const data = await fetchData(token, updatedCollections);
-        const collections = await getLocalCollections();
-        const collectionLatestFile = await getCollectionLatestFile(
+        const collections = await syncCollections(token, encryptionKey);
+        const { data, isUpdated } = await syncData(token, collections);
+        const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
             collections,
             data
         );
         const favItemIds = await getFavItemIds(data);
-        if (updatedCollections.length > 0) {
-            setCollections(collections);
+        setCollections(collections);
+        if (isUpdated) {
             setData(data);
         }
-        setCollectionLatestFile(collectionLatestFile);
+        setCollectionAndItsLatestFile(collectionAndItsLatestFile);
         setFavItemIds(favItemIds);
         setSinceTime(new Date().getTime());
         props.setUploadButtonView(true);
@@ -298,7 +303,7 @@ export default function Gallery(props) {
         );
     }
 
-    const selectCollection = (id?: string) => {
+    const selectCollection = (id?: number) => {
         const href = `/gallery?collection=${id || ''}`;
         router.push(href, undefined, { shallow: true });
     };
@@ -348,7 +353,7 @@ export default function Gallery(props) {
                 uploadModalView={props.uploadModalView}
                 closeUploadModal={props.closeUploadModal}
                 showUploadModal={props.showUploadModal}
-                collectionLatestFile={collectionLatestFile}
+                collectionAndItsLatestFile={collectionAndItsLatestFile}
                 refetchData={syncWithRemote}
                 setErrorCode={setErrorCode}
             />

@@ -16,6 +16,8 @@ localForage.config({
     storeName: 'files',
 });
 
+const FILES = 'files';
+
 export interface fileAttribute {
     encryptedData: Uint8Array | string;
     decryptionHeader: string;
@@ -28,7 +30,6 @@ export interface user {
     name: string;
     email: string;
 }
-
 
 export interface file {
     id: number;
@@ -49,92 +50,95 @@ export interface file {
     updationTime: number;
 }
 
+export const syncData = async (token, collections) => {
+    const { files: resp, isUpdated } = await syncFiles(token, collections);
 
-
-export const fetchData = async (token, collections) => {
-    const resp = await fetchFiles(
-        token,
-        collections
-    );
-
-    return (
-        resp.map((item) => ({
+    return {
+        data: resp.map((item) => ({
             ...item,
             w: window.innerWidth,
             h: window.innerHeight,
-        }))
-    );
-}
+        })),
+        isUpdated,
+    };
+};
 
 export const localFiles = async () => {
-    let files: Array<file> = (await localForage.getItem<file[]>('files')) || [];
-    return files;
-}
-
-export const fetchFiles = async (
-    token: string,
-    collections: collection[]
-) => {
-    let files = await localFiles();
-    const collectionUpdationTime = new Map<string, string>();
-    let fetchedFiles = [];
-    for (let collection of collections) {
-        const files = await getFiles(collection, null, 100, token);
-        fetchedFiles.push(...files);
-        collectionUpdationTime.set(collection.id, files.length > 0 ? files.slice(-1)[0].updationTime.toString() : "0");
-    }
-    files.push(...fetchedFiles);
-    var latestFiles = new Map<string, file>();
-    files.forEach((file) => {
-        let uid = `${file.collectionID}-${file.id}`;
-        if (!latestFiles.has(uid) || latestFiles.get(uid).updationTime < file.updationTime) {
-            latestFiles.set(uid, file);
-        }
-    });
-    files = [];
-    for (const [_, file] of latestFiles) {
-        if (!file.isDeleted)
-            files.push(file);
-    }
-    files = files.sort(
-        (a, b) => b.metadata.creationTime - a.metadata.creationTime
-    );
-    await localForage.setItem('files', files);
-    for (let [collectionID, updationTime] of collectionUpdationTime) {
-        await localForage.setItem(`${collectionID}-time`, updationTime);
-    }
-    let updationTime = await localForage.getItem('collection-update-time') as number;
-    for (let collection of collections) {
-        updationTime = Math.max(updationTime, collection.updationTime);
-    }
-    await localForage.setItem('collection-update-time', updationTime);
+    let files: Array<file> = (await localForage.getItem<file[]>(FILES)) || [];
     return files;
 };
 
-export const getFiles = async (collection: collection, sinceTime: string, limit: number, token: string): Promise<file[]> => {
+export const syncFiles = async (token: string, collections: collection[]) => {
+    let files = await localFiles();
+    let isUpdated = false;
+    files = await removeDeletedCollectionFiles(collections, files);
+    for (let collection of collections) {
+        const lastSyncTime =
+            (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
+        if (collection.updationTime === lastSyncTime) {
+            continue;
+        }
+        isUpdated = true;
+        let fetchedFiles =
+            (await getFiles(collection, lastSyncTime, 100, token)) ?? [];
+        files.push(...fetchedFiles);
+        var latestVersionFiles = new Map<number, file>();
+        files.forEach((file) => {
+            if (
+                !latestVersionFiles.has(file.id) ||
+                latestVersionFiles.get(file.id).updationTime < file.updationTime
+            ) {
+                latestVersionFiles.set(file.id, file);
+            }
+        });
+        files = [];
+        for (const [_, file] of latestVersionFiles) {
+            if (file.isDeleted) {
+                continue;
+            }
+            files.push(file);
+        }
+        files = files.sort(
+            (a, b) => b.metadata.creationTime - a.metadata.creationTime
+        );
+        await localForage.setItem('files', files);
+        await localForage.setItem(
+            `${collection.id}-time`,
+            collection.updationTime
+        );
+    }
+    return { files, isUpdated };
+};
+
+export const getFiles = async (
+    collection: collection,
+    sinceTime: number,
+    limit: number,
+    token: string
+): Promise<file[]> => {
     try {
         const worker = await new CryptoWorker();
         let promises: Promise<file>[] = [];
-        if (collection.isDeleted) {
-            // TODO: Remove files in this collection from localForage and cache
-            return;
-        }
         let time =
-            sinceTime || (await localForage.getItem<string>(`${collection.id}-time`)) || "0";
+            sinceTime ||
+            (await localForage.getItem<number>(`${collection.id}-time`)) ||
+            0;
         let resp;
         do {
-            resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
-                collectionID: collection.id,
-                sinceTime: time,
-                limit: limit.toString(),
-            },
+            resp = await HTTPService.get(
+                `${ENDPOINT}/collections/diff`,
                 {
-                    'X-Auth-Token': token
-                });
-            promises.push(...resp.data.diff.map(
-                async (file: file) => {
+                    collectionID: collection.id.toString(),
+                    sinceTime: time.toString(),
+                    limit: limit.toString(),
+                },
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+            promises.push(
+                ...resp.data.diff.map(async (file: file) => {
                     if (!file.isDeleted) {
-
                         file.key = await worker.decryptB64(
                             file.encryptedKey,
                             file.keyDecryptionNonce,
@@ -143,8 +147,8 @@ export const getFiles = async (collection: collection, sinceTime: string, limit:
                         file.metadata = await worker.decryptMetadata(file);
                     }
                     return file;
-                }
-            ));
+                })
+            );
 
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime.toString();
@@ -152,9 +156,9 @@ export const getFiles = async (collection: collection, sinceTime: string, limit:
         } while (resp.data.diff.length === limit);
         return await Promise.all(promises);
     } catch (e) {
-        console.log("Get files failed" + e);
+        console.log('Get files failed' + e);
     }
-}
+};
 export const getPreview = async (token: string, file: file) => {
     try {
         const cache = await caches.open('thumbs');
@@ -175,13 +179,16 @@ export const getPreview = async (token: string, file: file) => {
             file.key
         );
         try {
-            await cache.put(file.id.toString(), new Response(new Blob([decrypted])));
+            await cache.put(
+                file.id.toString(),
+                new Response(new Blob([decrypted]))
+            );
         } catch (e) {
             // TODO: handle storage full exception.
         }
         return URL.createObjectURL(new Blob([decrypted]));
     } catch (e) {
-        console.log("get preview Failed" + e);
+        console.log('get preview Failed' + e);
     }
 };
 
@@ -200,9 +207,19 @@ export const getFile = async (token: string, file: file) => {
             file.key
         );
         return URL.createObjectURL(new Blob([decrypted]));
-    }
-    catch (e) {
-        console.log("get file failed " + e);
+    } catch (e) {
+        console.log('get file failed ' + e);
     }
 };
 
+const removeDeletedCollectionFiles = async (
+    collections: collection[],
+    files: file[]
+) => {
+    const syncedCollectionIds = new Set<number>();
+    for (let collection of collections) {
+        syncedCollectionIds.add(collection.id);
+    }
+    files = files.filter((file) => syncedCollectionIds.has(file.collectionID));
+    return files;
+};
