@@ -24,10 +24,7 @@ void main() async {
   await _runWithLogs(_main);
 }
 
-void _main() async {
-  await _init();
-  _sync();
-
+void _main() {
   final SentryClient sentry = new SentryClient(dsn: SENTRY_DSN);
 
   FlutterError.onError = (FlutterErrorDetails details) async {
@@ -36,7 +33,9 @@ void _main() async {
   };
 
   runZoned(
-    () {
+    () async {
+      await _init();
+      _sync();
       runApp(MyApp());
       BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
     },
