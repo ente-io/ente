@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:collection';
 import 'dart:io' as io;
 import 'dart:io';
 import 'dart:typed_data';
@@ -161,8 +163,26 @@ Future<Uint8List> getBytesFromDisk(File file, {int quality = 100}) async {
 final Map<int, Future<io.File>> fileDownloadsInProgress =
     Map<int, Future<io.File>>();
 
-final Map<int, Future<io.File>> thumbnailDownloadsInProgress =
-    Map<int, Future<io.File>>();
+final _thumbnailQueue = LinkedHashMap<int, FileDownloadItem>();
+int _currentlyDownloading = 0;
+int kMaximumConcurrentDownloads = 32;
+
+class FileDownloadItem {
+  final File file;
+  final Completer<io.File> completer;
+  DownloadStatus status;
+
+  FileDownloadItem(
+    this.file,
+    this.completer, {
+    this.status = DownloadStatus.not_started,
+  });
+}
+
+enum DownloadStatus {
+  not_started,
+  in_progress,
+}
 
 Future<io.File> getFileFromServer(File file,
     {ProgressCallback progressCallback}) async {
@@ -190,19 +210,53 @@ Future<io.File> getThumbnailFromServer(File file) async {
       .getFileFromCache(file.getThumbnailUrl())
       .then((info) {
     if (info == null) {
-      if (!thumbnailDownloadsInProgress.containsKey(file.uploadedFileID)) {
-        thumbnailDownloadsInProgress[file.uploadedFileID] =
-            _downloadAndDecryptThumbnail(file).then((data) {
-          ThumbnailFileLruCache.put(file, data);
-          return data;
-        });
+      if (!_thumbnailQueue.containsKey(file.uploadedFileID)) {
+        final completer = Completer<io.File>();
+        _thumbnailQueue[file.uploadedFileID] =
+            FileDownloadItem(file, completer);
+        _pollQueue();
+        return completer.future;
+      } else {
+        return _thumbnailQueue[file.uploadedFileID].completer.future;
       }
-      return thumbnailDownloadsInProgress[file.uploadedFileID];
     } else {
       ThumbnailFileLruCache.put(file, info.file);
       return info.file;
     }
   });
+}
+
+void removePendingGetThumbnailRequestIfAny(File file) {
+  if (_thumbnailQueue[file.uploadedFileID] != null &&
+      _thumbnailQueue[file.uploadedFileID].status ==
+          DownloadStatus.not_started) {
+    _thumbnailQueue.remove(file.uploadedFileID);
+  }
+}
+
+void _pollQueue() async {
+  if (_thumbnailQueue.length > 0 &&
+      _currentlyDownloading < kMaximumConcurrentDownloads) {
+    final firstPendingEntry = _thumbnailQueue.entries.firstWhere(
+        (entry) => entry.value.status == DownloadStatus.not_started,
+        orElse: () => null);
+    if (firstPendingEntry != null) {
+      final item = firstPendingEntry.value;
+      _currentlyDownloading++;
+      item.status = DownloadStatus.in_progress;
+      try {
+        final data = await _downloadAndDecryptThumbnail(item.file);
+        ThumbnailFileLruCache.put(item.file, data);
+        item.completer.complete(data);
+      } catch (e) {
+        _logger.severe("Downloading thumbnail failed", e);
+        item.completer.completeError(e);
+      }
+      _currentlyDownloading--;
+      _thumbnailQueue.remove(firstPendingEntry.key);
+      _pollQueue();
+    }
+  }
 }
 
 Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
@@ -272,47 +326,40 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
 }
 
 Future<io.File> _downloadAndDecryptThumbnail(File file) async {
+  _logger.info("Downloading thumbnail for " + file.title);
   final temporaryPath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       "_thumbnail.decrypted";
-  return Network.instance
-      .getDio()
-      .download(
+  await Network.instance.getDio().download(
         file.getThumbnailUrl(),
         temporaryPath,
         options: Options(
           headers: {"X-Auth-Token": Configuration.instance.getToken()},
         ),
-      )
-      .then((_) async {
-    final encryptedFile = io.File(temporaryPath);
-    final thumbnailDecryptionKey = decryptFileKey(file);
-    var data = CryptoUtil.decryptChaCha(
-      encryptedFile.readAsBytesSync(),
-      thumbnailDecryptionKey,
-      Sodium.base642bin(file.thumbnailDecryptionHeader),
-    );
-    final thumbnailSize = data.length;
-    if (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
-      data = await compressThumbnail(data);
-      _logger.info("Compressed thumbnail from " +
-          thumbnailSize.toString() +
-          " to " +
-          data.length.toString());
-    }
-    encryptedFile.deleteSync();
-    final cachedThumbnail = ThumbnailCacheManager().putFile(
-      file.getThumbnailUrl(),
-      data,
-      eTag: file.getThumbnailUrl(),
-      maxAge: Duration(days: 365),
-    );
-    thumbnailDownloadsInProgress.remove(file.uploadedFileID);
-    return cachedThumbnail;
-  }).catchError((e, s) {
-    _logger.severe("Error downloading thumbnail ", e, s);
-    thumbnailDownloadsInProgress.remove(file.uploadedFileID);
-  });
+      );
+  final encryptedFile = io.File(temporaryPath);
+  final thumbnailDecryptionKey = decryptFileKey(file);
+  var data = CryptoUtil.decryptChaCha(
+    encryptedFile.readAsBytesSync(),
+    thumbnailDecryptionKey,
+    Sodium.base642bin(file.thumbnailDecryptionHeader),
+  );
+  final thumbnailSize = data.length;
+  if (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
+    data = await compressThumbnail(data);
+    _logger.info("Compressed thumbnail from " +
+        thumbnailSize.toString() +
+        " to " +
+        data.length.toString());
+  }
+  encryptedFile.deleteSync();
+  final cachedThumbnail = ThumbnailCacheManager().putFile(
+    file.getThumbnailUrl(),
+    data,
+    eTag: file.getThumbnailUrl(),
+    maxAge: Duration(days: 365),
+  );
+  return cachedThumbnail;
 }
 
 Uint8List decryptFileKey(File file) {
