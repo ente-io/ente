@@ -7,21 +7,33 @@ import {
     getFile,
     getPreview,
     fetchData,
+    localFiles,
 } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
-import { getActualKey } from 'utils/common/key';
+import { getActualKey, getToken } from 'utils/common/key';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { Options } from 'photoswipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
+import LoadingBar from 'react-top-loading-bar';
 import Collections from './components/Collections';
-import SadFace from 'components/SadFace';
 import Upload from './components/Upload';
-import { collection, fetchCollections, collectionLatestFile, getCollectionLatestFile, getFavItemIds } from 'services/collectionService';
+import {
+    collection,
+    fetchUpdatedCollections,
+    collectionLatestFile,
+    getCollectionLatestFile,
+    getFavItemIds,
+    getLocalCollections,
+} from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import { ErrorAlert } from './components/ErrorAlert';
+
+const DATE_CONTAINER_HEIGHT = 45;
+const IMAGE_CONTAINER_HEIGHT = 200;
+const NO_OF_PAGES = 2;
 
 enum ITEM_TYPE {
     TIME = 'TIME',
@@ -30,7 +42,7 @@ enum ITEM_TYPE {
 export enum FILE_TYPE {
     IMAGE,
     VIDEO,
-    OTHERS
+    OTHERS,
 }
 
 interface TimeStampListItem {
@@ -68,8 +80,11 @@ const DeadCenter = styled.div`
     flex-direction: column;
 `;
 
-const ListContainer = styled.div`
-    display: flex;
+const ListContainer = styled.div<{ columns: number }>`
+    display: grid;
+    grid-template-columns: repeat(${(props) => props.columns}, 1fr);
+    grid-column-gap: 8px;
+    padding: 0 8px;
     max-width: 100%;
     color: #fff;
 
@@ -87,13 +102,12 @@ const ListContainer = styled.div`
 `;
 
 const DateContainer = styled.div`
-    padding: 0 4px;
+    padding-top: 15px;
 `;
 
 export default function Gallery(props) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [reload, setReload] = useState(0);
     const [collections, setCollections] = useState<collection[]>([]);
     const [collectionLatestFile, setCollectionLatestFile] = useState<
         collectionLatestFile[]
@@ -108,37 +122,53 @@ export default function Gallery(props) {
     const fetching: { [k: number]: boolean } = {};
     const [errorCode, setErrorCode] = useState<number>(null);
 
+    const [sinceTime, setSinceTime] = useState(0);
+
+    const [progress, setProgress] = useState(0);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        const token = getData(LS_KEYS.USER).token;
         if (!key) {
             router.push('/');
         }
         const main = async () => {
             setLoading(true);
-            const encryptionKey = await getActualKey();
-            const collections = await fetchCollections(token, encryptionKey);
-            const data = await fetchData(token, collections);
-            const collectionLatestFile = await getCollectionLatestFile(collections, token);
-            const favItemIds = await getFavItemIds(data);
-            setCollections(collections);
+            const data = await localFiles();
+            const collections = await getLocalCollections();
             setData(data);
-            setCollectionLatestFile(collectionLatestFile);
-            setFavItemIds(favItemIds);
+            setCollections(collections);
             setLoading(false);
+            setProgress(80);
+            await syncWithRemote();
+            setProgress(100);
         };
         main();
         props.setUploadButtonView(true);
-    }, [reload]);
+    }, []);
 
-    if (!data || loading) {
-        return (
-            <div className='text-center'>
-                <Spinner animation='border' variant='primary' />
-            </div>
+    const syncWithRemote = async () => {
+        const token = getToken();
+        const encryptionKey = await getActualKey();
+        const updatedCollections = await fetchUpdatedCollections(
+            token,
+            encryptionKey
         );
-    }
+        const data = await fetchData(token, updatedCollections);
+        const collections = await getLocalCollections();
+        const collectionLatestFile = await getCollectionLatestFile(
+            collections,
+            data
+        );
+        const favItemIds = await getFavItemIds(data);
+        if (updatedCollections.length > 0) {
+            setCollections(collections);
+            setData(data);
+        }
+        setCollectionLatestFile(collectionLatestFile);
+        setFavItemIds(favItemIds);
+        setSinceTime(new Date().getTime());
+        props.setUploadButtonView(true);
+    };
 
     const updateUrl = (index: number) => (url: string) => {
         data[index] = {
@@ -147,7 +177,10 @@ export default function Gallery(props) {
             w: window.innerWidth,
             h: window.innerHeight,
         };
-        if (data[index].metadata.fileType === FILE_TYPE.VIDEO && !data[index].html) {
+        if (
+            data[index].metadata.fileType === FILE_TYPE.VIDEO &&
+            !data[index].html
+        ) {
             data[index].html = `
                 <div class="video-loading">
                     <img src="${url}" />
@@ -158,7 +191,10 @@ export default function Gallery(props) {
             `;
             delete data[index].src;
         }
-        if (data[index].metadata.fileType === FILE_TYPE.IMAGE && !data[index].src) {
+        if (
+            data[index].metadata.fileType === FILE_TYPE.IMAGE &&
+            !data[index].src
+        ) {
             data[index].src = url;
         }
         setData(data);
@@ -185,7 +221,7 @@ export default function Gallery(props) {
 
     const handleClose = () => {
         setOpen(false);
-        // setReload(Math.random());
+        // syncWithRemote();
     };
 
     const onThumbnailClick = (index: number) => () => {
@@ -225,7 +261,10 @@ export default function Gallery(props) {
                 // ignore
             }
         }
-        if ((!item.src || item.src === item.msrc) && !fetching[item.dataIndex]) {
+        if (
+            (!item.src || item.src === item.msrc) &&
+            !fetching[item.dataIndex]
+        ) {
             fetching[item.dataIndex] = true;
             const url = await getFile(token, item);
             updateSrcUrl(item.dataIndex, url);
@@ -250,6 +289,14 @@ export default function Gallery(props) {
             }
         }
     };
+
+    if (!data || loading) {
+        return (
+            <div className="text-center">
+                <Spinner animation="border" variant="primary" />
+            </div>
+        );
+    }
 
     const selectCollection = (id?: string) => {
         const href = `/gallery?collection=${id || ''}`;
@@ -287,6 +334,11 @@ export default function Gallery(props) {
     return (
         <>
             <ErrorAlert errorCode={errorCode} />
+            <LoadingBar
+                color="#007bff"
+                progress={progress}
+                onLoaderFinished={() => setProgress(0)}
+            />
             <Collections
                 collections={collections}
                 selected={router.query.collection?.toString()}
@@ -297,9 +349,8 @@ export default function Gallery(props) {
                 closeUploadModal={props.closeUploadModal}
                 showUploadModal={props.showUploadModal}
                 collectionLatestFile={collectionLatestFile}
-                refetchData={() => setReload(Math.random())}
+                refetchData={syncWithRemote}
                 setErrorCode={setErrorCode}
-
             />
             {filteredData.length ? (
                 <Container>
@@ -322,20 +373,28 @@ export default function Gallery(props) {
                             filteredData.forEach((item, index) => {
                                 if (
                                     !isSameDay(
-                                        new Date(item.metadata.creationTime / 1000),
+                                        new Date(
+                                            item.metadata.creationTime / 1000
+                                        ),
                                         new Date(currentDate)
                                     )
                                 ) {
-                                    currentDate = item.metadata.creationTime / 1000;
-                                    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-                                        weekday: 'short',
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                    });
+                                    currentDate =
+                                        item.metadata.creationTime / 1000;
+                                    const dateTimeFormat = new Intl.DateTimeFormat(
+                                        'en-IN',
+                                        {
+                                            weekday: 'short',
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                        }
+                                    );
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TIME,
-                                        date: dateTimeFormat.format(currentDate),
+                                        date: dateTimeFormat.format(
+                                            currentDate
+                                        ),
                                     });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TILE,
@@ -345,7 +404,9 @@ export default function Gallery(props) {
                                     listItemIndex = 1;
                                 } else {
                                     if (listItemIndex < columns) {
-                                        timeStampList[timeStampList.length - 1].items.push(item);
+                                        timeStampList[
+                                            timeStampList.length - 1
+                                        ].items.push(item);
                                         listItemIndex++;
                                     } else {
                                         listItemIndex = 1;
@@ -357,36 +418,61 @@ export default function Gallery(props) {
                                     }
                                 }
                             });
-
+                            const extraRowsToRender = Math.ceil(
+                                (NO_OF_PAGES * height) / IMAGE_CONTAINER_HEIGHT
+                            );
                             return (
                                 <List
                                     itemSize={(index) =>
-                                        timeStampList[index].itemType === ITEM_TYPE.TIME
-                                            ? 30
-                                            : 200
+                                        timeStampList[index].itemType ===
+                                        ITEM_TYPE.TIME
+                                            ? DATE_CONTAINER_HEIGHT
+                                            : IMAGE_CONTAINER_HEIGHT
                                     }
                                     height={height}
                                     width={width}
                                     itemCount={timeStampList.length}
-                                    key={`${router.query.collection}-${columns}`}
+                                    key={`${router.query.collection}-${columns}-${sinceTime}`}
+                                    overscanCount={extraRowsToRender}
                                 >
                                     {({ index, style }) => {
                                         return (
                                             <ListItem style={style}>
-                                                <ListContainer>
-                                                    {timeStampList[index].itemType ===
-                                                        ITEM_TYPE.TIME ? (
-                                                            <DateContainer>
-                                                                {timeStampList[index].date}
-                                                            </DateContainer>
-                                                        ) : (
-                                                            timeStampList[index].items.map((item, idx) => {
+                                                <ListContainer
+                                                    columns={
+                                                        timeStampList[index]
+                                                            .itemType ===
+                                                        ITEM_TYPE.TIME
+                                                            ? 1
+                                                            : columns
+                                                    }
+                                                >
+                                                    {timeStampList[index]
+                                                        .itemType ===
+                                                    ITEM_TYPE.TIME ? (
+                                                        <DateContainer>
+                                                            {
+                                                                timeStampList[
+                                                                    index
+                                                                ].date
+                                                            }
+                                                        </DateContainer>
+                                                    ) : (
+                                                        timeStampList[
+                                                            index
+                                                        ].items.map(
+                                                            (item, idx) => {
                                                                 return getThumbnail(
                                                                     filteredData,
-                                                                    timeStampList[index].itemStartIndex + idx
+                                                                    timeStampList[
+                                                                        index
+                                                                    ]
+                                                                        .itemStartIndex +
+                                                                        idx
                                                                 );
-                                                            })
-                                                        )}
+                                                            }
+                                                        )
+                                                    )}
                                                 </ListContainer>
                                             </ListItem>
                                         );
@@ -406,10 +492,10 @@ export default function Gallery(props) {
                     />
                 </Container>
             ) : (
-                    <DeadCenter>
-                        <div>{constants.NOTHING_HERE}</div>
-                    </DeadCenter>
-                )}
+                <DeadCenter>
+                    <div>{constants.NOTHING_HERE}</div>
+                </DeadCenter>
+            )}
         </>
     );
 }

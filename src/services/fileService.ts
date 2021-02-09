@@ -66,13 +66,23 @@ export const fetchData = async (token, collections) => {
     );
 }
 
+export const localFiles = async () => {
+    let files: Array<file> = (await localForage.getItem<file[]>('files')) || [];
+    return files;
+}
+
 export const fetchFiles = async (
     token: string,
     collections: collection[]
 ) => {
-    let files: Array<file> = (await localForage.getItem<file[]>('files')) || [];
-    const fetchedFiles = await getFiles(collections, null, "100", token);
-
+    let files = await localFiles();
+    const collectionUpdationTime = new Map<string, string>();
+    let fetchedFiles = [];
+    for (let collection of collections) {
+        const files = await getFiles(collection, null, 100, token);
+        fetchedFiles.push(...files);
+        collectionUpdationTime.set(collection.id, files.length > 0 ? files.slice(-1)[0].updationTime.toString() : "0");
+    }
     files.push(...fetchedFiles);
     var latestFiles = new Map<string, file>();
     files.forEach((file) => {
@@ -82,7 +92,7 @@ export const fetchFiles = async (
         }
     });
     files = [];
-    for (const [_, file] of latestFiles.entries()) {
+    for (const [_, file] of latestFiles) {
         if (!file.isDeleted)
             files.push(file);
     }
@@ -90,53 +100,57 @@ export const fetchFiles = async (
         (a, b) => b.metadata.creationTime - a.metadata.creationTime
     );
     await localForage.setItem('files', files);
+    for (let [collectionID, updationTime] of collectionUpdationTime) {
+        await localForage.setItem(`${collectionID}-time`, updationTime);
+    }
+    let updationTime = await localForage.getItem('collection-update-time') as number;
+    for (let collection of collections) {
+        updationTime = Math.max(updationTime, collection.updationTime);
+    }
+    await localForage.setItem('collection-update-time', updationTime);
     return files;
 };
 
-export const getFiles = async (collections: collection[], sinceTime: string, limit: string, token: string): Promise<file[]> => {
+export const getFiles = async (collection: collection, sinceTime: string, limit: number, token: string): Promise<file[]> => {
     try {
         const worker = await new CryptoWorker();
         let promises: Promise<file>[] = [];
-        for (const index in collections) {
-            const collection = collections[index];
-            if (collection.isDeleted) {
-                // TODO: Remove files in this collection from localForage and cache
-                continue;
-            }
-            let time =
-                sinceTime || (await localForage.getItem<string>(`${collection.id}-time`)) || "0";
-            let resp;
-            do {
-                resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
-                    collectionID: collection.id,
-                    sinceTime: time,
-                    limit,
-                },
-                    {
-                        'X-Auth-Token': token
-                    });
-                promises.push(...resp.data.diff.map(
-                    async (file: file) => {
-                        if (!file.isDeleted) {
-
-                            file.key = await worker.decryptB64(
-                                file.encryptedKey,
-                                file.keyDecryptionNonce,
-                                collection.key
-                            );
-                            file.metadata = await worker.decryptMetadata(file);
-                        }
-                        return file;
-                    }
-                ));
-
-                if (resp.data.diff.length) {
-                    time = resp.data.diff.slice(-1)[0].updationTime.toString();
-                }
-            } while (resp.data.diff.length);
-            await localForage.setItem(`${collection.id}-time`, time);
+        if (collection.isDeleted) {
+            // TODO: Remove files in this collection from localForage and cache
+            return;
         }
-        return Promise.all(promises);
+        let time =
+            sinceTime || (await localForage.getItem<string>(`${collection.id}-time`)) || "0";
+        let resp;
+        do {
+            resp = await HTTPService.get(`${ENDPOINT}/collections/diff`, {
+                collectionID: collection.id,
+                sinceTime: time,
+                limit: limit.toString(),
+            },
+                {
+                    'X-Auth-Token': token
+                });
+            promises.push(...resp.data.diff.map(
+                async (file: file) => {
+                    if (!file.isDeleted) {
+
+                        file.key = await worker.decryptB64(
+                            file.encryptedKey,
+                            file.keyDecryptionNonce,
+                            collection.key
+                        );
+                        file.metadata = await worker.decryptMetadata(file);
+                    }
+                    return file;
+                }
+            ));
+
+            if (resp.data.diff.length) {
+                time = resp.data.diff.slice(-1)[0].updationTime.toString();
+            }
+        } while (resp.data.diff.length === limit);
+        return await Promise.all(promises);
     } catch (e) {
         console.log("Get files failed" + e);
     }
