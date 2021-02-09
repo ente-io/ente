@@ -52,7 +52,7 @@ const englishConstants = {
         3: "Files Uploaded Successfully !!!"
     },
     OF: 'of',
-    SUBSCRIPTION_EXPIRED: 'You don\'t have a active subscription plan!!, Please get one in the mobile app',
+    SUBSCRIPTION_EXPIRED: 'You don\'t have a active subscription plan!! Please get one in the mobile app',
     STORAGE_QUOTA_EXCEEDED:'You have exceeded your designated storage Quota, please upgrade your plan to add more files',
 };
 
