@@ -436,21 +436,38 @@ class FileUploader {
     return _uploadURLFetchInProgress;
   }
 
-  Future<String> _putFile(UploadURL uploadURL, io.File file) async {
-    final fileSize = file.lengthSync().toString();
+  Future<String> _putFile(UploadURL uploadURL, io.File file,
+      {int contentLength}) async {
+    final fileSize = contentLength ?? file.lengthSync();
     final startTime = DateTime.now().millisecondsSinceEpoch;
-    _logger.info("Putting file of size " + fileSize + " to " + uploadURL.url);
-    await _dio.put(uploadURL.url,
+    _logger.info(
+        "Putting file of size " + fileSize.toString() + " to " + uploadURL.url);
+    try {
+      await _dio.put(
+        uploadURL.url,
         data: file.openRead(),
-        options: Options(headers: {
-          Headers.contentLengthHeader: await file.length(),
-        }));
-    _logger.info("Upload speed : " +
-        (file.lengthSync() /
-                (DateTime.now().millisecondsSinceEpoch - startTime))
-            .toString() +
-        " kilo bytes per second");
-    return uploadURL.objectKey;
+        options: Options(
+          headers: {
+            Headers.contentLengthHeader: fileSize,
+          },
+        ),
+      );
+      _logger.info("Upload speed : " +
+          (file.lengthSync() /
+                  (DateTime.now().millisecondsSinceEpoch - startTime))
+              .toString() +
+          " kilo bytes per second");
+
+      return uploadURL.objectKey;
+    } on DioError catch (e) {
+      if (e.message.startsWith(
+          "HttpException: Content size exceeds specified contentLength.")) {
+        return _putFile(uploadURL, file,
+            contentLength: file.readAsBytesSync().length);
+      } else {
+        throw e;
+      }
+    }
   }
 }
 
