@@ -436,8 +436,12 @@ class FileUploader {
     return _uploadURLFetchInProgress;
   }
 
-  Future<String> _putFile(UploadURL uploadURL, io.File file,
-      {int contentLength}) async {
+  Future<String> _putFile(
+    UploadURL uploadURL,
+    io.File file, {
+    int contentLength,
+    int attempt = 1,
+  }) async {
     final fileSize = contentLength ?? file.lengthSync();
     final startTime = DateTime.now().millisecondsSinceEpoch;
     _logger.info(
@@ -461,9 +465,10 @@ class FileUploader {
       return uploadURL.objectKey;
     } on DioError catch (e) {
       if (e.message.startsWith(
-          "HttpException: Content size exceeds specified contentLength.")) {
+              "HttpException: Content size exceeds specified contentLength.") &&
+          attempt == 1) {
         return _putFile(uploadURL, file,
-            contentLength: file.readAsBytesSync().length);
+            contentLength: file.readAsBytesSync().length, attempt: 2);
       } else {
         throw e;
       }
