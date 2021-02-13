@@ -16,7 +16,7 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/date_time_util.dart';
-import 'package:photos/utils/file_downloader.dart';
+import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/utils/file_sync_util.dart';
@@ -33,7 +33,7 @@ class SyncService {
   final _db = FilesDB.instance;
   final _uploader = FileUploader.instance;
   final _collectionsService = CollectionsService.instance;
-  final _downloader = DiffFetcher();
+  final _diffFetcher = DiffFetcher();
   bool _isSyncInProgress = false;
   bool _syncStopRequested = false;
   Future<void> _existingSync;
@@ -226,7 +226,7 @@ class SyncService {
   }
 
   Future<void> _syncCollectionDiff(int collectionID) async {
-    final diff = await _downloader.getEncryptedFilesDiff(
+    final diff = await _diffFetcher.getEncryptedFilesDiff(
       collectionID,
       _collectionsService.getCollectionSyncTime(collectionID),
       _diffLimit,
