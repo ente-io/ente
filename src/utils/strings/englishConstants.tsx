@@ -61,6 +61,7 @@ const englishConstants = {
         "You don't have a active subscription plan!! Please get one in the mobile app",
     STORAGE_QUOTA_EXCEEDED:
         'You have exceeded your designated storage Quota, please upgrade your plan to add more files',
+    WEB_SIGNUPS_DISABLED:'Web signups are disabled for now, please install the mobile app and signup there'
 };
 
 export default englishConstants;
