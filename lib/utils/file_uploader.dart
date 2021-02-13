@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:math';
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -415,7 +416,7 @@ class FileUploader {
         final response = await _dio.get(
           Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
           queryParameters: {
-            "count": 42, // m4gic number
+            "count": min(42, 2 * _queue.length), // m4gic number
           },
           options: Options(
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
