@@ -13,7 +13,6 @@ export default function ErrorAlert({ errorCode }) {
         default:
             errorMessage = errorCode;
     }
-    console.log(errorCode);
     return (
         <Alert variant={'danger'} style={{ display: errorCode ? 'block' : 'none' }}>
             {errorMessage}
