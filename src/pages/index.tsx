@@ -41,7 +41,7 @@ export default function Home() {
             router.push('/verify');
         } catch (e) {
             if (e.response.status == 403) {
-                setFieldError('email', `${constants.USER_DOESNOT_EXIST}`);
+                setFieldError('email', `${constants.USER_DOES_NOT_EXIST}`);
             } else {
                 setFieldError(
                     'email',
