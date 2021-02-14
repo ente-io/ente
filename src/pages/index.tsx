@@ -10,6 +10,7 @@ import * as Yup from 'yup';
 import { getOtt } from 'services/userService';
 import Container from 'components/Container';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
+import { Alert } from 'react-bootstrap';
 
 interface formValues {
     email: string;
@@ -18,6 +19,7 @@ interface formValues {
 export default function Home() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const [showMessage, setShowMessage] = useState(false);
 
     useEffect(() => {
         router.prefetch('/verify');
@@ -38,77 +40,91 @@ export default function Home() {
             setData(LS_KEYS.USER, { email });
             router.push('/verify');
         } catch (e) {
-            setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
+            if (e.response.status == 403) {
+                setFieldError('email', `${constants.USER_DOES_NOT_EXIST}`);
+            } else {
+                setFieldError(
+                    'email',
+                    `${constants.UNKNOWN_ERROR} ${e.message}`
+                );
+            }
         }
         setLoading(false);
     };
 
     const register = () => {
-        router.push('/signup');
+        setShowMessage(true);
+        setTimeout(() => setShowMessage(false), 15000);
     };
 
     return (
-        <Container>
-            <Card style={{ minWidth: '300px' }} className="text-center">
-                <Card.Body>
-                    <Card.Title style={{ marginBottom: '20px' }}>
-                        {constants.LOGIN}
-                    </Card.Title>
-                    <Formik<formValues>
-                        initialValues={{ email: '' }}
-                        validationSchema={Yup.object().shape({
-                            email: Yup.string()
-                                .email(constants.EMAIL_ERROR)
-                                .required(constants.REQUIRED),
-                        })}
-                        onSubmit={loginUser}
-                    >
-                        {({
-                            values,
-                            errors,
-                            touched,
-                            handleChange,
-                            handleBlur,
-                            handleSubmit,
-                        }) => (
-                            <Form noValidate onSubmit={handleSubmit}>
-                                <Form.Group controlId="formBasicEmail">
-                                    <Form.Control
-                                        type="email"
-                                        placeholder={constants.ENTER_EMAIL}
-                                        value={values.email}
-                                        onChange={handleChange('email')}
-                                        onBlur={handleBlur('email')}
-                                        isInvalid={Boolean(
-                                            touched.email && errors.email
-                                        )}
+        <>
+            <div style={{ display: showMessage ? 'block' : 'none' }}>
+                <Alert variant="info">{constants.WEB_SIGNUPS_DISABLED}</Alert>
+            </div>
+
+            <Container>
+                <Card style={{ minWidth: '300px' }} className="text-center">
+                    <Card.Body>
+                        <Card.Title style={{ marginBottom: '20px' }}>
+                            {constants.LOGIN}
+                        </Card.Title>
+                        <Formik<formValues>
+                            initialValues={{ email: '' }}
+                            validationSchema={Yup.object().shape({
+                                email: Yup.string()
+                                    .email(constants.EMAIL_ERROR)
+                                    .required(constants.REQUIRED),
+                            })}
+                            onSubmit={loginUser}
+                        >
+                            {({
+                                values,
+                                errors,
+                                touched,
+                                handleChange,
+                                handleBlur,
+                                handleSubmit,
+                            }) => (
+                                <Form noValidate onSubmit={handleSubmit}>
+                                    <Form.Group controlId="formBasicEmail">
+                                        <Form.Control
+                                            type="email"
+                                            placeholder={constants.ENTER_EMAIL}
+                                            value={values.email}
+                                            onChange={handleChange('email')}
+                                            onBlur={handleBlur('email')}
+                                            isInvalid={Boolean(
+                                                touched.email && errors.email
+                                            )}
+                                            disabled={loading}
+                                        />
+                                        <FormControl.Feedback type="invalid">
+                                            {errors.email}
+                                        </FormControl.Feedback>
+                                    </Form.Group>
+                                    <Button
+                                        variant="primary"
+                                        type="submit"
+                                        block
                                         disabled={loading}
-                                    />
-                                    <FormControl.Feedback type="invalid">
-                                        {errors.email}
-                                    </FormControl.Feedback>
-                                </Form.Group>
-                                <Button
-                                    variant="primary"
-                                    type="submit"
-                                    block
-                                    disabled={loading}
-                                    style={{ marginBottom: '12px' }}
-                                >
-                                    {constants.SUBMIT}
-                                </Button>
-                            </Form>
-                        )}
-                    </Formik>
-                    <Card.Link
-                        href="#"
-                        onClick={register}
-                        style={{ fontSize: '14px' }}
-                    >
-                        Don't have an account?
-                    </Card.Link>
-                </Card.Body>
-            </Card>
-        </Container>
+                                        style={{ marginBottom: '12px' }}
+                                    >
+                                        {constants.SUBMIT}
+                                    </Button>
+                                </Form>
+                            )}
+                        </Formik>
+                        <Card.Link
+                            href="#"
+                            onClick={register}
+                            style={{ fontSize: '14px' }}
+                        >
+                            Don't have an account?
+                        </Card.Link>
+                    </Card.Body>
+                </Card>
+            </Container>
+        </>
     );
 }
