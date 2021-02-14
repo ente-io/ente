@@ -46,6 +46,7 @@ Future<void> deleteFilesFromEverywhere(
   final deletedIDs =
       (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
   bool hasUploadedFiles = false;
+  final updatedCollectionIDs = Set<int>();
   for (final file in files) {
     if (file.localID != null) {
       // Remove only those files that have been removed from disk
@@ -53,6 +54,7 @@ Future<void> deleteFilesFromEverywhere(
         if (file.uploadedFileID != null) {
           hasUploadedFiles = true;
           await FilesDB.instance.markForDeletion(file.uploadedFileID);
+          updatedCollectionIDs.add(file.collectionID);
         } else {
           await FilesDB.instance.deleteLocalFile(file.localID);
         }
@@ -66,7 +68,9 @@ Future<void> deleteFilesFromEverywhere(
 
   await FileRepository.instance.reloadFiles();
   if (hasUploadedFiles) {
-    Bus.instance.fire(CollectionUpdatedEvent());
+    for (final collectionID in updatedCollectionIDs) {
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
+    }
     // TODO: Blocking call?
     SyncService.instance.deleteFilesOnServer();
   }
