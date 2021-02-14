@@ -78,6 +78,34 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () async {
+              _showFoldersDialog(context);
+            },
+            child: SettingsTextItem(
+                text: "backed up folders", icon: Icons.navigate_next),
+          ),
+          Divider(height: 4),
+          Padding(padding: EdgeInsets.all(4)),
+          Container(
+            height: 36,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("backup over mobile data"),
+                Switch(
+                  value: Configuration.instance.shouldBackupOverMobileData(),
+                  onChanged: (value) async {
+                    Configuration.instance.setBackupOverMobileData(value);
+                    setState(() {});
+                  },
+                ),
+              ],
+            ),
+          ),
+          Padding(padding: EdgeInsets.all(4)),
+          Divider(height: 4),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () async {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (BuildContext context) {
@@ -104,34 +132,6 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
                       ),
               ),
             ],
-          ),
-          Padding(padding: EdgeInsets.all(8)),
-          Divider(height: 4),
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () async {
-              _showFoldersDialog(context);
-            },
-            child: SettingsTextItem(
-                text: "backed up folders", icon: Icons.navigate_next),
-          ),
-          Divider(height: 4),
-          Padding(padding: EdgeInsets.all(4)),
-          Container(
-            height: 36,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("backup over mobile data"),
-                Switch(
-                  value: Configuration.instance.shouldBackupOverMobileData(),
-                  onChanged: (value) async {
-                    Configuration.instance.setBackupOverMobileData(value);
-                    setState(() {});
-                  },
-                ),
-              ],
-            ),
           ),
         ],
       ),
