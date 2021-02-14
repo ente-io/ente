@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/services/billing_service.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/ui/web_page.dart';
@@ -191,24 +192,23 @@ class _BackedUpFoldersWidgetState extends State<BackedUpFoldersWidget> {
             return first.toLowerCase().compareTo(second.toLowerCase());
           });
           final backedUpFolders = Configuration.instance.getPathsToBackUp();
-          final foldersWidget = List<Row>();
+          final foldersWidget = List<Widget>();
           for (final folder in snapshot.data) {
-            foldersWidget.add(Row(children: [
-              Checkbox(
-                value: backedUpFolders.contains(folder),
-                onChanged: (value) async {
-                  if (value) {
-                    backedUpFolders.add(folder);
-                  } else {
-                    backedUpFolders.remove(folder);
-                  }
-                  await Configuration.instance
-                      .setPathsToBackUp(backedUpFolders);
-                  setState(() {});
-                },
-              ),
-              Text(folder)
-            ]));
+            foldersWidget.add(CheckboxListTile(
+              value: backedUpFolders.contains(folder),
+              dense: true,
+              title: Text(folder),
+              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: (value) async {
+                if (value) {
+                  backedUpFolders.add(folder);
+                } else {
+                  backedUpFolders.remove(folder);
+                }
+                await Configuration.instance.setPathsToBackUp(backedUpFolders);
+                setState(() {});
+              },
+            ));
           }
           final scrollController = ScrollController();
           return Container(
