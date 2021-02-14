@@ -11,24 +11,28 @@ class MemoriesService extends ChangeNotifier {
   final _logger = Logger("MemoryService");
   final _memoriesDB = MemoriesDB.instance;
   final _filesDB = FilesDB.instance;
-  final _cachedMemories = List<Memory>();
   static final microSecondsInADay = 86400000000;
   static final daysInAYear = 365;
   static final yearsBefore = 30;
   static final daysBefore = 7;
   static final daysAfter = 1;
 
+  List<Memory> _cachedMemories;
+
   MemoriesService._privateConstructor();
 
   static final MemoriesService instance = MemoriesService._privateConstructor();
 
   Future<void> init() async {
+    addListener(() {
+      _cachedMemories = null;
+    });
     await _memoriesDB.clearMemoriesSeenBeforeTime(
         DateTime.now().microsecondsSinceEpoch - (7 * microSecondsInADay));
   }
 
   Future<List<Memory>> getMemories() async {
-    if (_cachedMemories.isNotEmpty) {
+    if (_cachedMemories != null) {
       return _cachedMemories;
     }
     final filter = ImportantItemsFilter();
@@ -66,9 +70,8 @@ class MemoriesService extends ChangeNotifier {
       }
     }
     _logger.info("Number of memories: " + memories.length.toString());
-    _cachedMemories.clear();
-    _cachedMemories.addAll(memories);
-    return memories;
+    _cachedMemories = memories;
+    return _cachedMemories;
   }
 
   DateTime _getDate(DateTime present, int yearAgo) {
