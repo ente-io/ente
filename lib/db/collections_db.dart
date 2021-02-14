@@ -22,6 +22,7 @@ class CollectionsDB {
   static final columnType = 'type';
   static final columnEncryptedPath = 'encrypted_path';
   static final columnPathDecryptionNonce = 'path_decryption_nonce';
+  static final columnVersion = 'version';
   static final columnSharees = 'sharees';
   static final columnUpdationTime = 'updation_time';
 
@@ -29,6 +30,7 @@ class CollectionsDB {
   static final migrationScripts = [
     ...alterNameToAllowNULL(),
     ...addEncryptedName(),
+    ...addVersion(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -97,6 +99,15 @@ class CollectionsDB {
     ];
   }
 
+  static List<String> addVersion() {
+    return [
+      '''
+        ALTER TABLE $table
+        ADD COLUMN $columnVersion INTEGER DEFAULT 0;
+      '''
+    ];
+  }
+
   Future<List<dynamic>> insert(List<Collection> collections) async {
     final db = await instance.database;
     var batch = db.batch();
@@ -152,6 +163,7 @@ class CollectionsDB {
     row[columnType] = Collection.typeToString(collection.type);
     row[columnEncryptedPath] = collection.attributes.encryptedPath;
     row[columnPathDecryptionNonce] = collection.attributes.pathDecryptionNonce;
+    row[columnVersion] = collection.attributes.version;
     row[columnSharees] =
         json.encode(collection.sharees?.map((x) => x?.toMap())?.toList());
     row[columnUpdationTime] = collection.updationTime;
@@ -169,8 +181,10 @@ class CollectionsDB {
       row[columnNameDecryptionNonce],
       Collection.typeFromString(row[columnType]),
       CollectionAttributes(
-          encryptedPath: row[columnEncryptedPath],
-          pathDecryptionNonce: row[columnPathDecryptionNonce]),
+        encryptedPath: row[columnEncryptedPath],
+        pathDecryptionNonce: row[columnPathDecryptionNonce],
+        version: row[columnVersion],
+      ),
       List<User>.from((json.decode(row[columnSharees]) as List)
           .map((x) => User.fromMap(x))),
       int.parse(row[columnUpdationTime]),
