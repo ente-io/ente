@@ -260,9 +260,10 @@ class CollectionsService {
       Sodium.bin2base64(encryptedPath.nonce),
       CollectionType.folder,
       CollectionAttributes(
-          encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData),
-          pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce),
-          version: 1),
+        encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData),
+        pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce),
+        version: 1,
+      ),
       null,
       null,
     ));
@@ -347,7 +348,7 @@ class CollectionsService {
 
   String decryptCollectionPath(Collection collection) {
     final key = collection.attributes.version == 1
-        ? getCollectionKey(collection.id)
+        ? _getDecryptedKey(collection)
         : _config.getKey();
     return utf8.decode(CryptoUtil.decryptSync(
         Sodium.base642bin(collection.attributes.encryptedPath),

@@ -203,7 +203,7 @@ class CollectionAttributes {
     if (pathDecryptionNonce != null) {
       map['pathDecryptionNonce'] = pathDecryptionNonce;
     }
-    if (version != null) map['version'] = version;
+    map['version'] = version ?? 0;
     return map;
   }
 
