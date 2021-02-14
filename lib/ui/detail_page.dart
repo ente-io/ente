@@ -301,6 +301,9 @@ class _DetailPageState extends State<DetailPage> {
               ],
             ));
           }
+          items.add(
+            Padding(padding: EdgeInsets.all(4)),
+          );
         }
         if (file.uploadedFileID != null) {
           items.add(Row(
