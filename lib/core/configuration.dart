@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -12,7 +13,6 @@ import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/private_key_attributes.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:photos/utils/crypto_util.dart';
 
 class Configuration {
@@ -186,7 +186,12 @@ class Configuration {
   }
 
   Future<void> setPathsToBackUp(Set<String> folders) async {
+    bool shouldSync =
+        !listEquals(getPathsToBackUp().toList(), folders.toList());
     await _preferences.setStringList(foldersToBackUpKey, folders.toList());
+    if (shouldSync) {
+      SyncService.instance.sync();
+    }
   }
 
   Future<void> addPathToFoldersToBeBackedUp(String path) async {
