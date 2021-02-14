@@ -26,7 +26,8 @@ class FileUploader {
   final _logger = Logger("FileUploader");
   final _dio = Network.instance.getDio();
   final _queue = LinkedHashMap<int, FileUploadItem>();
-  final _maximumConcurrentUploads = 4;
+  final kMaximumConcurrentUploads = 4;
+  final kMaximumThumbnailCompressionAttempts = 2;
   int _currentlyUploading = 0;
   final _uploadURLs = Queue<UploadURL>();
 
@@ -129,7 +130,7 @@ class FileUploader {
     if (SyncService.instance.shouldStopSync()) {
       clearQueue();
     }
-    if (_queue.length > 0 && _currentlyUploading < _maximumConcurrentUploads) {
+    if (_queue.length > 0 && _currentlyUploading < kMaximumConcurrentUploads) {
       final firstPendingEntry = _queue.entries
           .firstWhere((entry) => entry.value.status == UploadStatus.not_started,
               orElse: () => null)
@@ -206,12 +207,14 @@ class FileUploader {
         await FilesDB.instance.deleteLocalFile(file.localID);
         throw InvalidFileError();
       }
-      final thumbnailSize = thumbnailData.length;
-      if (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
+      int compressionAttempts = 0;
+      while (thumbnailData.length > THUMBNAIL_DATA_LIMIT &&
+          compressionAttempts < kMaximumThumbnailCompressionAttempts) {
+        _logger.info("Thumbnail size " + thumbnailData.length.toString());
         thumbnailData = await compressThumbnail(thumbnailData);
-        _logger.info("Thumbnail size " + thumbnailSize.toString());
         _logger.info(
             "Compressed thumbnail size " + thumbnailData.length.toString());
+        compressionAttempts++;
       }
 
       final encryptedThumbnailData =
