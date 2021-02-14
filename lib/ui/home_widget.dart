@@ -162,7 +162,10 @@ class _HomeWidgetState extends State<HomeWidget> {
             header = Container(
               margin: EdgeInsets.only(top: 12),
               child: Stack(
-                children: [_settingsButton, _headerWidget],
+                children: [
+                  _headerWidget,
+                  _settingsButton,
+                ],
               ),
             );
           } else {
