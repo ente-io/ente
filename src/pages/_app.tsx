@@ -101,9 +101,21 @@ const GlobalStyles = createGlobalStyle`
         overflow: hidden;
         margin: 0 0 5px 0;
     }
-    .modal-content{
+    .modal-content {
         background-color:#303030 !important;
         color:#aaa;
+    }
+    .btn-primary {
+        background: #2dc262;
+        padding: 8px;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+    .btn-primary:hover {
+        background-color: #29a354;
+    }
+    .btn-primary:disabled {
+        background-color: #69b383;
     }
 `;
 

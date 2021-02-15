@@ -110,7 +110,7 @@ export default function Home() {
                                         disabled={loading}
                                         style={{ marginBottom: '12px' }}
                                     >
-                                        {constants.SUBMIT}
+                                        {constants.LOGIN}
                                     </Button>
                                 </Form>
                             )}
@@ -120,7 +120,7 @@ export default function Home() {
                             onClick={register}
                             style={{ fontSize: '14px' }}
                         >
-                            Don't have an account?
+                            {constants.NO_ACCOUNT}
                         </Card.Link>
                     </Card.Body>
                 </Card>

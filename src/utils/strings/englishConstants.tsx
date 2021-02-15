@@ -5,15 +5,15 @@ import { template } from './vernacularStrings';
  */
 const englishConstants = {
     COMPANY_NAME: 'ente',
-    LOGIN: 'Login',
+    LOGIN: 'login',
     SIGN_UP: 'Sign Up',
     NAME: 'Name',
     ENTER_NAME: 'your name',
     EMAIL: 'Email Address',
-    ENTER_EMAIL: 'email address',
+    ENTER_EMAIL: 'email',
     DATA_DISCLAIMER: `We'll never share your data with anyone else.`,
-    SUBMIT: 'Submit',
-    EMAIL_ERROR: 'Enter a valid email address',
+    SUBMIT: 'submit',
+    EMAIL_ERROR: 'Enter a valid email',
     REQUIRED: 'Required',
     VERIFY_EMAIL: 'Verify Email',
     EMAIL_SENT: ({ email }) => (
@@ -64,6 +64,8 @@ const englishConstants = {
     WEB_SIGNUPS_DISABLED:
         'Web signups are disabled for now, please install the mobile app and signup there',
     USER_DOES_NOT_EXIST: 'Incorrect EmailId, No such user exists',
+    UPLOAD_BUTTON_TEXT: 'Upload',
+    NO_ACCOUNT: 'don\'t have an account?',
 };
 
 export default englishConstants;
