@@ -108,7 +108,6 @@ const DateContainer = styled.div`
 
 export default function Gallery(props) {
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
     const [collections, setCollections] = useState<collection[]>([]);
     const [
         collectionAndItsLatestFile,
@@ -134,7 +133,6 @@ export default function Gallery(props) {
             router.push('/');
         }
         const main = async () => {
-            setLoading(true);
             const data = await localFiles();
             const collections = await getLocalCollections();
             const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
@@ -147,8 +145,7 @@ export default function Gallery(props) {
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
 
-            setLoading(false);
-            setProgress(80);
+            data.length == 0 ? setProgress(20) : setProgress(80);
             await syncWithRemote();
             setProgress(100);
         };
@@ -296,14 +293,20 @@ export default function Gallery(props) {
         }
     };
 
-    if (!data || loading || data.length == 0) {
+    if (!data) {
+        return <div />;
+    }
+    if (data.length == 0) {
         return (
             <div className="text-center">
-                {data?.length == 0 && (
-                    <Alert variant="primary">
-                        {constants.INITIAL_LOAD_DELAY_WARNING}
-                    </Alert>
-                )}
+                <LoadingBar
+                    color="#2dc262"
+                    progress={progress}
+                    onLoaderFinished={() => setProgress(0)}
+                />
+                <Alert variant="primary">
+                    {constants.INITIAL_LOAD_DELAY_WARNING}
+                </Alert>
             </div>
         );
     }
