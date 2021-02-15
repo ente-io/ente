@@ -5,66 +5,78 @@ import { template } from './vernacularStrings';
  */
 const englishConstants = {
     COMPANY_NAME: 'ente',
-    LOGIN: 'Login',
-    SIGN_UP: 'Sign Up',
-    NAME: 'Name',
+    LOGIN: 'login',
+    SIGN_UP: 'sign up',
+    NAME: 'name',
     ENTER_NAME: 'your name',
-    EMAIL: 'Email Address',
-    ENTER_EMAIL: 'email address',
-    DATA_DISCLAIMER: `We'll never share your data with anyone else.`,
-    SUBMIT: 'Submit',
-    EMAIL_ERROR: 'Enter a valid email address',
-    REQUIRED: 'Required',
-    VERIFY_EMAIL: 'Verify Email',
+    EMAIL: 'email',
+    ENTER_EMAIL: 'email',
+    DATA_DISCLAIMER: `we'll never share your data with anyone else.`,
+    SUBMIT: 'submit',
+    EMAIL_ERROR: 'enter a valid email',
+    REQUIRED: 'required',
+    VERIFY_EMAIL: 'verify email',
     EMAIL_SENT: ({ email }) => (
         <p>
-            We have sent a mail to <b>{email}</b>.
+            we have sent a mail to <b>{email}</b>
         </p>
     ),
-    CHECK_INBOX: 'Please check your inbox (and spam) to complete verification.',
-    ENTER_OTT: 'Enter verification code here',
-    RESEND_MAIL: 'Did not get email?',
-    VERIFY: 'Verify',
-    UNKNOWN_ERROR: 'Oops! Something went wrong. Please try again.',
-    INVALID_CODE: 'Invalid verification code',
-    SENDING: 'Sending...',
-    SENT: 'Sent! Check again.',
-    ENTER_PASSPHRASE: 'Please enter your passphrase.',
-    RETURN_PASSPHRASE_HINT: 'That thing you promised to never forget.',
-    SET_PASSPHRASE: 'Set Passphrase',
-    VERIFY_PASSPHRASE: 'Verify Passphrase',
-    INCORRECT_PASSPHRASE: 'Incorrect Passphrase',
+    CHECK_INBOX: 'please check your inbox (and spam) to complete verification',
+    ENTER_OTT: 'verification code',
+    RESEND_MAIL: 'did not get email?',
+    VERIFY: 'verify',
+    UNKNOWN_ERROR: 'something went wrong, please try again',
+    INVALID_CODE: 'invalid verification code',
+    SENDING: 'sending...',
+    SENT: 'sent!',
+    ENTER_PASSPHRASE: 'enter your password',
+    RETURN_PASSPHRASE_HINT: 'password',
+    SET_PASSPHRASE: 'set password',
+    VERIFY_PASSPHRASE: 'sign in',
+    INCORRECT_PASSPHRASE: 'incorrect password',
     ENTER_ENC_PASSPHRASE:
-        'Please enter a passphrase that we can use to encrypt your data.',
+        'please enter a password that we can use to encrypt your data',
     PASSPHRASE_DISCLAIMER: () => (
         <p>
-            We don't store your passphrase, so if you forget,
+            we don't store your password, so if you forget,
             <strong> we will not be able to help you</strong> recover your data.
         </p>
     ),
-    PASSPHRASE_HINT: 'Something you will never forget',
-    PASSPHRASE_CONFIRM: 'Please repeat it once more',
-    PASSPHRASE_MATCH_ERROR: `Passphrase didn't match`,
+    PASSPHRASE_HINT: 'password',
+    PASSPHRASE_CONFIRM: 'password again',
+    PASSPHRASE_MATCH_ERROR: `passwords don't match`,
     CONSOLE_WARNING_STOP: 'STOP!',
-    CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. If someone told you to copy-paste something here to enable a feature or "hack" someone's account, it is a scam and will give them access to your account.`,
-    SELECT_COLLECTION: `Select/Click on Collection to upload`,
-    CLOSE: 'Close',
+    CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. Please don't copy-paste unverified code here.`,
+    SELECT_COLLECTION: `select an album to upload to`,
+    CREATE_COLLECTION: `create album`,
+    CLOSE: 'close',
     NOTHING_HERE: `nothing to see here! 👀`,
     UPLOAD: {
-        0: 'Preparing to upload',
-        1: 'Encryting your files',
-        2: 'Uploading your Files',
-        3: 'Files Uploaded Successfully !!!',
+        0: 'preparing to upload',
+        1: 'encrypting your files',
+        2: 'uploading your files',
+        3: 'files uploaded successfully!',
     },
     OF: 'of',
     SUBSCRIPTION_EXPIRED:
-        "You don't have a active subscription plan!! Please get one in the mobile app",
+        'your subscription has expired, please renew it form the mobile app',
     STORAGE_QUOTA_EXCEEDED:
-        'You have exceeded your designated storage Quota, please upgrade your plan to add more files',
-    WEB_SIGNUPS_DISABLED:
-        'Web signups are disabled for now, please install the mobile app and signup there',
-    USER_DOES_NOT_EXIST: 'Incorrect emailId, no such user exists',
+        'you have exceeded your storage quota, please upgrade your plan from the mobile app',
     INITIAL_LOAD_DELAY_WARNING: 'Please wait, intial load may take some time',
+
+    WEB_SIGNUPS_DISABLED: () => (
+        <div>
+            sorry signups are possibly only on the{' '}
+            <a href="https://ente.io/app" target="_blank">
+                mobile app
+            </a>
+        </div>
+    ),
+    USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
+    UPLOAD_BUTTON_TEXT: 'upload',
+    NO_ACCOUNT: "don't have an account?",
+    ALBUM_NAME: 'album name',
+    CREATE: 'create',
 };
 
 export default englishConstants;
