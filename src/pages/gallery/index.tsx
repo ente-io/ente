@@ -30,6 +30,7 @@ import {
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import ErrorAlert from './components/ErrorAlert';
+import { Alert } from 'react-bootstrap';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -295,9 +296,12 @@ export default function Gallery(props) {
         }
     };
 
-    if (!data || loading) {
+    if (!data || loading || data.length == 0) {
         return (
             <div className="text-center">
+                <Alert variant="primary">
+                    {constants.INITIAL_LOAD_DELAY_WARNING}
+                </Alert>
                 <Spinner animation="border" variant="primary" />
             </div>
         );

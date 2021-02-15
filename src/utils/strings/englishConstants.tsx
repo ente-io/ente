@@ -63,7 +63,8 @@ const englishConstants = {
         'You have exceeded your designated storage Quota, please upgrade your plan to add more files',
     WEB_SIGNUPS_DISABLED:
         'Web signups are disabled for now, please install the mobile app and signup there',
-    USER_DOES_NOT_EXIST: 'Incorrect EmailId, No such user exists',
+    USER_DOES_NOT_EXIST: 'Incorrect emailId, no such user exists',
+    INITIAL_LOAD_DELAY_WARNING: 'Please wait, intial load may take some time',
 };
 
 export default englishConstants;
