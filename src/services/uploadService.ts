@@ -5,6 +5,7 @@ import EXIF from 'exif-js';
 import { fileAttribute } from './fileService';
 import { collection, CollectionAndItsLatestFile } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
+import { error } from 'console';
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
@@ -446,20 +447,7 @@ class UploadService {
                 await new Promise(async (resolve) => {
                     let video = document.createElement('video');
                     imageURL = URL.createObjectURL(file);
-                    var timeupdate = function () {
-                        if (snapImage()) {
-                            video.removeEventListener('timeupdate', timeupdate);
-                            video.pause();
-                            resolve(null);
-                        }
-                    };
                     video.addEventListener('loadeddata', function () {
-                        if (snapImage()) {
-                            video.removeEventListener('timeupdate', timeupdate);
-                            resolve(null);
-                        }
-                    });
-                    var snapImage = function () {
                         canvas.width = THUMBNAIL_WIDTH;
                         canvas.height = THUMBNAIL_HEIGHT;
                         canvas_CTX.drawImage(
@@ -469,11 +457,8 @@ class UploadService {
                             THUMBNAIL_WIDTH,
                             THUMBNAIL_HEIGHT
                         );
-                        var image = canvas.toDataURL();
-                        var success = image.length;
-                        return success;
-                    };
-                    video.addEventListener('timeupdate', timeupdate);
+                        resolve(null);
+                    });
                     video.preload = 'metadata';
                     video.src = imageURL;
                     // Load video in Safari / IE11
@@ -483,6 +468,9 @@ class UploadService {
                 });
             }
             URL.revokeObjectURL(imageURL);
+            if (canvas.toDataURL().length == 0) {
+                throw new Error('');
+            }
             let thumbnailBlob: Blob = file,
                 attempts = 0;
             let quality = 1;
@@ -506,7 +494,7 @@ class UploadService {
             const thumbnail = this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
         } catch (e) {
-            console.log('Error generatin thumbnail ' + e);
+            console.log('Error generating thumbnail ' + e);
         }
     }
 
