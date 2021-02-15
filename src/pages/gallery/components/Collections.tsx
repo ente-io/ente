@@ -36,9 +36,9 @@ const Wrapper = styled.div`
     max-width: 100%;
 `;
 const Chip = styled.button<{ active: boolean }>`
-    border-radius: 20px;
-    padding: 2px 10px;
-    margin: 2px 5px 2px 2px;
+    border-radius: 8px;
+    padding: 4px 14px;
+    margin: 2px 8px 2px 2px;
     border: none;
     background-color: ${(props) =>
         props.active ? '#fff' : 'rgba(255, 255, 255, 0.3)'};

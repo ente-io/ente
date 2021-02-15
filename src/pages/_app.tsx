@@ -107,12 +107,14 @@ const GlobalStyles = createGlobalStyle`
     }
     .btn-primary {
         background: #2dc262;
+        border-color: #29a354;
         padding: 8px;
         padding-left: 24px;
         padding-right: 24px;
     }
     .btn-primary:hover {
         background-color: #29a354;
+        border-color: #2dc262;
     }
     .btn-primary:disabled {
         background-color: #69b383;
