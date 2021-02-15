@@ -340,7 +340,7 @@ export default function Gallery(props) {
         <>
             <ErrorAlert errorCode={errorCode} />
             <LoadingBar
-                color="#007bff"
+                color="#2dc262"
                 progress={progress}
                 onLoaderFinished={() => setProgress(0)}
             />
@@ -430,7 +430,7 @@ export default function Gallery(props) {
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                        ITEM_TYPE.TIME
+                                            ITEM_TYPE.TIME
                                             ? DATE_CONTAINER_HEIGHT
                                             : IMAGE_CONTAINER_HEIGHT
                                     }
@@ -447,14 +447,14 @@ export default function Gallery(props) {
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                        ITEM_TYPE.TIME
+                                                            ITEM_TYPE.TIME
                                                             ? 1
                                                             : columns
                                                     }
                                                 >
                                                     {timeStampList[index]
                                                         .itemType ===
-                                                    ITEM_TYPE.TIME ? (
+                                                        ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
                                                                 timeStampList[
@@ -473,7 +473,7 @@ export default function Gallery(props) {
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                        idx
+                                                                    idx
                                                                 );
                                                             }
                                                         )
