@@ -117,6 +117,7 @@ export default function Verify() {
                                         )}
                                         placeholder={constants.ENTER_OTT}
                                         disabled={loading}
+                                        autoFocus={true}
                                     />
                                     <Form.Control.Feedback type="invalid">
                                         {errors.ott}

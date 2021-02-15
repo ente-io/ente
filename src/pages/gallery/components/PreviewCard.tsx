@@ -12,7 +12,7 @@ interface IProps {
 }
 
 const Cont = styled.div<{ disabled: boolean }>`
-    background: #333;
+    background: #222;
     display: block;
     width: fit-content;
     height: 192px;

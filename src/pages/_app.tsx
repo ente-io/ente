@@ -32,7 +32,7 @@ const GlobalStyles = createGlobalStyle`
         flex: 1;
         display: flex;
         flex-direction: column;
-        background-color: #303030;
+        background-color: #191919;
     }
 
     #__next {
@@ -118,6 +118,11 @@ const GlobalStyles = createGlobalStyle`
     }
     .btn-primary:disabled {
         background-color: #69b383;
+    }
+    .card {
+        background-color: #242424;
+        color: #fff;
+        border-radius: 12px;
     }
 `;
 

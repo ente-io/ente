@@ -59,14 +59,14 @@ export default function Home() {
 
     return (
         <>
-            <div style={{ display: showMessage ? 'block' : 'none' }}>
-                <Alert variant="info">{constants.WEB_SIGNUPS_DISABLED}</Alert>
+            <div style={{ display: showMessage ? 'block' : 'none', textAlign: 'center' }}>
+                <Alert variant="warning">{constants.WEB_SIGNUPS_DISABLED()}</Alert>
             </div>
 
             <Container>
-                <Card style={{ minWidth: '300px' }} className="text-center">
-                    <Card.Body>
-                        <Card.Title style={{ marginBottom: '20px' }}>
+                <Card style={{ minWidth: '320px' }} className="text-center">
+                    <Card.Body style={{ padding: '40px 30px' }}>
+                        <Card.Title style={{ marginBottom: '32px' }}>
                             {constants.LOGIN}
                         </Card.Title>
                         <Formik<formValues>

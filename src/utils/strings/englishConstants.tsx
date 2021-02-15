@@ -29,7 +29,7 @@ const englishConstants = {
     INVALID_CODE: 'invalid verification code',
     SENDING: 'sending...',
     SENT: 'sent!',
-    ENTER_PASSPHRASE: 'please enter your password',
+    ENTER_PASSPHRASE: 'enter your password',
     RETURN_PASSPHRASE_HINT: 'password',
     SET_PASSPHRASE: 'set password',
     VERIFY_PASSPHRASE: 'sign in',
@@ -61,9 +61,10 @@ const englishConstants = {
         "You don't have a active subscription plan!! Please get one in the mobile app",
     STORAGE_QUOTA_EXCEEDED:
         'You have exceeded your designated storage Quota, please upgrade your plan to add more files',
-    WEB_SIGNUPS_DISABLED:
-        'Web signups are disabled for now, please install the mobile app and signup there',
-    USER_DOES_NOT_EXIST: 'sorry, could not find an ente user',
+    WEB_SIGNUPS_DISABLED: () => (
+        <div>sorry signups are possibly only on the <a href="https://ente.io/app" target="_blank">mobile app</a></div>
+    ),
+    USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
     NO_ACCOUNT: 'don\'t have an account?',
 };
