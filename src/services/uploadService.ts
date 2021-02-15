@@ -10,6 +10,11 @@ const CryptoWorker: any =
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 const ENDPOINT = getEndpoint();
 
+const THUMBNAIL_WIDTH = 1920;
+const THUMBNAIL_HEIGHT = 1080;
+const MAX_ATTEMPTS = 3;
+const MIN_THUMBNAIL_SIZE = 50000;
+
 interface encryptionResult {
     file: fileAttribute;
     key: string;
@@ -424,9 +429,15 @@ class UploadService {
                 image.setAttribute('src', imageURL);
                 await new Promise((resolve) => {
                     image.onload = () => {
-                        canvas.width = 1920;
-                        canvas.height = 1080;
-                        canvas_CTX.drawImage(image, 0, 0, 1920, 1080);
+                        canvas.width = THUMBNAIL_WIDTH;
+                        canvas.height = THUMBNAIL_HEIGHT;
+                        canvas_CTX.drawImage(
+                            image,
+                            0,
+                            0,
+                            THUMBNAIL_WIDTH,
+                            THUMBNAIL_HEIGHT
+                        );
                         image = undefined;
                         resolve(null);
                     };
@@ -449,14 +460,14 @@ class UploadService {
                         }
                     });
                     var snapImage = function () {
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
+                        canvas.width = THUMBNAIL_WIDTH;
+                        canvas.height = THUMBNAIL_HEIGHT;
                         canvas_CTX.drawImage(
                             video,
                             0,
                             0,
-                            canvas.width,
-                            canvas.height
+                            THUMBNAIL_WIDTH,
+                            THUMBNAIL_HEIGHT
                         );
                         var image = canvas.toDataURL();
                         var success = image.length;
@@ -488,7 +499,10 @@ class UploadService {
                         quality
                     );
                 });
-            } while (thumbnailBlob.size > 50000 && attempts < 3);
+            } while (
+                thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
+                attempts < MAX_ATTEMPTS
+            );
             const thumbnail = this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
         } catch (e) {
