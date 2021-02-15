@@ -488,7 +488,7 @@ class UploadService {
                 });
             } while (
                 thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
-                attempts < MAX_ATTEMPTS
+                attempts <= MAX_ATTEMPTS
             );
             const thumbnail = this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
