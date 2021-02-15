@@ -15,24 +15,26 @@ function CollectionSelector(props) {
     } = props;
 
     const CollectionIcons = collectionAndItsLatestFile?.map((item) => (
-        <CollectionDropZone
-            key={item.collection.id}
-            {...rest}
-            closeModal={closeUploadModal}
-            showModal={showUploadModal}
-            collectionAndItsLatestFile={item}
-        >
-            <Card>
-                <PreviewCard
-                    data={item.file}
-                    updateUrl={() => {}}
-                    forcedEnable
-                />
-                <Card.Text className="text-center">
-                    {item.collection.name}
-                </Card.Text>
-            </Card>
-        </CollectionDropZone>
+        <div style={{ margin: '10px' }}>
+            <CollectionDropZone
+                key={item.collection.id}
+                {...rest}
+                closeModal={closeUploadModal}
+                showModal={showUploadModal}
+                collectionAndItsLatestFile={item}
+            >
+                <Card>
+                    <PreviewCard
+                        data={item.file}
+                        updateUrl={() => { }}
+                        forcedEnable
+                    />
+                    <Card.Text className="text-center">
+                        {item.collection.name}
+                    </Card.Text>
+                </Card>
+            </CollectionDropZone>
+        </div>
     ));
 
     return (
@@ -40,9 +42,10 @@ function CollectionSelector(props) {
             show={uploadModalView}
             onHide={closeUploadModal}
             dialogClassName="modal-90w"
+            style={{ maxWidth: '100%' }}
         >
             <Modal.Header closeButton>
-                <Modal.Title>{constants.SELECT_COLLECTION}</Modal.Title>
+                <Modal.Title style={{ marginLeft: '12px' }}>{constants.SELECT_COLLECTION}</Modal.Title>
             </Modal.Header>
             <Modal.Body
                 style={{

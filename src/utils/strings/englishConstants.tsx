@@ -47,7 +47,8 @@ const englishConstants = {
     PASSPHRASE_MATCH_ERROR: `passwords don't match`,
     CONSOLE_WARNING_STOP: 'STOP!',
     CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. Please don't copy-paste unverified code here.`,
-    SELECT_COLLECTION: `Select/Click on Collection to upload`,
+    SELECT_COLLECTION: `select an album to upload to`,
+    CREATE_COLLECTION: `create album`,
     CLOSE: 'Close',
     NOTHING_HERE: `nothing to see here! 👀`,
     UPLOAD: {

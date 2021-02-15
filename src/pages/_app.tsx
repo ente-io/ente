@@ -82,7 +82,7 @@ const GlobalStyles = createGlobalStyle`
     }
     .modal-90w{
         width:90vw;
-        max-width:880px!important;
+        max-width:960px!important;
     }
     .modal .modal-header, .modal  .modal-footer {
         border-color: #444 !important;
@@ -92,7 +92,7 @@ const GlobalStyles = createGlobalStyle`
         text-shadow: none;
     }
     .modal .card {
-        background-color: #303030;
+        background-color: #202020;
         border: none;
         color: #aaa;
     }
@@ -102,7 +102,7 @@ const GlobalStyles = createGlobalStyle`
         margin: 0 0 5px 0;
     }
     .modal-content {
-        background-color:#303030 !important;
+        background-color:#202020 !important;
         color:#aaa;
     }
     .btn-primary {
