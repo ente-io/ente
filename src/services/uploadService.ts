@@ -465,7 +465,7 @@ class UploadService {
                             canvas.height
                         );
                         var image = canvas.toDataURL();
-                        var success = image.length > 100000;
+                        var success = image.length;
                         return success;
                     };
                     video.addEventListener('timeupdate', timeupdate);
@@ -478,13 +478,25 @@ class UploadService {
                 });
             }
             URL.revokeObjectURL(imageURL);
-            var thumbnailBlob = await new Promise((resolve) => {
-                canvas.toBlob(function (blob) {
-                    resolve(blob);
-                }),
-                    'image/jpeg',
-                    0.4;
-            });
+            let thumbnailBlob: Blob = file,
+                prevSize = file.size;
+            let quality = 1;
+            do {
+                prevSize = thumbnailBlob.size;
+                quality /= 2;
+                thumbnailBlob = await new Promise((resolve) => {
+                    canvas.toBlob(
+                        function (blob) {
+                            resolve(blob);
+                        },
+                        'image/jpeg',
+                        quality
+                    );
+                });
+            } while (
+                thumbnailBlob.size > 50000 &&
+                prevSize != thumbnailBlob.size
+            );
             const thumbnail = this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
         } catch (e) {
