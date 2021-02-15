@@ -114,6 +114,8 @@ const Image = styled.img`
 
 const FlexContainer = styled.div`
     flex: 1;
+    text-align: center;
+    margin: 16px;
 `;
 
 export default function App({ Component, pageProps }) {
@@ -170,8 +172,7 @@ export default function App({ Component, pageProps }) {
             <GlobalStyles />
             <Navbar>
                 <FlexContainer>
-                    <Image alt="logo" src="/icon.png" />
-                    {constants.COMPANY_NAME}
+                    <Image alt="logo" src="/icon.svg" />
                 </FlexContainer>
                 {uploadButtonView && (
                     <UploadButton showModal={showUploadModal} />
