@@ -304,7 +304,6 @@ export default function Gallery(props) {
                         {constants.INITIAL_LOAD_DELAY_WARNING}
                     </Alert>
                 )}
-                <Spinner animation="border" variant="primary" />
             </div>
         );
     }
@@ -346,7 +345,7 @@ export default function Gallery(props) {
         <>
             <ErrorAlert errorCode={errorCode} />
             <LoadingBar
-                color="#007bff"
+                color="#2dc262"
                 progress={progress}
                 onLoaderFinished={() => setProgress(0)}
             />

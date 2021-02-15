@@ -32,7 +32,7 @@ const GlobalStyles = createGlobalStyle`
         flex: 1;
         display: flex;
         flex-direction: column;
-        background-color: #303030;
+        background-color: #191919;
     }
 
     #__next {
@@ -82,7 +82,7 @@ const GlobalStyles = createGlobalStyle`
     }
     .modal-90w{
         width:90vw;
-        max-width:880px!important;
+        max-width:960px!important;
     }
     .modal .modal-header, .modal  .modal-footer {
         border-color: #444 !important;
@@ -92,7 +92,7 @@ const GlobalStyles = createGlobalStyle`
         text-shadow: none;
     }
     .modal .card {
-        background-color: #303030;
+        background-color: #202020;
         border: none;
         color: #aaa;
     }
@@ -101,9 +101,28 @@ const GlobalStyles = createGlobalStyle`
         overflow: hidden;
         margin: 0 0 5px 0;
     }
-    .modal-content{
-        background-color:#303030 !important;
+    .modal-content {
+        background-color:#202020 !important;
         color:#aaa;
+    }
+    .btn-primary {
+        background: #2dc262;
+        border-color: #29a354;
+        padding: 8px;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+    .btn-primary:hover {
+        background-color: #29a354;
+        border-color: #2dc262;
+    }
+    .btn-primary:disabled {
+        background-color: #69b383;
+    }
+    .card {
+        background-color: #242424;
+        color: #fff;
+        border-radius: 12px;
     }
 `;
 
@@ -166,7 +185,7 @@ export default function App({ Component, pageProps }) {
         >
             <Head>
                 <title>
-                    ente.io | Privacy friendly alternative to Google Photos
+                    ente.io | Encrypted Photo Storage
                 </title>
             </Head>
             <GlobalStyles />

@@ -3,6 +3,7 @@ import { Card } from 'react-bootstrap';
 import styled from 'styled-components';
 import CreateCollection from './CreateCollection';
 import DropzoneWrapper from './DropzoneWrapper';
+import constants from 'utils/strings/constants';
 
 const ImageContainer = styled.div`
     min-height: 192px;
@@ -32,12 +33,12 @@ export default function AddCollection(props) {
         <StyledCard>
             <ImageContainer>+</ImageContainer>
             <Card.Text style={{ textAlign: 'center' }}>
-                Create New Album
+                {constants.CREATE_COLLECTION}
             </Card.Text>
         </StyledCard>
     );
     return (
-        <>
+        <div style={{ margin: '10px' }}>
             <DropzoneWrapper
                 onDropAccepted={createCollection}
                 onDropRejected={closeUploadModal}
@@ -51,6 +52,6 @@ export default function AddCollection(props) {
                 closeModal={() => setCreateCollectionView(false)}
                 acceptedFiles={acceptedFiles}
             />
-        </>
+        </div>
     );
 }

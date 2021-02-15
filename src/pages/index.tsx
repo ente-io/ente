@@ -59,14 +59,14 @@ export default function Home() {
 
     return (
         <>
-            <div style={{ display: showMessage ? 'block' : 'none' }}>
-                <Alert variant="info">{constants.WEB_SIGNUPS_DISABLED}</Alert>
+            <div style={{ display: showMessage ? 'block' : 'none', textAlign: 'center' }}>
+                <Alert variant="warning">{constants.WEB_SIGNUPS_DISABLED()}</Alert>
             </div>
 
             <Container>
-                <Card style={{ minWidth: '300px' }} className="text-center">
-                    <Card.Body>
-                        <Card.Title style={{ marginBottom: '20px' }}>
+                <Card style={{ minWidth: '320px' }} className="text-center">
+                    <Card.Body style={{ padding: '40px 30px' }}>
+                        <Card.Title style={{ marginBottom: '32px' }}>
                             {constants.LOGIN}
                         </Card.Title>
                         <Formik<formValues>
@@ -110,7 +110,7 @@ export default function Home() {
                                         disabled={loading}
                                         style={{ marginBottom: '12px' }}
                                     >
-                                        {constants.SUBMIT}
+                                        {constants.LOGIN}
                                     </Button>
                                 </Form>
                             )}
@@ -120,7 +120,7 @@ export default function Home() {
                             onClick={register}
                             style={{ fontSize: '14px' }}
                         >
-                            Don't have an account?
+                            {constants.NO_ACCOUNT}
                         </Card.Link>
                     </Card.Body>
                 </Card>
