@@ -34,7 +34,7 @@ export default class MyDocument extends Document {
                 <Head>
                     <meta
                         name="description"
-                        content="ente is a privacy focussed alternative to Google Photos that supports end-to-end encryption. Because memories are precious."
+                        content="ente is a privacy focussed photo storage service that offers end-to-end encryption."
                     />
                     <link rel="icon" href="/icon.svg" type="image/png" />
                 </Head>

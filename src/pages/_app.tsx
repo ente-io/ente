@@ -166,7 +166,7 @@ export default function App({ Component, pageProps }) {
         >
             <Head>
                 <title>
-                    ente.io | Privacy friendly alternative to Google Photos
+                    ente.io | Encrypted Photo Storage
                 </title>
             </Head>
             <GlobalStyles />
