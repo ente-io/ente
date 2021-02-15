@@ -105,6 +105,16 @@ const GlobalStyles = createGlobalStyle`
         background-color:#303030 !important;
         color:#aaa;
     }
+    .download-btn{
+        margin-top:10px;
+        width: 25px;
+        height: 25px;
+        float: right;
+        background: url('/download_icon.png') no-repeat;
+        cursor: pointer;
+        background-size: cover;
+        border: none;
+    }
 `;
 
 const Image = styled.img`

@@ -149,12 +149,15 @@ function PhotoSwipe(props: Iprops) {
 
                         <button
                             className="pswp__button pswp__button--close"
-                            title="Share"
+                            title="Close"
                         />
-                        <button
-                            className="pswp__button pswp__button--share"
-                            title="Share"
-                        />
+                        <a
+                            download={photoSwipe?.currItem['metadata']['title']}
+                            href={photoSwipe?.currItem.msrc}
+                        >
+                            <button className="download-btn" title="Download" />
+                        </a>
+
                         <button
                             className="pswp__button pswp__button--fs"
                             title="Toggle fullscreen"
