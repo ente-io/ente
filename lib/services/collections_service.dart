@@ -337,13 +337,18 @@ class CollectionsService {
   }
 
   void _cacheCollectionAttributes(Collection collection) {
-    final collectionWithDecryptedName =
-        _getCollectionWithDecryptedName(collection);
-    if (collection.attributes.encryptedPath != null) {
-      _localCollections[decryptCollectionPath(collection)] =
-          collectionWithDecryptedName;
+    try {
+      final collectionWithDecryptedName =
+          _getCollectionWithDecryptedName(collection);
+      if (collection.attributes.encryptedPath != null) {
+        _localCollections[decryptCollectionPath(collection)] =
+            collectionWithDecryptedName;
+      }
+      _collectionIDToCollections[collection.id] = collectionWithDecryptedName;
+    } catch (e) {
+      _logger.info(collection.toString());
+      throw e;
     }
-    _collectionIDToCollections[collection.id] = collectionWithDecryptedName;
   }
 
   String decryptCollectionPath(Collection collection) {
@@ -359,10 +364,17 @@ class CollectionsService {
   Collection _getCollectionWithDecryptedName(Collection collection) {
     if (collection.encryptedName != null &&
         collection.encryptedName.isNotEmpty) {
-      final name = utf8.decode(CryptoUtil.decryptSync(
+      var result = CryptoUtil.decryptSync(
           Sodium.base642bin(collection.encryptedName),
           _getDecryptedKey(collection),
-          Sodium.base642bin(collection.nameDecryptionNonce)));
+          Sodium.base642bin(collection.nameDecryptionNonce));
+      var name;
+      try {
+        name = utf8.decode(result); 
+      } catch (e) {
+        _logger.severe(e);
+        name = "Unknown Album";
+      }
       return collection.copyWith(name: name);
     } else {
       return collection;
