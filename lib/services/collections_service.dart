@@ -357,28 +357,16 @@ class CollectionsService {
   }
 
   Collection _getCollectionWithDecryptedName(Collection collection) {
-    var name;
     if (collection.encryptedName != null &&
         collection.encryptedName.isNotEmpty) {
-      name = utf8.decode(CryptoUtil.decryptSync(
+      final name = utf8.decode(CryptoUtil.decryptSync(
           Sodium.base642bin(collection.encryptedName),
           _getDecryptedKey(collection),
           Sodium.base642bin(collection.nameDecryptionNonce)));
-      return Collection(
-        collection.id,
-        collection.owner,
-        collection.encryptedKey,
-        collection.keyDecryptionNonce,
-        name,
-        collection.encryptedName,
-        collection.nameDecryptionNonce,
-        collection.type,
-        collection.attributes,
-        collection.sharees,
-        collection.updationTime,
-      );
-    } else
+      return collection.copyWith(name: name);
+    } else {
       return collection;
+    }
   }
 }
 
