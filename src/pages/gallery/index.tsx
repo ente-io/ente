@@ -299,9 +299,11 @@ export default function Gallery(props) {
     if (!data || loading || data.length == 0) {
         return (
             <div className="text-center">
-                <Alert variant="primary">
-                    {constants.INITIAL_LOAD_DELAY_WARNING}
-                </Alert>
+                {data?.length == 0 && (
+                    <Alert variant="primary">
+                        {constants.INITIAL_LOAD_DELAY_WARNING}
+                    </Alert>
+                )}
                 <Spinner animation="border" variant="primary" />
             </div>
         );
