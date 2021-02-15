@@ -122,6 +122,15 @@ function PhotoSwipe(props: Iprops) {
             setFavItemIds(favItemIds);
         }
     };
+    const downloadFile = (file) => {
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = file.msrc;
+        a.download = file.metadata['title'];
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    };
     const { id } = props;
     let { className } = props;
     className = classnames(['pswp', className]).trim();
@@ -151,12 +160,12 @@ function PhotoSwipe(props: Iprops) {
                             className="pswp__button pswp__button--close"
                             title="Close"
                         />
-                        <a
-                            download={photoSwipe?.currItem['metadata']['title']}
-                            href={photoSwipe?.currItem.msrc}
-                        >
-                            <button className="download-btn" title="Download" />
-                        </a>
+
+                        <button
+                            className="download-btn"
+                            title="Download"
+                            onClick={() => downloadFile(photoSwipe.currItem)}
+                        />
 
                         <button
                             className="pswp__button pswp__button--fs"
