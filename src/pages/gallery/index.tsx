@@ -30,6 +30,7 @@ import {
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import ErrorAlert from './components/ErrorAlert';
+import { Alert } from 'react-bootstrap';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -107,7 +108,6 @@ const DateContainer = styled.div`
 
 export default function Gallery(props) {
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
     const [collections, setCollections] = useState<collection[]>([]);
     const [
         collectionAndItsLatestFile,
@@ -133,7 +133,6 @@ export default function Gallery(props) {
             router.push('/');
         }
         const main = async () => {
-            setLoading(true);
             const data = await localFiles();
             const collections = await getLocalCollections();
             const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
@@ -146,8 +145,7 @@ export default function Gallery(props) {
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
 
-            setLoading(false);
-            setProgress(80);
+            data.length == 0 ? setProgress(20) : setProgress(80);
             await syncWithRemote();
             setProgress(100);
         };
@@ -295,9 +293,20 @@ export default function Gallery(props) {
         }
     };
 
-    if (!data || loading) {
+    if (!data) {
+        return <div />;
+    }
+    if (data.length == 0) {
         return (
             <div className="text-center">
+                <LoadingBar
+                    color="#2dc262"
+                    progress={progress}
+                    onLoaderFinished={() => setProgress(0)}
+                />
+                <Alert variant="primary">
+                    {constants.INITIAL_LOAD_DELAY_WARNING}
+                </Alert>
             </div>
         );
     }
@@ -429,7 +438,7 @@ export default function Gallery(props) {
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                            ITEM_TYPE.TIME
+                                        ITEM_TYPE.TIME
                                             ? DATE_CONTAINER_HEIGHT
                                             : IMAGE_CONTAINER_HEIGHT
                                     }
@@ -446,14 +455,14 @@ export default function Gallery(props) {
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                            ITEM_TYPE.TIME
+                                                        ITEM_TYPE.TIME
                                                             ? 1
                                                             : columns
                                                     }
                                                 >
                                                     {timeStampList[index]
                                                         .itemType ===
-                                                        ITEM_TYPE.TIME ? (
+                                                    ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
                                                                 timeStampList[
@@ -472,7 +481,7 @@ export default function Gallery(props) {
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                    idx
+                                                                        idx
                                                                 );
                                                             }
                                                         )
