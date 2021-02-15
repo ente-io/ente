@@ -424,15 +424,9 @@ class UploadService {
                 image.setAttribute('src', imageURL);
                 await new Promise((resolve) => {
                     image.onload = () => {
-                        canvas.width = image.width;
-                        canvas.height = image.height;
-                        canvas_CTX.drawImage(
-                            image,
-                            0,
-                            0,
-                            image.width,
-                            image.height
-                        );
+                        canvas.width = 1920;
+                        canvas.height = 1080;
+                        canvas_CTX.drawImage(image, 0, 0, 1920, 1080);
                         image = undefined;
                         resolve(null);
                     };
@@ -479,10 +473,11 @@ class UploadService {
             }
             URL.revokeObjectURL(imageURL);
             let thumbnailBlob: Blob = file,
-                prevSize = file.size;
+                attempts = 0;
             let quality = 1;
+
             do {
-                prevSize = thumbnailBlob.size;
+                attempts++;
                 quality /= 2;
                 thumbnailBlob = await new Promise((resolve) => {
                     canvas.toBlob(
@@ -493,10 +488,7 @@ class UploadService {
                         quality
                     );
                 });
-            } while (
-                thumbnailBlob.size > 50000 &&
-                prevSize != thumbnailBlob.size
-            );
+            } while (thumbnailBlob.size > 50000 && attempts < 3);
             const thumbnail = this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
         } catch (e) {
