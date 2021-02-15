@@ -298,7 +298,6 @@ export default function Gallery(props) {
     if (!data || loading) {
         return (
             <div className="text-center">
-                <Spinner animation="border" variant="primary" />
             </div>
         );
     }
