@@ -90,10 +90,10 @@ export default function Credentials() {
 
     return (
         <Container>
-            <Image alt="vault" src="/vault.svg" />
-            <Card style={{ minWidth: '300px' }}>
+            {/* <Image alt="vault" src="/vault.svg" /> */}
+            <Card style={{ minWidth: '300px' }} className="text-center">
                 <Card.Body>
-                    <p className="text-center">{constants.ENTER_PASSPHRASE}</p>
+                    <Card.Title style={{ marginBottom: '24px' }}>{constants.ENTER_PASSPHRASE}</Card.Title>
                     <Formik<formValues>
                         initialValues={{ passphrase: '' }}
                         onSubmit={verifyPassphrase}
@@ -123,7 +123,7 @@ export default function Credentials() {
                                         onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                                errors.passphrase
+                                            errors.passphrase
                                         )}
                                         disabled={loading}
                                     />
