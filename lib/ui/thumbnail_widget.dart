@@ -88,6 +88,19 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           duration: Duration(milliseconds: 400),
           child: content,
         ),
+        widget.file.uploadedFileID == null
+            ? Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8, bottom: 4),
+                  child: Icon(
+                    Icons.cloud_off_outlined,
+                    size: 18,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+              )
+            : Container(),
       ],
       fit: StackFit.expand,
     );
