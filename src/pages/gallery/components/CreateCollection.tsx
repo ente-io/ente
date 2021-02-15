@@ -4,6 +4,7 @@ import { createAlbum } from 'services/collectionService';
 import UploadService from 'services/uploadService';
 import { CollectionAndItsLatestFile } from 'services/collectionService';
 import { getToken } from 'utils/common/key';
+import constants from 'utils/strings/constants';
 
 export default function CreateCollection(props) {
     const {
@@ -78,17 +79,17 @@ export default function CreateCollection(props) {
         }
     };
     return (
-        <Modal show={modalView} onHide={closeModal} centered backdrop="static">
+        <Modal show={modalView} onHide={closeModal} centered backdrop="static"
+            style={{ background: 'rgba(0, 0, 0, 0.8)' }}>
             <Modal.Header closeButton>
-                <Modal.Title>Create Collection</Modal.Title>
+                <Modal.Title>{constants.CREATE_COLLECTION}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form onSubmit={handleSubmit}>
                     <Form.Group controlId="formBasicEmail">
-                        <Form.Label>Album Name:</Form.Label>
                         <Form.Control
                             type="text"
-                            placeholder="Enter Album Name"
+                            placeholder={constants.ALBUM_NAME}
                             value={albumName}
                             onChange={handleChange}
                         />
@@ -98,7 +99,7 @@ export default function CreateCollection(props) {
                         type="submit"
                         style={{ width: '100%' }}
                     >
-                        Submit
+                        {constants.CREATE}
                     </Button>
                 </Form>
             </Modal.Body>

@@ -49,25 +49,27 @@ const englishConstants = {
     CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. Please don't copy-paste unverified code here.`,
     SELECT_COLLECTION: `select an album to upload to`,
     CREATE_COLLECTION: `create album`,
-    CLOSE: 'Close',
+    CLOSE: 'close',
     NOTHING_HERE: `nothing to see here! 👀`,
     UPLOAD: {
-        0: 'Preparing to upload',
-        1: 'Encryting your files',
-        2: 'Uploading your Files',
-        3: 'Files Uploaded Successfully !!!',
+        0: 'preparing to upload',
+        1: 'encrypting your files',
+        2: 'uploading your files',
+        3: 'files uploaded successfully!',
     },
     OF: 'of',
     SUBSCRIPTION_EXPIRED:
-        "You don't have a active subscription plan!! Please get one in the mobile app",
+        "your subscription has expired, please renew it form the mobile app",
     STORAGE_QUOTA_EXCEEDED:
-        'You have exceeded your designated storage Quota, please upgrade your plan to add more files',
+        'you have exceeded your storage quota, please upgrade your plan from the mobile app',
     WEB_SIGNUPS_DISABLED: () => (
         <div>sorry signups are possibly only on the <a href="https://ente.io/app" target="_blank">mobile app</a></div>
     ),
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
     NO_ACCOUNT: 'don\'t have an account?',
+    ALBUM_NAME: 'album name',
+    CREATE: 'create',
 };
 
 export default englishConstants;
