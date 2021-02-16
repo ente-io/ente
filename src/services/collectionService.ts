@@ -5,7 +5,7 @@ import localForage from 'localforage';
 
 import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
-import { keyEncryptionResult } from './uploadService';
+import { KeyEncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
 
 const CryptoWorker: any =
@@ -208,14 +208,14 @@ export const AddCollection = async (
     const {
         encryptedData: encryptedKey,
         nonce: keyDecryptionNonce,
-    }: keyEncryptionResult = await worker.encryptToB64(
+    }: KeyEncryptionResult = await worker.encryptToB64(
         collectionKey,
         encryptionKey
     );
     const {
         encryptedData: encryptedName,
         nonce: nameDecryptionNonce,
-    }: keyEncryptionResult = await worker.encryptToB64(
+    }: KeyEncryptionResult = await worker.encryptToB64(
         collectionName,
         collectionKey
     );
@@ -290,7 +290,7 @@ const addToCollection = async (collection: collection, files: file[]) => {
         await Promise.all(
             files.map(async (file) => {
                 file.collectionID = collection.id;
-                const newEncryptedKey: keyEncryptionResult = await worker.encryptToB64(
+                const newEncryptedKey: KeyEncryptionResult = await worker.encryptToB64(
                     file.key,
                     collection.key
                 );
