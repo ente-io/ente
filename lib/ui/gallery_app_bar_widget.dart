@@ -9,6 +9,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
@@ -162,12 +163,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
-    actions.add(IconButton(
-      icon: Icon(Platform.isAndroid ? Icons.add_outlined : CupertinoIcons.add),
-      onPressed: () {
-        _createAlbum();
-      },
-    ));
+    if (BillingService.instance.hasActiveSubscription()) {
+      actions.add(IconButton(
+        icon:
+            Icon(Platform.isAndroid ? Icons.add_outlined : CupertinoIcons.add),
+        onPressed: () {
+          _createAlbum();
+        },
+      ));
+    }
     actions.add(IconButton(
       icon: Icon(
           Platform.isAndroid ? Icons.share_outlined : CupertinoIcons.share),
