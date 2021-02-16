@@ -222,7 +222,7 @@ export const AddCollection = async (
         const {
             encryptedData: encryptedName,
             nonce: nameDecryptionNonce,
-        }: B64EncryptionResult = await worker.encryptToB64(
+        }: B64EncryptionResult = await worker.encryptUTF8(
             collectionName,
             collectionKey
         );
