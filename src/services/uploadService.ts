@@ -10,6 +10,11 @@ const CryptoWorker: any =
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 const ENDPOINT = getEndpoint();
 
+const THUMBNAIL_WIDTH = 1920;
+const THUMBNAIL_HEIGHT = 1080;
+const MAX_ATTEMPTS = 3;
+const MIN_THUMBNAIL_SIZE = 50000;
+
 interface encryptionResult {
     file: fileAttribute;
     key: string;
@@ -424,14 +429,14 @@ class UploadService {
                 image.setAttribute('src', imageURL);
                 await new Promise((resolve) => {
                     image.onload = () => {
-                        canvas.width = image.width;
-                        canvas.height = image.height;
+                        canvas.width = THUMBNAIL_WIDTH;
+                        canvas.height = THUMBNAIL_HEIGHT;
                         canvas_CTX.drawImage(
                             image,
                             0,
                             0,
-                            image.width,
-                            image.height
+                            THUMBNAIL_WIDTH,
+                            THUMBNAIL_HEIGHT
                         );
                         image = undefined;
                         resolve(null);
@@ -441,34 +446,18 @@ class UploadService {
                 await new Promise(async (resolve) => {
                     let video = document.createElement('video');
                     imageURL = URL.createObjectURL(file);
-                    var timeupdate = function () {
-                        if (snapImage()) {
-                            video.removeEventListener('timeupdate', timeupdate);
-                            video.pause();
-                            resolve(null);
-                        }
-                    };
                     video.addEventListener('loadeddata', function () {
-                        if (snapImage()) {
-                            video.removeEventListener('timeupdate', timeupdate);
-                            resolve(null);
-                        }
-                    });
-                    var snapImage = function () {
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
+                        canvas.width = THUMBNAIL_WIDTH;
+                        canvas.height = THUMBNAIL_HEIGHT;
                         canvas_CTX.drawImage(
                             video,
                             0,
                             0,
-                            canvas.width,
-                            canvas.height
+                            THUMBNAIL_WIDTH,
+                            THUMBNAIL_HEIGHT
                         );
-                        var image = canvas.toDataURL();
-                        var success = image.length > 100000;
-                        return success;
-                    };
-                    video.addEventListener('timeupdate', timeupdate);
+                        resolve(null);
+                    });
                     video.preload = 'metadata';
                     video.src = imageURL;
                     // Load video in Safari / IE11
@@ -478,17 +467,33 @@ class UploadService {
                 });
             }
             URL.revokeObjectURL(imageURL);
-            var thumbnailBlob = await new Promise((resolve) => {
-                canvas.toBlob(function (blob) {
-                    resolve(blob);
-                }),
-                    'image/jpeg',
-                    0.4;
-            });
+            if (canvas.toDataURL().length == 0) {
+                throw new Error('');
+            }
+            let thumbnailBlob: Blob = file,
+                attempts = 0;
+            let quality = 1;
+
+            do {
+                attempts++;
+                quality /= 2;
+                thumbnailBlob = await new Promise((resolve) => {
+                    canvas.toBlob(
+                        function (blob) {
+                            resolve(blob);
+                        },
+                        'image/jpeg',
+                        quality
+                    );
+                });
+            } while (
+                thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
+                attempts <= MAX_ATTEMPTS
+            );
             const thumbnail = this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
         } catch (e) {
-            console.log('Error generatin thumbnail ' + e);
+            console.log('Error generating thumbnail ' + e);
         }
     }
 
