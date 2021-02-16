@@ -331,24 +331,19 @@ class CollectionsService {
     )
         .then((response) {
       final collection = Collection.fromMap(response.data["collection"]);
-      _cacheCollectionAttributes(collection);
-      return collection;
+      return _cacheCollectionAttributes(collection);
     });
   }
 
-  void _cacheCollectionAttributes(Collection collection) {
-    try {
-      final collectionWithDecryptedName =
-          _getCollectionWithDecryptedName(collection);
-      if (collection.attributes.encryptedPath != null) {
-        _localCollections[decryptCollectionPath(collection)] =
-            collectionWithDecryptedName;
-      }
-      _collectionIDToCollections[collection.id] = collectionWithDecryptedName;
-    } catch (e) {
-      _logger.info(collection.toString());
-      throw e;
+  Collection _cacheCollectionAttributes(Collection collection) {
+    final collectionWithDecryptedName =
+        _getCollectionWithDecryptedName(collection);
+    if (collection.attributes.encryptedPath != null) {
+      _localCollections[decryptCollectionPath(collection)] =
+          collectionWithDecryptedName;
     }
+    _collectionIDToCollections[collection.id] = collectionWithDecryptedName;
+    return collectionWithDecryptedName;
   }
 
   String decryptCollectionPath(Collection collection) {
@@ -370,7 +365,7 @@ class CollectionsService {
           Sodium.base642bin(collection.nameDecryptionNonce));
       var name;
       try {
-        name = utf8.decode(result); 
+        name = utf8.decode(result);
       } catch (e) {
         _logger.severe(e);
         name = "Unknown Album";
