@@ -50,6 +50,14 @@ String getDayAndMonth(DateTime dateTime) {
       _months[dateTime.month];
 }
 
+String getDateAndMonthAndYear(DateTime dateTime) {
+  return dateTime.day.toString() +
+      " " +
+      _months[dateTime.month] +
+      ", " +
+      dateTime.year.toString();
+}
+
 String getDay(DateTime dateTime) {
   return _days[dateTime.weekday];
 }

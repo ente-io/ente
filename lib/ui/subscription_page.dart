@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ui/expansion_card.dart';
+import 'package:photos/utils/date_time_util.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -281,14 +282,30 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             },
             child: Container(
               padding: EdgeInsets.all(80),
-              child: RichText(
-                text: TextSpan(
-                  text: "payment details",
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontFamily: 'Ubuntu',
+              child: Column(
+                children: [
+                  Text(
+                    "next renewal on " +
+                        getDateAndMonthAndYear(
+                            DateTime.fromMicrosecondsSinceEpoch(
+                                _currentSubscription.expiryTime)),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.6),
+                      fontSize: 14,
+                    ),
                   ),
-                ),
+                  Padding(padding: EdgeInsets.all(8)),
+                  RichText(
+                    text: TextSpan(
+                      text: "payment details",
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontFamily: 'Ubuntu',
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
