@@ -23,7 +23,7 @@
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data android:name="flutterEmbedding" android:value="2" />
 
-        <meta-data android:name="io.sentry.dsn" android:value="http://96780dc0b00f4c69a16c02e90d379996@3.211.17.56/2" />
+        <meta-data android:name="io.sentry.dsn" android:value="https://93b8ea6f54f442dc8408ebccdff6fe7a@errors.ente.io/2" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"/>
