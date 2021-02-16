@@ -123,7 +123,6 @@ export const syncCollections = async (token: string, key: string) => {
         (await localForage.getItem<string>(COLLECTION_UPDATION_TIME)) ?? '0';
     const updatedCollections =
         (await getCollections(token, lastCollectionUpdationTime, key)) || [];
-    localCollections.sort((a, b) => b.updationTime - a.updationTime);
     if (updatedCollections.length == 0) {
         return localCollections;
     }
