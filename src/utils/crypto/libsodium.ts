@@ -77,8 +77,6 @@ export async function encryptChaChaOneShot(data: Uint8Array, key?: string) {
         file: {
             encryptedData: pushResult,
             decryptionHeader: await toB64(header),
-            creationTime: Date.now(),
-            fileType: 0,
         },
     };
 }
@@ -123,8 +121,6 @@ export async function encryptChaCha(data: Uint8Array, key?: string) {
         file: {
             encryptedData: new Uint8Array(encryptedData),
             decryptionHeader: await toB64(header),
-            creationTime: Date.now(),
-            fileType: 0,
         },
     };
 }
