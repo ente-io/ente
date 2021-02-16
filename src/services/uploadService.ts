@@ -19,7 +19,7 @@ interface encryptionResult {
     file: fileAttribute;
     key: string;
 }
-export interface keyEncryptionResult {
+export interface B64EncryptionResult {
     encryptedData: string;
     key: string;
     nonce: string;
@@ -39,7 +39,7 @@ interface FileinMemory {
 interface encryptedFile {
     filedata: fileAttribute;
     thumbnail: fileAttribute;
-    fileKey: keyEncryptionResult;
+    fileKey: B64EncryptionResult;
 }
 
 interface objectKey {
@@ -63,7 +63,7 @@ interface uploadFile extends objectKeys {
 
 interface UploadFileWithoutMetaData {
     tempUploadFile: uploadFile;
-    encryptedFileKey: keyEncryptionResult;
+    encryptedFileKey: B64EncryptionResult;
     fileName: string;
 }
 
@@ -270,7 +270,7 @@ class UploadService {
                 fileKey
             );
 
-            const encryptedKey: keyEncryptionResult = await worker.encryptToB64(
+            const encryptedKey: B64EncryptionResult = await worker.encryptB64(
                 fileKey,
                 encryptionKey
             );
@@ -289,7 +289,7 @@ class UploadService {
     private async encryptMetadata(
         worker: any,
         fileName: string,
-        encryptedFileKey: keyEncryptionResult
+        encryptedFileKey: B64EncryptionResult
     ) {
         const metaData = this.metadataMap.get(fileName);
         const fileKey = await worker.decryptB64(
@@ -340,7 +340,7 @@ class UploadService {
 
     private getuploadFile(
         collection: collection,
-        encryptedKey: keyEncryptionResult,
+        encryptedKey: B64EncryptionResult,
         objectKeys: objectKeys
     ): uploadFile {
         const uploadFile: uploadFile = {

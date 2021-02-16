@@ -25,11 +25,6 @@ export interface fileAttribute {
     fileType: number;
 }
 
-export interface user {
-    id: number;
-    name: string;
-    email: string;
-}
 
 export interface file {
     id: number;
