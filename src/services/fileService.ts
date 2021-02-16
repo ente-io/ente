@@ -25,11 +25,6 @@ export interface fileAttribute {
     decryptionHeader: string;
 }
 
-export interface user {
-    id: number;
-    name: string;
-    email: string;
-}
 
 export interface file {
     id: number;

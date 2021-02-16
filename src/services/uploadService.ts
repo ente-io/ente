@@ -18,7 +18,7 @@ interface EncryptionResult {
     file: fileAttribute;
     key: string;
 }
-export interface KeyEncryptionResult {
+export interface B64EncryptionResult {
     encryptedData: string;
     key: string;
     nonce: string;
@@ -46,7 +46,7 @@ interface FileinMemory {
 
 interface EncryptedFile {
     file: ProcessedFile;
-    fileKey: KeyEncryptionResult;
+    fileKey: B64EncryptionResult;
 }
 interface ProcessedFile {
     file: fileAttribute;
@@ -251,7 +251,7 @@ class UploadService {
                 fileKey
             );
 
-            const encryptedKey: KeyEncryptionResult = await worker.encryptToB64(
+            const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
                 fileKey,
                 encryptionKey
             );
@@ -299,7 +299,7 @@ class UploadService {
     private getuploadFile(
         collection: collection,
         backupedFile: BackupedFile,
-        fileKey: KeyEncryptionResult
+        fileKey: B64EncryptionResult
     ): uploadFile {
         const uploadFile: uploadFile = {
             collectionID: collection.id,
