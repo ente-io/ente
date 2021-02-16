@@ -77,8 +77,6 @@ export async function encryptChaChaOneShot(data: Uint8Array, key?: string) {
         file: {
             encryptedData: pushResult,
             decryptionHeader: await toB64(header),
-            creationTime: Date.now(),
-            fileType: 0,
         },
     };
 }
@@ -123,8 +121,6 @@ export async function encryptChaCha(data: Uint8Array, key?: string) {
         file: {
             encryptedData: new Uint8Array(encryptedData),
             decryptionHeader: await toB64(header),
-            creationTime: Date.now(),
-            fileType: 0,
         },
     };
 }
@@ -142,6 +138,10 @@ export async function encryptToB64(data: string, key?: string) {
         nonce: await toB64(encrypted.nonce),
     };
 }
+export async function encryptUTF8(data: string, key?: string) {
+    const b64Data = await toB64(await fromString(data));
+    return await encryptToB64(b64Data, key);
+}
 
 export async function decryptB64(data: string, nonce: string, key: string) {
     await sodium.ready;
@@ -154,7 +154,7 @@ export async function decryptB64(data: string, nonce: string, key: string) {
     return await toB64(decrypted);
 }
 
-export async function decryptString(data: string, nonce: string, key: string) {
+export async function decryptToUTF8(data: string, nonce: string, key: string) {
     await sodium.ready;
     const decrypted = await decrypt(
         await fromB64(data),
@@ -250,14 +250,7 @@ export async function boxSealOpen(
 
 export async function fromB64(input: string) {
     await sodium.ready;
-    let result;
-    try {
-        result = sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
-    } catch (e) {
-        result = await fromB64(await toB64(await fromString(input)));
-    } finally {
-        return result;
-    }
+    return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
 }
 
 export async function toB64(input: Uint8Array) {

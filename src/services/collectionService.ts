@@ -1,12 +1,13 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { file, user, getFiles } from './fileService';
+import { file } from './fileService';
 import localForage from 'localforage';
 
 import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
-import { keyEncryptionResult } from './uploadService';
+import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
+import { user } from './userService';
 
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
@@ -77,7 +78,7 @@ const getCollectionSecrets = async (
     }
     collection.name =
         collection.name ||
-        (await worker.decryptString(
+        (await worker.decryptToUTF8(
             collection.encryptedName,
             collection.nameDecryptionNonce,
             decryptedKey
@@ -122,7 +123,6 @@ export const syncCollections = async (token: string, key: string) => {
         (await localForage.getItem<string>(COLLECTION_UPDATION_TIME)) ?? '0';
     const updatedCollections =
         (await getCollections(token, lastCollectionUpdationTime, key)) || [];
-
     if (updatedCollections.length == 0) {
         return localCollections;
     }
@@ -152,6 +152,7 @@ export const syncCollections = async (token: string, key: string) => {
             updationTime = Math.max(updationTime, collection.updationTime);
         }
     }
+    collections.sort((a, b) => b.updationTime - a.updationTime);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
     await localForage.setItem(COLLECTIONS, collections);
     return collections;
@@ -164,19 +165,24 @@ export const getCollectionAndItsLatestFile = (
     const latestFile = new Map<number, file>();
     const collectionMap = new Map<number, collection>();
 
-    collections.forEach((collection) =>
-        collectionMap.set(collection.id, collection)
-    );
     files.forEach((file) => {
         if (!latestFile.has(file.collectionID)) {
             latestFile.set(file.collectionID, file);
         }
     });
     let allCollectionAndItsLatestFile: CollectionAndItsLatestFile[] = [];
-    for (const [collectionID, file] of latestFile) {
+    const userID = getData(LS_KEYS.USER).id;
+
+    for (const collection of collections) {
+        if (
+            collection.owner.id != userID ||
+            collection.type == CollectionType.favorites
+        ) {
+            continue;
+        }
         allCollectionAndItsLatestFile.push({
-            collection: collectionMap.get(collectionID),
-            file,
+            collection,
+            file: latestFile.get(collection.id),
         });
     }
     return allCollectionAndItsLatestFile;
@@ -201,46 +207,50 @@ export const AddCollection = async (
     collectionName: string,
     type: CollectionType
 ) => {
-    const worker = await new CryptoWorker();
-    const encryptionKey = await getActualKey();
-    const token = getToken();
-    const collectionKey: string = await worker.generateMasterKey();
-    const {
-        encryptedData: encryptedKey,
-        nonce: keyDecryptionNonce,
-    }: keyEncryptionResult = await worker.encryptToB64(
-        collectionKey,
-        encryptionKey
-    );
-    const {
-        encryptedData: encryptedName,
-        nonce: nameDecryptionNonce,
-    }: keyEncryptionResult = await worker.encryptToB64(
-        collectionName,
-        collectionKey
-    );
-    const newCollection: collection = {
-        id: null,
-        owner: null,
-        encryptedKey,
-        keyDecryptionNonce,
-        encryptedName,
-        nameDecryptionNonce,
-        type,
-        attributes: {},
-        sharees: null,
-        updationTime: null,
-        isDeleted: false,
-    };
-    let createdCollection: collection = await createCollection(
-        newCollection,
-        token
-    );
-    createdCollection = await getCollectionSecrets(
-        createdCollection,
-        encryptionKey
-    );
-    return createdCollection;
+    try {
+        const worker = await new CryptoWorker();
+        const encryptionKey = await getActualKey();
+        const token = getToken();
+        const collectionKey: string = await worker.generateMasterKey();
+        const {
+            encryptedData: encryptedKey,
+            nonce: keyDecryptionNonce,
+        }: B64EncryptionResult = await worker.encryptToB64(
+            collectionKey,
+            encryptionKey
+        );
+        const {
+            encryptedData: encryptedName,
+            nonce: nameDecryptionNonce,
+        }: B64EncryptionResult = await worker.encryptUTF8(
+            collectionName,
+            collectionKey
+        );
+        const newCollection: collection = {
+            id: null,
+            owner: null,
+            encryptedKey,
+            keyDecryptionNonce,
+            encryptedName,
+            nameDecryptionNonce,
+            type,
+            attributes: {},
+            sharees: null,
+            updationTime: null,
+            isDeleted: false,
+        };
+        let createdCollection: collection = await createCollection(
+            newCollection,
+            token
+        );
+        createdCollection = await getCollectionSecrets(
+            createdCollection,
+            encryptionKey
+        );
+        return createdCollection;
+    } catch (e) {
+        console.log('Add collection failed', e);
+    }
 };
 
 const createCollection = async (
@@ -290,7 +300,7 @@ const addToCollection = async (collection: collection, files: file[]) => {
         await Promise.all(
             files.map(async (file) => {
                 file.collectionID = collection.id;
-                const newEncryptedKey: keyEncryptionResult = await worker.encryptToB64(
+                const newEncryptedKey: B64EncryptionResult = await worker.encryptToB64(
                     file.key,
                     collection.key
                 );

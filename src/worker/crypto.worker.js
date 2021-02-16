@@ -69,12 +69,16 @@ export class Crypto {
         return libsodium.decryptB64(data, nonce, key);
     }
 
-    async decryptString(data, nonce, key) {
-        return libsodium.decryptString(data, nonce, key);
+    async decryptToUTF8(data, nonce, key) {
+        return libsodium.decryptToUTF8(data, nonce, key);
     }
 
     async encryptToB64(data, key) {
         return libsodium.encryptToB64(data, key);
+    }
+
+    async encryptUTF8(data, key) {
+        return libsodium.encryptUTF8(data, key);
     }
 
     async generateMasterKey() {

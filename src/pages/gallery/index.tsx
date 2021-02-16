@@ -264,10 +264,7 @@ export default function Gallery(props) {
                 // ignore
             }
         }
-        if (
-            (!item.src || item.src === item.msrc) &&
-            !fetching[item.dataIndex]
-        ) {
+        if (!fetching[item.dataIndex]) {
             fetching[item.dataIndex] = true;
             const url = await getFile(token, item);
             updateSrcUrl(item.dataIndex, url);
@@ -296,7 +293,7 @@ export default function Gallery(props) {
     if (!data) {
         return <div />;
     }
-    if (data.length == 0) {
+    if (data.length == 0 && progress != 0) {
         return (
             <div className="text-center">
                 <LoadingBar

@@ -199,16 +199,16 @@ export default function App({ Component, pageProps }) {
             </Head>
             <GlobalStyles />
             <Navbar>
+                {user && (
+                    <Button variant="link" onClick={logout}>
+                        <PowerSettings />
+                    </Button>
+                )}
                 <FlexContainer>
                     <Image alt="logo" src="/icon.svg" />
                 </FlexContainer>
                 {uploadButtonView && (
                     <UploadButton showModal={showUploadModal} />
-                )}
-                {user && (
-                    <Button variant="link" onClick={logout}>
-                        <PowerSettings />
-                    </Button>
                 )}
             </Navbar>
             {loading ? (

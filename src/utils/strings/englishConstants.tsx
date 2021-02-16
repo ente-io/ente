@@ -53,7 +53,7 @@ const englishConstants = {
     NOTHING_HERE: `nothing to see here! 👀`,
     UPLOAD: {
         0: 'preparing to upload',
-        1: 'encrypting your files',
+        1: 'reading google metadata files',
         2: 'uploading your files',
         3: 'files uploaded successfully!',
     },
@@ -62,7 +62,7 @@ const englishConstants = {
         'your subscription has expired, please renew it form the mobile app',
     STORAGE_QUOTA_EXCEEDED:
         'you have exceeded your storage quota, please upgrade your plan from the mobile app',
-    INITIAL_LOAD_DELAY_WARNING: 'Please wait, intial load may take some time',
+    INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
 
     WEB_SIGNUPS_DISABLED: () => (
         <div>

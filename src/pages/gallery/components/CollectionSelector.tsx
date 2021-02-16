@@ -13,11 +13,9 @@ function CollectionSelector(props) {
         collectionAndItsLatestFile,
         ...rest
     } = props;
-
     const CollectionIcons = collectionAndItsLatestFile?.map((item) => (
-        <div style={{ margin: '10px' }}>
+        <div style={{ margin: '10px' }} key={item.collection.id}>
             <CollectionDropZone
-                key={item.collection.id}
                 {...rest}
                 closeModal={closeUploadModal}
                 showModal={showUploadModal}
@@ -45,7 +43,9 @@ function CollectionSelector(props) {
             style={{ maxWidth: '100%' }}
         >
             <Modal.Header closeButton>
-                <Modal.Title style={{ marginLeft: '12px' }}>{constants.SELECT_COLLECTION}</Modal.Title>
+                <Modal.Title style={{ marginLeft: '12px' }}>
+                    {constants.SELECT_COLLECTION}
+                </Modal.Title>
             </Modal.Header>
             <Modal.Body
                 style={{

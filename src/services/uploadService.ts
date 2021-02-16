@@ -10,72 +10,73 @@ const CryptoWorker: any =
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 const ENDPOINT = getEndpoint();
 
-interface encryptionResult {
+const THUMBNAIL_HEIGHT = 720;
+const MAX_ATTEMPTS = 3;
+const MIN_THUMBNAIL_SIZE = 50000;
+
+interface EncryptionResult {
     file: fileAttribute;
     key: string;
 }
-export interface keyEncryptionResult {
+export interface B64EncryptionResult {
     encryptedData: string;
     key: string;
     nonce: string;
 }
 
-interface uploadURL {
+interface UploadURL {
     url: string;
     objectKey: string;
+}
+
+export interface MetadataObject {
+    title: string;
+    creationTime: number;
+    modificationTime: number;
+    latitude: number;
+    longitude: number;
+    fileType: FILE_TYPE;
 }
 
 interface FileinMemory {
     filedata: Uint8Array;
     thumbnail: Uint8Array;
-    filename: string;
+    metadata: MetadataObject;
 }
 
-interface encryptedFile {
-    filedata: fileAttribute;
+interface EncryptedFile {
+    file: ProcessedFile;
+    fileKey: B64EncryptionResult;
+}
+interface ProcessedFile {
+    file: fileAttribute;
     thumbnail: fileAttribute;
-    fileKey: keyEncryptionResult;
+    metadata: fileAttribute;
 }
+interface BackupedFile extends ProcessedFile {}
 
-interface objectKey {
-    objectKey: string;
-    decryptionHeader: string;
-}
-interface objectKeys {
-    file: objectKey;
-    thumbnail: objectKey;
-}
-
-interface uploadFile extends objectKeys {
+interface uploadFile extends BackupedFile {
     collectionID: number;
     encryptedKey: string;
     keyDecryptionNonce: string;
-    metadata?: {
-        encryptedData: string | Uint8Array;
-        decryptionHeader: string;
-    };
-}
-
-interface UploadFileWithoutMetaData {
-    tempUploadFile: uploadFile;
-    encryptedFileKey: keyEncryptionResult;
-    fileName: string;
 }
 
 export enum UPLOAD_STAGES {
     START,
-    ENCRYPTION,
-    UPLOAD,
+    READING_GOOGLE_METADATA_FILES,
+    UPLOADING,
     FINISH,
 }
 
 class UploadService {
-    private uploadURLs: uploadURL[];
-    private uploadURLFetchInProgress: Promise<any>;
-    private perStepProgress: number;
-    private stepsCompleted: number;
-    private totalFilesCount: number;
+    private uploadURLs: UploadURL[] = [];
+    private uploadURLFetchInProgress: Promise<any> = null;
+    private perFileProgress: number;
+    private filesCompleted: number;
+    private totalFileCount: number;
     private metadataMap: Map<string, Object>;
+    private filesToBeUploaded: File[];
+    private progressBarProps;
 
     public async uploadFiles(
         recievedFiles: File[],
@@ -84,11 +85,11 @@ class UploadService {
         progressBarProps
     ) {
         try {
-            const worker = await new CryptoWorker();
-            this.stepsCompleted = 0;
+            progressBarProps.setUploadStage(UPLOAD_STAGES.START);
+
+            this.filesCompleted = 0;
             this.metadataMap = new Map<string, object>();
-            this.uploadURLs = [];
-            this.uploadURLFetchInProgress = null;
+            this.progressBarProps = progressBarProps;
 
             let metadataFiles: File[] = [];
             let actualFiles: File[] = [];
@@ -103,67 +104,33 @@ class UploadService {
                     metadataFiles.push(file);
                 }
             });
-            this.totalFilesCount = actualFiles.length;
-            this.perStepProgress = 100 / (3 * actualFiles.length);
+            this.totalFileCount = actualFiles.length;
+            this.perFileProgress = 100 / actualFiles.length;
+            this.filesToBeUploaded = actualFiles;
 
-            progressBarProps.setUploadStage(UPLOAD_STAGES.START);
-            this.changeProgressBarProps(progressBarProps);
-
-            const uploadFilesWithoutMetaData: UploadFileWithoutMetaData[] = [];
-
-            while (actualFiles.length > 0) {
-                var promises = [];
-                for (var i = 0; i < 5 && actualFiles.length > 0; i++)
-                    promises.push(
-                        this.uploadHelper(
-                            progressBarProps,
-                            actualFiles.pop(),
-                            collectionAndItsLatestFile.collection,
-                            token
-                        )
-                    );
-                uploadFilesWithoutMetaData.push(
-                    ...(await Promise.all(promises))
-                );
-            }
+            progressBarProps.setUploadStage(
+                UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
+            );
 
             for await (const rawFile of metadataFiles) {
-                await this.updateMetadata(rawFile);
+                await this.seedMetadataMap(rawFile);
             }
 
-            progressBarProps.setUploadStage(UPLOAD_STAGES.ENCRYPTION);
-            const completeUploadFiles: uploadFile[] = await Promise.all(
-                uploadFilesWithoutMetaData.map(
-                    async (file: UploadFileWithoutMetaData) => {
-                        const {
-                            file: encryptedMetaData,
-                        } = await this.encryptMetadata(
-                            worker,
-                            file.fileName,
-                            file.encryptedFileKey
-                        );
-                        const completeUploadFile = {
-                            ...file.tempUploadFile,
-                            metadata: {
-                                encryptedData: encryptedMetaData.encryptedData,
-                                decryptionHeader:
-                                    encryptedMetaData.decryptionHeader,
-                            },
-                        };
-                        this.changeProgressBarProps(progressBarProps);
-                        return completeUploadFile;
-                    }
-                )
-            );
+            progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOADING);
+            this.changeProgressBarProps();
 
-            progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOAD);
-            await Promise.all(
-                completeUploadFiles.map(async (uploadFile: uploadFile) => {
-                    await this.uploadFile(uploadFile, token);
-                    this.changeProgressBarProps(progressBarProps);
-                })
-            );
-
+            const uploadProcesses = [];
+            for (let i = 0; i < Math.min(5, this.totalFileCount); i++) {
+                uploadProcesses.push(
+                    this.uploader(
+                        await new CryptoWorker(),
+                        this.filesToBeUploaded.pop(),
+                        collectionAndItsLatestFile.collection,
+                        token
+                    )
+                );
+            }
+            await Promise.all(uploadProcesses);
             progressBarProps.setUploadStage(UPLOAD_STAGES.FINISH);
             progressBarProps.setPercentComplete(100);
         } catch (e) {
@@ -171,43 +138,50 @@ class UploadService {
             throw e;
         }
     }
-    private async uploadHelper(progressBarProps, rawFile, collection, token) {
+    private async uploader(worker, rawFile, collection, token) {
         try {
-            const worker = await new CryptoWorker();
             let file: FileinMemory = await this.readFile(rawFile);
-            let encryptedFile: encryptedFile = await this.encryptFile(
+
+            let encryptedFile: EncryptedFile = await this.encryptFile(
                 worker,
                 file,
                 collection.key
             );
-            let objectKeys = await this.uploadtoBucket(
-                encryptedFile,
-                token,
-                2 * this.totalFilesCount
+            let backupedFile: BackupedFile = await this.uploadtoBucket(
+                encryptedFile.file,
+                token
             );
-            let uploadFileWithoutMetaData: uploadFile = this.getuploadFile(
+            let uploadFile: uploadFile = this.getuploadFile(
                 collection,
-                encryptedFile.fileKey,
-                objectKeys
+                backupedFile,
+                encryptedFile.fileKey
             );
-            this.changeProgressBarProps(progressBarProps);
+            await this.uploadFile(uploadFile, token);
 
-            return {
-                tempUploadFile: uploadFileWithoutMetaData,
-                encryptedFileKey: encryptedFile.fileKey,
-                fileName: file.filename,
-            };
+            this.changeProgressBarProps();
+
+            if (this.filesToBeUploaded.length > 0) {
+                await this.uploader(
+                    worker,
+                    this.filesToBeUploaded.pop(),
+                    collection,
+                    token
+                );
+            }
         } catch (e) {
             console.log(e);
             throw e;
         }
     }
 
-    private changeProgressBarProps({ setPercentComplete, setFileCounter }) {
-        this.stepsCompleted++;
-        const fileCompleted = this.stepsCompleted % this.totalFilesCount;
-        setFileCounter({ current: fileCompleted, total: this.totalFilesCount });
-        setPercentComplete(this.perStepProgress * this.stepsCompleted);
+    private changeProgressBarProps() {
+        const { setPercentComplete, setFileCounter } = this.progressBarProps;
+        setFileCounter({
+            current: this.filesCompleted + 1,
+            total: this.totalFileCount,
+        });
+        setPercentComplete(this.filesCompleted * this.perFileProgress);
+        this.filesCompleted++;
     }
 
     private async readFile(recievedFile: File) {
@@ -215,7 +189,9 @@ class UploadService {
             const filedata: Uint8Array = await this.getUint8ArrayView(
                 recievedFile
             );
-            let fileType;
+            const thumbnail = await this.generateThumbnail(recievedFile);
+
+            let fileType: FILE_TYPE;
             switch (recievedFile.type.split('/')[0]) {
                 case 'image':
                     fileType = FILE_TYPE.IMAGE;
@@ -230,18 +206,22 @@ class UploadService {
             const { location, creationTime } = await this.getExifData(
                 recievedFile
             );
-            this.metadataMap.set(recievedFile.name, {
-                title: recievedFile.name,
-                creationTime: creationTime || recievedFile.lastModified * 1000,
-                modificationTime: recievedFile.lastModified * 1000,
-                latitude: location?.latitude,
-                longitude: location?.latitude,
-                fileType,
-            });
+            const metadata = Object.assign(
+                this.metadataMap.get(recievedFile.name) ?? {},
+                {
+                    title: recievedFile.name,
+                    creationTime:
+                        creationTime || recievedFile.lastModified * 1000,
+                    modificationTime: recievedFile.lastModified * 1000,
+                    latitude: location?.latitude,
+                    longitude: location?.latitude,
+                    fileType,
+                }
+            );
             return {
                 filedata,
-                filename: recievedFile.name,
-                thumbnail: await this.generateThumbnail(recievedFile),
+                thumbnail,
+                metadata,
             };
         } catch (e) {
             console.log('error reading files ' + e);
@@ -251,28 +231,37 @@ class UploadService {
         worker,
         file: FileinMemory,
         encryptionKey: string
-    ): Promise<encryptedFile> {
+    ): Promise<EncryptedFile> {
         try {
             const {
                 key: fileKey,
                 file: encryptedFiledata,
-            }: encryptionResult = await worker.encryptFile(file.filedata);
+            }: EncryptionResult = await worker.encryptFile(file.filedata);
 
             const {
                 file: encryptedThumbnail,
-            }: encryptionResult = await worker.encryptThumbnail(
+            }: EncryptionResult = await worker.encryptThumbnail(
                 file.thumbnail,
                 fileKey
             );
+            const {
+                file: encryptedMetadata,
+            }: EncryptionResult = await worker.encryptMetadata(
+                file.metadata,
+                fileKey
+            );
 
-            const encryptedKey: keyEncryptionResult = await worker.encryptToB64(
+            const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
                 fileKey,
                 encryptionKey
             );
 
-            const result: encryptedFile = {
-                filedata: encryptedFiledata,
-                thumbnail: encryptedThumbnail,
+            const result: EncryptedFile = {
+                file: {
+                    file: encryptedFiledata,
+                    thumbnail: encryptedThumbnail,
+                    metadata: encryptedMetadata,
+                },
                 fileKey: encryptedKey,
             };
             return result;
@@ -281,52 +270,26 @@ class UploadService {
         }
     }
 
-    private async encryptMetadata(
-        worker: any,
-        fileName: string,
-        encryptedFileKey: keyEncryptionResult
-    ) {
-        const metaData = this.metadataMap.get(fileName);
-        const fileKey = await worker.decryptB64(
-            encryptedFileKey.encryptedData,
-            encryptedFileKey.nonce,
-            encryptedFileKey.key
-        );
-        const encryptedMetaData = await worker.encryptMetadata(
-            metaData,
-            fileKey
-        );
-        return encryptedMetaData;
-    }
-
     private async uploadtoBucket(
-        file: encryptedFile,
-        token,
-        count: number
-    ): Promise<objectKeys> {
+        file: ProcessedFile,
+        token
+    ): Promise<BackupedFile> {
         try {
-            const fileUploadURL = await this.getUploadURL(token, count);
-            const fileObjectKey = await this.putFile(
+            const fileUploadURL = await this.getUploadURL(token);
+            file.file.objectKey = await this.putFile(
                 fileUploadURL,
-                file.filedata.encryptedData
+                file.file.encryptedData
             );
 
-            const thumbnailUploadURL = await this.getUploadURL(token, count);
-            const thumbnailObjectKey = await this.putFile(
+            const thumbnailUploadURL = await this.getUploadURL(token);
+            file.thumbnail.objectKey = await this.putFile(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData
             );
+            delete file.file.encryptedData;
+            delete file.thumbnail.encryptedData;
 
-            return {
-                file: {
-                    objectKey: fileObjectKey,
-                    decryptionHeader: file.filedata.decryptionHeader,
-                },
-                thumbnail: {
-                    objectKey: thumbnailObjectKey,
-                    decryptionHeader: file.thumbnail.decryptionHeader,
-                },
-            };
+            return file;
         } catch (e) {
             console.log('error uploading to bucket ' + e);
             throw e;
@@ -335,14 +298,14 @@ class UploadService {
 
     private getuploadFile(
         collection: collection,
-        encryptedKey: keyEncryptionResult,
-        objectKeys: objectKeys
+        backupedFile: BackupedFile,
+        fileKey: B64EncryptionResult
     ): uploadFile {
         const uploadFile: uploadFile = {
             collectionID: collection.id,
-            encryptedKey: encryptedKey.encryptedData,
-            keyDecryptionNonce: encryptedKey.nonce,
-            ...objectKeys,
+            encryptedKey: fileKey.encryptedData,
+            keyDecryptionNonce: fileKey.nonce,
+            ...backupedFile,
         };
         return uploadFile;
     }
@@ -362,7 +325,7 @@ class UploadService {
         }
     }
 
-    private async updateMetadata(recievedFile: File) {
+    private async seedMetadataMap(recievedFile: File) {
         try {
             const metadataJSON: object = await new Promise(
                 (resolve, reject) => {
@@ -424,14 +387,16 @@ class UploadService {
                 image.setAttribute('src', imageURL);
                 await new Promise((resolve) => {
                     image.onload = () => {
-                        canvas.width = image.width;
-                        canvas.height = image.height;
+                        const thumbnailWidth =
+                            (image.width * THUMBNAIL_HEIGHT) / image.height;
+                        canvas.width = thumbnailWidth;
+                        canvas.height = THUMBNAIL_HEIGHT;
                         canvas_CTX.drawImage(
                             image,
                             0,
                             0,
-                            image.width,
-                            image.height
+                            thumbnailWidth,
+                            THUMBNAIL_HEIGHT
                         );
                         image = undefined;
                         resolve(null);
@@ -441,34 +406,21 @@ class UploadService {
                 await new Promise(async (resolve) => {
                     let video = document.createElement('video');
                     imageURL = URL.createObjectURL(file);
-                    var timeupdate = function () {
-                        if (snapImage()) {
-                            video.removeEventListener('timeupdate', timeupdate);
-                            video.pause();
-                            resolve(null);
-                        }
-                    };
                     video.addEventListener('loadeddata', function () {
-                        if (snapImage()) {
-                            video.removeEventListener('timeupdate', timeupdate);
-                            resolve(null);
-                        }
-                    });
-                    var snapImage = function () {
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
+                        const thumbnailWidth =
+                            (video.videoWidth * THUMBNAIL_HEIGHT) /
+                            video.videoHeight;
+                        canvas.width = thumbnailWidth;
+                        canvas.height = THUMBNAIL_HEIGHT;
                         canvas_CTX.drawImage(
                             video,
                             0,
                             0,
-                            canvas.width,
-                            canvas.height
+                            thumbnailWidth,
+                            THUMBNAIL_HEIGHT
                         );
-                        var image = canvas.toDataURL();
-                        var success = image.length > 100000;
-                        return success;
-                    };
-                    video.addEventListener('timeupdate', timeupdate);
+                        resolve(null);
+                    });
                     video.preload = 'metadata';
                     video.src = imageURL;
                     // Load video in Safari / IE11
@@ -478,17 +430,33 @@ class UploadService {
                 });
             }
             URL.revokeObjectURL(imageURL);
-            var thumbnailBlob = await new Promise((resolve) => {
-                canvas.toBlob(function (blob) {
-                    resolve(blob);
-                }),
-                    'image/jpeg',
-                    0.4;
-            });
+            if (canvas.toDataURL().length == 0) {
+                throw new Error('');
+            }
+            let thumbnailBlob: Blob = file,
+                attempts = 0;
+            let quality = 1;
+
+            do {
+                attempts++;
+                quality /= 2;
+                thumbnailBlob = await new Promise((resolve) => {
+                    canvas.toBlob(
+                        function (blob) {
+                            resolve(blob);
+                        },
+                        'image/jpeg',
+                        quality
+                    );
+                });
+            } while (
+                thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
+                attempts <= MAX_ATTEMPTS
+            );
             const thumbnail = this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
         } catch (e) {
-            console.log('Error generatin thumbnail ' + e);
+            console.log('Error generating thumbnail ' + e);
         }
     }
 
@@ -515,20 +483,23 @@ class UploadService {
         }
     }
 
-    private async getUploadURL(token: string, count: number) {
+    private async getUploadURL(token: string) {
         if (this.uploadURLs.length == 0) {
-            await this.fetchUploadURLs(token, count);
+            await this.fetchUploadURLs(token);
         }
         return this.uploadURLs.pop();
     }
 
-    private async fetchUploadURLs(token: string, count: number): Promise<void> {
+    private async fetchUploadURLs(token: string): Promise<void> {
         try {
             if (!this.uploadURLFetchInProgress) {
                 this.uploadURLFetchInProgress = HTTPService.get(
                     `${ENDPOINT}/files/upload-urls`,
                     {
-                        count: Math.min(50, count).toString(), //m4gic number
+                        count: Math.min(
+                            50,
+                            (this.filesToBeUploaded.length + 1) * 2
+                        ).toString(),
                     },
                     { 'X-Auth-Token': token }
                 );
@@ -545,7 +516,7 @@ class UploadService {
     }
 
     private async putFile(
-        fileUploadURL: uploadURL,
+        fileUploadURL: UploadURL,
         file: Uint8Array | string
     ): Promise<string> {
         try {
@@ -581,10 +552,10 @@ class UploadService {
         }
     }
     private getUNIXTime(exifData: any) {
-        if (!exifData.DateTimeOriginal) {
+        let dateString: string = exifData.DateTimeOriginal || exifData.DateTime;
+        if (!dateString) {
             return null;
         }
-        let dateString: string = exifData.DateTimeOriginal;
         var parts = dateString.split(' ')[0].split(':');
         var date = new Date(
             Number(parts[0]),
@@ -598,10 +569,28 @@ class UploadService {
         if (!exifData.GPSLatitude) {
             return null;
         }
-        var latDegree = exifData.GPSLatitude[0].numerator;
-        var latMinute = exifData.GPSLatitude[1].numerator;
-        var latSecond = exifData.GPSLatitude[2].numerator;
+
+        let latDegree: number, latMinute: number, latSecond: number;
+        let lonDegree: number, lonMinute: number, lonSecond: number;
+        if (exifData.GPSLatitude[0].numerator) {
+            latDegree = exifData.GPSLatitude[0].numerator;
+            latMinute = exifData.GPSLatitude[1].numerator;
+            latSecond = exifData.GPSLatitude[2].numerator;
+
+            lonDegree = exifData.GPSLongitude[0].numerator;
+            lonMinute = exifData.GPSLongitude[1].numerator;
+            lonSecond = exifData.GPSLongitude[2].numerator;
+        } else {
+            latDegree = exifData.GPSLatitude[0];
+            latMinute = exifData.GPSLatitude[1];
+            latSecond = exifData.GPSLatitude[2];
+
+            lonDegree = exifData.GPSLongitude[0];
+            lonMinute = exifData.GPSLongitude[1];
+            lonSecond = exifData.GPSLongitude[2];
+        }
         var latDirection = exifData.GPSLatitudeRef;
+        var lonDirection = exifData.GPSLongitudeRef;
 
         var latFinal = this.convertDMSToDD(
             latDegree,
@@ -610,19 +599,12 @@ class UploadService {
             latDirection
         );
 
-        // Calculate longitude decimal
-        var lonDegree = exifData.GPSLongitude[0].numerator;
-        var lonMinute = exifData.GPSLongitude[1].numerator;
-        var lonSecond = exifData.GPSLongitude[2].numerator;
-        var lonDirection = exifData.GPSLongitudeRef;
-
         var lonFinal = this.convertDMSToDD(
             lonDegree,
             lonMinute,
             lonSecond,
             lonDirection
         );
-
         return { latitude: latFinal * 1.0, longitude: lonFinal * 1.0 };
     }
 
