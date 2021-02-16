@@ -1,12 +1,13 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { file, user, getFiles } from './fileService';
+import { file } from './fileService';
 import localForage from 'localforage';
 
 import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
 import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
+import { user } from './userService';
 
 const CryptoWorker: any =
     typeof window !== 'undefined' &&

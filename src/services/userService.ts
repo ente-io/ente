@@ -4,6 +4,12 @@ import { getEndpoint } from 'utils/common/apiUtil';
 
 const ENDPOINT = getEndpoint();
 
+export interface user {
+    id: number;
+    name: string;
+    email: string;
+}
+
 export const getOtt = (email: string) => {
     return HTTPService.get(`${ENDPOINT}/users/ott`, {
         email: email,
