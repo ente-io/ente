@@ -174,10 +174,18 @@ export const getCollectionAndItsLatestFile = (
         }
     });
     let allCollectionAndItsLatestFile: CollectionAndItsLatestFile[] = [];
-    for (const [collectionID, file] of latestFile) {
+    const userID = getData(LS_KEYS.USER).id;
+
+    for (const [_, collection] of collectionMap) {
+        if (
+            collection.owner.id != userID ||
+            collection.type == CollectionType.favorites
+        ) {
+            continue;
+        }
         allCollectionAndItsLatestFile.push({
-            collection: collectionMap.get(collectionID),
-            file,
+            collection,
+            file: latestFile.get(collection.id),
         });
     }
     return allCollectionAndItsLatestFile;
