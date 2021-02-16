@@ -53,7 +53,7 @@ const englishConstants = {
     NOTHING_HERE: `nothing to see here! 👀`,
     UPLOAD: {
         0: 'preparing to upload',
-        1: 'encrypting your files',
+        1: 'reading google metadata files',
         2: 'uploading your files',
         3: 'files uploaded successfully!',
     },
