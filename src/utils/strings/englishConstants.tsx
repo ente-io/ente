@@ -62,7 +62,7 @@ const englishConstants = {
         'your subscription has expired, please renew it form the mobile app',
     STORAGE_QUOTA_EXCEEDED:
         'you have exceeded your storage quota, please upgrade your plan from the mobile app',
-    INITIAL_LOAD_DELAY_WARNING: 'Please wait, intial load may take some time',
+    INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
 
     WEB_SIGNUPS_DISABLED: () => (
         <div>
