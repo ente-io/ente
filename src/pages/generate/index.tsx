@@ -12,7 +12,7 @@ import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import * as Comlink from 'comlink';
-import { keyEncryptionResult } from 'services/uploadService';
+import { KeyEncryptionResult } from 'services/uploadService';
 
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
@@ -63,12 +63,12 @@ export default function Generate() {
                     kekSalt
                 );
                 const kekHash: string = await cryptoWorker.hash(kek);
-                const encryptedKeyAttributes: keyEncryptionResult = await cryptoWorker.encryptToB64(
+                const encryptedKeyAttributes: KeyEncryptionResult = await cryptoWorker.encryptToB64(
                     key,
                     kek
                 );
                 const keyPair = await cryptoWorker.generateKeyPair();
-                const encryptedKeyPairAttributes: keyEncryptionResult = await cryptoWorker.encryptToB64(
+                const encryptedKeyPairAttributes: KeyEncryptionResult = await cryptoWorker.encryptToB64(
                     keyPair.privateKey,
                     key
                 );
