@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+// import 'package:flutter/foundation.dart';
 // import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
@@ -30,10 +29,10 @@ class BillingService {
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     InAppPurchaseConnection.enablePendingPurchases();
-    if (Platform.isIOS && kDebugMode) {
-      await FlutterInappPurchase.instance.initConnection;
-      FlutterInappPurchase.instance.clearTransactionIOS();
-    }
+    // if (Platform.isIOS && kDebugMode) {
+    //   await FlutterInappPurchase.instance.initConnection;
+    //   FlutterInappPurchase.instance.clearTransactionIOS();
+    // }
     InAppPurchaseConnection.instance.purchaseUpdatedStream.listen((purchases) {
       if (_isOnSubscriptionPage) {
         return;
