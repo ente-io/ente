@@ -3,6 +3,7 @@ import HTTPService from './HTTPService';
 import * as Comlink from 'comlink';
 import localForage from 'localforage';
 import { collection } from './collectionService';
+import { MetadataObject } from './uploadService';
 
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
@@ -19,10 +20,9 @@ localForage.config({
 const FILES = 'files';
 
 export interface fileAttribute {
-    encryptedData: Uint8Array | string;
+    encryptedData?: Uint8Array;
+    objectKey?: string;
     decryptionHeader: string;
-    creationTime: number;
-    fileType: number;
 }
 
 
@@ -31,7 +31,7 @@ export interface file {
     collectionID: number;
     file: fileAttribute;
     thumbnail: fileAttribute;
-    metadata: fileAttribute;
+    metadata: MetadataObject;
     encryptedKey: string;
     keyDecryptionNonce: string;
     key: string;
