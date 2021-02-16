@@ -207,46 +207,50 @@ export const AddCollection = async (
     collectionName: string,
     type: CollectionType
 ) => {
-    const worker = await new CryptoWorker();
-    const encryptionKey = await getActualKey();
-    const token = getToken();
-    const collectionKey: string = await worker.generateMasterKey();
-    const {
-        encryptedData: encryptedKey,
-        nonce: keyDecryptionNonce,
-    }: B64EncryptionResult = await worker.encryptToB64(
-        collectionKey,
-        encryptionKey
-    );
-    const {
-        encryptedData: encryptedName,
-        nonce: nameDecryptionNonce,
-    }: B64EncryptionResult = await worker.encryptToB64(
-        collectionName,
-        collectionKey
-    );
-    const newCollection: collection = {
-        id: null,
-        owner: null,
-        encryptedKey,
-        keyDecryptionNonce,
-        encryptedName,
-        nameDecryptionNonce,
-        type,
-        attributes: {},
-        sharees: null,
-        updationTime: null,
-        isDeleted: false,
-    };
-    let createdCollection: collection = await createCollection(
-        newCollection,
-        token
-    );
-    createdCollection = await getCollectionSecrets(
-        createdCollection,
-        encryptionKey
-    );
-    return createdCollection;
+    try {
+        const worker = await new CryptoWorker();
+        const encryptionKey = await getActualKey();
+        const token = getToken();
+        const collectionKey: string = await worker.generateMasterKey();
+        const {
+            encryptedData: encryptedKey,
+            nonce: keyDecryptionNonce,
+        }: B64EncryptionResult = await worker.encryptToB64(
+            collectionKey,
+            encryptionKey
+        );
+        const {
+            encryptedData: encryptedName,
+            nonce: nameDecryptionNonce,
+        }: B64EncryptionResult = await worker.encryptToB64(
+            collectionName,
+            collectionKey
+        );
+        const newCollection: collection = {
+            id: null,
+            owner: null,
+            encryptedKey,
+            keyDecryptionNonce,
+            encryptedName,
+            nameDecryptionNonce,
+            type,
+            attributes: {},
+            sharees: null,
+            updationTime: null,
+            isDeleted: false,
+        };
+        let createdCollection: collection = await createCollection(
+            newCollection,
+            token
+        );
+        createdCollection = await getCollectionSecrets(
+            createdCollection,
+            encryptionKey
+        );
+        return createdCollection;
+    } catch (e) {
+        console.log('Add collection failed', e);
+    }
 };
 
 const createCollection = async (
