@@ -9,6 +9,7 @@ import {
     removeFromFavorites,
 } from 'services/collectionService';
 import { file } from 'services/fileService';
+import constants from 'utils/strings/constants';
 
 interface Iprops {
     isOpen: boolean;
@@ -158,22 +159,22 @@ function PhotoSwipe(props: Iprops) {
 
                         <button
                             className="pswp__button pswp__button--close"
-                            title="Close"
+                            title={constants.CLOSE}
                         />
 
                         <button
                             className="download-btn"
-                            title="Download"
+                            title={constants.DOWNLOAD}
                             onClick={() => downloadFile(photoSwipe.currItem)}
                         />
 
                         <button
                             className="pswp__button pswp__button--fs"
-                            title="Toggle fullscreen"
+                            title={constants.TOGGLE_FULLSCREEN}
                         />
                         <button
                             className="pswp__button pswp__button--zoom"
-                            title="Zoom in/out"
+                            title={constants.ZOOM_IN_OUT}
                         />
                         <FavButton
                             size={44}
@@ -195,11 +196,11 @@ function PhotoSwipe(props: Iprops) {
                     </div>
                     <button
                         className="pswp__button pswp__button--arrow--left"
-                        title="Previous (arrow left)"
+                        title={constants.PREVIOUS}
                     />
                     <button
                         className="pswp__button pswp__button--arrow--right"
-                        title="Next (arrow right)"
+                        title={constants.NEXT}
                     />
                     <div className="pswp__caption">
                         <div className="pswp__caption__center" />

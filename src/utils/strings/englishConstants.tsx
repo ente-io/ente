@@ -77,6 +77,11 @@ const englishConstants = {
     NO_ACCOUNT: "don't have an account?",
     ALBUM_NAME: 'album name',
     CREATE: 'create',
+    DOWNLOAD: 'download',
+    TOGGLE_FULLSCREEN: 'Toggle fullscreen',
+    ZOOM_IN_OUT: 'Zoom in/out',
+    PREVIOUS: 'Previous (arrow left)',
+    NEXT: 'Next (arrow right)',
 };
 
 export default englishConstants;
