@@ -70,7 +70,7 @@ export class Crypto {
     }
 
     async decryptToUTF8(data, nonce, key) {
-        return libsodium.decryptString(data, nonce, key);
+        return libsodium.decryptToUTF8(data, nonce, key);
     }
 
     async encryptToB64(data, key) {
