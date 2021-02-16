@@ -10,8 +10,7 @@ const CryptoWorker: any =
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 const ENDPOINT = getEndpoint();
 
-const THUMBNAIL_WIDTH = 1920;
-const THUMBNAIL_HEIGHT = 1080;
+const THUMBNAIL_HEIGHT = 720;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;
 
@@ -388,13 +387,15 @@ class UploadService {
                 image.setAttribute('src', imageURL);
                 await new Promise((resolve) => {
                     image.onload = () => {
-                        canvas.width = THUMBNAIL_WIDTH;
+                        const thumbnailWidth =
+                            (image.width * THUMBNAIL_HEIGHT) / image.height;
+                        canvas.width = thumbnailWidth;
                         canvas.height = THUMBNAIL_HEIGHT;
                         canvas_CTX.drawImage(
                             image,
                             0,
                             0,
-                            THUMBNAIL_WIDTH,
+                            thumbnailWidth,
                             THUMBNAIL_HEIGHT
                         );
                         image = undefined;
@@ -406,13 +407,16 @@ class UploadService {
                     let video = document.createElement('video');
                     imageURL = URL.createObjectURL(file);
                     video.addEventListener('loadeddata', function () {
-                        canvas.width = THUMBNAIL_WIDTH;
+                        const thumbnailWidth =
+                            (video.videoWidth * THUMBNAIL_HEIGHT) /
+                            video.videoHeight;
+                        canvas.width = thumbnailWidth;
                         canvas.height = THUMBNAIL_HEIGHT;
                         canvas_CTX.drawImage(
                             video,
                             0,
                             0,
-                            THUMBNAIL_WIDTH,
+                            thumbnailWidth,
                             THUMBNAIL_HEIGHT
                         );
                         resolve(null);
