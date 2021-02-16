@@ -296,7 +296,7 @@ export default function Gallery(props) {
     if (!data) {
         return <div />;
     }
-    if (data.length == 0) {
+    if (data.length == 0 && progress != 0) {
         return (
             <div className="text-center">
                 <LoadingBar
