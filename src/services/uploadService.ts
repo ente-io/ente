@@ -157,7 +157,7 @@ class UploadService {
                 encryptedFile.fileKey
             );
             await this.uploadFile(uploadFile, token);
-
+            this.filesCompleted++;
             this.changeProgressBarProps();
 
             if (this.filesToBeUploaded.length > 0) {
@@ -181,7 +181,6 @@ class UploadService {
             total: this.totalFileCount,
         });
         setPercentComplete(this.filesCompleted * this.perFileProgress);
-        this.filesCompleted++;
     }
 
     private async readFile(recievedFile: File) {
@@ -498,7 +497,7 @@ class UploadService {
                     {
                         count: Math.min(
                             50,
-                            (this.filesToBeUploaded.length + 1) * 2
+                            (this.totalFileCount - this.filesCompleted) * 2
                         ).toString(),
                     },
                     { 'X-Auth-Token': token }
