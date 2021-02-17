@@ -105,6 +105,16 @@ const GlobalStyles = createGlobalStyle`
         background-color:#202020 !important;
         color:#aaa;
     }
+    .download-btn{
+        margin-top:10px;
+        width: 25px;
+        height: 25px;
+        float: right;
+        background: url('/download_icon.png') no-repeat;
+        cursor: pointer;
+        background-size: cover;
+        border: none;
+    }
     .btn-primary {
         background: #2dc262;
         border-color: #29a354;

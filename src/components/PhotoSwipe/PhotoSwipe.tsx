@@ -9,17 +9,20 @@ import {
     removeFromFavorites,
 } from 'services/collectionService';
 import { file } from 'services/fileService';
+import constants from 'utils/strings/constants';
+import DownloadManger from 'services/downloadManager';
 
 interface Iprops {
     isOpen: boolean;
     items: any[];
-    options?: Object;
+    currentIndex?: number;
     onClose?: () => void;
     gettingData?: (instance: any, index: number, item: file) => void;
     id?: string;
     className?: string;
     favItemIds: Set<number>;
     setFavItemIds: (favItemIds: Set<number>) => void;
+    loadingBar: any;
 }
 
 function PhotoSwipe(props: Iprops) {
@@ -56,7 +59,12 @@ function PhotoSwipe(props: Iprops) {
     }
 
     const openPhotoSwipe = () => {
-        const { items, options } = props;
+        const { items, currentIndex } = props;
+        const options = {
+            history: false,
+            maxSpreadZoom: 5,
+            index: currentIndex,
+        };
         let photoSwipe = new Photoswipe(
             pswpElement,
             PhotoswipeUIDefault,
@@ -122,6 +130,18 @@ function PhotoSwipe(props: Iprops) {
             setFavItemIds(favItemIds);
         }
     };
+    const downloadFile = async (file) => {
+        const { loadingBar } = props;
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        loadingBar.current.continuousStart();
+        a.href = await DownloadManger.getFile(file);
+        loadingBar.current.complete();
+        a.download = file.metadata['title'];
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    };
     const { id } = props;
     let { className } = props;
     className = classnames(['pswp', className]).trim();
@@ -149,19 +169,22 @@ function PhotoSwipe(props: Iprops) {
 
                         <button
                             className="pswp__button pswp__button--close"
-                            title="Share"
+                            title={constants.CLOSE}
                         />
+
                         <button
-                            className="pswp__button pswp__button--share"
-                            title="Share"
+                            className="download-btn"
+                            title={constants.DOWNLOAD}
+                            onClick={() => downloadFile(photoSwipe.currItem)}
                         />
+
                         <button
                             className="pswp__button pswp__button--fs"
-                            title="Toggle fullscreen"
+                            title={constants.TOGGLE_FULLSCREEN}
                         />
                         <button
                             className="pswp__button pswp__button--zoom"
-                            title="Zoom in/out"
+                            title={constants.ZOOM_IN_OUT}
                         />
                         <FavButton
                             size={44}
@@ -183,11 +206,11 @@ function PhotoSwipe(props: Iprops) {
                     </div>
                     <button
                         className="pswp__button pswp__button--arrow--left"
-                        title="Previous (arrow left)"
+                        title={constants.PREVIOUS}
                     />
                     <button
                         className="pswp__button pswp__button--arrow--right"
-                        title="Next (arrow right)"
+                        title={constants.NEXT}
                     />
                     <div className="pswp__caption">
                         <div className="pswp__caption__center" />

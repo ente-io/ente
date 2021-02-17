@@ -50,7 +50,7 @@ const englishConstants = {
     SELECT_COLLECTION: `select an album to upload to`,
     CREATE_COLLECTION: `create album`,
     CLOSE: 'close',
-    NOTHING_HERE: `nothing to see here! 👀`,
+    NOTHING_HERE: `nothing to see here, yet 👀`,
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
@@ -77,6 +77,11 @@ const englishConstants = {
     NO_ACCOUNT: "don't have an account?",
     ALBUM_NAME: 'album name',
     CREATE: 'create',
+    DOWNLOAD: 'download',
+    TOGGLE_FULLSCREEN: 'Toggle fullscreen',
+    ZOOM_IN_OUT: 'Zoom in/out',
+    PREVIOUS: 'Previous (arrow left)',
+    NEXT: 'Next (arrow right)',
 };
 
 export default englishConstants;

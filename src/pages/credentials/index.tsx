@@ -126,6 +126,7 @@ export default function Credentials() {
                                             errors.passphrase
                                         )}
                                         disabled={loading}
+                                        autoFocus={true}
                                     />
                                     <Form.Control.Feedback type="invalid">
                                         {errors.passphrase}

@@ -157,7 +157,7 @@ class UploadService {
                 encryptedFile.fileKey
             );
             await this.uploadFile(uploadFile, token);
-
+            this.filesCompleted++;
             this.changeProgressBarProps();
 
             if (this.filesToBeUploaded.length > 0) {
@@ -181,7 +181,6 @@ class UploadService {
             total: this.totalFileCount,
         });
         setPercentComplete(this.filesCompleted * this.perFileProgress);
-        this.filesCompleted++;
     }
 
     private async readFile(recievedFile: File) {
@@ -498,8 +497,8 @@ class UploadService {
                     {
                         count: Math.min(
                             50,
-                            (this.filesToBeUploaded.length + 1) * 2
-                        ).toString(),
+                            (this.totalFileCount - this.filesCompleted) * 2
+                        ),
                     },
                     { 'X-Auth-Token': token }
                 );
@@ -520,7 +519,7 @@ class UploadService {
         file: Uint8Array | string
     ): Promise<string> {
         try {
-            const fileSize = file.length.toString();
+            const fileSize = file.length;
             await HTTPService.put(fileUploadURL.url, file, null, {
                 contentLengthHeader: fileSize,
             });
@@ -572,23 +571,15 @@ class UploadService {
 
         let latDegree: number, latMinute: number, latSecond: number;
         let lonDegree: number, lonMinute: number, lonSecond: number;
-        if (exifData.GPSLatitude[0].numerator) {
-            latDegree = exifData.GPSLatitude[0].numerator;
-            latMinute = exifData.GPSLatitude[1].numerator;
-            latSecond = exifData.GPSLatitude[2].numerator;
 
-            lonDegree = exifData.GPSLongitude[0].numerator;
-            lonMinute = exifData.GPSLongitude[1].numerator;
-            lonSecond = exifData.GPSLongitude[2].numerator;
-        } else {
-            latDegree = exifData.GPSLatitude[0];
-            latMinute = exifData.GPSLatitude[1];
-            latSecond = exifData.GPSLatitude[2];
+        latDegree = exifData.GPSLatitude[0];
+        latMinute = exifData.GPSLatitude[1];
+        latSecond = exifData.GPSLatitude[2];
 
-            lonDegree = exifData.GPSLongitude[0];
-            lonMinute = exifData.GPSLongitude[1];
-            lonSecond = exifData.GPSLongitude[2];
-        }
+        lonDegree = exifData.GPSLongitude[0];
+        lonMinute = exifData.GPSLongitude[1];
+        lonSecond = exifData.GPSLongitude[2];
+
         var latDirection = exifData.GPSLatitudeRef;
         var lonDirection = exifData.GPSLongitudeRef;
 
