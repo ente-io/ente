@@ -16,6 +16,7 @@ const ImageContainer = styled.div`
 `;
 
 const StyledCard = styled(Card)`
+    border-radius: 30px !important;
     cursor: pointer;
 `;
 
