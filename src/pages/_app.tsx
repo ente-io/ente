@@ -190,7 +190,6 @@ export default function App({ Component, pageProps }) {
 
     return (
         <FullScreenDropZone
-            closeModal={closeUploadModal}
             showModal={showUploadModal}
         >
             <Head>
