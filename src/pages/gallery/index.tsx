@@ -2,12 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { file, syncData, localFiles } from 'services/fileService';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
 import { getActualKey, getToken } from 'utils/common/key';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
-import { Options } from 'photoswipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 import LoadingBar from 'react-top-loading-bar';
@@ -21,6 +19,7 @@ import {
     getCollectionAndItsLatestFile,
     getFavItemIds,
     getLocalCollections,
+    getCollectionUpdationTime,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import ErrorAlert from './components/ErrorAlert';
@@ -113,8 +112,8 @@ export default function Gallery(props) {
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const fetching: { [k: number]: boolean } = {};
     const [errorCode, setErrorCode] = useState<number>(null);
-
     const [sinceTime, setSinceTime] = useState(0);
+    const [isFirstLoad, setIsFirstLoad] = useState(false);
 
     const loadingBar = useRef(null);
     useEffect(() => {
@@ -124,6 +123,7 @@ export default function Gallery(props) {
             return;
         }
         const main = async () => {
+            setIsFirstLoad(await getCollectionUpdationTime() == 0);
             const data = await localFiles();
             const collections = await getLocalCollections();
             const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
@@ -139,6 +139,7 @@ export default function Gallery(props) {
             loadingBar.current.continuousStart();
             await syncWithRemote();
             loadingBar.current.complete();
+            setIsFirstLoad(false);
         };
         main();
         props.setUploadButtonView(true);
@@ -316,7 +317,8 @@ export default function Gallery(props) {
 
     return (
         <>
-            {data.length == 0 && loadingBar.current.progress != 0 && (
+            <LoadingBar color="#2dc262" ref={loadingBar} />
+            {isFirstLoad && (
                 <div className="text-center">
                     <Alert variant="primary">
                         {constants.INITIAL_LOAD_DELAY_WARNING}
@@ -324,7 +326,6 @@ export default function Gallery(props) {
                 </div>
             )}
             <ErrorAlert errorCode={errorCode} />
-            <LoadingBar color="#2dc262" ref={loadingBar} />
 
             <Collections
                 collections={collections}
