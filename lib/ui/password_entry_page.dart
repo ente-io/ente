@@ -13,8 +13,11 @@ class PasswordEntryPage extends StatefulWidget {
 }
 
 class _PasswordEntryPageState extends State<PasswordEntryPage> {
+  static const kPasswordStrengthThreshold = 0.4;
+
   final _passwordController1 = TextEditingController(),
       _passwordController2 = TextEditingController();
+  double _passwordStrength = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +37,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           password: _passwordController1.text,
           backgroundColor: Colors.grey[850],
           strengthCallback: (strength) {
-            debugPrint(strength.toString());
+            _passwordStrength = strength;
           },
         ),
         Expanded(
@@ -120,6 +123,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                     _passwordController2.text) {
                                   showErrorDialog(context, "uhm...",
                                       "the passwords you entered don't match");
+                                } else if (_passwordStrength <
+                                    kPasswordStrengthThreshold) {
+                                  showErrorDialog(context, "weak password",
+                                      "the password you have chosen is too simple, please choose another one");
                                 } else {
                                   _showPasswordConfirmationDialog();
                                 }
