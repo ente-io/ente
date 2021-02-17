@@ -17,7 +17,7 @@ export default function FullScreenDropZone({
     showModal,
     closeModal,
 }: Props) {
-    const closeTimer = useRef<number>();
+    const closeTimer = useRef<NodeJS.Timeout>();
 
     const clearTimer = () => {
         if (closeTimer.current) {
