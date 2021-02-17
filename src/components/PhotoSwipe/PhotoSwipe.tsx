@@ -15,13 +15,14 @@ import DownloadManger from 'services/downloadManager';
 interface Iprops {
     isOpen: boolean;
     items: any[];
-    options?: Object;
+    currentIndex?: number;
     onClose?: () => void;
     gettingData?: (instance: any, index: number, item: file) => void;
     id?: string;
     className?: string;
     favItemIds: Set<number>;
     setFavItemIds: (favItemIds: Set<number>) => void;
+    loadingBar: any;
 }
 
 function PhotoSwipe(props: Iprops) {
@@ -58,7 +59,12 @@ function PhotoSwipe(props: Iprops) {
     }
 
     const openPhotoSwipe = () => {
-        const { items, options } = props;
+        const { items, currentIndex } = props;
+        const options = {
+            history: false,
+            maxSpreadZoom: 5,
+            index: currentIndex,
+        };
         let photoSwipe = new Photoswipe(
             pswpElement,
             PhotoswipeUIDefault,
@@ -125,9 +131,12 @@ function PhotoSwipe(props: Iprops) {
         }
     };
     const downloadFile = async (file) => {
+        const { loadingBar } = props;
         const a = document.createElement('a');
         a.style.display = 'none';
+        loadingBar.current.continuousStart();
         a.href = await DownloadManger.getFile(file);
+        loadingBar.current.complete();
         a.download = file.metadata['title'];
         document.body.appendChild(a);
         a.click();

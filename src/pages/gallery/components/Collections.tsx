@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 interface CollectionProps {
     collections: collection[];
-    selected?: Number;
+    selected?: number;
     selectCollection: (id?: number) => void;
 }
 

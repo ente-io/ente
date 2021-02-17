@@ -123,9 +123,9 @@ export const getFiles = async (
             resp = await HTTPService.get(
                 `${ENDPOINT}/collections/diff`,
                 {
-                    collectionID: collection.id.toString(),
-                    sinceTime: time.toString(),
-                    limit: limit.toString(),
+                    collectionID: collection.id,
+                    sinceTime: time,
+                    limit: limit,
                 },
                 {
                     'X-Auth-Token': token,
@@ -146,7 +146,7 @@ export const getFiles = async (
             );
 
             if (resp.data.diff.length) {
-                time = resp.data.diff.slice(-1)[0].updationTime.toString();
+                time = resp.data.diff.slice(-1)[0].updationTime;
             }
         } while (resp.data.diff.length === limit);
         return await Promise.all(promises);

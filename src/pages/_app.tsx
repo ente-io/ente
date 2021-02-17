@@ -114,6 +114,7 @@ const GlobalStyles = createGlobalStyle`
         cursor: pointer;
         background-size: cover;
         border: none;
+    }
     .btn-primary {
         background: #2dc262;
         border-color: #29a354;

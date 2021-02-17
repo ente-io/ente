@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { file, syncData, localFiles } from 'services/fileService';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
 import { getActualKey, getToken } from 'utils/common/key';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
-import { Options } from 'photoswipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 import LoadingBar from 'react-top-loading-bar';
@@ -21,6 +19,7 @@ import {
     getCollectionAndItsLatestFile,
     getFavItemIds,
     getLocalCollections,
+    getCollectionUpdationTime,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import ErrorAlert from './components/ErrorAlert';
@@ -110,23 +109,21 @@ export default function Gallery(props) {
     const [data, setData] = useState<file[]>();
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [open, setOpen] = useState(false);
-    const [options, setOptions] = useState<Options>({
-        history: false,
-        maxSpreadZoom: 5,
-    });
+    const [currentIndex, setCurrentIndex] = useState<number>(0);
     const fetching: { [k: number]: boolean } = {};
     const [errorCode, setErrorCode] = useState<number>(null);
-
     const [sinceTime, setSinceTime] = useState(0);
+    const [isFirstLoad, setIsFirstLoad] = useState(false);
 
-    const [progress, setProgress] = useState(0);
-
+    const loadingBar = useRef(null);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
             router.push('/');
+            return;
         }
         const main = async () => {
+            setIsFirstLoad(await getCollectionUpdationTime() == 0);
             const data = await localFiles();
             const collections = await getLocalCollections();
             const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
@@ -139,9 +136,10 @@ export default function Gallery(props) {
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
 
-            data.length == 0 ? setProgress(20) : setProgress(80);
+            loadingBar.current.continuousStart();
             await syncWithRemote();
-            setProgress(100);
+            loadingBar.current.complete();
+            setIsFirstLoad(false);
         };
         main();
         props.setUploadButtonView(true);
@@ -222,10 +220,7 @@ export default function Gallery(props) {
     };
 
     const onThumbnailClick = (index: number) => () => {
-        setOptions({
-            ...options,
-            index,
-        });
+        setCurrentIndex(index);
         setOpen(true);
     };
 
@@ -286,20 +281,6 @@ export default function Gallery(props) {
     if (!data) {
         return <div />;
     }
-    if (data.length == 0 && progress != 0) {
-        return (
-            <div className="text-center">
-                <LoadingBar
-                    color="#2dc262"
-                    progress={progress}
-                    onLoaderFinished={() => setProgress(0)}
-                />
-                <Alert variant="primary">
-                    {constants.INITIAL_LOAD_DELAY_WARNING}
-                </Alert>
-            </div>
-        );
-    }
 
     const selectCollection = (id?: number) => {
         const href = `/gallery?collection=${id || ''}`;
@@ -336,12 +317,16 @@ export default function Gallery(props) {
 
     return (
         <>
+            <LoadingBar color="#2dc262" ref={loadingBar} />
+            {isFirstLoad && (
+                <div className="text-center">
+                    <Alert variant="primary">
+                        {constants.INITIAL_LOAD_DELAY_WARNING}
+                    </Alert>
+                </div>
+            )}
             <ErrorAlert errorCode={errorCode} />
-            <LoadingBar
-                color="#2dc262"
-                progress={progress}
-                onLoaderFinished={() => setProgress(0)}
-            />
+
             <Collections
                 collections={collections}
                 selected={Number(router.query.collection)}
@@ -487,11 +472,12 @@ export default function Gallery(props) {
                     <PhotoSwipe
                         isOpen={open}
                         items={filteredData}
-                        options={options}
+                        currentIndex={currentIndex}
                         onClose={handleClose}
                         gettingData={getSlideData}
                         favItemIds={favItemIds}
                         setFavItemIds={setFavItemIds}
+                        loadingBar={loadingBar}
                     />
                 </Container>
             ) : (
