@@ -22,6 +22,7 @@ interface Iprops {
     className?: string;
     favItemIds: Set<number>;
     setFavItemIds: (favItemIds: Set<number>) => void;
+    loadingBar: any;
 }
 
 function PhotoSwipe(props: Iprops) {
@@ -130,9 +131,12 @@ function PhotoSwipe(props: Iprops) {
         }
     };
     const downloadFile = async (file) => {
+        const { loadingBar } = props;
         const a = document.createElement('a');
         a.style.display = 'none';
+        loadingBar.current.continuousStart();
         a.href = await DownloadManger.getFile(file);
+        loadingBar.current.complete();
         a.download = file.metadata['title'];
         document.body.appendChild(a);
         a.click();

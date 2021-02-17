@@ -475,6 +475,7 @@ export default function Gallery(props) {
                         gettingData={getSlideData}
                         favItemIds={favItemIds}
                         setFavItemIds={setFavItemIds}
+                        loadingBar={loadingBar}
                     />
                 </Container>
             ) : (
