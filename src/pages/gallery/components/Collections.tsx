@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 interface CollectionProps {
     collections: collection[];
-    selected?: string;
+    selected?: Number;
     selectCollection: (id?: number) => void;
 }
 
@@ -64,7 +64,7 @@ export default function Collections(props: CollectionProps) {
                 {collections?.map((item) => (
                     <Chip
                         key={item.id}
-                        active={selected === item.id.toString()}
+                        active={selected === item.id}
                         onClick={clickHandler(item.id)}
                     >
                         {item.name}
