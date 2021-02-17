@@ -91,7 +91,7 @@ const getCollectionSecrets = async (
 
 const getCollections = async (
     token: string,
-    sinceTime: string,
+    sinceTime: number,
     key: string
 ): Promise<collection[]> => {
     try {
@@ -117,10 +117,13 @@ export const getLocalCollections = async (): Promise<collection[]> => {
     return collections;
 };
 
+export const getCollectionUpdationTime = async (): Promise<number> => {
+    return await localForage.getItem<number>(COLLECTION_UPDATION_TIME) ?? 0;
+}
+
 export const syncCollections = async (token: string, key: string) => {
     const localCollections = await getLocalCollections();
-    const lastCollectionUpdationTime =
-        (await localForage.getItem<string>(COLLECTION_UPDATION_TIME)) ?? '0';
+    const lastCollectionUpdationTime = await getCollectionUpdationTime();
     const updatedCollections =
         (await getCollections(token, lastCollectionUpdationTime, key)) || [];
     if (updatedCollections.length == 0) {
@@ -163,7 +166,6 @@ export const getCollectionAndItsLatestFile = (
     files: file[]
 ): CollectionAndItsLatestFile[] => {
     const latestFile = new Map<number, file>();
-    const collectionMap = new Map<number, collection>();
 
     files.forEach((file) => {
         if (!latestFile.has(file.collectionID)) {

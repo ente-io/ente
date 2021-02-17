@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { file, getPreview } from 'services/fileService';
+import { file } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/PlayCircleOutline';
+import DownloadManager from 'services/downloadManager';
 
 interface IProps {
     data: file;
@@ -48,7 +49,7 @@ export default function PreviewCard(props: IProps) {
         if (data && !data.msrc) {
             const main = async () => {
                 const token = getData(LS_KEYS.USER).token;
-                const url = await getPreview(token, data);
+                const url = await DownloadManager.getPreview(data);
                 setImgSrc(url);
                 data.msrc = url;
                 updateUrl(url);

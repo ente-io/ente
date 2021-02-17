@@ -1,11 +1,11 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
 interface IHTTPHeaders {
-    [headerKey: string]: string;
+    [headerKey: string]: any;
 }
 
 interface IQueryPrams {
-    [paramName: string]: string;
+    [paramName: string]: any;
 }
 
 /**

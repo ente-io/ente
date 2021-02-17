@@ -50,7 +50,7 @@ const englishConstants = {
     SELECT_COLLECTION: `select an album to upload to`,
     CREATE_COLLECTION: `create album`,
     CLOSE: 'close',
-    NOTHING_HERE: `nothing to see here! 👀`,
+    NOTHING_HERE: `nothing to see here, yet 👀`,
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
