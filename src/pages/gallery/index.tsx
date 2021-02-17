@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Spinner from 'react-bootstrap/Spinner';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import {
-    file,
-    getFile,
-    getPreview,
-    syncData,
-    localFiles,
-} from 'services/fileService';
+import { file, syncData, localFiles } from 'services/fileService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PreviewCard from './components/PreviewCard';
 import { getActualKey, getToken } from 'utils/common/key';
@@ -20,6 +13,7 @@ import { VariableSizeList as List } from 'react-window';
 import LoadingBar from 'react-top-loading-bar';
 import Collections from './components/Collections';
 import Upload from './components/Upload';
+import DownloadManager from '../../services/downloadManager';
 import {
     collection,
     syncCollections,
@@ -247,9 +241,8 @@ export default function Gallery(props) {
     };
 
     const getSlideData = async (instance: any, index: number, item: file) => {
-        const token = getData(LS_KEYS.USER).token;
         if (!item.msrc) {
-            const url = await getPreview(token, item);
+            const url = await DownloadManager.getPreview(item);
             updateUrl(item.dataIndex)(url);
             item.msrc = url;
             if (!item.src) {
@@ -266,7 +259,7 @@ export default function Gallery(props) {
         }
         if (!fetching[item.dataIndex]) {
             fetching[item.dataIndex] = true;
-            const url = await getFile(token, item);
+            const url = await DownloadManager.getFile(item);
             updateSrcUrl(item.dataIndex, url);
             if (item.metadata.fileType === FILE_TYPE.VIDEO) {
                 item.html = `

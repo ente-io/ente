@@ -10,6 +10,7 @@ import {
 } from 'services/collectionService';
 import { file } from 'services/fileService';
 import constants from 'utils/strings/constants';
+import DownloadManger from 'services/downloadManager';
 
 interface Iprops {
     isOpen: boolean;
@@ -123,10 +124,10 @@ function PhotoSwipe(props: Iprops) {
             setFavItemIds(favItemIds);
         }
     };
-    const downloadFile = (file) => {
+    const downloadFile = async (file) => {
         const a = document.createElement('a');
         a.style.display = 'none';
-        a.href = file.msrc;
+        a.href = await DownloadManger.getFile(file);
         a.download = file.metadata['title'];
         document.body.appendChild(a);
         a.click();
