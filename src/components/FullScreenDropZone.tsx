@@ -34,7 +34,7 @@ export default function FullScreenDropZone({
     const onDragLeave = (e) => {
         e.preventDefault();
         clearTimer();
-        closeTimer.current = setTimeout(closeModal, 1000);
+        closeTimer.current = global.setTimeout(closeModal, 1000);
     };
 
     return (
