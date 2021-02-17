@@ -13,7 +13,7 @@ import { VariableSizeList as List } from 'react-window';
 import LoadingBar from 'react-top-loading-bar';
 import Collections from './components/Collections';
 import Upload from './components/Upload';
-import DownloadManager from '../../services/downloadManager';
+import DownloadManager from 'services/downloadManager';
 import {
     collection,
     syncCollections,
@@ -344,7 +344,7 @@ export default function Gallery(props) {
             />
             <Collections
                 collections={collections}
-                selected={router.query.collection?.toString()}
+                selected={Number(router.query.collection)}
                 selectCollection={selectCollection}
             />
             <Upload
