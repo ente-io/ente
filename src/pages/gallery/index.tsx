@@ -121,6 +121,7 @@ export default function Gallery(props) {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
             router.push('/');
+            return;
         }
         const main = async () => {
             const data = await localFiles();
