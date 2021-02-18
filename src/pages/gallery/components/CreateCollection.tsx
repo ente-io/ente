@@ -15,7 +15,8 @@ export default function CreateCollection(props) {
         modalView,
         closeModal,
         closeUploadModal,
-        setErrorCode,
+        setUploadErrors,
+        setBannerErrorCode,
     } = props;
     const [albumName, setAlbumName] = useState('');
 
@@ -67,20 +68,26 @@ export default function CreateCollection(props) {
                 acceptedFiles,
                 collectionAndItsLatestFile,
                 token,
-                progressBarProps
+                progressBarProps,
+                setUploadErrors
             );
             refetchData();
         } catch (err) {
             if (err.response) {
-                setErrorCode(err.response.status);
+                setBannerErrorCode(err.response.status);
             }
         } finally {
             setProgressView(false);
         }
     };
     return (
-        <Modal show={modalView} onHide={closeModal} centered backdrop="static"
-            style={{ background: 'rgba(0, 0, 0, 0.8)' }}>
+        <Modal
+            show={modalView}
+            onHide={closeModal}
+            centered
+            backdrop="static"
+            style={{ background: 'rgba(0, 0, 0, 0.8)' }}
+        >
             <Modal.Header closeButton>
                 <Modal.Title>{constants.CREATE_COLLECTION}</Modal.Title>
             </Modal.Header>

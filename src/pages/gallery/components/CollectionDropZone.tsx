@@ -11,7 +11,8 @@ function CollectionDropZone({
     collectionAndItsLatestFile,
     setProgressView,
     progressBarProps,
-    setErrorCode,
+    setBannerErrorCode,
+    setUploadErrors,
 }) {
     const upload = async (acceptedFiles) => {
         try {
@@ -24,12 +25,13 @@ function CollectionDropZone({
                 acceptedFiles,
                 collectionAndItsLatestFile,
                 token,
-                progressBarProps
+                progressBarProps,
+                setUploadErrors
             );
             refetchData();
         } catch (err) {
             if (err.response) {
-                setErrorCode(err.response.status);
+                setBannerErrorCode(err.response.status);
             }
         } finally {
             setProgressView(false);

@@ -6,6 +6,7 @@ export default function UploadProgress({
     fileCounter,
     uploadStage,
     now,
+    uploadErrors,
     ...props
 }) {
     return (
@@ -34,6 +35,20 @@ export default function UploadProgress({
                         </Alert>
                         <ProgressBar animated now={now} />
                     </>
+                )}
+                {uploadErrors.length && (
+                    <Alert variant="danger">
+                        <div
+                            style={{
+                                overflow: 'auto',
+                                height: '100px',
+                            }}
+                        >
+                            {uploadErrors.map((error) => (
+                                <li>{error.message}</li>
+                            ))}
+                        </div>
+                    </Alert>
                 )}
             </Modal.Body>
         </Modal>
