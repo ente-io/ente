@@ -199,7 +199,6 @@ class _SharingDialogState extends State<SharingDialog> {
             CollectionsService.instance.decryptCollectionPath(collection);
         if (!Configuration.instance.getPathsToBackUp().contains(path)) {
           await Configuration.instance.addPathToFoldersToBeBackedUp(path);
-          SyncService.instance.sync();
         }
       }
       try {
