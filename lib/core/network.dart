@@ -15,10 +15,10 @@ class Network {
         responseHeader: false,
         requestBody: true,
         responseBody: true,
-        logPrint: (object) {
+        logPrint: (object) async {
           log(object);
           if (Platform.isAndroid) {
-            SuperLogging.logFile.writeAsString(
+            await SuperLogging.logFile.writeAsString(
               object.toString() + "\n",
               encoding: Utf8Codec(allowMalformed: true),
               mode: FileMode.append,
