@@ -22,7 +22,7 @@ import {
     getCollectionUpdationTime,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import ErrorAlert from './components/ErrorAlert';
+import AlertBanner from './components/AlertBanner';
 import { Alert } from 'react-bootstrap';
 
 const DATE_CONTAINER_HEIGHT = 45;
@@ -111,7 +111,7 @@ export default function Gallery(props) {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const fetching: { [k: number]: boolean } = {};
-    const [errorCode, setErrorCode] = useState<number>(null);
+    const [bannerErrorCode, setBannerErrorCode] = useState<number>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
 
@@ -123,7 +123,7 @@ export default function Gallery(props) {
             return;
         }
         const main = async () => {
-            setIsFirstLoad(await getCollectionUpdationTime() == 0);
+            setIsFirstLoad((await getCollectionUpdationTime()) == 0);
             const data = await localFiles();
             const collections = await getLocalCollections();
             const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
@@ -325,7 +325,7 @@ export default function Gallery(props) {
                     </Alert>
                 </div>
             )}
-            <ErrorAlert errorCode={errorCode} />
+            <AlertBanner bannerErrorCode={bannerErrorCode} />
 
             <Collections
                 collections={collections}
@@ -338,7 +338,7 @@ export default function Gallery(props) {
                 showUploadModal={props.showUploadModal}
                 collectionAndItsLatestFile={collectionAndItsLatestFile}
                 refetchData={syncWithRemote}
-                setErrorCode={setErrorCode}
+                setBannerErrorCode={setBannerErrorCode}
             />
             {filteredData.length ? (
                 <Container>
@@ -413,7 +413,7 @@ export default function Gallery(props) {
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                            ITEM_TYPE.TIME
+                                        ITEM_TYPE.TIME
                                             ? DATE_CONTAINER_HEIGHT
                                             : IMAGE_CONTAINER_HEIGHT
                                     }
@@ -430,14 +430,14 @@ export default function Gallery(props) {
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                            ITEM_TYPE.TIME
+                                                        ITEM_TYPE.TIME
                                                             ? 1
                                                             : columns
                                                     }
                                                 >
                                                     {timeStampList[index]
                                                         .itemType ===
-                                                        ITEM_TYPE.TIME ? (
+                                                    ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
                                                                 timeStampList[
@@ -456,7 +456,7 @@ export default function Gallery(props) {
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                    idx
+                                                                        idx
                                                                 );
                                                             }
                                                         )
