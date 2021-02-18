@@ -17,6 +17,7 @@ import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/upload_url.dart';
+import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -262,6 +263,7 @@ class FileUploader {
         );
         // Update across all collections
         await FilesDB.instance.updateUploadedFileAcrossCollections(updatedFile);
+        FileRepository.instance.reloadFiles();
         return updatedFile;
       } else {
         final uploadedFile = await _uploadFile(
@@ -276,6 +278,7 @@ class FileUploader {
           metadataDecryptionHeader,
         );
         await FilesDB.instance.update(uploadedFile);
+        FileRepository.instance.reloadFiles();
         return uploadedFile;
       }
     } catch (e, s) {
