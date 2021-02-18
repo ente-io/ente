@@ -6,6 +6,8 @@ import { CollectionAndItsLatestFile } from 'services/collectionService';
 import { getToken } from 'utils/common/key';
 import constants from 'utils/strings/constants';
 
+export const ERR_NO_INTERNET_CONNECTION = 0;
+
 export default function CreateCollection(props) {
     const {
         acceptedFiles,
@@ -76,6 +78,8 @@ export default function CreateCollection(props) {
             if (err.response) {
                 setBannerErrorCode(err.response.status);
             }
+            setBannerErrorCode(ERR_NO_INTERNET_CONNECTION);
+            setProgressView(false);
         }
     };
     return (
