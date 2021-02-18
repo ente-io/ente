@@ -177,6 +177,7 @@ class FileUploader {
 
     try {
       // Placing this in the try-catch block to safe guard against: https://github.com/CaiJingLong/flutter_photo_manager/issues/405
+      _logger.info("Trying to upload " + file.toString());
       sourceFile = (await (await file.getAsset()).originFile);
       var key;
       var isAlreadyUploadedFile = file.uploadedFileID != null;
