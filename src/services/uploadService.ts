@@ -77,17 +77,22 @@ class UploadService {
     private metadataMap: Map<string, Object>;
     private filesToBeUploaded: File[];
     private progressBarProps;
+    private uploadErrors: Error[];
+    private setUploadErrors;
 
     public async uploadFiles(
         recievedFiles: File[],
         collectionAndItsLatestFile: CollectionAndItsLatestFile,
         token: string,
-        progressBarProps
+        progressBarProps,
+        setUploadErrors
     ) {
         try {
             progressBarProps.setUploadStage(UPLOAD_STAGES.START);
 
             this.filesCompleted = 0;
+            this.uploadErrors = [];
+            this.setUploadErrors = setUploadErrors;
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
 
@@ -111,8 +116,7 @@ class UploadService {
             progressBarProps.setUploadStage(
                 UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
             );
-
-            for await (const rawFile of metadataFiles) {
+            for (const rawFile of metadataFiles) {
                 await this.seedMetadataMap(rawFile);
             }
 
@@ -159,18 +163,18 @@ class UploadService {
             await this.uploadFile(uploadFile, token);
             this.filesCompleted++;
             this.changeProgressBarProps();
-
-            if (this.filesToBeUploaded.length > 0) {
-                await this.uploader(
-                    worker,
-                    this.filesToBeUploaded.pop(),
-                    collection,
-                    token
-                );
-            }
         } catch (e) {
-            console.log(e);
-            throw e;
+            const error = new Error(`Error Uploading File ${rawFile.name}`);
+            this.uploadErrors.push(error);
+            this.setUploadErrors(this.uploadErrors);
+        }
+        if (this.filesToBeUploaded.length > 0) {
+            await this.uploader(
+                worker,
+                this.filesToBeUploaded.pop(),
+                collection,
+                token
+            );
         }
     }
 
@@ -372,7 +376,11 @@ class UploadService {
                 }
             }
         } catch (e) {
-            console.log('error reading metaData Files ' + e);
+            const error = new Error(
+                `Error reading metaDataFile ${recievedFile.name}`
+            );
+            this.uploadErrors.push(error);
+            this.setUploadErrors(this.uploadErrors);
         }
     }
     private async generateThumbnail(file: File): Promise<Uint8Array> {
