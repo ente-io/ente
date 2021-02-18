@@ -35,6 +35,7 @@ export default function Upload(props) {
                 uploadStage={uploadStage}
                 uploadErrors={uploadErrors}
                 show={progressView}
+                closeModal={() => setProgressView(false)}
                 onHide={init}
             />
         </>

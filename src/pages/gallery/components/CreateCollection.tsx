@@ -76,8 +76,6 @@ export default function CreateCollection(props) {
             if (err.response) {
                 setBannerErrorCode(err.response.status);
             }
-        } finally {
-            setProgressView(false);
         }
     };
     return (
