@@ -164,7 +164,12 @@ class UploadService {
             this.filesCompleted++;
             this.changeProgressBarProps();
         } catch (e) {
-            const error = new Error(`Error Uploading File ${rawFile.name}`);
+            if (e.response?.status == 402 || e.response?.status == 426) {
+                throw e;
+            }
+            const error = new Error(
+                `Uploading Failed for File - ${rawFile.name}`
+            );
             this.uploadErrors.push(error);
             this.setUploadErrors(this.uploadErrors);
         }
@@ -228,6 +233,7 @@ class UploadService {
             };
         } catch (e) {
             console.log('error reading files ' + e);
+            throw e;
         }
     }
     private async encryptFile(
@@ -270,6 +276,7 @@ class UploadService {
             return result;
         } catch (e) {
             console.log('Error encrypting files ' + e);
+            throw e;
         }
     }
 
@@ -325,6 +332,7 @@ class UploadService {
             return response.data;
         } catch (e) {
             console.log('upload Files Failed ' + e);
+            throw e;
         }
     }
 
@@ -456,14 +464,18 @@ class UploadService {
                         quality
                     );
                 });
+                if (!thumbnailBlob) {
+                    thumbnailBlob = file;
+                }
             } while (
                 thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
                 attempts <= MAX_ATTEMPTS
             );
-            const thumbnail = this.getUint8ArrayView(thumbnailBlob);
+            const thumbnail = await this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
         } catch (e) {
             console.log('Error generating thumbnail ' + e);
+            throw e;
         }
     }
 
@@ -556,6 +568,7 @@ class UploadService {
             };
         } catch (e) {
             console.log('error reading exif data');
+            throw e;
         }
     }
     private getUNIXTime(exifData: any) {
