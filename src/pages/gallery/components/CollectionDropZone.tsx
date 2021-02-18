@@ -6,7 +6,6 @@ import DropzoneWrapper from './DropzoneWrapper';
 function CollectionDropZone({
     children,
     closeModal,
-    showModal,
     refetchData,
     collectionAndItsLatestFile,
     setProgressView,
@@ -39,7 +38,6 @@ function CollectionDropZone({
         <DropzoneWrapper
             children={children}
             onDropAccepted={upload}
-            onDragOver={showModal}
             onDropRejected={closeModal}
         />
     );

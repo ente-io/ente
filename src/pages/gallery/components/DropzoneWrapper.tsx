@@ -14,15 +14,16 @@ export const getColor = (props) => {
     }
 };
 
-export const enableBorder = (props) => (props.isDragActive ? 'dashed' : 'none');
+export const enableBorder = (props) => (props.isDragActive ? 'solid' : 'none');
 
 export const DropDiv = styled.div`
     width: 200px;
     margin: 5px;
-    height: 230px;
+    height: 240px;
+    padding: 4px;
     color: black;
-    border-width: 2px;
-    border-radius: 2px;
+    border-width: 4px;
+    border-radius: 34px;
     border-color: ${(props) => getColor(props)};
     border-style: ${(props) => enableBorder(props)};
     outline: none;

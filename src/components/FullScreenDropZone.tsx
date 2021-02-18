@@ -9,13 +9,11 @@ const DropDiv = styled.div`
 
 type Props = React.PropsWithChildren<{
     showModal: () => void;
-    closeModal: () => void;
 }>;
 
 export default function FullScreenDropZone({
     children,
     showModal,
-    closeModal,
 }: Props) {
     const closeTimer = useRef<NodeJS.Timeout>();
 
@@ -31,14 +29,8 @@ export default function FullScreenDropZone({
         showModal();
     };
 
-    const onDragLeave = (e) => {
-        e.preventDefault();
-        clearTimer();
-        closeTimer.current = global.setTimeout(closeModal, 1000);
-    };
-
     return (
-        <DropDiv onDragOver={onDragOver} onDragLeave={onDragLeave}>
+        <DropDiv onDragOver={onDragOver}>
             {children}
         </DropDiv>
     );

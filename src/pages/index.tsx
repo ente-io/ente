@@ -97,6 +97,7 @@ export default function Home() {
                                             isInvalid={Boolean(
                                                 touched.email && errors.email
                                             )}
+                                            autoFocus={true}
                                             disabled={loading}
                                         />
                                         <FormControl.Feedback type="invalid">

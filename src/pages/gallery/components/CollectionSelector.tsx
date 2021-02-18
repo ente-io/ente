@@ -21,7 +21,7 @@ function CollectionSelector(props) {
                 showModal={showUploadModal}
                 collectionAndItsLatestFile={item}
             >
-                <Card>
+                <Card style={{ borderRadius: '30px' }}>
                     <PreviewCard
                         data={item.file}
                         updateUrl={() => { }}
