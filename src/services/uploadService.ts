@@ -13,7 +13,8 @@ const ENDPOINT = getEndpoint();
 const THUMBNAIL_HEIGHT = 720;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;
-
+export const ERR_STORAGE_LIMIT_EXCEEDED = 426;
+export const ERR_NO_ACTIVE_SUBSRICTION = 402;
 interface EncryptionResult {
     file: fileAttribute;
     key: string;
@@ -122,7 +123,7 @@ class UploadService {
 
             progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOADING);
             this.changeProgressBarProps();
-
+            await this.fetchUploadURLs(token);
             const uploadProcesses = [];
             for (let i = 0; i < Math.min(5, this.totalFileCount); i++) {
                 uploadProcesses.push(
@@ -138,6 +139,7 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.FINISH);
             progressBarProps.setPercentComplete(100);
         } catch (e) {
+            this.filesToBeUploaded = [];
             console.log(e);
             throw e;
         }
@@ -164,7 +166,10 @@ class UploadService {
             this.filesCompleted++;
             this.changeProgressBarProps();
         } catch (e) {
-            if (e.response?.status == 402 || e.response?.status == 426) {
+            if (
+                e.response?.status == ERR_STORAGE_LIMIT_EXCEEDED ||
+                e.response?.status == ERR_NO_ACTIVE_SUBSRICTION
+            ) {
                 throw e;
             }
             const error = new Error(

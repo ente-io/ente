@@ -1,15 +1,22 @@
 import React from 'react';
 import { Alert } from 'react-bootstrap';
+import {
+    ERR_STORAGE_LIMIT_EXCEEDED,
+    ERR_NO_ACTIVE_SUBSRICTION,
+} from 'services/uploadService';
 import constants from 'utils/strings/constants';
+import { ERR_NO_INTERNET_CONNECTION } from './CreateCollection';
 
 export default function AlertBanner({ bannerErrorCode }) {
     let errorMessage;
     switch (bannerErrorCode) {
-        case 402:
+        case ERR_NO_ACTIVE_SUBSRICTION:
             errorMessage = constants.SUBSCRIPTION_EXPIRED;
             break;
-        case 426:
+        case ERR_STORAGE_LIMIT_EXCEEDED:
             errorMessage = constants.STORAGE_QUOTA_EXCEEDED;
+        case ERR_NO_INTERNET_CONNECTION:
+            errorMessage = constants.NO_INTERNET_CONNECTION;
         default:
             errorMessage = `Unknown Error Code - ${bannerErrorCode} Encountered`;
     }
