@@ -6,7 +6,7 @@ import { CollectionAndItsLatestFile } from 'services/collectionService';
 import { getToken } from 'utils/common/key';
 import constants from 'utils/strings/constants';
 
-export const ERR_NO_INTERNET_CONNECTION = 0;
+export const ERR_NO_INTERNET_CONNECTION = 1;
 
 export default function CreateCollection(props) {
     const {

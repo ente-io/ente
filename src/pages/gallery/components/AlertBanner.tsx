@@ -15,8 +15,10 @@ export default function AlertBanner({ bannerErrorCode }) {
             break;
         case ERR_STORAGE_LIMIT_EXCEEDED:
             errorMessage = constants.STORAGE_QUOTA_EXCEEDED;
+            break;
         case ERR_NO_INTERNET_CONNECTION:
             errorMessage = constants.NO_INTERNET_CONNECTION;
+            break;
         default:
             errorMessage = `Unknown Error Code - ${bannerErrorCode} Encountered`;
     }
