@@ -152,8 +152,8 @@ class SyncService {
         return await syncWithRemote();
       }
     }
-    final lastDBUpdationTime = _prefs.getInt(_dbUpdationTimeKey);
-    if (lastDBUpdationTime != null && lastDBUpdationTime != 0) {
+    final lastDBUpdationTime = _prefs.getInt(_dbUpdationTimeKey) ?? 0;
+    if (lastDBUpdationTime != 0) {
       await _loadAndStorePhotos(
           lastDBUpdationTime, syncStartTime, existingLocalFileIDs);
     } else {
