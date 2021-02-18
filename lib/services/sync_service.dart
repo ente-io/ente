@@ -175,9 +175,9 @@ class SyncService {
   Future<void> _loadAndStorePhotos(
       int fromTime, int toTime, Set<String> existingLocalFileIDs) async {
     _logger.info("Loading photos from " +
-        getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(fromTime)) +
+        DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
         " to " +
-        getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(toTime)));
+        DateTime.fromMicrosecondsSinceEpoch(toTime).toString());
     final files = await getDeviceFiles(fromTime, toTime);
     if (files.isNotEmpty) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applying_local_diff));
