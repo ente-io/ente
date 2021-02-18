@@ -252,8 +252,8 @@ void _pollQueue() async {
         final data = await _downloadAndDecryptThumbnail(item.file);
         ThumbnailFileLruCache.put(item.file, data);
         item.completer.complete(data);
-      } catch (e) {
-        _logger.severe("Downloading thumbnail failed", e);
+      } catch (e, s) {
+        _logger.severe("Downloading thumbnail failed", e, s);
         item.completer.completeError(e);
       }
       _currentlyDownloading--;
@@ -343,6 +343,8 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
       );
   final encryptedFile = io.File(temporaryPath);
   final thumbnailDecryptionKey = decryptFileKey(file);
+  _logger.info("Key: " + Sodium.bin2base64(thumbnailDecryptionKey));
+  _logger.info("Header: " + file.thumbnailDecryptionHeader);
   var data = CryptoUtil.decryptChaCha(
     encryptedFile.readAsBytesSync(),
     thumbnailDecryptionKey,
