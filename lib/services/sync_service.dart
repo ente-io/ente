@@ -139,6 +139,7 @@ class SyncService {
   }
 
   Future<void> _doSync({bool isAppInBackground = false}) async {
+    _logger.info("Doing sync", Error(), StackTrace.current);
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     if (isAppInBackground) {
