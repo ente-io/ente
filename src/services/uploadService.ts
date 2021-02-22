@@ -5,8 +5,8 @@ import EXIF from 'exif-js';
 import { fileAttribute } from './fileService';
 import { collection, CollectionAndItsLatestFile } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
-import errorCodes from 'utils/common/errorCodes';
 import { checkConnectivity } from 'utils/common/utilFunctions';
+import { ErrorHandler } from 'utils/common/errorUtil';
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
@@ -125,7 +125,11 @@ class UploadService {
 
             progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOADING);
             this.changeProgressBarProps();
-            await this.fetchUploadURLs(token);
+            try {
+                await this.fetchUploadURLs(token);
+            } catch (e) {
+                ErrorHandler(e);
+            }
             const uploadProcesses = [];
             for (let i = 0; i < Math.min(5, this.totalFileCount); i++) {
                 uploadProcesses.push(
@@ -168,14 +172,7 @@ class UploadService {
             this.filesCompleted++;
             this.changeProgressBarProps();
         } catch (e) {
-            if (
-                e.response?.status.toString() ==
-                    errorCodes.ERR_STORAGE_LIMIT_EXCEEDED ||
-                e.response?.status.toString() ==
-                    errorCodes.ERR_NO_ACTIVE_SUBSRICTION
-            ) {
-                throw new Error(e.response.status);
-            }
+            ErrorHandler(e);
             const error = new Error(
                 `Uploading Failed for File - ${rawFile.name}`
             );

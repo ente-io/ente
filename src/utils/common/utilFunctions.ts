@@ -1,4 +1,4 @@
-import errorCodes from './errorCodes';
+import errorCodes from './errorUtil';
 
 export function checkConnectivity() {
     if (navigator.onLine) {

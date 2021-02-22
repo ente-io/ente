@@ -2,7 +2,7 @@ import React from 'react';
 import { Alert } from 'react-bootstrap';
 
 import constants from 'utils/strings/constants';
-import errorCodes from 'utils/common/errorCodes';
+import {errorCodes} from 'utils/common/errorUtil';
 
 export default function AlertBanner({ bannerErrorCode }) {
     let errorMessage;
