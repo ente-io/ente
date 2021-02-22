@@ -33,6 +33,6 @@ export function ErrorBannerMessage(bannerErrorCode) {
             break;
         default:
             errorMessage = `Unknown Error Code - ${bannerErrorCode} Encountered`;
-            return errorMessage;
     }
+    return errorMessage;
 }
