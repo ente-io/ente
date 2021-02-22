@@ -5,15 +5,14 @@ export const errorCodes = {
 };
 
 export function ErrorHandler(error) {
-    if (error.res)
-        if (
-            error.response?.status.toString() ==
-                errorCodes.ERR_STORAGE_LIMIT_EXCEEDED ||
-            error.response?.status.toString() ==
-                errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION
-        ) {
-            throw new Error(error.response.status);
-        } else {
-            return;
-        }
+    if (
+        error.response?.status.toString() ==
+            errorCodes.ERR_STORAGE_LIMIT_EXCEEDED ||
+        error.response?.status.toString() ==
+            errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION
+    ) {
+        throw new Error(error.response.status);
+    } else {
+        return;
+    }
 }
