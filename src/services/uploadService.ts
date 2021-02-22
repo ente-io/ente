@@ -224,7 +224,6 @@ class UploadService {
                 recievedFile
             );
             const metadata = Object.assign(
-                this.metadataMap.get(recievedFile.name) ?? {},
                 {
                     title: recievedFile.name,
                     creationTime:
@@ -233,7 +232,8 @@ class UploadService {
                     latitude: location?.latitude,
                     longitude: location?.latitude,
                     fileType,
-                }
+                },
+                this.metadataMap.get(recievedFile.name)
             );
             return {
                 filedata,
@@ -360,38 +360,30 @@ class UploadService {
                     reader.readAsText(recievedFile);
                 }
             );
-            if (!this.metadataMap.has(metadataJSON['title'])) {
-                return;
-            }
 
-            const metaDataObject = this.metadataMap.get(metadataJSON['title']);
+            const metaDataObject = {};
             metaDataObject['creationTime'] =
                 metadataJSON['photoTakenTime']['timestamp'] * 1000000;
             metaDataObject['modificationTime'] =
                 metadataJSON['modificationTime']['timestamp'] * 1000000;
 
+            var locationData = null;
             if (
-                metaDataObject['latitude'] == null ||
-                (metaDataObject['latitude'] == 0.0 &&
-                    metaDataObject['longitude'] == 0.0)
+                metadataJSON['geoData']['latitude'] != 0.0 ||
+                metadataJSON['geoData']['longitude'] != 0.0
             ) {
-                var locationData = null;
-                if (
-                    metadataJSON['geoData']['latitude'] != 0.0 ||
-                    metadataJSON['geoData']['longitude'] != 0.0
-                ) {
-                    locationData = metadataJSON['geoData'];
-                } else if (
-                    metadataJSON['geoDataExif']['latitude'] != 0.0 ||
-                    metadataJSON['geoDataExif']['longitude'] != 0.0
-                ) {
-                    locationData = metadataJSON['geoDataExif'];
-                }
-                if (locationData != null) {
-                    metaDataObject['latitude'] = locationData['latitide'];
-                    metaDataObject['longitude'] = locationData['longitude'];
-                }
+                locationData = metadataJSON['geoData'];
+            } else if (
+                metadataJSON['geoDataExif']['latitude'] != 0.0 ||
+                metadataJSON['geoDataExif']['longitude'] != 0.0
+            ) {
+                locationData = metadataJSON['geoDataExif'];
             }
+            if (locationData != null) {
+                metaDataObject['latitude'] = locationData['latitide'];
+                metaDataObject['longitude'] = locationData['longitude'];
+            }
+            this.metadataMap.set(metadataJSON['title'], metaDataObject);
         } catch (e) {
             const error = new Error(
                 `Error reading metaDataFile ${recievedFile.name}`
