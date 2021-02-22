@@ -5,6 +5,8 @@ import EXIF from 'exif-js';
 import { fileAttribute } from './fileService';
 import { collection, CollectionAndItsLatestFile } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
+import { checkConnectivity } from 'utils/common/utilFunctions';
+import { ErrorHandler } from 'utils/common/errorUtil';
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
@@ -77,17 +79,23 @@ class UploadService {
     private metadataMap: Map<string, Object>;
     private filesToBeUploaded: File[];
     private progressBarProps;
+    private uploadErrors: Error[];
+    private setUploadErrors;
 
     public async uploadFiles(
         recievedFiles: File[],
         collectionAndItsLatestFile: CollectionAndItsLatestFile,
         token: string,
-        progressBarProps
+        progressBarProps,
+        setUploadErrors
     ) {
         try {
+            checkConnectivity();
             progressBarProps.setUploadStage(UPLOAD_STAGES.START);
 
             this.filesCompleted = 0;
+            this.uploadErrors = [];
+            this.setUploadErrors = setUploadErrors;
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
 
@@ -111,14 +119,17 @@ class UploadService {
             progressBarProps.setUploadStage(
                 UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
             );
-
-            for await (const rawFile of metadataFiles) {
+            for (const rawFile of metadataFiles) {
                 await this.seedMetadataMap(rawFile);
             }
 
             progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOADING);
             this.changeProgressBarProps();
-
+            try {
+                await this.fetchUploadURLs(token);
+            } catch (e) {
+                ErrorHandler(e);
+            }
             const uploadProcesses = [];
             for (let i = 0; i < Math.min(5, this.totalFileCount); i++) {
                 uploadProcesses.push(
@@ -134,6 +145,7 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.FINISH);
             progressBarProps.setPercentComplete(100);
         } catch (e) {
+            this.filesToBeUploaded = [];
             console.log(e);
             throw e;
         }
@@ -159,18 +171,21 @@ class UploadService {
             await this.uploadFile(uploadFile, token);
             this.filesCompleted++;
             this.changeProgressBarProps();
-
-            if (this.filesToBeUploaded.length > 0) {
-                await this.uploader(
-                    worker,
-                    this.filesToBeUploaded.pop(),
-                    collection,
-                    token
-                );
-            }
         } catch (e) {
-            console.log(e);
-            throw e;
+            ErrorHandler(e);
+            const error = new Error(
+                `Uploading Failed for File - ${rawFile.name}`
+            );
+            this.uploadErrors.push(error);
+            this.setUploadErrors(this.uploadErrors);
+        }
+        if (this.filesToBeUploaded.length > 0) {
+            await this.uploader(
+                worker,
+                this.filesToBeUploaded.pop(),
+                collection,
+                token
+            );
         }
     }
 
@@ -206,7 +221,6 @@ class UploadService {
                 recievedFile
             );
             const metadata = Object.assign(
-                this.metadataMap.get(recievedFile.name) ?? {},
                 {
                     title: recievedFile.name,
                     creationTime:
@@ -215,7 +229,8 @@ class UploadService {
                     latitude: location?.latitude,
                     longitude: location?.latitude,
                     fileType,
-                }
+                },
+                this.metadataMap.get(recievedFile.name)
             );
             return {
                 filedata,
@@ -223,7 +238,8 @@ class UploadService {
                 metadata,
             };
         } catch (e) {
-            console.log('error reading files ' + e);
+            console.log('error reading files ', e);
+            throw e;
         }
     }
     private async encryptFile(
@@ -265,7 +281,8 @@ class UploadService {
             };
             return result;
         } catch (e) {
-            console.log('Error encrypting files ' + e);
+            console.log('Error encrypting files ', e);
+            throw e;
         }
     }
 
@@ -290,7 +307,7 @@ class UploadService {
 
             return file;
         } catch (e) {
-            console.log('error uploading to bucket ' + e);
+            console.log('error uploading to bucket ', e);
             throw e;
         }
     }
@@ -320,7 +337,8 @@ class UploadService {
 
             return response.data;
         } catch (e) {
-            console.log('upload Files Failed ' + e);
+            console.log('upload Files Failed ', e);
+            throw e;
         }
     }
 
@@ -339,40 +357,36 @@ class UploadService {
                     reader.readAsText(recievedFile);
                 }
             );
-            if (!this.metadataMap.has(metadataJSON['title'])) {
-                return;
-            }
 
-            const metaDataObject = this.metadataMap.get(metadataJSON['title']);
+            const metaDataObject = {};
             metaDataObject['creationTime'] =
                 metadataJSON['photoTakenTime']['timestamp'] * 1000000;
             metaDataObject['modificationTime'] =
                 metadataJSON['modificationTime']['timestamp'] * 1000000;
 
+            var locationData = null;
             if (
-                metaDataObject['latitude'] == null ||
-                (metaDataObject['latitude'] == 0.0 &&
-                    metaDataObject['longitude'] == 0.0)
+                metadataJSON['geoData']['latitude'] != 0.0 ||
+                metadataJSON['geoData']['longitude'] != 0.0
             ) {
-                var locationData = null;
-                if (
-                    metadataJSON['geoData']['latitude'] != 0.0 ||
-                    metadataJSON['geoData']['longitude'] != 0.0
-                ) {
-                    locationData = metadataJSON['geoData'];
-                } else if (
-                    metadataJSON['geoDataExif']['latitude'] != 0.0 ||
-                    metadataJSON['geoDataExif']['longitude'] != 0.0
-                ) {
-                    locationData = metadataJSON['geoDataExif'];
-                }
-                if (locationData != null) {
-                    metaDataObject['latitude'] = locationData['latitide'];
-                    metaDataObject['longitude'] = locationData['longitude'];
-                }
+                locationData = metadataJSON['geoData'];
+            } else if (
+                metadataJSON['geoDataExif']['latitude'] != 0.0 ||
+                metadataJSON['geoDataExif']['longitude'] != 0.0
+            ) {
+                locationData = metadataJSON['geoDataExif'];
             }
+            if (locationData != null) {
+                metaDataObject['latitude'] = locationData['latitide'];
+                metaDataObject['longitude'] = locationData['longitude'];
+            }
+            this.metadataMap.set(metadataJSON['title'], metaDataObject);
         } catch (e) {
-            console.log('error reading metaData Files ' + e);
+            const error = new Error(
+                `Error reading metaDataFile ${recievedFile.name}`
+            );
+            this.uploadErrors.push(error);
+            this.setUploadErrors(this.uploadErrors);
         }
     }
     private async generateThumbnail(file: File): Promise<Uint8Array> {
@@ -448,14 +462,18 @@ class UploadService {
                         quality
                     );
                 });
+                if (!thumbnailBlob) {
+                    thumbnailBlob = file;
+                }
             } while (
                 thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
                 attempts <= MAX_ATTEMPTS
             );
-            const thumbnail = this.getUint8ArrayView(thumbnailBlob);
+            const thumbnail = await this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
         } catch (e) {
-            console.log('Error generating thumbnail ' + e);
+            console.log('Error generating thumbnail ', e);
+            throw e;
         }
     }
 
@@ -477,7 +495,7 @@ class UploadService {
                 reader.readAsArrayBuffer(file);
             });
         } catch (e) {
-            console.log('error readinf file to bytearray ' + e);
+            console.log('error readinf file to bytearray ', e);
             throw e;
         }
     }
@@ -509,7 +527,7 @@ class UploadService {
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
-            console.log('fetch upload-url failed ' + e);
+            console.log('fetch upload-url failed ', e);
             throw e;
         }
     }
@@ -525,7 +543,7 @@ class UploadService {
             });
             return fileUploadURL.objectKey;
         } catch (e) {
-            console.log('putFile to dataStore failed ' + e);
+            console.log('putFile to dataStore failed ', e);
             throw e;
         }
     }
@@ -548,6 +566,7 @@ class UploadService {
             };
         } catch (e) {
             console.log('error reading exif data');
+            throw e;
         }
     }
     private getUNIXTime(exifData: any) {

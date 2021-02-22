@@ -82,6 +82,8 @@ const englishConstants = {
     ZOOM_IN_OUT: 'Zoom in/out',
     PREVIOUS: 'Previous (arrow left)',
     NEXT: 'Next (arrow right)',
+    NO_INTERNET_CONNECTION:
+        'You seem to be offline please check your internet connection and try again',
 };
 
 export default englishConstants;

@@ -50,7 +50,7 @@ class DownloadManager {
             }
             return await this.thumbnailDownloads.get(file.id);
         } catch (e) {
-            console.log('get preview Failed' + e);
+            console.log('get preview Failed' , e );
         }
     }
 
@@ -72,7 +72,7 @@ class DownloadManager {
                     );
                     return URL.createObjectURL(new Blob([decrypted]));
                 } catch (e) {
-                    console.log('get file failed ' + e);
+                    console.log('get file failed ' , e );
                 }
             })();
             this.fileDownloads.set(file.id, download);

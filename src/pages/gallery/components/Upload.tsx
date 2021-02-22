@@ -10,6 +10,7 @@ export default function Upload(props) {
     );
     const [fileCounter, setFileCounter] = useState({ current: 0, total: 0 });
     const [percentComplete, setPercentComplete] = useState(0);
+    const [uploadErrors, setUploadErrors] = useState<Error[]>([]);
     const init = () => {
         setProgressView(false);
         setUploadStage(UPLOAD_STAGES.START);
@@ -26,12 +27,15 @@ export default function Upload(props) {
                     setFileCounter,
                     setUploadStage,
                 }}
+                setUploadErrors={setUploadErrors}
             />
             <UploadProgress
                 now={percentComplete}
                 fileCounter={fileCounter}
                 uploadStage={uploadStage}
+                uploadErrors={uploadErrors}
                 show={progressView}
+                closeModal={() => setProgressView(false)}
                 onHide={init}
             />
         </>

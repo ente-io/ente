@@ -151,7 +151,7 @@ export const getFiles = async (
         } while (resp.data.diff.length === limit);
         return await Promise.all(promises);
     } catch (e) {
-        console.log('Get files failed' + e);
+        console.log('Get files failed' , e );
     }
 };
 

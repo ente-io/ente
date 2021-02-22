@@ -1,11 +1,13 @@
 import React from 'react';
-import { Alert, Modal, ProgressBar } from 'react-bootstrap';
+import { Alert, Button, Modal, ProgressBar } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
 export default function UploadProgress({
     fileCounter,
     uploadStage,
     now,
+    uploadErrors,
+    closeModal,
     ...props
 }) {
     return (
@@ -34,6 +36,33 @@ export default function UploadProgress({
                         </Alert>
                         <ProgressBar animated now={now} />
                     </>
+                )}
+                {uploadErrors.length > 0 && (
+                    <>
+                        <Alert variant="danger">
+                            <div
+                                style={{
+                                    overflow: 'auto',
+                                    height: '100px',
+                                }}
+                            >
+                                {uploadErrors.map((error) => (
+                                    <li key={error.message}>{error.message}</li>
+                                ))}
+                            </div>
+                        </Alert>
+                    </>
+                )}
+                {now === 100 && (
+                    <Modal.Footer>
+                        <Button
+                            variant="dark"
+                            style={{ width: '100%' }}
+                            onClick={closeModal}
+                        >
+                            {constants.CLOSE}
+                        </Button>
+                    </Modal.Footer>
                 )}
             </Modal.Body>
         </Modal>

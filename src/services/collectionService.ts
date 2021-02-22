@@ -107,7 +107,7 @@ const getCollections = async (
         );
         return await Promise.all(promises);
     } catch (e) {
-        console.log('getCollections failed- ' + e);
+        console.log('getCollections failed- ', e.response);
     }
 };
 
@@ -118,8 +118,8 @@ export const getLocalCollections = async (): Promise<collection[]> => {
 };
 
 export const getCollectionUpdationTime = async (): Promise<number> => {
-    return await localForage.getItem<number>(COLLECTION_UPDATION_TIME) ?? 0;
-}
+    return (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
+};
 
 export const syncCollections = async (token: string, key: string) => {
     const localCollections = await getLocalCollections();
@@ -268,7 +268,7 @@ const createCollection = async (
         );
         return response.data.collection;
     } catch (e) {
-        console.log('create Collection failed ' + e);
+        console.log('create Collection failed ', e);
     }
 };
 
@@ -326,7 +326,7 @@ const addToCollection = async (collection: collection, files: file[]) => {
             { 'X-Auth-Token': token }
         );
     } catch (e) {
-        console.log('Add to collection Failed ' + e);
+        console.log('Add to collection Failed ', e);
     }
 };
 const removeFromCollection = async (collection: collection, files: file[]) => {
@@ -349,7 +349,7 @@ const removeFromCollection = async (collection: collection, files: file[]) => {
             { 'X-Auth-Token': token }
         );
     } catch (e) {
-        console.log('remove from collection failed ' + e);
+        console.log('remove from collection failed ', e);
     }
 };
 
