@@ -4,6 +4,7 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
+import { getToken } from 'utils/common/key';
 
 interface IProps {
     data: file;
@@ -48,7 +49,7 @@ export default function PreviewCard(props: IProps) {
     useEffect(() => {
         if (data && !data.msrc) {
             const main = async () => {
-                const token = getData(LS_KEYS.USER).token;
+                const token = getToken();
                 const url = await DownloadManager.getPreview(data);
                 setImgSrc(url);
                 data.msrc = url;
