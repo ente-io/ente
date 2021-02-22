@@ -5,6 +5,8 @@ import EXIF from 'exif-js';
 import { fileAttribute } from './fileService';
 import { collection, CollectionAndItsLatestFile } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
+import errorCodes from 'utils/common/errorCodes';
+import { checkConnectivity } from 'utils/common/utilFunctions';
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
@@ -13,8 +15,7 @@ const ENDPOINT = getEndpoint();
 const THUMBNAIL_HEIGHT = 720;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;
-export const ERR_STORAGE_LIMIT_EXCEEDED = 426;
-export const ERR_NO_ACTIVE_SUBSRICTION = 402;
+
 interface EncryptionResult {
     file: fileAttribute;
     key: string;
@@ -89,6 +90,7 @@ class UploadService {
         setUploadErrors
     ) {
         try {
+            checkConnectivity();
             progressBarProps.setUploadStage(UPLOAD_STAGES.START);
 
             this.filesCompleted = 0;
@@ -167,10 +169,12 @@ class UploadService {
             this.changeProgressBarProps();
         } catch (e) {
             if (
-                e.response?.status == ERR_STORAGE_LIMIT_EXCEEDED ||
-                e.response?.status == ERR_NO_ACTIVE_SUBSRICTION
+                e.response?.status.toString() ==
+                    errorCodes.ERR_STORAGE_LIMIT_EXCEEDED ||
+                e.response?.status.toString() ==
+                    errorCodes.ERR_NO_ACTIVE_SUBSRICTION
             ) {
-                throw e;
+                throw new Error(e.response.status);
             }
             const error = new Error(
                 `Uploading Failed for File - ${rawFile.name}`
@@ -237,7 +241,7 @@ class UploadService {
                 metadata,
             };
         } catch (e) {
-            console.log('error reading files ' + e);
+            console.log('error reading files ', e);
             throw e;
         }
     }
@@ -280,7 +284,7 @@ class UploadService {
             };
             return result;
         } catch (e) {
-            console.log('Error encrypting files ' + e);
+            console.log('Error encrypting files ', e);
             throw e;
         }
     }
@@ -306,7 +310,7 @@ class UploadService {
 
             return file;
         } catch (e) {
-            console.log('error uploading to bucket ' + e);
+            console.log('error uploading to bucket ', e);
             throw e;
         }
     }
@@ -336,7 +340,7 @@ class UploadService {
 
             return response.data;
         } catch (e) {
-            console.log('upload Files Failed ' + e);
+            console.log('upload Files Failed ', e);
             throw e;
         }
     }
@@ -479,7 +483,7 @@ class UploadService {
             const thumbnail = await this.getUint8ArrayView(thumbnailBlob);
             return thumbnail;
         } catch (e) {
-            console.log('Error generating thumbnail ' + e);
+            console.log('Error generating thumbnail ', e);
             throw e;
         }
     }
@@ -502,7 +506,7 @@ class UploadService {
                 reader.readAsArrayBuffer(file);
             });
         } catch (e) {
-            console.log('error readinf file to bytearray ' + e);
+            console.log('error readinf file to bytearray ', e);
             throw e;
         }
     }
@@ -534,7 +538,7 @@ class UploadService {
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
-            console.log('fetch upload-url failed ' + e);
+            console.log('fetch upload-url failed ', e);
             throw e;
         }
     }
@@ -550,7 +554,7 @@ class UploadService {
             });
             return fileUploadURL.objectKey;
         } catch (e) {
-            console.log('putFile to dataStore failed ' + e);
+            console.log('putFile to dataStore failed ', e);
             throw e;
         }
     }

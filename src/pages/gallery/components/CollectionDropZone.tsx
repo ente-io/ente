@@ -1,7 +1,6 @@
 import React from 'react';
 import UploadService from 'services/uploadService';
 import { getToken } from 'utils/common/key';
-import { ERR_NO_INTERNET_CONNECTION } from './CreateCollection';
 import DropzoneWrapper from './DropzoneWrapper';
 
 function CollectionDropZone({
@@ -30,10 +29,7 @@ function CollectionDropZone({
             );
             refetchData();
         } catch (err) {
-            if (err.response) {
-                setBannerErrorCode(err.response.status);
-            }
-            setBannerErrorCode(ERR_NO_INTERNET_CONNECTION);
+            setBannerErrorCode(err.message);
             setProgressView(false);
         }
     };
