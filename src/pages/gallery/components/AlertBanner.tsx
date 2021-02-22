@@ -7,7 +7,7 @@ import errorCodes from 'utils/common/errorCodes';
 export default function AlertBanner({ bannerErrorCode }) {
     let errorMessage;
     switch (bannerErrorCode) {
-        case errorCodes.ERR_NO_ACTIVE_SUBSRICTION:
+        case errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION:
             errorMessage = constants.SUBSCRIPTION_EXPIRED;
             break;
         case errorCodes.ERR_STORAGE_LIMIT_EXCEEDED:
