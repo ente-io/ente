@@ -37,7 +37,7 @@ export default function UploadProgress({
                         <ProgressBar animated now={now} />
                     </>
                 )}
-                {uploadErrors.length > 0 && (
+                {uploadErrors && uploadErrors.length > 0 && (
                     <>
                         <Alert variant="danger">
                             <div
@@ -46,8 +46,8 @@ export default function UploadProgress({
                                     height: '100px',
                                 }}
                             >
-                                {uploadErrors.map((error) => (
-                                    <li key={error.message}>{error.message}</li>
+                                {uploadErrors.map((error, index) => (
+                                    <li key={index}>{error.message}</li>
                                 ))}
                             </div>
                         </Alert>
