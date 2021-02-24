@@ -10,6 +10,7 @@ const CryptoWorker: any =
     typeof window !== 'undefined' &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 
+const heic2any = typeof window !== 'undefined' && require('heic2any');
 const TYPE_HEIC = 'heic';
 
 class DownloadManager {
@@ -91,7 +92,6 @@ class DownloadManager {
     };
 
     private async convertHEIC2JPEG(fileBlob): Promise<Blob> {
-        const heic2any = require('heic2any');
         return await heic2any({
             blob: fileBlob,
             toType: 'image/jpeg',
