@@ -3,11 +3,15 @@ import { file } from './fileService';
 import HTTPService from './HTTPService';
 import { getEndpoint } from 'utils/common/apiUtil';
 import * as Comlink from 'comlink';
+import { getFileExtension } from 'utils/common/utilFunctions';
 
 const ENDPOINT = getEndpoint();
 const CryptoWorker: any =
     typeof window !== 'undefined' &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
+
+const heic2any = typeof window !== 'undefined' && require('heic2any');
+const TYPE_HEIC = 'heic';
 
 class DownloadManager {
     private fileDownloads = new Map<number, Promise<string>>();
@@ -50,7 +54,7 @@ class DownloadManager {
             }
             return await this.thumbnailDownloads.get(file.id);
         } catch (e) {
-            console.log('get preview Failed' , e );
+            console.log('get preview Failed', e);
         }
     }
 
@@ -65,20 +69,35 @@ class DownloadManager {
                         { responseType: 'arraybuffer' }
                     );
                     const worker = await new CryptoWorker();
-                    const decrypted: any = await worker.decryptFile(
+                    const decryptedFile: any = await worker.decryptFile(
                         new Uint8Array(resp.data),
                         await worker.fromB64(file.file.decryptionHeader),
                         file.key
                     );
-                    return URL.createObjectURL(new Blob([decrypted]));
+                    let decryptedFileBlob = new Blob([decryptedFile]);
+
+                    if (getFileExtension(file.metadata.title) === TYPE_HEIC) {
+                        decryptedFileBlob = await this.convertHEIC2JPEG(
+                            decryptedFileBlob
+                        );
+                    }
+                    return URL.createObjectURL(decryptedFileBlob);
                 } catch (e) {
-                    console.log('get file failed ' , e );
+                    console.log('get file failed ', e);
                 }
             })();
             this.fileDownloads.set(file.id, download);
         }
         return await this.fileDownloads.get(file.id);
     };
+
+    private async convertHEIC2JPEG(fileBlob): Promise<Blob> {
+        return await heic2any({
+            blob: fileBlob,
+            toType: 'image/jpeg',
+            quality: 1,
+        });
+    }
 }
 
 export default new DownloadManager(getToken());

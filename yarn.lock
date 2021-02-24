@@ -3306,6 +3306,11 @@ he@1.1.1:
   resolved "https://registry.yarnpkg.com/he/-/he-1.1.1.tgz#93410fd21b009735151f8868c2f271f3427e23fd"
   integrity sha1-k0EP0hsAlzUVH4howvJx80J+I/0=
 
+heic2any@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/heic2any/-/heic2any-0.0.3.tgz#59248665a3646424b1f88c0aaaa1abba3bbd1aae"
+  integrity sha512-1KG0LzZuIPiqyJjwLgGlgrgWd3UBwUE9g5+tOuHy8PbeH2hF0U4gc4ZWT4ChlCmcdISr1xVRimSehsTOPdRXnQ==
+
 hmac-drbg@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/hmac-drbg/-/hmac-drbg-1.0.1.tgz#d2745701025a6c775a6c545793ed502fc0c649a1"
