@@ -135,6 +135,7 @@ class UploadService {
                 uploadProcesses.push(
                     this.uploader(
                         await new CryptoWorker(),
+                        new FileReader(),
                         this.filesToBeUploaded.pop(),
                         collectionAndItsLatestFile.collection,
                         token
@@ -150,10 +151,15 @@ class UploadService {
             throw e;
         }
     }
-    private async uploader(worker, rawFile, collection, token) {
+    private async uploader(
+        worker: any,
+        reader: FileReader,
+        rawFile: File,
+        collection: collection,
+        token: string
+    ) {
         try {
-            let file: FileinMemory = await this.readFile(rawFile);
-
+            let file: FileinMemory = await this.readFile(reader, rawFile);
             let encryptedFile: EncryptedFile = await this.encryptFile(
                 worker,
                 file,
@@ -177,11 +183,11 @@ class UploadService {
                 `Uploading Failed for File - ${rawFile.name}`
             );
             this.uploadErrors.push(error);
-            this.setUploadErrors(this.uploadErrors);
         }
         if (this.filesToBeUploaded.length > 0) {
             await this.uploader(
                 worker,
+                reader,
                 this.filesToBeUploaded.pop(),
                 collection,
                 token
@@ -196,14 +202,19 @@ class UploadService {
             total: this.totalFileCount,
         });
         setPercentComplete(this.filesCompleted * this.perFileProgress);
+        this.setUploadErrors(this.uploadErrors);
     }
 
-    private async readFile(recievedFile: File) {
+    private async readFile(reader: FileReader, recievedFile: File) {
         try {
             const filedata: Uint8Array = await this.getUint8ArrayView(
+                reader,
                 recievedFile
             );
-            const thumbnail = await this.generateThumbnail(recievedFile);
+            const thumbnail = await this.generateThumbnail(
+                reader,
+                recievedFile
+            );
 
             let fileType: FILE_TYPE;
             switch (recievedFile.type.split('/')[0]) {
@@ -218,6 +229,7 @@ class UploadService {
             }
 
             const { location, creationTime } = await this.getExifData(
+                reader,
                 recievedFile
             );
             const metadata = Object.assign(
@@ -389,7 +401,10 @@ class UploadService {
             this.setUploadErrors(this.uploadErrors);
         }
     }
-    private async generateThumbnail(file: File): Promise<Uint8Array> {
+    private async generateThumbnail(
+        reader: FileReader,
+        file: File
+    ): Promise<Uint8Array> {
         try {
             let canvas = document.createElement('canvas');
             let canvas_CTX = canvas.getContext('2d');
@@ -469,7 +484,10 @@ class UploadService {
                 thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
                 attempts <= MAX_ATTEMPTS
             );
-            const thumbnail = await this.getUint8ArrayView(thumbnailBlob);
+            const thumbnail = await this.getUint8ArrayView(
+                reader,
+                thumbnailBlob
+            );
             return thumbnail;
         } catch (e) {
             console.log('Error generating thumbnail ', e);
@@ -477,11 +495,12 @@ class UploadService {
         }
     }
 
-    private async getUint8ArrayView(file): Promise<Uint8Array> {
+    private async getUint8ArrayView(
+        reader: FileReader,
+        file: Blob
+    ): Promise<Uint8Array> {
         try {
             return await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-
                 reader.onabort = () => reject('file reading was aborted');
                 reader.onerror = () => reject('file reading has failed');
                 reader.onload = () => {
@@ -548,10 +567,9 @@ class UploadService {
         }
     }
 
-    private async getExifData(recievedFile) {
+    private async getExifData(reader: FileReader, recievedFile: File) {
         try {
             const exifData: any = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
                 reader.onload = () => {
                     resolve(EXIF.readFromBinaryFile(reader.result));
                 };
