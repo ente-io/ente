@@ -157,22 +157,26 @@ class UploadService {
     ) {
         try {
             let file: FileinMemory = await this.readFile(reader, rawFile);
-            let encryptedFile: EncryptedFile = await this.encryptFile(
+            let {
+                file: encryptedFile,
+                fileKey: encryptedKey,
+            }: EncryptedFile = await this.encryptFile(
                 worker,
                 file,
                 collection.key
             );
             file = null;
             let backupedFile: BackupedFile = await this.uploadtoBucket(
-                encryptedFile.file,
+                encryptedFile,
                 token
             );
             encryptedFile = null;
             let uploadFile: uploadFile = this.getuploadFile(
                 collection,
                 backupedFile,
-                encryptedFile.fileKey
+                encryptedKey
             );
+            encryptedFile = null;
             backupedFile = null;
             await this.uploadFile(uploadFile, token);
             uploadFile = null;
