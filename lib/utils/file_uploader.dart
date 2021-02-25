@@ -229,12 +229,12 @@ class FileUploader {
       encryptedThumbnailFile
           .writeAsBytesSync(encryptedThumbnailData.encryptedData);
 
-      final fileUploadURL = await _getUploadURL();
-      String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
-
       final thumbnailUploadURL = await _getUploadURL();
       String thumbnailObjectKey =
           await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
+
+      final fileUploadURL = await _getUploadURL();
+      String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
       // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
       if (file.location == null ||
