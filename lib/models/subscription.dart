@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+const kFreeProductID = "free";
+
 class Subscription {
   final int id;
   final String productID;
