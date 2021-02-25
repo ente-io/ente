@@ -29,6 +29,7 @@ class FileUploader {
   final _queue = LinkedHashMap<int, FileUploadItem>();
   final kMaximumConcurrentUploads = 4;
   final kMaximumThumbnailCompressionAttempts = 2;
+  final kMaximumUploadAttempts = 4;
   int _currentlyUploading = 0;
   final _uploadURLs = Queue<UploadURL>();
 
@@ -489,6 +490,11 @@ class FileUploader {
           attempt == 1) {
         return _putFile(uploadURL, file,
             contentLength: file.readAsBytesSync().length, attempt: 2);
+      } else if (attempt < kMaximumUploadAttempts) {
+        _logger.info("Retrying upload that failed ", e);
+        final newUploadURL = await _getUploadURL();
+        return _putFile(newUploadURL, file,
+            contentLength: file.readAsBytesSync().length, attempt: attempt++);
       } else {
         throw e;
       }
