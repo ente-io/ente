@@ -435,6 +435,8 @@ class FileUploader {
       } on DioError catch (e) {
         if (e.response.statusCode == 402) {
           throw NoActiveSubscriptionError();
+        } else if (e.response.statusCode == 426) {
+          throw StorageLimitExceededError();
         }
         throw e;
       }
