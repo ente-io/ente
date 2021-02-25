@@ -9,6 +9,7 @@ const CryptoWorker: any =
     typeof window !== 'undefined' &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 const ENDPOINT = getEndpoint();
+const DIFF_LIMIT: number = 2500;
 
 localForage.config({
     driver: localForage.INDEXEDDB,
@@ -75,7 +76,7 @@ export const syncFiles = async (token: string, collections: collection[]) => {
         }
         isUpdated = true;
         let fetchedFiles =
-            (await getFiles(collection, lastSyncTime, 100, token)) ?? [];
+            (await getFiles(collection, lastSyncTime, DIFF_LIMIT, token)) ?? [];
         files.push(...fetchedFiles);
         var latestVersionFiles = new Map<number, file>();
         files.forEach((file) => {
@@ -151,7 +152,7 @@ export const getFiles = async (
         } while (resp.data.diff.length === limit);
         return await Promise.all(promises);
     } catch (e) {
-        console.log('Get files failed' , e );
+        console.log('Get files failed', e);
     }
 };
 
