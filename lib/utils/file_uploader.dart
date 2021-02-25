@@ -116,7 +116,7 @@ class FileUploader {
     }
   }
 
-  void clearQueue() {
+  void clearQueue(final Error reason) {
     final uploadsToBeRemoved = List<int>();
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.not_started)
@@ -124,13 +124,13 @@ class FileUploader {
       uploadsToBeRemoved.add(pendingUpload.key);
     });
     for (final id in uploadsToBeRemoved) {
-      _queue.remove(id).completer.completeError(SyncStopRequestedError());
+      _queue.remove(id).completer.completeError(reason);
     }
   }
 
   void _pollQueue() {
     if (SyncService.instance.shouldStopSync()) {
-      clearQueue();
+      clearQueue(SyncStopRequestedError());
     }
     if (_queue.length > 0 && _currentlyUploading < kMaximumConcurrentUploads) {
       final firstPendingEntry = _queue.entries
@@ -434,10 +434,12 @@ class FileUploader {
             .toList();
         _uploadURLs.addAll(urls);
       } on DioError catch (e) {
-        if (e.response.statusCode == 402) {
-          _onExpiredSubscription();
-        } else if (e.response.statusCode == 426) {
-          _onStorageLimitExceeded();
+        if (e.response != null) {
+          if (e.response.statusCode == 402) {
+            _onExpiredSubscription();
+          } else if (e.response.statusCode == 426) {
+            _onStorageLimitExceeded();
+          }
         }
         throw e;
       }
@@ -448,12 +450,12 @@ class FileUploader {
   }
 
   void _onStorageLimitExceeded() {
-    clearQueue();
+    clearQueue(StorageLimitExceededError());
     throw StorageLimitExceededError();
   }
 
   void _onExpiredSubscription() {
-    clearQueue();
+    clearQueue(NoActiveSubscriptionError());
     throw NoActiveSubscriptionError();
   }
 
