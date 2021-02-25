@@ -4,14 +4,11 @@ import { file } from './fileService';
 import localForage from 'localforage';
 
 import HTTPService from './HTTPService';
-import * as Comlink from 'comlink';
 import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
 import { user } from './userService';
+import CryptoWorker from 'utils/crypto/cryptoWorker';
 
-const CryptoWorker: any =
-    typeof window !== 'undefined' &&
-    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 const ENDPOINT = getEndpoint();
 
 enum CollectionType {

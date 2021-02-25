@@ -1,15 +1,12 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
-import * as Comlink from 'comlink';
 import EXIF from 'exif-js';
 import { fileAttribute } from './fileService';
 import { collection, CollectionAndItsLatestFile } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity } from 'utils/common/utilFunctions';
 import { ErrorHandler } from 'utils/common/errorUtil';
-const CryptoWorker: any =
-    typeof window !== 'undefined' &&
-    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
+import CryptoWorker from 'utils/crypto/cryptoWorker';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;

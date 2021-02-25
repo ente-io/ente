@@ -2,13 +2,11 @@ import { getToken } from 'utils/common/key';
 import { file } from './fileService';
 import HTTPService from './HTTPService';
 import { getEndpoint } from 'utils/common/apiUtil';
-import * as Comlink from 'comlink';
 import { getFileExtension } from 'utils/common/utilFunctions';
+import CryptoWorker from 'utils/crypto/cryptoWorker';
 
 const ENDPOINT = getEndpoint();
-const CryptoWorker: any =
-    typeof window !== 'undefined' &&
-    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
+
 
 const heic2any = typeof window !== 'undefined' && require('heic2any');
 const TYPE_HEIC = 'heic';

@@ -1,10 +1,6 @@
+import CryptoWorker from 'utils/crypto/cryptoWorker';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import * as Comlink from 'comlink';
-
-const CryptoWorker: any =
-    typeof window !== 'undefined' &&
-    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 
 export const getActualKey = async () => {
     const session = getData(LS_KEYS.SESSION);
