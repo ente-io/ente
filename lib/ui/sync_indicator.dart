@@ -154,7 +154,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                   color: Theme.of(context).accentColor,
                 ),
                 Padding(padding: EdgeInsets.all(4)),
-                Text("storage quota exceeded"),
+                Text("storage limit exceeded"),
               ],
             ),
             Padding(padding: EdgeInsets.all(6)),
