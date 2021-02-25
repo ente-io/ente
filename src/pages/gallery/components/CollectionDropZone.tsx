@@ -33,13 +33,7 @@ function CollectionDropZone({
             setProgressView(false);
         }
     };
-    return (
-        <DropzoneWrapper
-            children={children}
-            onDropAccepted={upload}
-            onDropRejected={closeModal}
-        />
-    );
+    return <DropzoneWrapper children={children} onDropAccepted={upload} />;
 }
 
 export default CollectionDropZone;

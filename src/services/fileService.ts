@@ -1,13 +1,10 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
-import * as Comlink from 'comlink';
 import localForage from 'localforage';
 import { collection } from './collectionService';
 import { MetadataObject } from './uploadService';
+import CryptoWorker from 'utils/crypto/cryptoWorker';
 
-const CryptoWorker: any =
-    typeof window !== 'undefined' &&
-    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 const ENDPOINT = getEndpoint();
 const DIFF_LIMIT: number = 2500;
 

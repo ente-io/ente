@@ -42,7 +42,6 @@ export default function AddCollection(props) {
         <div style={{ margin: '10px' }}>
             <DropzoneWrapper
                 onDropAccepted={createCollection}
-                onDropRejected={closeUploadModal}
                 onDragOver={showUploadModal}
                 children={children}
             />
