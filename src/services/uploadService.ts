@@ -165,16 +165,20 @@ class UploadService {
                 file,
                 collection.key
             );
+            file = null;
             let backupedFile: BackupedFile = await this.uploadtoBucket(
                 encryptedFile.file,
                 token
             );
+            encryptedFile = null;
             let uploadFile: uploadFile = this.getuploadFile(
                 collection,
                 backupedFile,
                 encryptedFile.fileKey
             );
+            backupedFile = null;
             await this.uploadFile(uploadFile, token);
+            uploadFile = null;
             this.filesCompleted++;
             this.changeProgressBarProps();
         } catch (e) {
