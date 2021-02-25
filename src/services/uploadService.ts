@@ -176,7 +176,7 @@ class UploadService {
                 backupedFile,
                 encryptedKey
             );
-            encryptedFile = null;
+            encryptedKey = null;
             backupedFile = null;
             await this.uploadFile(uploadFile, token);
             uploadFile = null;
