@@ -147,7 +147,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return SubscriptionPage();
+              return SubscriptionPage(isOnboarding: true);
             },
           ),
           (route) => route.isFirst,

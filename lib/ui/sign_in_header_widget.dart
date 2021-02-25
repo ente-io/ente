@@ -189,7 +189,7 @@ class _SignInHeaderState extends State<SignInHeader> {
                       page = PasswordReentryPage();
                     } else {
                       // All is well, user just has not subscribed
-                      page = SubscriptionPage();
+                      page = SubscriptionPage(isOnboarding: true);
                     }
                   }
                   Navigator.of(context).push(

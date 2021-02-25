@@ -24,7 +24,12 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class SubscriptionPage extends StatefulWidget {
-  const SubscriptionPage({Key key}) : super(key: key);
+  final bool isOnboarding;
+
+  const SubscriptionPage({
+    this.isOnboarding = false,
+    Key key,
+  }) : super(key: key);
 
   @override
   _SubscriptionPageState createState() => _SubscriptionPageState();
@@ -220,11 +225,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final pageSize = MediaQuery.of(context).size.height;
     final notifySize = MediaQuery.of(context).padding.top;
     final widgets = List<Widget>();
-    if (_currentSubscription == null) {
+    if (_currentSubscription == null ||
+        _currentSubscription.productID == kFreeProductID) {
       widgets.add(Padding(
         padding: const EdgeInsets.fromLTRB(12, 20, 12, 24),
         child: Text(
-          "ente preserves your photos and videos, so they're always available, even if you lose your device",
+          "ente encrypts and backs up your memories, so they're always available, even if you lose your device",
           style: TextStyle(
             color: Colors.white54,
             height: 1.2,
@@ -264,7 +270,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       Padding(padding: EdgeInsets.all(8)),
     ]);
 
-    if (_hasActiveSubscription) {
+    if (_hasActiveSubscription &&
+        _currentSubscription.productID != kFreeProductID) {
       widgets.addAll([
         Expanded(child: Container()),
         Align(
@@ -330,11 +337,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ]);
       }
       widgets.addAll([
-        Expanded(child: Container()),
         Align(
           alignment: Alignment.center,
           child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
+            behavior: HitTestBehavior.translucent,
             onTap: () {
               showModalBottomSheet<void>(
                 backgroundColor: Colors.grey[900],
@@ -346,7 +352,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               );
             },
             child: Container(
-              padding: EdgeInsets.all(80),
+              padding: EdgeInsets.all(40),
               child: RichText(
                 text: TextSpan(
                   text: "questions?",
@@ -359,7 +365,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             ),
           ),
         ),
+        Expanded(child: Container()),
       ]);
+    }
+    if (widget.isOnboarding &&
+        (_currentSubscription == null ||
+            _currentSubscription.productID == kFreeProductID)) {
+      widgets.addAll([_getSkipButton()]);
     }
     return SingleChildScrollView(
       child: Container(
@@ -369,6 +381,73 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           children: widgets,
         ),
       ),
+    );
+  }
+
+  GestureDetector _getSkipButton() {
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(40, 20, 40, 20),
+        margin: EdgeInsets.only(bottom: 40),
+        child: Column(
+          children: [
+            Icon(
+              Icons.fast_forward_outlined,
+              color: Colors.white.withOpacity(0.8),
+            ),
+            Text(
+              "skip",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
+      onTap: () {
+        AlertDialog alert = AlertDialog(
+          title: Text("sure?"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "you will only be able to backup 100 MB for the next 14 days",
+                style: TextStyle(
+                  height: 1.4,
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(8)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  FlatButton(
+                    child: Text("review plans"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  FlatButton(
+                    child: Text("ok"),
+                    onPressed: () {
+                      Bus.instance.fire(SubscriptionPurchasedEvent());
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return alert;
+          },
+        );
+      },
     );
   }
 }

@@ -94,7 +94,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
                                 builder: (BuildContext context) {
-                                  return SubscriptionPage();
+                                  return SubscriptionPage(isOnboarding: true);
                                 },
                               ),
                             );
