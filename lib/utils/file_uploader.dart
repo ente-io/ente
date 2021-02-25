@@ -354,7 +354,7 @@ class FileUploader {
       return file;
     } on DioError catch (e) {
       if (e.response.statusCode == 426) {
-        throw StorageLimitExceededError();
+        _onStorageLimitExceeded();
       }
       throw e;
     }
@@ -400,7 +400,7 @@ class FileUploader {
       return file;
     } on DioError catch (e) {
       if (e.response.statusCode == 426) {
-        throw StorageLimitExceededError();
+        _onStorageLimitExceeded();
       }
       throw e;
     }
@@ -434,9 +434,9 @@ class FileUploader {
         _uploadURLs.addAll(urls);
       } on DioError catch (e) {
         if (e.response.statusCode == 402) {
-          throw NoActiveSubscriptionError();
+          _onExpiredSubscription();
         } else if (e.response.statusCode == 426) {
-          throw StorageLimitExceededError();
+          _onStorageLimitExceeded();
         }
         throw e;
       }
@@ -444,6 +444,16 @@ class FileUploader {
       completer.complete();
     }
     return _uploadURLFetchInProgress;
+  }
+
+  void _onStorageLimitExceeded() {
+    clearQueue();
+    throw StorageLimitExceededError();
+  }
+
+  void _onExpiredSubscription() {
+    clearQueue();
+    throw NoActiveSubscriptionError();
   }
 
   Future<String> _putFile(
