@@ -15,7 +15,6 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
