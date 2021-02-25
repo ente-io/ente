@@ -145,21 +145,27 @@ class CollectionsService {
     });
   }
 
-  Future<void> share(int collectionID, String email, String publicKey) {
+  Future<void> share(int collectionID, String email, String publicKey) async {
     final encryptedKey = CryptoUtil.sealSync(
         getCollectionKey(collectionID), Sodium.base642bin(publicKey));
-    return _dio
-        .post(
-          Configuration.instance.getHttpEndpoint() + "/collections/share",
-          data: {
-            "collectionID": collectionID,
-            "email": email,
-            "encryptedKey": Sodium.bin2base64(encryptedKey),
-          },
-          options: Options(
-              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-        )
-        .then((value) => SyncService.instance.syncWithRemote(silently: true));
+    try {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/collections/share",
+        data: {
+          "collectionID": collectionID,
+          "email": email,
+          "encryptedKey": Sodium.bin2base64(encryptedKey),
+        },
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+    } on DioError catch (e) {
+      if (e.response.statusCode == 402) {
+        throw SharingNotPermittedForFreeAccountsError();
+      }
+      throw e;
+    }
+    SyncService.instance.syncWithRemote(silently: true);
   }
 
   Future<void> unshare(int collectionID, String email) {
@@ -434,3 +440,5 @@ class AddFilesRequest {
   @override
   int get hashCode => collectionID.hashCode ^ files.hashCode;
 }
+
+class SharingNotPermittedForFreeAccountsError extends Error {}

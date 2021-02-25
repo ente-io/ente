@@ -13,6 +13,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
@@ -212,7 +213,42 @@ class _SharingDialogState extends State<SharingDialog> {
         });
       } catch (e) {
         await dialog.hide();
-        showGenericErrorDialog(context);
+        if (e is SharingNotPermittedForFreeAccountsError) {
+          AlertDialog alert = AlertDialog(
+            title: Text("sorry"),
+            content: Text(
+                "sharing is not permitted for free accounts, please subscribe"),
+            actions: [
+              FlatButton(
+                child: Text("subscribe"),
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return SubscriptionPage();
+                      },
+                    ),
+                  );
+                },
+              ),
+              FlatButton(
+                child: Text("ok"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return alert;
+            },
+          );
+        } else {
+          showGenericErrorDialog(context);
+        }
       }
     }
   }
