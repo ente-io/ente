@@ -121,7 +121,8 @@ class FilesDB {
 
   Future<int> insert(File file) async {
     final db = await instance.database;
-    return await db.insert(table, _getRowForFile(file));
+    return await db.insert(table, _getRowForFile(file),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> insertMultiple(List<File> files) async {
