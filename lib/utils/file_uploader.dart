@@ -27,7 +27,7 @@ import 'package:photos/utils/file_util.dart';
 class FileUploader {
   final _logger = Logger("FileUploader");
   final _dio = Network.instance.getDio();
-  final _queue = LinkedHashMap<int, FileUploadItem>();
+  final _queue = LinkedHashMap<String, FileUploadItem>();
   final kMaximumConcurrentUploads = 4;
   final kMaximumThumbnailCompressionAttempts = 2;
   final kMaximumUploadAttempts = 4;
@@ -43,16 +43,16 @@ class FileUploader {
 
   Future<File> upload(File file, int collectionID) {
     // If the file hasn't been queued yet, queue it
-    if (!_queue.containsKey(file.generatedID)) {
+    if (!_queue.containsKey(file.localID)) {
       final completer = Completer<File>();
-      _queue[file.generatedID] = FileUploadItem(file, collectionID, completer);
+      _queue[file.localID] = FileUploadItem(file, collectionID, completer);
       _pollQueue();
       return completer.future;
     }
 
     // If the file exists in the queue for a matching collectionID,
     // return the existing future
-    final item = _queue[file.generatedID];
+    final item = _queue[file.localID];
     if (item.collectionID == collectionID) {
       return item.completer.future;
     }
@@ -73,9 +73,9 @@ class FileUploader {
         " into collection " +
         collectionID.toString());
     // If the file hasn't been queued yet, ez.
-    if (!_queue.containsKey(file.generatedID)) {
+    if (!_queue.containsKey(file.localID)) {
       final completer = Completer<File>();
-      _queue[file.generatedID] = FileUploadItem(
+      _queue[file.localID] = FileUploadItem(
         file,
         collectionID,
         completer,
@@ -84,7 +84,7 @@ class FileUploader {
       _encryptAndUploadFileToCollection(file, collectionID, forcedUpload: true);
       return completer.future;
     }
-    var item = _queue[file.generatedID];
+    var item = _queue[file.localID];
     // If the file is being uploaded right now, wait and proceed
     if (item.status == UploadStatus.in_progress) {
       final uploadedFile = await item.completer.future;
@@ -100,7 +100,7 @@ class FileUploader {
       // 1. Set the status to in_progress
       // 2. Force upload the file
       // 3. Add to the relevant collection
-      item = _queue[file.generatedID];
+      item = _queue[file.localID];
       item.status = UploadStatus.in_progress;
       final uploadedFile = await _encryptAndUploadFileToCollection(
           file, collectionID,
@@ -116,7 +116,7 @@ class FileUploader {
   }
 
   void clearQueue(final Error reason) {
-    final uploadsToBeRemoved = List<int>();
+    final uploadsToBeRemoved = List<String>();
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.not_started)
         .forEach((pendingUpload) {
@@ -149,10 +149,10 @@ class FileUploader {
     _currentlyUploading++;
     try {
       final uploadedFile = await _tryToUpload(file, collectionID, forcedUpload);
-      _queue.remove(file.generatedID).completer.complete(uploadedFile);
+      _queue.remove(file.localID).completer.complete(uploadedFile);
       return uploadedFile;
     } catch (e) {
-      _queue.remove(file.generatedID).completer.completeError(e);
+      _queue.remove(file.localID).completer.completeError(e);
       return null;
     } finally {
       _currentlyUploading--;
