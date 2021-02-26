@@ -19,6 +19,7 @@ import 'package:logging/logging.dart';
 
 final _logger = Logger("main");
 bool _isInitialized = false;
+bool _isInitializing = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +49,7 @@ void _main() {
 }
 
 Future _init() async {
+  _isInitializing = true;
   _logger.info("Initializing...");
   InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
@@ -58,6 +60,7 @@ Future _init() async {
   await MemoriesService.instance.init();
   _isInitialized = true;
   _logger.info("Initialization done");
+  _isInitializing = false;
 }
 
 Future<void> _sync({bool isAppInBackground = false}) async {
@@ -71,7 +74,7 @@ Future<void> _sync({bool isAppInBackground = false}) async {
 /// This "Headless Task" is run when app is terminated.
 void backgroundFetchHeadlessTask(String taskId) async {
   print("[BackgroundFetch] Headless event received: $taskId");
-  if (!_isInitialized) {
+  if (!_isInitialized && !_isInitializing) {
     await _runWithLogs(() async {
       await _init();
       await _sync(isAppInBackground: true);
