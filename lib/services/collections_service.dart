@@ -25,6 +25,8 @@ class CollectionsService {
   static final _collectionSyncTimeKeyPrefix = "collection_sync_time_";
   static final _collectionsSyncTimeKey = "collections_sync_time";
 
+  static const int kMaximumWriteAttempts = 5;
+
   final _logger = Logger("CollectionsService");
 
   CollectionsDB _db;
@@ -76,7 +78,7 @@ class CollectionsService {
           ? collection.updationTime
           : maxUpdationTime;
     }
-    await _db.insert(updatedCollections);
+    await _updateDB(updatedCollections);
     _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
     final collections = await _db.getAllCollections();
     for (final collection in collections) {
@@ -379,6 +381,18 @@ class CollectionsService {
       return collection.copyWith(name: name);
     } else {
       return collection;
+    }
+  }
+
+  Future _updateDB(List<Collection> collections, {int attempt = 1}) async {
+    try {
+      await _db.insert(collections);
+    } catch (e) {
+      if (attempt < kMaximumWriteAttempts) {
+        return _updateDB(collections, attempt: attempt++);
+      } else {
+        throw e;
+      }
     }
   }
 }
