@@ -16,10 +16,9 @@ function CollectionDropZone({
     const upload = async (acceptedFiles) => {
         try {
             const token = getToken();
-            closeModal();
             progressBarProps.setPercentComplete(0);
             setProgressView(true);
-
+            closeModal();
             await UploadService.uploadFiles(
                 acceptedFiles,
                 collectionAndItsLatestFile,
