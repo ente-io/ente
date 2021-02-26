@@ -1,15 +1,12 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
-import * as Comlink from 'comlink';
 import EXIF from 'exif-js';
 import { fileAttribute } from './fileService';
 import { collection, CollectionAndItsLatestFile } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity } from 'utils/common/utilFunctions';
 import { ErrorHandler } from 'utils/common/errorUtil';
-const CryptoWorker: any =
-    typeof window !== 'undefined' &&
-    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
+import CryptoWorker from 'utils/crypto/cryptoWorker';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;
@@ -135,6 +132,7 @@ class UploadService {
                 uploadProcesses.push(
                     this.uploader(
                         await new CryptoWorker(),
+                        new FileReader(),
                         this.filesToBeUploaded.pop(),
                         collectionAndItsLatestFile.collection,
                         token
@@ -150,25 +148,38 @@ class UploadService {
             throw e;
         }
     }
-    private async uploader(worker, rawFile, collection, token) {
+    private async uploader(
+        worker: any,
+        reader: FileReader,
+        rawFile: File,
+        collection: collection,
+        token: string
+    ) {
         try {
-            let file: FileinMemory = await this.readFile(rawFile);
-
-            let encryptedFile: EncryptedFile = await this.encryptFile(
+            let file: FileinMemory = await this.readFile(reader, rawFile);
+            let {
+                file: encryptedFile,
+                fileKey: encryptedKey,
+            }: EncryptedFile = await this.encryptFile(
                 worker,
                 file,
                 collection.key
             );
+            file = null;
             let backupedFile: BackupedFile = await this.uploadtoBucket(
-                encryptedFile.file,
+                encryptedFile,
                 token
             );
+            encryptedFile = null;
             let uploadFile: uploadFile = this.getuploadFile(
                 collection,
                 backupedFile,
-                encryptedFile.fileKey
+                encryptedKey
             );
+            encryptedKey = null;
+            backupedFile = null;
             await this.uploadFile(uploadFile, token);
+            uploadFile = null;
             this.filesCompleted++;
             this.changeProgressBarProps();
         } catch (e) {
@@ -177,11 +188,11 @@ class UploadService {
                 `Uploading Failed for File - ${rawFile.name}`
             );
             this.uploadErrors.push(error);
-            this.setUploadErrors(this.uploadErrors);
         }
         if (this.filesToBeUploaded.length > 0) {
             await this.uploader(
                 worker,
+                reader,
                 this.filesToBeUploaded.pop(),
                 collection,
                 token
@@ -196,14 +207,19 @@ class UploadService {
             total: this.totalFileCount,
         });
         setPercentComplete(this.filesCompleted * this.perFileProgress);
+        this.setUploadErrors(this.uploadErrors);
     }
 
-    private async readFile(recievedFile: File) {
+    private async readFile(reader: FileReader, recievedFile: File) {
         try {
             const filedata: Uint8Array = await this.getUint8ArrayView(
+                reader,
                 recievedFile
             );
-            const thumbnail = await this.generateThumbnail(recievedFile);
+            const thumbnail = await this.generateThumbnail(
+                reader,
+                recievedFile
+            );
 
             let fileType: FILE_TYPE;
             switch (recievedFile.type.split('/')[0]) {
@@ -218,6 +234,7 @@ class UploadService {
             }
 
             const { location, creationTime } = await this.getExifData(
+                reader,
                 recievedFile
             );
             const metadata = Object.assign(
@@ -389,7 +406,10 @@ class UploadService {
             this.setUploadErrors(this.uploadErrors);
         }
     }
-    private async generateThumbnail(file: File): Promise<Uint8Array> {
+    private async generateThumbnail(
+        reader: FileReader,
+        file: File
+    ): Promise<Uint8Array> {
         try {
             let canvas = document.createElement('canvas');
             let canvas_CTX = canvas.getContext('2d');
@@ -469,7 +489,10 @@ class UploadService {
                 thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
                 attempts <= MAX_ATTEMPTS
             );
-            const thumbnail = await this.getUint8ArrayView(thumbnailBlob);
+            const thumbnail = await this.getUint8ArrayView(
+                reader,
+                thumbnailBlob
+            );
             return thumbnail;
         } catch (e) {
             console.log('Error generating thumbnail ', e);
@@ -477,11 +500,12 @@ class UploadService {
         }
     }
 
-    private async getUint8ArrayView(file): Promise<Uint8Array> {
+    private async getUint8ArrayView(
+        reader: FileReader,
+        file: Blob
+    ): Promise<Uint8Array> {
         try {
             return await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-
                 reader.onabort = () => reject('file reading was aborted');
                 reader.onerror = () => reject('file reading has failed');
                 reader.onload = () => {
@@ -548,10 +572,9 @@ class UploadService {
         }
     }
 
-    private async getExifData(recievedFile) {
+    private async getExifData(reader: FileReader, recievedFile: File) {
         try {
             const exifData: any = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
                 reader.onload = () => {
                     resolve(EXIF.readFromBinaryFile(reader.result));
                 };

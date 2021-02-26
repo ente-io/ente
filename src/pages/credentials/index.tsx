@@ -11,11 +11,7 @@ import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import { keyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
-import * as Comlink from 'comlink';
-
-const CryptoWorker: any =
-    typeof window !== 'undefined' &&
-    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
+import CryptoWorker from 'utils/crypto/cryptoWorker';
 
 const Image = styled.img`
     width: 200px;
