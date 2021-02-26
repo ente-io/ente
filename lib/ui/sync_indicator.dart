@@ -52,7 +52,9 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       } else {
         _containerHeight = 48;
       }
-      if (_event.status != SyncStatus.error) {
+      if (_event.status == SyncStatus.error) {
+        return _getErrorWidget();
+      } else {
         var icon;
         if (_event.status == SyncStatus.completed) {
           icon = Icon(
@@ -96,8 +98,6 @@ class _SyncIndicatorState extends State<SyncIndicator> {
             ),
           ),
         );
-      } else {
-        return _getErrorWidget();
       }
     }
     return Container();
