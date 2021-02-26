@@ -181,7 +181,11 @@ class FileUploader {
           file.toString() +
           ", isForced: " +
           forcedUpload.toString());
-      sourceFile = (await (await file.getAsset()).originFile);
+      final asset = await file.getAsset();
+      if (asset == null) {
+        throw InvalidFileError();
+      }
+      sourceFile = (await asset.originFile);
       var key;
       var isAlreadyUploadedFile = file.uploadedFileID != null;
       if (isAlreadyUploadedFile) {
@@ -201,11 +205,11 @@ class FileUploader {
         key: key,
       );
 
-      var thumbnailData = (await (await file.getAsset()).thumbDataWithSize(
+      var thumbnailData = await asset.thumbDataWithSize(
         THUMBNAIL_LARGE_SIZE,
         THUMBNAIL_LARGE_SIZE,
         quality: 50,
-      ));
+      );
       if (thumbnailData == null) {
         _logger.severe("Could not generate thumbnail for " + file.toString());
         await FilesDB.instance.deleteLocalFile(file.localID);
