@@ -399,11 +399,7 @@ class UploadService {
             }
             this.metadataMap.set(metadataJSON['title'], metaDataObject);
         } catch (e) {
-            const error = new Error(
-                `Error reading metaDataFile ${recievedFile.name}`
-            );
-            this.uploadErrors.push(error);
-            this.setUploadErrors(this.uploadErrors);
+            //ignore
         }
     }
     private async generateThumbnail(
