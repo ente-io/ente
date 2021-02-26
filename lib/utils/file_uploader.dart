@@ -183,7 +183,7 @@ class FileUploader {
           forcedUpload.toString());
       final asset = await file.getAsset();
       if (asset == null) {
-        throw InvalidFileError();
+        await _onInvalidFileError(file);
       }
       sourceFile = (await asset.originFile);
       var key;
@@ -211,9 +211,7 @@ class FileUploader {
         quality: 50,
       );
       if (thumbnailData == null) {
-        _logger.severe("Could not generate thumbnail for " + file.toString());
-        await FilesDB.instance.deleteLocalFile(file.localID);
-        throw InvalidFileError();
+        await _onInvalidFileError(file);
       }
       int compressionAttempts = 0;
       while (thumbnailData.length > THUMBNAIL_DATA_LIMIT &&
@@ -304,6 +302,12 @@ class FileUploader {
       }
       _logger.severe("File upload attempt complete for " + file.toString());
     }
+  }
+
+  Future _onInvalidFileError(File file) async {
+    _logger.severe("Invalid file encountered: " + file.toString());
+    await FilesDB.instance.deleteLocalFile(file.localID);
+    throw InvalidFileError();
   }
 
   Future<File> _uploadFile(
