@@ -76,13 +76,14 @@ Future<void> _sync({bool isAppInBackground = false}) async {
 
 /// This "Headless Task" is run when app is terminated.
 void backgroundFetchHeadlessTask(String taskId) async {
-  print("[BackgroundFetch] Headless event received: $taskId");
+  _logger.info("[BackgroundFetch] Headless event received: $taskId");
   if (!_isInitialized && !_isInitializing) {
     await _runWithLogs(() async {
       await _init();
       await _sync(isAppInBackground: true);
     });
   } else {
+    _logger.info("Skipping initialization");
     await _sync(isAppInBackground: true);
   }
   BackgroundFetch.finish(taskId);
@@ -104,10 +105,10 @@ void _sendErrorToSentry(SentryClient sentry, Object error, StackTrace stack) {
       exception: error,
       stackTrace: stack,
     );
-    print('Error sent to sentry.io: $error');
+    _logger.info('Error sent to sentry.io: $error');
   } catch (e) {
-    print('Sending report to sentry.io failed: $e');
-    print('Original error: $error');
+    _logger.info('Sending report to sentry.io failed: $e');
+    _logger.info('Original error: $error');
   }
 }
 
@@ -131,13 +132,13 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
           requiresDeviceIdle: false,
           requiredNetworkType: NetworkType.NONE,
         ), (String taskId) async {
-      print("[BackgroundFetch] event received: $taskId");
+      _logger.info("[BackgroundFetch] event received: $taskId");
       await _sync(isAppInBackground: true);
       BackgroundFetch.finish(taskId);
     }).then((int status) {
-      print('[BackgroundFetch] configure success: $status');
+      _logger.info('[BackgroundFetch] configure success: $status');
     }).catchError((e) {
-      print('[BackgroundFetch] configure ERROR: $e');
+      _logger.info('[BackgroundFetch] configure ERROR: $e');
     });
 
     return MaterialApp(
