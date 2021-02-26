@@ -281,7 +281,7 @@ class FileUploader {
         return uploadedFile;
       }
     } catch (e, s) {
-      if (!(e is NoActiveSubscriptionError)) {
+      if (!(e is NoActiveSubscriptionError || e is StorageLimitExceededError)) {
         _logger.severe(
             "File upload failed for " + file.generatedID.toString(), e, s);
       }
