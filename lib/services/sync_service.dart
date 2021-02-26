@@ -79,6 +79,7 @@ class SyncService {
       _logger.warning("Sync already in progress, skipping.");
       return _existingSync;
     }
+    _logger.info("Sync triggered by", Error(), StackTrace.current);
     _isSyncInProgress = true;
     _existingSync = Future<void>(() async {
       _logger.info("Syncing...");
@@ -140,7 +141,6 @@ class SyncService {
   }
 
   Future<void> _doSync({bool isAppInBackground = false}) async {
-    _logger.info("Doing sync", Error(), StackTrace.current);
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     if (isAppInBackground) {
