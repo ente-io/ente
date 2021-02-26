@@ -95,22 +95,21 @@ class FileUploader {
       });
     } else {
       // If the file is yet to be processed,
-      // 1. Remove it from the queue,
-      // 2. Force upload the current file
-      // 3. Trigger the callback for the original request
-      item = _queue.remove(file.generatedID);
+      // 1. Set the status to in_progress
+      // 2. Force upload the file
+      // 3. Add to the relevant collection
+      item = _queue[file.generatedID];
+      item.status = UploadStatus.in_progress;
       return _encryptAndUploadFileToCollection(file, collectionID,
               forcedUpload: true)
           .then((uploadedFile) {
         if (item.collectionID == collectionID) {
-          item.completer.complete(uploadedFile);
           return uploadedFile;
         } else {
-          CollectionsService.instance
+          return CollectionsService.instance
               .addToCollection(item.collectionID, [uploadedFile]).then((aVoid) {
-            item.completer.complete(uploadedFile);
+            return uploadedFile;
           });
-          return uploadedFile;
         }
       });
     }
@@ -151,13 +150,14 @@ class FileUploader {
     try {
       final uploadedFile = await _tryToUpload(file, collectionID, forcedUpload);
       _queue.remove(file.generatedID).completer.complete(uploadedFile);
+      return uploadedFile;
     } catch (e) {
       _queue.remove(file.generatedID).completer.completeError(e);
+      return null;
     } finally {
       _currentlyUploading--;
       _pollQueue();
     }
-    return null;
   }
 
   Future<File> _tryToUpload(
