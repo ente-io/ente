@@ -108,8 +108,8 @@ class SyncService {
         } else {
           Bus.instance.fire(
               SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
+          throw e;
         }
-        throw e;
       } finally {
         _isSyncInProgress = false;
       }
