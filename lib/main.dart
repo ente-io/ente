@@ -18,8 +18,7 @@ import 'package:super_logging/super_logging.dart';
 import 'package:logging/logging.dart';
 
 final _logger = Logger("main");
-bool _isInitialized = false;
-bool _isInitializing = false;
+AppInitState _state = AppInitState.pending;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,10 +34,14 @@ void _main() async {
     _sendErrorToSentry(sentry, details.exception, details.stack);
   };
 
-  await _init();
-  _sync();
   runZoned(
     () async {
+      if (_state == AppInitState.pending) {
+        await _init();
+      }
+      if (_state == AppInitState.initialized) {
+        _sync();
+      }
       runApp(MyApp());
       BackgroundFetch.registerHeadlessTask(_onBackgroundTaskReceived);
     },
@@ -49,8 +52,8 @@ void _main() async {
 }
 
 Future _init() async {
-  _isInitializing = true;
-  _logger.info("Initializing...");
+  _state = AppInitState.initialzing;
+  _logger.info("Initializing...", Error(), StackTrace.current);
   InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
   await Configuration.instance.init();
@@ -58,14 +61,16 @@ Future _init() async {
   await CollectionsService.instance.init();
   await SyncService.instance.init();
   await MemoriesService.instance.init();
-  _isInitialized = true;
+  _state = AppInitState.initialized;
   _logger.info("Initialization done");
-  _isInitializing = false;
 }
 
 Future<void> _sync({bool isAppInBackground = false}) async {
   if (SyncService.instance.isSyncInProgress()) {
     return;
+  }
+  if (isAppInBackground) {
+    _logger.info("Syncing in background");
   }
   try {
     await SyncService.instance.sync(isAppInBackground: isAppInBackground);
@@ -75,15 +80,17 @@ Future<void> _sync({bool isAppInBackground = false}) async {
 }
 
 Future _onBackgroundTaskReceived(String taskId) async {
-  _logger.info("[BackgroundFetch] Event received: $taskId");
-  if (!_isInitialized && !_isInitializing) {
+  if (_state == AppInitState.pending) {
     await _runWithLogs(() async {
+      _logger.info("[BackgroundFetch] Event received: $taskId");
       await _init();
       await _sync(isAppInBackground: true);
     });
-  } else {
-    _logger.info("Skipping initialization");
+  } else if (_state == AppInitState.initialized) {
+    _logger.info("[BackgroundFetch] Skipping init");
     await _sync(isAppInBackground: true);
+  } else {
+    _logger.info("[BackgroundFetch] Skipping init and sync");
   }
   BackgroundFetch.finish(taskId);
 }
@@ -171,4 +178,10 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
       _sync();
     }
   }
+}
+
+enum AppInitState {
+  pending,
+  initialzing,
+  initialized,
 }
