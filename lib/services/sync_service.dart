@@ -207,7 +207,8 @@ class SyncService {
 
   Future<void> syncWithRemote({bool silently = false}) async {
     if (!Configuration.instance.hasConfiguredAccount()) {
-      return Future.error("Account not configured yet");
+      _logger.info("Skipping remote sync since account is not configured");
+      return;
     }
     await _collectionsService.sync();
     final updatedCollections =
