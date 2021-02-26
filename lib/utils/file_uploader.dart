@@ -177,7 +177,10 @@ class FileUploader {
     var sourceFile;
 
     try {
-      _logger.info("Trying to upload " + file.toString());
+      _logger.info("Trying to upload " +
+          file.toString() +
+          ", isForced: " +
+          forcedUpload.toString());
       sourceFile = (await (await file.getAsset()).originFile);
       var key;
       var isAlreadyUploadedFile = file.uploadedFileID != null;
