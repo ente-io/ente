@@ -343,8 +343,6 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
       );
   final encryptedFile = io.File(temporaryPath);
   final thumbnailDecryptionKey = decryptFileKey(file);
-  _logger.info("Key: " + Sodium.bin2base64(thumbnailDecryptionKey));
-  _logger.info("Header: " + file.thumbnailDecryptionHeader);
   var data = CryptoUtil.decryptChaCha(
     encryptedFile.readAsBytesSync(),
     thumbnailDecryptionKey,
