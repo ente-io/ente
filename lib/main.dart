@@ -26,7 +26,7 @@ void main() async {
   await _runWithLogs(_main);
 }
 
-void _main() {
+void _main() async {
   final SentryClient sentry =
       new SentryClient(dsn: kDebugMode ? SENTRY_DEBUG_DSN : SENTRY_DSN);
 
@@ -35,12 +35,12 @@ void _main() {
     _sendErrorToSentry(sentry, details.exception, details.stack);
   };
 
+  await _init();
+  _sync();
   runZoned(
     () async {
-      await _init();
-      _sync();
       runApp(MyApp());
-      BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+      BackgroundFetch.registerHeadlessTask(_onBackgroundTaskReceived);
     },
     onError: (Object error, StackTrace stackTrace) {
       _sendErrorToSentry(sentry, error, stackTrace);
@@ -74,9 +74,8 @@ Future<void> _sync({bool isAppInBackground = false}) async {
   }
 }
 
-/// This "Headless Task" is run when app is terminated.
-void backgroundFetchHeadlessTask(String taskId) async {
-  _logger.info("[BackgroundFetch] Headless event received: $taskId");
+Future _onBackgroundTaskReceived(String taskId) async {
+  _logger.info("[BackgroundFetch] Event received: $taskId");
   if (!_isInitialized && !_isInitializing) {
     await _runWithLogs(() async {
       await _init();
@@ -132,9 +131,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
           requiresDeviceIdle: false,
           requiredNetworkType: NetworkType.NONE,
         ), (String taskId) async {
-      _logger.info("[BackgroundFetch] event received: $taskId");
-      await _sync(isAppInBackground: true);
-      BackgroundFetch.finish(taskId);
+      await _onBackgroundTaskReceived(taskId);
     }).then((int status) {
       _logger.info('[BackgroundFetch] configure success: $status');
     }).catchError((e) {
