@@ -1,0 +1,3 @@
+[submodule "thirdparty/photoswipe"]
+	path = thirdparty/photoswipe
+	url = https://github.com/ente-io/PhotoSwipe.git
