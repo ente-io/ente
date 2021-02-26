@@ -110,6 +110,7 @@ class SyncService {
         throw e;
       } finally {
         _isSyncInProgress = false;
+        _logger.info("Syncing completed");
       }
     });
     return _existingSync;
