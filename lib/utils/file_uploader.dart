@@ -67,6 +67,10 @@ class FileUploader {
   }
 
   Future<File> forceUpload(File file, int collectionID) async {
+    _logger.info("Force uploading " +
+        file.toString() +
+        " into collection " +
+        collectionID.toString());
     // If the file hasn't been queued yet, ez.
     if (!_queue.containsKey(file.generatedID)) {
       final completer = Completer<File>();
