@@ -128,7 +128,7 @@ class UploadService {
                 ErrorHandler(e);
             }
             const uploadProcesses = [];
-            for (let i = 0; i < Math.min(5, this.totalFileCount); i++) {
+            for (let i = 0; i < Math.min(4, this.totalFileCount); i++) {
                 uploadProcesses.push(
                     this.uploader(
                         await new CryptoWorker(),
