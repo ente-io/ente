@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/subscription_page.dart';
-import 'package:photos/utils/file_uploader.dart';
 
 class SyncIndicator extends StatefulWidget {
   const SyncIndicator({Key key}) : super(key: key);

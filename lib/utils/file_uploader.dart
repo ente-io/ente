@@ -9,6 +9,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
@@ -530,13 +531,3 @@ enum UploadStatus {
   in_progress,
   completed,
 }
-
-class InvalidFileError extends Error {}
-
-class WiFiUnavailableError extends Error {}
-
-class SyncStopRequestedError extends Error {}
-
-class NoActiveSubscriptionError extends Error {}
-
-class StorageLimitExceededError extends Error {}
