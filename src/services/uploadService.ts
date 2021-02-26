@@ -12,6 +12,12 @@ const ENDPOINT = getEndpoint();
 const THUMBNAIL_HEIGHT = 720;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;
+const MAX_CONCURRENT_UPLOADS = 4;
+const TYPE_IMAGE = 'image';
+const TYPE_VIDEO = 'video';
+const TYPE_JSON = 'json';
+const SOUTH_DIRECTION = 'S';
+const WEST_DIRECTION = 'W';
 
 interface EncryptionResult {
     file: fileAttribute;
@@ -100,12 +106,12 @@ class UploadService {
             let actualFiles: File[] = [];
             recievedFiles.forEach((file) => {
                 if (
-                    file.type.substr(0, 5) === 'image' ||
-                    file.type.substr(0, 5) === 'video'
+                    file.type.substr(0, 5) === TYPE_IMAGE ||
+                    file.type.substr(0, 5) === TYPE_VIDEO
                 ) {
                     actualFiles.push(file);
                 }
-                if (file.name.slice(-4) == 'json') {
+                if (file.name.slice(-4) == TYPE_JSON) {
                     metadataFiles.push(file);
                 }
             });
@@ -128,7 +134,11 @@ class UploadService {
                 ErrorHandler(e);
             }
             const uploadProcesses = [];
-            for (let i = 0; i < Math.min(5, this.totalFileCount); i++) {
+            for (
+                let i = 0;
+                i < Math.min(MAX_CONCURRENT_UPLOADS, this.totalFileCount);
+                i++
+            ) {
                 uploadProcesses.push(
                     this.uploader(
                         await new CryptoWorker(),
@@ -223,10 +233,10 @@ class UploadService {
 
             let fileType: FILE_TYPE;
             switch (recievedFile.type.split('/')[0]) {
-                case 'image':
+                case TYPE_IMAGE:
                     fileType = FILE_TYPE.IMAGE;
                     break;
-                case 'video':
+                case TYPE_VIDEO:
                     fileType = FILE_TYPE.VIDEO;
                     break;
                 default:
@@ -410,7 +420,7 @@ class UploadService {
             let canvas = document.createElement('canvas');
             let canvas_CTX = canvas.getContext('2d');
             let imageURL = null;
-            if (file.type.match('image')) {
+            if (file.type.match(TYPE_IMAGE)) {
                 let image = new Image();
                 imageURL = URL.createObjectURL(file);
                 image.setAttribute('src', imageURL);
@@ -448,6 +458,7 @@ class UploadService {
                             thumbnailWidth,
                             THUMBNAIL_HEIGHT
                         );
+                        video = null;
                         resolve(null);
                     });
                     video.preload = 'metadata';
@@ -640,7 +651,7 @@ class UploadService {
     private convertDMSToDD(degrees, minutes, seconds, direction) {
         var dd = degrees + minutes / 60 + seconds / 3600;
 
-        if (direction == 'S' || direction == 'W') {
+        if (direction == SOUTH_DIRECTION || direction == WEST_DIRECTION) {
             dd = dd * -1;
         }
 
