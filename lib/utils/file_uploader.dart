@@ -86,17 +86,14 @@ class FileUploader {
     var item = _queue[file.generatedID];
     // If the file is being uploaded right now, wait and proceed
     if (item.status == UploadStatus.in_progress) {
-      return item.completer.future.then((uploadedFile) async {
-        if (uploadedFile.collectionID == collectionID) {
-          // Do nothing
-          return uploadedFile;
-        } else {
-          return CollectionsService.instance
-              .addToCollection(collectionID, [uploadedFile]).then((aVoid) {
-            return uploadedFile;
-          });
-        }
-      });
+      final uploadedFile = await item.completer.future;
+      if (uploadedFile.collectionID == collectionID) {
+        // Do nothing
+      } else {
+        await CollectionsService.instance
+            .addToCollection(collectionID, [uploadedFile]);
+      }
+      return uploadedFile;
     } else {
       // If the file is yet to be processed,
       // 1. Set the status to in_progress
@@ -104,18 +101,16 @@ class FileUploader {
       // 3. Add to the relevant collection
       item = _queue[file.generatedID];
       item.status = UploadStatus.in_progress;
-      return _encryptAndUploadFileToCollection(file, collectionID,
-              forcedUpload: true)
-          .then((uploadedFile) {
-        if (item.collectionID == collectionID) {
-          return uploadedFile;
-        } else {
-          return CollectionsService.instance
-              .addToCollection(item.collectionID, [uploadedFile]).then((aVoid) {
-            return uploadedFile;
-          });
-        }
-      });
+      final uploadedFile = await _encryptAndUploadFileToCollection(
+          file, collectionID,
+          forcedUpload: true);
+      if (item.collectionID == collectionID) {
+        return uploadedFile;
+      } else {
+        await CollectionsService.instance
+            .addToCollection(item.collectionID, [uploadedFile]);
+        return uploadedFile;
+      }
     }
   }
 
