@@ -468,8 +468,6 @@ class FileUploader {
   }) async {
     final fileSize = contentLength ?? file.lengthSync();
     final startTime = DateTime.now().millisecondsSinceEpoch;
-    _logger.info(
-        "Putting file of size " + fileSize.toString() + " to " + uploadURL.url);
     try {
       await _dio.put(
         uploadURL.url,
