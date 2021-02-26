@@ -109,6 +109,7 @@ class SyncService {
           Bus.instance.fire(
               SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
         }
+        throw e;
       } finally {
         _isSyncInProgress = false;
       }
