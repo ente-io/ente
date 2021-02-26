@@ -282,8 +282,7 @@ class FileUploader {
       }
     } catch (e, s) {
       if (!(e is NoActiveSubscriptionError || e is StorageLimitExceededError)) {
-        _logger.severe(
-            "File upload failed for " + file.generatedID.toString(), e, s);
+        _logger.severe("File upload failed for " + file.toString(), e, s);
       }
       throw e;
     } finally {
@@ -296,6 +295,7 @@ class FileUploader {
       if (io.File(encryptedThumbnailPath).existsSync()) {
         io.File(encryptedThumbnailPath).deleteSync();
       }
+      _logger.severe("File upload attempt complete for " + file.toString());
     }
   }
 
