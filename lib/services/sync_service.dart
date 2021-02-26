@@ -105,13 +105,9 @@ class SyncService {
             error: StorageLimitExceededError()));
       } catch (e, s) {
         _logger.severe(e, s);
-        if (e is InvalidFileError) {
-          // Do n0thing, encountered a corrupt file
-        } else {
-          Bus.instance.fire(
-              SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
-          throw e;
-        }
+        Bus.instance
+            .fire(SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
+        throw e;
       } finally {
         _isSyncInProgress = false;
       }
@@ -305,8 +301,7 @@ class SyncService {
       await Future.wait(futures, eagerError: true);
     } on InvalidFileError {
       // Do nothing
-    } catch (e, s) {
-      _logger.severe("Error in syncing files", e, s);
+    } catch (e) {
       throw e;
     }
     return uploadCounter > 0;
