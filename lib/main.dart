@@ -64,6 +64,9 @@ Future _init() async {
 }
 
 Future<void> _sync({bool isAppInBackground = false}) async {
+  if (SyncService.instance.isSyncInProgress()) {
+    return;
+  }
   try {
     await SyncService.instance.sync(isAppInBackground: isAppInBackground);
   } catch (e, s) {
