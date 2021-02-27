@@ -191,7 +191,9 @@ export default function App({ Component, pageProps }) {
     return (
         <FullScreenDropZone showModal={showUploadModal}>
             <Head>
-                <title>{constants.TITLE}</title>
+                <title>
+{constants.TITLE}
+</title>
             </Head>
             <GlobalStyles />
             <Navbar>
