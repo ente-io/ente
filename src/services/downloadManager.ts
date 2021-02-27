@@ -1,7 +1,7 @@
 import { getToken } from 'utils/common/key';
 import { file } from './fileService';
 import HTTPService from './HTTPService';
-import { getEndpoint } from 'utils/common/apiUtil';
+import { getEndpoint, getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
 import { getFileExtension } from 'utils/common/utilFunctions';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 
@@ -26,7 +26,7 @@ class DownloadManager {
             if (!this.thumbnailDownloads.get(file.id)) {
                 const download = (async () => {
                     const resp = await HTTPService.get(
-                        `https://thumbnails.ente.workers.dev/?fileID=${file.id}`,
+                        getThumbnailUrl(file.id),
                         null,
                         { 'X-Auth-Token': this.token },
                         { responseType: 'arraybuffer' }
@@ -61,7 +61,7 @@ class DownloadManager {
             const download = (async () => {
                 try {
                     const resp = await HTTPService.get(
-                        `https://files.ente.workers.dev/?fileID=${file.id}`,
+                        getFileUrl(file.id),
                         null,
                         { 'X-Auth-Token': this.token },
                         { responseType: 'arraybuffer' }
