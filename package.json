@@ -38,6 +38,7 @@
     "@types/libsodium-wrappers": "^0.7.8",
     "@types/localforage": "^0.0.34",
     "@types/node": "^14.6.4",
+    "@types/photoswipe": "^4.1.1",
     "@types/react": "^16.9.49",
     "@types/react-window": "^1.8.2",
     "@types/react-window-infinite-loader": "^1.0.3",
