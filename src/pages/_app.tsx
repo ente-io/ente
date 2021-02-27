@@ -154,8 +154,12 @@ export default function App({ Component, pageProps }) {
     const [uploadButtonView, setUploadButtonView] = useState(false);
     const [uploadModalView, setUploadModalView] = useState(false);
 
-    const closeUploadModal = () => setUploadModalView(false);
-    const showUploadModal = () => setUploadModalView(true);
+    function closeUploadModal() {
+        setUploadModalView(false);
+    }
+    function showUploadModal() {
+        setUploadModalView(true);
+    }
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
@@ -191,9 +195,7 @@ export default function App({ Component, pageProps }) {
     return (
         <FullScreenDropZone showModal={showUploadModal}>
             <Head>
-                <title>
-{constants.TITLE}
-</title>
+                <title>{constants.TITLE}</title>
             </Head>
             <GlobalStyles />
             <Navbar>
