@@ -84,6 +84,7 @@ const englishConstants = {
     NEXT: 'Next (arrow right)',
     NO_INTERNET_CONNECTION:
         'You seem to be offline please check your internet connection and try again',
+    TITLE: 'ente.io | Encrypted Photo Storage',
 };
 
 export default englishConstants;

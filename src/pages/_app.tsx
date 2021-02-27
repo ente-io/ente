@@ -191,7 +191,7 @@ export default function App({ Component, pageProps }) {
     return (
         <FullScreenDropZone showModal={showUploadModal}>
             <Head>
-                <title>ente.io | Encrypted Photo Storage</title>
+                <title>{constants.TITLE}</title>
             </Head>
             <GlobalStyles />
             <Navbar>
