@@ -15,7 +15,7 @@ class DownloadManager {
     private fileDownloads = new Map<number, Promise<string>>();
     private thumbnailDownloads = new Map<number, Promise<string>>();
 
-    constructor(private token) {}
+    constructor(private token) { }
     public async getPreview(file: file) {
         try {
             const cache = await caches.open('thumbs');
@@ -26,7 +26,7 @@ class DownloadManager {
             if (!this.thumbnailDownloads.get(file.id)) {
                 const download = (async () => {
                     const resp = await HTTPService.get(
-                        `${ENDPOINT}/files/preview/${file.id}`,
+                        `https://thumbnails.ente.workers.dev/?fileID=${file.id}`,
                         null,
                         { 'X-Auth-Token': this.token },
                         { responseType: 'arraybuffer' }
@@ -61,7 +61,7 @@ class DownloadManager {
             const download = (async () => {
                 try {
                     const resp = await HTTPService.get(
-                        `${ENDPOINT}/files/download/${file.id}`,
+                        `https://files.ente.workers.dev/?fileID=${file.id}`,
                         null,
                         { 'X-Auth-Token': this.token },
                         { responseType: 'arraybuffer' }
