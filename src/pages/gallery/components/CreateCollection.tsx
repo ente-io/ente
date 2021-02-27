@@ -50,6 +50,8 @@ export default function CreateCollection(props) {
         try {
             const token = getToken();
             event.preventDefault();
+            progressBarProps.setPercentComplete(0);
+            setProgressView(true);
 
             closeModal();
             closeUploadModal();
@@ -60,9 +62,6 @@ export default function CreateCollection(props) {
                 collection,
                 file: null,
             };
-
-            progressBarProps.setPercentComplete(0);
-            setProgressView(true);
 
             await UploadService.uploadFiles(
                 acceptedFiles,
