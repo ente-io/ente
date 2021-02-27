@@ -235,7 +235,11 @@ export default function Gallery(props) {
         );
     };
 
-    const getSlideData = async (instance: any, index: number, item: file) => {
+    const getSlideData = async (
+        instance: any,
+        loadMainImage: boolean,
+        item: file
+    ) => {
         if (!item.msrc) {
             const url = await DownloadManager.getPreview(item);
             updateUrl(item.dataIndex)(url);
@@ -252,7 +256,7 @@ export default function Gallery(props) {
                 // ignore
             }
         }
-        if (!fetching[item.dataIndex]) {
+        if (!fetching[item.dataIndex] && loadMainImage) {
             fetching[item.dataIndex] = true;
             const url = await DownloadManager.getFile(item);
             updateSrcUrl(item.dataIndex, url);
