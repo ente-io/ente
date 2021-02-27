@@ -2124,6 +2124,11 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.31.tgz#72286bd33d137aa0d152d47ec7c1762563d34055"
   integrity sha512-vFHy/ezP5qI0rFgJ7aQnjDXwAMrG0KqqIH7tQG5PPv3BWBayOPIQNBjVc/P6hhdZfMx51REc6tfDNXHUio893g==
 
+"@types/photoswipe@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@types/photoswipe/-/photoswipe-4.1.1.tgz#3d76ed9698775ea17a1191578e4d0eeb331024a2"
+  integrity sha512-5ffGZEWjDqARuX/04uH/913zwkz/z9fuCVgMAnToeDBwOcN7P0xJE5LCrX50EiuyfpWN2AlkAIFwRfhaWYs6mw==
+
 "@types/prop-types@*", "@types/prop-types@^15.7.3":
   version "15.7.3"
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.3.tgz#2ab0d5da2e5815f94b0b9d4b95d1e5f243ab2ca7"
