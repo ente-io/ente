@@ -11,7 +11,7 @@ import Container from 'components/Container';
 import PowerSettings from 'components/power_settings';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'react-photoswipe/lib/photoswipe.css';
+import 'photoswipe/dist/photoswipe.css';
 import localForage from 'localforage';
 import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
@@ -154,8 +154,12 @@ export default function App({ Component, pageProps }) {
     const [uploadButtonView, setUploadButtonView] = useState(false);
     const [uploadModalView, setUploadModalView] = useState(false);
 
-    const closeUploadModal = () => setUploadModalView(false);
-    const showUploadModal = () => setUploadModalView(true);
+    function closeUploadModal() {
+        setUploadModalView(false);
+    }
+    function showUploadModal() {
+        setUploadModalView(true);
+    }
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
@@ -189,13 +193,9 @@ export default function App({ Component, pageProps }) {
     };
 
     return (
-        <FullScreenDropZone
-            showModal={showUploadModal}
-        >
+        <FullScreenDropZone showModal={showUploadModal}>
             <Head>
-                <title>
-                    ente.io | Encrypted Photo Storage
-                </title>
+                <title>{constants.TITLE}</title>
             </Head>
             <GlobalStyles />
             <Navbar>
