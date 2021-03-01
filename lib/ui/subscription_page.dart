@@ -184,6 +184,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
               final isCrossGradingOnAndroid = Platform.isAndroid &&
                   _hasActiveSubscription &&
+                  _currentSubscription.productID != kFreeProductID &&
                   _currentSubscription.productID != plan.androidID;
               if (isCrossGradingOnAndroid) {
                 final existingProductDetailsResponse =
