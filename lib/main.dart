@@ -34,7 +34,7 @@ void _main() async {
     _sendErrorToSentry(sentry, details.exception, details.stack);
   };
 
-  runZoned(
+  runZonedGuarded(
     () async {
       if (_state == AppInitState.pending) {
         await _init();
@@ -45,7 +45,7 @@ void _main() async {
       runApp(MyApp());
       BackgroundFetch.registerHeadlessTask(_onBackgroundTaskReceived);
     },
-    onError: (Object error, StackTrace stackTrace) {
+    (Object error, StackTrace stackTrace) {
       _sendErrorToSentry(sentry, error, stackTrace);
     },
   );
