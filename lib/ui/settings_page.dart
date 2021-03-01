@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/services/billing_service.dart';
-import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/ui/web_page.dart';
@@ -40,9 +40,9 @@ class SettingsPage extends StatelessWidget {
       SupportSectionWidget(),
       InfoSectionWidget(),
     ];
-    if (kDebugMode) {
-      contents.add(DebugWidget());
-    }
+    // if (kDebugMode) {
+    //   contents.add(DebugWidget());
+    // }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -397,8 +397,31 @@ class InfoSectionWidget extends StatelessWidget {
           child:
               SettingsTextItem(text: "source code", icon: Icons.navigate_next),
         ),
+        FutureBuilder(
+          future: _getAppVersion(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "app version: " + snapshot.data,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.6),
+                  ),
+                ),
+              );
+            }
+            return Container();
+          },
+        ),
       ]),
     );
+  }
+
+  static Future<String> _getAppVersion() async {
+    var pkgInfo = await PackageInfo.fromPlatform();
+    return "${pkgInfo.version}";
   }
 }
 
