@@ -40,9 +40,9 @@ class SettingsPage extends StatelessWidget {
       SupportSectionWidget(),
       InfoSectionWidget(),
     ];
-    // if (kDebugMode) {
-    //   contents.add(DebugWidget());
-    // }
+    if (kDebugMode) {
+      contents.add(DebugWidget());
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
