@@ -301,7 +301,7 @@ class FileUploader {
       if (io.File(encryptedThumbnailPath).existsSync()) {
         io.File(encryptedThumbnailPath).deleteSync();
       }
-      _logger.severe("File upload attempt complete for " + file.toString());
+      _logger.info("File upload attempt complete for " + file.toString());
     }
   }
 
