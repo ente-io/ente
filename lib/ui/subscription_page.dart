@@ -176,6 +176,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   await InAppPurchaseConnection.instance
                       .queryProductDetails([productID].toSet());
               if (response.notFoundIDs.isNotEmpty) {
+                _logger.severe("Could not find products: " +
+                    response.notFoundIDs.toString());
                 await _dialog.hide();
                 showGenericErrorDialog(context);
                 return;
@@ -188,6 +190,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     await InAppPurchaseConnection.instance.queryProductDetails(
                         [_currentSubscription.productID].toSet());
                 if (existingProductDetailsResponse.notFoundIDs.isNotEmpty) {
+                  _logger.severe("Could not find existing products: " +
+                      response.notFoundIDs.toString());
                   await _dialog.hide();
                   showGenericErrorDialog(context);
                   return;
