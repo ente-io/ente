@@ -188,7 +188,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           _showDeleteSheet(context);
         },
       ));
-    } else if (widget.type == GalleryAppBarType.collection) {
+    } else if (widget.type == GalleryAppBarType.collection ||
+        (widget.type == GalleryAppBarType.shared_collection &&
+            widget.collection.owner.id == Configuration.instance.getUserID())) {
       if (widget.collection.type == CollectionType.folder) {
         actions.add(IconButton(
           icon: Icon(Platform.isAndroid
