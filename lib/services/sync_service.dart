@@ -34,9 +34,8 @@ class SyncService {
   final _uploader = FileUploader.instance;
   final _collectionsService = CollectionsService.instance;
   final _diffFetcher = DiffFetcher();
-  bool _isSyncInProgress = false;
   bool _syncStopRequested = false;
-  Future<void> _existingSync;
+  Completer<void> _existingSync;
   SharedPreferences _prefs;
   SyncStatusUpdate _lastSyncStatusEvent;
 
@@ -75,45 +74,47 @@ class SyncService {
 
   Future<void> sync({bool isAppInBackground = false}) async {
     _syncStopRequested = false;
-    if (_isSyncInProgress) {
+    if (_existingSync != null) {
       _logger.warning("Sync already in progress, skipping.");
-      return _existingSync;
+      return _existingSync.future;
     }
+    _existingSync = Completer<void>();
     _logger.info("Sync triggered by", Error(), StackTrace.current);
-    _isSyncInProgress = true;
-    _existingSync = Future<void>(() async {
-      _logger.info("Syncing...");
-      try {
-        await _doSync(isAppInBackground: isAppInBackground);
-        if (_lastSyncStatusEvent != null &&
-            _lastSyncStatusEvent.status != SyncStatus.applying_local_diff) {
-          Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
-        }
-      } on WiFiUnavailableError {
-        _logger.warning("Not uploading over mobile data");
-        Bus.instance.fire(
-            SyncStatusUpdate(SyncStatus.paused, reason: "Waiting for WiFi..."));
-      } on SyncStopRequestedError {
-        _syncStopRequested = false;
-        Bus.instance
-            .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
-      } on NoActiveSubscriptionError {
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
-            error: NoActiveSubscriptionError()));
-      } on StorageLimitExceededError {
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
-            error: StorageLimitExceededError()));
-      } catch (e, s) {
-        _logger.severe(e, s);
-        Bus.instance
-            .fire(SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
-        throw e;
-      } finally {
-        _isSyncInProgress = false;
-        _logger.info("Syncing completed");
+    bool successful = false;
+    try {
+      await _doSync(isAppInBackground: isAppInBackground);
+      if (_lastSyncStatusEvent != null &&
+          _lastSyncStatusEvent.status != SyncStatus.applying_local_diff) {
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
       }
-    });
-    return _existingSync;
+      _existingSync.complete();
+      successful = true;
+    } on WiFiUnavailableError {
+      _logger.warning("Not uploading over mobile data");
+      Bus.instance.fire(
+          SyncStatusUpdate(SyncStatus.paused, reason: "Waiting for WiFi..."));
+    } on SyncStopRequestedError {
+      _syncStopRequested = false;
+      Bus.instance
+          .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
+    } on NoActiveSubscriptionError {
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
+          error: NoActiveSubscriptionError()));
+    } on StorageLimitExceededError {
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
+          error: StorageLimitExceededError()));
+    } catch (e, s) {
+      _logger.severe(e, s);
+      Bus.instance
+          .fire(SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
+      throw e;
+    } finally {
+      if (!successful) {
+        _existingSync.completeError(Error());
+      }
+      _existingSync = null;
+      _logger.info("Syncing completed");
+    }
   }
 
   void stopSync() {
@@ -130,7 +131,7 @@ class SyncService {
   }
 
   bool isSyncInProgress() {
-    return _isSyncInProgress;
+    return _existingSync != null;
   }
 
   SyncStatusUpdate getLastSyncStatusEvent() {
@@ -302,6 +303,10 @@ class SyncService {
       await Future.wait(futures, eagerError: true);
     } on InvalidFileError {
       // Do nothing
+    } on FileSystemException {
+      // Do nothing since it's caused mostly due to concurrency issues
+      // when the foreground app deletes temporary files, interrupting a background
+      // upload
     } catch (e) {
       throw e;
     }
