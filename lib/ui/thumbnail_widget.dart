@@ -133,7 +133,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
               .thumbDataWithSize(
             THUMBNAIL_SMALL_SIZE,
             THUMBNAIL_SMALL_SIZE,
-            quality: THUMBNAIL_SMALL_SIZE_QUALITY,
+            quality: THUMBNAIL_QUALITY,
           )
               .then((data) {
             if (data != null && mounted) {

@@ -126,7 +126,7 @@ void preloadLocalFileThumbnail(File file) {
         .thumbDataWithSize(
       THUMBNAIL_SMALL_SIZE,
       THUMBNAIL_SMALL_SIZE,
-      quality: THUMBNAIL_SMALL_SIZE_QUALITY,
+      quality: THUMBNAIL_QUALITY,
     )
         .then((data) {
       ThumbnailLruCache.put(file, THUMBNAIL_SMALL_SIZE, data);
