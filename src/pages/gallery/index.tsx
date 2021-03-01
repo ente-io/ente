@@ -237,7 +237,7 @@ export default function Gallery(props) {
 
     const getSlideData = async (
         instance: any,
-        loadMainImage: boolean,
+        index: number,
         item: file
     ) => {
         if (!item.msrc) {
@@ -256,7 +256,7 @@ export default function Gallery(props) {
                 // ignore
             }
         }
-        if (!fetching[item.dataIndex] && loadMainImage) {
+        if (!fetching[item.dataIndex]) {
             fetching[item.dataIndex] = true;
             const url = await DownloadManager.getFile(item);
             updateSrcUrl(item.dataIndex, url);
