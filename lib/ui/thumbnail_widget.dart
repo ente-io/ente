@@ -198,6 +198,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       setState(() {
         _hasLoadedThumbnail = false;
         _isLoadingThumbnail = false;
+        _encounteredErrorLoadingThumbnail = false;
         _imageProvider = null;
       });
     }
