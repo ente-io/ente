@@ -36,6 +36,7 @@ class _SharedCollectionPageState extends State<SharedCollectionPage> {
         GalleryAppBarType.shared_collection,
         widget.collection.name,
         _selectedFiles,
+        collection: widget.collection,
       ),
       body: gallery,
     );

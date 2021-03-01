@@ -189,45 +189,23 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         },
       ));
     } else if (widget.type == GalleryAppBarType.collection) {
-      actions.add(PopupMenuButton(
-        itemBuilder: (context) {
-          return [
-            PopupMenuItem(
-              value: 1,
-              child: Row(
-                children: [
-                  Icon(Icons.remove_circle_outline_rounded),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text("remove"),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 2,
-              child: Row(
-                children: [
-                  Icon(Platform.isAndroid
-                      ? Icons.delete_outline
-                      : CupertinoIcons.delete),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text("delete"),
-                ],
-              ),
-            )
-          ];
-        },
-        onSelected: (value) {
-          if (value == 1) {
-            _showRemoveFromCollectionSheet(context);
-          } else if (value == 2) {
+      if (widget.collection.type == CollectionType.folder) {
+        actions.add(IconButton(
+          icon: Icon(Platform.isAndroid
+              ? Icons.delete_outline
+              : CupertinoIcons.delete),
+          onPressed: () {
             _showDeleteSheet(context);
-          }
-        },
-      ));
+          },
+        ));
+      } else {
+        actions.add(IconButton(
+          icon: Icon(Icons.remove_circle_outline_rounded),
+          onPressed: () {
+            _showRemoveFromCollectionSheet(context);
+          },
+        ));
+      }
     }
     return actions;
   }
@@ -239,7 +217,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   void _showRemoveFromCollectionSheet(BuildContext context) {
     final count = widget.selectedFiles.files.length;
     final action = CupertinoActionSheet(
-      title: Text("Remove " +
+      title: Text("remove " +
           count.toString() +
           " file" +
           (count == 1 ? "" : "s") +
