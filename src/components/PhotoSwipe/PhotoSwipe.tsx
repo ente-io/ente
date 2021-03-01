@@ -17,7 +17,7 @@ interface Iprops {
     items: any[];
     currentIndex?: number;
     onClose?: () => void;
-    gettingData: (instance: any, index: number, item: file) => void
+    gettingData: (instance: any, index: number, item: file) => void;
     id?: string;
     className?: string;
     favItemIds: Set<number>;
