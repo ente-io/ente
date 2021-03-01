@@ -13,46 +13,57 @@ import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/home_widget.dart';
 import 'package:photos/utils/crypto_util.dart';
-import 'package:sentry/sentry.dart';
 import 'package:super_logging/super_logging.dart';
 import 'package:logging/logging.dart';
 
 final _logger = Logger("main");
-AppInitState _state = AppInitState.pending;
+
+Completer<void> _initializationStatus;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await _runWithLogs(_main);
+  _runInForeground();
+  BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);
 }
 
-void _main() async {
-  final SentryClient sentry =
-      new SentryClient(dsn: kDebugMode ? SENTRY_DEBUG_DSN : SENTRY_DSN);
-
-  FlutterError.onError = (FlutterErrorDetails details) async {
-    FlutterError.dumpErrorToConsole(details, forceReport: true);
-    _sendErrorToSentry(sentry, details.exception, details.stack);
-  };
-
-  runZonedGuarded(
-    () async {
-      if (_state == AppInitState.pending) {
-        await _init();
-      }
-      if (_state == AppInitState.initialized) {
-        _sync();
-      }
-      runApp(MyApp());
-      BackgroundFetch.registerHeadlessTask(_onBackgroundTaskReceived);
-    },
-    (Object error, StackTrace stackTrace) {
-      _sendErrorToSentry(sentry, error, stackTrace);
-    },
-  );
+void _runInForeground() async {
+  await _runWithLogs(() async {
+    _logger.info("Starting app in foreground");
+    await _init();
+    _sync();
+    runApp(MyApp());
+  });
 }
 
-Future _init() async {
-  _state = AppInitState.initialzing;
+Future _runInBackground(String taskId) async {
+  if (_initializationStatus == null) {
+    _runWithLogs(() async {
+      _logger.info("[BackgroundFetch] Event received: $taskId");
+      await _init();
+      await _sync(isAppInBackground: true);
+      BackgroundFetch.finish(taskId);
+    });
+  } else {
+    _logger.info("[BackgroundFetch] Event received: $taskId");
+    await _init();
+    await _sync(isAppInBackground: true);
+    BackgroundFetch.finish(taskId);
+  }
+}
+
+void _headlessTaskHandler(HeadlessTask task) {
+  if (task.timeout) {
+    BackgroundFetch.finish(task.taskId);
+  } else {
+    _runInBackground(task.taskId);
+  }
+}
+
+Future<void> _init() async {
+  if (_initializationStatus != null) {
+    return _initializationStatus.future;
+  }
+  _initializationStatus = Completer<void>();
   _logger.info("Initializing...", Error(), StackTrace.current);
   InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
@@ -61,8 +72,8 @@ Future _init() async {
   await CollectionsService.instance.init();
   await SyncService.instance.init();
   await MemoriesService.instance.init();
-  _state = AppInitState.initialized;
   _logger.info("Initialization done");
+  _initializationStatus.complete();
 }
 
 Future<void> _sync({bool isAppInBackground = false}) async {
@@ -79,43 +90,14 @@ Future<void> _sync({bool isAppInBackground = false}) async {
   }
 }
 
-Future _onBackgroundTaskReceived(String taskId) async {
-  if (_state == AppInitState.pending) {
-    await _runWithLogs(() async {
-      _logger.info("[BackgroundFetch] Event received: $taskId");
-      await _init();
-      await _sync(isAppInBackground: true);
-    });
-  } else if (_state == AppInitState.initialized) {
-    _logger.info("[BackgroundFetch] Skipping init");
-    await _sync(isAppInBackground: true);
-  } else {
-    _logger.info("[BackgroundFetch] Skipping init and sync");
-  }
-  BackgroundFetch.finish(taskId);
-}
-
 Future _runWithLogs(Function() function) async {
   await SuperLogging.main(LogConfig(
     body: function,
     logDirPath: (await getTemporaryDirectory()).path + "/logs",
-    enableInDebugMode: true,
     maxLogFiles: 5,
+    sentryDsn: kDebugMode ? SENTRY_DEBUG_DSN : SENTRY_DSN,
+    enableInDebugMode: true,
   ));
-}
-
-void _sendErrorToSentry(SentryClient sentry, Object error, StackTrace stack) {
-  _logger.shout("Uncaught error", error, stack);
-  try {
-    sentry.captureException(
-      exception: error,
-      stackTrace: stack,
-    );
-    _logger.info('Error sent to sentry.io: $error');
-  } catch (e) {
-    _logger.info('Sending report to sentry.io failed: $e');
-    _logger.info('Original error: $error');
-  }
 }
 
 class MyApp extends StatelessWidget with WidgetsBindingObserver {
@@ -138,7 +120,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
           requiresDeviceIdle: false,
           requiredNetworkType: NetworkType.NONE,
         ), (String taskId) async {
-      await _onBackgroundTaskReceived(taskId);
+      await _runInBackground(taskId);
     }).then((int status) {
       _logger.info('[BackgroundFetch] configure success: $status');
     }).catchError((e) {
@@ -178,10 +160,4 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
       _sync();
     }
   }
-}
-
-enum AppInitState {
-  pending,
-  initialzing,
-  initialized,
 }
