@@ -1,7 +1,7 @@
 import { getToken } from 'utils/common/key';
 import { file } from './fileService';
 import HTTPService from './HTTPService';
-import { getEndpoint } from 'utils/common/apiUtil';
+import { getEndpoint, getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
 import { getFileExtension } from 'utils/common/utilFunctions';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 
@@ -15,7 +15,7 @@ class DownloadManager {
     private fileDownloads = new Map<number, Promise<string>>();
     private thumbnailDownloads = new Map<number, Promise<string>>();
 
-    constructor(private token) {}
+    constructor(private token) { }
     public async getPreview(file: file) {
         try {
             const cache = await caches.open('thumbs');
@@ -26,7 +26,7 @@ class DownloadManager {
             if (!this.thumbnailDownloads.get(file.id)) {
                 const download = (async () => {
                     const resp = await HTTPService.get(
-                        `${ENDPOINT}/files/preview/${file.id}`,
+                        getThumbnailUrl(file.id),
                         null,
                         { 'X-Auth-Token': this.token },
                         { responseType: 'arraybuffer' }
@@ -61,7 +61,7 @@ class DownloadManager {
             const download = (async () => {
                 try {
                     const resp = await HTTPService.get(
-                        `${ENDPOINT}/files/download/${file.id}`,
+                        getFileUrl(file.id),
                         null,
                         { 'X-Auth-Token': this.token },
                         { responseType: 'arraybuffer' }
