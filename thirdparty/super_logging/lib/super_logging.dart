@@ -145,6 +145,8 @@ class SuperLogging {
   /// The current super logging configuration
   static LogConfig config;
 
+  static SentryClient sentryClient;
+
   static Future<void> main([LogConfig config]) async {
     config ??= LogConfig();
     SuperLogging.config = config;
@@ -160,8 +162,8 @@ class SuperLogging {
     if (fileIsEnabled) {
       await setupLogDir();
     }
-    if (sentryIsEnabled) {
-      sentryUploader();
+    if (sentryIsEnabled && sentryClient == null) {
+      setupSentry();
     }
 
     Logger.root.level = Level.ALL;
@@ -186,12 +188,27 @@ class SuperLogging {
           details.exception,
           details.stack,
         );
+        FlutterError.dumpErrorToConsole(details, forceReport: true);
+        _sendErrorToSentry(details.exception, details.stack);
       };
-      await runZoned(config.body, onError: (e, trace) {
+      await runZonedGuarded(config.body, (e, trace) {
         $.fine("uncaught error from runZoned()", e, trace);
       });
     } else {
       await config.body();
+    }
+  }
+
+  static void _sendErrorToSentry(Object error, StackTrace stack) {
+    try {
+      sentryClient.captureException(
+        exception: error,
+        stackTrace: stack,
+      );
+      $.info('Error sent to sentry.io: $error');
+    } catch (e) {
+      $.info('Sending report to sentry.io failed: $e');
+      $.info('Original error: $error');
     }
   }
 
@@ -233,20 +250,18 @@ class SuperLogging {
     text.chunked(logChunkSize).forEach(print);
   }
 
-  /// A queue to be consumed by [sentryUploader].
+  /// A queue to be consumed by [setupSentry].
   static final sentryQueueControl = StreamController<Event>();
 
   /// Whether sentry logging is currently enabled or not.
   static bool sentryIsEnabled;
 
-  static Future<void> sentryUploader() async {
-    var client = SentryClient(dsn: config.sentryDsn);
-
+  static Future<void> setupSentry() async {
+    sentryClient = SentryClient(dsn: config.sentryDsn);
     await for (final event in sentryQueueControl.stream) {
       dynamic error;
-
       try {
-        var response = await client.capture(event: event);
+        var response = await sentryClient.capture(event: event);
         error = response.error;
       } catch (e) {
         error = e;
