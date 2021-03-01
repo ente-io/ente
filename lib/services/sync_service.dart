@@ -79,7 +79,6 @@ class SyncService {
       _logger.warning("Sync already in progress, skipping.");
       return _existingSync;
     }
-    _logger.info("Sync triggered by", Error(), StackTrace.current);
     _isSyncInProgress = true;
     _existingSync = Future<void>(() async {
       _logger.info("Syncing...");

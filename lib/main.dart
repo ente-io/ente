@@ -53,7 +53,7 @@ void _main() async {
 
 Future _init() async {
   _state = AppInitState.initialzing;
-  _logger.info("Initializing...", Error(), StackTrace.current);
+  _logger.info("Initializing...");
   InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
   await Configuration.instance.init();
