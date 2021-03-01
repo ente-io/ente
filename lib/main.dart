@@ -22,12 +22,12 @@ Completer<void> _initializationStatus;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  _runInForeground();
-  BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);
+  await _runInForeground();
+  // BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);
 }
 
-void _runInForeground() async {
-  await _runWithLogs(() async {
+Future<void> _runInForeground() async {
+  return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init();
     _sync();
@@ -78,6 +78,7 @@ Future<void> _init() async {
 
 Future<void> _sync({bool isAppInBackground = false}) async {
   if (SyncService.instance.isSyncInProgress()) {
+    _logger.info("Sync is already in progress, skipping");
     return;
   }
   if (isAppInBackground) {
