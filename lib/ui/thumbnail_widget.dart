@@ -25,7 +25,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   static final _logger = Logger("ThumbnailWidget");
   static final Widget loadingWidget = Container(
     alignment: Alignment.center,
-    color: Colors.grey[800],
+    color: Colors.grey[900],
   );
 
   bool _hasLoadedThumbnail = false;
