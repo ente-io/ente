@@ -235,11 +235,7 @@ export default function Gallery(props) {
         );
     };
 
-    const getSlideData = async (
-        instance: any,
-        index: number,
-        item: file
-    ) => {
+    const getSlideData = async (instance: any, index: number, item: file) => {
         if (!item.msrc) {
             const url = await DownloadManager.getPreview(item);
             updateUrl(item.dataIndex)(url);
