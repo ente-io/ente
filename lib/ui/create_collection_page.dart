@@ -131,14 +131,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         onTap: () async {
           if (await _addToCollection(item.collection.id)) {
             showToast("added successfully to '" + item.collection.name);
-            Navigator.pop(context);
-            Navigator.push(
-                context,
-                PageTransition(
-                    type: PageTransitionType.bottomToTop,
-                    child: CollectionPage(
-                      item.collection,
-                    )));
+            _navigateToCollection(item.collection);
           }
         },
       ),
@@ -197,14 +190,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             if (collection != null) {
               if (await _addToCollection(collection.id)) {
                 showToast("album '" + _albumName + "' created.");
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    PageTransition(
-                        type: PageTransitionType.bottomToTop,
-                        child: CollectionPage(
-                          collection,
-                        )));
+                _navigateToCollection(collection);
               }
             }
           },
@@ -218,6 +204,17 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         return alert;
       },
     );
+  }
+
+  void _navigateToCollection(Collection collection) {
+    Navigator.pop(context);
+    Navigator.push(
+        context,
+        PageTransition(
+            type: PageTransitionType.bottomToTop,
+            child: CollectionPage(
+              collection,
+            )));
   }
 
   Future<bool> _addToCollection(int collectionID) async {
