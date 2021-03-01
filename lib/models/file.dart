@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
@@ -98,9 +99,14 @@ class File {
   }
 
   String getDownloadUrl() {
-    return Configuration.instance.getHttpEndpoint() +
-        "/files/download/" +
-        uploadedFileID.toString();
+    if (kDebugMode) {
+      return Configuration.instance.getHttpEndpoint() +
+          "/files/download/" +
+          uploadedFileID.toString();
+    } else {
+      return "https://files.ente.workers.dev/?fileID=" +
+          uploadedFileID.toString();
+    }
   }
 
   // Passing token within the URL due to https://github.com/flutter/flutter/issues/16466
@@ -114,9 +120,14 @@ class File {
   }
 
   String getThumbnailUrl() {
-    return Configuration.instance.getHttpEndpoint() +
-        "/files/preview/" +
-        uploadedFileID.toString();
+    if (kDebugMode) {
+      return Configuration.instance.getHttpEndpoint() +
+          "/files/preview/" +
+          uploadedFileID.toString();
+    } else {
+      return "https://thumbnails.ente.workers.dev/?fileID=" +
+          uploadedFileID.toString();
+    }
   }
 
   @override
