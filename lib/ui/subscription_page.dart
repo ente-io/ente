@@ -441,7 +441,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   FlatButton(
                     child: Text("ok"),
                     onPressed: () {
-                      Bus.instance.fire(SubscriptionPurchasedEvent());
+                      if (widget.isOnboarding) {
+                        Bus.instance.fire(SubscriptionPurchasedEvent());
+                      }
                       Navigator.of(context).popUntil((route) => route.isFirst);
                     },
                   ),
