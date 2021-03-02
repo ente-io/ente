@@ -72,15 +72,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             );
             await InAppPurchaseConnection.instance.completePurchase(purchase);
             Bus.instance.fire(SubscriptionPurchasedEvent());
-            final isUpgrade = _hasActiveSubscription &&
-                newSubscription.storage > _currentSubscription.storage;
-            final isDowngrade = _hasActiveSubscription &&
-                newSubscription.storage < _currentSubscription.storage;
             String text = "your photos and videos will now be backed up";
-            if (isUpgrade) {
-              text = "your plan was successfully upgraded";
-            } else if (isDowngrade) {
-              text = "your plan was successfully downgraded";
+            if (!widget.isOnboarding) {
+              final isUpgrade = _hasActiveSubscription &&
+                  newSubscription.storage > _currentSubscription.storage;
+              final isDowngrade = _hasActiveSubscription &&
+                  newSubscription.storage < _currentSubscription.storage;
+              if (isUpgrade) {
+                text = "your plan was successfully upgraded";
+              } else if (isDowngrade) {
+                text = "your plan was successfully downgraded";
+              }
             }
             showToast(text);
             if (_currentSubscription != null) {
