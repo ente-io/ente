@@ -131,7 +131,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _getBody(final appBarSize) {
-    return FutureBuilder<List<BillingPlan>>(
+    return FutureBuilder<BillingPlans>(
       future: _billingService.getBillingPlans(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
@@ -146,9 +146,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _buildPlans(
-      BuildContext context, List<BillingPlan> plans, final appBarSize) {
+      BuildContext context, BillingPlans plans, final appBarSize) {
     final planWidgets = List<Widget>();
-    for (final plan in plans) {
+    for (final plan in plans.plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
       if (productID == null || productID.isEmpty) {
         continue;
@@ -376,7 +376,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     if (widget.isOnboarding &&
         (_currentSubscription == null ||
             _currentSubscription.productID == kFreeProductID)) {
-      widgets.addAll([_getSkipButton()]);
+      widgets.addAll([_getSkipButton(plans.freePlan)]);
     }
     return SingleChildScrollView(
       child: Container(
@@ -389,7 +389,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
-  GestureDetector _getSkipButton() {
+  GestureDetector _getSkipButton(FreePlan plan) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       child: Container(
@@ -418,7 +418,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "you will only be able to backup 100 MB for the next 14 days",
+                "you will only be able to backup " +
+                    convertBytesToReadableFormat(plan.storage) +
+                    " for the next " +
+                    plan.duration.toString() +
+                    " " +
+                    plan.period,
                 style: TextStyle(
                   height: 1.4,
                 ),

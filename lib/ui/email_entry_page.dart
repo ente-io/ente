@@ -229,7 +229,7 @@ class PricingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<BillingPlan>>(
+    return FutureBuilder<BillingPlans>(
       future: BillingService.instance.getBillingPlans(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
@@ -242,9 +242,9 @@ class PricingWidget extends StatelessWidget {
     );
   }
 
-  Container _buildPlans(BuildContext context, List<BillingPlan> plans) {
+  Container _buildPlans(BuildContext context, BillingPlans plans) {
     final planWidgets = List<BillingPlanWidget>();
-    for (final plan in plans) {
+    for (final plan in plans.plans) {
       planWidgets.add(BillingPlanWidget(plan));
     }
     return Container(

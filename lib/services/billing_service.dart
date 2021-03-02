@@ -24,7 +24,7 @@ class BillingService {
   bool _isOnSubscriptionPage = false;
 
   SharedPreferences _prefs;
-  Future<List<BillingPlan>> _future;
+  Future<BillingPlans> _future;
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -53,16 +53,12 @@ class BillingService {
     });
   }
 
-  Future<List<BillingPlan>> getBillingPlans() {
+  Future<BillingPlans> getBillingPlans() {
     if (_future == null) {
       _future = _dio
           .get(_config.getHttpEndpoint() + "/billing/plans")
           .then((response) {
-        final plans = List<BillingPlan>();
-        for (final plan in response.data["plans"]) {
-          plans.add(BillingPlan.fromMap(plan));
-        }
-        return plans;
+        return BillingPlans.fromMap(response.data);
       });
     }
     return _future;
