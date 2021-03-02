@@ -44,7 +44,7 @@ export interface MetadataObject {
 }
 
 interface FileinMemory {
-    filedata: Uint8Array;
+    filedata: ReadableStream<Uint8Array>;
     thumbnail: Uint8Array;
     metadata: MetadataObject;
 }
@@ -84,6 +84,7 @@ class UploadService {
     private progressBarProps;
     private uploadErrors: Error[];
     private setUploadErrors;
+    private fileSize;
 
     public async uploadFiles(
         recievedFiles: File[],
@@ -101,7 +102,7 @@ class UploadService {
             this.setUploadErrors = setUploadErrors;
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-
+            this.fileSize = 0;
             let metadataFiles: File[] = [];
             let actualFiles: File[] = [];
             recievedFiles.forEach((file) => {
@@ -166,7 +167,16 @@ class UploadService {
         token: string
     ) {
         try {
-            let file: FileinMemory = await this.readFile(reader, rawFile);
+            let file: FileinMemory = this.readFile(reader, rawFile);
+            this.fileSize = rawFile.size;
+            // let streamFileReader = file.filedata.getReader();
+            // while (true) {
+            //     let { done, value } = await streamFileReader.read();
+            //     if (done) {
+            //         break;
+            //     }
+            //     console.log('reading file chunk -> ', value);
+            // }
             let {
                 file: encryptedFile,
                 fileKey: encryptedKey,
@@ -175,11 +185,13 @@ class UploadService {
                 file,
                 collection.key
             );
+
             file = null;
             let backupedFile: BackupedFile = await this.uploadtoBucket(
                 encryptedFile,
                 token
             );
+            return;
             encryptedFile = null;
             let uploadFile: uploadFile = this.getuploadFile(
                 collection,
@@ -193,6 +205,7 @@ class UploadService {
             this.filesCompleted++;
             this.changeProgressBarProps();
         } catch (e) {
+            console.log(e);
             ErrorHandler(e);
             const error = new Error(
                 `Uploading Failed for File - ${rawFile.name}`
@@ -220,49 +233,49 @@ class UploadService {
         this.setUploadErrors(this.uploadErrors);
     }
 
-    private async readFile(reader: FileReader, recievedFile: File) {
+    private readFile(reader: FileReader, recievedFile: File) {
         try {
-            const filedata: Uint8Array = await this.getUint8ArrayView(
+            const filedata: ReadableStream<Uint8Array> = this.getFileStream(
                 reader,
                 recievedFile
             );
-            const thumbnail = await this.generateThumbnail(
-                reader,
-                recievedFile
-            );
+            // const thumbnail = await this.generateThumbnail(
+            //     reader,
+            //     recievedFile
+            // );
 
-            let fileType: FILE_TYPE;
-            switch (recievedFile.type.split('/')[0]) {
-                case TYPE_IMAGE:
-                    fileType = FILE_TYPE.IMAGE;
-                    break;
-                case TYPE_VIDEO:
-                    fileType = FILE_TYPE.VIDEO;
-                    break;
-                default:
-                    fileType = FILE_TYPE.OTHERS;
-            }
+            // let fileType: FILE_TYPE;
+            // switch (recievedFile.type.split('/')[0]) {
+            //     case TYPE_IMAGE:
+            //         fileType = FILE_TYPE.IMAGE;
+            //         break;
+            //     case TYPE_VIDEO:
+            //         fileType = FILE_TYPE.VIDEO;
+            //         break;
+            //     default:
+            //         fileType = FILE_TYPE.OTHERS;
+            // }
 
-            const { location, creationTime } = await this.getExifData(
-                reader,
-                recievedFile
-            );
-            const metadata = Object.assign(
-                {
-                    title: recievedFile.name,
-                    creationTime:
-                        creationTime || recievedFile.lastModified * 1000,
-                    modificationTime: recievedFile.lastModified * 1000,
-                    latitude: location?.latitude,
-                    longitude: location?.latitude,
-                    fileType,
-                },
-                this.metadataMap.get(recievedFile.name)
-            );
+            // const { location, creationTime } = await this.getExifData(
+            //     reader,
+            //     recievedFile
+            // );
+            // const metadata = Object.assign(
+            //     {
+            //         title: recievedFile.name,
+            //         creationTime:
+            //             creationTime || recievedFile.lastModified * 1000,
+            //         modificationTime: recievedFile.lastModified * 1000,
+            //         latitude: location?.latitude,
+            //         longitude: location?.latitude,
+            //         fileType,
+            //     },
+            //     this.metadataMap.get(recievedFile.name)
+            // );
             return {
                 filedata,
-                thumbnail,
-                metadata,
+                thumbnail: null,
+                metadata: null,
             };
         } catch (e) {
             console.log('error reading files ', e);
@@ -276,35 +289,36 @@ class UploadService {
     ): Promise<EncryptedFile> {
         try {
             const {
-                key: fileKey,
-                file: encryptedFiledata,
-            }: EncryptionResult = await worker.encryptFile(file.filedata);
-
-            const {
-                file: encryptedThumbnail,
-            }: EncryptionResult = await worker.encryptThumbnail(
-                file.thumbnail,
-                fileKey
-            );
-            const {
-                file: encryptedMetadata,
-            }: EncryptionResult = await worker.encryptMetadata(
-                file.metadata,
-                fileKey
-            );
-
-            const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
                 fileKey,
-                encryptionKey
-            );
+                fileDecryptionHeader,
+                encryptedFiledata,
+            } = await this.encryptFileStream(worker, file.filedata);
+
+            // const {
+            //     file: encryptedThumbnail,
+            // }: EncryptionResult = await worker.encryptThumbnail(
+            //     file.thumbnail,
+            //     fileKey
+            // );
+            // const {
+            //     file: encryptedMetadata,
+            // }: EncryptionResult = await worker.encryptMetadata(
+            //     file.metadata,
+            //     fileKey
+            // );
+
+            // const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
+            //     fileKey,
+            //     encryptionKey
+            // );
 
             const result: EncryptedFile = {
                 file: {
                     file: encryptedFiledata,
-                    thumbnail: encryptedThumbnail,
-                    metadata: encryptedMetadata,
+                    thumbnail: null,
+                    metadata: null,
                 },
-                fileKey: encryptedKey,
+                fileKey: null,
             };
             return result;
         } catch (e) {
@@ -313,22 +327,63 @@ class UploadService {
         }
     }
 
+    private async encryptFileStream(worker, fileData) {
+        const fileStreamReader = fileData.getReader();
+        const {
+            key,
+            decryptionHeader,
+            pushState,
+        } = await worker.initChunkEncryption();
+
+        const encryptedFileStream = new ReadableStream({
+            async start(controller) {
+                while (true) {
+                    let { done, value } = await fileStreamReader.read();
+                    // console.log({ done, value });
+
+                    const encryptedFileChunk = await worker.encryptFileChunk(
+                        value ?? new Uint8Array(),
+                        pushState,
+                        done
+                    );
+                    controller.enqueue(encryptedFileChunk);
+                    if (done) {
+                        break;
+                    }
+                }
+                controller.close();
+            },
+        });
+        return {
+            fileKey: key,
+            fileDecryptionHeader: decryptionHeader,
+            encryptedFiledata: encryptedFileStream,
+        };
+    }
+
     private async uploadtoBucket(
         file: ProcessedFile,
         token
     ): Promise<BackupedFile> {
         try {
+            // let streamEncryptedFileReader = file.file.getReader();
+            // while (true) {
+            //     let { done, value } = await streamEncryptedFileReader.read();
+            //     if (done) {
+            //         break;
+            //     }
+            //     console.log('reading encrypted file chunk -> ', value);
+            // }
+            // return;
             const fileUploadURL = await this.getUploadURL(token);
-            file.file.objectKey = await this.putFile(
-                fileUploadURL,
-                file.file.encryptedData
-            );
+            file.file.objectKey = await this.putFile(fileUploadURL, file.file);
+            return;
 
             const thumbnailUploadURL = await this.getUploadURL(token);
-            file.thumbnail.objectKey = await this.putFile(
-                thumbnailUploadURL,
-                file.thumbnail.encryptedData
-            );
+            // file.thumbnail.objectKey = await this.putFile(
+            //     thumbnailUploadURL,
+            //     file.thumbnail.encryptedData
+            // );
             delete file.file.encryptedData;
             delete file.thumbnail.encryptedData;
 
@@ -375,7 +430,7 @@ class UploadService {
                 (resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = () => {
-                        var result =
+                        let result =
                             typeof reader.result !== 'string'
                                 ? new TextDecoder().decode(reader.result)
                                 : reader.result;
@@ -391,7 +446,7 @@ class UploadService {
             metaDataObject['modificationTime'] =
                 metadataJSON['modificationTime']['timestamp'] * 1000000;
 
-            var locationData = null;
+            let locationData = null;
             if (
                 metadataJSON['geoData']['latitude'] != 0.0 ||
                 metadataJSON['geoData']['longitude'] != 0.0
@@ -507,6 +562,27 @@ class UploadService {
         }
     }
 
+    private getFileStream(reader, file) {
+        let fileSize = file.size;
+        let chunkSize = 4 * 1024 * 1024; // bytes
+        let offset = 0;
+        let self = this;
+        return new ReadableStream<Uint8Array>({
+            async start(controller) {
+                while (true) {
+                    let blob = file.slice(offset, chunkSize + offset);
+                    let fileChunk = await self.getUint8ArrayView(reader, blob);
+                    offset += chunkSize;
+                    if (offset >= fileSize) {
+                        break;
+                    }
+                    controller.enqueue(fileChunk);
+                }
+                controller.close();
+            },
+        });
+    }
+
     private async getUint8ArrayView(
         reader: FileReader,
         file: Blob
@@ -565,12 +641,25 @@ class UploadService {
 
     private async putFile(
         fileUploadURL: UploadURL,
-        file: Uint8Array | string
+        file: ReadableStream<Uint8Array>
     ): Promise<string> {
         try {
-            const fileSize = file.length;
-            await HTTPService.put(fileUploadURL.url, file, null, {
-                contentLengthHeader: fileSize,
+            // let streamEncryptedFileReader = file.getReader();
+            // while (true) {
+            //     let { done, value } = await streamEncryptedFileReader.read();
+            //     if (done) {
+            //         break;
+            //     }
+            //     console.log('reading uploading file chunk -> ', value);
+            // }
+            // return;
+            await fetch(fileUploadURL.url, {
+                headers: {
+                    'Content-Type': 'application/octet-stream',
+                    'Content-Length': this.fileSize,
+                },
+                method: 'PUT',
+                body: file,
             });
             return fileUploadURL.objectKey;
         } catch (e) {
@@ -604,8 +693,8 @@ class UploadService {
         if (!dateString) {
             return null;
         }
-        var parts = dateString.split(' ')[0].split(':');
-        var date = new Date(
+        let parts = dateString.split(' ')[0].split(':');
+        let date = new Date(
             Number(parts[0]),
             Number(parts[1]) - 1,
             Number(parts[2])
@@ -629,17 +718,17 @@ class UploadService {
         lonMinute = exifData.GPSLongitude[1];
         lonSecond = exifData.GPSLongitude[2];
 
-        var latDirection = exifData.GPSLatitudeRef;
-        var lonDirection = exifData.GPSLongitudeRef;
+        let latDirection = exifData.GPSLatitudeRef;
+        let lonDirection = exifData.GPSLongitudeRef;
 
-        var latFinal = this.convertDMSToDD(
+        let latFinal = this.convertDMSToDD(
             latDegree,
             latMinute,
             latSecond,
             latDirection
         );
 
-        var lonFinal = this.convertDMSToDD(
+        let lonFinal = this.convertDMSToDD(
             lonDegree,
             lonMinute,
             lonSecond,
@@ -649,7 +738,7 @@ class UploadService {
     }
 
     private convertDMSToDD(degrees, minutes, seconds, direction) {
-        var dd = degrees + minutes / 60 + seconds / 3600;
+        let dd = degrees + minutes / 60 + seconds / 3600;
 
         if (direction == SOUTH_DIRECTION || direction == WEST_DIRECTION) {
             dd = dd * -1;
