@@ -107,7 +107,7 @@ class SyncService {
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
             reason: "waiting for network..."));
       } else {
-        _logger.severe(e, s);
+        _logger.severe("backup failed", e, s);
         Bus.instance
             .fire(SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
         throw e;
