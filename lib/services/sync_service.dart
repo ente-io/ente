@@ -44,7 +44,7 @@ class SyncService {
 
   SyncService._privateConstructor() {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
-      _uploader.clearQueue(SyncStopRequestedError());
+      _uploader.clearQueue(SilentlyCancelUploadsError());
       sync();
     });
 
@@ -91,7 +91,7 @@ class SyncService {
     } on WiFiUnavailableError {
       _logger.warning("Not uploading over mobile data");
       Bus.instance.fire(
-          SyncStatusUpdate(SyncStatus.paused, reason: "Waiting for WiFi..."));
+          SyncStatusUpdate(SyncStatus.paused, reason: "waiting for WiFi..."));
     } on SyncStopRequestedError {
       _syncStopRequested = false;
       Bus.instance
@@ -103,10 +103,15 @@ class SyncService {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
           error: StorageLimitExceededError()));
     } catch (e, s) {
-      _logger.severe(e, s);
-      Bus.instance
-          .fire(SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
-      throw e;
+      if (e is DioError && e.error?.osError?.errorCode == 111) {
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
+            reason: "waiting for network..."));
+      } else {
+        _logger.severe(e, s);
+        Bus.instance
+            .fire(SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
+        throw e;
+      }
     } finally {
       if (!successful) {
         _existingSync.completeError(Error());
