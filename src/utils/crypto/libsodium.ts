@@ -125,6 +125,38 @@ export async function encryptChaCha(data: Uint8Array, key?: string) {
     };
 }
 
+export async function initChunkEncryption() {
+    await sodium.ready;
+    let key = sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    let initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(
+        key
+    );
+    let [pushState, header] = [initPushResult.state, initPushResult.header];
+    return {
+        key: await toB64(key),
+        decryptionHeader: await toB64(header),
+        pushState,
+    };
+}
+export async function encryptFileChunk(
+    data: Uint8Array,
+    pushState: sodium.StateAddress,
+    finalChunk?: boolean
+) {
+    await sodium.ready;
+
+    let tag = finalChunk
+        ? sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+        : sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL;
+    const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
+        pushState,
+        data,
+        null,
+        tag
+    );
+
+    return pushResult;
+}
 export async function encryptToB64(data: string, key?: string) {
     await sodium.ready;
     const encrypted = await encrypt(
