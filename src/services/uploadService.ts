@@ -84,7 +84,6 @@ class UploadService {
     private progressBarProps;
     private uploadErrors: Error[];
     private setUploadErrors;
-    private fileSize;
 
     public async uploadFiles(
         recievedFiles: File[],
@@ -102,7 +101,7 @@ class UploadService {
             this.setUploadErrors = setUploadErrors;
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-            this.fileSize = 0;
+
             let metadataFiles: File[] = [];
             let actualFiles: File[] = [];
             recievedFiles.forEach((file) => {
@@ -168,7 +167,6 @@ class UploadService {
     ) {
         try {
             let file: FileinMemory = this.readFile(reader, rawFile);
-            this.fileSize = rawFile.size;
             // let streamFileReader = file.filedata.getReader();
             // while (true) {
             //     let { done, value } = await streamFileReader.read();
@@ -653,14 +651,7 @@ class UploadService {
             //     console.log('reading uploading file chunk -> ', value);
             // }
             // return;
-            await fetch(fileUploadURL.url, {
-                headers: {
-                    'Content-Type': 'application/octet-stream',
-                    'Content-Length': this.fileSize,
-                },
-                method: 'PUT',
-                body: file,
-            });
+            await fetch(fileUploadURL.url, { method: 'PUT', body: file });
             return fileUploadURL.objectKey;
         } catch (e) {
             console.log('putFile to dataStore failed ', e);
