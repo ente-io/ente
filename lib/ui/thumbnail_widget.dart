@@ -12,10 +12,12 @@ import 'package:photos/utils/file_util.dart';
 class ThumbnailWidget extends StatefulWidget {
   final File file;
   final BoxFit fit;
+  final bool shouldShowSyncStatus;
   const ThumbnailWidget(
     this.file, {
     Key key,
     this.fit = BoxFit.cover,
+    this.shouldShowSyncStatus = true,
   }) : super(key: key);
   @override
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
@@ -88,7 +90,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           duration: Duration(milliseconds: 400),
           child: content,
         ),
-        widget.file.uploadedFileID == null
+        widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
             ? Align(
                 alignment: Alignment.bottomRight,
                 child: Padding(

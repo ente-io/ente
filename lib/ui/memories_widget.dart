@@ -164,7 +164,10 @@ class MemoryWidget extends StatelessWidget {
           height: isSeen ? 76 : 72,
           child: Hero(
             tag: "memories" + memories[index].file.tag(),
-            child: ThumbnailWidget(memories[index].file),
+            child: ThumbnailWidget(
+              memories[index].file,
+              shouldShowSyncStatus: false,
+            ),
           ),
         ),
       ),
