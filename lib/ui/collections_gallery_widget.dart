@@ -11,6 +11,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/ui/collection_page.dart';
@@ -131,20 +132,23 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             Padding(padding: EdgeInsets.all(6)),
             SectionTitle("backed-up memories"),
             Padding(padding: EdgeInsets.all(10)),
-            GridView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-              physics: ScrollPhysics(), // to disable GridView's scrolling
-              itemBuilder: (context, index) {
-                return _buildCollection(context, items.collections, index);
-              },
-              itemCount:
-                  items.collections.length + 1, // To include the + button
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-              ),
-            ),
+            BillingService.instance.hasActiveSubscription()
+                ? GridView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+                    physics: ScrollPhysics(), // to disable GridView's scrolling
+                    itemBuilder: (context, index) {
+                      return _buildCollection(
+                          context, items.collections, index);
+                    },
+                    itemCount:
+                        items.collections.length + 1, // To include the + button
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
+                    ),
+                  )
+                : nothingToSeeHere,
           ],
         ),
       ),
