@@ -64,7 +64,7 @@ Future<void> _init() async {
     return _initializationStatus.future;
   }
   _initializationStatus = Completer<void>();
-  _logger.info("Initializing...", Error(), StackTrace.current);
+  _logger.info("Initializing...");
   InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
   await Configuration.instance.init();

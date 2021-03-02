@@ -79,7 +79,6 @@ class SyncService {
       return _existingSync.future;
     }
     _existingSync = Completer<void>();
-    _logger.info("Sync triggered by", Error(), StackTrace.current);
     bool successful = false;
     try {
       await _doSync(isAppInBackground: isAppInBackground);
