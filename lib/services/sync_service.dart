@@ -109,7 +109,8 @@ class SyncService {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
           error: StorageLimitExceededError()));
     } catch (e, s) {
-      if (e is DioError && e.error?.osError?.errorCode == 111) {
+      final errorCode = e.error?.osError?.errorCode;
+      if (errorCode == 111 || errorCode == 7) {
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
             reason: "waiting for network..."));
       } else {
