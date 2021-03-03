@@ -294,7 +294,6 @@ class FileUploader {
         );
         // Update across all collections
         await FilesDB.instance.updateUploadedFileAcrossCollections(remoteFile);
-        FileRepository.instance.reloadFiles();
       } else {
         remoteFile = await _uploadFile(
           file,
@@ -308,8 +307,8 @@ class FileUploader {
           metadataDecryptionHeader,
         );
         await FilesDB.instance.update(remoteFile);
-        FileRepository.instance.reloadFiles();
       }
+      FileRepository.instance.reloadFiles();
       _logger.info("File upload complete for " + remoteFile.toString());
       return remoteFile;
     } catch (e, s) {
