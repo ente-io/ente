@@ -642,6 +642,52 @@ class UploadService {
         file: ReadableStream<Uint8Array>
     ): Promise<string> {
         try {
+            // Server should respond with postBody text value, indicating it was sent and received.
+            // const post = async (postBody) => {
+            //     const response = await fetch(
+            //         'https://dev.anthum.com/post-test/',
+            //         {
+            //             body: postBody,
+            //             headers: { 'content-type': 'text/plain' },
+            //             method: 'POST',
+            //             allowHTTP1ForStreamingUpload: true,
+            //         }
+            //     );
+            //     console.log(await response.text());
+            // };
+
+            // const wait = function (milliseconds) {
+            //     return new Promise((resolve) =>
+            //         setTimeout(resolve, milliseconds)
+            //     );
+            // };
+
+            // await post(
+            //     new ReadableStream({
+            //         async start(controller) {
+            //             controller.enqueue(new TextEncoder().encode('hello'));
+            //             await wait(1000);
+            //             console.log('g');
+            //             controller.enqueue(new TextEncoder().encode('hello'));
+            //             await wait(1000);
+            //             console.log('g');
+
+            //             controller.enqueue(new TextEncoder().encode('hello'));
+            //             await wait(1000);
+            //             console.log('g');
+
+            //             controller.enqueue(new TextEncoder().encode('hello'));
+            //             await wait(1000);
+            //             console.log('g');
+
+            //             controller.enqueue(new TextEncoder().encode('hello'));
+            //             await wait(1000);
+            //             controller.enqueue(new TextEncoder().encode('hello'));
+            //             controller.close();
+            //         },
+            //     })
+            // );
+
             // let streamEncryptedFileReader = file.getReader();
             // while (true) {
             //     let { done, value } = await streamEncryptedFileReader.read();
@@ -651,7 +697,35 @@ class UploadService {
             //     console.log('reading uploading file chunk -> ', value);
             // }
             // return;
-            await fetch(fileUploadURL.url, { method: 'PUT', body: file });
+
+            // const stream = new ReadableStream({
+            //     async start(controller) {
+            //         await wait(1000);
+            //         controller.enqueue('This ');
+            //         await wait(1000);
+            //         controller.enqueue('is ');
+            //         await wait(1000);
+            //         controller.enqueue('a ');
+            //         await wait(1000);
+            //         controller.enqueue('slow ');
+            //         await wait(1000);
+            //         controller.enqueue('request.');
+            //         controller.close();
+            //     },
+            // }).pipeThrough(new TextEncoderStream());
+            // await post(stream);
+            // await fetch('0.0.0.0:5555', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'text/plain' },
+            //     body: stream,
+            // });
+
+            await fetch('http://localhost:8080', {
+                headers: { 'Content-Type': 'application/octet-stream' },
+                method: 'PUT',
+                body: file,
+                allowHTTP1ForStreamingUpload: true,
+            });
             return fileUploadURL.objectKey;
         } catch (e) {
             console.log('putFile to dataStore failed ', e);
