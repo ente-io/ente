@@ -46,6 +46,7 @@ class SyncService {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       _uploader.clearQueue(SilentlyCancelUploadsError());
       sync();
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applying_remote_diff));
     });
 
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
