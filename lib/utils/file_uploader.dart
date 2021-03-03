@@ -364,7 +364,7 @@ class FileUploader {
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
     } on DioError catch (e) {
-      if (e.response.statusCode == 426) {
+      if (e.response?.statusCode == 426) {
         _onStorageLimitExceeded();
       }
       throw e;
@@ -410,7 +410,7 @@ class FileUploader {
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
     } on DioError catch (e) {
-      if (e.response.statusCode == 426) {
+      if (e.response?.statusCode == 426) {
         _onStorageLimitExceeded();
       }
       throw e;
