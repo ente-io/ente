@@ -13,6 +13,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
@@ -28,10 +29,13 @@ class FileUploader {
   final _logger = Logger("FileUploader");
   final _dio = Network.instance.getDio();
   final _queue = LinkedHashMap<String, FileUploadItem>();
+  final _uploadLocks = UploadLocksDB.instance;
   final kMaximumConcurrentUploads = 4;
   final kMaximumThumbnailCompressionAttempts = 2;
   final kMaximumUploadAttempts = 4;
+  final kSafeBufferForLockExpiry = Duration(days: 1).inMicroseconds;
   int _currentlyUploading = 0;
+  LockOwner _lockOwner;
   final _uploadURLs = Queue<UploadURL>();
 
   FileUploader._privateConstructor() {
@@ -40,6 +44,16 @@ class FileUploader {
     });
   }
   static FileUploader instance = FileUploader._privateConstructor();
+
+  Future<void> init(bool isBackground) async {
+    _lockOwner = isBackground
+        ? LockOwner.background_process
+        : LockOwner.foreground_process;
+    await _uploadLocks.releaseLocksAcquiredByOwnerBefore(
+        _lockOwner, DateTime.now().microsecondsSinceEpoch);
+    await _uploadLocks.releaseAllLocksAcquiredBefore(
+        DateTime.now().microsecondsSinceEpoch - kSafeBufferForLockExpiry);
+  }
 
   Future<File> upload(File file, int collectionID) {
     // If the file hasn't been queued yet, queue it
@@ -168,6 +182,17 @@ class FileUploader {
             Configuration.instance.shouldBackupOverMobileData());
     if (!canUploadUnderCurrentNetworkConditions && !forcedUpload) {
       throw WiFiUnavailableError();
+    }
+
+    try {
+      await _uploadLocks.acquireLock(
+        file.localID,
+        _lockOwner,
+        DateTime.now().microsecondsSinceEpoch,
+      );
+    } catch (e) {
+      _logger.warning("Lock was already taken for " + file.toString());
+      throw LockAlreadyAcquiredError();
     }
 
     final tempDirectory = Configuration.instance.getTempDirectory();
@@ -302,6 +327,7 @@ class FileUploader {
       if (io.File(encryptedThumbnailPath).existsSync()) {
         io.File(encryptedThumbnailPath).deleteSync();
       }
+      await _uploadLocks.releaseLock(file.localID, _lockOwner);
     }
   }
 

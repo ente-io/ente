@@ -325,6 +325,8 @@ class SyncService {
       // Do nothing since it's caused mostly due to concurrency issues
       // when the foreground app deletes temporary files, interrupting a background
       // upload
+    } on LockAlreadyAcquiredError {
+      // Do nothing
     } on SilentlyCancelUploadsError {
       // Do nothing
     } catch (e) {

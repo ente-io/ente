@@ -13,6 +13,7 @@ import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/home_widget.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/file_uploader.dart';
 import 'package:super_logging/super_logging.dart';
 import 'package:logging/logging.dart';
 
@@ -70,6 +71,7 @@ Future<void> _init(bool isBackground) async {
   await Configuration.instance.init();
   await BillingService.instance.init();
   await CollectionsService.instance.init();
+  await FileUploader.instance.init(isBackground);
   await SyncService.instance.init(isBackground);
   await MemoriesService.instance.init();
   _logger.info("Initialization done");
