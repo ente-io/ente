@@ -24,7 +24,7 @@ Completer<void> _initializationStatus;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _runInForeground();
-  // BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);
+  BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);
 }
 
 Future<void> _runInForeground() async {
