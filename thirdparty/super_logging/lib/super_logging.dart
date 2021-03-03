@@ -125,6 +125,8 @@ class LogConfig {
   /// `DateFormat('y-M-d')` by default.
   DateFormat dateFmt;
 
+  String prefix;
+
   LogConfig({
     this.sentryDsn,
     this.sentryRetryDelay = const Duration(seconds: 30),
@@ -133,6 +135,7 @@ class LogConfig {
     this.enableInDebugMode = false,
     this.body,
     this.dateFmt,
+    this.prefix = "",
   }) {
     dateFmt ??= DateFormat("y-M-d");
   }
@@ -223,7 +226,7 @@ class SuperLogging {
       extraLines = null;
     }
 
-    var str = rec.toPrettyString(extraLines);
+    var str = config.prefix + " " + rec.toPrettyString(extraLines);
 
     // write to stdout
     printLog(str);
