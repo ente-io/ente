@@ -44,16 +44,16 @@ class UploadLocksDB {
                 ''');
   }
 
-  Future<void> acquireLock(String id, LockOwner owner, int time) async {
+  Future<void> acquireLock(String id, String owner, int time) async {
     final db = await instance.database;
     final row = new Map<String, dynamic>();
     row[_columnID] = id;
-    row[_columnOwner] = owner.toString();
+    row[_columnOwner] = owner;
     row[_columnTime] = time;
     await db.insert(_table, row, conflictAlgorithm: ConflictAlgorithm.fail);
   }
 
-  Future<int> releaseLock(String id, LockOwner owner) async {
+  Future<int> releaseLock(String id, String owner) async {
     final db = await instance.database;
     return db.delete(
       _table,
@@ -62,8 +62,7 @@ class UploadLocksDB {
     );
   }
 
-  Future<int> releaseLocksAcquiredByOwnerBefore(
-      LockOwner owner, int time) async {
+  Future<int> releaseLocksAcquiredByOwnerBefore(String owner, int time) async {
     final db = await instance.database;
     return db.delete(
       _table,
@@ -80,9 +79,4 @@ class UploadLocksDB {
       whereArgs: [time],
     );
   }
-}
-
-enum LockOwner {
-  background_process,
-  foreground_process,
 }

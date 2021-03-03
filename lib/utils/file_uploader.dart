@@ -38,7 +38,7 @@ class FileUploader {
   final kSafeBufferForLockExpiry = Duration(days: 1).inMicroseconds;
 
   int _currentlyUploading = 0;
-  LockOwner _lockOwner;
+  ProcessType _processType;
   final _uploadURLs = Queue<UploadURL>();
 
   FileUploader._privateConstructor() {
@@ -49,11 +49,10 @@ class FileUploader {
   static FileUploader instance = FileUploader._privateConstructor();
 
   Future<void> init(bool isBackground) async {
-    _lockOwner = isBackground
-        ? LockOwner.background_process
-        : LockOwner.foreground_process;
+    _processType =
+        isBackground ? ProcessType.background : ProcessType.foreground;
     await _uploadLocks.releaseLocksAcquiredByOwnerBefore(
-        _lockOwner, DateTime.now().microsecondsSinceEpoch);
+        _processType.toString(), DateTime.now().microsecondsSinceEpoch);
     await _uploadLocks.releaseAllLocksAcquiredBefore(
         DateTime.now().microsecondsSinceEpoch - kSafeBufferForLockExpiry);
   }
@@ -190,7 +189,7 @@ class FileUploader {
     try {
       await _uploadLocks.acquireLock(
         file.localID,
-        _lockOwner,
+        _processType.toString(),
         DateTime.now().microsecondsSinceEpoch,
       );
     } catch (e) {
@@ -312,7 +311,7 @@ class FileUploader {
         await FilesDB.instance.update(remoteFile);
       }
       FileRepository.instance.reloadFiles();
-      if (_lockOwner == LockOwner.background_process) {
+      if (_processType == ProcessType.background) {
         (await SharedPreferences.getInstance()).setInt(
             kLastBackgroundUploadTimeKey,
             DateTime.now().microsecondsSinceEpoch);
@@ -334,7 +333,7 @@ class FileUploader {
       if (io.File(encryptedThumbnailPath).existsSync()) {
         io.File(encryptedThumbnailPath).deleteSync();
       }
-      await _uploadLocks.releaseLock(file.localID, _lockOwner);
+      await _uploadLocks.releaseLock(file.localID, _processType.toString());
     }
   }
 
@@ -565,4 +564,9 @@ enum UploadStatus {
   not_started,
   in_progress,
   completed,
+}
+
+enum ProcessType {
+  background,
+  foreground,
 }
