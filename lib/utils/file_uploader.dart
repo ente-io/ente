@@ -256,8 +256,9 @@ class FileUploader {
           Sodium.bin2base64(encryptedMetadataData.encryptedData);
       final metadataDecryptionHeader =
           Sodium.bin2base64(encryptedMetadataData.header);
+      var remoteFile;
       if (isAlreadyUploadedFile) {
-        final updatedFile = await _updateFile(
+        remoteFile = await _updateFile(
           file,
           fileObjectKey,
           fileDecryptionHeader,
@@ -267,11 +268,10 @@ class FileUploader {
           metadataDecryptionHeader,
         );
         // Update across all collections
-        await FilesDB.instance.updateUploadedFileAcrossCollections(updatedFile);
+        await FilesDB.instance.updateUploadedFileAcrossCollections(remoteFile);
         FileRepository.instance.reloadFiles();
-        return updatedFile;
       } else {
-        final uploadedFile = await _uploadFile(
+        remoteFile = await _uploadFile(
           file,
           collectionID,
           fileAttributes,
@@ -282,10 +282,11 @@ class FileUploader {
           encryptedMetadata,
           metadataDecryptionHeader,
         );
-        await FilesDB.instance.update(uploadedFile);
+        await FilesDB.instance.update(remoteFile);
         FileRepository.instance.reloadFiles();
-        return uploadedFile;
       }
+      _logger.info("File upload complete for " + remoteFile.toString());
+      return remoteFile;
     } catch (e, s) {
       if (!(e is NoActiveSubscriptionError || e is StorageLimitExceededError)) {
         _logger.severe("File upload failed for " + file.toString(), e, s);
@@ -301,7 +302,6 @@ class FileUploader {
       if (io.File(encryptedThumbnailPath).existsSync()) {
         io.File(encryptedThumbnailPath).deleteSync();
       }
-      _logger.info("File upload attempt complete for " + file.toString());
     }
   }
 
