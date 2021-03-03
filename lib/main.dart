@@ -29,7 +29,7 @@ void main() async {
 Future<void> _runInForeground() async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
-    await _init();
+    await _init(false);
     _sync();
     runApp(MyApp());
   });
@@ -39,13 +39,13 @@ Future _runInBackground(String taskId) async {
   if (_initializationStatus == null) {
     _runWithLogs(() async {
       _logger.info("[BackgroundFetch] Event received: $taskId");
-      await _init();
+      await _init(true);
       await _sync(isAppInBackground: true);
       BackgroundFetch.finish(taskId);
-    });
+    }, prefix: "[bg]");
   } else {
     _logger.info("[BackgroundFetch] Event received: $taskId");
-    await _init();
+    await _init(true);
     await _sync(isAppInBackground: true);
     BackgroundFetch.finish(taskId);
   }
@@ -59,7 +59,7 @@ void _headlessTaskHandler(HeadlessTask task) {
   }
 }
 
-Future<void> _init() async {
+Future<void> _init(bool isBackground) async {
   if (_initializationStatus != null) {
     return _initializationStatus.future;
   }
@@ -70,7 +70,7 @@ Future<void> _init() async {
   await Configuration.instance.init();
   await BillingService.instance.init();
   await CollectionsService.instance.init();
-  await SyncService.instance.init();
+  await SyncService.instance.init(isBackground);
   await MemoriesService.instance.init();
   _logger.info("Initialization done");
   _initializationStatus.complete();
@@ -85,19 +85,20 @@ Future<void> _sync({bool isAppInBackground = false}) async {
     _logger.info("Syncing in background");
   }
   try {
-    await SyncService.instance.sync(isAppInBackground: isAppInBackground);
+    await SyncService.instance.sync();
   } catch (e, s) {
     _logger.severe("Sync error", e, s);
   }
 }
 
-Future _runWithLogs(Function() function) async {
+Future _runWithLogs(Function() function, {String prefix = ""}) async {
   await SuperLogging.main(LogConfig(
     body: function,
     logDirPath: (await getTemporaryDirectory()).path + "/logs",
     maxLogFiles: 5,
     sentryDsn: kDebugMode ? SENTRY_DEBUG_DSN : SENTRY_DSN,
     enableInDebugMode: true,
+    prefix: prefix,
   ));
 }
 

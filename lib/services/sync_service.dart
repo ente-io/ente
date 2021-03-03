@@ -35,6 +35,7 @@ class SyncService {
   final _collectionsService = CollectionsService.instance;
   final _diffFetcher = DiffFetcher();
   bool _syncStopRequested = false;
+  bool _isBackground;
   Completer<void> _existingSync;
   SharedPreferences _prefs;
   SyncStatusUpdate _lastSyncStatusEvent;
@@ -53,7 +54,7 @@ class SyncService {
       _logger.info("Connectivity change detected " + result.toString());
       if (Configuration.instance.hasConfiguredAccount() &&
           BillingService.instance.getSubscription() != null) {
-        sync(isAppInBackground: true);
+        sync();
       }
     });
 
@@ -67,7 +68,8 @@ class SyncService {
 
   static final SyncService instance = SyncService._privateConstructor();
 
-  Future<void> init() async {
+  Future<void> init(bool isBackground) async {
+    _isBackground = isBackground;
     _prefs = await SharedPreferences.getInstance();
     if (Platform.isIOS) {
       _logger.info("Clearing file cache");
@@ -76,7 +78,7 @@ class SyncService {
     }
   }
 
-  Future<void> sync({bool isAppInBackground = false}) async {
+  Future<void> sync() async {
     _syncStopRequested = false;
     if (_existingSync != null) {
       _logger.warning("Sync already in progress, skipping.");
@@ -85,7 +87,7 @@ class SyncService {
     _existingSync = Completer<void>();
     bool successful = false;
     try {
-      await _doSync(isAppInBackground: isAppInBackground);
+      await _doSync();
       if (_lastSyncStatusEvent != null &&
           _lastSyncStatusEvent.status != SyncStatus.applying_local_diff) {
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
@@ -146,10 +148,10 @@ class SyncService {
     return _lastSyncStatusEvent;
   }
 
-  Future<void> _doSync({bool isAppInBackground = false}) async {
+  Future<void> _doSync() async {
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
-    if (isAppInBackground) {
+    if (_isBackground) {
       await PhotoManager.setIgnorePermissionCheck(true);
     } else {
       final result = await PhotoManager.requestPermission();
@@ -262,7 +264,7 @@ class SyncService {
       }
     }
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
-    final filesToBeUploaded =
+    var filesToBeUploaded =
         await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
     if (kDebugMode) {
       filesToBeUploaded
@@ -281,15 +283,21 @@ class SyncService {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
     }
 
+    final numberOfFilesCurrentlyUploaded =
+        await FilesDB.instance.getNumberOfUploadedFiles();
+
     final futures = List<Future>();
     for (final uploadedFileID in updatedFileIDs) {
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
-      final future = _uploader.upload(file, file.collectionID).then((value) {
+      final future =
+          _uploader.upload(file, file.collectionID).then((value) async {
         uploadCounter++;
+        final newTotal = await FilesDB.instance.getNumberOfUploadedFiles();
         Bus.instance
             .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
-            completed: uploadCounter, total: totalUploads));
+            completed: newTotal - numberOfFilesCurrentlyUploaded,
+            total: totalUploads));
       });
       futures.add(future);
     }
@@ -298,17 +306,19 @@ class SyncService {
       final collectionID = (await CollectionsService.instance
               .getOrCreateForPath(file.deviceFolder))
           .id;
-      final future = _uploader.upload(file, collectionID).then((value) {
+      final future = _uploader.upload(file, collectionID).then((value) async {
         uploadCounter++;
+        final newTotal = await FilesDB.instance.getNumberOfUploadedFiles();
         Bus.instance
             .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
-            completed: uploadCounter, total: totalUploads));
+            completed: newTotal - numberOfFilesCurrentlyUploaded,
+            total: totalUploads));
       });
       futures.add(future);
     }
     try {
-      await Future.wait(futures, eagerError: true);
+      await Future.wait(futures);
     } on InvalidFileError {
       // Do nothing
     } on FileSystemException {
