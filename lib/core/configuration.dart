@@ -19,6 +19,7 @@ class Configuration {
   Configuration._privateConstructor();
   static final Configuration instance = Configuration._privateConstructor();
   static final _logger = Logger("Configuration");
+  final kTempFolderDeletionTimeBuffer = Duration(days: 1).inMicroseconds;
 
   static const endpointKey = "endpoint";
   static const userIDKey = "user_id";
@@ -31,6 +32,7 @@ class Configuration {
   static const secretKeyKey = "secret_key";
   static const keyAttributesKey = "key_attributes";
   static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
+  static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
 
   SharedPreferences _preferences;
   FlutterSecureStorage _secureStorage;
@@ -47,8 +49,15 @@ class Configuration {
     _tempDirectory = _documentsDirectory + "/temp/";
     final tempDirectory = new io.Directory(_tempDirectory);
     try {
-      if (tempDirectory.existsSync()) {
+      final currentTime = DateTime.now().microsecondsSinceEpoch;
+      if (tempDirectory.existsSync() &&
+          (_preferences.getInt(lastTempFolderClearTimeKey) ?? 0) <
+              (currentTime - kTempFolderDeletionTimeBuffer)) {
         tempDirectory.deleteSync(recursive: true);
+        await _preferences.setInt(lastTempFolderClearTimeKey, currentTime);
+        _logger.info("Cleared temp folder");
+      } else {
+        _logger.info("Skipping temp folder clear");
       }
     } catch (e) {
       _logger.warning(e);
