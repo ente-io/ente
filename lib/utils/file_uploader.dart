@@ -7,6 +7,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/common_keys.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
@@ -24,6 +25,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FileUploader {
   final _logger = Logger("FileUploader");
@@ -34,6 +36,7 @@ class FileUploader {
   final kMaximumThumbnailCompressionAttempts = 2;
   final kMaximumUploadAttempts = 4;
   final kSafeBufferForLockExpiry = Duration(days: 1).inMicroseconds;
+
   int _currentlyUploading = 0;
   LockOwner _lockOwner;
   final _uploadURLs = Queue<UploadURL>();
@@ -309,6 +312,11 @@ class FileUploader {
         await FilesDB.instance.update(remoteFile);
       }
       FileRepository.instance.reloadFiles();
+      if (_lockOwner == LockOwner.background_process) {
+        (await SharedPreferences.getInstance()).setInt(
+            kLastBackgroundUploadTimeKey,
+            DateTime.now().microsecondsSinceEpoch);
+      }
       _logger.info("File upload complete for " + remoteFile.toString());
       return remoteFile;
     } catch (e, s) {
