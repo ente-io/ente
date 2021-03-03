@@ -469,7 +469,9 @@ class FileUploader {
             .map((e) => UploadURL.fromMap(e))
             .toList();
         _uploadURLs.addAll(urls);
+        completer.complete();
       } on DioError catch (e) {
+        completer.completeError(e);
         if (e.response != null) {
           if (e.response.statusCode == 402) {
             _onExpiredSubscription();
@@ -478,9 +480,9 @@ class FileUploader {
           }
         }
         throw e;
+      } finally {
+        _uploadURLFetchInProgress = null;
       }
-      _uploadURLFetchInProgress = null;
-      completer.complete();
     }
     return _uploadURLFetchInProgress;
   }
