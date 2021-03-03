@@ -16,6 +16,11 @@ class SyncStatusUpdate extends Event {
     this.reason = "",
     this.error,
   });
+
+  @override
+  String toString() {
+    return 'SyncStatusUpdate(completed: $completed, total: $total, wasStopped: $wasStopped, status: $status, reason: $reason, error: $error)';
+  }
 }
 
 enum SyncStatus {

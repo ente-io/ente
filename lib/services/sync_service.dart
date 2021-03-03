@@ -57,6 +57,9 @@ class SyncService {
     });
 
     Bus.instance.on<SyncStatusUpdate>().listen((event) {
+      if (event.status != SyncStatus.in_progress) {
+        _logger.info("Sync status received " + event.toString());
+      }
       _lastSyncStatusEvent = event;
     });
   }
