@@ -18,7 +18,7 @@ const TYPE_VIDEO = 'video';
 const TYPE_JSON = 'json';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
-const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
+const MIN_STREAM_FILE_SIZE = 10 * 1024 * 1024;
 const CHUNK_SIZE = 8 * 1024 * 1024;
 
 export interface DataStream {
@@ -689,16 +689,20 @@ class UploadService {
         let streamEncryptedFileReader = file.getReader();
         const resParts = [];
         for (const [index, fileUploadURL] of filePartUploadURLs.entries()) {
-            let { value } = await streamEncryptedFileReader.read();
+            let { done, value } = await streamEncryptedFileReader.read();
+            if (done) {
+                break;
+            }
             const response = await HTTPService.put(fileUploadURL.url, value);
+            console.log(response.headers);
             resParts.push({
-                eTag: response.headers.etag,
-                partNumber: index + 1,
+                ETag: response.headers.etag,
+                PartNumber: index + 1,
             });
         }
         await HTTPService.post(
             filePartUploadURLs[filePartUploadURLs.length - 1].url,
-            { Parts: resParts }
+            { MultipartUpload: { Parts: resParts } }
         );
         return filePartUploadURLs[0].objectKey;
     }
