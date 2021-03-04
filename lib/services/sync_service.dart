@@ -6,7 +6,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_cache_manager.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
-import 'package:photos/core/common_keys.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
@@ -79,10 +78,6 @@ class SyncService {
       _logger.info("Clearing file cache");
       await PhotoManager.clearFileCache();
       _logger.info("Cleared file cache");
-    }
-
-    if (!_isBackground) {
-      _pollForBackgroundUploads();
     }
   }
 
@@ -414,18 +409,5 @@ class SyncService {
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         )
         .catchError((e) => _logger.severe(e));
-  }
-
-  Future<void> _pollForBackgroundUploads() async {
-    await _prefs.reload();
-    final time = _prefs.getInt(kLastBackgroundUploadTimeKey);
-    if ((_prefs.getInt(kLastBackgroundUploadDetectedTime) ?? 0) < (time ?? 0)) {
-      FileRepository.instance.reloadFiles();
-      await _prefs.setInt(kLastBackgroundUploadDetectedTime,
-          DateTime.now().microsecondsSinceEpoch);
-    }
-    Future.delayed(kBackgroundUploadPollFrequency, () async {
-      await _pollForBackgroundUploads();
-    });
   }
 }

@@ -7,7 +7,6 @@ import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/common_keys.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
@@ -33,6 +32,7 @@ class FileUploader {
   static const kMaximumUploadAttempts = 4;
   static const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
   static const kBGHeartBeatFrequency = Duration(seconds: 1);
+  static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
 
   final _logger = Logger("FileUploader");
   final _dio = Network.instance.getDio();
@@ -75,6 +75,7 @@ class FileUploader {
             ProcessType.background.toString(), currentTime);
         _logger.info("BG task was found dead, cleared all locks");
       }
+      _pollBlockedUploads();
     }
   }
 
@@ -123,7 +124,8 @@ class FileUploader {
     }
     var item = _queue[file.localID];
     // If the file is being uploaded right now, wait and proceed
-    if (item.status == UploadStatus.in_progress) {
+    if (item.status == UploadStatus.in_progress ||
+        item.status == UploadStatus.blocked) {
       final uploadedFile = await item.completer.future;
       if (uploadedFile.collectionID == collectionID) {
         // Do nothing
@@ -189,8 +191,13 @@ class FileUploader {
       _queue.remove(file.localID).completer.complete(uploadedFile);
       return uploadedFile;
     } catch (e) {
-      _queue.remove(file.localID).completer.completeError(e);
-      return null;
+      if (e is LockAlreadyAcquiredError) {
+        _queue[file.localID].status = UploadStatus.blocked;
+        return _queue[file.localID].completer.future;
+      } else {
+        _queue.remove(file.localID).completer.completeError(e);
+        return null;
+      }
     } finally {
       _currentlyUploading--;
       _pollQueue();
@@ -336,11 +343,7 @@ class FileUploader {
         );
         await FilesDB.instance.update(remoteFile);
       }
-      if (_processType == ProcessType.background) {
-        final time = DateTime.now().microsecondsSinceEpoch;
-        await _prefs.setInt(kLastBackgroundUploadTimeKey, time);
-        _logger.info("Updated background: " + time.toString());
-      } else {
+      if (!_isBackground) {
         FileRepository.instance.reloadFiles();
       }
       _logger.info("File upload complete for " + remoteFile.toString());
@@ -576,6 +579,24 @@ class FileUploader {
       await _scheduleBGHeartBeat();
     });
   }
+
+  Future<void> _pollBlockedUploads() async {
+    final blockedUploads = _queue.entries
+        .where((e) => e.value.status == UploadStatus.blocked)
+        .toList();
+    for (final upload in blockedUploads) {
+      final dbFile =
+          await FilesDB.instance.getFile(upload.value.file.generatedID);
+      if (dbFile.uploadedFileID != null) {
+        _logger.info("Background upload detected");
+        // File was uploaded in the background
+        _queue.remove(upload.key).completer.complete(dbFile);
+      }
+    }
+    Future.delayed(kBlockedUploadsPollFrequency, () async {
+      await _pollBlockedUploads();
+    });
+  }
 }
 
 class FileUploadItem {
@@ -595,6 +616,7 @@ class FileUploadItem {
 enum UploadStatus {
   not_started,
   in_progress,
+  blocked,
   completed,
 }
 
