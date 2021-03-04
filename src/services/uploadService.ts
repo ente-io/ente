@@ -574,17 +574,14 @@ class UploadService {
         return {
             stream: new ReadableStream<Uint8Array>({
                 async start(controller) {
-                    while (true) {
+                    while (offset < fileSize) {
                         let blob = file.slice(offset, CHUNK_SIZE + offset);
                         let fileChunk = await self.getUint8ArrayView(
                             reader,
                             blob
                         );
-                        if (offset >= fileSize) {
-                            break;
-                        }
-                        offset += CHUNK_SIZE;
                         controller.enqueue(fileChunk);
+                        offset += CHUNK_SIZE;
                     }
                     controller.close();
                 },
