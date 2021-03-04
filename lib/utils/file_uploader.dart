@@ -65,6 +65,7 @@ class FileUploader {
     if (isBackground) {
       _scheduleBGHeartBeat();
     } else {
+      await _prefs.reload();
       final isBGTaskDead = (_prefs.getInt(kLastBGTaskHeartBeatTime) ?? 0) <
           (currentTime - kBGTaskDeathTimeout);
       if (isBGTaskDead) {
