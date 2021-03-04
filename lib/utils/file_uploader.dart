@@ -75,7 +75,7 @@ class FileUploader {
             ProcessType.background.toString(), currentTime);
         _logger.info("BG task was found dead, cleared all locks");
       }
-      _pollBlockedUploads();
+      _pollBackgroundUploads();
     }
   }
 
@@ -125,7 +125,7 @@ class FileUploader {
     var item = _queue[file.localID];
     // If the file is being uploaded right now, wait and proceed
     if (item.status == UploadStatus.in_progress ||
-        item.status == UploadStatus.blocked) {
+        item.status == UploadStatus.in_background) {
       final uploadedFile = await item.completer.future;
       if (uploadedFile.collectionID == collectionID) {
         // Do nothing
@@ -192,7 +192,7 @@ class FileUploader {
       return uploadedFile;
     } catch (e) {
       if (e is LockAlreadyAcquiredError) {
-        _queue[file.localID].status = UploadStatus.blocked;
+        _queue[file.localID].status = UploadStatus.in_background;
         return _queue[file.localID].completer.future;
       } else {
         _queue.remove(file.localID).completer.completeError(e);
@@ -580,9 +580,9 @@ class FileUploader {
     });
   }
 
-  Future<void> _pollBlockedUploads() async {
+  Future<void> _pollBackgroundUploads() async {
     final blockedUploads = _queue.entries
-        .where((e) => e.value.status == UploadStatus.blocked)
+        .where((e) => e.value.status == UploadStatus.in_background)
         .toList();
     for (final upload in blockedUploads) {
       final dbFile =
@@ -594,7 +594,7 @@ class FileUploader {
       }
     }
     Future.delayed(kBlockedUploadsPollFrequency, () async {
-      await _pollBlockedUploads();
+      await _pollBackgroundUploads();
     });
   }
 }
@@ -616,7 +616,7 @@ class FileUploadItem {
 enum UploadStatus {
   not_started,
   in_progress,
-  blocked,
+  in_background,
   completed,
 }
 
