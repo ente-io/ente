@@ -39,6 +39,7 @@ class FileUploader {
 
   int _currentlyUploading = 0;
   ProcessType _processType;
+  SharedPreferences _prefs;
   final _uploadURLs = Queue<UploadURL>();
 
   FileUploader._privateConstructor() {
@@ -49,6 +50,7 @@ class FileUploader {
   static FileUploader instance = FileUploader._privateConstructor();
 
   Future<void> init(bool isBackground) async {
+    _prefs = await SharedPreferences.getInstance();
     _processType =
         isBackground ? ProcessType.background : ProcessType.foreground;
     await _uploadLocks.releaseLocksAcquiredByOwnerBefore(
@@ -312,8 +314,7 @@ class FileUploader {
       }
       if (_processType == ProcessType.background) {
         final time = DateTime.now().microsecondsSinceEpoch;
-        (await SharedPreferences.getInstance())
-            .setInt(kLastBackgroundUploadTimeKey, time);
+        await _prefs.setInt(kLastBackgroundUploadTimeKey, time);
         _logger.info("Updated background: " + time.toString());
       } else {
         FileRepository.instance.reloadFiles();
@@ -462,35 +463,37 @@ class FileUploader {
 
   Future<void> _fetchUploadURLs() async {
     if (_uploadURLFetchInProgress == null) {
-      final completer = Completer<void>();
-      _uploadURLFetchInProgress = completer.future;
-      try {
-        final response = await _dio.get(
-          Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
-          queryParameters: {
-            "count": min(42, 2 * _queue.length), // m4gic number
-          },
-          options: Options(
-              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-        );
-        final urls = (response.data["urls"] as List)
-            .map((e) => UploadURL.fromMap(e))
-            .toList();
-        _uploadURLs.addAll(urls);
-        completer.complete();
-      } on DioError catch (e) {
-        completer.completeError(e);
-        if (e.response != null) {
-          if (e.response.statusCode == 402) {
-            _onExpiredSubscription();
-          } else if (e.response.statusCode == 426) {
-            _onStorageLimitExceeded();
+      _uploadURLFetchInProgress = Future<void>(() async {
+        try {
+          final response = await _dio.get(
+            Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
+            queryParameters: {
+              "count": min(42, 2 * _queue.length), // m4gic number
+            },
+            options: Options(
+                headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+          );
+          final urls = (response.data["urls"] as List)
+              .map((e) => UploadURL.fromMap(e))
+              .toList();
+          _uploadURLs.addAll(urls);
+          _uploadURLFetchInProgress = null;
+        } on DioError catch (e) {
+          _uploadURLFetchInProgress = null;
+          if (e.response != null) {
+            if (e.response.statusCode == 402) {
+              final error = NoActiveSubscriptionError();
+              clearQueue(error);
+              throw error;
+            } else if (e.response.statusCode == 426) {
+              final error = StorageLimitExceededError();
+              clearQueue(error);
+              throw error;
+            }
           }
+          throw e;
         }
-        throw e;
-      } finally {
-        _uploadURLFetchInProgress = null;
-      }
+      });
     }
     return _uploadURLFetchInProgress;
   }
