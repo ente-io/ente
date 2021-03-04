@@ -1,6 +1,6 @@
 import sodium from 'libsodium-wrappers';
 
-const encryptionChunkSize = 4 * 1024 * 1024;
+export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
 
 export async function decryptChaChaOneShot(
     data: Uint8Array,
@@ -31,7 +31,7 @@ export async function decryptChaCha(
         await fromB64(key)
     );
     const decryptionChunkSize =
-        encryptionChunkSize +
+        ENCRYPTION_CHUNK_SIZE +
         sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
     var bytesRead = 0;
     var decryptedData = [];
@@ -98,7 +98,7 @@ export async function encryptChaCha(data: Uint8Array, key?: string) {
     let encryptedData = [];
 
     while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
-        let chunkSize = encryptionChunkSize;
+        let chunkSize = ENCRYPTION_CHUNK_SIZE;
         if (bytesRead + chunkSize >= data.length) {
             chunkSize = data.length - bytesRead;
             tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL;
