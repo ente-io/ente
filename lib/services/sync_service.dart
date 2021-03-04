@@ -6,6 +6,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_cache_manager.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
+import 'package:photos/core/common_keys.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
@@ -35,13 +36,16 @@ class SyncService {
   final _collectionsService = CollectionsService.instance;
   final _diffFetcher = DiffFetcher();
   bool _syncStopRequested = false;
-  bool _isBackground;
+  bool _isBackground = false;
   Completer<void> _existingSync;
   SharedPreferences _prefs;
   SyncStatusUpdate _lastSyncStatusEvent;
 
-  static final _dbUpdationTimeKey = "db_updation_time";
-  static final _diffLimit = 200;
+  static const kDbUpdationTimeKey = "db_updation_time";
+  static const kLastBackgroundUploadDetectedTime =
+      "last_background_upload_detected_time";
+  static const kDiffLimit = 200;
+  static const kBackgroundUploadPollFrequency = Duration(seconds: 1);
 
   SyncService._privateConstructor() {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
@@ -75,6 +79,10 @@ class SyncService {
       _logger.info("Clearing file cache");
       await PhotoManager.clearFileCache();
       _logger.info("Cleared file cache");
+    }
+
+    if (!_isBackground) {
+      _pollForBackgroundUploads();
     }
   }
 
@@ -138,7 +146,7 @@ class SyncService {
   }
 
   bool hasScannedDisk() {
-    return _prefs.containsKey(_dbUpdationTimeKey);
+    return _prefs.containsKey(kDbUpdationTimeKey);
   }
 
   bool isSyncInProgress() {
@@ -158,12 +166,12 @@ class SyncService {
       final result = await PhotoManager.requestPermission();
       if (!result) {
         _logger.severe("Did not get permission");
-        await _prefs.setInt(_dbUpdationTimeKey, syncStartTime);
+        await _prefs.setInt(kDbUpdationTimeKey, syncStartTime);
         await FileRepository.instance.reloadFiles();
         return await syncWithRemote();
       }
     }
-    final lastDBUpdationTime = _prefs.getInt(_dbUpdationTimeKey) ?? 0;
+    final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
     if (lastDBUpdationTime != 0) {
       await _loadAndStorePhotos(
           lastDBUpdationTime, syncStartTime, existingLocalFileIDs);
@@ -211,7 +219,7 @@ class SyncService {
       _logger.info("Inserted " + files.length.toString() + " files.");
       await FileRepository.instance.reloadFiles();
     }
-    await _prefs.setInt(_dbUpdationTimeKey, toTime);
+    await _prefs.setInt(kDbUpdationTimeKey, toTime);
   }
 
   Future<void> syncWithRemote({bool silently = false}) async {
@@ -241,7 +249,7 @@ class SyncService {
     final diff = await _diffFetcher.getEncryptedFilesDiff(
       collectionID,
       _collectionsService.getCollectionSyncTime(collectionID),
-      _diffLimit,
+      kDiffLimit,
     );
     if (diff.updatedFiles.isNotEmpty) {
       await _storeDiff(diff.updatedFiles, collectionID);
@@ -251,7 +259,7 @@ class SyncService {
           collectionID.toString());
       FileRepository.instance.reloadFiles();
       Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
-      if (diff.fetchCount == _diffLimit) {
+      if (diff.fetchCount == kDiffLimit) {
         return await _syncCollectionDiff(collectionID);
       }
     }
@@ -406,5 +414,18 @@ class SyncService {
               headers: {"X-Auth-Token": Configuration.instance.getToken()}),
         )
         .catchError((e) => _logger.severe(e));
+  }
+
+  Future<void> _pollForBackgroundUploads() async {
+    await _prefs.reload();
+    final time = _prefs.getInt(kLastBackgroundUploadTimeKey);
+    if ((_prefs.getInt(kLastBackgroundUploadDetectedTime) ?? 0) < (time ?? 0)) {
+      FileRepository.instance.reloadFiles();
+      await _prefs.setInt(kLastBackgroundUploadDetectedTime,
+          DateTime.now().microsecondsSinceEpoch);
+    }
+    Future.delayed(kBackgroundUploadPollFrequency, () async {
+      await _pollForBackgroundUploads();
+    });
   }
 }

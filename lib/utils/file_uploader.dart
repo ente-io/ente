@@ -310,11 +310,13 @@ class FileUploader {
         );
         await FilesDB.instance.update(remoteFile);
       }
-      FileRepository.instance.reloadFiles();
       if (_processType == ProcessType.background) {
-        (await SharedPreferences.getInstance()).setInt(
-            kLastBackgroundUploadTimeKey,
-            DateTime.now().microsecondsSinceEpoch);
+        final time = DateTime.now().microsecondsSinceEpoch;
+        (await SharedPreferences.getInstance())
+            .setInt(kLastBackgroundUploadTimeKey, time);
+        _logger.info("Updated background: " + time.toString());
+      } else {
+        FileRepository.instance.reloadFiles();
       }
       _logger.info("File upload complete for " + remoteFile.toString());
       return remoteFile;
