@@ -7,6 +7,7 @@ import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity } from 'utils/common/utilFunctions';
 import { ErrorHandler } from 'utils/common/errorUtil';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
+import * as convert from 'xml-js';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;
@@ -693,13 +694,20 @@ class UploadService {
             const response = await HTTPService.put(fileUploadURL.url, value);
             console.log(response.headers);
             resParts.push({
-                ETag: response.headers.etag,
                 PartNumber: index + 1,
+                ETag: response.headers.etag,
             });
         }
+        var options = { compact: true, ignoreComment: true, spaces: 4 };
+        const body = convert.js2xml(
+            { CompleteMultipartUpload: { Part: resParts } },
+            options
+        );
         await HTTPService.post(
             filePartUploadURLs[filePartUploadURLs.length - 1].url,
-            { MultipartUpload: { Parts: resParts } }
+            body,
+            null,
+            { 'content-type': 'text/xml' }
         );
         return filePartUploadURLs[0].objectKey;
     }
