@@ -78,13 +78,13 @@ const englishConstants = {
     ALBUM_NAME: 'album name',
     CREATE: 'create',
     DOWNLOAD: 'download',
-    TOGGLE_FULLSCREEN: 'Toggle fullscreen',
-    ZOOM_IN_OUT: 'Zoom in/out',
-    PREVIOUS: 'Previous (arrow left)',
-    NEXT: 'Next (arrow right)',
+    TOGGLE_FULLSCREEN: 'toggle fullscreen',
+    ZOOM_IN_OUT: 'zoom in/out',
+    PREVIOUS: 'previous (arrow left)',
+    NEXT: 'next (arrow right)',
     NO_INTERNET_CONNECTION:
-        'You seem to be offline please check your internet connection and try again',
-    TITLE: 'ente.io | Encrypted Photo Storage',
+        'please check your internet connection and try again',
+    TITLE: 'ente.io | encrypted photo storage',
 };
 
 export default englishConstants;
