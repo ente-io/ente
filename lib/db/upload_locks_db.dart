@@ -53,12 +53,22 @@ class UploadLocksDB {
     await db.insert(_table, row, conflictAlgorithm: ConflictAlgorithm.fail);
   }
 
+  Future<bool> isLocked(String id, String owner) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      _table,
+      where: '$_columnID = ? AND $_columnOwner = ?',
+      whereArgs: [id, owner.toString()],
+    );
+    return rows.length == 1;
+  }
+
   Future<int> releaseLock(String id, String owner) async {
     final db = await instance.database;
     return db.delete(
       _table,
       where: '$_columnID = ? AND $_columnOwner = ?',
-      whereArgs: [id, owner.toString()],
+      whereArgs: [id, owner],
     );
   }
 
@@ -67,7 +77,7 @@ class UploadLocksDB {
     return db.delete(
       _table,
       where: '$_columnOwner = ? AND $_columnTime < ?',
-      whereArgs: [owner.toString(), time],
+      whereArgs: [owner, time],
     );
   }
 

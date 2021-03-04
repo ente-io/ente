@@ -75,7 +75,7 @@ class FileUploader {
             ProcessType.background.toString(), currentTime);
         _logger.info("BG task was found dead, cleared all locks");
       }
-      _pollBackgroundUploads();
+      _pollBackgroundUploadStatus();
     }
   }
 
@@ -580,21 +580,29 @@ class FileUploader {
     });
   }
 
-  Future<void> _pollBackgroundUploads() async {
+  Future<void> _pollBackgroundUploadStatus() async {
     final blockedUploads = _queue.entries
         .where((e) => e.value.status == UploadStatus.in_background)
         .toList();
     for (final upload in blockedUploads) {
-      final dbFile =
-          await FilesDB.instance.getFile(upload.value.file.generatedID);
-      if (dbFile.uploadedFileID != null) {
-        _logger.info("Background upload detected");
-        // File was uploaded in the background
-        _queue.remove(upload.key).completer.complete(dbFile);
+      final file = upload.value.file;
+      final isStillLocked = await _uploadLocks.isLocked(
+          file.localID, ProcessType.background.toString());
+      if (!isStillLocked) {
+        final completer = _queue.remove(upload.key).completer;
+        final dbFile =
+            await FilesDB.instance.getFile(upload.value.file.generatedID);
+        if (dbFile.uploadedFileID != null) {
+          _logger.info("Background upload success detected");
+          completer.complete(dbFile);
+        } else {
+          _logger.info("Background upload failure detected");
+          completer.completeError(SilentlyCancelUploadsError());
+        }
       }
     }
     Future.delayed(kBlockedUploadsPollFrequency, () async {
-      await _pollBackgroundUploads();
+      await _pollBackgroundUploadStatus();
     });
   }
 }
