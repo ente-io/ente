@@ -18,7 +18,17 @@ const TYPE_VIDEO = 'video';
 const TYPE_JSON = 'json';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
+const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
+const CHUNK_SIZE = 8 * 1024 * 1024;
 
+export interface DataStream {
+    stream: ReadableStream<Uint8Array>;
+    chunkCount: number;
+}
+
+function isDataStream(object: any): object is DataStream {
+    return 'stream' in object;
+}
 interface EncryptionResult {
     file: fileAttribute;
     key: string;
@@ -44,7 +54,7 @@ export interface MetadataObject {
 }
 
 interface FileinMemory {
-    filedata: ReadableStream<Uint8Array>;
+    filedata: Uint8Array | DataStream;
     thumbnail: Uint8Array;
     metadata: MetadataObject;
 }
@@ -166,8 +176,9 @@ class UploadService {
         token: string
     ) {
         try {
-            let file: FileinMemory = this.readFile(reader, rawFile);
-            // let streamFileReader = file.filedata.getReader();
+            let file: FileinMemory = await this.readFile(reader, rawFile);
+            // console.log(file);
+            // let streamFileReader = file.filedata.stream.getReader();
             // while (true) {
             //     let { done, value } = await streamFileReader.read();
             //     if (done) {
@@ -175,6 +186,7 @@ class UploadService {
             //     }
             //     console.log('reading file chunk -> ', value);
             // }
+            // return;
             let {
                 file: encryptedFile,
                 fileKey: encryptedKey,
@@ -183,13 +195,21 @@ class UploadService {
                 file,
                 collection.key
             );
-
-            file = null;
+            // console.log(encryptedFile);
+            // let streamFileReader = encryptedFile.file.encryptedData.stream.getReader();
+            // while (true) {
+            //     let { done, value } = await streamFileReader.read();
+            //     if (done) {
+            //         break;
+            //     }
+            //     console.log('reading file chunk -> ', value);
+            // }
+            // return;
             let backupedFile: BackupedFile = await this.uploadtoBucket(
                 encryptedFile,
                 token
             );
-            return;
+            file = null;
             encryptedFile = null;
             let uploadFile: uploadFile = this.getuploadFile(
                 collection,
@@ -231,49 +251,51 @@ class UploadService {
         this.setUploadErrors(this.uploadErrors);
     }
 
-    private readFile(reader: FileReader, recievedFile: File) {
+    private async readFile(reader: FileReader, recievedFile: File) {
         try {
-            const filedata: ReadableStream<Uint8Array> = this.getFileStream(
+            console.log(recievedFile.size > MIN_STREAM_FILE_SIZE);
+            const filedata =
+                recievedFile.size > MIN_STREAM_FILE_SIZE
+                    ? this.getFileStream(reader, recievedFile)
+                    : await this.getUint8ArrayView(reader, recievedFile);
+
+            const thumbnail = await this.generateThumbnail(
                 reader,
                 recievedFile
             );
-            // const thumbnail = await this.generateThumbnail(
-            //     reader,
-            //     recievedFile
-            // );
 
-            // let fileType: FILE_TYPE;
-            // switch (recievedFile.type.split('/')[0]) {
-            //     case TYPE_IMAGE:
-            //         fileType = FILE_TYPE.IMAGE;
-            //         break;
-            //     case TYPE_VIDEO:
-            //         fileType = FILE_TYPE.VIDEO;
-            //         break;
-            //     default:
-            //         fileType = FILE_TYPE.OTHERS;
-            // }
+            let fileType: FILE_TYPE;
+            switch (recievedFile.type.split('/')[0]) {
+                case TYPE_IMAGE:
+                    fileType = FILE_TYPE.IMAGE;
+                    break;
+                case TYPE_VIDEO:
+                    fileType = FILE_TYPE.VIDEO;
+                    break;
+                default:
+                    fileType = FILE_TYPE.OTHERS;
+            }
 
-            // const { location, creationTime } = await this.getExifData(
-            //     reader,
-            //     recievedFile
-            // );
-            // const metadata = Object.assign(
-            //     {
-            //         title: recievedFile.name,
-            //         creationTime:
-            //             creationTime || recievedFile.lastModified * 1000,
-            //         modificationTime: recievedFile.lastModified * 1000,
-            //         latitude: location?.latitude,
-            //         longitude: location?.latitude,
-            //         fileType,
-            //     },
-            //     this.metadataMap.get(recievedFile.name)
-            // );
+            const { location, creationTime } = await this.getExifData(
+                reader,
+                recievedFile
+            );
+            const metadata = Object.assign(
+                {
+                    title: recievedFile.name,
+                    creationTime:
+                        creationTime || recievedFile.lastModified * 1000,
+                    modificationTime: recievedFile.lastModified * 1000,
+                    latitude: location?.latitude,
+                    longitude: location?.latitude,
+                    fileType,
+                },
+                this.metadataMap.get(recievedFile.name)
+            );
             return {
                 filedata,
-                thumbnail: null,
-                metadata: null,
+                thumbnail,
+                metadata,
             };
         } catch (e) {
             console.log('error reading files ', e);
@@ -281,43 +303,45 @@ class UploadService {
         }
     }
     private async encryptFile(
-        worker,
+        worker: any,
         file: FileinMemory,
         encryptionKey: string
     ): Promise<EncryptedFile> {
         try {
             const {
+                key: fileKey,
+                file: encryptedFiledata,
+            }: EncryptionResult = isDataStream(file.filedata)
+                ? await this.encryptFileStream(worker, file.filedata)
+                : await worker.encryptFile(file.filedata);
+
+            const {
+                file: encryptedThumbnail,
+            }: EncryptionResult = await worker.encryptThumbnail(
+                file.thumbnail,
+                fileKey
+            );
+            const {
+                file: encryptedMetadata,
+            }: EncryptionResult = await worker.encryptMetadata(
+                file.metadata,
+                fileKey
+            );
+
+            const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
                 fileKey,
-                fileDecryptionHeader,
-                encryptedFiledata,
-            } = await this.encryptFileStream(worker, file.filedata);
-
-            // const {
-            //     file: encryptedThumbnail,
-            // }: EncryptionResult = await worker.encryptThumbnail(
-            //     file.thumbnail,
-            //     fileKey
-            // );
-            // const {
-            //     file: encryptedMetadata,
-            // }: EncryptionResult = await worker.encryptMetadata(
-            //     file.metadata,
-            //     fileKey
-            // );
-
-            // const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
-            //     fileKey,
-            //     encryptionKey
-            // );
+                encryptionKey
+            );
 
             const result: EncryptedFile = {
                 file: {
                     file: encryptedFiledata,
-                    thumbnail: null,
-                    metadata: null,
+                    thumbnail: encryptedThumbnail,
+                    metadata: encryptedMetadata,
                 },
-                fileKey: null,
+                fileKey: encryptedKey,
             };
+            console.log(result);
             return result;
         } catch (e) {
             console.log('Error encrypting files ', e);
@@ -325,8 +349,10 @@ class UploadService {
         }
     }
 
-    private async encryptFileStream(worker, fileData) {
-        const fileStreamReader = fileData.getReader();
+    private async encryptFileStream(worker, fileData: DataStream) {
+        console.log(fileData);
+        const { stream, chunkCount } = fileData;
+        const fileStreamReader = stream.getReader();
         const {
             key,
             decryptionHeader,
@@ -335,14 +361,14 @@ class UploadService {
 
         const encryptedFileStream = new ReadableStream({
             async start(controller) {
-                while (true) {
+                for (let i = 0; i < chunkCount; i++) {
                     let { done, value } = await fileStreamReader.read();
-                    // console.log({ done, value });
+                    console.log({ done, value });
 
                     const encryptedFileChunk = await worker.encryptFileChunk(
-                        value ?? new Uint8Array(),
+                        value,
                         pushState,
-                        done
+                        i === chunkCount - 1
                     );
                     controller.enqueue(encryptedFileChunk);
                     if (done) {
@@ -353,35 +379,41 @@ class UploadService {
             },
         });
         return {
-            fileKey: key,
-            fileDecryptionHeader: decryptionHeader,
-            encryptedFiledata: encryptedFileStream,
+            key,
+            file: {
+                decryptionHeader,
+                encryptedData: { stream: encryptedFileStream, chunkCount },
+            } as fileAttribute,
         };
     }
 
     private async uploadtoBucket(
         file: ProcessedFile,
-        token
+        token: string
     ): Promise<BackupedFile> {
         try {
-            // let streamEncryptedFileReader = file.file.getReader();
-            // while (true) {
-            //     let { done, value } = await streamEncryptedFileReader.read();
-            //     if (done) {
-            //         break;
-            //     }
-            //     console.log('reading encrypted file chunk -> ', value);
-            // }
-            // return;
-            const fileUploadURL = await this.getUploadURL(token);
-            file.file.objectKey = await this.putFile(fileUploadURL, file.file);
-            return;
-
+            if (isDataStream(file.file.encryptedData)) {
+                const { chunkCount, stream } = file.file.encryptedData;
+                const filePartUploadURLs = await this.fetchUploadPartURLs(
+                    token,
+                    chunkCount
+                );
+                file.file.objectKey = await this.putFileInParts(
+                    filePartUploadURLs,
+                    stream
+                );
+            } else {
+                const fileUploadURL = await this.getUploadURL(token);
+                file.file.objectKey = await this.putFile(
+                    fileUploadURL,
+                    file.file.encryptedData
+                );
+            }
             const thumbnailUploadURL = await this.getUploadURL(token);
-            // file.thumbnail.objectKey = await this.putFile(
-            //     thumbnailUploadURL,
-            //     file.thumbnail.encryptedData
-            // );
+            file.thumbnail.objectKey = await this.putFile(
+                thumbnailUploadURL,
+                file.thumbnail.encryptedData as Uint8Array
+            );
             delete file.file.encryptedData;
             delete file.thumbnail.encryptedData;
 
@@ -560,25 +592,30 @@ class UploadService {
         }
     }
 
-    private getFileStream(reader, file) {
+    private getFileStream(reader: FileReader, file: File) {
         let fileSize = file.size;
-        let chunkSize = 4 * 1024 * 1024; // bytes
         let offset = 0;
         let self = this;
-        return new ReadableStream<Uint8Array>({
-            async start(controller) {
-                while (true) {
-                    let blob = file.slice(offset, chunkSize + offset);
-                    let fileChunk = await self.getUint8ArrayView(reader, blob);
-                    offset += chunkSize;
-                    if (offset >= fileSize) {
-                        break;
+        return {
+            stream: new ReadableStream<Uint8Array>({
+                async start(controller) {
+                    while (true) {
+                        let blob = file.slice(offset, CHUNK_SIZE + offset);
+                        let fileChunk = await self.getUint8ArrayView(
+                            reader,
+                            blob
+                        );
+                        if (offset >= fileSize) {
+                            break;
+                        }
+                        offset += CHUNK_SIZE;
+                        controller.enqueue(fileChunk);
                     }
-                    controller.enqueue(fileChunk);
-                }
-                controller.close();
-            },
-        });
+                    controller.close();
+                },
+            }),
+            chunkCount: Math.ceil(fileSize / CHUNK_SIZE),
+        };
     }
 
     private async getUint8ArrayView(
@@ -637,100 +674,58 @@ class UploadService {
         }
     }
 
+    private async fetchUploadPartURLs(
+        token: string,
+        count: number
+    ): Promise<UploadURL[]> {
+        try {
+            const response = await HTTPService.get(
+                `${ENDPOINT}/files/part-upload-urls`,
+                {
+                    count,
+                },
+                { 'X-Auth-Token': token }
+            );
+
+            return response.data['urls'];
+        } catch (e) {
+            console.log('fetch part-upload-url failed ', e);
+            throw e;
+        }
+    }
+
     private async putFile(
         fileUploadURL: UploadURL,
-        file: ReadableStream<Uint8Array>
+        file: Uint8Array
     ): Promise<string> {
         try {
-            // Server should respond with postBody text value, indicating it was sent and received.
-            // const post = async (postBody) => {
-            //     const response = await fetch(
-            //         'https://dev.anthum.com/post-test/',
-            //         {
-            //             body: postBody,
-            //             headers: { 'content-type': 'text/plain' },
-            //             method: 'POST',
-            //             allowHTTP1ForStreamingUpload: true,
-            //         }
-            //     );
-            //     console.log(await response.text());
-            // };
-
-            // const wait = function (milliseconds) {
-            //     return new Promise((resolve) =>
-            //         setTimeout(resolve, milliseconds)
-            //     );
-            // };
-
-            // await post(
-            //     new ReadableStream({
-            //         async start(controller) {
-            //             controller.enqueue(new TextEncoder().encode('hello'));
-            //             await wait(1000);
-            //             console.log('g');
-            //             controller.enqueue(new TextEncoder().encode('hello'));
-            //             await wait(1000);
-            //             console.log('g');
-
-            //             controller.enqueue(new TextEncoder().encode('hello'));
-            //             await wait(1000);
-            //             console.log('g');
-
-            //             controller.enqueue(new TextEncoder().encode('hello'));
-            //             await wait(1000);
-            //             console.log('g');
-
-            //             controller.enqueue(new TextEncoder().encode('hello'));
-            //             await wait(1000);
-            //             controller.enqueue(new TextEncoder().encode('hello'));
-            //             controller.close();
-            //         },
-            //     })
-            // );
-
-            // let streamEncryptedFileReader = file.getReader();
-            // while (true) {
-            //     let { done, value } = await streamEncryptedFileReader.read();
-            //     if (done) {
-            //         break;
-            //     }
-            //     console.log('reading uploading file chunk -> ', value);
-            // }
-            // return;
-
-            // const stream = new ReadableStream({
-            //     async start(controller) {
-            //         await wait(1000);
-            //         controller.enqueue('This ');
-            //         await wait(1000);
-            //         controller.enqueue('is ');
-            //         await wait(1000);
-            //         controller.enqueue('a ');
-            //         await wait(1000);
-            //         controller.enqueue('slow ');
-            //         await wait(1000);
-            //         controller.enqueue('request.');
-            //         controller.close();
-            //     },
-            // }).pipeThrough(new TextEncoderStream());
-            // await post(stream);
-            // await fetch('0.0.0.0:5555', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'text/plain' },
-            //     body: stream,
-            // });
-
-            await fetch('http://localhost:8080', {
-                headers: { 'Content-Type': 'application/octet-stream' },
-                method: 'PUT',
-                body: file,
-                allowHTTP1ForStreamingUpload: true,
-            });
+            await HTTPService.put(fileUploadURL.url, file);
             return fileUploadURL.objectKey;
         } catch (e) {
             console.log('putFile to dataStore failed ', e);
             throw e;
         }
+    }
+
+    private async putFileInParts(
+        filePartUploadURLs: UploadURL[],
+        file: ReadableStream<Uint8Array>
+    ) {
+        let streamEncryptedFileReader = file.getReader();
+        const resParts = [];
+        for (const [index, fileUploadURL] of filePartUploadURLs.entries()) {
+            let { value } = await streamEncryptedFileReader.read();
+            const response = await HTTPService.put(fileUploadURL.url, value);
+            resParts.push({
+                eTag: response.headers.etag,
+                partNumber: index + 1,
+            });
+        }
+        await HTTPService.post(
+            filePartUploadURLs[filePartUploadURLs.length - 1].url,
+            { Parts: resParts }
+        );
+        return filePartUploadURLs[0].objectKey;
     }
 
     private async getExifData(reader: FileReader, recievedFile: File) {

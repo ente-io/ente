@@ -2,7 +2,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 import localForage from 'localforage';
 import { collection } from './collectionService';
-import { MetadataObject } from './uploadService';
+import { DataStream, MetadataObject } from './uploadService';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 
 const ENDPOINT = getEndpoint();
@@ -18,11 +18,10 @@ localForage.config({
 const FILES = 'files';
 
 export interface fileAttribute {
-    encryptedData?: Uint8Array;
+    encryptedData?: DataStream | Uint8Array;
     objectKey?: string;
     decryptionHeader: string;
 }
-
 
 export interface file {
     id: number;
