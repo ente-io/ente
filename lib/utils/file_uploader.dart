@@ -28,19 +28,23 @@ import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FileUploader {
+  static const kMaximumConcurrentUploads = 4;
+  static const kMaximumThumbnailCompressionAttempts = 2;
+  static const kMaximumUploadAttempts = 4;
+  static const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
+  static const kBGHeartBeatFrequency = Duration(seconds: 1);
+
   final _logger = Logger("FileUploader");
   final _dio = Network.instance.getDio();
   final _queue = LinkedHashMap<String, FileUploadItem>();
   final _uploadLocks = UploadLocksDB.instance;
-  final kMaximumConcurrentUploads = 4;
-  final kMaximumThumbnailCompressionAttempts = 2;
-  final kMaximumUploadAttempts = 4;
   final kSafeBufferForLockExpiry = Duration(days: 1).inMicroseconds;
+  final kBGTaskDeathTimeout = Duration(seconds: 5).inMicroseconds;
+  final _uploadURLs = Queue<UploadURL>();
 
   int _currentlyUploading = 0;
   ProcessType _processType;
   SharedPreferences _prefs;
-  final _uploadURLs = Queue<UploadURL>();
 
   FileUploader._privateConstructor() {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
@@ -53,10 +57,22 @@ class FileUploader {
     _prefs = await SharedPreferences.getInstance();
     _processType =
         isBackground ? ProcessType.background : ProcessType.foreground;
+    final currentTime = DateTime.now().microsecondsSinceEpoch;
     await _uploadLocks.releaseLocksAcquiredByOwnerBefore(
-        _processType.toString(), DateTime.now().microsecondsSinceEpoch);
-    await _uploadLocks.releaseAllLocksAcquiredBefore(
-        DateTime.now().microsecondsSinceEpoch - kSafeBufferForLockExpiry);
+        _processType.toString(), currentTime);
+    await _uploadLocks
+        .releaseAllLocksAcquiredBefore(currentTime - kSafeBufferForLockExpiry);
+    if (isBackground) {
+      _scheduleBGHeartBeat();
+    } else {
+      final isBGTaskDead = (_prefs.getInt(kLastBGTaskHeartBeatTime) ?? 0) <
+          (currentTime - kBGTaskDeathTimeout);
+      if (isBGTaskDead) {
+        await _uploadLocks.releaseLocksAcquiredByOwnerBefore(
+            ProcessType.background.toString(), currentTime);
+        _logger.info("BG task was found dead, cleared all locks");
+      }
+    }
   }
 
   Future<File> upload(File file, int collectionID) {
@@ -503,11 +519,6 @@ class FileUploader {
     throw StorageLimitExceededError();
   }
 
-  void _onExpiredSubscription() {
-    clearQueue(NoActiveSubscriptionError());
-    throw NoActiveSubscriptionError();
-  }
-
   Future<String> _putFile(
     UploadURL uploadURL,
     io.File file, {
@@ -548,6 +559,14 @@ class FileUploader {
         throw e;
       }
     }
+  }
+
+  Future<void> _scheduleBGHeartBeat() async {
+    await _prefs.setInt(
+        kLastBGTaskHeartBeatTime, DateTime.now().microsecondsSinceEpoch);
+    Future.delayed(kBGHeartBeatFrequency, () async {
+      await _scheduleBGHeartBeat();
+    });
   }
 }
 
