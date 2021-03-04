@@ -205,7 +205,7 @@ export default function App({ Component, pageProps }) {
                     </Button>
                 )}
                 <FlexContainer>
-                    <Image alt="logo" src="/icon.svg" />
+                    <Image style={{ height: '24px' }} alt="logo" src="/icon.svg" />
                 </FlexContainer>
                 {uploadButtonView && (
                     <UploadButton showModal={showUploadModal} />
