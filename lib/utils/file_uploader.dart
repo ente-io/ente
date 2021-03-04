@@ -44,6 +44,7 @@ class FileUploader {
 
   int _currentlyUploading = 0;
   ProcessType _processType;
+  bool _isBackground;
   SharedPreferences _prefs;
 
   FileUploader._privateConstructor() {
@@ -55,6 +56,7 @@ class FileUploader {
 
   Future<void> init(bool isBackground) async {
     _prefs = await SharedPreferences.getInstance();
+    _isBackground = isBackground;
     _processType =
         isBackground ? ProcessType.background : ProcessType.foreground;
     final currentTime = DateTime.now().microsecondsSinceEpoch;
@@ -217,10 +219,15 @@ class FileUploader {
     }
 
     final tempDirectory = Configuration.instance.getTempDirectory();
-    final encryptedFilePath =
-        tempDirectory + file.generatedID.toString() + ".encrypted";
-    final encryptedThumbnailPath =
-        tempDirectory + file.generatedID.toString() + "_thumbnail.encrypted";
+    final encryptedFilePath = tempDirectory +
+        file.generatedID.toString() +
+        (_isBackground ? "_bg" : "") +
+        ".encrypted";
+    final encryptedThumbnailPath = tempDirectory +
+        file.generatedID.toString() +
+        "_thumbnail" +
+        (_isBackground ? "_bg" : "") +
+        ".encrypted";
     var sourceFile;
 
     try {
