@@ -164,7 +164,6 @@ class UploadService {
             progressBarProps.setPercentComplete(100);
         } catch (e) {
             this.filesToBeUploaded = [];
-            console.log(e);
             throw e;
         }
     }
@@ -177,16 +176,6 @@ class UploadService {
     ) {
         try {
             let file: FileinMemory = await this.readFile(reader, rawFile);
-            // console.log(file);
-            // let streamFileReader = file.filedata.stream.getReader();
-            // while (true) {
-            //     let { done, value } = await streamFileReader.read();
-            //     if (done) {
-            //         break;
-            //     }
-            //     console.log('reading file chunk -> ', value);
-            // }
-            // return;
             let {
                 file: encryptedFile,
                 fileKey: encryptedKey,
@@ -195,16 +184,6 @@ class UploadService {
                 file,
                 collection.key
             );
-            // console.log(encryptedFile);
-            // let streamFileReader = encryptedFile.file.encryptedData.stream.getReader();
-            // while (true) {
-            //     let { done, value } = await streamFileReader.read();
-            //     if (done) {
-            //         break;
-            //     }
-            //     console.log('reading file chunk -> ', value);
-            // }
-            // return;
             let backupedFile: BackupedFile = await this.uploadtoBucket(
                 encryptedFile,
                 token
@@ -253,7 +232,6 @@ class UploadService {
 
     private async readFile(reader: FileReader, recievedFile: File) {
         try {
-            console.log(recievedFile.size > MIN_STREAM_FILE_SIZE);
             const filedata =
                 recievedFile.size > MIN_STREAM_FILE_SIZE
                     ? this.getFileStream(reader, recievedFile)
@@ -341,7 +319,6 @@ class UploadService {
                 },
                 fileKey: encryptedKey,
             };
-            console.log(result);
             return result;
         } catch (e) {
             console.log('Error encrypting files ', e);
@@ -350,7 +327,6 @@ class UploadService {
     }
 
     private async encryptFileStream(worker, fileData: DataStream) {
-        console.log(fileData);
         const { stream, chunkCount } = fileData;
         const fileStreamReader = stream.getReader();
         const {
@@ -363,7 +339,6 @@ class UploadService {
             async start(controller) {
                 for (let i = 0; i < chunkCount; i++) {
                     let { done, value } = await fileStreamReader.read();
-                    console.log({ done, value });
 
                     const encryptedFileChunk = await worker.encryptFileChunk(
                         value,
