@@ -244,11 +244,6 @@ class UploadService {
 
     private async readFile(reader: FileReader, recievedFile: File) {
         try {
-            const filedata =
-                recievedFile.size > MIN_STREAM_FILE_SIZE
-                    ? this.getFileStream(reader, recievedFile)
-                    : await this.getUint8ArrayView(reader, recievedFile);
-
             const thumbnail = await this.generateThumbnail(
                 reader,
                 recievedFile
@@ -282,6 +277,11 @@ class UploadService {
                 },
                 this.metadataMap.get(recievedFile.name)
             );
+            const filedata =
+                recievedFile.size > MIN_STREAM_FILE_SIZE
+                    ? this.getFileStream(reader, recievedFile)
+                    : await this.getUint8ArrayView(reader, recievedFile);
+
             return {
                 filedata,
                 thumbnail,
