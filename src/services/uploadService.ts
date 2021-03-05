@@ -20,7 +20,7 @@ const TYPE_VIDEO = 'video';
 const TYPE_JSON = 'json';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
-const MIN_STREAM_FILE_SIZE = 10 * 1024 * 1024;
+const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
