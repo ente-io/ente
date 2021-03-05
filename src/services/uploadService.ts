@@ -45,6 +45,12 @@ interface UploadURL {
     objectKey: string;
 }
 
+interface MultipartUploadURLs {
+    objectKey: string;
+    partUrls: string[];
+    completeUrl: string;
+}
+
 export interface MetadataObject {
     title: string;
     creationTime: number;
@@ -378,22 +384,22 @@ class UploadService {
         try {
             if (isDataStream(file.file.encryptedData)) {
                 const { chunkCount, stream } = file.file.encryptedData;
-                const fileKey = await worker.decryptB64(
-                    enFilekey.encryptedData,
-                    enFilekey.nonce,
-                    collectionKey
-                );
-                const resp = await new Response(await stream).arrayBuffer();
-                const decryptedFile: any = await worker.decryptFile(
-                    new Uint8Array(resp),
-                    await worker.fromB64(file.file.decryptionHeader),
-                    fileKey
-                );
-                console.log(decryptedFile);
-                let decryptedFileBlob = new Blob([decryptedFile]);
-                console.log(URL.createObjectURL(decryptedFileBlob));
-                return;
-                const filePartUploadURLs = await this.fetchUploadPartURLs(
+                // const fileKey = await worker.decryptB64(
+                //     enFilekey.encryptedData,
+                //     enFilekey.nonce,
+                //     collectionKey
+                // );
+                // const resp = await new Response(await stream).arrayBuffer();
+                // const decryptedFile: any = await worker.decryptFile(
+                //     new Uint8Array(resp),
+                //     await worker.fromB64(file.file.decryptionHeader),
+                //     fileKey
+                // );
+                // console.log(decryptedFile);
+                // let decryptedFileBlob = new Blob([decryptedFile]);
+                // console.log(URL.createObjectURL(decryptedFileBlob));
+                // return;
+                const filePartUploadURLs = await this.fetchMultipartUploadURLs(
                     token,
                     Math.ceil(chunkCount / 2)
                 );
@@ -673,22 +679,22 @@ class UploadService {
         }
     }
 
-    private async fetchUploadPartURLs(
+    private async fetchMultipartUploadURLs(
         token: string,
         count: number
-    ): Promise<UploadURL[]> {
+    ): Promise<MultipartUploadURLs> {
         try {
             const response = await HTTPService.get(
-                `${ENDPOINT}/files/part-upload-urls`,
+                `${ENDPOINT}/files/multipart-upload-urls`,
                 {
                     count,
                 },
                 { 'X-Auth-Token': token }
             );
 
-            return response.data['urls'];
+            return response.data['multipartUploadUrls'];
         } catch (e) {
-            console.log('fetch part-upload-url failed ', e);
+            console.log('fetch multipart-upload-url failed ', e);
             throw e;
         }
     }
@@ -707,12 +713,15 @@ class UploadService {
     }
 
     private async putFileInParts(
-        filePartUploadURLs: UploadURL[],
+        multipartUploadURLs: MultipartUploadURLs,
         file: ReadableStream<Uint8Array>
     ) {
         let streamEncryptedFileReader = file.getReader();
         const resParts = [];
-        for (const [index, fileUploadURL] of filePartUploadURLs.entries()) {
+        for (const [
+            index,
+            fileUploadURL,
+        ] of multipartUploadURLs.partUrls.entries()) {
             let {
                 done: done1,
                 value: chunk1,
@@ -724,19 +733,16 @@ class UploadService {
                 done: done2,
                 value: chunk2,
             } = await streamEncryptedFileReader.read();
-            let uploadChunk;
+            let uploadChunk: Uint8Array;
             if (!done2) {
-                uploadChunk = new Int8Array(chunk1.length + chunk2.length);
+                uploadChunk = new Uint8Array(chunk1.length + chunk2.length);
                 uploadChunk.set(chunk1);
                 uploadChunk.set(chunk2, chunk1.length);
             } else {
                 uploadChunk = chunk1;
             }
             console.log(uploadChunk.length);
-            const response = await HTTPService.put(
-                fileUploadURL.url,
-                uploadChunk
-            );
+            const response = await HTTPService.put(fileUploadURL, uploadChunk);
             resParts.push({
                 PartNumber: index + 1,
                 ETag: response.headers.etag,
@@ -748,13 +754,10 @@ class UploadService {
             options
         );
         console.log(body);
-        await HTTPService.post(
-            filePartUploadURLs[filePartUploadURLs.length - 1].url,
-            body,
-            null,
-            { 'content-type': 'text/xml' }
-        );
-        return filePartUploadURLs[0].objectKey;
+        await HTTPService.post(multipartUploadURLs.completeUrl, body, null, {
+            'content-type': 'text/xml',
+        });
+        return multipartUploadURLs.objectKey;
     }
 
     private async getExifData(reader: FileReader, recievedFile: File) {
