@@ -67,7 +67,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'John Doe',
+                  hintText: 'name',
                   hintStyle: TextStyle(
                     color: Colors.white30,
                   ),
@@ -89,7 +89,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
               child: TextFormField(
                 decoration: InputDecoration(
-                  hintText: 'email@john.com',
+                  hintText: 'email',
                   hintStyle: TextStyle(
                     color: Colors.white30,
                   ),
