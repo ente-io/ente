@@ -195,10 +195,7 @@ class UploadService {
             );
             let backupedFile: BackupedFile = await this.uploadtoBucket(
                 encryptedFile,
-                token,
-                worker,
-                encryptedKey,
-                collection.key
+                token
             );
             file = null;
             encryptedFile = null;
@@ -376,29 +373,11 @@ class UploadService {
 
     private async uploadtoBucket(
         file: ProcessedFile,
-        token: string,
-        worker,
-        enFilekey: B64EncryptionResult,
-        collectionKey
+        token: string
     ): Promise<BackupedFile> {
         try {
             if (isDataStream(file.file.encryptedData)) {
                 const { chunkCount, stream } = file.file.encryptedData;
-                // const fileKey = await worker.decryptB64(
-                //     enFilekey.encryptedData,
-                //     enFilekey.nonce,
-                //     collectionKey
-                // );
-                // const resp = await new Response(await stream).arrayBuffer();
-                // const decryptedFile: any = await worker.decryptFile(
-                //     new Uint8Array(resp),
-                //     await worker.fromB64(file.file.decryptionHeader),
-                //     fileKey
-                // );
-                // console.log(decryptedFile);
-                // let decryptedFileBlob = new Blob([decryptedFile]);
-                // console.log(URL.createObjectURL(decryptedFileBlob));
-                // return;
                 const filePartUploadURLs = await this.fetchMultipartUploadURLs(
                     token,
                     Math.ceil(chunkCount / 2)
