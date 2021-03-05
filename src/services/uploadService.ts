@@ -12,6 +12,7 @@ import { ENCRYPTION_CHUNK_SIZE } from 'utils/crypto/libsodium';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;
+const MAX_URL_REQUESTS = 50;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;
 const MAX_CONCURRENT_UPLOADS = 4;
@@ -176,6 +177,7 @@ class UploadService {
             throw e;
         }
     }
+
     private async uploader(
         worker: any,
         reader: FileReader,
@@ -289,6 +291,7 @@ class UploadService {
             throw e;
         }
     }
+
     private async encryptFile(
         worker: any,
         file: FileinMemory,
@@ -637,7 +640,7 @@ class UploadService {
                     `${ENDPOINT}/files/upload-urls`,
                     {
                         count: Math.min(
-                            50,
+                            MAX_URL_REQUESTS,
                             (this.totalFileCount - this.filesCompleted) * 2
                         ),
                     },
