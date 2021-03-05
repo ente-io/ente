@@ -355,9 +355,6 @@ class UploadService {
                         i === chunkCount - 1
                     );
                     controller.enqueue(encryptedFileChunk);
-                    if (done) {
-                        break;
-                    }
                 }
                 controller.close();
             },
@@ -367,7 +364,7 @@ class UploadService {
             file: {
                 decryptionHeader,
                 encryptedData: { stream: encryptedFileStream, chunkCount },
-            } as fileAttribute,
+            },
         };
     }
 
@@ -720,7 +717,6 @@ class UploadService {
             } else {
                 uploadChunk = chunk1;
             }
-            console.log(uploadChunk.length);
             const response = await HTTPService.put(fileUploadURL, uploadChunk);
             resParts.push({
                 PartNumber: index + 1,
@@ -732,7 +728,6 @@ class UploadService {
             { CompleteMultipartUpload: { Part: resParts } },
             options
         );
-        console.log(body);
         await HTTPService.post(multipartUploadURLs.completeUrl, body, null, {
             'content-type': 'text/xml',
         });
