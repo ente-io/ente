@@ -146,8 +146,8 @@ export async function encryptFileChunk(
     await sodium.ready;
 
     let tag = finalChunk
-        ? sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
-        : sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL;
+        ? sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL
+        : sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
     const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
         pushState,
         data,
