@@ -8,6 +8,7 @@ import { checkConnectivity } from 'utils/common/utilFunctions';
 import { ErrorHandler } from 'utils/common/errorUtil';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 import * as convert from 'xml-js';
+import { ENCRYPTION_CHUNK_SIZE } from 'utils/crypto/libsodium';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;
@@ -20,7 +21,6 @@ const TYPE_JSON = 'json';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
 const MIN_STREAM_FILE_SIZE = 10 * 1024 * 1024;
-const CHUNK_SIZE = 8 * 1024 * 1024;
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -28,7 +28,7 @@ export interface DataStream {
 }
 
 function isDataStream(object: any): object is DataStream {
-    return 'stream' in object;
+    return object.hasOwnProperty('stream');
 }
 interface EncryptionResult {
     file: fileAttribute;
@@ -187,7 +187,10 @@ class UploadService {
             );
             let backupedFile: BackupedFile = await this.uploadtoBucket(
                 encryptedFile,
-                token
+                token,
+                worker,
+                encryptedKey,
+                collection.key
             );
             file = null;
             encryptedFile = null;
@@ -365,14 +368,32 @@ class UploadService {
 
     private async uploadtoBucket(
         file: ProcessedFile,
-        token: string
+        token: string,
+        worker,
+        enFilekey: B64EncryptionResult,
+        collectionKey
     ): Promise<BackupedFile> {
         try {
             if (isDataStream(file.file.encryptedData)) {
                 const { chunkCount, stream } = file.file.encryptedData;
+                const fileKey = await worker.decryptB64(
+                    enFilekey.encryptedData,
+                    enFilekey.nonce,
+                    collectionKey
+                );
+                const resp = await new Response(await stream).arrayBuffer();
+                const decryptedFile: any = await worker.decryptFile(
+                    new Uint8Array(resp),
+                    await worker.fromB64(file.file.decryptionHeader),
+                    fileKey
+                );
+                console.log(decryptedFile);
+                let decryptedFileBlob = new Blob([decryptedFile]);
+                console.log(URL.createObjectURL(decryptedFileBlob));
+                return;
                 const filePartUploadURLs = await this.fetchUploadPartURLs(
                     token,
-                    chunkCount
+                    Math.ceil(chunkCount / 2)
                 );
                 file.file.objectKey = await this.putFileInParts(
                     filePartUploadURLs,
@@ -576,18 +597,21 @@ class UploadService {
             stream: new ReadableStream<Uint8Array>({
                 async start(controller) {
                     while (offset < fileSize) {
-                        let blob = file.slice(offset, CHUNK_SIZE + offset);
+                        let blob = file.slice(
+                            offset,
+                            ENCRYPTION_CHUNK_SIZE + offset
+                        );
                         let fileChunk = await self.getUint8ArrayView(
                             reader,
                             blob
                         );
                         controller.enqueue(fileChunk);
-                        offset += CHUNK_SIZE;
+                        offset += ENCRYPTION_CHUNK_SIZE;
                     }
                     controller.close();
                 },
             }),
-            chunkCount: Math.ceil(fileSize / CHUNK_SIZE),
+            chunkCount: Math.ceil(fileSize / ENCRYPTION_CHUNK_SIZE),
         };
     }
 
@@ -687,12 +711,30 @@ class UploadService {
         let streamEncryptedFileReader = file.getReader();
         const resParts = [];
         for (const [index, fileUploadURL] of filePartUploadURLs.entries()) {
-            let { done, value } = await streamEncryptedFileReader.read();
-            if (done) {
+            let {
+                done: done1,
+                value: chunk1,
+            } = await streamEncryptedFileReader.read();
+            if (done1) {
                 break;
             }
-            const response = await HTTPService.put(fileUploadURL.url, value);
-            console.log(response.headers);
+            let {
+                done: done2,
+                value: chunk2,
+            } = await streamEncryptedFileReader.read();
+            let uploadChunk;
+            if (!done2) {
+                uploadChunk = new Int8Array(chunk1.length + chunk2.length);
+                uploadChunk.set(chunk1);
+                uploadChunk.set(chunk2, chunk1.length);
+            } else {
+                uploadChunk = chunk1;
+            }
+            console.log(uploadChunk.length);
+            const response = await HTTPService.put(
+                fileUploadURL.url,
+                uploadChunk
+            );
             resParts.push({
                 PartNumber: index + 1,
                 ETag: response.headers.etag,
@@ -703,6 +745,7 @@ class UploadService {
             { CompleteMultipartUpload: { Part: resParts } },
             options
         );
+        console.log(body);
         await HTTPService.post(
             filePartUploadURLs[filePartUploadURLs.length - 1].url,
             body,
