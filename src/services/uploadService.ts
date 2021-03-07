@@ -22,6 +22,7 @@ const TYPE_JSON = 'json';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
 const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
+const CHUNKS_COMBINED_FOR_UPLOAD = 2;
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -380,7 +381,7 @@ class UploadService {
                 const { chunkCount, stream } = file.file.encryptedData;
                 const filePartUploadURLs = await this.fetchMultipartUploadURLs(
                     token,
-                    Math.ceil(chunkCount / 2)
+                    Math.ceil(chunkCount / CHUNKS_COMBINED_FOR_UPLOAD)
                 );
                 file.file.objectKey = await this.putFileInParts(
                     filePartUploadURLs,
