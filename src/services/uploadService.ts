@@ -42,14 +42,14 @@ export interface B64EncryptionResult {
 }
 
 interface UploadURL {
-    url: string;
+    URL: string;
     objectKey: string;
 }
 
 interface MultipartUploadURLs {
     objectKey: string;
-    partUrls: string[];
-    completeUrl: string;
+    partURLs: string[];
+    completeURL: string;
 }
 
 export interface MetadataObject {
@@ -350,7 +350,7 @@ class UploadService {
         const encryptedFileStream = new ReadableStream({
             async start(controller) {
                 for (let i = 0; i < chunkCount; i++) {
-                    let { done, value } = await fileStreamReader.read();
+                    let { value } = await fileStreamReader.read();
 
                     const encryptedFileChunk = await worker.encryptFileChunk(
                         value,
@@ -683,7 +683,7 @@ class UploadService {
         file: Uint8Array
     ): Promise<string> {
         try {
-            await HTTPService.put(fileUploadURL.url, file);
+            await HTTPService.put(fileUploadURL.URL, file);
             return fileUploadURL.objectKey;
         } catch (e) {
             console.log('putFile to dataStore failed ', e);
@@ -700,7 +700,7 @@ class UploadService {
         for (const [
             index,
             fileUploadURL,
-        ] of multipartUploadURLs.partUrls.entries()) {
+        ] of multipartUploadURLs.partURLs.entries()) {
             let {
                 done: done1,
                 value: chunk1,
@@ -731,7 +731,7 @@ class UploadService {
             { CompleteMultipartUpload: { Part: resParts } },
             options
         );
-        await HTTPService.post(multipartUploadURLs.completeUrl, body, null, {
+        await HTTPService.post(multipartUploadURLs.completeURL, body, null, {
             'content-type': 'text/xml',
         });
         return multipartUploadURLs.objectKey;
