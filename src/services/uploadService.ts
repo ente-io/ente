@@ -650,7 +650,7 @@ class UploadService {
                 const response = await this.uploadURLFetchInProgress;
 
                 this.uploadURLFetchInProgress = null;
-                this.uploadURLs.push(...response.data['urls']);
+                this.uploadURLs.push(...response.data['UploadURLs']);
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
@@ -672,7 +672,7 @@ class UploadService {
                 { 'X-Auth-Token': token }
             );
 
-            return response.data['multipartUploadUrls'];
+            return response.data['multipartUploadURLs'];
         } catch (e) {
             console.log('fetch multipart-upload-url failed ', e);
             throw e;
