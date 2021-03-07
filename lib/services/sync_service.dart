@@ -112,10 +112,13 @@ class SyncService {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
           error: StorageLimitExceededError()));
     } catch (e, s) {
-      final errorCode = e.error?.osError?.errorCode;
-      if (errorCode == 111 || errorCode == 7) {
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
-            reason: "waiting for network..."));
+      if (e is DioError) {
+        final errorCode = e.error?.osError?.errorCode;
+        if (errorCode == 111 || errorCode == 7) {
+          Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
+              reason: "waiting for network..."));
+          return;
+        }
       } else {
         _logger.severe("backup failed", e, s);
         Bus.instance
