@@ -311,7 +311,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           count.toString() +
           " file" +
           (count == 1 ? "" : "s") +
-          (containsUploadedFile ? " from" : "?")),
+          (containsUploadedFile && containsLocalFile ? " from" : "?")),
       actions: actions,
       cancelButton: CupertinoActionSheetAction(
         child: Text("cancel"),
