@@ -9,6 +9,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "@sentry/browser": "^5.21.3",
+    "@sentry/integrations": "^5.21.3",
+    "@sentry/node": "^5.21.3",
+    "@sentry/webpack-plugin": "^1.12.1",
     "axios": "^0.20.0",
     "bootstrap": "^4.5.2",
     "comlink": "^4.3.0",

@@ -15,6 +15,7 @@ import 'photoswipe/dist/photoswipe.css';
 import localForage from 'localforage';
 import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
+import { init } from '../utils/sentry';
 
 localForage.config({
     driver: localForage.INDEXEDDB,
@@ -147,7 +148,8 @@ const FlexContainer = styled.div`
     margin: 16px;
 `;
 
-export default function App({ Component, pageProps }) {
+init();
+export default function App({ Component, pageProps, err }) {
     const router = useRouter();
     const [user, setUser] = useState();
     const [loading, setLoading] = useState(false);
@@ -223,6 +225,7 @@ export default function App({ Component, pageProps }) {
                     showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}
                     setUploadButtonView={setUploadButtonView}
+                    err={err}
                 />
             )}
         </FullScreenDropZone>
