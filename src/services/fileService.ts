@@ -171,10 +171,8 @@ export const getFile = async (token: string, file: file) => {
         const reader = resp.body.getReader();
         const stream = new ReadableStream({
             async start(controller) {
-                console.log('start');
                 const decryptionHeader = await worker.fromB64(file.file.decryptionHeader);
                 const fileKey = await worker.fromB64(file.key);
-                console.log(decryptionHeader, fileKey);
                 let { pullState, decryptionChunkSize, tag } = await worker.initDecryption(decryptionHeader, fileKey);
                 let data = new Uint8Array();
                 // The following function handles each data chunk
@@ -192,10 +190,8 @@ export const getFile = async (token: string, file: file) => {
                                 controller.enqueue(decryptedData);
                                 tag = newTag;
                                 data = buffer.slice(decryptionChunkSize);
-                                console.log('>', decryptionChunkSize, data.length, tag);
                             } else {
                                 data = buffer;
-                                console.log('>', data.length);
                             }
                             push();
                         } else {
@@ -212,7 +208,7 @@ export const getFile = async (token: string, file: file) => {
                 push();
             }
         });
-        return URL.createObjectURL(await new Response(stream, { headers: { "Content-type": "video/mp4" } }).blob());
+        return URL.createObjectURL(await new Response(stream).blob());
     }
 }
 
