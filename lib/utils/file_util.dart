@@ -43,8 +43,12 @@ Future<void> deleteFilesFromEverywhere(
       localIDs.add(file.localID);
     }
   }
-  final deletedIDs =
-      (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
+  var deletedIDs;
+  try {
+    deletedIDs = (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
+  } catch (e, s) {
+    _logger.severe("Could not delete file", e, s);
+  }
   bool hasUploadedFiles = false;
   final updatedCollectionIDs = Set<int>();
   for (final file in files) {
