@@ -260,14 +260,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   void _showDeleteSheet(BuildContext context) {
     final count = widget.selectedFiles.files.length;
-    bool containsUploadedFile = false;
+    bool containsUploadedFile = false, containsLocalFile = false;
     for (final file in widget.selectedFiles.files) {
       if (file.uploadedFileID != null) {
         containsUploadedFile = true;
       }
+      if (file.localID != null) {
+        containsLocalFile = true;
+      }
     }
     final actions = List<Widget>();
-    if (containsUploadedFile) {
+    if (containsUploadedFile && containsLocalFile) {
       actions.add(CupertinoActionSheetAction(
         child: Text("this device"),
         isDestructiveAction: true,
