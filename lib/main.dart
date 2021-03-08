@@ -154,6 +154,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
         ),
       ),
       home: HomeWidget(_title),
+      debugShowCheckedModeBanner: false,
     );
   }
 
