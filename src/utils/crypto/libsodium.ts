@@ -66,12 +66,6 @@ export async function initChunkDecryption(header: Uint8Array, key: Uint8Array) {
 
 export async function decryptChunk(data: Uint8Array, pullState: StateAddress) {
     await sodium.ready;
-    var decryptedData = [];
-    // var chunkSize = decryptionChunkSize;
-    // if (bytesRead + chunkSize > data.length) {
-    //     chunkSize = data.length - bytesRead;
-    // }
-    // const buffer = data.slice(bytesRead, bytesRead + chunkSize);
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(pullState, data);
     const newTag = pullResult.tag;
     return { decryptedData: pullResult.message, newTag };
