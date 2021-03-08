@@ -2,12 +2,12 @@ import { getToken } from 'utils/common/key';
 import { file } from './fileService';
 import HTTPService from './HTTPService';
 import { getEndpoint, getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
-import { getFileExtension } from 'utils/common/utilFunctions';
+import { getFileExtension, runningInBrowser } from 'utils/common/utilFunctions';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 
 const ENDPOINT = getEndpoint();
 
-const heic2any = typeof window !== 'undefined' && require('heic2any');
+const heic2any = runningInBrowser() && require('heic2any');
 const TYPE_HEIC = 'heic';
 
 class DownloadManager {

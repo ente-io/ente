@@ -16,14 +16,16 @@ import localForage from 'localforage';
 import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import { init } from '../utils/sentry';
+import { runningInBrowser } from 'utils/common/utilFunctions';
 
-localForage.config({
-    driver: localForage.INDEXEDDB,
-    name: 'ente-files',
-    version: 1.0,
-    storeName: 'files',
-});
-
+if (runningInBrowser()) {
+    localForage.config({
+        driver: localForage.INDEXEDDB,
+        name: 'ente-files',
+        version: 1.0,
+        storeName: 'files',
+    });
+}
 const GlobalStyles = createGlobalStyle`
     html, body {
         padding: 0;

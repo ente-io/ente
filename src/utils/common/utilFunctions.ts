@@ -11,3 +11,7 @@ export function checkConnectivity() {
 export function getFileExtension(fileName): string {
     return fileName.substr(fileName.lastIndexOf('.') + 1).toLowerCase();
 }
+
+export function runningInBrowser() {
+    return typeof window !== 'undefined';
+}
