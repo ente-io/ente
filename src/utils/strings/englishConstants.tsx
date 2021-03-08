@@ -85,6 +85,9 @@ const englishConstants = {
     NO_INTERNET_CONNECTION:
         'please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
+    LOGOUT: 'logout',
+    LOGOUT_WARNING: 'sure you want to logout?',
+    CANCEL: 'cancel',
 };
 
 export default englishConstants;
