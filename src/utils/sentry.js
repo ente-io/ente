@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { RewriteFrames } from '@sentry/integrations';
+import { RewriteFrames, CaptureConsole } from '@sentry/integrations';
 
 export const init = () => {
     if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
@@ -27,6 +27,11 @@ export const init = () => {
                 })
             );
         }
+        integrations.push(
+            new CaptureConsole({
+                levels: ['error'],
+            })
+        );
 
         Sentry.init({
             environment: process.env.NODE_ENV,

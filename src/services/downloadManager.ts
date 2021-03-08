@@ -7,7 +7,6 @@ import CryptoWorker from 'utils/crypto/cryptoWorker';
 
 const ENDPOINT = getEndpoint();
 
-
 const heic2any = typeof window !== 'undefined' && require('heic2any');
 const TYPE_HEIC = 'heic';
 
@@ -15,7 +14,7 @@ class DownloadManager {
     private fileDownloads = new Map<number, Promise<string>>();
     private thumbnailDownloads = new Map<number, Promise<string>>();
 
-    constructor(private token) { }
+    constructor(private token) {}
     public async getPreview(file: file) {
         try {
             const cache = await caches.open('thumbs');
@@ -52,7 +51,7 @@ class DownloadManager {
             }
             return await this.thumbnailDownloads.get(file.id);
         } catch (e) {
-            console.log('get preview Failed', e);
+            console.error('get preview Failed', e);
         }
     }
 
@@ -81,7 +80,7 @@ class DownloadManager {
                     }
                     return URL.createObjectURL(decryptedFileBlob);
                 } catch (e) {
-                    console.log('get file failed ', e);
+                    console.error('get file failed ', e);
                 }
             })();
             this.fileDownloads.set(file.id, download);

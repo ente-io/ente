@@ -23,7 +23,6 @@ export interface fileAttribute {
     decryptionHeader: string;
 }
 
-
 export interface file {
     id: number;
     collectionID: number;
@@ -149,7 +148,7 @@ export const getFiles = async (
         } while (resp.data.diff.length === limit);
         return await Promise.all(promises);
     } catch (e) {
-        console.log('Get files failed', e);
+        console.error('Get files failed', e);
     }
 };
 
