@@ -4,7 +4,7 @@ const Navbar = styled.div`
     padding: 8px 12px;
     font-size: 20px;
     line-height: 2rem;
-    background-color: #212121;
+    background-color: #111;
     color: #fff;
     min-height: 56px;
     display: flex;

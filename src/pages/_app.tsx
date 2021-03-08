@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import styled, {createGlobalStyle } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
 import Button from 'react-bootstrap/Button';
@@ -11,8 +11,10 @@ import Container from 'components/Container';
 import PowerSettings from 'components/power_settings';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'react-photoswipe/lib/photoswipe.css';
+import 'photoswipe/dist/photoswipe.css';
 import localForage from 'localforage';
+import UploadButton from 'pages/gallery/components/UploadButton';
+import FullScreenDropZone from 'components/FullScreenDropZone';
 
 localForage.config({
     driver: localForage.INDEXEDDB,
@@ -30,7 +32,7 @@ const GlobalStyles = createGlobalStyle`
         flex: 1;
         display: flex;
         flex-direction: column;
-        background-color: #303030;
+        background-color: #191919;
     }
 
     #__next {
@@ -78,6 +80,60 @@ const GlobalStyles = createGlobalStyle`
     .pswp__img {
         object-fit: contain;
     }
+    .modal-90w{
+        width:90vw;
+        max-width:960px!important;
+    }
+    .modal .modal-header, .modal  .modal-footer {
+        border-color: #444 !important;
+    }
+    .modal .modal-header .close {
+        color: #aaa;
+        text-shadow: none;
+    }
+    .modal .card {
+        background-color: #202020;
+        border: none;
+        color: #aaa;
+    }
+    .modal .card > div {
+        border-radius: 30px;
+        overflow: hidden;
+        margin: 0 0 5px 0;
+    }
+    .modal-content {
+        background-color:#202020 !important;
+        color:#aaa;
+    }
+    .download-btn{
+        margin-top:10px;
+        width: 25px;
+        height: 25px;
+        float: right;
+        background: url('/download_icon.png') no-repeat;
+        cursor: pointer;
+        background-size: cover;
+        border: none;
+    }
+    .btn-primary {
+        background: #2dc262;
+        border-color: #29a354;
+        padding: 8px;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+    .btn-primary:hover {
+        background-color: #29a354;
+        border-color: #2dc262;
+    }
+    .btn-primary:disabled {
+        background-color: #69b383;
+    }
+    .card {
+        background-color: #242424;
+        color: #fff;
+        border-radius: 12px;
+    }
 `;
 
 const Image = styled.img`
@@ -87,17 +143,31 @@ const Image = styled.img`
 
 const FlexContainer = styled.div`
     flex: 1;
+    text-align: center;
+    margin: 16px;
 `;
 
 export default function App({ Component, pageProps }) {
     const router = useRouter();
     const [user, setUser] = useState();
     const [loading, setLoading] = useState(false);
+    const [uploadButtonView, setUploadButtonView] = useState(false);
+    const [uploadModalView, setUploadModalView] = useState(false);
+
+    function closeUploadModal() {
+        setUploadModalView(false);
+    }
+    function showUploadModal() {
+        setUploadModalView(true);
+    }
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         setUser(user);
-        console.log(`%c${constants.CONSOLE_WARNING_STOP}`, 'color: red; font-size: 52px;');
+        console.log(
+            `%c${constants.CONSOLE_WARNING_STOP}`,
+            'color: red; font-size: 52px;'
+        );
         console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
 
         router.events.on('routeChangeStart', (url: string) => {
@@ -116,34 +186,45 @@ export default function App({ Component, pageProps }) {
     const logout = async () => {
         clearKeys();
         clearData();
+        setUploadButtonView(false);
         localForage.clear();
         const cache = await caches.delete('thumbs');
-        router.push("/");
-    }
+        router.push('/');
+    };
 
     return (
-        <>
+        <FullScreenDropZone showModal={showUploadModal}>
             <Head>
-                <title>ente.io | Privacy friendly alternative to Google Photos</title>
+                <title>{constants.TITLE}</title>
             </Head>
             <GlobalStyles />
             <Navbar>
+                {user && (
+                    <Button variant="link" onClick={logout}>
+                        <PowerSettings />
+                    </Button>
+                )}
                 <FlexContainer>
-                    <Image alt='logo' src="/icon.png" />
-                    {constants.COMPANY_NAME}
+                    <Image style={{ height: '24px' }} alt="logo" src="/icon.svg" />
                 </FlexContainer>
-                {user && <Button variant='link' onClick={logout}>
-                    <PowerSettings />
-                </Button>}
+                {uploadButtonView && (
+                    <UploadButton showModal={showUploadModal} />
+                )}
             </Navbar>
-            {loading
-                ? <Container>
+            {loading ? (
+                <Container>
                     <Spinner animation="border" role="status" variant="primary">
                         <span className="sr-only">Loading...</span>
                     </Spinner>
                 </Container>
-                : <Component />
-            }
-        </>
+            ) : (
+                <Component
+                    uploadModalView={uploadModalView}
+                    showUploadModal={showUploadModal}
+                    closeUploadModal={closeUploadModal}
+                    setUploadButtonView={setUploadButtonView}
+                />
+            )}
+        </FullScreenDropZone>
     );
 }

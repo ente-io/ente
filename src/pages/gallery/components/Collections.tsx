@@ -1,17 +1,17 @@
 import React from 'react';
-import { collection } from 'services/fileService';
+import { collection } from 'services/collectionService';
 import styled from 'styled-components';
 
 interface CollectionProps {
     collections: collection[];
-    selected?: string;
-    selectCollection: (id?: string) => void;
+    selected?: number;
+    selectCollection: (id?: number) => void;
 }
 
 const Container = styled.div`
     margin: 0 auto;
     overflow-y: hidden;
-    height: 40px;
+    height: 50px;
     display: flex;
     max-width: 100%;
 
@@ -30,36 +30,47 @@ const Container = styled.div`
 
 const Wrapper = styled.div`
     height: 70px;
+    margin-top: 10px;
     flex: 1;
     white-space: nowrap;
     overflow: auto;
     max-width: 100%;
-`
+`;
 const Chip = styled.button<{ active: boolean }>`
-    border-radius: 20px;
-    padding: 2px 10px;
-    margin: 2px 5px 2px 2px;
+    border-radius: 8px;
+    padding: 4px 14px;
+    margin: 2px 8px 2px 2px;
     border: none;
-    background-color: ${props => props.active ? '#fff' : 'rgba(255, 255, 255, 0.3)'};
+    background-color: ${(props) =>
+        props.active ? '#fff' : 'rgba(255, 255, 255, 0.3)'};
     outline: none !important;
 
     &:focus {
-        box-shadow : 0 0 0 2px #2666cc;
+        box-shadow: 0 0 0 2px #2666cc;
         background-color: #eee;
     }
 `;
 
 export default function Collections(props: CollectionProps) {
     const { selected, collections, selectCollection } = props;
-    const clickHandler = (id?: string) => () => selectCollection(id);
+    const clickHandler = (id?: number) => () => selectCollection(id);
 
-    return <Container>
-        <Wrapper>
-            <Chip active={!selected} onClick={clickHandler()}>All</Chip>
-            {collections?.map(item => <Chip
-                active={selected === item.id.toString()}
-                onClick={clickHandler(item.id)}
-            >{item.name}</Chip>)}
-        </Wrapper>
-    </Container>;
+    return (
+        <Container>
+            <Wrapper>
+                <Chip active={!selected} onClick={clickHandler()}>
+                    All
+                </Chip>
+                {collections?.map((item) => (
+                    <Chip
+                        key={item.id}
+                        active={selected === item.id}
+                        onClick={clickHandler(item.id)}
+                    >
+                        {item.name}
+                    </Chip>
+                ))}
+            </Wrapper>
+        </Container>
+    );
 }

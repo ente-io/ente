@@ -3,4 +3,4 @@ export interface keyAttributes {
     kekHash: string;
     encryptedKey: string;
     keyDecryptionNonce: string;
-};
+}
