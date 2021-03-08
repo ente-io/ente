@@ -131,7 +131,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             Divider(),
             Padding(padding: EdgeInsets.all(6)),
             SectionTitle("backed-up memories"),
-            Padding(padding: EdgeInsets.all(10)),
+            Padding(padding: EdgeInsets.all(14)),
             BillingService.instance.hasActiveSubscription()
                 ? GridView.builder(
                     shrinkWrap: true,
