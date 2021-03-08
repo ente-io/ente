@@ -15,7 +15,7 @@ import 'photoswipe/dist/photoswipe.css';
 import localForage from 'localforage';
 import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
-import { init } from '../utils/sentry';
+import { sentryInit } from '../utils/sentry';
 import { runningInBrowser } from 'utils/common/utilFunctions';
 
 if (runningInBrowser()) {
@@ -150,7 +150,7 @@ const FlexContainer = styled.div`
     margin: 16px;
 `;
 
-init();
+sentryInit();
 export default function App({ Component, pageProps, err }) {
     const router = useRouter();
     const [user, setUser] = useState();
