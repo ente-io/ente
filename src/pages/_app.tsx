@@ -15,6 +15,7 @@ import 'photoswipe/dist/photoswipe.css';
 import localForage from 'localforage';
 import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
+import ConfirmLogout from 'components/ConfirmLogout';
 
 localForage.config({
     driver: localForage.INDEXEDDB,
@@ -153,7 +154,14 @@ export default function App({ Component, pageProps }) {
     const [loading, setLoading] = useState(false);
     const [uploadButtonView, setUploadButtonView] = useState(false);
     const [uploadModalView, setUploadModalView] = useState(false);
+    const [logoutModalView, setLogoutModalView] = useState(false);
 
+    function showLogoutModal() {
+        setLogoutModalView(true);
+    }
+    function closeLogoutModal() {
+        setLogoutModalView(false);
+    }
     function closeUploadModal() {
         setUploadModalView(false);
     }
@@ -184,6 +192,7 @@ export default function App({ Component, pageProps }) {
     }, []);
 
     const logout = async () => {
+        setLogoutModalView(false);
         clearKeys();
         clearData();
         setUploadButtonView(false);
@@ -200,12 +209,23 @@ export default function App({ Component, pageProps }) {
             <GlobalStyles />
             <Navbar>
                 {user && (
-                    <Button variant="link" onClick={logout}>
-                        <PowerSettings />
-                    </Button>
+                    <>
+                        <ConfirmLogout
+                            show={logoutModalView}
+                            onHide={closeLogoutModal}
+                            logout={logout}
+                        />
+                        <Button variant="link" onClick={showLogoutModal}>
+                            <PowerSettings />
+                        </Button>
+                    </>
                 )}
                 <FlexContainer>
-                    <Image style={{ height: '24px' }} alt="logo" src="/icon.svg" />
+                    <Image
+                        style={{ height: '24px' }}
+                        alt="logo"
+                        src="/icon.svg"
+                    />
                 </FlexContainer>
                 {uploadButtonView && (
                     <UploadButton showModal={showUploadModal} />
