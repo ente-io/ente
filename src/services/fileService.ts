@@ -1,4 +1,4 @@
-import { getEndpoint } from 'utils/common/apiUtil';
+import { getEndpoint, getFileUrl } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 import localForage from 'localforage';
 import { collection } from './collectionService';
@@ -157,8 +157,8 @@ export const getFile = async (token: string, file: file) => {
     const worker = await new CryptoWorker();
     if (file.metadata.fileType === 0) {
         const resp = await HTTPService.get(
-            `${ENDPOINT}/files/download/${file.id}`,
-            { token }, null, { responseType: 'arraybuffer' },
+            getFileUrl(file.id),
+            null, { 'X-Auth-Token': token }, { responseType: 'arraybuffer' },
         );
         const decrypted: any = await worker.decryptFile(
             new Uint8Array(resp.data),
@@ -167,7 +167,11 @@ export const getFile = async (token: string, file: file) => {
         );
         return URL.createObjectURL(new Blob([decrypted]));
     } else {
-        const resp = await fetch(`${ENDPOINT}/files/download/${file.id}?token=${token}`);
+        const resp = await fetch(getFileUrl(file.id), {
+            headers: {
+                'X-Auth-Token': token,
+            }
+        });
         const reader = resp.body.getReader();
         const stream = new ReadableStream({
             async start(controller) {
