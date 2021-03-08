@@ -10,19 +10,15 @@ function ConfirmLogout({ logout, ...props }) {
             aria-labelledby="contained-modal-title-vcenter"
             centered
         >
-            <Modal.Header closeButton>
+            <Modal.Body style={{ padding: '24px' }}>
                 <Modal.Title
                     id="contained-modal-title-vcenter"
-                    className="text-center"
                 >
-                    {constants.LOGOUT}
+                    {constants.LOGOUT_WARNING}
                 </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <strong>{constants.LOGOUT_WARNING}</strong>
             </Modal.Body>
-            <Modal.Footer>
-                <Button variant="primary" onClick={props.onHide}>
+            <Modal.Footer style={{ borderTop: 'none' }}>
+                <Button variant="secondary" onClick={props.onHide}>
                     {constants.CANCEL}
                 </Button>
                 <Button variant="danger" onClick={logout}>
