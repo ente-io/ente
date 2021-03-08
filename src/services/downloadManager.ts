@@ -1,5 +1,5 @@
 import { getToken } from 'utils/common/key';
-import { file, getFile } from './fileService';
+import { file } from './fileService';
 import HTTPService from './HTTPService';
 import { getEndpoint, getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
 import { getFileExtension } from 'utils/common/utilFunctions';
@@ -59,12 +59,82 @@ class DownloadManager {
     getFile = async (file: file) => {
         if (!this.fileDownloads.get(file.id)) {
             const download = (async () => {
-                return await getFile(this.token, file);
+                return await this.downloadFile(this.token, file);
             })();
             this.fileDownloads.set(file.id, download);
         }
         return await this.fileDownloads.get(file.id);
     };
+
+    private async downloadFile(token: string, file: file) {
+        const worker = await new CryptoWorker();
+        if (file.metadata.fileType === 0) {
+            const resp = await HTTPService.get(
+                getFileUrl(file.id),
+                null, { 'X-Auth-Token': token }, { responseType: 'arraybuffer' },
+            );
+            const decrypted: any = await worker.decryptFile(
+                new Uint8Array(resp.data),
+                await worker.fromB64(file.file.decryptionHeader),
+                file.key,
+            );
+            let decryptedBlob = new Blob([decrypted]);
+
+            if (getFileExtension(file.metadata.title) === TYPE_HEIC) {
+                decryptedBlob = await this.convertHEIC2JPEG(
+                    decryptedBlob
+                );
+            }
+            return URL.createObjectURL(new Blob([decryptedBlob]));
+        } else {
+            const resp = await fetch(getFileUrl(file.id), {
+                headers: {
+                    'X-Auth-Token': token,
+                }
+            });
+            const reader = resp.body.getReader();
+            const stream = new ReadableStream({
+                async start(controller) {
+                    const decryptionHeader = await worker.fromB64(file.file.decryptionHeader);
+                    const fileKey = await worker.fromB64(file.key);
+                    let { pullState, decryptionChunkSize, tag } = await worker.initDecryption(decryptionHeader, fileKey);
+                    let data = new Uint8Array();
+                    // The following function handles each data chunk
+                    function push() {
+                        // "done" is a Boolean and value a "Uint8Array"
+                        reader.read().then(async ({ done, value }) => {
+                            // Is there more data to read?
+                            if (!done) {
+                                const buffer = new Uint8Array(data.byteLength + value.byteLength);
+                                buffer.set(new Uint8Array(data), 0);
+                                buffer.set(new Uint8Array(value), data.byteLength);
+                                if (buffer.length > decryptionChunkSize) {
+                                    const fileData = buffer.slice(0, decryptionChunkSize);
+                                    const { decryptedData, newTag } = await worker.decryptChunk(fileData, pullState);
+                                    controller.enqueue(decryptedData);
+                                    tag = newTag;
+                                    data = buffer.slice(decryptionChunkSize);
+                                } else {
+                                    data = buffer;
+                                }
+                                push();
+                            } else {
+                                if (data) {
+                                    const { decryptedData } = await worker.decryptChunk(data, pullState);
+                                    controller.enqueue(decryptedData);
+                                    data = null;
+                                }
+                                controller.close();
+                            }
+                        });
+                    };
+
+                    push();
+                }
+            });
+            return URL.createObjectURL(await new Response(stream).blob());
+        }
+    }
 
     private async convertHEIC2JPEG(fileBlob): Promise<Blob> {
         return await heic2any({
