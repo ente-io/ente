@@ -167,70 +167,52 @@ export const getFile = async (token: string, file: file) => {
         );
         return URL.createObjectURL(new Blob([decrypted]));
     } else {
-        const source = new MediaSource();
-        source.addEventListener('sourceopen', async () => {
-            if (!source.sourceBuffers.length) {
-                const sourceBuffer = source.addSourceBuffer('video/mp4; codecs="avc1.64000d,mp4a.40.2"');
-                const resp = await fetch(`${ENDPOINT}/files/download/${file.id}?token=${token}`);
-                const reader = resp.body.getReader();
-                new ReadableStream({
-                    async start() {
-                        let { pullState, decryptionChunkSize, tag } = await worker.initDecryption(
-                            await worker.fromB64(file.file.decryptionHeader),
-                            file.key
-                        );
-                        console.log(pullState, decryptionChunkSize, tag);
-                        let data = new Uint8Array();
-                        // The following function handles each data chunk
-                        function push() {
-                            // "done" is a Boolean and value a "Uint8Array"
-                            reader.read().then(async ({ done, value }) => {
-                                // Is there more data to read?
-                                if (!done) {
-                                    const buffer = new Uint8Array(data.byteLength + value.byteLength);
-                                    buffer.set(new Uint8Array(data), 0);
-                                    buffer.set(new Uint8Array(value), data.byteLength);
-                                    if (buffer.length > decryptionChunkSize) {
-                                        const fileData = buffer.slice(0, decryptionChunkSize);
-                                        const { decryptedData, newTag } = await worker.decryptChunk(fileData, pullState);
-                                        sourceBuffer.appendBuffer(decryptedData);
-                                        tag = newTag;
-                                        data = buffer.slice(decryptionChunkSize);
-                                        console.log('>', decryptionChunkSize, data.length, tag);
-                                        console.log();
-                                    } else {
-                                        data = buffer;
-                                        push();
-                                    }
-                                } else {
-                                    if (data) {
-                                        const { decryptedData } = await worker.decryptChunk(data, pullState);
-                                        sourceBuffer.appendBuffer(decryptedData);
-                                        data = null;
-                                    } else {
-                                        // console.log('end', value.length);
-                                        console.log(source);
-                                        // source.endOfStream();
-                                    }
-                                }
-                            });
-                        };
-    
-                        sourceBuffer.addEventListener('updateend', () => {
-                            console.log('appended');
+        const resp = await fetch(`${ENDPOINT}/files/download/${file.id}?token=${token}`);
+        const reader = resp.body.getReader();
+        const stream = new ReadableStream({
+            async start(controller) {
+                console.log('start');
+                const decryptionHeader = await worker.fromB64(file.file.decryptionHeader);
+                const fileKey = await worker.fromB64(file.key);
+                console.log(decryptionHeader, fileKey);
+                let { pullState, decryptionChunkSize, tag } = await worker.initDecryption(decryptionHeader, fileKey);
+                let data = new Uint8Array();
+                // The following function handles each data chunk
+                function push() {
+                    // "done" is a Boolean and value a "Uint8Array"
+                    reader.read().then(async ({ done, value }) => {
+                        // Is there more data to read?
+                        if (!done) {
+                            const buffer = new Uint8Array(data.byteLength + value.byteLength);
+                            buffer.set(new Uint8Array(data), 0);
+                            buffer.set(new Uint8Array(value), data.byteLength);
+                            if (buffer.length > decryptionChunkSize) {
+                                const fileData = buffer.slice(0, decryptionChunkSize);
+                                const { decryptedData, newTag } = await worker.decryptChunk(fileData, pullState);
+                                controller.enqueue(decryptedData);
+                                tag = newTag;
+                                data = buffer.slice(decryptionChunkSize);
+                                console.log('>', decryptionChunkSize, data.length, tag);
+                            } else {
+                                data = buffer;
+                                console.log('>', data.length);
+                            }
                             push();
-                        });
-    
-                        push();
-                    }
-                });
+                        } else {
+                            if (data) {
+                                const { decryptedData } = await worker.decryptChunk(data, pullState);
+                                controller.enqueue(decryptedData);
+                                data = null;
+                            }
+                            controller.close();
+                        }
+                    });
+                };
+
+                push();
             }
         });
-
-        source.addEventListener('sourceended', () => {
-            console.log('sourceend');
-        });
-        return URL.createObjectURL(source);
+        return URL.createObjectURL(await new Response(stream, { headers: { "Content-type": "video/mp4" } }).blob());
     }
 }
 

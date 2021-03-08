@@ -1,5 +1,5 @@
 import { getToken } from 'utils/common/key';
-import { file } from './fileService';
+import { file, getFile } from './fileService';
 import HTTPService from './HTTPService';
 import { getEndpoint, getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
 import { getFileExtension } from 'utils/common/utilFunctions';
@@ -59,30 +59,7 @@ class DownloadManager {
     getFile = async (file: file) => {
         if (!this.fileDownloads.get(file.id)) {
             const download = (async () => {
-                try {
-                    const resp = await HTTPService.get(
-                        getFileUrl(file.id),
-                        null,
-                        { 'X-Auth-Token': this.token },
-                        { responseType: 'arraybuffer' }
-                    );
-                    const worker = await new CryptoWorker();
-                    const decryptedFile: any = await worker.decryptFile(
-                        new Uint8Array(resp.data),
-                        await worker.fromB64(file.file.decryptionHeader),
-                        file.key
-                    );
-                    let decryptedFileBlob = new Blob([decryptedFile]);
-
-                    if (getFileExtension(file.metadata.title) === TYPE_HEIC) {
-                        decryptedFileBlob = await this.convertHEIC2JPEG(
-                            decryptedFileBlob
-                        );
-                    }
-                    return URL.createObjectURL(decryptedFileBlob);
-                } catch (e) {
-                    console.log('get file failed ', e);
-                }
+                return await getFile(this.token, file);
             })();
             this.fileDownloads.set(file.id, download);
         }
