@@ -91,6 +91,9 @@ const englishConstants = {
             to automatically backup all your photos and videos
         </div>
     ),
+    LOGOUT: 'logout',
+    LOGOUT_WARNING: 'sure you want to logout?',
+    CANCEL: 'cancel',
 };
 
 export default englishConstants;
