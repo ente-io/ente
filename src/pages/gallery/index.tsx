@@ -24,7 +24,7 @@ import {
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
 import { Alert, Button } from 'react-bootstrap';
-import { buySubscription } from 'services/subscriptionService';
+import subscriptionService from 'services/subscriptionService';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -124,6 +124,7 @@ export default function Gallery(props) {
             return;
         }
         const main = async () => {
+            subscriptionService.init();
             setIsFirstLoad((await getCollectionUpdationTime()) == 0);
             const data = await localFiles();
             const collections = await getLocalCollections();
@@ -316,6 +317,16 @@ export default function Gallery(props) {
         );
     };
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const transactionStatus = urlParams.get('success');
+    let redirectMessage;
+    if (typeof transactionStatus != 'undefined') {
+        if (transactionStatus) {
+            const sessionId = urlParams.get('session_id');
+            if (sessionId) {
+            }
+        }
+    }
     return (
         <>
             <LoadingBar color="#2dc262" ref={loadingBar} />
@@ -332,7 +343,9 @@ export default function Gallery(props) {
                 variant="primary"
                 size="lg"
                 block
-                onClick={buySubscription}
+                onClick={async () => {
+                    await subscriptionService.buySubscription();
+                }}
             >
                 {constants.SUBSCRIBE}
             </Button>

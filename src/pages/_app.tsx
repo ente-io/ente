@@ -206,6 +206,9 @@ export default function App({ Component, pageProps }) {
             <Head>
                 <title>{constants.TITLE}</title>
             </Head>
+            <Head>
+                <script src="https://js.stripe.com/v3/"></script>
+            </Head>
             <GlobalStyles />
             <Navbar>
                 {user && (
