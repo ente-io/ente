@@ -330,7 +330,7 @@ export default function Gallery(props) {
             <LoadingBar color="#2dc262" ref={loadingBar} />
             {isFirstLoad && (
                 <div className="text-center">
-                    <Alert variant="primary">
+                    <Alert variant="success">
                         {constants.INITIAL_LOAD_DELAY_WARNING}
                     </Alert>
                 </div>
@@ -507,8 +507,8 @@ export default function Gallery(props) {
             )}
             {data.length < 30 && (
                 <Alert
-                    variant="info"
-                    style={{ position: 'fixed', bottom: '1%', width: '100%' }}
+                    variant="success"
+                    style={{ position: 'fixed', bottom: '1%', width: '100%', textAlign: 'center', marginBottom: '0px' }}
                 >
                     {constants.INSTALL_MOBILE_APP()}
                 </Alert>

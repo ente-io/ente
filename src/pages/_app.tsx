@@ -136,10 +136,16 @@ const GlobalStyles = createGlobalStyle`
         border-radius: 12px;
     }
     .jumbotron{
-        background-color: #242424;
+        background-color: #191919;
         color: #fff;
-        text-align:center;
-        margin-top:50px;
+        text-align: center;
+        margin-top: 50px;
+    }
+    .alert-success {
+        background-color: #c4ffd6;
+    }
+    .alert-primary {
+        background-color: #c4ffd6;
     }
 `;
 
