@@ -342,11 +342,8 @@ export default function Gallery(props) {
             />
             {!isFirstLoad && data.length == 0 ? (
                 <Jumbotron>
-                    <h1>Welcome to ente!</h1>
-                    <p>
-                        you don't seem to have any photo uploaded , click on
-                        upload to start preserving your memories
-                    </p>
+                    <h1>{constants.WELCOME}</h1>
+                    <p>{constants.UPLOAD_FIRST_PHOTO}</p>
                     <p>
                         <Button
                             variant="primary"

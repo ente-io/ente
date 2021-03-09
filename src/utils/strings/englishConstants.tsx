@@ -76,6 +76,8 @@ const englishConstants = {
     NO_INTERNET_CONNECTION:
         'please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
+    WELCOME: 'welcome to ente!',
+    UPLOAD_FIRST_PHOTO: 'backup your first photo',
 };
 
 export default englishConstants;
