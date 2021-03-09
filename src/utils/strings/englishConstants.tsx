@@ -63,15 +63,6 @@ const englishConstants = {
     STORAGE_QUOTA_EXCEEDED:
         'you have exceeded your storage quota, please upgrade your plan from the mobile app',
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
-
-    WEB_SIGNUPS_DISABLED: () => (
-        <div>
-            sorry signups are possibly only on the{' '}
-            <a href="https://ente.io/app" target="_blank">
-                mobile app
-            </a>
-        </div>
-    ),
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
     NO_ACCOUNT: "don't have an account?",
