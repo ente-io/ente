@@ -54,7 +54,7 @@ const Chip = styled.button<{ active: boolean }>`
 export default function Collections(props: CollectionProps) {
     const { selected, collections, selectCollection } = props;
     const clickHandler = (id?: number) => () => selectCollection(id);
-    if (collections.length == 0) {
+    if (!collections || collections.length === 0) {
         return <Container />;
     }
     return (
