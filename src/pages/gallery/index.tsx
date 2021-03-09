@@ -23,7 +23,8 @@ import {
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
-import { Alert } from 'react-bootstrap';
+import { Alert, Button } from 'react-bootstrap';
+import { buySubscription } from 'services/subscriptionService';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -326,7 +327,15 @@ export default function Gallery(props) {
                 </div>
             )}
             <AlertBanner bannerErrorCode={bannerErrorCode} />
-
+            <Button
+                id="checkout"
+                variant="primary"
+                size="lg"
+                block
+                onClick={buySubscription}
+            >
+                {constants.SUBSCRIBE}
+            </Button>
             <Collections
                 collections={collections}
                 selected={Number(router.query.collection)}

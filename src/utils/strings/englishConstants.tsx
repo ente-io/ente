@@ -88,6 +88,7 @@ const englishConstants = {
     LOGOUT: 'logout',
     LOGOUT_WARNING: 'sure you want to logout?',
     CANCEL: 'cancel',
+    SUBSCRIBE: 'subscribe',
 };
 
 export default englishConstants;
