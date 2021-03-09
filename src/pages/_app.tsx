@@ -116,7 +116,7 @@ const GlobalStyles = createGlobalStyle`
         background-size: cover;
         border: none;
     }
-    .btn-primary {
+    .btn-primary ,.btn:focus {
         background: #2dc262;
         border-color: #29a354;
         padding: 8px;
@@ -134,6 +134,18 @@ const GlobalStyles = createGlobalStyle`
         background-color: #242424;
         color: #fff;
         border-radius: 12px;
+    }
+    .jumbotron{
+        background-color: #191919;
+        color: #fff;
+        text-align: center;
+        margin-top: 50px;
+    }
+    .alert-success {
+        background-color: #c4ffd6;
+    }
+    .alert-primary {
+        background-color: #c4ffd6;
     }
 `;
 

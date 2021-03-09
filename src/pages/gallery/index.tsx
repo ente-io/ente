@@ -23,7 +23,7 @@ import {
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
-import { Alert } from 'react-bootstrap';
+import { Alert, Button, Jumbotron } from 'react-bootstrap';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -93,6 +93,16 @@ const ListContainer = styled.div<{ columns: number }>`
     @media (max-width: 450px) {
         width: 100%;
     }
+`;
+
+const Image = styled.img`
+    width: 200px;
+    max-width: 100%;
+    display: block;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
 `;
 
 const DateContainer = styled.div`
@@ -320,7 +330,7 @@ export default function Gallery(props) {
             <LoadingBar color="#2dc262" ref={loadingBar} />
             {isFirstLoad && (
                 <div className="text-center">
-                    <Alert variant="primary">
+                    <Alert variant="success">
                         {constants.INITIAL_LOAD_DELAY_WARNING}
                     </Alert>
                 </div>
@@ -340,7 +350,17 @@ export default function Gallery(props) {
                 refetchData={syncWithRemote}
                 setBannerErrorCode={setBannerErrorCode}
             />
-            {filteredData.length ? (
+            {!isFirstLoad && data.length == 0 ? (
+                <Jumbotron>
+                    <Image alt="vault" src="/vault.png" />
+                    <Button
+                        variant="primary"
+                        onClick={props.showUploadModal}
+                    >
+                        {constants.UPLOAD_FIRST_PHOTO}
+                    </Button>
+                </Jumbotron>
+            ) : filteredData.length ? (
                 <Container>
                     <AutoSizer>
                         {({ height, width }) => {
@@ -413,7 +433,7 @@ export default function Gallery(props) {
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                        ITEM_TYPE.TIME
+                                            ITEM_TYPE.TIME
                                             ? DATE_CONTAINER_HEIGHT
                                             : IMAGE_CONTAINER_HEIGHT
                                     }
@@ -430,14 +450,14 @@ export default function Gallery(props) {
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                        ITEM_TYPE.TIME
+                                                            ITEM_TYPE.TIME
                                                             ? 1
                                                             : columns
                                                     }
                                                 >
                                                     {timeStampList[index]
                                                         .itemType ===
-                                                    ITEM_TYPE.TIME ? (
+                                                        ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
                                                                 timeStampList[
@@ -456,7 +476,7 @@ export default function Gallery(props) {
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                        idx
+                                                                    idx
                                                                 );
                                                             }
                                                         )
@@ -484,6 +504,14 @@ export default function Gallery(props) {
                 <DeadCenter>
                     <div>{constants.NOTHING_HERE}</div>
                 </DeadCenter>
+            )}
+            {data.length < 30 && (
+                <Alert
+                    variant="success"
+                    style={{ position: 'fixed', bottom: '1%', width: '100%', textAlign: 'center', marginBottom: '0px' }}
+                >
+                    {constants.INSTALL_MOBILE_APP()}
+                </Alert>
             )}
         </>
     );
