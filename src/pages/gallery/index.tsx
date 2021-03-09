@@ -498,6 +498,14 @@ export default function Gallery(props) {
                     <div>{constants.NOTHING_HERE}</div>
                 </DeadCenter>
             )}
+            {data.length < 30 && (
+                <Alert
+                    variant="info"
+                    style={{ position: 'fixed', bottom: '1%', width: '100%' }}
+                >
+                    {constants.INSTALL_MOBILE_APP()}
+                </Alert>
+            )}
         </>
     );
 }

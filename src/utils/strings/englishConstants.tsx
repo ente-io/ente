@@ -78,6 +78,19 @@ const englishConstants = {
     TITLE: 'ente.io | encrypted photo storage',
     WELCOME: 'welcome to ente!',
     UPLOAD_FIRST_PHOTO: 'backup your first photo',
+    INSTALL_MOBILE_APP: () => (
+        <div>
+            install our{' '}
+            <a href="https://play.google.com/store/apps/details?id=io.ente.photos">
+                android
+            </a>{' '}
+            or{' '}
+            <a href="https://apps.apple.com/in/app/ente-photos/id1542026904">
+                ios app{' '}
+            </a>
+            to automatically backup all your photos and videos
+        </div>
+    ),
 };
 
 export default englishConstants;
