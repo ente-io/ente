@@ -217,6 +217,10 @@ export default function App({ Component, pageProps }) {
         <FullScreenDropZone showModal={showUploadModal}>
             <Head>
                 <title>{constants.TITLE}</title>
+                <script
+                    async
+                    src={`https://sa.ente.io/latest.js`}
+                />
             </Head>
             <GlobalStyles />
             <Navbar>
