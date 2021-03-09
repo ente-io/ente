@@ -20,7 +20,7 @@ export default function UploadProgress({
         >
             <Modal.Header>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    Uploading Files
+                    {constants.UPLOADING_FILES}
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>

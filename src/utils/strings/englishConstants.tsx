@@ -57,6 +57,7 @@ const englishConstants = {
         2: 'uploading your files',
         3: 'files uploaded successfully!',
     },
+    UPLOADING_FILES: `uploading files`,
     OF: 'of',
     SUBSCRIPTION_EXPIRED:
         'your subscription has expired, please renew it form the mobile app',
