@@ -23,7 +23,7 @@ import {
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
-import { Alert } from 'react-bootstrap';
+import { Alert, Button, Jumbotron } from 'react-bootstrap';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -340,7 +340,23 @@ export default function Gallery(props) {
                 refetchData={syncWithRemote}
                 setBannerErrorCode={setBannerErrorCode}
             />
-            {filteredData.length ? (
+            {!isFirstLoad && data.length == 0 ? (
+                <Jumbotron>
+                    <h1>Welcome to ente!</h1>
+                    <p>
+                        you don't seem to have any photo uploaded , click on
+                        upload to start preserving your memories
+                    </p>
+                    <p>
+                        <Button
+                            variant="primary"
+                            onClick={props.showUploadModal}
+                        >
+                            upload
+                        </Button>
+                    </p>
+                </Jumbotron>
+            ) : filteredData.length ? (
                 <Container>
                     <AutoSizer>
                         {({ height, width }) => {
