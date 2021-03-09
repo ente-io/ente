@@ -114,7 +114,7 @@ export default function Generate() {
                 <Card.Body>
                     <div className="text-center">
                         <p>{constants.ENTER_ENC_PASSPHRASE}</p>
-                        <p>{constants.PASSPHRASE_DISCLAIMER()}</p>
+                        {constants.PASSPHRASE_DISCLAIMER()}
                     </div>
                     <Formik<formValues>
                         initialValues={{ passphrase: '', confirm: '' }}
