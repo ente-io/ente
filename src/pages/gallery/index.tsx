@@ -95,6 +95,16 @@ const ListContainer = styled.div<{ columns: number }>`
     }
 `;
 
+const Image = styled.img`
+    width: 200px;
+    max-width: 100%;
+    display: block;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+`;
+
 const DateContainer = styled.div`
     padding-top: 15px;
 `;
@@ -342,16 +352,13 @@ export default function Gallery(props) {
             />
             {!isFirstLoad && data.length == 0 ? (
                 <Jumbotron>
-                    <h1>{constants.WELCOME}</h1>
-                    <p>{constants.UPLOAD_FIRST_PHOTO}</p>
-                    <p>
-                        <Button
-                            variant="primary"
-                            onClick={props.showUploadModal}
-                        >
-                            upload
-                        </Button>
-                    </p>
+                    <Image alt="vault" src="/vault.png" />
+                    <Button
+                        variant="primary"
+                        onClick={props.showUploadModal}
+                    >
+                        {constants.UPLOAD_FIRST_PHOTO}
+                    </Button>
                 </Jumbotron>
             ) : filteredData.length ? (
                 <Container>
@@ -426,7 +433,7 @@ export default function Gallery(props) {
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                        ITEM_TYPE.TIME
+                                            ITEM_TYPE.TIME
                                             ? DATE_CONTAINER_HEIGHT
                                             : IMAGE_CONTAINER_HEIGHT
                                     }
@@ -443,14 +450,14 @@ export default function Gallery(props) {
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                        ITEM_TYPE.TIME
+                                                            ITEM_TYPE.TIME
                                                             ? 1
                                                             : columns
                                                     }
                                                 >
                                                     {timeStampList[index]
                                                         .itemType ===
-                                                    ITEM_TYPE.TIME ? (
+                                                        ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
                                                                 timeStampList[
@@ -469,7 +476,7 @@ export default function Gallery(props) {
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                        idx
+                                                                    idx
                                                                 );
                                                             }
                                                         )

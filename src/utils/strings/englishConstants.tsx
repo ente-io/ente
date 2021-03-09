@@ -76,19 +76,18 @@ const englishConstants = {
     NO_INTERNET_CONNECTION:
         'please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
-    WELCOME: 'welcome to ente!',
     UPLOAD_FIRST_PHOTO: 'backup your first photo',
     INSTALL_MOBILE_APP: () => (
         <div>
             install our{' '}
-            <a href="https://play.google.com/store/apps/details?id=io.ente.photos">
+            <a href="https://play.google.com/store/apps/details?id=io.ente.photos" target="_blank">
                 android
             </a>{' '}
             or{' '}
-            <a href="https://apps.apple.com/in/app/ente-photos/id1542026904">
+            <a href="https://apps.apple.com/in/app/ente-photos/id1542026904" target="_blank">
                 ios app{' '}
             </a>
-            to automatically backup all your photos and videos
+            to automatically backup all your photos
         </div>
     ),
     LOGOUT: 'logout',
