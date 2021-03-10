@@ -4,7 +4,6 @@ const ENDPOINT = getEndpoint();
 
 class SubscriptionService {
     private stripe;
-
     public init() {
         let publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
         this.stripe = Stripe(publishableKey);
@@ -27,6 +26,17 @@ class SubscriptionService {
         return HTTPService.post(`${ENDPOINT}/billing/create-checkout-session`, {
             priceId: priceId,
         });
+    }
+
+    public async getCheckoutSession(sessionId) {
+        try {
+            const session = await HTTPService.get(
+                `${ENDPOINT}/billing/checkout-session?sessionId= ${sessionId}`
+            );
+            return JSON.stringify(session, null, 2);
+        } catch (err) {
+            console.log('Error when fetching Checkout session', err);
+        }
     }
 }
 
