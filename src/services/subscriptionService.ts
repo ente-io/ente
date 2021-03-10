@@ -10,7 +10,7 @@ class SubscriptionService {
     }
     public async buySubscription() {
         try {
-            const priceId = 'price_1IT1GfK59oeucIMOZXxQCayi';
+            const priceId = 'price_1IT1DPK59oeucIMOiYs1P6Xd';
             const response = await this.createCheckoutSession(priceId);
             console.log(response.data);
             const result = await this.stripe.redirectToCheckout({
