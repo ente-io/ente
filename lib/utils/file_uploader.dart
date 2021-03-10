@@ -562,14 +562,12 @@ class FileUploader {
         return _putFile(uploadURL, file,
             contentLength: file.readAsBytesSync().length, attempt: 2);
       } else if (attempt < kMaximumUploadAttempts) {
-        _logger.info(
-            "Retrying upload that failed for file with size " +
-                fileSize.toString(),
-            e);
         final newUploadURL = await _getUploadURL();
         return _putFile(newUploadURL, file,
             contentLength: file.readAsBytesSync().length, attempt: attempt++);
       } else {
+        _logger.info(
+            "Upload failed for file with size " + fileSize.toString(), e);
         throw e;
       }
     }
