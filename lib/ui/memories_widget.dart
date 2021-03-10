@@ -23,15 +23,25 @@ class MemoriesWidget extends StatefulWidget {
 class _MemoriesWidgetState extends State<MemoriesWidget>
     with AutomaticKeepAliveClientMixin {
   final _logger = Logger("MemoriesWidget");
+  Function _listener;
 
   @override
   void initState() {
-    MemoriesService.instance.addListener(() {
-      setState(() {
-        _logger.info("Building because memories listener fired");
-      });
-    });
+    _listener = () {
+      if (mounted) {
+        setState(() {
+          _logger.info("Building because memories listener fired");
+        });
+      }
+    };
+    MemoriesService.instance.addListener(_listener);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    MemoriesService.instance.removeListener(_listener);
+    super.dispose();
   }
 
   @override
