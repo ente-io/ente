@@ -149,91 +149,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget _buildPlans(
       BuildContext context, BillingPlans plans, final appBarSize) {
-    final planWidgets = List<Widget>();
-    for (final plan in plans.plans) {
-      final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      if (productID == null || productID.isEmpty) {
-        continue;
-      }
-      final isActive =
-          _hasActiveSubscription && _currentSubscription.productID == productID;
-      planWidgets.add(
-        Material(
-          child: InkWell(
-            onTap: () async {
-              if (isActive) {
-                return;
-              }
-              await _dialog.show();
-              if (_usageFuture != null) {
-                final usage = await _usageFuture;
-                if (usage > plan.storage) {
-                  await _dialog.hide();
-                  showErrorDialog(
-                      context, "sorry", "you cannot downgrade to this plan");
-                  return;
-                }
-              }
-              final ProductDetailsResponse response =
-                  await InAppPurchaseConnection.instance
-                      .queryProductDetails([productID].toSet());
-              if (response.notFoundIDs.isNotEmpty) {
-                _logger.severe("Could not find products: " +
-                    response.notFoundIDs.toString());
-                await _dialog.hide();
-                showGenericErrorDialog(context);
-                return;
-              }
-              final isCrossGradingOnAndroid = Platform.isAndroid &&
-                  _hasActiveSubscription &&
-                  _currentSubscription.productID != kFreeProductID &&
-                  _currentSubscription.productID != plan.androidID;
-              if (isCrossGradingOnAndroid) {
-                final existingProductDetailsResponse =
-                    await InAppPurchaseConnection.instance.queryProductDetails(
-                        [_currentSubscription.productID].toSet());
-                if (existingProductDetailsResponse.notFoundIDs.isNotEmpty) {
-                  _logger.severe("Could not find existing products: " +
-                      response.notFoundIDs.toString());
-                  await _dialog.hide();
-                  showGenericErrorDialog(context);
-                  return;
-                }
-                final subscriptionChangeParam = ChangeSubscriptionParam(
-                  oldPurchaseDetails: PurchaseDetails(
-                    purchaseID: null,
-                    productID: _currentSubscription.productID,
-                    verificationData: null,
-                    transactionDate: null,
-                  ),
-                );
-                await InAppPurchaseConnection.instance.buyNonConsumable(
-                  purchaseParam: PurchaseParam(
-                    productDetails: response.productDetails[0],
-                    changeSubscriptionParam: subscriptionChangeParam,
-                  ),
-                );
-              } else {
-                await InAppPurchaseConnection.instance.buyNonConsumable(
-                  purchaseParam: PurchaseParam(
-                    productDetails: response.productDetails[0],
-                  ),
-                );
-              }
-            },
-            child: SubscriptionPlanWidget(
-              plan: plan,
-              isActive: isActive,
-            ),
-          ),
-        ),
-      );
-    }
+    List<Widget> planWidgets = _getPlanWidgets(plans, context);
     final pageSize = MediaQuery.of(context).size.height;
     final notifySize = MediaQuery.of(context).padding.top;
     final widgets = List<Widget>();
-    if (_currentSubscription == null ||
-        _currentSubscription.productID == kFreeProductID) {
+    if (widget.isOnboarding) {
       widgets.add(Padding(
         padding: const EdgeInsets.fromLTRB(12, 20, 12, 24),
         child: Text(
@@ -372,6 +292,104 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       ),
     );
+  }
+
+  List<Widget> _getPlanWidgets(BillingPlans plans, BuildContext context) {
+    final planWidgets = List<Widget>();
+    if (!widget.isOnboarding &&
+        _hasActiveSubscription &&
+        _currentSubscription.productID == kFreeProductID) {
+      planWidgets.add(
+        SubscriptionPlanWidget(
+          storage: plans.freePlan.storage,
+          price: "free",
+          period: "",
+          isActive: true,
+        ),
+      );
+    }
+    for (final plan in plans.plans) {
+      final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
+      if (productID == null || productID.isEmpty) {
+        continue;
+      }
+      final isActive =
+          _hasActiveSubscription && _currentSubscription.productID == productID;
+      planWidgets.add(
+        Material(
+          child: InkWell(
+            onTap: () async {
+              if (isActive) {
+                return;
+              }
+              await _dialog.show();
+              if (_usageFuture != null) {
+                final usage = await _usageFuture;
+                if (usage > plan.storage) {
+                  await _dialog.hide();
+                  showErrorDialog(
+                      context, "sorry", "you cannot downgrade to this plan");
+                  return;
+                }
+              }
+              final ProductDetailsResponse response =
+                  await InAppPurchaseConnection.instance
+                      .queryProductDetails([productID].toSet());
+              if (response.notFoundIDs.isNotEmpty) {
+                _logger.severe("Could not find products: " +
+                    response.notFoundIDs.toString());
+                await _dialog.hide();
+                showGenericErrorDialog(context);
+                return;
+              }
+              final isCrossGradingOnAndroid = Platform.isAndroid &&
+                  _hasActiveSubscription &&
+                  _currentSubscription.productID != kFreeProductID &&
+                  _currentSubscription.productID != plan.androidID;
+              if (isCrossGradingOnAndroid) {
+                final existingProductDetailsResponse =
+                    await InAppPurchaseConnection.instance.queryProductDetails(
+                        [_currentSubscription.productID].toSet());
+                if (existingProductDetailsResponse.notFoundIDs.isNotEmpty) {
+                  _logger.severe("Could not find existing products: " +
+                      response.notFoundIDs.toString());
+                  await _dialog.hide();
+                  showGenericErrorDialog(context);
+                  return;
+                }
+                final subscriptionChangeParam = ChangeSubscriptionParam(
+                  oldPurchaseDetails: PurchaseDetails(
+                    purchaseID: null,
+                    productID: _currentSubscription.productID,
+                    verificationData: null,
+                    transactionDate: null,
+                  ),
+                );
+                await InAppPurchaseConnection.instance.buyNonConsumable(
+                  purchaseParam: PurchaseParam(
+                    productDetails: response.productDetails[0],
+                    changeSubscriptionParam: subscriptionChangeParam,
+                  ),
+                );
+              } else {
+                await InAppPurchaseConnection.instance.buyNonConsumable(
+                  purchaseParam: PurchaseParam(
+                    productDetails: response.productDetails[0],
+                  ),
+                );
+              }
+            },
+            child: SubscriptionPlanWidget(
+              storage: plan.storage,
+              price: plan.price,
+              period: plan.period,
+              isActive: isActive,
+            ),
+          ),
+        ),
+      );
+    }
+    return planWidgets;
   }
 
   GestureDetector _getSkipButton(FreePlan plan) {
@@ -590,11 +608,15 @@ class FaqItem {
 class SubscriptionPlanWidget extends StatelessWidget {
   const SubscriptionPlanWidget({
     Key key,
-    @required this.plan,
+    @required this.storage,
+    @required this.price,
+    @required this.period,
     this.isActive = false,
   }) : super(key: key);
 
-  final BillingPlan plan;
+  final int storage;
+  final String price;
+  final String period;
   final bool isActive;
 
   @override
@@ -618,10 +640,7 @@ class SubscriptionPlanWidget extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          (plan.storage / (1024 * 1024 * 1024))
-                                  .round()
-                                  .toString() +
-                              " GB",
+                          convertBytesToReadableFormat(storage),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -633,7 +652,7 @@ class SubscriptionPlanWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(plan.price + " per " + plan.period),
+              Text(price + (period.isNotEmpty ? " per " + period : "")),
               Expanded(child: Container()),
               isActive
                   ? Expanded(
