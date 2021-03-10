@@ -11,6 +11,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/file_type.dart';
@@ -165,7 +166,7 @@ class SyncService {
       if (!result) {
         _logger.severe("Did not get permission");
         await _prefs.setInt(kDbUpdationTimeKey, syncStartTime);
-        await FileRepository.instance.reloadFiles();
+        Bus.instance.fire(LocalPhotosUpdatedEvent());
         return await syncWithRemote();
       }
     }
