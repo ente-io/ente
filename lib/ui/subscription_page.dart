@@ -326,23 +326,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       ]);
     } else {
-      if (_currentSubscription == null) {
-        widgets.addAll([
-          Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Text(
-                "we offer a 14 day free trial, you can cancel anytime",
-                style: TextStyle(
-                  color: Colors.white,
-                  height: 1.2,
-                ),
-              ),
-            ),
-          ),
-        ]);
-      }
       widgets.addAll([
         Align(
           alignment: Alignment.center,

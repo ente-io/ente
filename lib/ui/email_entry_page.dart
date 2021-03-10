@@ -247,6 +247,7 @@ class PricingWidget extends StatelessWidget {
     for (final plan in plans.plans) {
       planWidgets.add(BillingPlanWidget(plan));
     }
+    final freePlan = plans.freePlan;
     return Container(
       height: 280,
       color: Theme.of(context).cardColor,
@@ -264,7 +265,12 @@ class PricingWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: planWidgets,
           ),
-          const Text("we offer a 14 day free trial"),
+          Text("there is also a free trial of " +
+              convertBytesToReadableFormat(freePlan.storage) +
+              " for " +
+              freePlan.duration.toString() +
+              " " +
+              freePlan.period),
           GestureDetector(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
