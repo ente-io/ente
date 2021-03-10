@@ -345,18 +345,15 @@ export default function Gallery(props) {
             <Upload
                 uploadModalView={props.uploadModalView}
                 closeUploadModal={props.closeUploadModal}
-                showUploadModal={props.showUploadModal}
                 collectionAndItsLatestFile={collectionAndItsLatestFile}
                 refetchData={syncWithRemote}
                 setBannerErrorCode={setBannerErrorCode}
+                acceptedFiles={props.acceptedFiles}
             />
             {!isFirstLoad && data.length == 0 ? (
                 <Jumbotron>
                     <Image alt="vault" src="/vault.png" />
-                    <Button
-                        variant="primary"
-                        onClick={props.showUploadModal}
-                    >
+                    <Button variant="primary" onClick={props.openFileUploader}>
                         {constants.UPLOAD_FIRST_PHOTO}
                     </Button>
                 </Jumbotron>
@@ -433,7 +430,7 @@ export default function Gallery(props) {
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                            ITEM_TYPE.TIME
+                                        ITEM_TYPE.TIME
                                             ? DATE_CONTAINER_HEIGHT
                                             : IMAGE_CONTAINER_HEIGHT
                                     }
@@ -450,14 +447,14 @@ export default function Gallery(props) {
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                            ITEM_TYPE.TIME
+                                                        ITEM_TYPE.TIME
                                                             ? 1
                                                             : columns
                                                     }
                                                 >
                                                     {timeStampList[index]
                                                         .itemType ===
-                                                        ITEM_TYPE.TIME ? (
+                                                    ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
                                                                 timeStampList[
@@ -476,7 +473,7 @@ export default function Gallery(props) {
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                    idx
+                                                                        idx
                                                                 );
                                                             }
                                                         )
@@ -508,7 +505,13 @@ export default function Gallery(props) {
             {data.length < 30 && (
                 <Alert
                     variant="success"
-                    style={{ position: 'fixed', bottom: '1%', width: '100%', textAlign: 'center', marginBottom: '0px' }}
+                    style={{
+                        position: 'fixed',
+                        bottom: '1%',
+                        width: '100%',
+                        textAlign: 'center',
+                        marginBottom: '0px',
+                    }}
                 >
                     {constants.INSTALL_MOBILE_APP()}
                 </Alert>
