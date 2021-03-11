@@ -148,6 +148,10 @@ const GlobalStyles = createGlobalStyle`
     .alert-primary {
         background-color: #c4ffd6;
     }
+    .collection-create-modal{
+        width: 400px;
+        max-width:100%;
+    } 
 `;
 
 const Image = styled.img`

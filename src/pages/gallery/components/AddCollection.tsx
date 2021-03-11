@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, Card, Form, Modal } from 'react-bootstrap';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
@@ -21,13 +21,16 @@ export default function AddCollection({
 }) {
     const [createCollectionView, setCreateCollectionView] = useState(false);
     const [albumName, setAlbumName] = useState('');
-
+    const inputRef = useRef<HTMLInputElement>(null);
     const handleChange = (event) => {
         setAlbumName(event.target.value);
     };
     useEffect(() => {
         setAlbumName(autoFilledName);
         setCreateCollectionView(triggerCreateCollectionOpen);
+        setTimeout(() => {
+            inputRef.current && inputRef.current.focus();
+        }, 1);
     }, []);
 
     const handleSubmit = async (event) => {
@@ -53,6 +56,7 @@ export default function AddCollection({
                 centered
                 backdrop="static"
                 style={{ background: 'rgba(0, 0, 0, 0.8)' }}
+                dialogClassName="collection-create-modal"
             >
                 <Modal.Header closeButton>
                     <Modal.Title>{constants.CREATE_COLLECTION}</Modal.Title>
@@ -65,6 +69,7 @@ export default function AddCollection({
                                 placeholder={constants.ALBUM_NAME}
                                 value={albumName}
                                 onChange={handleChange}
+                                ref={inputRef}
                             />
                         </Form.Group>
                         <Button
