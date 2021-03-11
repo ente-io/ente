@@ -34,7 +34,7 @@ export default function Upload(props: Props) {
             const token = getToken();
             setPercentComplete(0);
             setProgressView(true);
-
+            props.closeUploadModal();
             if (!collection) {
                 collection = await createAlbum(collectionName);
             }
@@ -49,7 +49,6 @@ export default function Upload(props: Props) {
                 },
                 setUploadErrors
             );
-            props.closeUploadModal();
             props.refetchData();
         } catch (err) {
             props.setBannerErrorCode(err.message);
