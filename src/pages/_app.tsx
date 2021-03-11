@@ -220,27 +220,23 @@ export default function App({ Component, pageProps }) {
 
     const onDropAccepted = useCallback(() => {
         showUploadModal();
+        setIsDragActive(false);
     }, []);
-    const {
-        getRootProps,
-        getInputProps,
-        open,
-        acceptedFiles,
-        isDragActive,
-        isDragAccept,
-        isDragReject,
-    } = useDropzone({
+    const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
         noClick: true,
         noKeyboard: true,
         onDropAccepted,
     });
+    const [isDragActive, setIsDragActive] = useState(false);
+    const onDragEnter = () => setIsDragActive(true);
+    const onDragLeave = () => setIsDragActive(false);
     return (
         <FullScreenDropZone
             getRootProps={getRootProps}
             getInputProps={getInputProps}
             isDragActive={isDragActive}
-            isDragAccept={isDragAccept}
-            isDragReject={isDragReject}
+            onDragEnter={onDragEnter}
+            onDragLeave={onDragLeave}
         >
             <Head>
                 <title>{constants.TITLE}</title>

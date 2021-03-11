@@ -1,15 +1,11 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 export const getColor = (props) => {
-    if (props.isDragAccept) {
-        return '#00e676';
-    }
-    if (props.isDragReject) {
-        return '#ff1744';
-    }
     if (props.isDragActive) {
-        return '#2196f3';
+        return '#00e676';
+    } else {
+        return '#191919';
     }
 };
 
@@ -18,35 +14,47 @@ const DropDiv = styled.div`
     flex: 1;
     display: flex;
     flex-direction: column;
-    color: black;
+`;
+
+const Overlay = styled.div`
     border-width: 4px;
     border-radius: 34px;
-    border-color: ${(props) => getColor(props)};
-    border-style: ${(props) => enableBorder(props)};
     outline: none;
     transition: border 0.24s ease-in-out;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    text-align: center;
+    position: absolute;
+    border-color: ${(props) => getColor(props)};
+    border-style: solid;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9;
 `;
 
 type Props = React.PropsWithChildren<{
     getRootProps: any;
     getInputProps: any;
     isDragActive;
-    isDragAccept;
-    isDragReject;
+    onDragLeave;
+    onDragEnter;
 }>;
 
 export default function FullScreenDropZone(props: Props) {
-    const { isDragActive, isDragAccept, isDragReject } = props;
     return (
-        <DropDiv
-            {...props.getRootProps({
-                className: 'dropzone',
-                isDragActive,
-                isDragAccept,
-                isDragReject,
-            })}
-        >
+        <DropDiv {...props.getRootProps()} onDragEnter={props.onDragEnter}>
             <input {...props.getInputProps()} />
+            {props.isDragActive && (
+                <Overlay
+                    onDragLeave={props.onDragLeave}
+                    isDragActive={props.isDragActive}
+                >
+                    drop to backup your files
+                </Overlay>
+            )}
             {props.children}
         </DropDiv>
     );
