@@ -167,10 +167,6 @@ const GlobalStyles = createGlobalStyle`
       }
 `;
 
-/*
-padding: 8px;
-        padding-left: 24px;
-        padding-right: 24px;*/
 const Image = styled.img`
     max-height: 28px;
     margin-right: 5px;

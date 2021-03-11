@@ -89,15 +89,11 @@ export default function FullScreenDropZone(props: Props) {
                         size="sm"
                         onClick={() => setChangeDisabledMessageModalView(true)}
                     >
-                        Change
+                        {constants.CHANGE}
                     </Button>
                     <ChangeDisabledMessage
                         show={changeDisabledMessageModalView}
                         onHide={() => setChangeDisabledMessageModalView(false)}
-                        logout={() => {
-                            setLogoutModalView(false);
-                            props.logout();
-                        }}
                     />
                     <br />
                     <br />

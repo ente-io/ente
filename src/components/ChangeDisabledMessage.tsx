@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
-function ChangeDisabledMessage({ logout, ...props }) {
+function ChangeDisabledMessage(props) {
     return (
         <Modal
             {...props}

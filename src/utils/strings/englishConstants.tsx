@@ -115,6 +115,7 @@ const englishConstants = {
         </p>
     ),
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
+    CHANGE: 'change',
 };
 
 export default englishConstants;
