@@ -17,8 +17,8 @@ const DropDiv = styled.div`
 `;
 
 const Overlay = styled.div<{ isDragActive: boolean }>`
-    border-width: 4px;
-    border-radius: 34px;
+    border-width: 8px;
+
     outline: none;
     transition: border 0.24s ease-in-out;
     height: 100%;
@@ -27,11 +27,13 @@ const Overlay = styled.div<{ isDragActive: boolean }>`
     justify-content: center;
     align-items: center;
     color: #fff;
+    font-size: 24px;
+    font-weight: 900;
     text-align: center;
     position: absolute;
     border-color: ${(props) => getColor(props)};
     border-style: solid;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.9);
     z-index: 9;
 `;
 
