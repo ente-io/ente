@@ -1,39 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Card, Modal } from 'react-bootstrap';
-import CollectionDropZone from './CollectionDropZone';
+import React from 'react';
+import { Card, Modal } from 'react-bootstrap';
 import AddCollection from './AddCollection';
 import PreviewCard from './PreviewCard';
 import constants from 'utils/strings/constants';
+import styled from 'styled-components';
 
-function CollectionSelector(props) {
-    const {
-        uploadModalView,
-        closeUploadModal,
-        showUploadModal,
-        collectionAndItsLatestFile,
-        ...rest
-    } = props;
-    const CollectionIcons = collectionAndItsLatestFile?.map((item) => (
-        <div style={{ margin: '10px' }} key={item.collection.id}>
-            <CollectionDropZone
-                {...rest}
-                closeModal={closeUploadModal}
-                showModal={showUploadModal}
-                collectionAndItsLatestFile={item}
+export const CollectionIcon = styled.div`
+    width: 200px;
+    margin: 10px;
+    height: 240px;
+    padding: 4px;
+    color: black;
+    border-width: 4px;
+    border-radius: 34px;
+    outline: none;
+`;
+
+function CollectionSelector({
+    collectionAndItsLatestFile,
+    uploadFiles,
+    uploadModalView,
+    closeUploadModal,
+    suggestedCollectionName,
+}) {
+    const CollectionIcons: JSX.Element[] = collectionAndItsLatestFile?.map(
+        (item) => (
+            <CollectionIcon
+                key={item.collection.id}
+                onClick={async () => await uploadFiles(item.collection)}
             >
-                <Card style={{ borderRadius: '30px' }}>
+                <Card>
                     <PreviewCard
                         data={item.file}
-                        updateUrl={() => { }}
+                        updateUrl={() => {}}
                         forcedEnable
                     />
                     <Card.Text className="text-center">
                         {item.collection.name}
                     </Card.Text>
                 </Card>
-            </CollectionDropZone>
-        </div>
-    ));
+            </CollectionIcon>
+        )
+    );
 
     return (
         <Modal
@@ -50,14 +58,13 @@ function CollectionSelector(props) {
             <Modal.Body
                 style={{
                     display: 'flex',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'space-between',
                     flexWrap: 'wrap',
                 }}
             >
                 <AddCollection
-                    {...rest}
-                    showUploadModal={showUploadModal}
-                    closeUploadModal={closeUploadModal}
+                    uploadFiles={uploadFiles}
+                    autoFilledName={suggestedCollectionName}
                 />
                 {CollectionIcons}
             </Modal.Body>

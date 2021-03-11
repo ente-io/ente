@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { Card } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Button, Card, Form, Modal } from 'react-bootstrap';
 import styled from 'styled-components';
-import CreateCollection from './CreateCollection';
-import DropzoneWrapper from './DropzoneWrapper';
 import constants from 'utils/strings/constants';
+import { CollectionIcon } from './CollectionSelector';
 
 const ImageContainer = styled.div`
     min-height: 192px;
@@ -15,43 +14,63 @@ const ImageContainer = styled.div`
     font-size: 42px;
 `;
 
-const StyledCard = styled(Card)`
-    border-radius: 30px !important;
-    cursor: pointer;
-`;
-
-export default function AddCollection(props) {
-    const [acceptedFiles, setAcceptedFiles] = useState<File[]>();
+export default function AddCollection({ uploadFiles, autoFilledName }) {
     const [createCollectionView, setCreateCollectionView] = useState(false);
 
-    const { closeUploadModal, showUploadModal, ...rest } = props;
+    const [albumName, setAlbumName] = useState('');
 
-    const createCollection = (acceptedFiles) => {
-        setAcceptedFiles(acceptedFiles);
-        setCreateCollectionView(true);
+    const handleChange = (event) => {
+        setAlbumName(event.target.value);
     };
-    const children = (
-        <StyledCard>
-            <ImageContainer>+</ImageContainer>
-            <Card.Text style={{ textAlign: 'center' }}>
-                {constants.CREATE_COLLECTION}
-            </Card.Text>
-        </StyledCard>
-    );
+    useEffect(() => setAlbumName(autoFilledName), []);
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        await uploadFiles(null, albumName);
+    };
     return (
-        <div style={{ margin: '10px' }}>
-            <DropzoneWrapper
-                onDropAccepted={createCollection}
-                onDragOver={showUploadModal}
-                children={children}
-            />
-            <CreateCollection
-                {...rest}
-                modalView={createCollectionView}
-                closeUploadModal={closeUploadModal}
-                closeModal={() => setCreateCollectionView(false)}
-                acceptedFiles={acceptedFiles}
-            />
-        </div>
+        <>
+            <CollectionIcon
+                style={{ margin: '10px' }}
+                onClick={() => setCreateCollectionView(true)}
+            >
+                <Card>
+                    <ImageContainer>+</ImageContainer>
+                    <Card.Text style={{ textAlign: 'center' }}>
+                        {constants.CREATE_COLLECTION}
+                    </Card.Text>
+                </Card>
+            </CollectionIcon>
+            <Modal
+                show={createCollectionView}
+                onHide={() => setCreateCollectionView(false)}
+                centered
+                backdrop="static"
+                style={{ background: 'rgba(0, 0, 0, 0.8)' }}
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>{constants.CREATE_COLLECTION}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group controlId="formBasicEmail">
+                            <Form.Control
+                                type="text"
+                                placeholder={constants.ALBUM_NAME}
+                                value={albumName}
+                                onChange={handleChange}
+                            />
+                        </Form.Group>
+                        <Button
+                            variant="primary"
+                            type="submit"
+                            style={{ width: '100%' }}
+                        >
+                            {constants.CREATE}
+                        </Button>
+                    </Form>
+                </Modal.Body>
+            </Modal>
+        </>
     );
 }
