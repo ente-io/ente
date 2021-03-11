@@ -16,7 +16,7 @@ const DropDiv = styled.div`
     flex-direction: column;
 `;
 
-const Overlay = styled.div`
+const Overlay = styled.div<{ isDragActive: boolean }>`
     border-width: 4px;
     border-radius: 34px;
     outline: none;
