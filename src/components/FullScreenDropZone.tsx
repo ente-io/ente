@@ -5,7 +5,9 @@ import { Button } from 'react-bootstrap';
 import ConfirmLogout from 'components/ConfirmLogout';
 import Spinner from 'react-bootstrap/Spinner';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import subscriptionService from 'services/subscriptionService';
+import subscriptionService, {
+    Subscription,
+} from 'services/subscriptionService';
 import ChangeDisabledMessage from './ChangeDisabledMessage';
 import constants from 'utils/strings/constants';
 
@@ -54,15 +56,6 @@ type Props = React.PropsWithChildren<{
     logout;
 }>;
 
-interface Subscription {
-    id: number;
-    userID: number;
-    productID: string;
-    storage: number;
-    originalTransactionID: string;
-    expiryTime: number;
-    paymentProvider: string;
-}
 export default function FullScreenDropZone(props: Props) {
     const [logoutModalView, setLogoutModalView] = useState(false);
     const [

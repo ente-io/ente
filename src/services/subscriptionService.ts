@@ -4,6 +4,16 @@ import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
 const token = getToken();
+
+export interface Subscription {
+    id: number;
+    userID: number;
+    productID: string;
+    storage: number;
+    originalTransactionID: string;
+    expiryTime: number;
+    paymentProvider: string;
+}
 class SubscriptionService {
     async getUsage() {
         try {
