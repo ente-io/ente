@@ -2,20 +2,17 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
-import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import Container from 'components/Container';
-import PowerSettings from 'components/power_settings';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import localForage from 'localforage';
 import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
-import ConfirmLogout from 'components/ConfirmLogout';
 import { useDropzone } from 'react-dropzone';
 
 localForage.config({
@@ -117,12 +114,9 @@ const GlobalStyles = createGlobalStyle`
         background-size: cover;
         border: none;
     }
-    .btn-primary ,.btn:focus {
+    .btn-primary {
         background: #2dc262;
         border-color: #29a354;
-        padding: 8px;
-        padding-left: 24px;
-        padding-right: 24px;
     }
     .btn-primary:hover {
         background-color: #29a354;
@@ -152,8 +146,31 @@ const GlobalStyles = createGlobalStyle`
         width: 500px;
         max-width:100%;
     } 
+    .bm-burger-button {
+        position: fixed;
+        width: 36px;
+        height: 30px;
+        left: 36px;
+        top: 25px;
+      }
+    .bm-burger-bars {
+        background: #fff;
+      }
+      .bm-menu {
+        background: #373a47;
+        padding: 2.5em 1.5em 0;
+        font-size: 1.15em;
+        color:#fff
+      }
+      .bm-cross {
+        background: #fff;
+      }
 `;
 
+/*
+padding: 8px;
+        padding-left: 24px;
+        padding-right: 24px;*/
 const Image = styled.img`
     max-height: 28px;
     margin-right: 5px;
@@ -171,14 +188,7 @@ export default function App({ Component, pageProps }) {
     const [loading, setLoading] = useState(false);
     const [uploadButtonView, setUploadButtonView] = useState(false);
     const [uploadModalView, setUploadModalView] = useState(false);
-    const [logoutModalView, setLogoutModalView] = useState(false);
 
-    function showLogoutModal() {
-        setLogoutModalView(true);
-    }
-    function closeLogoutModal() {
-        setLogoutModalView(false);
-    }
     function closeUploadModal() {
         setUploadModalView(false);
     }
@@ -209,7 +219,6 @@ export default function App({ Component, pageProps }) {
     }, []);
 
     const logout = async () => {
-        setLogoutModalView(false);
         clearKeys();
         clearData();
         setUploadButtonView(false);
@@ -237,6 +246,7 @@ export default function App({ Component, pageProps }) {
             isDragActive={isDragActive}
             onDragEnter={onDragEnter}
             onDragLeave={onDragLeave}
+            logout={logout}
         >
             <Head>
                 <title>{constants.TITLE}</title>
@@ -244,18 +254,6 @@ export default function App({ Component, pageProps }) {
             </Head>
             <GlobalStyles />
             <Navbar>
-                {user && (
-                    <>
-                        <ConfirmLogout
-                            show={logoutModalView}
-                            onHide={closeLogoutModal}
-                            logout={logout}
-                        />
-                        <Button variant="link" onClick={showLogoutModal}>
-                            <PowerSettings />
-                        </Button>
-                    </>
-                )}
                 <FlexContainer>
                     <Image
                         style={{ height: '24px' }}
