@@ -31,13 +31,11 @@ export default function Upload(props: Props) {
 
     const uploadFiles = async (collection, collectionName) => {
         try {
-            console.log(collection);
             const token = getToken();
             setPercentComplete(0);
             setProgressView(true);
 
             if (!collection) {
-                console.log('collection name sent');
                 collection = await createAlbum(collectionName);
             }
             await UploadService.uploadFiles(
@@ -52,7 +50,7 @@ export default function Upload(props: Props) {
                 setUploadErrors
             );
             props.closeUploadModal();
-            // props.refetchData();
+            props.refetchData();
         } catch (err) {
             props.setBannerErrorCode(err.message);
             setProgressView(false);

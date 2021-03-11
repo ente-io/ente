@@ -58,7 +58,7 @@ function CollectionSelector({
             <Modal.Body
                 style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    justifyContent: 'flex-start',
                     flexWrap: 'wrap',
                 }}
             >
