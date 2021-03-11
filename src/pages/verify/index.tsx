@@ -54,6 +54,7 @@ export default function Verify() {
                 id: resp.data.id,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, resp.data.keyAttributes);
+            setData(LS_KEYS.SUBSCRIPTION, resp.data.subscription);
             if (resp.data.keyAttributes?.encryptedKey) {
                 router.push('/credentials');
             } else {
@@ -84,7 +85,11 @@ export default function Verify() {
         <Container>
             <Card style={{ minWidth: '300px' }} className="text-center">
                 <Card.Body>
-                    <Card.Title style={{ fontWeight: 'bold', marginBottom: '24px' }}>{constants.VERIFY_EMAIL}</Card.Title>
+                    <Card.Title
+                        style={{ fontWeight: 'bold', marginBottom: '24px' }}
+                    >
+                        {constants.VERIFY_EMAIL}
+                    </Card.Title>
                     {constants.EMAIL_SENT({ email })}
                     {constants.CHECK_INBOX}
                     <br />
