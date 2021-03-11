@@ -23,6 +23,7 @@
     "photoswipe": "file:./thirdparty/photoswipe",
     "react": "16.13.1",
     "react-bootstrap": "^1.3.0",
+    "react-burger-menu": "^3.0.4",
     "react-dom": "16.13.1",
     "react-dropzone": "^11.2.4",
     "react-top-loading-bar": "^2.0.1",
