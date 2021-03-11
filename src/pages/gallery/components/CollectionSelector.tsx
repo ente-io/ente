@@ -65,6 +65,7 @@ function CollectionSelector({
                 <AddCollection
                     uploadFiles={uploadFiles}
                     autoFilledName={suggestedCollectionName}
+                    triggerCreateCollectionOpen={CollectionIcons.length == 0}
                 />
                 {CollectionIcons}
             </Modal.Body>

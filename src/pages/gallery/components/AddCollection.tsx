@@ -14,15 +14,21 @@ const ImageContainer = styled.div`
     font-size: 42px;
 `;
 
-export default function AddCollection({ uploadFiles, autoFilledName }) {
+export default function AddCollection({
+    uploadFiles,
+    autoFilledName,
+    triggerCreateCollectionOpen,
+}) {
     const [createCollectionView, setCreateCollectionView] = useState(false);
-
     const [albumName, setAlbumName] = useState('');
 
     const handleChange = (event) => {
         setAlbumName(event.target.value);
     };
-    useEffect(() => setAlbumName(autoFilledName), []);
+    useEffect(() => {
+        setAlbumName(autoFilledName);
+        setCreateCollectionView(triggerCreateCollectionOpen);
+    }, []);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
