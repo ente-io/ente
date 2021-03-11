@@ -103,6 +103,7 @@ const englishConstants = {
     SUBSCRIPTION_CHANGE_DISABLED:
         'sorry, you can only change the subscription on the mobile app.',
     SUBCRIPTION_PLAN: 'subscription plan',
+    USAGE_DETAILS: 'Usage Details',
     SUBSCRIPTION_INFO: (productID) => (
         <p>
             you are currently on <strong>{productID}</strong> plan

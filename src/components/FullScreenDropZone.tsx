@@ -113,7 +113,7 @@ export default function FullScreenDropZone(props: Props) {
                     <br />
                 </div>
                 <div>
-                    <h4>Usage Details</h4>
+                    <h4>{constants.USAGE_DETAILS}</h4>
                     <br />
                     <div>
                         {usage ? (
