@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
@@ -16,6 +16,7 @@ import localForage from 'localforage';
 import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import ConfirmLogout from 'components/ConfirmLogout';
+import { useDropzone } from 'react-dropzone';
 
 localForage.config({
     driver: localForage.INDEXEDDB,
@@ -147,6 +148,10 @@ const GlobalStyles = createGlobalStyle`
     .alert-primary {
         background-color: #c4ffd6;
     }
+    .ente-modal{
+        width: 500px;
+        max-width:100%;
+    } 
 `;
 
 const Image = styled.img`
@@ -213,14 +218,29 @@ export default function App({ Component, pageProps }) {
         router.push('/');
     };
 
+    const onDropAccepted = useCallback(() => {
+        showUploadModal();
+        setIsDragActive(false);
+    }, []);
+    const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
+        noClick: true,
+        noKeyboard: true,
+        onDropAccepted,
+    });
+    const [isDragActive, setIsDragActive] = useState(false);
+    const onDragEnter = () => setIsDragActive(true);
+    const onDragLeave = () => setIsDragActive(false);
     return (
-        <FullScreenDropZone showModal={showUploadModal}>
+        <FullScreenDropZone
+            getRootProps={getRootProps}
+            getInputProps={getInputProps}
+            isDragActive={isDragActive}
+            onDragEnter={onDragEnter}
+            onDragLeave={onDragLeave}
+        >
             <Head>
                 <title>{constants.TITLE}</title>
-                <script
-                    async
-                    src={`https://sa.ente.io/latest.js`}
-                />
+                <script async src={`https://sa.ente.io/latest.js`} />
             </Head>
             <GlobalStyles />
             <Navbar>
@@ -243,9 +263,7 @@ export default function App({ Component, pageProps }) {
                         src="/icon.svg"
                     />
                 </FlexContainer>
-                {uploadButtonView && (
-                    <UploadButton showModal={showUploadModal} />
-                )}
+                {uploadButtonView && <UploadButton openFileUploader={open} />}
             </Navbar>
             {loading ? (
                 <Container>
@@ -255,6 +273,8 @@ export default function App({ Component, pageProps }) {
                 </Container>
             ) : (
                 <Component
+                    openFileUploader={open}
+                    acceptedFiles={acceptedFiles}
                     uploadModalView={uploadModalView}
                     showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}

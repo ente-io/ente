@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { file } from 'services/fileService';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
