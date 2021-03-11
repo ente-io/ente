@@ -21,7 +21,7 @@ interface formValues {
     ott: string;
 }
 
-export default function Verify() {
+export default function Verify(props) {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [resend, setResend] = useState(0);
@@ -141,6 +141,13 @@ export default function Verify() {
                                     <span>{constants.SENDING}</span>
                                 )}
                                 {resend === 2 && <span>{constants.SENT}</span>}
+                                <br />
+                                <br />
+                                <div>
+                                    <a href="#" onClick={props.logout}>
+                                        {constants.CHANGE_EMAIL}
+                                    </a>
+                                </div>
                             </Form>
                         )}
                     </Formik>

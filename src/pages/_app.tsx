@@ -273,6 +273,7 @@ export default function App({ Component, pageProps }) {
                     showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}
                     setUploadButtonView={setUploadButtonView}
+                    logout={logout}
                 />
             )}
         </FullScreenDropZone>

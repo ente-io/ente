@@ -23,7 +23,7 @@ const englishConstants = {
     ),
     CHECK_INBOX: 'please check your inbox (and spam) to complete verification',
     ENTER_OTT: 'verification code',
-    RESEND_MAIL: 'did not get email?',
+    RESEND_MAIL: 'resend?',
     VERIFY: 'verify',
     UNKNOWN_ERROR: 'something went wrong, please try again',
     INVALID_CODE: 'invalid verification code',
@@ -116,6 +116,7 @@ const englishConstants = {
     ),
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CHANGE: 'change',
+    CHANGE_EMAIL: 'change email ?',
 };
 
 export default englishConstants;
