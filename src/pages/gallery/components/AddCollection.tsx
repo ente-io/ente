@@ -56,7 +56,7 @@ export default function AddCollection({
                 centered
                 backdrop="static"
                 style={{ background: 'rgba(0, 0, 0, 0.8)' }}
-                dialogClassName="my-modal"
+                dialogClassName="ente-modal"
             >
                 <Modal.Header closeButton>
                     <Modal.Title>{constants.CREATE_COLLECTION}</Modal.Title>

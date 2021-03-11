@@ -148,7 +148,7 @@ const GlobalStyles = createGlobalStyle`
     .alert-primary {
         background-color: #c4ffd6;
     }
-    .my-modal{
+    .ente-modal{
         width: 500px;
         max-width:100%;
     } 

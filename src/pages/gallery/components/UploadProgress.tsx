@@ -17,7 +17,7 @@ export default function UploadProgress({
             aria-labelledby="contained-modal-title-vcenter"
             centered
             backdrop="static"
-            dialogClassName="my-modal"
+            dialogClassName="ente-modal"
         >
             <Modal.Header>
                 <Modal.Title id="contained-modal-title-vcenter">
