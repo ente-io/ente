@@ -6,6 +6,8 @@ import ConfirmLogout from 'components/ConfirmLogout';
 import Spinner from 'react-bootstrap/Spinner';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import subscriptionService from 'services/subscriptionService';
+import ChangeDisabledMessage from './ChangeDisabledMessage';
+import constants from 'utils/strings/constants';
 
 export const getColor = (props) => {
     if (props.isDragActive) {
@@ -63,7 +65,10 @@ interface Subscription {
 }
 export default function FullScreenDropZone(props: Props) {
     const [logoutModalView, setLogoutModalView] = useState(false);
-
+    const [
+        changeDisabledMessageModalView,
+        setChangeDisabledMessageModalView,
+    ] = useState(false);
     function showLogoutModal() {
         setLogoutModalView(true);
     }
@@ -85,15 +90,25 @@ export default function FullScreenDropZone(props: Props) {
         <DropDiv {...props.getRootProps()} onDragEnter={props.onDragEnter}>
             <Menu className="text-center">
                 <div>
-                    Subscription Plans{' '}
-                    <Button variant="success" size="sm">
+                    {constants.SUBCRIPTION_PLAN}
+                    <Button
+                        variant="success"
+                        size="sm"
+                        onClick={() => setChangeDisabledMessageModalView(true)}
+                    >
                         Change
                     </Button>
+                    <ChangeDisabledMessage
+                        show={changeDisabledMessageModalView}
+                        onHide={() => setChangeDisabledMessageModalView(false)}
+                        logout={() => {
+                            setLogoutModalView(false);
+                            props.logout();
+                        }}
+                    />
                     <br />
                     <br />
-                    you are currently on{' '}
-                    <strong>{subscription?.productID}</strong> plan
-                    <br />
+                    {constants.SUBSCRIPTION_INFO(subscription?.productID)}
                     <br />
                     <br />
                 </div>
@@ -102,9 +117,12 @@ export default function FullScreenDropZone(props: Props) {
                     <br />
                     <div>
                         {usage ? (
-                            `you have used ${usage} GB out of your ${subscriptionService.convertBytesToGBs(
-                                subscription.storage
-                            )} GB quota`
+                            constants.USAGE_INFO(
+                                usage,
+                                subscriptionService.convertBytesToGBs(
+                                    subscription?.storage
+                                )
+                            )
                         ) : (
                             <Spinner animation="border" />
                         )}
@@ -132,7 +150,7 @@ export default function FullScreenDropZone(props: Props) {
                     onDragLeave={props.onDragLeave}
                     isDragActive={props.isDragActive}
                 >
-                    drop to backup your files
+                    {constants.UPLOAD_DROPZONE_MESSAGE}
                 </Overlay>
             )}
             {props.children}

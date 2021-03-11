@@ -81,11 +81,17 @@ const englishConstants = {
     INSTALL_MOBILE_APP: () => (
         <div>
             install our{' '}
-            <a href="https://play.google.com/store/apps/details?id=io.ente.photos" target="_blank">
+            <a
+                href="https://play.google.com/store/apps/details?id=io.ente.photos"
+                target="_blank"
+            >
                 android
             </a>{' '}
             or{' '}
-            <a href="https://apps.apple.com/in/app/ente-photos/id1542026904" target="_blank">
+            <a
+                href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                target="_blank"
+            >
                 ios app{' '}
             </a>
             to automatically backup all your photos
@@ -94,6 +100,20 @@ const englishConstants = {
     LOGOUT: 'logout',
     LOGOUT_WARNING: 'sure you want to logout?',
     CANCEL: 'cancel',
+    SUBSCRIPTION_CHANGE_DISABLED:
+        'sorry, you can only change the subscription on the mobile app.',
+    SUBCRIPTION_PLAN: 'subscription plan',
+    SUBSCRIPTION_INFO: (productID) => (
+        <p>
+            you are currently on <strong>{productID}</strong> plan
+        </p>
+    ),
+    USAGE_INFO: (usage, quota) => (
+        <p>
+            you have used {usage} GB out of your {quota} GB quota
+        </p>
+    ),
+    UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
 };
 
 export default englishConstants;
