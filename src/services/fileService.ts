@@ -1,19 +1,13 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
-import localForage from 'localforage';
+import localForage from 'utils/storage/localForage';
+
 import { collection } from './collectionService';
 import { MetadataObject } from './uploadService';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 
 const ENDPOINT = getEndpoint();
 const DIFF_LIMIT: number = 2500;
-
-localForage.config({
-    driver: localForage.INDEXEDDB,
-    name: 'ente-files',
-    version: 1.0,
-    storeName: 'files',
-});
 
 const FILES = 'files';
 
@@ -22,7 +16,6 @@ export interface fileAttribute {
     objectKey?: string;
     decryptionHeader: string;
 }
-
 
 export interface file {
     id: number;
@@ -149,7 +142,7 @@ export const getFiles = async (
         } while (resp.data.diff.length === limit);
         return await Promise.all(promises);
     } catch (e) {
-        console.log('Get files failed', e);
+        console.error('Get files failed', e);
     }
 };
 

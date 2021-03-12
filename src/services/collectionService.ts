@@ -1,7 +1,7 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { file } from './fileService';
-import localForage from 'localforage';
+import localForage from 'utils/storage/localForage';
 
 import HTTPService from './HTTPService';
 import { B64EncryptionResult } from './uploadService';
@@ -104,7 +104,7 @@ const getCollections = async (
         );
         return await Promise.all(promises);
     } catch (e) {
-        console.log('getCollections failed- ', e.response);
+        console.error('getCollections failed- ', e.response);
     }
 };
 
@@ -248,7 +248,7 @@ export const AddCollection = async (
         );
         return createdCollection;
     } catch (e) {
-        console.log('Add collection failed', e);
+        console.error('Add collection failed', e);
     }
 };
 
@@ -265,7 +265,7 @@ const createCollection = async (
         );
         return response.data.collection;
     } catch (e) {
-        console.log('create Collection failed ', e);
+        console.error('create Collection failed ', e);
     }
 };
 
@@ -323,7 +323,7 @@ const addToCollection = async (collection: collection, files: file[]) => {
             { 'X-Auth-Token': token }
         );
     } catch (e) {
-        console.log('Add to collection Failed ', e);
+        console.error('Add to collection Failed ', e);
     }
 };
 const removeFromCollection = async (collection: collection, files: file[]) => {
@@ -346,7 +346,7 @@ const removeFromCollection = async (collection: collection, files: file[]) => {
             { 'X-Auth-Token': token }
         );
     } catch (e) {
-        console.log('remove from collection failed ', e);
+        console.error('remove from collection failed ', e);
     }
 };
 

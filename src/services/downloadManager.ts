@@ -2,10 +2,10 @@ import { getToken } from 'utils/common/key';
 import { file } from './fileService';
 import HTTPService from './HTTPService';
 import { getEndpoint, getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
-import { getFileExtension } from 'utils/common/utilFunctions';
+import { getFileExtension, runningInBrowser } from 'utils/common/utilFunctions';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 
-const heic2any = typeof window !== 'undefined' && require('heic2any');
+const heic2any = runningInBrowser() && require('heic2any');
 const TYPE_HEIC = 'heic';
 
 class DownloadManager {
@@ -48,7 +48,7 @@ class DownloadManager {
             }
             return await this.thumbnailDownloads.get(file.id);
         } catch (e) {
-            console.log('get preview Failed', e);
+            console.error('get preview Failed', e);
         }
     }
 
