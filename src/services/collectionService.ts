@@ -1,7 +1,7 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { file } from './fileService';
-import localForage from 'localforage';
+import localForage from 'utils/storage/localForage';
 
 import HTTPService from './HTTPService';
 import { B64EncryptionResult } from './uploadService';

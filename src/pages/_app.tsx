@@ -12,20 +12,12 @@ import PowerSettings from 'components/power_settings';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
-import localForage from 'localforage';
+import localForage from 'utils/storage/localForage';
+
 import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import { sentryInit } from '../utils/sentry';
-import { runningInBrowser } from 'utils/common/utilFunctions';
 
-if (runningInBrowser()) {
-    localForage.config({
-        driver: localForage.INDEXEDDB,
-        name: 'ente-files',
-        version: 1.0,
-        storeName: 'files',
-    });
-}
 const GlobalStyles = createGlobalStyle`
     html, body {
         padding: 0;
