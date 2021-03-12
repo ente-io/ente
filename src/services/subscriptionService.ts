@@ -3,6 +3,8 @@ import HTTPService from './HTTPService';
 const ENDPOINT = getEndpoint();
 import { getToken } from 'utils/common/key';
 import { ExecFileOptionsWithStringEncoding } from 'node:child_process';
+import { runningInBrowser } from 'utils/common/utilFunctions';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 export interface Subscription {
     id: number;
     userID: number;
@@ -21,12 +23,12 @@ export interface Plan {
     period: string;
     stripeID: string;
 }
+const FREE_PLAN = 'free';
 class SubscriptionService {
     private stripe;
-    private productID;
-    public init() {
+    constructor() {
         let publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-        this.stripe = window['Stripe'](publishableKey);
+        this.stripe = runningInBrowser() && window['Stripe'](publishableKey);
     }
     public async getPlans(): Promise<Plan[]> {
         try {
@@ -38,8 +40,7 @@ class SubscriptionService {
     }
     public async buySubscription(productID) {
         try {
-            this.productID = productID;
-            const response = await this.createCheckoutSession();
+            const response = await this.createCheckoutSession(productID);
             await this.stripe.redirectToCheckout({
                 sessionId: response.data['sessionID'],
             });
@@ -48,9 +49,9 @@ class SubscriptionService {
         }
     }
 
-    private async createCheckoutSession() {
+    private async createCheckoutSession(productID) {
         return HTTPService.post(`${ENDPOINT}/billing/create-checkout-session`, {
-            productID: this.productID,
+            productID,
         });
     }
 
@@ -60,7 +61,7 @@ class SubscriptionService {
                 `${ENDPOINT}/billing/verify-subscription`,
                 {
                     paymentProvider: 'stripe',
-                    productID: this.productID,
+                    productID: null,
                     VerificationData: sessionID,
                 },
                 null,
@@ -68,7 +69,6 @@ class SubscriptionService {
                     'X-Auth-Token': getToken(),
                 }
             );
-            console.log(response.data['subscription']);
             return response.data['subscription'];
         } catch (err) {
             console.error('Error while verifying subscription', err);
@@ -95,6 +95,10 @@ class SubscriptionService {
 
     public convertBytesToGBs(bytes): string {
         return (bytes / (1024 * 1024 * 1024)).toFixed(2);
+    }
+    public isOnFreePlan() {
+        const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
+        return subscription?.productID === FREE_PLAN;
     }
 }
 
