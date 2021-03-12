@@ -54,7 +54,12 @@ export default function Sidebar(props: Props) {
             itemListElement="div"
         >
             <div style={{ outline: 'none' }}>
-                {constants.SUBCRIPTION_PLAN}
+                <h4>{constants.SUBCRIPTION_PLAN}</h4>
+                {constants.SUBSCRIPTION_INFO(
+                    subscription?.productID,
+                    subscription?.expiryTime
+                )}
+
                 <Button
                     variant="success"
                     size="sm"
@@ -68,13 +73,10 @@ export default function Sidebar(props: Props) {
                 />
                 <br />
                 <br />
-                {constants.SUBSCRIPTION_INFO(subscription?.productID)}
-                <br />
                 <br />
             </div>
             <div style={{ outline: 'none' }}>
                 <h4>{constants.USAGE_DETAILS}</h4>
-                <br />
                 <div>
                     {usage ? (
                         constants.USAGE_INFO(
@@ -87,7 +89,6 @@ export default function Sidebar(props: Props) {
                         <Spinner animation="border" />
                     )}
                 </div>
-                <br />
                 <br />
             </div>
             <>
