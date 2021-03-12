@@ -1,5 +1,7 @@
 import Container from 'components/Container';
+import router from 'next/router';
 import { useEffect, useState } from 'react';
+import { Button } from 'react-bootstrap';
 import subscriptionService from 'services/subscriptionService';
 
 export default function SuccessRedirect() {
@@ -17,13 +19,14 @@ export default function SuccessRedirect() {
         }
     }, []);
     return (
-        <Container style={{ color: '#aaa' }}>
+        <Container style={{ color: '#fff' }}>
             <div>
                 <h1>Your payment succeeded</h1>
+                <Button onClick={() => router.push('/gallery')}>Go Home</Button>
                 <h4>View CheckoutSession response:</h4>
             </div>
             <div>
-                <pre>{sessionData}</pre>
+                <pre style={{ color: '#fff' }}>{sessionData}</pre>
             </div>
         </Container>
     );

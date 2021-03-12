@@ -25,6 +25,7 @@ const GlobalStyles = createGlobalStyle`
         display: flex;
         flex-direction: column;
         background-color: #191919;
+        color: #aaa;
     }
 
     #__next {
@@ -86,7 +87,7 @@ const GlobalStyles = createGlobalStyle`
     .modal .card {
         background-color: #202020;
         border: none;
-        color: #aaa;
+       
     }
     .modal .card > div {
         border-radius: 30px;
