@@ -2,6 +2,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 const ENDPOINT = getEndpoint();
 import { getToken } from 'utils/common/key';
+import { ExecFileOptionsWithStringEncoding } from 'node:child_process';
 export interface Subscription {
     id: number;
     userID: number;
@@ -11,16 +12,32 @@ export interface Subscription {
     expiryTime: number;
     paymentProvider: string;
 }
+export interface Plan {
+    id: string;
+    androidID: string;
+    iosID: string;
+    storage: number;
+    price: string;
+    period: string;
+    stripePriceID: string;
+}
 class SubscriptionService {
     private stripe;
     public init() {
         let publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
         this.stripe = window['Stripe'](publishableKey);
     }
-    public async buySubscription() {
+    public async getPlans(): Promise<Plan[]> {
         try {
-            const priceId = 'price_1IT1DPK59oeucIMOiYs1P6Xd';
-            const response = await this.createCheckoutSession(priceId);
+            const response = await HTTPService.get(`${ENDPOINT}/billing/plans`);
+            return response.data['plans'];
+        } catch (e) {
+            console.error('failed to get plans', e);
+        }
+    }
+    public async buySubscription(priceID) {
+        try {
+            const response = await this.createCheckoutSession(priceID);
             await this.stripe.redirectToCheckout({
                 sessionId: response.data.sessionId,
             });

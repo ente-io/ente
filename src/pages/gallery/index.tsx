@@ -24,7 +24,8 @@ import {
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
 import { Alert, Button, Jumbotron } from 'react-bootstrap';
-import subscriptionService from 'services/subscriptionService';
+import subscriptionService, { Plan } from 'services/subscriptionService';
+import PlanSelector from './components/PlanSelector';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -125,6 +126,8 @@ export default function Gallery(props) {
     const [bannerErrorCode, setBannerErrorCode] = useState<number>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
+    const [planModalView, setPlanModalView] = useState(false);
+    const [plans, setPlans] = useState<Plan[]>(null);
 
     const loadingBar = useRef(null);
     useEffect(() => {
@@ -142,9 +145,13 @@ export default function Gallery(props) {
                 collections,
                 data
             );
+            const plans = await subscriptionService.getPlans();
+
+            console.log(plans);
             setData(data);
             setCollections(collections);
             setCollectionAndItsLatestFile(collectionAndItsLatestFile);
+            setPlans(plans);
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
 
@@ -353,12 +360,15 @@ export default function Gallery(props) {
                 variant="primary"
                 size="lg"
                 block
-                onClick={async () => {
-                    await subscriptionService.buySubscription();
-                }}
+                onClick={() => setPlanModalView(true)}
             >
                 {constants.SUBSCRIBE}
             </Button>
+            <PlanSelector
+                plans={plans}
+                modalView={planModalView}
+                closeModal={() => setPlanModalView(false)}
+            />
             <Collections
                 collections={collections}
                 selected={Number(router.query.collection)}

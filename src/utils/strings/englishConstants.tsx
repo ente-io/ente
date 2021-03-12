@@ -118,6 +118,7 @@ const englishConstants = {
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email ?',
+    CHOOSE_PLAN: 'choose your subscription plan',
 };
 
 export default englishConstants;
