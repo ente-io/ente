@@ -23,7 +23,7 @@ const englishConstants = {
     ),
     CHECK_INBOX: 'please check your inbox (and spam) to complete verification',
     ENTER_OTT: 'verification code',
-    RESEND_MAIL: 'did not get email?',
+    RESEND_MAIL: 'resend?',
     VERIFY: 'verify',
     UNKNOWN_ERROR: 'something went wrong, please try again',
     INVALID_CODE: 'invalid verification code',
@@ -57,21 +57,13 @@ const englishConstants = {
         2: 'uploading your files',
         3: 'files uploaded successfully!',
     },
+    UPLOADING_FILES: `uploading files`,
     OF: 'of',
     SUBSCRIPTION_EXPIRED:
         'your subscription has expired, please renew it form the mobile app',
     STORAGE_QUOTA_EXCEEDED:
         'you have exceeded your storage quota, please upgrade your plan from the mobile app',
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
-
-    WEB_SIGNUPS_DISABLED: () => (
-        <div>
-            sorry signups are possibly only on the{' '}
-            <a href="https://ente.io/app" target="_blank">
-                mobile app
-            </a>
-        </div>
-    ),
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
     NO_ACCOUNT: "don't have an account?",
@@ -85,10 +77,47 @@ const englishConstants = {
     NO_INTERNET_CONNECTION:
         'please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
+    UPLOAD_FIRST_PHOTO: 'backup your first photo',
+    INSTALL_MOBILE_APP: () => (
+        <div>
+            install our{' '}
+            <a
+                href="https://play.google.com/store/apps/details?id=io.ente.photos"
+                target="_blank"
+            >
+                android
+            </a>{' '}
+            or{' '}
+            <a
+                href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                target="_blank"
+            >
+                ios app{' '}
+            </a>
+            to automatically backup all your photos
+        </div>
+    ),
     LOGOUT: 'logout',
     LOGOUT_WARNING: 'sure you want to logout?',
     CANCEL: 'cancel',
     SUBSCRIBE: 'subscribe',
+    SUBSCRIPTION_CHANGE_DISABLED:
+        'sorry, you can only change the subscription on the mobile app.',
+    SUBCRIPTION_PLAN: 'subscription plan',
+    USAGE_DETAILS: 'Usage Details',
+    SUBSCRIPTION_INFO: (productID) => (
+        <p>
+            you are currently on <strong>{productID}</strong> plan
+        </p>
+    ),
+    USAGE_INFO: (usage, quota) => (
+        <p>
+            you have used {usage} GB out of your {quota} GB quota
+        </p>
+    ),
+    UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
+    CHANGE: 'change',
+    CHANGE_EMAIL: 'change email ?',
 };
 
 export default englishConstants;

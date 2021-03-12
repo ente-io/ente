@@ -9,7 +9,7 @@ import { LS_KEYS, getData, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import { verifyOtt, getOtt } from 'services/userService';
+import { verifyOtt, getOtt, logoutUser } from 'services/userService';
 
 const Image = styled.img`
     width: 350px;
@@ -54,6 +54,7 @@ export default function Verify() {
                 id: resp.data.id,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, resp.data.keyAttributes);
+            setData(LS_KEYS.SUBSCRIPTION, resp.data.subscription);
             if (resp.data.keyAttributes?.encryptedKey) {
                 router.push('/credentials');
             } else {
@@ -84,7 +85,11 @@ export default function Verify() {
         <Container>
             <Card style={{ minWidth: '300px' }} className="text-center">
                 <Card.Body>
-                    <Card.Title style={{ fontWeight: 'bold', marginBottom: '24px' }}>{constants.VERIFY_EMAIL}</Card.Title>
+                    <Card.Title
+                        style={{ fontWeight: 'bold', marginBottom: '24px' }}
+                    >
+                        {constants.VERIFY_EMAIL}
+                    </Card.Title>
                     {constants.EMAIL_SENT({ email })}
                     {constants.CHECK_INBOX}
                     <br />
@@ -136,6 +141,13 @@ export default function Verify() {
                                     <span>{constants.SENDING}</span>
                                 )}
                                 {resend === 2 && <span>{constants.SENT}</span>}
+                                <br />
+                                <br />
+                                <div>
+                                    <a href="#" onClick={logoutUser}>
+                                        {constants.CHANGE_EMAIL}
+                                    </a>
+                                </div>
                             </Form>
                         )}
                     </Formik>
