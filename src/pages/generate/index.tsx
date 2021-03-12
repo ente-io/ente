@@ -109,12 +109,12 @@ export default function Generate() {
 
     return (
         <Container>
-            <Image alt="vault" src="/vault.svg" />
-            <Card>
+            {/* <Image alt="vault" src="/vault.png" style={{ paddingBottom: '40px' }} /> */}
+            <Card style={{ maxWidth: '540px', padding: '20px' }}>
                 <Card.Body>
-                    <div className="text-center">
+                    <div className="text-center" style={{ marginBottom: '40px' }}>
                         <p>{constants.ENTER_ENC_PASSPHRASE}</p>
-                        <p>{constants.PASSPHRASE_DISCLAIMER()}</p>
+                        {constants.PASSPHRASE_DISCLAIMER()}
                     </div>
                     <Formik<formValues>
                         initialValues={{ passphrase: '', confirm: '' }}
@@ -137,15 +137,16 @@ export default function Generate() {
                             <Form noValidate onSubmit={handleSubmit}>
                                 <Form.Group>
                                     <Form.Control
-                                        type="text"
+                                        type="password"
                                         placeholder={constants.PASSPHRASE_HINT}
                                         value={values.passphrase}
                                         onChange={handleChange('passphrase')}
                                         onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                                errors.passphrase
+                                            errors.passphrase
                                         )}
+                                        autoFocus={true}
                                         disabled={loading}
                                     />
                                     <Form.Control.Feedback type="invalid">
@@ -154,7 +155,7 @@ export default function Generate() {
                                 </Form.Group>
                                 <Form.Group>
                                     <Form.Control
-                                        type="text"
+                                        type="password"
                                         placeholder={
                                             constants.PASSPHRASE_CONFIRM
                                         }
@@ -170,7 +171,7 @@ export default function Generate() {
                                         {errors.confirm}
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Button type="submit" block disabled={loading}>
+                                <Button type="submit" block disabled={loading} style={{ marginTop: '28px' }}>
                                     {constants.SET_PASSPHRASE}
                                 </Button>
                             </Form>

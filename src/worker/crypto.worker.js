@@ -45,6 +45,14 @@ export class Crypto {
         return libsodium.encryptChaCha(fileData, key);
     }
 
+    async initDecryption(header, key) {
+        return libsodium.initChunkDecryption(header, key);
+    }
+
+    async decryptChunk(fileData, pullState) {
+        return libsodium.decryptChunk(fileData, pullState);
+    }
+
     async encrypt(data, key) {
         return libsodium.encrypt(data, key);
     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
@@ -17,6 +17,8 @@ import localForage from 'utils/storage/localForage';
 import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import { sentryInit } from '../utils/sentry';
+import ConfirmLogout from 'components/ConfirmLogout';
+import { useDropzone } from 'react-dropzone';
 
 const GlobalStyles = createGlobalStyle`
     html, body {
@@ -110,7 +112,7 @@ const GlobalStyles = createGlobalStyle`
         background-size: cover;
         border: none;
     }
-    .btn-primary {
+    .btn-primary ,.btn:focus {
         background: #2dc262;
         border-color: #29a354;
         padding: 8px;
@@ -129,6 +131,22 @@ const GlobalStyles = createGlobalStyle`
         color: #fff;
         border-radius: 12px;
     }
+    .jumbotron{
+        background-color: #191919;
+        color: #fff;
+        text-align: center;
+        margin-top: 50px;
+    }
+    .alert-success {
+        background-color: #c4ffd6;
+    }
+    .alert-primary {
+        background-color: #c4ffd6;
+    }
+    .ente-modal{
+        width: 500px;
+        max-width:100%;
+    } 
 `;
 
 const Image = styled.img`
@@ -149,7 +167,14 @@ export default function App({ Component, pageProps, err }) {
     const [loading, setLoading] = useState(false);
     const [uploadButtonView, setUploadButtonView] = useState(false);
     const [uploadModalView, setUploadModalView] = useState(false);
+    const [logoutModalView, setLogoutModalView] = useState(false);
 
+    function showLogoutModal() {
+        setLogoutModalView(true);
+    }
+    function closeLogoutModal() {
+        setLogoutModalView(false);
+    }
     function closeUploadModal() {
         setUploadModalView(false);
     }
@@ -180,6 +205,7 @@ export default function App({ Component, pageProps, err }) {
     }, []);
 
     const logout = async () => {
+        setLogoutModalView(false);
         clearKeys();
         clearData();
         setUploadButtonView(false);
@@ -188,24 +214,53 @@ export default function App({ Component, pageProps, err }) {
         router.push('/');
     };
 
+    const onDropAccepted = useCallback(() => {
+        showUploadModal();
+        setIsDragActive(false);
+    }, []);
+    const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
+        noClick: true,
+        noKeyboard: true,
+        onDropAccepted,
+        accept: 'image/*, video/*, application/json, ',
+    });
+    const [isDragActive, setIsDragActive] = useState(false);
+    const onDragEnter = () => setIsDragActive(true);
+    const onDragLeave = () => setIsDragActive(false);
     return (
-        <FullScreenDropZone showModal={showUploadModal}>
+        <FullScreenDropZone
+            getRootProps={getRootProps}
+            getInputProps={getInputProps}
+            isDragActive={isDragActive}
+            onDragEnter={onDragEnter}
+            onDragLeave={onDragLeave}
+        >
             <Head>
                 <title>{constants.TITLE}</title>
+                <script async src={`https://sa.ente.io/latest.js`} />
             </Head>
             <GlobalStyles />
             <Navbar>
                 {user && (
-                    <Button variant="link" onClick={logout}>
-                        <PowerSettings />
-                    </Button>
+                    <>
+                        <ConfirmLogout
+                            show={logoutModalView}
+                            onHide={closeLogoutModal}
+                            logout={logout}
+                        />
+                        <Button variant="link" onClick={showLogoutModal}>
+                            <PowerSettings />
+                        </Button>
+                    </>
                 )}
                 <FlexContainer>
-                    <Image alt="logo" src="/icon.svg" />
+                    <Image
+                        style={{ height: '24px' }}
+                        alt="logo"
+                        src="/icon.svg"
+                    />
                 </FlexContainer>
-                {uploadButtonView && (
-                    <UploadButton showModal={showUploadModal} />
-                )}
+                {uploadButtonView && <UploadButton openFileUploader={open} />}
             </Navbar>
             {loading ? (
                 <Container>
@@ -215,6 +270,8 @@ export default function App({ Component, pageProps, err }) {
                 </Container>
             ) : (
                 <Component
+                    openFileUploader={open}
+                    acceptedFiles={acceptedFiles}
                     uploadModalView={uploadModalView}
                     showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}

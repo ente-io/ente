@@ -86,7 +86,7 @@ export default function Credentials() {
 
     return (
         <Container>
-            {/* <Image alt="vault" src="/vault.svg" /> */}
+            {/* <Image alt="vault" src="/vault.png" /> */}
             <Card style={{ minWidth: '320px', padding: '40px 30px' }} className="text-center">
                 <Card.Body>
                     <Card.Title style={{ marginBottom: '24px' }}>{constants.ENTER_PASSPHRASE}</Card.Title>

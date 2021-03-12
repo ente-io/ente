@@ -57,34 +57,43 @@ const englishConstants = {
         2: 'uploading your files',
         3: 'files uploaded successfully!',
     },
+    UPLOADING_FILES: `uploading files`,
     OF: 'of',
     SUBSCRIPTION_EXPIRED:
         'your subscription has expired, please renew it form the mobile app',
     STORAGE_QUOTA_EXCEEDED:
         'you have exceeded your storage quota, please upgrade your plan from the mobile app',
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
-
-    WEB_SIGNUPS_DISABLED: () => (
-        <div>
-            sorry signups are possibly only on the{' '}
-            <a href="https://ente.io/app" target="_blank">
-                mobile app
-            </a>
-        </div>
-    ),
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
     NO_ACCOUNT: "don't have an account?",
     ALBUM_NAME: 'album name',
     CREATE: 'create',
     DOWNLOAD: 'download',
-    TOGGLE_FULLSCREEN: 'Toggle fullscreen',
-    ZOOM_IN_OUT: 'Zoom in/out',
-    PREVIOUS: 'Previous (arrow left)',
-    NEXT: 'Next (arrow right)',
+    TOGGLE_FULLSCREEN: 'toggle fullscreen',
+    ZOOM_IN_OUT: 'zoom in/out',
+    PREVIOUS: 'previous (arrow left)',
+    NEXT: 'next (arrow right)',
     NO_INTERNET_CONNECTION:
-        'You seem to be offline please check your internet connection and try again',
-    TITLE: 'ente.io | Encrypted Photo Storage',
+        'please check your internet connection and try again',
+    TITLE: 'ente.io | encrypted photo storage',
+    UPLOAD_FIRST_PHOTO: 'backup your first photo',
+    INSTALL_MOBILE_APP: () => (
+        <div>
+            install our{' '}
+            <a href="https://play.google.com/store/apps/details?id=io.ente.photos" target="_blank">
+                android
+            </a>{' '}
+            or{' '}
+            <a href="https://apps.apple.com/in/app/ente-photos/id1542026904" target="_blank">
+                ios app{' '}
+            </a>
+            to automatically backup all your photos
+        </div>
+    ),
+    LOGOUT: 'logout',
+    LOGOUT_WARNING: 'sure you want to logout?',
+    CANCEL: 'cancel',
 };
 
 export default englishConstants;

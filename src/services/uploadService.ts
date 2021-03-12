@@ -2,7 +2,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 import EXIF from 'exif-js';
 import { fileAttribute } from './fileService';
-import { collection, CollectionAndItsLatestFile } from './collectionService';
+import { collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity } from 'utils/common/utilFunctions';
 import { ErrorHandler } from 'utils/common/errorUtil';
@@ -87,7 +87,7 @@ class UploadService {
 
     public async uploadFiles(
         recievedFiles: File[],
-        collectionAndItsLatestFile: CollectionAndItsLatestFile,
+        collection: collection,
         token: string,
         progressBarProps,
         setUploadErrors
@@ -144,7 +144,7 @@ class UploadService {
                         await new CryptoWorker(),
                         new FileReader(),
                         this.filesToBeUploaded.pop(),
-                        collectionAndItsLatestFile.collection,
+                        collection,
                         token
                     )
                 );
