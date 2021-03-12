@@ -155,9 +155,7 @@ export default function Gallery(props) {
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
 
-            loadingBar.current.continuousStart();
             await syncWithRemote();
-            loadingBar.current.complete();
             setIsFirstLoad(false);
         };
         main();
@@ -165,6 +163,7 @@ export default function Gallery(props) {
     }, []);
 
     const syncWithRemote = async () => {
+        loadingBar.current.continuousStart();
         const token = getToken();
         const encryptionKey = await getActualKey();
         const collections = await syncCollections(token, encryptionKey);
@@ -182,6 +181,7 @@ export default function Gallery(props) {
         setFavItemIds(favItemIds);
         setSinceTime(new Date().getTime());
         props.setUploadButtonView(true);
+        loadingBar.current.complete();
     };
 
     const updateUrl = (index: number) => (url: string) => {
@@ -334,16 +334,6 @@ export default function Gallery(props) {
         );
     };
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const transactionStatus = urlParams.get('success');
-    let redirectMessage;
-    if (typeof transactionStatus != 'undefined') {
-        if (transactionStatus) {
-            const sessionId = urlParams.get('session_id');
-            if (sessionId) {
-            }
-        }
-    }
     return (
         <>
             <LoadingBar color="#2dc262" ref={loadingBar} />
