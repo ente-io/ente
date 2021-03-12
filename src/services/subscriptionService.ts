@@ -23,6 +23,7 @@ export interface Plan {
 }
 class SubscriptionService {
     private stripe;
+    private productID;
     public init() {
         let publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
         this.stripe = window['Stripe'](publishableKey);
@@ -35,35 +36,47 @@ class SubscriptionService {
             console.error('failed to get plans', e);
         }
     }
-    public async buySubscription(priceID) {
+    public async buySubscription(productID) {
         try {
-            const response = await this.createCheckoutSession(priceID);
+            this.productID = productID;
+            const response = await this.createCheckoutSession();
             await this.stripe.redirectToCheckout({
                 sessionId: response.data['sessionID'],
             });
         } catch (e) {
-            console.error(e);
+            console.error('unable to buy subscription', e);
         }
     }
 
-    private async createCheckoutSession(priceId) {
+    private async createCheckoutSession() {
         return HTTPService.post(`${ENDPOINT}/billing/create-checkout-session`, {
-            priceId: priceId,
+            productID: this.productID,
         });
     }
 
-    public async getCheckoutSession(sessionId) {
+    public async verifySubscription(sessionID): Promise<Subscription> {
         try {
-            const session = await HTTPService.get(
-                `${ENDPOINT}/billing/checkout-session`,
+            const response = await HTTPService.post(
+                `${ENDPOINT}/billing/verify-subscription`,
                 {
-                    sessionId: sessionId,
+                    paymentProvider: 'stripe',
+                    productID: this.productID,
+                    VerificationData: sessionID,
+                },
+                null,
+                {
+                    'X-Auth-Token': getToken(),
                 }
             );
-            return JSON.stringify(session, null, 2);
+            console.log(response.data['subscription']);
+            return response.data['subscription'];
         } catch (err) {
-            console.error('Error when fetching Checkout session', err);
+            console.error('Error while verifying subscription', err);
         }
+    }
+
+    public async redirectToCustomerPortal() {
+        return null;
     }
     async getUsage() {
         try {
