@@ -3,7 +3,6 @@ import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
-const token = getToken();
 
 export interface Subscription {
     id: number;
@@ -21,7 +20,7 @@ class SubscriptionService {
                 `${ENDPOINT}/billing/usage`,
                 { startTime: 0, endTime: Date.now() * 1000 },
                 {
-                    'X-Auth-Token': token,
+                    'X-Auth-Token': getToken(),
                 }
             );
             return this.convertBytesToGBs(response.data.usage);
