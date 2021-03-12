@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/file.dart';
@@ -16,6 +17,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
+import 'package:photos/ui/grant_permissions_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
@@ -51,6 +53,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   StreamSubscription<LocalPhotosUpdatedEvent> _photosUpdatedEvent;
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
+  StreamSubscription<PermissionGrantedEvent> _permissionGrantedEvent;
 
   @override
   void initState() {
@@ -75,6 +78,10 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
       }
     });
+    _permissionGrantedEvent =
+        Bus.instance.on<PermissionGrantedEvent>().listen((event) {
+      setState(() {});
+    });
     _initDeepLinks();
     super.initState();
   }
@@ -91,9 +98,11 @@ class _HomeWidgetState extends State<HomeWidget> {
         children: [
           ExtentsPageView(
             children: [
-              SyncService.instance.hasScannedDisk()
-                  ? _getMainGalleryWidget()
-                  : LoadingPhotosWidget(),
+              SyncService.instance.hasGrantedPermissions()
+                  ? (SyncService.instance.hasScannedDisk()
+                      ? _getMainGalleryWidget()
+                      : LoadingPhotosWidget())
+                  : GrantPermissionsWidget(),
               _deviceFolderGalleryWidget,
               _sharedCollectionGallery,
             ],
@@ -254,6 +263,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   void dispose() {
     _tabChangedEventSubscription.cancel();
     _photosUpdatedEvent.cancel();
+    _permissionGrantedEvent.cancel();
     super.dispose();
   }
 }

@@ -12,6 +12,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/file_type.dart';
@@ -42,6 +43,7 @@ class SyncService {
   SyncStatusUpdate _lastSyncStatusEvent;
 
   static const kDbUpdationTimeKey = "db_updation_time";
+  static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kLastBackgroundUploadDetectedTime =
       "last_background_upload_detected_time";
   static const kDiffLimit = 200;
@@ -156,7 +158,27 @@ class SyncService {
     return _lastSyncStatusEvent;
   }
 
+  bool hasGrantedPermissions() {
+    return _prefs.containsKey(kHasGrantedPermissionsKey) &&
+        _prefs.getBool(kHasGrantedPermissionsKey);
+  }
+
+  Future<void> onPermissionGranted() async {
+    await _prefs.setBool(kHasGrantedPermissionsKey, true);
+    Bus.instance.fire(PermissionGrantedEvent());
+    _doSync();
+  }
+
   Future<void> _doSync() async {
+    await _syncWithDevice();
+    await syncWithRemote();
+  }
+
+  Future<void> _syncWithDevice() async {
+    if (!_prefs.containsKey(kHasGrantedPermissionsKey)) {
+      _logger.info("Skipping local sync since permission has not been granted");
+      return;
+    }
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     if (_isBackground) {
@@ -187,7 +209,6 @@ class SyncService {
       }
       await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
     }
-    await syncWithRemote();
   }
 
   Future<void> _loadAndStorePhotos(
