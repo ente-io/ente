@@ -5,7 +5,7 @@ import 'package:photos/services/sync_service.dart';
 
 class GrantPermissionsWidget extends StatelessWidget {
   final _logger = Logger("GrantPermissionsWidget");
-  
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -16,9 +16,10 @@ class GrantPermissionsWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(32),
             child: Text(
-              "ente needs your permission to load and display your gallery",
+              "ente needs your permission to display your gallery",
               textAlign: TextAlign.center,
               style: TextStyle(
+                fontSize: 16,
                 height: 1.4,
               ),
             ),
