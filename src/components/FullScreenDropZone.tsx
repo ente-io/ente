@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
-import Sidebar from './Sidebar';
 
 export const getColor = (props) => {
     if (props.isDragActive) {
@@ -52,9 +51,6 @@ type Props = React.PropsWithChildren<{
 export default function FullScreenDropZone(props: Props) {
     return (
         <DropDiv {...props.getRootProps()} onDragEnter={props.onDragEnter}>
-            <div style={{ display: props.navbarIconView ? 'block' : 'none' }}>
-                <Sidebar setNavbarIconView={props.setNavbarIconView} />
-            </div>
             <input {...props.getInputProps()} />
             {props.isDragActive && (
                 <Overlay

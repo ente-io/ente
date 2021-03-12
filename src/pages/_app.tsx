@@ -14,6 +14,7 @@ import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import { sentryInit } from '../utils/sentry';
 import { useDropzone } from 'react-dropzone';
+import Sidebar from 'components/Sidebar';
 
 const GlobalStyles = createGlobalStyle`
     html, body {
@@ -240,6 +241,9 @@ export default function App({ Component, pageProps, err }) {
                 <script src="https://js.stripe.com/v3/"></script>
             </Head>
             <GlobalStyles />
+            <div style={{ display: navbarIconView ? 'block' : 'none' }}>
+                <Sidebar setNavbarIconView={setNavbarIconView} />
+            </div>
             <Navbar>
                 <FlexContainer>
                     <Image
