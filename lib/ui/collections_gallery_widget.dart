@@ -109,27 +109,33 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             Padding(padding: EdgeInsets.all(6)),
             SectionTitle("device folders"),
             Padding(padding: EdgeInsets.all(6)),
-            Container(
-              height: 160,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: items.folders.isEmpty
-                    ? nothingToSeeHere
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-                        physics:
-                            ScrollPhysics(), // to disable GridView's scrolling
-                        itemBuilder: (context, index) {
-                          return _buildFolder(context, items.folders[index]);
-                        },
-                        itemCount: items.folders.length,
-                      ),
-              ),
-            ),
+            items.folders.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(22),
+                    child: nothingToSeeHere,
+                  )
+                : Container(
+                    height: 160,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: items.folders.isEmpty
+                          ? nothingToSeeHere
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+                              physics:
+                                  ScrollPhysics(), // to disable GridView's scrolling
+                              itemBuilder: (context, index) {
+                                return _buildFolder(
+                                    context, items.folders[index]);
+                              },
+                              itemCount: items.folders.length,
+                            ),
+                    ),
+                  ),
             Divider(),
-            Padding(padding: EdgeInsets.all(6)),
+            Padding(padding: EdgeInsets.all(10)),
             SectionTitle("backed-up memories"),
             Padding(padding: EdgeInsets.all(14)),
             BillingService.instance.hasActiveSubscription()
