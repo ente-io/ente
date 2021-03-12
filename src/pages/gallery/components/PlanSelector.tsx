@@ -1,8 +1,7 @@
-import React from 'react';
-import { Modal } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Modal, Spinner } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
-import { ImageContainer } from './AddCollection';
 import subscriptionService, { Plan } from 'services/subscriptionService';
 
 export const PlanIcon = styled.div`
@@ -16,21 +15,35 @@ export const PlanIcon = styled.div`
     cursor: pointer;
 `;
 
+const LoaderOverlay = styled.div`
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    z-index: 9;
+    color: white;
+    align-items: center;
+`;
+
 interface Props {
     plans: Plan[];
     modalView: boolean;
     closeModal: any;
 }
 function PlanSelector(props: Props) {
+    const [loading, setLoading] = useState(false);
     const PlanIcons: JSX.Element[] = props.plans?.map((plan) => (
         <PlanIcon
             key={plan.stripeID}
-            onClick={() => subscriptionService.buySubscription(plan.stripeID)}
+            onClick={() => {
+                setLoading(true);
+                subscriptionService.buySubscription(plan.stripeID);
+            }}
         >
             {plan.androidID}
         </PlanIcon>
     ));
-
     return (
         <Modal
             show={props.modalView}
@@ -51,6 +64,11 @@ function PlanSelector(props: Props) {
                 }}
             >
                 {PlanIcons}
+                {loading && (
+                    <LoaderOverlay>
+                        <Spinner animation="border" />
+                    </LoaderOverlay>
+                )}
             </Modal.Body>
         </Modal>
     );
