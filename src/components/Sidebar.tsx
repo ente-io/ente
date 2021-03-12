@@ -63,7 +63,9 @@ export default function Sidebar(props: Props) {
                 <Button
                     variant="success"
                     size="sm"
-                    onClick={() => setChangeDisabledMessageModalView(true)}
+                    onClick={() =>
+                        subscriptionService.redirectToCustomerPortal()
+                    }
                 >
                     {constants.CHANGE}
                 </Button>
