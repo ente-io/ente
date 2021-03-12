@@ -32,7 +32,7 @@ export const sentryInit = () => {
                 levels: ['error'],
             })
         );
-
+        console.log(process.env.NODE_ENV);
         Sentry.init({
             enabled: process.env.NODE_ENV === 'production',
             integrations,
