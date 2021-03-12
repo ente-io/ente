@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ui/loading_widget.dart';
 
-class LoadingPhotosWidget extends StatefulWidget {
-  @override
-  _LoadingPhotosWidgetState createState() => _LoadingPhotosWidgetState();
-}
-
-class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
+class LoadingPhotosWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
