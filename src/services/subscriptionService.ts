@@ -19,7 +19,7 @@ export interface Plan {
     storage: number;
     price: string;
     period: string;
-    stripePriceID: string;
+    stripeID: string;
 }
 class SubscriptionService {
     private stripe;
@@ -39,7 +39,7 @@ class SubscriptionService {
         try {
             const response = await this.createCheckoutSession(priceID);
             await this.stripe.redirectToCheckout({
-                sessionId: response.data.sessionId,
+                sessionId: response.data['sessionID'],
             });
         } catch (e) {
             console.error(e);
