@@ -137,7 +137,6 @@ export default function Gallery(props) {
             return;
         }
         const main = async () => {
-            subscriptionService.init();
             setIsFirstLoad((await getCollectionUpdationTime()) == 0);
             const data = await localFiles();
             const collections = await getLocalCollections();
@@ -345,15 +344,17 @@ export default function Gallery(props) {
                 </div>
             )}
             <AlertBanner bannerErrorCode={bannerErrorCode} />
-            <Button
-                id="checkout"
-                variant="primary"
-                size="lg"
-                block
-                onClick={() => setPlanModalView(true)}
-            >
-                {constants.SUBSCRIBE}
-            </Button>
+            {subscriptionService.isOnFreePlan() && (
+                <Button
+                    id="checkout"
+                    variant="primary"
+                    size="lg"
+                    block
+                    onClick={() => setPlanModalView(true)}
+                >
+                    {constants.SUBSCRIBE}
+                </Button>
+            )}
             <PlanSelector
                 plans={plans}
                 modalView={planModalView}
