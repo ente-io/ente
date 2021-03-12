@@ -21,11 +21,9 @@ class SubscriptionService {
         try {
             const priceId = 'price_1IT1DPK59oeucIMOiYs1P6Xd';
             const response = await this.createCheckoutSession(priceId);
-            console.log(response.data);
-            const result = await this.stripe.redirectToCheckout({
+            await this.stripe.redirectToCheckout({
                 sessionId: response.data.sessionId,
             });
-            console.log(result);
         } catch (e) {
             console.error(e);
         }
@@ -40,11 +38,14 @@ class SubscriptionService {
     public async getCheckoutSession(sessionId) {
         try {
             const session = await HTTPService.get(
-                `${ENDPOINT}/billing/checkout-session?sessionId= ${sessionId}`
+                `${ENDPOINT}/billing/checkout-session`,
+                {
+                    sessionId: sessionId,
+                }
             );
             return JSON.stringify(session, null, 2);
         } catch (err) {
-            console.log('Error when fetching Checkout session', err);
+            console.error('Error when fetching Checkout session', err);
         }
     }
     async getUsage() {
