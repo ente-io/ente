@@ -13,10 +13,18 @@ export const setData = (key: LS_KEYS, value: object) => {
 };
 
 export const getData = (key: LS_KEYS) => {
-    if (typeof localStorage === 'undefined') {
-        return null;
+    try {
+        if (
+            typeof localStorage === 'undefined' ||
+            typeof key === 'undefined' ||
+            typeof localStorage.getItem(key) === 'undefined'
+        ) {
+            return null;
+        }
+        return JSON.parse(localStorage.getItem(key));
+    } catch (e) {
+        console.log('Failed to Parse JSON');
     }
-    return JSON.parse(localStorage.getItem(key));
 };
 
 export const clearData = () => {
