@@ -15,7 +15,7 @@ class SubscriptionService {
     private stripe;
     public init() {
         let publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-        this.stripe = Stripe(publishableKey);
+        this.stripe = window['Stripe'](publishableKey);
     }
     public async buySubscription() {
         try {
