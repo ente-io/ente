@@ -1,32 +1,47 @@
 import Container from 'components/Container';
 import router from 'next/router';
 import { useEffect, useState } from 'react';
-import { Button } from 'react-bootstrap';
-import subscriptionService from 'services/subscriptionService';
+import { Button, Spinner } from 'react-bootstrap';
+import subscriptionService, {
+    Subscription,
+} from 'services/subscriptionService';
+import { LS_KEYS, setData } from 'utils/storage/localStorage';
+import constants from 'utils/strings/constants';
 
 export default function SuccessRedirect() {
-    const [sessionData, setSessionData] = useState(null);
+    const [subscription, setSubscription] = useState<Subscription>(null);
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
         if (sessionId) {
             (async () => {
-                const sessionJSON = await subscriptionService.getCheckoutSession(
+                const subscription = await subscriptionService.verifySubscription(
                     sessionId
                 );
-                setSessionData(sessionJSON);
+                setSubscription(subscription);
+                setData(LS_KEYS.SUBSCRIPTION, subscription);
             })();
         }
     }, []);
     return (
         <Container style={{ color: '#fff' }}>
             <div>
-                <h1>Your payment succeeded</h1>
-                <Button onClick={() => router.push('/gallery')}>Go Home</Button>
-                <h4>View CheckoutSession response:</h4>
-            </div>
-            <div>
-                <pre style={{ color: '#fff' }}>{sessionData}</pre>
+                {subscription ? (
+                    <>
+                        <h1>Your payment succeeded</h1>
+                        <h4>
+                            {constants.SUBSCRIPTION_INFO(
+                                subscription?.productID,
+                                subscription?.expiryTime
+                            )}
+                        </h4>
+                        <Button onClick={() => router.push('/gallery')}>
+                            Go Back To Gallery
+                        </Button>
+                    </>
+                ) : (
+                    <Spinner animation="border" />
+                )}
             </div>
         </Container>
     );
