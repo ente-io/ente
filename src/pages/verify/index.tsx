@@ -9,7 +9,7 @@ import { LS_KEYS, getData, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import { verifyOtt, getOtt } from 'services/userService';
+import { verifyOtt, getOtt, logoutUser } from 'services/userService';
 
 const Image = styled.img`
     width: 350px;
@@ -21,7 +21,7 @@ interface formValues {
     ott: string;
 }
 
-export default function Verify(props) {
+export default function Verify() {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [resend, setResend] = useState(0);
@@ -144,7 +144,7 @@ export default function Verify(props) {
                                 <br />
                                 <br />
                                 <div>
-                                    <a href="#" onClick={props.logout}>
+                                    <a href="#" onClick={logoutUser}>
                                         {constants.CHANGE_EMAIL}
                                     </a>
                                 </div>

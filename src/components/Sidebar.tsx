@@ -4,17 +4,18 @@ import { slide as Menu } from 'react-burger-menu';
 import { Button } from 'react-bootstrap';
 import ConfirmLogout from 'components/ConfirmLogout';
 import Spinner from 'react-bootstrap/Spinner';
-import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import subscriptionService, {
     Subscription,
 } from 'services/subscriptionService';
 import ChangeDisabledMessage from './ChangeDisabledMessage';
 import constants from 'utils/strings/constants';
-import { clearKeys } from 'utils/storage/sessionStorage';
-import router from 'next/router';
-import localForage from 'localforage';
+import { logoutUser } from 'services/userService';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
-export default function Sidebar(props) {
+interface Props {
+    setNavbarIconView;
+}
+export default function Sidebar(props: Props) {
     const [logoutModalView, setLogoutModalView] = useState(false);
     const [
         changeDisabledMessageModalView,
@@ -39,13 +40,10 @@ export default function Sidebar(props) {
     });
 
     const logout = async () => {
-        clearKeys();
-        clearData();
+        setLogoutModalView(false);
         setIsOpen(false);
-        props.setUploadButtonView(false);
-        localForage.clear();
-        const cache = await caches.delete('thumbs');
-        router.push('/');
+        props.setNavbarIconView(false);
+        logoutUser();
     };
 
     return (
@@ -91,10 +89,7 @@ export default function Sidebar(props) {
                 <ConfirmLogout
                     show={logoutModalView}
                     onHide={closeLogoutModal}
-                    logout={() => {
-                        setLogoutModalView(false);
-                        logout();
-                    }}
+                    logout={logout}
                 />
                 <Button variant="danger" onClick={showLogoutModal}>
                     logout

@@ -53,7 +53,7 @@ export default function FullScreenDropZone(props: Props) {
     return (
         <DropDiv {...props.getRootProps()} onDragEnter={props.onDragEnter}>
             <div style={{ display: props.navbarIconView ? 'block' : 'none' }}>
-                <Sidebar setUploadButtonView={props.setNavbarIconView} />
+                <Sidebar setNavbarIconView={props.setNavbarIconView} />
             </div>
             <input {...props.getInputProps()} />
             {props.isDragActive && (
