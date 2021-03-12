@@ -24,10 +24,8 @@ interface Props {
 function PlanSelector(props: Props) {
     const PlanIcons: JSX.Element[] = props.plans?.map((plan) => (
         <PlanIcon
-            key={plan.stripePriceID}
-            onClick={() =>
-                subscriptionService.buySubscription(plan.stripePriceID)
-            }
+            key={plan.stripeID}
+            onClick={() => subscriptionService.buySubscription(plan.stripeID)}
         >
             {plan.androidID}
         </PlanIcon>
