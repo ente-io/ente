@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { getToken } from 'utils/common/key';
 
 import constants from 'utils/strings/constants';
 import Sidebar from './Sidebar';
@@ -52,7 +53,9 @@ type Props = React.PropsWithChildren<{
 export default function FullScreenDropZone(props: Props) {
     return (
         <DropDiv {...props.getRootProps()} onDragEnter={props.onDragEnter}>
-            <Sidebar />
+            <div style={{ display: getToken() ? 'block' : 'none' }}>
+                <Sidebar setUploadButtonView={props.setUploadButtonView} />
+            </div>
             <input {...props.getInputProps()} />
             {props.isDragActive && (
                 <Overlay

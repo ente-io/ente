@@ -48,7 +48,7 @@ export default function Sidebar(props) {
     };
 
     return (
-        <Menu className="text-center">
+        <Menu className="text-center" isOpen={false}>
             <div>
                 {constants.SUBCRIPTION_PLAN}
                 <Button
@@ -92,7 +92,7 @@ export default function Sidebar(props) {
                     onHide={closeLogoutModal}
                     logout={() => {
                         setLogoutModalView(false);
-                        props.logout();
+                        logout();
                     }}
                 />
                 <Button variant="danger" onClick={showLogoutModal}>
