@@ -1,3 +1,4 @@
+import { runningInBrowser } from 'utils/common/utilFunctions';
 import englishConstants from './englishConstants';
 
 /** Enums of supported locale */
@@ -62,8 +63,7 @@ const globalConstants: VernacularConstants<typeof englishConstants> = {
  * @param localConstants
  */
 export function getConstantValue<T>(localConstants?: VernacularConstants<T>) {
-    const searchParam =
-        typeof window !== 'undefined' ? window.location.search : '';
+    const searchParam = runningInBrowser() ? window.location.search : '';
     const query = new URLSearchParams(searchParam);
     const currLocale = getLocale(query.get('lang'));
 
