@@ -226,6 +226,7 @@ export default function App({ Component, pageProps }) {
         noClick: true,
         noKeyboard: true,
         onDropAccepted,
+        accept: 'image/*, video/*, application/json, ',
     });
     const [isDragActive, setIsDragActive] = useState(false);
     const onDragEnter = () => setIsDragActive(true);
