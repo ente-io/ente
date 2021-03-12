@@ -76,7 +76,18 @@ class SubscriptionService {
     }
 
     public async redirectToCustomerPortal() {
-        return null;
+        try {
+            const response = await HTTPService.get(
+                `${ENDPOINT}/billing/customer-portal`,
+                null,
+                {
+                    'X-Auth-Token': getToken(),
+                }
+            );
+            window.location.href = response.data['URL'];
+        } catch (e) {
+            console.error('unable to get customer portal url');
+        }
     }
     async getUsage() {
         try {
