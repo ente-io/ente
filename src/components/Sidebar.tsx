@@ -28,7 +28,7 @@ export default function Sidebar(props) {
     }
     const [usage, SetUsage] = useState<string>(null);
     const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
-
+    const [isOpen, setIsOpen] = useState(false);
     useEffect(() => {
         const main = async () => {
             const usage = await subscriptionService.getUsage();
@@ -41,6 +41,7 @@ export default function Sidebar(props) {
     const logout = async () => {
         clearKeys();
         clearData();
+        setIsOpen(false);
         props.setUploadButtonView(false);
         localForage.clear();
         const cache = await caches.delete('thumbs');
@@ -48,8 +49,8 @@ export default function Sidebar(props) {
     };
 
     return (
-        <Menu className="text-center" isOpen={false}>
-            <div>
+        <Menu className="text-center" isOpen={isOpen} itemListElement="div">
+            <div style={{ outline: 'none' }}>
                 {constants.SUBCRIPTION_PLAN}
                 <Button
                     variant="success"

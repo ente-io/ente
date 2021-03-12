@@ -181,7 +181,7 @@ export default function App({ Component, pageProps }) {
     const router = useRouter();
     const [user, setUser] = useState();
     const [loading, setLoading] = useState(false);
-    const [uploadButtonView, setUploadButtonView] = useState(false);
+    const [navbarIconView, setNavbarIconView] = useState(false);
     const [uploadModalView, setUploadModalView] = useState(false);
 
     function closeUploadModal() {
@@ -232,7 +232,8 @@ export default function App({ Component, pageProps }) {
             isDragActive={isDragActive}
             onDragEnter={onDragEnter}
             onDragLeave={onDragLeave}
-            setUploadButtonView={setUploadButtonView}
+            navbarIconView={navbarIconView}
+            setNavbarIconView={setNavbarIconView}
         >
             <Head>
                 <title>{constants.TITLE}</title>
@@ -247,7 +248,7 @@ export default function App({ Component, pageProps }) {
                         src="/icon.svg"
                     />
                 </FlexContainer>
-                {uploadButtonView && <UploadButton openFileUploader={open} />}
+                {navbarIconView && <UploadButton openFileUploader={open} />}
             </Navbar>
             {loading ? (
                 <Container>
@@ -262,7 +263,7 @@ export default function App({ Component, pageProps }) {
                     uploadModalView={uploadModalView}
                     showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}
-                    setUploadButtonView={setUploadButtonView}
+                    setUploadButtonView={setNavbarIconView}
                 />
             )}
         </FullScreenDropZone>
