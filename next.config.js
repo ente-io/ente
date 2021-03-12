@@ -46,11 +46,11 @@ module.exports = withBundleAnalyzer({
             })
         );
         if (
+            false &&
             SENTRY_DSN &&
             SENTRY_ORG &&
             SENTRY_PROJECT &&
             SENTRY_AUTH_TOKEN &&
-            COMMIT_SHA &&
             NODE_ENV === 'production'
         ) {
             config.plugins.push(
@@ -59,7 +59,6 @@ module.exports = withBundleAnalyzer({
                     ignore: ['node_modules'],
                     stripPrefix: ['webpack://_N_E/'],
                     urlPrefix: `~${basePath}/_next`,
-                    release: COMMIT_SHA,
                 })
             );
         }
