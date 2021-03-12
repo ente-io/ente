@@ -11,6 +11,7 @@ import ChangeDisabledMessage from './ChangeDisabledMessage';
 import constants from 'utils/strings/constants';
 import { logoutUser } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getToken } from 'utils/common/key';
 
 interface Props {
     setNavbarIconView;
@@ -32,12 +33,12 @@ export default function Sidebar(props: Props) {
     const [isOpen, setIsOpen] = useState(false);
     useEffect(() => {
         const main = async () => {
-            const usage = await subscriptionService.getUsage();
+            const usage = getToken() && (await subscriptionService.getUsage());
 
             SetUsage(usage);
         };
         main();
-    });
+    }, [getToken()]);
 
     const logout = async () => {
         setLogoutModalView(false);
@@ -45,9 +46,13 @@ export default function Sidebar(props: Props) {
         props.setNavbarIconView(false);
         logoutUser();
     };
-
     return (
-        <Menu className="text-center" isOpen={isOpen} itemListElement="div">
+        <Menu
+            className="text-center"
+            isOpen={isOpen}
+            onStateChange={(state) => setIsOpen(state.isOpen)}
+            itemListElement="div"
+        >
             <div style={{ outline: 'none' }}>
                 {constants.SUBCRIPTION_PLAN}
                 <Button
