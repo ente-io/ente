@@ -3,8 +3,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
 import Spinner from 'react-bootstrap/Spinner';
-import { clearKeys } from 'utils/storage/sessionStorage';
-import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import Container from 'components/Container';
 import Head from 'next/head';
@@ -214,15 +213,6 @@ export default function App({ Component, pageProps }) {
         });
     }, []);
 
-    const logout = async () => {
-        clearKeys();
-        clearData();
-        setUploadButtonView(false);
-        localForage.clear();
-        const cache = await caches.delete('thumbs');
-        router.push('/');
-    };
-
     const onDropAccepted = useCallback(() => {
         showUploadModal();
         setIsDragActive(false);
@@ -242,7 +232,7 @@ export default function App({ Component, pageProps }) {
             isDragActive={isDragActive}
             onDragEnter={onDragEnter}
             onDragLeave={onDragLeave}
-            logout={logout}
+            setUploadButtonView={setUploadButtonView}
         >
             <Head>
                 <title>{constants.TITLE}</title>
@@ -273,7 +263,6 @@ export default function App({ Component, pageProps }) {
                     showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}
                     setUploadButtonView={setUploadButtonView}
-                    logout={logout}
                 />
             )}
         </FullScreenDropZone>
