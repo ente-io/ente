@@ -69,7 +69,7 @@ export default function Sidebar(props) {
                 <br />
                 <br />
             </div>
-            <div>
+            <div style={{ outline: 'none' }}>
                 <h4>{constants.USAGE_DETAILS}</h4>
                 <br />
                 <div>
