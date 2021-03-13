@@ -147,23 +147,23 @@ const GlobalStyles = createGlobalStyle`
     } 
     .bm-burger-button {
         position: fixed;
-        width: 36px;
-        height: 30px;
+        width: 28px;
+        height: 20px;
         left: 36px;
-        top: 25px;
-      }
+        margin-top: 30px;
+    }
     .bm-burger-bars {
-        background: #fff;
-      }
-      .bm-menu {
+        background: #bdbdbd;
+    }
+    .bm-menu {
         background: #373a47;
         padding: 2.5em 1.5em 0;
         font-size: 1.15em;
         color:#fff
-      }
-      .bm-cross {
+    }
+    .bm-cross {
         background: #fff;
-      }
+    }
 `;
 
 const Image = styled.img`
