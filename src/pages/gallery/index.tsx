@@ -145,8 +145,7 @@ export default function Gallery(props) {
                 data
             );
             const plans = await subscriptionService.getPlans();
-
-            console.log(plans);
+            await subscriptionService.getUserSubscription();
             setData(data);
             setCollections(collections);
             setCollectionAndItsLatestFile(collectionAndItsLatestFile);

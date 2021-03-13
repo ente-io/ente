@@ -2,9 +2,8 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 const ENDPOINT = getEndpoint();
 import { getToken } from 'utils/common/key';
-import { ExecFileOptionsWithStringEncoding } from 'node:child_process';
 import { runningInBrowser } from 'utils/common/utilFunctions';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, setData, LS_KEYS } from 'utils/storage/localStorage';
 export interface Subscription {
     id: number;
     userID: number;
@@ -36,6 +35,22 @@ class SubscriptionService {
             return response.data['plans'];
         } catch (e) {
             console.error('failed to get plans', e);
+        }
+    }
+    public async getUserSubscription() {
+        try {
+            const response = await HTTPService.get(
+                `${ENDPOINT}/billing/subscription`,
+                null,
+                {
+                    'X-Auth-Token': getToken(),
+                }
+            );
+            const subscription = response.data['subscription'];
+            setData(LS_KEYS.SUBSCRIPTION, subscription);
+            return subscription;
+        } catch (e) {
+            console.error(`failed to get user's subscription details`, e);
         }
     }
     public async buySubscription(productID) {
@@ -76,7 +91,9 @@ class SubscriptionService {
                     'X-Auth-Token': getToken(),
                 }
             );
-            return response.data['subscription'];
+            const subscription = response.data['subscription'];
+            setData(LS_KEYS.SUBSCRIPTION, subscription);
+            return subscription;
         } catch (err) {
             console.error('Error while verifying subscription', err);
         }

@@ -5,7 +5,6 @@ import { Button, Spinner } from 'react-bootstrap';
 import subscriptionService, {
     Subscription,
 } from 'services/subscriptionService';
-import { LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 
 export default function SuccessRedirect() {
@@ -19,7 +18,6 @@ export default function SuccessRedirect() {
                     sessionId
                 );
                 setSubscription(subscription);
-                setData(LS_KEYS.SUBSCRIPTION, subscription);
             })();
         }
     }, []);
