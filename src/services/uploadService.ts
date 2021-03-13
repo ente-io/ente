@@ -154,7 +154,7 @@ class UploadService {
             progressBarProps.setPercentComplete(100);
         } catch (e) {
             this.filesToBeUploaded = [];
-            console.log(e);
+            console.error(e);
             throw e;
         }
     }
@@ -265,7 +265,7 @@ class UploadService {
                 metadata,
             };
         } catch (e) {
-            console.log('error reading files ', e);
+            console.error('error reading files ', e);
             throw e;
         }
     }
@@ -308,7 +308,7 @@ class UploadService {
             };
             return result;
         } catch (e) {
-            console.log('Error encrypting files ', e);
+            console.error('Error encrypting files ', e);
             throw e;
         }
     }
@@ -334,7 +334,7 @@ class UploadService {
 
             return file;
         } catch (e) {
-            console.log('error uploading to bucket ', e);
+            console.error('error uploading to bucket ', e);
             throw e;
         }
     }
@@ -364,7 +364,7 @@ class UploadService {
 
             return response.data;
         } catch (e) {
-            console.log('upload Files Failed ', e);
+            console.error('upload Files Failed ', e);
             throw e;
         }
     }
@@ -502,7 +502,7 @@ class UploadService {
             );
             return thumbnail;
         } catch (e) {
-            console.log('Error generating thumbnail ', e);
+            console.error('Error generating thumbnail ', e);
             throw e;
         }
     }
@@ -526,7 +526,7 @@ class UploadService {
                 reader.readAsArrayBuffer(file);
             });
         } catch (e) {
-            console.log('error readinf file to bytearray ', e);
+            console.error('error readinf file to bytearray ', e);
             throw e;
         }
     }
@@ -558,7 +558,7 @@ class UploadService {
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
-            console.log('fetch upload-url failed ', e);
+            console.error('fetch upload-url failed ', e);
             throw e;
         }
     }
@@ -574,7 +574,7 @@ class UploadService {
             });
             return fileUploadURL.objectKey;
         } catch (e) {
-            console.log('putFile to dataStore failed ', e);
+            console.error('putFile to dataStore failed ', e);
             throw e;
         }
     }
@@ -595,7 +595,7 @@ class UploadService {
                 creationTime: this.getUNIXTime(exifData),
             };
         } catch (e) {
-            console.log('error reading exif data');
+            console.error('error reading exif data');
             throw e;
         }
     }
