@@ -56,29 +56,13 @@ export default function Sidebar(props: Props) {
             itemListElement="div"
         >
             <div style={{ outline: 'none' }}>
-                <h4 style={{ marginBottom: '20px' }}>{constants.SUBSCRIPTION_PLAN}</h4>
-                {constants.SUBSCRIPTION_INFO(
-                    subscription?.productID,
-                    subscription?.expiryTime
-                )}
-
-                <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() => setChangeDisabledMessageModalView(true)}
-                >
-                    {constants.CHANGE}
-                </Button>
-                <ChangeDisabledMessage
-                    show={changeDisabledMessageModalView}
-                    onHide={() => setChangeDisabledMessageModalView(false)}
-                />
-                <br />
-                <br />
-                <br />
+                <h4 style={{ marginBottom: '12px' }}>{constants.SUBSCRIPTION_PLAN}</h4>
+                {
+                    subscription?.productID == "free" ? constants.FREE_SUBSCRIPTION_INFO(subscription?.expiryTime) : constants.PAID_SUBSCRIPTION_INFO(subscription?.expiryTime)
+                }
             </div>
-            <div style={{ outline: 'none' }}>
-                <h4>{constants.USAGE_DETAILS}</h4>
+            <div style={{ outline: 'none', marginTop: '40px' }}>
+                <h4 style={{ marginBottom: '12px' }}>{constants.USAGE_DETAILS}</h4>
                 <div>
                     {usage ? (
                         constants.USAGE_INFO(
@@ -95,7 +79,6 @@ export default function Sidebar(props: Props) {
                         <Spinner animation="border" />
                     )}
                 </div>
-                <br />
             </div>
             <>
                 <ConfirmLogout
@@ -103,9 +86,9 @@ export default function Sidebar(props: Props) {
                     onHide={closeLogoutModal}
                     logout={logout}
                 />
-                <Button variant="danger" onClick={showLogoutModal}>
+                <h4 style={{ cursor: 'pointer', color: '#F96C6C', marginTop: '40px' }} onClick={showLogoutModal}>
                     logout
-                </Button>
+                </h4>
             </>
         </Menu>
     );

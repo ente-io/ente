@@ -77,7 +77,10 @@ const GlobalStyles = createGlobalStyle`
         width:90vw;
         max-width:960px!important;
     }
-    .modal .modal-header, .modal  .modal-footer {
+    .modal {
+        z-index: 2000;
+    }
+    .modal .modal-header, .modal .modal-footer {
         border-color: #444 !important;
     }
     .modal .modal-header .close {

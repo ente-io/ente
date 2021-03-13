@@ -103,17 +103,20 @@ const englishConstants = {
     SUBSCRIPTION_CHANGE_DISABLED:
         'sorry, this operation is currently not supported on the web, please check your mobile app',
     SUBSCRIPTION_PLAN: 'subscription plan',
-    USAGE_DETAILS: 'usage details',
-    SUBSCRIPTION_INFO: (productID, expiryTime) => (
+    USAGE_DETAILS: 'usage',
+    FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
-                you are currently on <strong>{productID}</strong> plan
+                you are on the <strong>free</strong> plan {' '} that expires on {' '}
+                {new Date(expiryTime / 1000).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
+        </>
+    ),
+    PAID_SUBSCRIPTION_INFO: (expiryTime) => (
+        <>
             <p>
-                {' '}
-                which expires on {new Date(
-                    expiryTime / 1000
-                ).toDateString()}{' '}
+                your subscription will renew on {' '}
+                {new Date(expiryTime / 1000).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
         </>
     ),
