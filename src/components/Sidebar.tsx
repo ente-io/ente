@@ -51,13 +51,12 @@ export default function Sidebar(props: Props) {
     };
     return (
         <Menu
-            className="text-center"
             isOpen={isOpen}
             onStateChange={(state) => setIsOpen(state.isOpen)}
             itemListElement="div"
         >
             <div style={{ outline: 'none' }}>
-                <h4>{constants.SUBSCRIPTION_PLAN}</h4>
+                <h4 style={{ marginBottom: '20px' }}>{constants.SUBSCRIPTION_PLAN}</h4>
                 {constants.SUBSCRIPTION_INFO(
                     subscription?.productID,
                     subscription?.expiryTime

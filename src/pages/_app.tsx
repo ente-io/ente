@@ -151,7 +151,7 @@ const GlobalStyles = createGlobalStyle`
         background: #bdbdbd;
     }
     .bm-menu {
-        background: #373a47;
+        background: #131313;
         padding: 2.5em 1.5em 0;
         font-size: 1.15em;
         color:#fff

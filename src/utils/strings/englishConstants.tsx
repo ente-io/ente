@@ -103,7 +103,7 @@ const englishConstants = {
     SUBSCRIPTION_CHANGE_DISABLED:
         'sorry, this operation is currently not supported on the web, please check your mobile app',
     SUBSCRIPTION_PLAN: 'subscription plan',
-    USAGE_DETAILS: 'Usage Details',
+    USAGE_DETAILS: 'usage details',
     SUBSCRIPTION_INFO: (productID, expiryTime) => (
         <>
             <p>
