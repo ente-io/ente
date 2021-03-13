@@ -50,9 +50,16 @@ class SubscriptionService {
     }
 
     private async createCheckoutSession(productID) {
-        return HTTPService.post(`${ENDPOINT}/billing/create-checkout-session`, {
-            productID,
-        });
+        return HTTPService.post(
+            `${ENDPOINT}/billing/create-checkout-session`,
+            {
+                productID,
+            },
+            null,
+            {
+                'X-Auth-Token': getToken(),
+            }
+        );
     }
 
     public async verifySubscription(sessionID): Promise<Subscription> {
