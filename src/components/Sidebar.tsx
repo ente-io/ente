@@ -33,12 +33,15 @@ export default function Sidebar(props: Props) {
     const [isOpen, setIsOpen] = useState(false);
     useEffect(() => {
         const main = async () => {
-            const usage = getToken() && (await subscriptionService.getUsage());
+            if (!isOpen) {
+                return;
+            }
+            const usage = await subscriptionService.getUsage();
 
             SetUsage(usage);
         };
         main();
-    }, [getToken()]);
+    }, [isOpen]);
 
     const logout = async () => {
         setLogoutModalView(false);
@@ -81,9 +84,13 @@ export default function Sidebar(props: Props) {
                     {usage ? (
                         constants.USAGE_INFO(
                             usage,
-                            Math.ceil(Number(subscriptionService.convertBytesToGBs(
-                                subscription?.storage
-                            )))
+                            Math.ceil(
+                                Number(
+                                    subscriptionService.convertBytesToGBs(
+                                        subscription?.storage
+                                    )
+                                )
+                            )
                         )
                     ) : (
                         <Spinner animation="border" />
