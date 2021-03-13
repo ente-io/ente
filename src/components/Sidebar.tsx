@@ -81,9 +81,9 @@ export default function Sidebar(props: Props) {
                     {usage ? (
                         constants.USAGE_INFO(
                             usage,
-                            subscriptionService.convertBytesToGBs(
+                            Math.ceil(Number(subscriptionService.convertBytesToGBs(
                                 subscription?.storage
-                            )
+                            )))
                         )
                     ) : (
                         <Spinner animation="border" />
