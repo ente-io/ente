@@ -54,7 +54,7 @@ export default function Sidebar(props: Props) {
             itemListElement="div"
         >
             <div style={{ outline: 'none' }}>
-                {constants.SUBCRIPTION_PLAN}
+                {constants.SUBSCRIPTION_PLAN}
                 <Button
                     variant="success"
                     size="sm"

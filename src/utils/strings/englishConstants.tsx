@@ -101,8 +101,8 @@ const englishConstants = {
     LOGOUT_WARNING: 'sure you want to logout?',
     CANCEL: 'cancel',
     SUBSCRIPTION_CHANGE_DISABLED:
-        'sorry, you can only change the subscription on the mobile app.',
-    SUBCRIPTION_PLAN: 'subscription plan',
+        'sorry, this operation is currently not supported on the web, please check your mobile app',
+    SUBSCRIPTION_PLAN: 'subscription plan',
     USAGE_DETAILS: 'Usage Details',
     SUBSCRIPTION_INFO: (productID) => (
         <p>
