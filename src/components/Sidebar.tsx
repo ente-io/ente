@@ -54,7 +54,7 @@ export default function Sidebar(props: Props) {
             itemListElement="div"
         >
             <div style={{ outline: 'none' }}>
-                <h4>{constants.SUBCRIPTION_PLAN}</h4>
+                <h4>{constants.SUBSCRIPTION_PLAN}</h4>
                 {constants.SUBSCRIPTION_INFO(
                     subscription?.productID,
                     subscription?.expiryTime
