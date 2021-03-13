@@ -104,10 +104,18 @@ const englishConstants = {
         'sorry, this operation is currently not supported on the web, please check your mobile app',
     SUBSCRIPTION_PLAN: 'subscription plan',
     USAGE_DETAILS: 'Usage Details',
-    SUBSCRIPTION_INFO: (productID) => (
-        <p>
-            you are currently on <strong>{productID}</strong> plan
-        </p>
+    SUBSCRIPTION_INFO: (productID, expiryTime) => (
+        <>
+            <p>
+                you are currently on <strong>{productID}</strong> plan
+            </p>
+            <p>
+                {' '}
+                which expires on {new Date(
+                    expiryTime / 1000
+                ).toDateString()}{' '}
+            </p>
+        </>
     ),
     USAGE_INFO: (usage, quota) => (
         <p>
