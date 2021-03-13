@@ -37,3 +37,4 @@ out_functions
 out_publish
 
 .env
+/.vscode/

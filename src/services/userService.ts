@@ -1,6 +1,10 @@
 import HTTPService from './HTTPService';
 import { keyAttributes } from 'types';
 import { getEndpoint } from 'utils/common/apiUtil';
+import { clearKeys } from 'utils/storage/sessionStorage';
+import router from 'next/router';
+import { clearData } from 'utils/storage/localStorage';
+import localForage from 'localforage';
 
 const ENDPOINT = getEndpoint();
 
@@ -35,4 +39,12 @@ export const putAttributes = (
             'X-Auth-Token': token,
         }
     );
+};
+
+export const logoutUser = async () => {
+    clearKeys();
+    clearData();
+    localForage.clear();
+    const cache = await caches.delete('thumbs');
+    router.push('/');
 };

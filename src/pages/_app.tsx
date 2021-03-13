@@ -2,23 +2,19 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
-import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
-import { clearKeys } from 'utils/storage/sessionStorage';
-import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import Container from 'components/Container';
-import PowerSettings from 'components/power_settings';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
-import localForage from 'utils/storage/localForage';
 
 import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import { sentryInit } from '../utils/sentry';
-import ConfirmLogout from 'components/ConfirmLogout';
 import { useDropzone } from 'react-dropzone';
+import Sidebar from 'components/Sidebar';
 
 const GlobalStyles = createGlobalStyle`
     html, body {
@@ -81,7 +77,10 @@ const GlobalStyles = createGlobalStyle`
         width:90vw;
         max-width:960px!important;
     }
-    .modal .modal-header, .modal  .modal-footer {
+    .modal {
+        z-index: 2000;
+    }
+    .modal .modal-header, .modal .modal-footer {
         border-color: #444 !important;
     }
     .modal .modal-header .close {
@@ -112,12 +111,9 @@ const GlobalStyles = createGlobalStyle`
         background-size: cover;
         border: none;
     }
-    .btn-primary ,.btn:focus {
+    .btn-primary {
         background: #2dc262;
         border-color: #29a354;
-        padding: 8px;
-        padding-left: 24px;
-        padding-right: 24px;
     }
     .btn-primary:hover {
         background-color: #29a354;
@@ -147,6 +143,25 @@ const GlobalStyles = createGlobalStyle`
         width: 500px;
         max-width:100%;
     } 
+    .bm-burger-button {
+        position: fixed;
+        width: 28px;
+        height: 20px;
+        left: 36px;
+        margin-top: 30px;
+    }
+    .bm-burger-bars {
+        background: #bdbdbd;
+    }
+    .bm-menu {
+        background: #131313;
+        padding: 2.5em 1.5em 0;
+        font-size: 1.15em;
+        color:#fff
+    }
+    .bm-cross {
+        background: #fff;
+    }
 `;
 
 const Image = styled.img`
@@ -165,16 +180,9 @@ export default function App({ Component, pageProps, err }) {
     const router = useRouter();
     const [user, setUser] = useState();
     const [loading, setLoading] = useState(false);
-    const [uploadButtonView, setUploadButtonView] = useState(false);
+    const [navbarIconView, setNavbarIconView] = useState(false);
     const [uploadModalView, setUploadModalView] = useState(false);
-    const [logoutModalView, setLogoutModalView] = useState(false);
 
-    function showLogoutModal() {
-        setLogoutModalView(true);
-    }
-    function closeLogoutModal() {
-        setLogoutModalView(false);
-    }
     function closeUploadModal() {
         setUploadModalView(false);
     }
@@ -204,16 +212,6 @@ export default function App({ Component, pageProps, err }) {
         });
     }, []);
 
-    const logout = async () => {
-        setLogoutModalView(false);
-        clearKeys();
-        clearData();
-        setUploadButtonView(false);
-        localForage.clear();
-        const cache = await caches.delete('thumbs');
-        router.push('/');
-    };
-
     const onDropAccepted = useCallback(() => {
         showUploadModal();
         setIsDragActive(false);
@@ -234,25 +232,18 @@ export default function App({ Component, pageProps, err }) {
             isDragActive={isDragActive}
             onDragEnter={onDragEnter}
             onDragLeave={onDragLeave}
+            navbarIconView={navbarIconView}
+            setNavbarIconView={setNavbarIconView}
         >
             <Head>
                 <title>{constants.TITLE}</title>
                 <script async src={`https://sa.ente.io/latest.js`} />
             </Head>
             <GlobalStyles />
+            <div style={{ display: navbarIconView ? 'block' : 'none' }}>
+                <Sidebar setNavbarIconView={setNavbarIconView} />
+            </div>
             <Navbar>
-                {user && (
-                    <>
-                        <ConfirmLogout
-                            show={logoutModalView}
-                            onHide={closeLogoutModal}
-                            logout={logout}
-                        />
-                        <Button variant="link" onClick={showLogoutModal}>
-                            <PowerSettings />
-                        </Button>
-                    </>
-                )}
                 <FlexContainer>
                     <Image
                         style={{ height: '24px' }}
@@ -260,7 +251,7 @@ export default function App({ Component, pageProps, err }) {
                         src="/icon.svg"
                     />
                 </FlexContainer>
-                {uploadButtonView && <UploadButton openFileUploader={open} />}
+                {navbarIconView && <UploadButton openFileUploader={open} />}
             </Navbar>
             {loading ? (
                 <Container>
@@ -275,7 +266,7 @@ export default function App({ Component, pageProps, err }) {
                     uploadModalView={uploadModalView}
                     showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}
-                    setUploadButtonView={setUploadButtonView}
+                    setUploadButtonView={setNavbarIconView}
                     err={err}
                 />
             )}

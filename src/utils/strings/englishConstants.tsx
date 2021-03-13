@@ -23,7 +23,7 @@ const englishConstants = {
     ),
     CHECK_INBOX: 'please check your inbox (and spam) to complete verification',
     ENTER_OTT: 'verification code',
-    RESEND_MAIL: 'did not get email?',
+    RESEND_MAIL: 'resend?',
     VERIFY: 'verify',
     UNKNOWN_ERROR: 'something went wrong, please try again',
     INVALID_CODE: 'invalid verification code',
@@ -81,11 +81,17 @@ const englishConstants = {
     INSTALL_MOBILE_APP: () => (
         <div>
             install our{' '}
-            <a href="https://play.google.com/store/apps/details?id=io.ente.photos" target="_blank">
+            <a
+                href="https://play.google.com/store/apps/details?id=io.ente.photos"
+                target="_blank"
+            >
                 android
             </a>{' '}
             or{' '}
-            <a href="https://apps.apple.com/in/app/ente-photos/id1542026904" target="_blank">
+            <a
+                href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                target="_blank"
+            >
                 ios app{' '}
             </a>
             to automatically backup all your photos
@@ -94,6 +100,34 @@ const englishConstants = {
     LOGOUT: 'logout',
     LOGOUT_WARNING: 'sure you want to logout?',
     CANCEL: 'cancel',
+    SUBSCRIPTION_CHANGE_DISABLED:
+        'sorry, this operation is currently not supported on the web, please check your mobile app',
+    SUBSCRIPTION_PLAN: 'subscription plan',
+    USAGE_DETAILS: 'usage',
+    FREE_SUBSCRIPTION_INFO: (expiryTime) => (
+        <>
+            <p>
+                you are on the <strong>free</strong> plan {' '} that expires on {' '}
+                {new Date(expiryTime / 1000).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+        </>
+    ),
+    PAID_SUBSCRIPTION_INFO: (expiryTime) => (
+        <>
+            <p>
+                your subscription will renew on {' '}
+                {new Date(expiryTime / 1000).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+        </>
+    ),
+    USAGE_INFO: (usage, quota) => (
+        <p>
+            you have used {usage} GB out of your {quota} GB quota
+        </p>
+    ),
+    UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
+    CHANGE: 'change',
+    CHANGE_EMAIL: 'change email ?',
 };
 
 export default englishConstants;

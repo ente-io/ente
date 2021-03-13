@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import constants from 'utils/strings/constants';
 
 export const getColor = (props) => {
     if (props.isDragActive) {
@@ -43,6 +44,8 @@ type Props = React.PropsWithChildren<{
     isDragActive;
     onDragLeave;
     onDragEnter;
+    setNavbarIconView;
+    navbarIconView;
 }>;
 
 export default function FullScreenDropZone(props: Props) {
@@ -54,7 +57,7 @@ export default function FullScreenDropZone(props: Props) {
                     onDragLeave={props.onDragLeave}
                     isDragActive={props.isDragActive}
                 >
-                    drop to backup your files
+                    {constants.UPLOAD_DROPZONE_MESSAGE}
                 </Overlay>
             )}
             {props.children}
