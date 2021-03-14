@@ -57,13 +57,15 @@ export default function Sidebar(props: Props) {
         >
             <div style={{ outline: 'none' }}>
                 <h4 style={{ marginBottom: '12px' }}>{constants.SUBSCRIPTION_PLAN}</h4>
-                {
-                    subscription?.productID == "free" ? constants.FREE_SUBSCRIPTION_INFO(subscription?.expiryTime) : constants.PAID_SUBSCRIPTION_INFO(subscription?.expiryTime)
-                }
+                <div style={{ color: '#959595' }}>
+                    {
+                        subscription?.productID == "free" ? constants.FREE_SUBSCRIPTION_INFO(subscription?.expiryTime) : constants.PAID_SUBSCRIPTION_INFO(subscription?.expiryTime)
+                    }
+                </div>
             </div>
             <div style={{ outline: 'none', marginTop: '40px' }}>
                 <h4 style={{ marginBottom: '12px' }}>{constants.USAGE_DETAILS}</h4>
-                <div>
+                <div style={{ color: '#959595' }}>
                     {usage ? (
                         constants.USAGE_INFO(
                             usage,
