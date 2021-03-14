@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
-import { Button } from 'react-bootstrap';
 import ConfirmLogout from 'components/ConfirmLogout';
 import Spinner from 'react-bootstrap/Spinner';
 import subscriptionService, {
     Subscription,
 } from 'services/subscriptionService';
-import ChangeDisabledMessage from './ChangeDisabledMessage';
 import constants from 'utils/strings/constants';
 import { logoutUser } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getToken } from 'utils/common/key';
+import { getEndpoint } from 'utils/common/apiUtil';
 
 interface Props {
     setNavbarIconView;
@@ -49,6 +48,13 @@ export default function Sidebar(props: Props) {
         props.setNavbarIconView(false);
         logoutUser();
     };
+
+    function openFeedbackURL() {
+        const feedbackURL: string = getEndpoint() + "/users/feedback?token=" + getToken();
+        var win = window.open(feedbackURL, '_blank');
+        win.focus();
+    }
+
     return (
         <Menu
             isOpen={isOpen}
@@ -56,15 +62,15 @@ export default function Sidebar(props: Props) {
             itemListElement="div"
         >
             <div style={{ outline: 'none' }}>
-                <h4 style={{ marginBottom: '12px' }}>{constants.SUBSCRIPTION_PLAN}</h4>
+                <h5 style={{ marginBottom: '12px' }}>{constants.SUBSCRIPTION_PLAN}</h5>
                 <div style={{ color: '#959595' }}>
                     {
                         subscription?.productID == "free" ? constants.FREE_SUBSCRIPTION_INFO(subscription?.expiryTime) : constants.PAID_SUBSCRIPTION_INFO(subscription?.expiryTime)
                     }
                 </div>
             </div>
-            <div style={{ outline: 'none', marginTop: '40px' }}>
-                <h4 style={{ marginBottom: '12px' }}>{constants.USAGE_DETAILS}</h4>
+            <div style={{ outline: 'none', marginTop: '30px' }}>
+                <h5 style={{ marginBottom: '12px' }}>{constants.USAGE_DETAILS}</h5>
                 <div style={{ color: '#959595' }}>
                     {usage ? (
                         constants.USAGE_INFO(
@@ -82,15 +88,19 @@ export default function Sidebar(props: Props) {
                     )}
                 </div>
             </div>
+            <div style={{ height: '1px', marginTop: '40px', background: '#242424', width: '100%' }}></div>
+            <h5 style={{ cursor: 'pointer', marginTop: '40px' }} onClick={openFeedbackURL}>
+                request feature
+            </h5>
             <>
                 <ConfirmLogout
                     show={logoutModalView}
                     onHide={closeLogoutModal}
                     logout={logout}
                 />
-                <h4 style={{ cursor: 'pointer', color: '#F96C6C', marginTop: '40px' }} onClick={showLogoutModal}>
+                <h5 style={{ cursor: 'pointer', color: '#F96C6C', marginTop: '30px' }} onClick={showLogoutModal}>
                     logout
-                </h4>
+                </h5>
             </>
         </Menu>
     );
