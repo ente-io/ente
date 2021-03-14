@@ -349,20 +349,20 @@ class UploadService {
             decryptionHeader,
             pushState,
         } = await worker.initChunkEncryption();
-
+        let ref = { pullCount: 1 };
         const encryptedFileStream = new ReadableStream({
-            async start(controller) {
-                for (let i = 0; i < chunkCount; i++) {
-                    let { value } = await fileStreamReader.read();
-
-                    const encryptedFileChunk = await worker.encryptFileChunk(
-                        value,
-                        pushState,
-                        i === chunkCount - 1
-                    );
-                    controller.enqueue(encryptedFileChunk);
+            async pull(controller) {
+                let { value } = await fileStreamReader.read();
+                const encryptedFileChunk = await worker.encryptFileChunk(
+                    value,
+                    pushState,
+                    ref.pullCount === chunkCount
+                );
+                controller.enqueue(encryptedFileChunk);
+                if (ref.pullCount == chunkCount) {
+                    controller.close();
                 }
-                controller.close();
+                ref.pullCount++;
             },
         });
         return {
@@ -580,28 +580,32 @@ class UploadService {
     }
 
     private getFileStream(reader: FileReader, file: File) {
-        let fileSize = file.size;
-        let offset = 0;
         let self = this;
+        let fileChunkReader = (async function* fileChunkReaderMaker(
+            fileSize,
+            self
+        ) {
+            let offset = 0;
+            while (offset < fileSize) {
+                let blob = file.slice(offset, ENCRYPTION_CHUNK_SIZE + offset);
+                let fileChunk = await self.getUint8ArrayView(reader, blob);
+                yield fileChunk;
+                offset += ENCRYPTION_CHUNK_SIZE;
+            }
+            return null;
+        })(file.size, self);
         return {
             stream: new ReadableStream<Uint8Array>({
-                async start(controller) {
-                    while (offset < fileSize) {
-                        let blob = file.slice(
-                            offset,
-                            ENCRYPTION_CHUNK_SIZE + offset
-                        );
-                        let fileChunk = await self.getUint8ArrayView(
-                            reader,
-                            blob
-                        );
-                        controller.enqueue(fileChunk);
-                        offset += ENCRYPTION_CHUNK_SIZE;
+                async pull(controller: ReadableStreamDefaultController) {
+                    let chunk = await fileChunkReader.next();
+                    if (chunk.done) {
+                        controller.close();
+                    } else {
+                        controller.enqueue(chunk.value);
                     }
-                    controller.close();
                 },
             }),
-            chunkCount: Math.ceil(fileSize / ENCRYPTION_CHUNK_SIZE),
+            chunkCount: Math.ceil(file.size / ENCRYPTION_CHUNK_SIZE),
         };
     }
 
