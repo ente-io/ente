@@ -678,7 +678,7 @@ class UploadService {
                 { 'X-Auth-Token': token }
             );
 
-            return response.data['multipartUploadURLs'];
+            return response.data['urls'];
         } catch (e) {
             console.log('fetch multipart-upload-url failed ', e);
             throw e;
