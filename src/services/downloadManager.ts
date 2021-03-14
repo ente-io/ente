@@ -53,13 +53,17 @@ class DownloadManager {
     }
 
     getFile = async (file: file) => {
-        if (!this.fileDownloads.get(file.id)) {
-            const download = (async () => {
-                return await this.downloadFile(file);
-            })();
-            this.fileDownloads.set(file.id, download);
+        try {
+            if (!this.fileDownloads.get(file.id)) {
+                const download = (async () => {
+                    return await this.downloadFile(file);
+                })();
+                this.fileDownloads.set(file.id, download);
+            }
+            return await this.fileDownloads.get(file.id);
+        } catch (e) {
+            console.error('Failed to get File', e);
         }
-        return await this.fileDownloads.get(file.id);
     };
 
     private async downloadFile(file: file) {
