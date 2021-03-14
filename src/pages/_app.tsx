@@ -1,27 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
-import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
-import { clearKeys } from 'utils/storage/sessionStorage';
-import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import Container from 'components/Container';
-import PowerSettings from 'components/power_settings';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
-import localForage from 'localforage';
+
 import UploadButton from 'pages/gallery/components/UploadButton';
 import FullScreenDropZone from 'components/FullScreenDropZone';
-
-localForage.config({
-    driver: localForage.INDEXEDDB,
-    name: 'ente-files',
-    version: 1.0,
-    storeName: 'files',
-});
+import { sentryInit } from '../utils/sentry';
+import { useDropzone } from 'react-dropzone';
+import Sidebar from 'components/Sidebar';
 
 const GlobalStyles = createGlobalStyle`
     html, body {
@@ -84,7 +77,10 @@ const GlobalStyles = createGlobalStyle`
         width:90vw;
         max-width:960px!important;
     }
-    .modal .modal-header, .modal  .modal-footer {
+    .modal {
+        z-index: 2000;
+    }
+    .modal .modal-header, .modal .modal-footer {
         border-color: #444 !important;
     }
     .modal .modal-header .close {
@@ -118,9 +114,6 @@ const GlobalStyles = createGlobalStyle`
     .btn-primary {
         background: #2dc262;
         border-color: #29a354;
-        padding: 8px;
-        padding-left: 24px;
-        padding-right: 24px;
     }
     .btn-primary:hover {
         background-color: #29a354;
@@ -133,6 +126,41 @@ const GlobalStyles = createGlobalStyle`
         background-color: #242424;
         color: #fff;
         border-radius: 12px;
+    }
+    .jumbotron{
+        background-color: #191919;
+        color: #fff;
+        text-align: center;
+        margin-top: 50px;
+    }
+    .alert-success {
+        background-color: #c4ffd6;
+    }
+    .alert-primary {
+        background-color: #c4ffd6;
+    }
+    .ente-modal{
+        width: 500px;
+        max-width:100%;
+    } 
+    .bm-burger-button {
+        position: fixed;
+        width: 28px;
+        height: 20px;
+        left: 36px;
+        margin-top: 30px;
+    }
+    .bm-burger-bars {
+        background: #bdbdbd;
+    }
+    .bm-menu {
+        background: #131313;
+        padding: 2.5em 1.5em 0;
+        font-size: 1.15em;
+        color:#fff
+    }
+    .bm-cross {
+        background: #fff;
     }
 `;
 
@@ -147,11 +175,12 @@ const FlexContainer = styled.div`
     margin: 16px;
 `;
 
-export default function App({ Component, pageProps }) {
+sentryInit();
+export default function App({ Component, pageProps, err }) {
     const router = useRouter();
     const [user, setUser] = useState();
     const [loading, setLoading] = useState(false);
-    const [uploadButtonView, setUploadButtonView] = useState(false);
+    const [navbarIconView, setNavbarIconView] = useState(false);
     const [uploadModalView, setUploadModalView] = useState(false);
 
     function closeUploadModal() {
@@ -183,33 +212,37 @@ export default function App({ Component, pageProps }) {
         });
     }, []);
 
-    const logout = async () => {
-        clearKeys();
-        clearData();
-        setUploadButtonView(false);
-        localForage.clear();
-        const cache = await caches.delete('thumbs');
-        router.push('/');
-    };
-
+    const onDropAccepted = useCallback(() => {
+        showUploadModal();
+    }, []);
+    const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
+        noClick: true,
+        noKeyboard: true,
+        onDropAccepted,
+        accept: 'image/*, video/*, application/json, ',
+    });
     return (
-        <FullScreenDropZone showModal={showUploadModal}>
+        <FullScreenDropZone
+            getRootProps={getRootProps}
+            getInputProps={getInputProps}
+        >
             <Head>
                 <title>{constants.TITLE}</title>
+                <script async src={`https://sa.ente.io/latest.js`} />
             </Head>
             <GlobalStyles />
+            <div style={{ display: navbarIconView ? 'block' : 'none' }}>
+                <Sidebar setNavbarIconView={setNavbarIconView} />
+            </div>
             <Navbar>
-                {user && (
-                    <Button variant="link" onClick={logout}>
-                        <PowerSettings />
-                    </Button>
-                )}
                 <FlexContainer>
-                    <Image alt="logo" src="/icon.svg" />
+                    <Image
+                        style={{ height: '24px' }}
+                        alt="logo"
+                        src="/icon.svg"
+                    />
                 </FlexContainer>
-                {uploadButtonView && (
-                    <UploadButton showModal={showUploadModal} />
-                )}
+                {navbarIconView && <UploadButton openFileUploader={open} />}
             </Navbar>
             {loading ? (
                 <Container>
@@ -219,10 +252,13 @@ export default function App({ Component, pageProps }) {
                 </Container>
             ) : (
                 <Component
+                    openFileUploader={open}
+                    acceptedFiles={acceptedFiles}
                     uploadModalView={uploadModalView}
                     showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}
-                    setUploadButtonView={setUploadButtonView}
+                    setUploadButtonView={setNavbarIconView}
+                    err={err}
                 />
             )}
         </FullScreenDropZone>

@@ -12,6 +12,7 @@ import * as Yup from 'yup';
 import { keyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
+import { logoutUser } from 'services/userService';
 
 const Image = styled.img`
     width: 200px;
@@ -86,10 +87,15 @@ export default function Credentials() {
 
     return (
         <Container>
-            {/* <Image alt="vault" src="/vault.svg" /> */}
-            <Card style={{ minWidth: '320px', padding: '40px 30px' }} className="text-center">
+            {/* <Image alt="vault" src="/vault.png" /> */}
+            <Card
+                style={{ minWidth: '320px', padding: '40px 30px' }}
+                className="text-center"
+            >
                 <Card.Body>
-                    <Card.Title style={{ marginBottom: '24px' }}>{constants.ENTER_PASSPHRASE}</Card.Title>
+                    <Card.Title style={{ marginBottom: '24px' }}>
+                        {constants.ENTER_PASSPHRASE}
+                    </Card.Title>
                     <Formik<formValues>
                         initialValues={{ passphrase: '' }}
                         onSubmit={verifyPassphrase}
@@ -119,7 +125,7 @@ export default function Credentials() {
                                         onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                            errors.passphrase
+                                                errors.passphrase
                                         )}
                                         disabled={loading}
                                         autoFocus={true}
@@ -131,6 +137,12 @@ export default function Credentials() {
                                 <Button block type="submit" disabled={loading}>
                                     {constants.VERIFY_PASSPHRASE}
                                 </Button>
+                                <br />
+                                <div>
+                                    <a href="#" onClick={logoutUser}>
+                                        {constants.LOGOUT}
+                                    </a>
+                                </div>
                             </Form>
                         )}
                     </Formik>

@@ -64,6 +64,7 @@ function PhotoSwipe(props: Iprops) {
             history: false,
             maxSpreadZoom: 5,
             index: currentIndex,
+            showHideOpacity: true,
         };
         let photoSwipe = new Photoswipe(
             pswpElement,
