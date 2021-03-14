@@ -264,7 +264,8 @@ class UploadService {
 
             const { location, creationTime } = await this.getExifData(
                 reader,
-                receivedFile
+                receivedFile,
+                fileType
             );
             const metadata = Object.assign(
                 {
@@ -739,8 +740,16 @@ class UploadService {
         return multipartUploadURLs.objectKey;
     }
 
-    private async getExifData(reader: FileReader, receivedFile: File) {
+    private async getExifData(
+        reader: FileReader,
+        receivedFile: File,
+        fileType: FILE_TYPE
+    ) {
         try {
+            if (fileType === FILE_TYPE.VIDEO) {
+                // Todo  extract exif data from videos
+                return { location: null, creationTime: null };
+            }
             const exifData: any = await new Promise((resolve, reject) => {
                 reader.onload = () => {
                     resolve(EXIF.readFromBinaryFile(reader.result));
