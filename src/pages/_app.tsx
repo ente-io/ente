@@ -215,30 +215,16 @@ export default function App({ Component, pageProps, err }) {
     const onDropAccepted = useCallback(() => {
         showUploadModal();
     }, []);
-    const onDrop = useCallback(() => {
-        setIsDragActive(false);
-        //to do add a banner error for when no files accepted
-    }, []);
-
     const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
         noClick: true,
         noKeyboard: true,
         onDropAccepted,
-        onDrop,
         accept: 'image/*, video/*, application/json, ',
     });
-    const [isDragActive, setIsDragActive] = useState(false);
-    const onDragEnter = () => setIsDragActive(true);
-    const onDragLeave = () => setIsDragActive(false);
     return (
         <FullScreenDropZone
             getRootProps={getRootProps}
             getInputProps={getInputProps}
-            isDragActive={isDragActive}
-            onDragEnter={onDragEnter}
-            onDragLeave={onDragLeave}
-            navbarIconView={navbarIconView}
-            setNavbarIconView={setNavbarIconView}
         >
             <Head>
                 <title>{constants.TITLE}</title>
