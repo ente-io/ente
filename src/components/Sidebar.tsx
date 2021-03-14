@@ -92,6 +92,11 @@ export default function Sidebar(props: Props) {
             <h5 style={{ cursor: 'pointer', marginTop: '40px' }} onClick={openFeedbackURL}>
                 request feature
             </h5>
+            <h5 style={{ cursor: 'pointer', marginTop: '30px' }}>
+                <a href="mailto:contact@ente.io" style={{ textDecoration: 'inherit', color: 'inherit' }}>
+                    support
+                </a>
+            </h5>
             <>
                 <ConfirmLogout
                     show={logoutModalView}
