@@ -150,7 +150,7 @@ class UploadService {
             try {
                 await this.fetchUploadURLs(token);
             } catch (e) {
-                console.log('error fetching uploadURLs', e);
+                console.error('error fetching uploadURLs', e);
                 ErrorHandler(e);
             }
             const uploadProcesses = [];
@@ -173,7 +173,7 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.FINISH);
             progressBarProps.setPercentComplete(100);
         } catch (e) {
-            console.log('uploading failed with error', e);
+            console.error('uploading failed with error', e);
             this.filesToBeUploaded = [];
             console.error(e);
             throw e;
@@ -215,7 +215,7 @@ class UploadService {
             this.filesCompleted++;
             this.changeProgressBarProps();
         } catch (e) {
-            console.log('file upload failed with error', e);
+            console.error('file upload failed with error', e);
             ErrorHandler(e);
             const error = new Error(
                 `Uploading Failed for File - ${rawFile.name}`
@@ -680,7 +680,7 @@ class UploadService {
 
             return response.data['urls'];
         } catch (e) {
-            console.log('fetch multipart-upload-url failed ', e);
+            console.error('fetch multipart-upload-url failed ', e);
             throw e;
         }
     }
