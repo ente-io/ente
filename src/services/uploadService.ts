@@ -62,7 +62,7 @@ export interface MetadataObject {
     fileType: FILE_TYPE;
 }
 
-interface FileinMemory {
+interface FileInMemory {
     filedata: Uint8Array | DataStream;
     thumbnail: Uint8Array;
     metadata: MetadataObject;
@@ -105,7 +105,7 @@ class UploadService {
     private setUploadErrors;
 
     public async uploadFiles(
-        recievedFiles: File[],
+        receivedFiles: File[],
         collection: collection,
         token: string,
         progressBarProps,
@@ -123,7 +123,7 @@ class UploadService {
 
             let metadataFiles: File[] = [];
             let actualFiles: File[] = [];
-            recievedFiles.forEach((file) => {
+            receivedFiles.forEach((file) => {
                 if (
                     file.type.substr(0, 5) === TYPE_IMAGE ||
                     file.type.substr(0, 5) === TYPE_VIDEO
@@ -188,7 +188,7 @@ class UploadService {
         token: string
     ) {
         try {
-            let file: FileinMemory = await this.readFile(reader, rawFile);
+            let file: FileInMemory = await this.readFile(reader, rawFile);
             let {
                 file: encryptedFile,
                 fileKey: encryptedKey,
@@ -197,13 +197,13 @@ class UploadService {
                 file,
                 collection.key
             );
-            let backupedFile: BackupedFile = await this.uploadtoBucket(
+            let backupedFile: BackupedFile = await this.uploadToBucket(
                 encryptedFile,
                 token
             );
             file = null;
             encryptedFile = null;
-            let uploadFile: uploadFile = this.getuploadFile(
+            let uploadFile: uploadFile = this.getUploadFile(
                 collection,
                 backupedFile,
                 encryptedKey
@@ -243,15 +243,15 @@ class UploadService {
         this.setUploadErrors(this.uploadErrors);
     }
 
-    private async readFile(reader: FileReader, recievedFile: File) {
+    private async readFile(reader: FileReader, receivedFile: File) {
         try {
             const thumbnail = await this.generateThumbnail(
                 reader,
-                recievedFile
+                receivedFile
             );
 
             let fileType: FILE_TYPE;
-            switch (recievedFile.type.split('/')[0]) {
+            switch (receivedFile.type.split('/')[0]) {
                 case TYPE_IMAGE:
                     fileType = FILE_TYPE.IMAGE;
                     break;
@@ -264,24 +264,24 @@ class UploadService {
 
             const { location, creationTime } = await this.getExifData(
                 reader,
-                recievedFile
+                receivedFile
             );
             const metadata = Object.assign(
                 {
-                    title: recievedFile.name,
+                    title: receivedFile.name,
                     creationTime:
-                        creationTime || recievedFile.lastModified * 1000,
-                    modificationTime: recievedFile.lastModified * 1000,
+                        creationTime || receivedFile.lastModified * 1000,
+                    modificationTime: receivedFile.lastModified * 1000,
                     latitude: location?.latitude,
                     longitude: location?.latitude,
                     fileType,
                 },
-                this.metadataMap.get(recievedFile.name)
+                this.metadataMap.get(receivedFile.name)
             );
             const filedata =
-                recievedFile.size > MIN_STREAM_FILE_SIZE
-                    ? this.getFileStream(reader, recievedFile)
-                    : await this.getUint8ArrayView(reader, recievedFile);
+                receivedFile.size > MIN_STREAM_FILE_SIZE
+                    ? this.getFileStream(reader, receivedFile)
+                    : await this.getUint8ArrayView(reader, receivedFile);
 
             return {
                 filedata,
@@ -296,7 +296,7 @@ class UploadService {
 
     private async encryptFile(
         worker: any,
-        file: FileinMemory,
+        file: FileInMemory,
         encryptionKey: string
     ): Promise<EncryptedFile> {
         try {
@@ -373,7 +373,7 @@ class UploadService {
         };
     }
 
-    private async uploadtoBucket(
+    private async uploadToBucket(
         file: ProcessedFile,
         token: string
     ): Promise<BackupedFile> {
@@ -410,7 +410,7 @@ class UploadService {
         }
     }
 
-    private getuploadFile(
+    private getUploadFile(
         collection: collection,
         backupedFile: BackupedFile,
         fileKey: B64EncryptionResult
@@ -440,7 +440,7 @@ class UploadService {
         }
     }
 
-    private async seedMetadataMap(recievedFile: File) {
+    private async seedMetadataMap(receivedFile: File) {
         try {
             const metadataJSON: object = await new Promise(
                 (resolve, reject) => {
@@ -452,7 +452,7 @@ class UploadService {
                                 : reader.result;
                         resolve(JSON.parse(result));
                     };
-                    reader.readAsText(recievedFile);
+                    reader.readAsText(receivedFile);
                 }
             );
 
@@ -475,7 +475,7 @@ class UploadService {
                 locationData = metadataJSON['geoDataExif'];
             }
             if (locationData != null) {
-                metaDataObject['latitude'] = locationData['latitide'];
+                metaDataObject['latitude'] = locationData['latitude'];
                 metaDataObject['longitude'] = locationData['longitude'];
             }
             this.metadataMap.set(metadataJSON['title'], metaDataObject);
@@ -623,7 +623,7 @@ class UploadService {
                 reader.readAsArrayBuffer(file);
             });
         } catch (e) {
-            console.error('error readinf file to bytearray ', e);
+            console.error('error reading file to byte-array ', e);
             throw e;
         }
     }
@@ -739,13 +739,13 @@ class UploadService {
         return multipartUploadURLs.objectKey;
     }
 
-    private async getExifData(reader: FileReader, recievedFile: File) {
+    private async getExifData(reader: FileReader, receivedFile: File) {
         try {
             const exifData: any = await new Promise((resolve, reject) => {
                 reader.onload = () => {
                     resolve(EXIF.readFromBinaryFile(reader.result));
                 };
-                reader.readAsArrayBuffer(recievedFile);
+                reader.readAsArrayBuffer(receivedFile);
             });
             if (!exifData) {
                 return { location: null, creationTime: null };
