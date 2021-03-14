@@ -43,7 +43,7 @@ export interface B64EncryptionResult {
 }
 
 interface UploadURL {
-    URL: string;
+    url: string;
     objectKey: string;
 }
 
@@ -650,7 +650,7 @@ class UploadService {
                 const response = await this.uploadURLFetchInProgress;
 
                 this.uploadURLFetchInProgress = null;
-                this.uploadURLs.push(...response.data['UploadURLs']);
+                this.uploadURLs.push(...response.data['urls']);
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
