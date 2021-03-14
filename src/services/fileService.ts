@@ -3,7 +3,7 @@ import HTTPService from './HTTPService';
 import localForage from 'utils/storage/localForage';
 
 import { collection } from './collectionService';
-import { MetadataObject } from './uploadService';
+import { DataStream, MetadataObject } from './uploadService';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 
 const ENDPOINT = getEndpoint();
@@ -12,7 +12,7 @@ const DIFF_LIMIT: number = 2500;
 const FILES = 'files';
 
 export interface fileAttribute {
-    encryptedData?: Uint8Array;
+    encryptedData?: DataStream | Uint8Array;
     objectKey?: string;
     decryptionHeader: string;
 }

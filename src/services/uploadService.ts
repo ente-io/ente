@@ -7,9 +7,12 @@ import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity } from 'utils/common/utilFunctions';
 import { ErrorHandler } from 'utils/common/errorUtil';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
+import * as convert from 'xml-js';
+import { ENCRYPTION_CHUNK_SIZE } from 'utils/crypto/libsodium';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;
+const MAX_URL_REQUESTS = 50;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;
 const MAX_CONCURRENT_UPLOADS = 4;
@@ -18,7 +21,17 @@ const TYPE_VIDEO = 'video';
 const TYPE_JSON = 'json';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
+const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
+const CHUNKS_COMBINED_FOR_UPLOAD = 2;
 
+export interface DataStream {
+    stream: ReadableStream<Uint8Array>;
+    chunkCount: number;
+}
+
+function isDataStream(object: any): object is DataStream {
+    return object.hasOwnProperty('stream');
+}
 interface EncryptionResult {
     file: fileAttribute;
     key: string;
@@ -34,6 +47,12 @@ interface UploadURL {
     objectKey: string;
 }
 
+interface MultipartUploadURLs {
+    objectKey: string;
+    partURLs: string[];
+    completeURL: string;
+}
+
 export interface MetadataObject {
     title: string;
     creationTime: number;
@@ -43,8 +62,8 @@ export interface MetadataObject {
     fileType: FILE_TYPE;
 }
 
-interface FileinMemory {
-    filedata: Uint8Array;
+interface FileInMemory {
+    filedata: Uint8Array | DataStream;
     thumbnail: Uint8Array;
     metadata: MetadataObject;
 }
@@ -86,7 +105,7 @@ class UploadService {
     private setUploadErrors;
 
     public async uploadFiles(
-        recievedFiles: File[],
+        receivedFiles: File[],
         collection: collection,
         token: string,
         progressBarProps,
@@ -104,7 +123,7 @@ class UploadService {
 
             let metadataFiles: File[] = [];
             let actualFiles: File[] = [];
-            recievedFiles.forEach((file) => {
+            receivedFiles.forEach((file) => {
                 if (
                     file.type.substr(0, 5) === TYPE_IMAGE ||
                     file.type.substr(0, 5) === TYPE_VIDEO
@@ -131,6 +150,7 @@ class UploadService {
             try {
                 await this.fetchUploadURLs(token);
             } catch (e) {
+                console.error('error fetching uploadURLs', e);
                 ErrorHandler(e);
             }
             const uploadProcesses = [];
@@ -153,11 +173,13 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.FINISH);
             progressBarProps.setPercentComplete(100);
         } catch (e) {
+            console.error('uploading failed with error', e);
             this.filesToBeUploaded = [];
             console.error(e);
             throw e;
         }
     }
+
     private async uploader(
         worker: any,
         reader: FileReader,
@@ -166,7 +188,7 @@ class UploadService {
         token: string
     ) {
         try {
-            let file: FileinMemory = await this.readFile(reader, rawFile);
+            let file: FileInMemory = await this.readFile(reader, rawFile);
             let {
                 file: encryptedFile,
                 fileKey: encryptedKey,
@@ -175,13 +197,13 @@ class UploadService {
                 file,
                 collection.key
             );
-            file = null;
-            let backupedFile: BackupedFile = await this.uploadtoBucket(
+            let backupedFile: BackupedFile = await this.uploadToBucket(
                 encryptedFile,
                 token
             );
+            file = null;
             encryptedFile = null;
-            let uploadFile: uploadFile = this.getuploadFile(
+            let uploadFile: uploadFile = this.getUploadFile(
                 collection,
                 backupedFile,
                 encryptedKey
@@ -193,6 +215,7 @@ class UploadService {
             this.filesCompleted++;
             this.changeProgressBarProps();
         } catch (e) {
+            console.error('file upload failed with error', e);
             ErrorHandler(e);
             const error = new Error(
                 `Uploading Failed for File - ${rawFile.name}`
@@ -220,19 +243,15 @@ class UploadService {
         this.setUploadErrors(this.uploadErrors);
     }
 
-    private async readFile(reader: FileReader, recievedFile: File) {
+    private async readFile(reader: FileReader, receivedFile: File) {
         try {
-            const filedata: Uint8Array = await this.getUint8ArrayView(
-                reader,
-                recievedFile
-            );
             const thumbnail = await this.generateThumbnail(
                 reader,
-                recievedFile
+                receivedFile
             );
 
             let fileType: FILE_TYPE;
-            switch (recievedFile.type.split('/')[0]) {
+            switch (receivedFile.type.split('/')[0]) {
                 case TYPE_IMAGE:
                     fileType = FILE_TYPE.IMAGE;
                     break;
@@ -245,20 +264,26 @@ class UploadService {
 
             const { location, creationTime } = await this.getExifData(
                 reader,
-                recievedFile
+                receivedFile,
+                fileType
             );
             const metadata = Object.assign(
                 {
-                    title: recievedFile.name,
+                    title: receivedFile.name,
                     creationTime:
-                        creationTime || recievedFile.lastModified * 1000,
-                    modificationTime: recievedFile.lastModified * 1000,
+                        creationTime || receivedFile.lastModified * 1000,
+                    modificationTime: receivedFile.lastModified * 1000,
                     latitude: location?.latitude,
                     longitude: location?.latitude,
                     fileType,
                 },
-                this.metadataMap.get(recievedFile.name)
+                this.metadataMap.get(receivedFile.name)
             );
+            const filedata =
+                receivedFile.size > MIN_STREAM_FILE_SIZE
+                    ? this.getFileStream(reader, receivedFile)
+                    : await this.getUint8ArrayView(reader, receivedFile);
+
             return {
                 filedata,
                 thumbnail,
@@ -269,16 +294,19 @@ class UploadService {
             throw e;
         }
     }
+
     private async encryptFile(
-        worker,
-        file: FileinMemory,
+        worker: any,
+        file: FileInMemory,
         encryptionKey: string
     ): Promise<EncryptedFile> {
         try {
             const {
                 key: fileKey,
                 file: encryptedFiledata,
-            }: EncryptionResult = await worker.encryptFile(file.filedata);
+            }: EncryptionResult = isDataStream(file.filedata)
+                ? await this.encryptFileStream(worker, file.filedata)
+                : await worker.encryptFile(file.filedata);
 
             const {
                 file: encryptedThumbnail,
@@ -313,21 +341,65 @@ class UploadService {
         }
     }
 
-    private async uploadtoBucket(
+    private async encryptFileStream(worker, fileData: DataStream) {
+        const { stream, chunkCount } = fileData;
+        const fileStreamReader = stream.getReader();
+        const {
+            key,
+            decryptionHeader,
+            pushState,
+        } = await worker.initChunkEncryption();
+        let ref = { pullCount: 1 };
+        const encryptedFileStream = new ReadableStream({
+            async pull(controller) {
+                let { value } = await fileStreamReader.read();
+                const encryptedFileChunk = await worker.encryptFileChunk(
+                    value,
+                    pushState,
+                    ref.pullCount === chunkCount
+                );
+                controller.enqueue(encryptedFileChunk);
+                if (ref.pullCount == chunkCount) {
+                    controller.close();
+                }
+                ref.pullCount++;
+            },
+        });
+        return {
+            key,
+            file: {
+                decryptionHeader,
+                encryptedData: { stream: encryptedFileStream, chunkCount },
+            },
+        };
+    }
+
+    private async uploadToBucket(
         file: ProcessedFile,
-        token
+        token: string
     ): Promise<BackupedFile> {
         try {
-            const fileUploadURL = await this.getUploadURL(token);
-            file.file.objectKey = await this.putFile(
-                fileUploadURL,
-                file.file.encryptedData
-            );
-
+            if (isDataStream(file.file.encryptedData)) {
+                const { chunkCount, stream } = file.file.encryptedData;
+                const filePartUploadURLs = await this.fetchMultipartUploadURLs(
+                    token,
+                    Math.ceil(chunkCount / CHUNKS_COMBINED_FOR_UPLOAD)
+                );
+                file.file.objectKey = await this.putFileInParts(
+                    filePartUploadURLs,
+                    stream
+                );
+            } else {
+                const fileUploadURL = await this.getUploadURL(token);
+                file.file.objectKey = await this.putFile(
+                    fileUploadURL,
+                    file.file.encryptedData
+                );
+            }
             const thumbnailUploadURL = await this.getUploadURL(token);
             file.thumbnail.objectKey = await this.putFile(
                 thumbnailUploadURL,
-                file.thumbnail.encryptedData
+                file.thumbnail.encryptedData as Uint8Array
             );
             delete file.file.encryptedData;
             delete file.thumbnail.encryptedData;
@@ -339,7 +411,7 @@ class UploadService {
         }
     }
 
-    private getuploadFile(
+    private getUploadFile(
         collection: collection,
         backupedFile: BackupedFile,
         fileKey: B64EncryptionResult
@@ -369,19 +441,19 @@ class UploadService {
         }
     }
 
-    private async seedMetadataMap(recievedFile: File) {
+    private async seedMetadataMap(receivedFile: File) {
         try {
             const metadataJSON: object = await new Promise(
                 (resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = () => {
-                        var result =
+                        let result =
                             typeof reader.result !== 'string'
                                 ? new TextDecoder().decode(reader.result)
                                 : reader.result;
                         resolve(JSON.parse(result));
                     };
-                    reader.readAsText(recievedFile);
+                    reader.readAsText(receivedFile);
                 }
             );
 
@@ -391,7 +463,7 @@ class UploadService {
             metaDataObject['modificationTime'] =
                 metadataJSON['modificationTime']['timestamp'] * 1000000;
 
-            var locationData = null;
+            let locationData = null;
             if (
                 metadataJSON['geoData']['latitude'] != 0.0 ||
                 metadataJSON['geoData']['longitude'] != 0.0
@@ -404,7 +476,7 @@ class UploadService {
                 locationData = metadataJSON['geoDataExif'];
             }
             if (locationData != null) {
-                metaDataObject['latitude'] = locationData['latitide'];
+                metaDataObject['latitude'] = locationData['latitude'];
                 metaDataObject['longitude'] = locationData['longitude'];
             }
             this.metadataMap.set(metadataJSON['title'], metaDataObject);
@@ -507,6 +579,36 @@ class UploadService {
         }
     }
 
+    private getFileStream(reader: FileReader, file: File) {
+        let self = this;
+        let fileChunkReader = (async function* fileChunkReaderMaker(
+            fileSize,
+            self
+        ) {
+            let offset = 0;
+            while (offset < fileSize) {
+                let blob = file.slice(offset, ENCRYPTION_CHUNK_SIZE + offset);
+                let fileChunk = await self.getUint8ArrayView(reader, blob);
+                yield fileChunk;
+                offset += ENCRYPTION_CHUNK_SIZE;
+            }
+            return null;
+        })(file.size, self);
+        return {
+            stream: new ReadableStream<Uint8Array>({
+                async pull(controller: ReadableStreamDefaultController) {
+                    let chunk = await fileChunkReader.next();
+                    if (chunk.done) {
+                        controller.close();
+                    } else {
+                        controller.enqueue(chunk.value);
+                    }
+                },
+            }),
+            chunkCount: Math.ceil(file.size / ENCRYPTION_CHUNK_SIZE),
+        };
+    }
+
     private async getUint8ArrayView(
         reader: FileReader,
         file: Blob
@@ -526,7 +628,7 @@ class UploadService {
                 reader.readAsArrayBuffer(file);
             });
         } catch (e) {
-            console.error('error readinf file to bytearray ', e);
+            console.error('error reading file to byte-array ', e);
             throw e;
         }
     }
@@ -545,7 +647,7 @@ class UploadService {
                     `${ENDPOINT}/files/upload-urls`,
                     {
                         count: Math.min(
-                            50,
+                            MAX_URL_REQUESTS,
                             (this.totalFileCount - this.filesCompleted) * 2
                         ),
                     },
@@ -563,15 +665,32 @@ class UploadService {
         }
     }
 
+    private async fetchMultipartUploadURLs(
+        token: string,
+        count: number
+    ): Promise<MultipartUploadURLs> {
+        try {
+            const response = await HTTPService.get(
+                `${ENDPOINT}/files/multipart-upload-urls`,
+                {
+                    count,
+                },
+                { 'X-Auth-Token': token }
+            );
+
+            return response.data['urls'];
+        } catch (e) {
+            console.error('fetch multipart-upload-url failed ', e);
+            throw e;
+        }
+    }
+
     private async putFile(
         fileUploadURL: UploadURL,
-        file: Uint8Array | string
+        file: Uint8Array
     ): Promise<string> {
         try {
-            const fileSize = file.length;
-            await HTTPService.put(fileUploadURL.url, file, null, {
-                contentLengthHeader: fileSize,
-            });
+            await HTTPService.put(fileUploadURL.url, file);
             return fileUploadURL.objectKey;
         } catch (e) {
             console.error('putFile to dataStore failed ', e);
@@ -579,13 +698,67 @@ class UploadService {
         }
     }
 
-    private async getExifData(reader: FileReader, recievedFile: File) {
+    private async putFileInParts(
+        multipartUploadURLs: MultipartUploadURLs,
+        file: ReadableStream<Uint8Array>
+    ) {
+        let streamEncryptedFileReader = file.getReader();
+        const resParts = [];
+        for (const [
+            index,
+            fileUploadURL,
+        ] of multipartUploadURLs.partURLs.entries()) {
+            let {
+                done: done1,
+                value: chunk1,
+            } = await streamEncryptedFileReader.read();
+            if (done1) {
+                break;
+            }
+            let {
+                done: done2,
+                value: chunk2,
+            } = await streamEncryptedFileReader.read();
+            let uploadChunk: Uint8Array;
+            if (!done2) {
+                uploadChunk = new Uint8Array(chunk1.length + chunk2.length);
+                uploadChunk.set(chunk1);
+                uploadChunk.set(chunk2, chunk1.length);
+            } else {
+                uploadChunk = chunk1;
+            }
+            const response = await HTTPService.put(fileUploadURL, uploadChunk);
+            resParts.push({
+                PartNumber: index + 1,
+                ETag: response.headers.etag,
+            });
+        }
+        var options = { compact: true, ignoreComment: true, spaces: 4 };
+        const body = convert.js2xml(
+            { CompleteMultipartUpload: { Part: resParts } },
+            options
+        );
+        await HTTPService.post(multipartUploadURLs.completeURL, body, null, {
+            'content-type': 'text/xml',
+        });
+        return multipartUploadURLs.objectKey;
+    }
+
+    private async getExifData(
+        reader: FileReader,
+        receivedFile: File,
+        fileType: FILE_TYPE
+    ) {
         try {
+            if (fileType === FILE_TYPE.VIDEO) {
+                // Todo  extract exif data from videos
+                return { location: null, creationTime: null };
+            }
             const exifData: any = await new Promise((resolve, reject) => {
                 reader.onload = () => {
                     resolve(EXIF.readFromBinaryFile(reader.result));
                 };
-                reader.readAsArrayBuffer(recievedFile);
+                reader.readAsArrayBuffer(receivedFile);
             });
             if (!exifData) {
                 return { location: null, creationTime: null };
@@ -604,8 +777,8 @@ class UploadService {
         if (!dateString) {
             return null;
         }
-        var parts = dateString.split(' ')[0].split(':');
-        var date = new Date(
+        let parts = dateString.split(' ')[0].split(':');
+        let date = new Date(
             Number(parts[0]),
             Number(parts[1]) - 1,
             Number(parts[2])
@@ -629,17 +802,17 @@ class UploadService {
         lonMinute = exifData.GPSLongitude[1];
         lonSecond = exifData.GPSLongitude[2];
 
-        var latDirection = exifData.GPSLatitudeRef;
-        var lonDirection = exifData.GPSLongitudeRef;
+        let latDirection = exifData.GPSLatitudeRef;
+        let lonDirection = exifData.GPSLongitudeRef;
 
-        var latFinal = this.convertDMSToDD(
+        let latFinal = this.convertDMSToDD(
             latDegree,
             latMinute,
             latSecond,
             latDirection
         );
 
-        var lonFinal = this.convertDMSToDD(
+        let lonFinal = this.convertDMSToDD(
             lonDegree,
             lonMinute,
             lonSecond,
@@ -649,7 +822,7 @@ class UploadService {
     }
 
     private convertDMSToDD(degrees, minutes, seconds, direction) {
-        var dd = degrees + minutes / 60 + seconds / 3600;
+        let dd = degrees + minutes / 60 + seconds / 3600;
 
         if (direction == SOUTH_DIRECTION || direction == WEST_DIRECTION) {
             dd = dd * -1;
