@@ -137,12 +137,16 @@ export default function Gallery(props) {
             setIsFirstLoad((await getCollectionUpdationTime()) == 0);
             const data = await localFiles();
             const collections = await getLocalCollections();
-            const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
+            const nonEmptyCollections = getNonEmptyCollections(
                 collections,
                 data
             );
+            const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
+                nonEmptyCollections,
+                data
+            );
             setData(data);
-            setCollections(collections);
+            setCollections(nonEmptyCollections);
             setCollectionAndItsLatestFile(collectionAndItsLatestFile);
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
@@ -163,7 +167,7 @@ export default function Gallery(props) {
         const { data, isUpdated } = await syncData(token, collections);
         const nonEmptyCollections = getNonEmptyCollections(collections, data);
         const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
-            collections,
+            nonEmptyCollections,
             data
         );
         const favItemIds = await getFavItemIds(data);
