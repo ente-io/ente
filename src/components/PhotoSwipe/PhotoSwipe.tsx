@@ -109,6 +109,10 @@ function PhotoSwipe(props: Iprops) {
         if (onClose) {
             onClose();
         }
+        var videoTags = document.getElementsByTagName('video');
+        for (var videoTag of videoTags) {
+            videoTag.pause();
+        }
     };
     const isInFav = (file) => {
         const { favItemIds } = props;
