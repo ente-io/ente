@@ -362,3 +362,16 @@ const setLocalFavoriteCollection = async (collections: collection[]) => {
         await localForage.setItem(FAV_COLLECTION, favCollection[0]);
     }
 };
+
+export const getNonEmptyCollections = (
+    collections: collection[],
+    files: file[]
+) => {
+    const nonEmptyCollectionsIds = new Set<number>();
+    for (let file of files) {
+        nonEmptyCollectionsIds.add(file.collectionID);
+    }
+    return collections.filter((collection) =>
+        nonEmptyCollectionsIds.has(collection.id)
+    );
+};

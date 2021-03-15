@@ -20,6 +20,7 @@ import {
     getFavItemIds,
     getLocalCollections,
     getCollectionUpdationTime,
+    getNonEmptyCollections,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
@@ -160,12 +161,13 @@ export default function Gallery(props) {
         const encryptionKey = await getActualKey();
         const collections = await syncCollections(token, encryptionKey);
         const { data, isUpdated } = await syncData(token, collections);
+        const nonEmptyCollections = getNonEmptyCollections(collections, data);
         const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
             collections,
             data
         );
         const favItemIds = await getFavItemIds(data);
-        setCollections(collections);
+        setCollections(nonEmptyCollections);
         if (isUpdated) {
             setData(data);
         }
