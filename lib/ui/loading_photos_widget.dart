@@ -13,7 +13,7 @@ class LoadingPhotosWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              "Hang on tight, your photos will appear in a jiffy! 🐣",
+              "hang on tight, your photos will appear in a jiffy! 🐣",
               textAlign: TextAlign.center,
             ),
           ),
