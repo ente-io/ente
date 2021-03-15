@@ -108,6 +108,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         } else if (Platform.isIOS && purchase.pendingCompletePurchase) {
           await InAppPurchaseConnection.instance.completePurchase(purchase);
           await _dialog.hide();
+        } else if (purchase.status == PurchaseStatus.error) {
+          await _dialog.hide();
         }
       }
     });
