@@ -77,7 +77,7 @@ class _SharingDialogState extends State<SharingDialog> {
     }
 
     return AlertDialog(
-      title: Text("Sharing"),
+      title: Text("sharing"),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
