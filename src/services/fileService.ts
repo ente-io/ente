@@ -72,13 +72,14 @@ export const syncFiles = async (collections: collection[]) => {
         let fetchedFiles =
             (await getFiles(collection, lastSyncTime, DIFF_LIMIT)) ?? [];
         files.push(...fetchedFiles);
-        var latestVersionFiles = new Map<number, file>();
+        var latestVersionFiles = new Map<string, file>();
         files.forEach((file) => {
+            const uid = `${file.collectionID}-${file.id}`;
             if (
-                !latestVersionFiles.has(file.id) ||
-                latestVersionFiles.get(file.id).updationTime < file.updationTime
+                !latestVersionFiles.has(uid) ||
+                latestVersionFiles.get(uid).updationTime < file.updationTime
             ) {
-                latestVersionFiles.set(file.id, file);
+                latestVersionFiles.set(uid, file);
             }
         });
         files = [];
