@@ -48,7 +48,6 @@ export default function PreviewCard(props: IProps) {
     useEffect(() => {
         if (data && !data.msrc) {
             const main = async () => {
-                const token = getToken();
                 const url = await DownloadManager.getPreview(data);
                 setImgSrc(url);
                 data.msrc = url;

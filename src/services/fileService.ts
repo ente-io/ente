@@ -5,6 +5,7 @@ import localForage from 'utils/storage/localForage';
 import { collection } from './collectionService';
 import { DataStream, MetadataObject } from './uploadService';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
+import { getToken } from 'utils/common/key';
 
 const ENDPOINT = getEndpoint();
 const DIFF_LIMIT: number = 2500;
@@ -36,8 +37,8 @@ export interface file {
     updationTime: number;
 }
 
-export const syncData = async (token, collections) => {
-    const { files: resp, isUpdated } = await syncFiles(token, collections);
+export const syncData = async (collections) => {
+    const { files: resp, isUpdated } = await syncFiles(collections);
 
     return {
         data: resp.map((item) => ({
@@ -54,11 +55,14 @@ export const localFiles = async () => {
     return files;
 };
 
-export const syncFiles = async (token: string, collections: collection[]) => {
+export const syncFiles = async (collections: collection[]) => {
     let files = await localFiles();
     let isUpdated = false;
     files = await removeDeletedCollectionFiles(collections, files);
     for (let collection of collections) {
+        if (!getToken()) {
+            continue;
+        }
         const lastSyncTime =
             (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
         if (collection.updationTime === lastSyncTime) {
@@ -66,7 +70,7 @@ export const syncFiles = async (token: string, collections: collection[]) => {
         }
         isUpdated = true;
         let fetchedFiles =
-            (await getFiles(collection, lastSyncTime, DIFF_LIMIT, token)) ?? [];
+            (await getFiles(collection, lastSyncTime, DIFF_LIMIT)) ?? [];
         files.push(...fetchedFiles);
         var latestVersionFiles = new Map<number, file>();
         files.forEach((file) => {
@@ -99,8 +103,7 @@ export const syncFiles = async (token: string, collections: collection[]) => {
 export const getFiles = async (
     collection: collection,
     sinceTime: number,
-    limit: number,
-    token: string
+    limit: number
 ): Promise<file[]> => {
     try {
         const worker = await new CryptoWorker();
@@ -111,6 +114,10 @@ export const getFiles = async (
             0;
         let resp;
         do {
+            const token = getToken();
+            if (!token) {
+                break;
+            }
             resp = await HTTPService.get(
                 `${ENDPOINT}/collections/diff`,
                 {

@@ -17,10 +17,6 @@ interface Props {
 }
 export default function Sidebar(props: Props) {
     const [logoutModalView, setLogoutModalView] = useState(false);
-    const [
-        changeDisabledMessageModalView,
-        setChangeDisabledMessageModalView,
-    ] = useState(false);
     function showLogoutModal() {
         setLogoutModalView(true);
     }
@@ -50,7 +46,8 @@ export default function Sidebar(props: Props) {
     };
 
     function openFeedbackURL() {
-        const feedbackURL: string = getEndpoint() + "/users/feedback?token=" + getToken();
+        const feedbackURL: string =
+            getEndpoint() + '/users/feedback?token=' + getToken();
         var win = window.open(feedbackURL, '_blank');
         win.focus();
     }
@@ -62,15 +59,23 @@ export default function Sidebar(props: Props) {
             itemListElement="div"
         >
             <div style={{ outline: 'none' }}>
-                <h5 style={{ marginBottom: '12px' }}>{constants.SUBSCRIPTION_PLAN}</h5>
+                <h5 style={{ marginBottom: '12px' }}>
+                    {constants.SUBSCRIPTION_PLAN}
+                </h5>
                 <div style={{ color: '#959595' }}>
-                    {
-                        subscription?.productID == "free" ? constants.FREE_SUBSCRIPTION_INFO(subscription?.expiryTime) : constants.PAID_SUBSCRIPTION_INFO(subscription?.expiryTime)
-                    }
+                    {subscription?.productID == 'free'
+                        ? constants.FREE_SUBSCRIPTION_INFO(
+                              subscription?.expiryTime
+                          )
+                        : constants.PAID_SUBSCRIPTION_INFO(
+                              subscription?.expiryTime
+                          )}
                 </div>
             </div>
             <div style={{ outline: 'none', marginTop: '30px' }}>
-                <h5 style={{ marginBottom: '12px' }}>{constants.USAGE_DETAILS}</h5>
+                <h5 style={{ marginBottom: '12px' }}>
+                    {constants.USAGE_DETAILS}
+                </h5>
                 <div style={{ color: '#959595' }}>
                     {usage ? (
                         constants.USAGE_INFO(
@@ -88,12 +93,25 @@ export default function Sidebar(props: Props) {
                     )}
                 </div>
             </div>
-            <div style={{ height: '1px', marginTop: '40px', background: '#242424', width: '100%' }}></div>
-            <h5 style={{ cursor: 'pointer', marginTop: '40px' }} onClick={openFeedbackURL}>
+            <div
+                style={{
+                    height: '1px',
+                    marginTop: '40px',
+                    background: '#242424',
+                    width: '100%',
+                }}
+            ></div>
+            <h5
+                style={{ cursor: 'pointer', marginTop: '40px' }}
+                onClick={openFeedbackURL}
+            >
                 request feature
             </h5>
             <h5 style={{ cursor: 'pointer', marginTop: '30px' }}>
-                <a href="mailto:contact@ente.io" style={{ textDecoration: 'inherit', color: 'inherit' }}>
+                <a
+                    href="mailto:contact@ente.io"
+                    style={{ textDecoration: 'inherit', color: 'inherit' }}
+                >
                     support
                 </a>
             </h5>
@@ -103,7 +121,14 @@ export default function Sidebar(props: Props) {
                     onHide={closeLogoutModal}
                     logout={logout}
                 />
-                <h5 style={{ cursor: 'pointer', color: '#F96C6C', marginTop: '30px' }} onClick={showLogoutModal}>
+                <h5
+                    style={{
+                        cursor: 'pointer',
+                        color: '#F96C6C',
+                        marginTop: '30px',
+                    }}
+                    onClick={showLogoutModal}
+                >
                     logout
                 </h5>
             </>

@@ -110,7 +110,15 @@ const DateContainer = styled.div`
     padding-top: 15px;
 `;
 
-export default function Gallery(props) {
+interface Props {
+    openFileUploader;
+    acceptedFiles;
+    uploadModalView;
+    closeUploadModal;
+    setNavbarIconView;
+    err;
+}
+export default function Gallery(props: Props) {
     const router = useRouter();
     const [collections, setCollections] = useState<collection[]>([]);
     const [
@@ -151,20 +159,18 @@ export default function Gallery(props) {
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
 
-            loadingBar.current.continuousStart();
+            loadingBar.current?.continuousStart();
             await syncWithRemote();
-            loadingBar.current.complete();
+            loadingBar.current?.complete();
             setIsFirstLoad(false);
         };
         main();
-        props.setUploadButtonView(true);
+        props.setNavbarIconView(true);
     }, []);
 
     const syncWithRemote = async () => {
-        const token = getToken();
-        const encryptionKey = await getActualKey();
-        const collections = await syncCollections(token, encryptionKey);
-        const { data, isUpdated } = await syncData(token, collections);
+        const collections = await syncCollections();
+        const { data, isUpdated } = await syncData(collections);
         const nonEmptyCollections = getNonEmptyCollections(collections, data);
         const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
             nonEmptyCollections,
@@ -178,7 +184,6 @@ export default function Gallery(props) {
         setCollectionAndItsLatestFile(collectionAndItsLatestFile);
         setFavItemIds(favItemIds);
         setSinceTime(new Date().getTime());
-        props.setUploadButtonView(true);
     };
 
     const updateUrl = (index: number) => (url: string) => {
