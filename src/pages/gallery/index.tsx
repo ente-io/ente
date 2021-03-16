@@ -119,6 +119,8 @@ interface Props {
     closeUploadModal;
     setNavbarIconView;
     err;
+    planModalView;
+    setPlanModalView;
 }
 export default function Gallery(props: Props) {
     const router = useRouter();
@@ -135,7 +137,6 @@ export default function Gallery(props: Props) {
     const [bannerErrorCode, setBannerErrorCode] = useState<number>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
-    const [planModalView, setPlanModalView] = useState(false);
     const [plans, setPlans] = useState<Plan[]>(null);
 
     const loadingBar = useRef(null);
@@ -360,15 +361,15 @@ export default function Gallery(props: Props) {
                     variant="primary"
                     size="lg"
                     block
-                    onClick={() => setPlanModalView(true)}
+                    onClick={() => props.setPlanModalView(true)}
                 >
                     {constants.SUBSCRIBE}
                 </Button>
             )}
             <PlanSelector
                 plans={plans}
-                modalView={planModalView}
-                closeModal={() => setPlanModalView(false)}
+                modalView={props.planModalView}
+                closeModal={() => props.setPlanModalView(false)}
             />
             <Collections
                 collections={collections}

@@ -112,7 +112,7 @@ const GlobalStyles = createGlobalStyle`
         background-size: cover;
         border: none;
     }
-    .btn-primary {
+    .btn-primary{
         background: #2dc262;
         border-color: #29a354;
     }
@@ -183,6 +183,7 @@ export default function App({ Component, pageProps, err }) {
     const [loading, setLoading] = useState(false);
     const [navbarIconView, setNavbarIconView] = useState(false);
     const [uploadModalView, setUploadModalView] = useState(false);
+    const [planModalView, setPlanModalView] = useState(false);
 
     function closeUploadModal() {
         setUploadModalView(false);
@@ -236,7 +237,10 @@ export default function App({ Component, pageProps, err }) {
             </Head>
             <GlobalStyles />
             <div style={{ display: navbarIconView ? 'block' : 'none' }}>
-                <Sidebar setNavbarIconView={setNavbarIconView} />
+                <Sidebar
+                    setNavbarIconView={setNavbarIconView}
+                    setPlanModalView={setPlanModalView}
+                />
             </div>
             <Navbar>
                 <FlexContainer>
@@ -262,6 +266,8 @@ export default function App({ Component, pageProps, err }) {
                     showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}
                     setNavbarIconView={setNavbarIconView}
+                    planModalView={planModalView}
+                    setPlanModalView={setPlanModalView}
                     err={err}
                 />
             )}

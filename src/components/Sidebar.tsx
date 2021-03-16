@@ -15,6 +15,7 @@ import { Button } from 'react-bootstrap';
 
 interface Props {
     setNavbarIconView;
+    setPlanModalView;
 }
 export default function Sidebar(props: Props) {
     const [logoutModalView, setLogoutModalView] = useState(false);
@@ -26,6 +27,7 @@ export default function Sidebar(props: Props) {
     }
     const [usage, SetUsage] = useState<string>(null);
     const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
+    const user = getData(LS_KEYS.USER);
     const [isOpen, setIsOpen] = useState(false);
     useEffect(() => {
         const main = async () => {
@@ -59,6 +61,9 @@ export default function Sidebar(props: Props) {
             onStateChange={(state) => setIsOpen(state.isOpen)}
             itemListElement="div"
         >
+            <div style={{ marginBottom: '12px', outline: 'none' }}>
+                Hi {user?.email} !!
+            </div>
             <div style={{ outline: 'none' }}>
                 <h5 style={{ marginBottom: '12px' }}>
                     {constants.SUBSCRIPTION_PLAN}
@@ -78,17 +83,25 @@ export default function Sidebar(props: Props) {
                         <p>{constants.SUBSCRIPTION_EXPIRED}</p>
                     )}
                 </div>
-                <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() =>
-                        subscriptionService.redirectToCustomerPortal()
-                    }
-                >
-                    {subscriptionService.hasActivePaidPlan()
-                        ? constants.MANAGE
-                        : constants.SUBSCRIBE}
-                </Button>
+                {subscriptionService.hasActivePaidPlan() ? (
+                    <Button
+                        variant="success"
+                        size="sm"
+                        onClick={() =>
+                            subscriptionService.redirectToCustomerPortal()
+                        }
+                    >
+                        {constants.MANAGE}
+                    </Button>
+                ) : (
+                    <Button
+                        variant="success"
+                        size="sm"
+                        onClick={() => props.setPlanModalView(true)}
+                    >
+                        {constants.SUBSCRIBE}
+                    </Button>
+                )}
             </div>
             <div style={{ outline: 'none', marginTop: '30px' }}>
                 <h5 style={{ marginBottom: '12px' }}>
