@@ -257,7 +257,7 @@ export default function App({ Component, pageProps, err }) {
                     uploadModalView={uploadModalView}
                     showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}
-                    setUploadButtonView={setNavbarIconView}
+                    setNavbarIconView={setNavbarIconView}
                     err={err}
                 />
             )}

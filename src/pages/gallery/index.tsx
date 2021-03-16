@@ -110,7 +110,15 @@ const DateContainer = styled.div`
     padding-top: 15px;
 `;
 
-export default function Gallery(props) {
+interface Props {
+    openFileUploader;
+    acceptedFiles;
+    uploadModalView;
+    closeUploadModal;
+    setNavbarIconView;
+    err;
+}
+export default function Gallery(props: Props) {
     const router = useRouter();
     const [collections, setCollections] = useState<collection[]>([]);
     const [
@@ -157,7 +165,7 @@ export default function Gallery(props) {
             setIsFirstLoad(false);
         };
         main();
-        props.setUploadButtonView(true);
+        props.setNavbarIconView(true);
     }, []);
 
     const syncWithRemote = async () => {
@@ -176,7 +184,6 @@ export default function Gallery(props) {
         setCollectionAndItsLatestFile(collectionAndItsLatestFile);
         setFavItemIds(favItemIds);
         setSinceTime(new Date().getTime());
-        props.setUploadButtonView(true);
     };
 
     const updateUrl = (index: number) => (url: string) => {
