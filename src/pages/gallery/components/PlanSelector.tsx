@@ -7,10 +7,8 @@ import subscriptionService, { Plan } from 'services/subscriptionService';
 export const PlanIcon = styled.div`
     height: 192px;
     width: 250px;
-    border: 1px solid #555;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border: 1px solid #404040;
+    text-align: center;
     font-size: 20px;
     cursor: pointer;
 `;
@@ -41,7 +39,30 @@ function PlanSelector(props: Props) {
                 subscriptionService.buySubscription(plan.stripeID);
             }}
         >
-            {plan.androidID}
+            <span
+                style={{
+                    color: '#ECECEC',
+                    fontWeight: 900,
+                    fontSize: '72px',
+                }}
+            >
+                {subscriptionService.convertBytesToGBs(plan.storage, 0)}
+            </span>
+            <span
+                style={{ color: '#858585', fontSize: '24px', fontWeight: 900 }}
+            >
+                {' '}
+                GB
+            </span>
+            <div
+                style={{
+                    color: '#ECECEC',
+                    lineHeight: '24px',
+                    fontSize: '24px',
+                }}
+            >
+                {`${plan.price} / ${constants.MONTH}`}
+            </div>
         </PlanIcon>
     ));
     return (

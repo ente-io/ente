@@ -128,8 +128,8 @@ class SubscriptionService {
         }
     }
 
-    public convertBytesToGBs(bytes): string {
-        return (bytes / (1024 * 1024 * 1024)).toFixed(2);
+    public convertBytesToGBs(bytes, precision?): string {
+        return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
     }
     public isOnFreePlan() {
         const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
