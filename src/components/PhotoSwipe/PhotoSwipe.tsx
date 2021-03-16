@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
@@ -16,12 +16,11 @@ interface Iprops {
     isOpen: boolean;
     items: any[];
     currentIndex?: number;
-    onClose?: () => void;
+    onClose?: (needUpdate: boolean) => void;
     gettingData: (instance: any, index: number, item: file) => void;
     id?: string;
     className?: string;
     favItemIds: Set<number>;
-    setFavItemIds: (favItemIds: Set<number>) => void;
     loadingBar: any;
 }
 
@@ -31,6 +30,7 @@ function PhotoSwipe(props: Iprops) {
 
     const { isOpen } = props;
     const [isFav, setIsFav] = useState(false);
+    const needUpdate = useRef(false);
 
     useEffect(() => {
         if (!pswpElement) {
@@ -88,6 +88,7 @@ function PhotoSwipe(props: Iprops) {
         });
         photoSwipe.listen('beforeChange', updateFavButton);
         photoSwipe.init();
+        needUpdate.current = false;
         setPhotoSwipe(photoSwipe);
     };
 
@@ -106,8 +107,8 @@ function PhotoSwipe(props: Iprops) {
 
     const handleClose = () => {
         const { onClose } = props;
-        if (onClose) {
-            onClose();
+        if (typeof onClose === 'function') {
+            onClose(needUpdate.current);
         }
         var videoTags = document.getElementsByTagName('video');
         for (var videoTag of videoTags) {
@@ -122,18 +123,17 @@ function PhotoSwipe(props: Iprops) {
     };
 
     const onFavClick = async (file) => {
-        const { favItemIds, setFavItemIds } = props;
+        const { favItemIds } = props;
         if (!isInFav(file)) {
             favItemIds.add(file.id);
             await addToFavorites(file);
             setIsFav(true);
-            setFavItemIds(favItemIds);
         } else {
             favItemIds.delete(file.id);
             await removeFromFavorites(file);
             setIsFav(false);
-            setFavItemIds(favItemIds);
         }
+        needUpdate.current = true;
     };
     const downloadFile = async (file) => {
         const { loadingBar } = props;
