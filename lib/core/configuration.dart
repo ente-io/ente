@@ -62,8 +62,12 @@ class Configuration {
       _logger.warning(e);
     }
     tempDirectory.createSync(recursive: true);
-    _key = await _secureStorage.read(key: keyKey);
-    _secretKey = await _secureStorage.read(key: secretKeyKey);
+    if (!_preferences.containsKey(tokenKey)) {
+      await _secureStorage.deleteAll();
+    } else {
+      _key = await _secureStorage.read(key: keyKey);
+      _secretKey = await _secureStorage.read(key: secretKeyKey);
+    }
   }
 
   Future<KeyGenResult> generateKey(String password) async {
