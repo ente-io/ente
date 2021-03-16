@@ -151,9 +151,9 @@ export default function Gallery(props) {
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
 
-            loadingBar.current.continuousStart();
+            loadingBar.current?.continuousStart();
             await syncWithRemote();
-            loadingBar.current.complete();
+            loadingBar.current?.complete();
             setIsFirstLoad(false);
         };
         main();
