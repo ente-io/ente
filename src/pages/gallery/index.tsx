@@ -161,10 +161,8 @@ export default function Gallery(props) {
     }, []);
 
     const syncWithRemote = async () => {
-        const token = getToken();
-        const encryptionKey = await getActualKey();
-        const collections = await syncCollections(token, encryptionKey);
-        const { data, isUpdated } = await syncData(token, collections);
+        const collections = await syncCollections();
+        const { data, isUpdated } = await syncData(collections);
         const nonEmptyCollections = getNonEmptyCollections(collections, data);
         const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
             nonEmptyCollections,
