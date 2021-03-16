@@ -83,25 +83,16 @@ export default function Sidebar(props: Props) {
                         <p>{constants.SUBSCRIPTION_EXPIRED}</p>
                     )}
                 </div>
-                {subscriptionService.hasActivePaidPlan() ? (
-                    <Button
-                        variant="success"
-                        size="sm"
-                        onClick={() =>
-                            subscriptionService.redirectToCustomerPortal()
-                        }
-                    >
-                        {constants.MANAGE}
-                    </Button>
-                ) : (
-                    <Button
-                        variant="success"
-                        size="sm"
-                        onClick={() => props.setPlanModalView(true)}
-                    >
-                        {constants.SUBSCRIBE}
-                    </Button>
-                )}
+
+                <Button
+                    variant="success"
+                    size="sm"
+                    onClick={() => props.setPlanModalView(true)}
+                >
+                    {subscriptionService.hasActivePaidPlan()
+                        ? constants.MANAGE
+                        : constants.SUBSCRIBE}
+                </Button>
             </div>
             <div style={{ outline: 'none', marginTop: '30px' }}>
                 <h5 style={{ marginBottom: '12px' }}>

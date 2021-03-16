@@ -139,6 +139,7 @@ const englishConstants = {
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email ?',
     CHOOSE_PLAN: 'choose your subscription plan',
+    MANAGE_PLAN: 'manage your subscription plan',
     MONTH: 'month',
 };
 

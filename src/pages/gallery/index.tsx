@@ -370,6 +370,7 @@ export default function Gallery(props: Props) {
                 plans={plans}
                 modalView={props.planModalView}
                 closeModal={() => props.setPlanModalView(false)}
+                setBannerErrorCode={setBannerErrorCode}
             />
             <Collections
                 collections={collections}
