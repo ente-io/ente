@@ -354,7 +354,7 @@ export default function Gallery(props: Props) {
                 </div>
             )}
             <AlertBanner bannerErrorCode={bannerErrorCode} />
-            {subscriptionService.isOnFreePlan() && (
+            {!subscriptionService.hasActivePaidPlan() && (
                 <Button
                     id="checkout"
                     variant="primary"

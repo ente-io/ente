@@ -64,13 +64,19 @@ export default function Sidebar(props: Props) {
                     {constants.SUBSCRIPTION_PLAN}
                 </h5>
                 <div style={{ color: '#959595' }}>
-                    {subscription?.productID == 'free'
-                        ? constants.FREE_SUBSCRIPTION_INFO(
-                              subscription?.expiryTime
-                          )
-                        : constants.PAID_SUBSCRIPTION_INFO(
-                              subscription?.expiryTime
-                          )}
+                    {subscriptionService.planIsActive(subscription) ? (
+                        subscription?.productID == 'free' ? (
+                            constants.FREE_SUBSCRIPTION_INFO(
+                                subscription?.expiryTime
+                            )
+                        ) : (
+                            constants.PAID_SUBSCRIPTION_INFO(
+                                subscription?.expiryTime
+                            )
+                        )
+                    ) : (
+                        <p>{constants.SUBSCRIPTION_EXPIRED}</p>
+                    )}
                 </div>
                 <Button
                     variant="success"
@@ -79,7 +85,9 @@ export default function Sidebar(props: Props) {
                         subscriptionService.redirectToCustomerPortal()
                     }
                 >
-                    {constants.CHANGE}
+                    {subscriptionService.hasActivePaidPlan()
+                        ? constants.MANAGE
+                        : constants.SUBSCRIBE}
                 </Button>
             </div>
             <div style={{ outline: 'none', marginTop: '30px' }}>

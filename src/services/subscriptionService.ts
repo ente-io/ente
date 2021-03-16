@@ -108,7 +108,7 @@ class SubscriptionService {
                     'X-Auth-Token': getToken(),
                 }
             );
-            window.location.href = response.data['URL'];
+            window.location.href = response.data['url'];
         } catch (e) {
             console.error('unable to get customer portal url');
         }
@@ -131,9 +131,16 @@ class SubscriptionService {
     public convertBytesToGBs(bytes, precision?): string {
         return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
     }
-    public isOnFreePlan() {
+    public hasActivePaidPlan() {
         const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
-        return subscription?.productID === FREE_PLAN;
+        return (
+            subscription &&
+            this.planIsActive(subscription) &&
+            subscription.productID !== FREE_PLAN
+        );
+    }
+    public planIsActive(subscription): boolean {
+        return subscription && subscription.expiryTime > Date.now() * 1000;
     }
 }
 

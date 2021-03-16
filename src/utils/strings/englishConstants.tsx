@@ -60,8 +60,7 @@ const englishConstants = {
     },
     UPLOADING_FILES: `uploading files`,
     OF: 'of',
-    SUBSCRIPTION_EXPIRED:
-        'your subscription has expired, please renew it form the mobile app',
+    SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew it',
     STORAGE_QUOTA_EXCEEDED:
         'you have exceeded your storage quota, please upgrade your plan from the mobile app',
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
@@ -102,6 +101,7 @@ const englishConstants = {
     LOGOUT_WARNING: 'sure you want to logout?',
     CANCEL: 'cancel',
     SUBSCRIBE: 'subscribe',
+    MANAGE: 'manage',
     SUBSCRIPTION_CHANGE_DISABLED:
         'sorry, this operation is currently not supported on the web, please check your mobile app',
     SUBSCRIPTION_PLAN: 'subscription plan',
