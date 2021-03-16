@@ -11,9 +11,7 @@ function ConfirmLogout({ logout, ...props }) {
             centered
         >
             <Modal.Body style={{ padding: '24px' }}>
-                <Modal.Title
-                    id="contained-modal-title-vcenter"
-                >
+                <Modal.Title id="contained-modal-title-vcenter">
                     {constants.LOGOUT_WARNING}
                 </Modal.Title>
             </Modal.Body>
