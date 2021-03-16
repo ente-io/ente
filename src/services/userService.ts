@@ -4,7 +4,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';
 import { clearData } from 'utils/storage/localStorage';
-import localForage from 'localforage';
+import localForage from 'utils/storage/localForage';
 
 const ENDPOINT = getEndpoint();
 
