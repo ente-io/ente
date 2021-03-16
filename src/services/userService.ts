@@ -45,9 +45,10 @@ export const logoutUser = async () => {
     clearKeys();
     clearData();
     const cache = await caches.delete('thumbs');
+    await clearFiles();
     router.push('/');
 };
 
-export const clearPreviousLoggedInUserData = async () => {
+export const clearFiles = async () => {
     await localForage.clear();
 };
