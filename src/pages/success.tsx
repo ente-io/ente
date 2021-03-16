@@ -28,8 +28,7 @@ export default function SuccessRedirect() {
                     <>
                         <h1>Your payment succeeded</h1>
                         <h4>
-                            {constants.SUBSCRIPTION_INFO(
-                                subscription?.productID,
+                            {constants.PAID_SUBSCRIPTION_INFO(
                                 subscription?.expiryTime
                             )}
                         </h4>

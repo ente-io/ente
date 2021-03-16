@@ -44,7 +44,11 @@ export const putAttributes = (
 export const logoutUser = async () => {
     clearKeys();
     clearData();
-    localForage.clear();
     const cache = await caches.delete('thumbs');
+    await clearFiles();
     router.push('/');
+};
+
+export const clearFiles = async () => {
+    await localForage.clear();
 };

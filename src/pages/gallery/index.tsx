@@ -20,6 +20,7 @@ import {
     getFavItemIds,
     getLocalCollections,
     getCollectionUpdationTime,
+    getNonEmptyCollections,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
@@ -111,7 +112,15 @@ const DateContainer = styled.div`
     padding-top: 15px;
 `;
 
-export default function Gallery(props) {
+interface Props {
+    openFileUploader;
+    acceptedFiles;
+    uploadModalView;
+    closeUploadModal;
+    setNavbarIconView;
+    err;
+}
+export default function Gallery(props: Props) {
     const router = useRouter();
     const [collections, setCollections] = useState<collection[]>([]);
     const [
@@ -140,46 +149,48 @@ export default function Gallery(props) {
             setIsFirstLoad((await getCollectionUpdationTime()) == 0);
             const data = await localFiles();
             const collections = await getLocalCollections();
-            const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
+            const nonEmptyCollections = getNonEmptyCollections(
                 collections,
                 data
             );
             const plans = await subscriptionService.getPlans();
             await subscriptionService.getUserSubscription();
+            const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
+                nonEmptyCollections,
+                data
+            );
             setData(data);
-            setCollections(collections);
+            setCollections(nonEmptyCollections);
             setCollectionAndItsLatestFile(collectionAndItsLatestFile);
             setPlans(plans);
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
 
+            loadingBar.current?.continuousStart();
             await syncWithRemote();
+            loadingBar.current?.complete();
             setIsFirstLoad(false);
         };
         main();
-        props.setUploadButtonView(true);
+        props.setNavbarIconView(true);
     }, []);
 
     const syncWithRemote = async () => {
-        loadingBar.current.continuousStart();
-        const token = getToken();
-        const encryptionKey = await getActualKey();
-        const collections = await syncCollections(token, encryptionKey);
-        const { data, isUpdated } = await syncData(token, collections);
+        const collections = await syncCollections();
+        const { data, isUpdated } = await syncData(collections);
+        const nonEmptyCollections = getNonEmptyCollections(collections, data);
         const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
-            collections,
+            nonEmptyCollections,
             data
         );
         const favItemIds = await getFavItemIds(data);
-        setCollections(collections);
+        setCollections(nonEmptyCollections);
         if (isUpdated) {
             setData(data);
         }
         setCollectionAndItsLatestFile(collectionAndItsLatestFile);
         setFavItemIds(favItemIds);
         setSinceTime(new Date().getTime());
-        props.setUploadButtonView(true);
-        loadingBar.current.complete();
     };
 
     const updateUrl = (index: number) => (url: string) => {

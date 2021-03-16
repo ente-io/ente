@@ -78,7 +78,10 @@ const GlobalStyles = createGlobalStyle`
         width:90vw;
         max-width:960px!important;
     }
-    .modal .modal-header, .modal  .modal-footer {
+    .modal {
+        z-index: 2000;
+    }
+    .modal .modal-header, .modal .modal-footer {
         border-color: #444 !important;
     }
     .modal .modal-header .close {
@@ -143,23 +146,23 @@ const GlobalStyles = createGlobalStyle`
     } 
     .bm-burger-button {
         position: fixed;
-        width: 36px;
-        height: 30px;
+        width: 28px;
+        height: 20px;
         left: 36px;
-        top: 25px;
-      }
+        margin-top: 30px;
+    }
     .bm-burger-bars {
-        background: #fff;
-      }
-      .bm-menu {
-        background: #373a47;
+        background: #bdbdbd;
+    }
+    .bm-menu {
+        background: #131313;
         padding: 2.5em 1.5em 0;
         font-size: 1.15em;
         color:#fff
-      }
-      .bm-cross {
+    }
+    .bm-cross {
         background: #fff;
-      }
+    }
 `;
 
 const Image = styled.img`
@@ -212,7 +215,6 @@ export default function App({ Component, pageProps, err }) {
 
     const onDropAccepted = useCallback(() => {
         showUploadModal();
-        setIsDragActive(false);
     }, []);
     const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
         noClick: true,
@@ -220,18 +222,10 @@ export default function App({ Component, pageProps, err }) {
         onDropAccepted,
         accept: 'image/*, video/*, application/json, ',
     });
-    const [isDragActive, setIsDragActive] = useState(false);
-    const onDragEnter = () => setIsDragActive(true);
-    const onDragLeave = () => setIsDragActive(false);
     return (
         <FullScreenDropZone
             getRootProps={getRootProps}
             getInputProps={getInputProps}
-            isDragActive={isDragActive}
-            onDragEnter={onDragEnter}
-            onDragLeave={onDragLeave}
-            navbarIconView={navbarIconView}
-            setNavbarIconView={setNavbarIconView}
         >
             <Head>
                 <title>{constants.TITLE}</title>
@@ -267,7 +261,7 @@ export default function App({ Component, pageProps, err }) {
                     uploadModalView={uploadModalView}
                     showUploadModal={showUploadModal}
                     closeUploadModal={closeUploadModal}
-                    setUploadButtonView={setNavbarIconView}
+                    setNavbarIconView={setNavbarIconView}
                     err={err}
                 />
             )}

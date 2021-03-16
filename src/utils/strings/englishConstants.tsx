@@ -103,19 +103,30 @@ const englishConstants = {
     CANCEL: 'cancel',
     SUBSCRIBE: 'subscribe',
     SUBSCRIPTION_CHANGE_DISABLED:
-        'sorry, you can only change the subscription on the mobile app.',
-    SUBCRIPTION_PLAN: 'subscription plan',
-    USAGE_DETAILS: 'Usage Details',
-    SUBSCRIPTION_INFO: (productID, expiryTime) => (
+        'sorry, this operation is currently not supported on the web, please check your mobile app',
+    SUBSCRIPTION_PLAN: 'subscription plan',
+    USAGE_DETAILS: 'usage',
+    FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
-                you are currently on <strong>{productID}</strong> plan
+                you are on the <strong>free</strong> plan that expires on{' '}
+                {new Date(expiryTime / 1000).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                })}
             </p>
+        </>
+    ),
+    PAID_SUBSCRIPTION_INFO: (expiryTime) => (
+        <>
             <p>
-                {' '}
-                which expires on {new Date(
-                    expiryTime / 1000
-                ).toDateString()}{' '}
+                your subscription will renew on{' '}
+                {new Date(expiryTime / 1000).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                })}
             </p>
         </>
     ),
@@ -128,6 +139,7 @@ const englishConstants = {
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email ?',
     CHOOSE_PLAN: 'choose your subscription plan',
+    MONTH: 'month',
 };
 
 export default englishConstants;

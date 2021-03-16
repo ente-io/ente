@@ -9,7 +9,12 @@ import { LS_KEYS, getData, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import { verifyOtt, getOtt, logoutUser } from 'services/userService';
+import {
+    verifyOtt,
+    getOtt,
+    logoutUser,
+    clearFiles,
+} from 'services/userService';
 
 const Image = styled.img`
     width: 350px;
@@ -53,8 +58,10 @@ export default function Verify() {
                 token: resp.data.token,
                 id: resp.data.id,
             });
-            setData(LS_KEYS.KEY_ATTRIBUTES, resp.data.keyAttributes);
-            setData(LS_KEYS.SUBSCRIPTION, resp.data.subscription);
+            const { subscription, keyAttributes } = resp.data;
+            keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+            subscription && setData(LS_KEYS.SUBSCRIPTION, subscription);
+            clearFiles();
             if (resp.data.keyAttributes?.encryptedKey) {
                 router.push('/credentials');
             } else {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 
@@ -41,21 +41,20 @@ const Overlay = styled.div<{ isDragActive: boolean }>`
 type Props = React.PropsWithChildren<{
     getRootProps: any;
     getInputProps: any;
-    isDragActive;
-    onDragLeave;
-    onDragEnter;
-    setNavbarIconView;
-    navbarIconView;
 }>;
 
 export default function FullScreenDropZone(props: Props) {
+    const [isDragActive, setIsDragActive] = useState(false);
+    const onDragEnter = () => setIsDragActive(true);
+    const onDragLeave = () => setIsDragActive(false);
     return (
-        <DropDiv {...props.getRootProps()} onDragEnter={props.onDragEnter}>
+        <DropDiv {...props.getRootProps()} onDragEnter={onDragEnter}>
             <input {...props.getInputProps()} />
-            {props.isDragActive && (
+            {isDragActive && (
                 <Overlay
-                    onDragLeave={props.onDragLeave}
-                    isDragActive={props.isDragActive}
+                    onDrop={onDragLeave}
+                    onDragLeave={onDragLeave}
+                    isDragActive={isDragActive}
                 >
                     {constants.UPLOAD_DROPZONE_MESSAGE}
                 </Overlay>

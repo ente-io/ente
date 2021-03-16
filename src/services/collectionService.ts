@@ -118,11 +118,16 @@ export const getCollectionUpdationTime = async (): Promise<number> => {
     return (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
 };
 
-export const syncCollections = async (token: string, key: string) => {
+export const syncCollections = async () => {
     const localCollections = await getLocalCollections();
     const lastCollectionUpdationTime = await getCollectionUpdationTime();
+    const key = await getActualKey(),
+        token = getToken();
+    if (!token) {
+        return localCollections;
+    }
     const updatedCollections =
-        (await getCollections(token, lastCollectionUpdationTime, key)) || [];
+        (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
     if (updatedCollections.length == 0) {
         return localCollections;
     }
@@ -170,7 +175,7 @@ export const getCollectionAndItsLatestFile = (
         }
     });
     let allCollectionAndItsLatestFile: CollectionAndItsLatestFile[] = [];
-    const userID = getData(LS_KEYS.USER).id;
+    const userID = getData(LS_KEYS.USER)?.id;
 
     for (const collection of collections) {
         if (
@@ -361,4 +366,17 @@ const setLocalFavoriteCollection = async (collections: collection[]) => {
     if (favCollection.length > 0) {
         await localForage.setItem(FAV_COLLECTION, favCollection[0]);
     }
+};
+
+export const getNonEmptyCollections = (
+    collections: collection[],
+    files: file[]
+) => {
+    const nonEmptyCollectionsIds = new Set<number>();
+    for (let file of files) {
+        nonEmptyCollectionsIds.add(file.collectionID);
+    }
+    return collections.filter((collection) =>
+        nonEmptyCollectionsIds.has(collection.id)
+    );
 };
