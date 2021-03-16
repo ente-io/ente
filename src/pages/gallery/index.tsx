@@ -166,9 +166,7 @@ export default function Gallery(props: Props) {
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
 
-            loadingBar.current?.continuousStart();
             await syncWithRemote();
-            loadingBar.current?.complete();
             setIsFirstLoad(false);
         };
         main();
@@ -176,6 +174,7 @@ export default function Gallery(props: Props) {
     }, []);
 
     const syncWithRemote = async () => {
+        loadingBar.current?.continuousStart();
         const collections = await syncCollections();
         const { data, isUpdated } = await syncData(collections);
         const nonEmptyCollections = getNonEmptyCollections(collections, data);
@@ -191,6 +190,7 @@ export default function Gallery(props: Props) {
         setCollectionAndItsLatestFile(collectionAndItsLatestFile);
         setFavItemIds(favItemIds);
         setSinceTime(new Date().getTime());
+        loadingBar.current?.complete();
     };
 
     const updateUrl = (index: number) => (url: string) => {
@@ -242,9 +242,9 @@ export default function Gallery(props: Props) {
         setData(data);
     };
 
-    const handleClose = () => {
+    const handleClose = (needUpdate) => {
         setOpen(false);
-        // syncWithRemote();
+        needUpdate && syncWithRemote();
     };
 
     const onThumbnailClick = (index: number) => () => {
@@ -526,7 +526,6 @@ export default function Gallery(props: Props) {
                         onClose={handleClose}
                         gettingData={getSlideData}
                         favItemIds={favItemIds}
-                        setFavItemIds={setFavItemIds}
                         loadingBar={loadingBar}
                     />
                 </Container>
