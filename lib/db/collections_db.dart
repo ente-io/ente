@@ -52,6 +52,11 @@ class CollectionsDB {
     return await openDatabaseWithMigration(path, dbConfig);
   }
 
+  Future<void> clearTable() async {
+    final db = await instance.database;
+    await db.delete(table);
+  }
+
   static List<String> createTable(String tableName) {
     return [
       '''

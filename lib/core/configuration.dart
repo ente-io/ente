@@ -7,6 +7,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/collections_db.dart';
+import 'package:photos/db/files_db.dart';
+import 'package:photos/db/memories_db.dart';
+import 'package:photos/db/public_keys_db.dart';
+import 'package:photos/db/upload_locks_db.dart';
+import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/private_key_attributes.dart';
@@ -68,6 +75,28 @@ class Configuration {
       _key = await _secureStorage.read(key: keyKey);
       _secretKey = await _secureStorage.read(key: secretKeyKey);
     }
+  }
+
+  Future<void> logout() async {
+    if (SyncService.instance.isSyncInProgress()) {
+      SyncService.instance.stopSync();
+      try {
+        await SyncService.instance.existingSync();
+      } catch (e) {
+        // ignore
+      }
+    }
+    await _preferences.clear();
+    await _secureStorage.deleteAll();
+    _key = null;
+    _cachedToken = null;
+    _secretKey = null;
+    await FilesDB.instance.clearTable();
+    await CollectionsDB.instance.clearTable();
+    await MemoriesDB.instance.clearTable();
+    await PublicKeysDB.instance.clearTable();
+    await UploadLocksDB.instance.clearTable();
+    Bus.instance.fire(UserLoggedOutEvent());
   }
 
   Future<KeyGenResult> generateKey(String password) async {

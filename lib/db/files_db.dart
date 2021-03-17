@@ -119,6 +119,11 @@ class FilesDB {
     ];
   }
 
+  Future<void> clearTable() async {
+    final db = await instance.database;
+    await db.delete(table);
+  }
+
   Future<int> insert(File file) async {
     final db = await instance.database;
     return await db.insert(table, _getRowForFile(file),

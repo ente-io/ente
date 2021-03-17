@@ -38,7 +38,7 @@ class SyncService {
   final _diffFetcher = DiffFetcher();
   bool _syncStopRequested = false;
   bool _isBackground = false;
-  Completer<void> _existingSync;
+  Completer<bool> _existingSync;
   SharedPreferences _prefs;
   SyncStatusUpdate _lastSyncStatusEvent;
 
@@ -84,13 +84,17 @@ class SyncService {
     }
   }
 
-  Future<void> sync() async {
+  Future<bool> existingSync() async {
+    return _existingSync.future;
+  }
+
+  Future<bool> sync() async {
     _syncStopRequested = false;
     if (_existingSync != null) {
       _logger.warning("Sync already in progress, skipping.");
       return _existingSync.future;
     }
-    _existingSync = Completer<void>();
+    _existingSync = Completer<bool>();
     bool successful = false;
     try {
       await _doSync();
@@ -98,7 +102,6 @@ class SyncService {
           _lastSyncStatusEvent.status != SyncStatus.applying_local_diff) {
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
       }
-      _existingSync.complete();
       successful = true;
     } on WiFiUnavailableError {
       _logger.warning("Not uploading over mobile data");
@@ -120,7 +123,7 @@ class SyncService {
         if (errorCode == 111 || errorCode == 7) {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
               reason: "waiting for network..."));
-          return;
+          return false;
         }
       } else {
         _logger.severe("backup failed", e, s);
@@ -129,12 +132,11 @@ class SyncService {
         throw e;
       }
     } finally {
-      if (!successful) {
-        _existingSync.completeError(Error());
-      }
+      _existingSync.complete(successful);
       _existingSync = null;
       _logger.info("Syncing completed");
     }
+    return successful;
   }
 
   void stopSync() {

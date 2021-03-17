@@ -5,9 +5,9 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
@@ -30,10 +30,14 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
     with AutomaticKeepAliveClientMixin {
   Logger _logger = Logger("SharedCollectionGallery");
   StreamSubscription<CollectionUpdatedEvent> _subscription;
+  StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
 
   @override
   void initState() {
     _subscription = Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+      setState(() {});
+    });
+    _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
     });
     super.initState();
@@ -299,6 +303,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
   @override
   void dispose() {
     _subscription.cancel();
+    _loggedOutEvent.cancel();
     super.dispose();
   }
 

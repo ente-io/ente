@@ -44,6 +44,11 @@ class UploadLocksDB {
                 ''');
   }
 
+  Future<void> clearTable() async {
+    final db = await instance.database;
+    await db.delete(_table);
+  }
+
   Future<void> acquireLock(String id, String owner, int time) async {
     final db = await instance.database;
     final row = new Map<String, dynamic>();

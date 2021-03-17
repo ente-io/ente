@@ -39,10 +39,29 @@ class SettingsPage extends StatelessWidget {
       BackupSettingsWidget(),
       SupportSectionWidget(),
       InfoSectionWidget(),
+      AccountSectionWidget(),
+      FutureBuilder(
+        future: _getAppVersion(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                "app version: " + snapshot.data,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white.withOpacity(0.6),
+                ),
+              ),
+            );
+          }
+          return Container();
+        },
+      ),
     ];
-    if (kDebugMode) {
-      contents.add(DebugWidget());
-    }
+    // if (kDebugMode) {
+    //   contents.add(DebugWidget());
+    // }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -51,6 +70,11 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static Future<String> _getAppVersion() async {
+    var pkgInfo = await PackageInfo.fromPlatform();
+    return "${pkgInfo.version}";
   }
 }
 
@@ -396,31 +420,68 @@ class InfoSectionWidget extends StatelessWidget {
           child:
               SettingsTextItem(text: "source code", icon: Icons.navigate_next),
         ),
-        FutureBuilder(
-          future: _getAppVersion(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "app version: " + snapshot.data,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white.withOpacity(0.6),
-                  ),
-                ),
-              );
-            }
-            return Container();
-          },
-        ),
       ]),
     );
   }
+}
 
-  static Future<String> _getAppVersion() async {
-    var pkgInfo = await PackageInfo.fromPlatform();
-    return "${pkgInfo.version}";
+class AccountSectionWidget extends StatelessWidget {
+  const AccountSectionWidget({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(children: [
+        Padding(padding: EdgeInsets.all(12)),
+        SettingsSectionTitle("account"),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            AlertDialog alert = AlertDialog(
+              title: Text("logout"),
+              content: Text("are you sure you want to logout?"),
+              actions: [
+                TextButton(
+                  child: Text(
+                    "no",
+                    style: TextStyle(
+                      color: Theme.of(context).buttonColor,
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text(
+                    "yes, logout",
+                    style: TextStyle(
+                      color: Colors.red,
+                    ),
+                  ),
+                  onPressed: () async {
+                    final dialog =
+                        createProgressDialog(context, "logging out...");
+                    await dialog.show();
+                    await Configuration.instance.logout();
+                    await dialog.hide();
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
+                ),
+              ],
+            );
+
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return alert;
+              },
+            );
+          },
+          child: SettingsTextItem(text: "logout", icon: Icons.navigate_next),
+        ),
+      ]),
+    );
   }
 }
 

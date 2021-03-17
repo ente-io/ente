@@ -8,7 +8,9 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
+import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
+import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/repositories/file_repository.dart';
@@ -54,6 +56,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   StreamSubscription<LocalPhotosUpdatedEvent> _photosUpdatedEvent;
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   StreamSubscription<PermissionGrantedEvent> _permissionGrantedEvent;
+  StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
+  StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
 
   @override
   void initState() {
@@ -80,6 +84,13 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
     _permissionGrantedEvent =
         Bus.instance.on<PermissionGrantedEvent>().listen((event) {
+      setState(() {});
+    });
+    _subscriptionPurchaseEvent =
+        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
+      setState(() {});
+    });
+    _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
     });
     _initDeepLinks();
@@ -264,6 +275,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _tabChangedEventSubscription.cancel();
     _photosUpdatedEvent.cancel();
     _permissionGrantedEvent.cancel();
+    _subscriptionPurchaseEvent.cancel();
+    _loggedOutEvent.cancel();
     super.dispose();
   }
 }

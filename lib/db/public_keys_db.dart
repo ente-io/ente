@@ -44,6 +44,11 @@ class PublicKeysDB {
                 ''');
   }
 
+  Future<void> clearTable() async {
+    final db = await instance.database;
+    await db.delete(table);
+  }
+
   Future<int> setKey(PublicKey key) async {
     final db = await instance.database;
     return db.insert(table, _getRow(key),

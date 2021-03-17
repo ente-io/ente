@@ -44,6 +44,11 @@ class MemoriesDB {
                 ''');
   }
 
+  Future<void> clearTable() async {
+    final db = await instance.database;
+    await db.delete(table);
+  }
+
   Future<int> clearMemoriesSeenBeforeTime(int timestamp) async {
     final db = await instance.database;
     return db.delete(

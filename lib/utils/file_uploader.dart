@@ -316,6 +316,9 @@ class FileUploader {
           Sodium.bin2base64(encryptedMetadataData.encryptedData);
       final metadataDecryptionHeader =
           Sodium.bin2base64(encryptedMetadataData.header);
+      if (SyncService.instance.shouldStopSync()) {
+        throw SyncStopRequestedError();
+      }
       var remoteFile;
       if (isAlreadyUploadedFile) {
         remoteFile = await _updateFile(
