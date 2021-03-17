@@ -295,7 +295,7 @@ class SupportSectionWidget extends StatelessWidget {
                   return WebPage(
                       "roadmap",
                       Configuration.instance.getHttpEndpoint() +
-                          "/users/feedback?token=" +
+                          "/users/roadmap?token=" +
                           Configuration.instance.getToken());
                 },
               ),
