@@ -1,11 +1,6 @@
 import Container from 'components/Container';
 import router from 'next/router';
-import { useEffect, useState } from 'react';
-import { Button, Spinner } from 'react-bootstrap';
-import subscriptionService, {
-    Subscription,
-} from 'services/subscriptionService';
-import constants from 'utils/strings/constants';
+import { Button } from 'react-bootstrap';
 
 export default function CancelRedirect() {
     return (
