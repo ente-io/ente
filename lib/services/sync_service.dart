@@ -118,7 +118,7 @@ class SyncService {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
           error: StorageLimitExceededError()));
     } catch (e, s) {
-      if (e is DioError) {
+      if (e is DioError && e.type == DioErrorType.DEFAULT) {
         final errorCode = e.error?.osError?.errorCode;
         if (errorCode == 111 || errorCode == 7) {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
