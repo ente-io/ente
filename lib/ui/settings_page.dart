@@ -269,7 +269,7 @@ class SupportSectionWidget extends StatelessWidget {
               MaterialPageRoute(
                 builder: (BuildContext context) {
                   return WebPage(
-                      "request feature",
+                      "roadmap",
                       Configuration.instance.getHttpEndpoint() +
                           "/users/feedback?token=" +
                           Configuration.instance.getToken());
@@ -277,8 +277,7 @@ class SupportSectionWidget extends StatelessWidget {
               ),
             );
           },
-          child: SettingsTextItem(
-              text: "request feature", icon: Icons.navigate_next),
+          child: SettingsTextItem(text: "roadmap", icon: Icons.navigate_next),
         ),
         Divider(height: 4),
         GestureDetector(
