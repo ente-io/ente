@@ -3,7 +3,8 @@ import HTTPService from './HTTPService';
 const ENDPOINT = getEndpoint();
 import { getToken } from 'utils/common/key';
 import { runningInBrowser } from 'utils/common/utilFunctions';
-import { getData, setData, LS_KEYS } from 'utils/storage/localStorage';
+import { setData, LS_KEYS } from 'utils/storage/localStorage';
+import { convertBytesToGBs } from 'utils/billingUtil';
 export interface Subscription {
     id: number;
     userID: number;
@@ -22,22 +23,23 @@ export interface Plan {
     period: string;
     stripeID: string;
 }
-const FREE_PLAN = 'free';
+export const FREE_PLAN = 'free';
 class SubscriptionService {
     private stripe;
     constructor() {
         let publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
         this.stripe = runningInBrowser() && window['Stripe'](publishableKey);
     }
-    public async getPlans(): Promise<Plan[]> {
+    public async updatePlans() {
         try {
             const response = await HTTPService.get(`${ENDPOINT}/billing/plans`);
-            return response.data['plans'];
+            const plans = response.data['plans'];
+            setData(LS_KEYS.PLANS, plans);
         } catch (e) {
             console.error('failed to get plans', e);
         }
     }
-    public async getUserSubscription() {
+    public async syncSubscription() {
         try {
             const response = await HTTPService.get(
                 `${ENDPOINT}/billing/subscription`,
@@ -48,7 +50,6 @@ class SubscriptionService {
             );
             const subscription = response.data['subscription'];
             setData(LS_KEYS.SUBSCRIPTION, subscription);
-            return subscription;
         } catch (e) {
             console.error(`failed to get user's subscription details`, e);
         }
@@ -61,12 +62,46 @@ class SubscriptionService {
             });
         } catch (e) {
             console.error('unable to buy subscription', e);
+            throw e;
+        }
+    }
+
+    public async updateSubscription(productID) {
+        try {
+            const response = await HTTPService.post(
+                `${ENDPOINT}/billing/stripe/update-subscription`,
+                {
+                    productID,
+                },
+                null,
+                {
+                    'X-Auth-Token': getToken(),
+                }
+            );
+            const subscription = response.data['subscription'];
+            setData(LS_KEYS.SUBSCRIPTION, subscription);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    public async cancelSubscription() {
+        try {
+            const response = await HTTPService.get(
+                `${ENDPOINT}/billing/stripe/cancel-subscription`,
+                null,
+                {
+                    'X-Auth-Token': getToken(),
+                }
+            );
+        } catch (e) {
+            console.log(e);
         }
     }
 
     private async createCheckoutSession(productID) {
         return HTTPService.post(
-            `${ENDPOINT}/billing/create-checkout-session`,
+            `${ENDPOINT}/billing/stripe/create-checkout-session`,
             {
                 productID,
             },
@@ -122,25 +157,10 @@ class SubscriptionService {
                     'X-Auth-Token': getToken(),
                 }
             );
-            return this.convertBytesToGBs(response.data.usage);
+            return convertBytesToGBs(response.data.usage);
         } catch (e) {
             console.error('error getting usage', e);
         }
-    }
-
-    public convertBytesToGBs(bytes, precision?): string {
-        return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
-    }
-    public hasActivePaidPlan() {
-        const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
-        return (
-            subscription &&
-            this.planIsActive(subscription) &&
-            subscription.productID !== FREE_PLAN
-        );
-    }
-    public planIsActive(subscription): boolean {
-        return subscription && subscription.expiryTime > Date.now() * 1000;
     }
 }
 
