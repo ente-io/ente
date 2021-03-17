@@ -7,6 +7,13 @@ import subscriptionService, {
     Subscription,
 } from 'services/subscriptionService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import {
+    convertBytesToGBs,
+    getPlans,
+    getUserSubscription,
+    hasActivePaidPlan,
+    hadSubscribedEarlier,
+} from 'utils/billingUtil';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     height: 192px;
@@ -30,18 +37,18 @@ const LoaderOverlay = styled.div`
 `;
 
 interface Props {
-    plans: Plan[];
     modalView: boolean;
     closeModal: any;
     setBannerErrorCode;
 }
 function PlanSelector(props: Props) {
     const [loading, setLoading] = useState(false);
-    const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
+    const subscription = getUserSubscription();
+    const plans = getPlans();
     const selectPlan = async (plan) => {
         try {
             setLoading(true);
-            if (subscriptionService.hasActivePaidPlan()) {
+            if (hadSubscribedEarlier(subscription)) {
                 if (plan.androidID === subscription.productID) {
                     return;
                 }
@@ -51,17 +58,22 @@ function PlanSelector(props: Props) {
             }
         } catch (err) {
             props.setBannerErrorCode(err.message);
-            setLoading(false);
             props.closeModal();
+        } finally {
+            setLoading(false);
+            setTimeout(() => {
+                props.setBannerErrorCode('plan Updated');
+                props.closeModal();
+            }, 300);
         }
     };
-    const PlanIcons: JSX.Element[] = props.plans?.map((plan) => (
+    const PlanIcons: JSX.Element[] = plans?.map((plan) => (
         <PlanIcon
             key={plan.stripeID}
             onClick={() => {
                 selectPlan(plan);
             }}
-            selected={plan.androidID === subscription.productID}
+            selected={plan.androidID === subscription?.productID}
         >
             <span
                 style={{
@@ -70,7 +82,7 @@ function PlanSelector(props: Props) {
                     fontSize: '72px',
                 }}
             >
-                {subscriptionService.convertBytesToGBs(plan.storage, 0)}
+                {convertBytesToGBs(plan.storage, 0)}
             </span>
             <span
                 style={{ color: '#858585', fontSize: '24px', fontWeight: 900 }}
@@ -87,7 +99,7 @@ function PlanSelector(props: Props) {
             >
                 {`${plan.price} / ${constants.MONTH}`}
             </div>
-            {plan.androidID === subscription.productID && (
+            {plan.androidID === subscription?.productID && (
                 <div
                     style={{
                         color: '#ECECEC',
@@ -110,7 +122,7 @@ function PlanSelector(props: Props) {
         >
             <Modal.Header closeButton>
                 <Modal.Title style={{ marginLeft: '12px' }}>
-                    {subscriptionService.hasActivePaidPlan()
+                    {hasActivePaidPlan(subscription)
                         ? constants.MANAGE_PLAN
                         : constants.CHOOSE_PLAN}
                 </Modal.Title>
@@ -124,7 +136,7 @@ function PlanSelector(props: Props) {
                 }}
             >
                 {PlanIcons}
-                {(!props.plans || loading) && (
+                {(!plans || loading) && (
                     <LoaderOverlay>
                         <Spinner animation="border" />
                     </LoaderOverlay>
