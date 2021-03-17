@@ -91,6 +91,12 @@ class CollectionsService {
     return collections;
   }
 
+  Future<void> clearCache() {
+    _localCollections.clear();
+    _collectionIDToCollections.clear();
+    _cachedKeys.clear();
+  }
+
   Future<List<Collection>> getCollectionsToBeSynced() async {
     final collections = await _db.getAllCollections();
     final updatedCollections = List<Collection>();

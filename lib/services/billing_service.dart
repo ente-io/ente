@@ -53,6 +53,10 @@ class BillingService {
     });
   }
 
+  void clearCache() {
+    _future = null;
+  }
+
   Future<BillingPlans> getBillingPlans() {
     if (_future == null) {
       _future = _dio

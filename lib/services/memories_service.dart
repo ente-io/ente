@@ -31,6 +31,10 @@ class MemoriesService extends ChangeNotifier {
         DateTime.now().microsecondsSinceEpoch - (7 * microSecondsInADay));
   }
 
+  void clearCache() {
+    _cachedMemories = null;
+  }
+
   Future<List<Memory>> getMemories() async {
     if (_cachedMemories != null) {
       return _cachedMemories;

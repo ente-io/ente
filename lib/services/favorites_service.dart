@@ -26,6 +26,10 @@ class FavoritesService {
   }
   static FavoritesService instance = FavoritesService._privateConstructor();
 
+  void clearCache() {
+    _cachedFavoritesCollectionID = null;
+  }
+
   Future<bool> isFavorite(File file) async {
     final collection = await _getFavoritesCollection();
     if (collection == null) {

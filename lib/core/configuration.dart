@@ -17,6 +17,10 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/private_key_attributes.dart';
+import 'package:photos/services/billing_service.dart';
+import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/favorites_service.dart';
+import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -96,6 +100,10 @@ class Configuration {
     await MemoriesDB.instance.clearTable();
     await PublicKeysDB.instance.clearTable();
     await UploadLocksDB.instance.clearTable();
+    CollectionsService.instance.clearCache();
+    FavoritesService.instance.clearCache();
+    MemoriesService.instance.clearCache();
+    BillingService.instance.clearCache();
     Bus.instance.fire(UserLoggedOutEvent());
   }
 
