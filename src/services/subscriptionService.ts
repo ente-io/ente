@@ -96,6 +96,7 @@ class SubscriptionService {
             );
         } catch (e) {
             console.log(e);
+            throw e;
         }
     }
 

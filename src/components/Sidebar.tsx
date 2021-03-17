@@ -27,6 +27,7 @@ enum Action {
 interface Props {
     setNavbarIconView;
     setPlanModalView;
+    setBannerMessage;
 }
 export default function Sidebar(props: Props) {
     const [confirmModalView, setConfirmModalView] = useState(false);
@@ -65,7 +66,18 @@ export default function Sidebar(props: Props) {
     const cancelSubscription = async () => {
         setConfirmModalView(false);
         setIsOpen(false);
-        await subscriptionService.cancelSubscription();
+        try {
+            await subscriptionService.cancelSubscription();
+        } catch (e) {
+            props.setBannerMessage({
+                message: constants.SUBSCRIPTION_CANCEL_FAILED,
+                variant: 'danger',
+            });
+        }
+        props.setBannerMessage({
+            message: constants.SUBSCRIPTION_CANCEL_SUCCESS,
+            variant: 'secondary',
+        });
     };
 
     let callback = [];

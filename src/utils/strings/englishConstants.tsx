@@ -143,6 +143,12 @@ const englishConstants = {
     CHOOSE_PLAN: 'choose your subscription plan',
     MANAGE_PLAN: 'manage your subscription plan',
     MONTH: 'month',
+    SUBSCRIPTION_CANCEL_FAILED: 'failed to cancel subscription',
+    SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
+    SUBSCRIPTION_PURCHASE_FAILED:
+        'subscription purchase failed , please try again later',
+    SUBSCRIPTION_UPDATE_SUCCESS:
+        'your subscription plan is successfully updated',
 };
 
 export default englishConstants;

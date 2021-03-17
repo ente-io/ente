@@ -122,6 +122,8 @@ interface Props {
     err;
     planModalView;
     setPlanModalView;
+    bannerMessage;
+    setBannerMessage;
 }
 export default function Gallery(props: Props) {
     const router = useRouter();
@@ -135,7 +137,6 @@ export default function Gallery(props: Props) {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const fetching: { [k: number]: boolean } = {};
-    const [bannerErrorCode, setBannerErrorCode] = useState<number>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const loadingBar = useRef(null);
@@ -352,7 +353,10 @@ export default function Gallery(props: Props) {
                     </Alert>
                 </div>
             )}
-            <AlertBanner bannerErrorCode={bannerErrorCode} />
+            <AlertBanner
+                bannerMessage={props.bannerMessage}
+                setBannerMessage={props.setBannerMessage}
+            />
             {!hasActivePaidPlan() && (
                 <Button
                     id="checkout"
@@ -367,7 +371,7 @@ export default function Gallery(props: Props) {
             <PlanSelector
                 modalView={props.planModalView}
                 closeModal={() => props.setPlanModalView(false)}
-                setBannerErrorCode={setBannerErrorCode}
+                setBannerMessage={props.setBannerMessage}
             />
             <Collections
                 collections={collections}
@@ -379,7 +383,7 @@ export default function Gallery(props: Props) {
                 closeUploadModal={props.closeUploadModal}
                 collectionAndItsLatestFile={collectionAndItsLatestFile}
                 refetchData={syncWithRemote}
-                setBannerErrorCode={setBannerErrorCode}
+                setBannerMessage={props.setBannerMessage}
                 acceptedFiles={props.acceptedFiles}
             />
             {!isFirstLoad && data.length == 0 ? (

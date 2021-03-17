@@ -5,13 +5,14 @@ import CollectionSelector from './CollectionSelector';
 import UploadProgress from './UploadProgress';
 import UploadService from 'services/uploadService';
 import { createAlbum } from 'services/collectionService';
+import { ErrorBannerMessage } from 'utils/common/errorUtil';
 
 interface Props {
     uploadModalView: any;
     closeUploadModal;
     collectionAndItsLatestFile;
     refetchData;
-    setBannerErrorCode;
+    setBannerMessage;
     acceptedFiles;
 }
 export default function Upload(props: Props) {
@@ -51,7 +52,10 @@ export default function Upload(props: Props) {
             );
             props.refetchData();
         } catch (err) {
-            props.setBannerErrorCode(err.message);
+            props.setBannerMessage({
+                message: ErrorBannerMessage(err.message),
+                variant: 'danger',
+            });
             setProgressView(false);
         }
     };

@@ -176,6 +176,11 @@ const FlexContainer = styled.div`
     margin: 16px;
 `;
 
+export interface BannerMessage {
+    message: string;
+    variant: string;
+}
+
 sentryInit();
 export default function App({ Component, pageProps, err }) {
     const router = useRouter();
@@ -184,6 +189,7 @@ export default function App({ Component, pageProps, err }) {
     const [navbarIconView, setNavbarIconView] = useState(false);
     const [uploadModalView, setUploadModalView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
+    const [bannerMessage, setBannerMessage] = useState<BannerMessage>(null);
 
     function closeUploadModal() {
         setUploadModalView(false);
@@ -240,6 +246,7 @@ export default function App({ Component, pageProps, err }) {
                 <Sidebar
                     setNavbarIconView={setNavbarIconView}
                     setPlanModalView={setPlanModalView}
+                    setBannerMessage={setBannerMessage}
                 />
             </div>
             <Navbar>
@@ -268,6 +275,8 @@ export default function App({ Component, pageProps, err }) {
                     setNavbarIconView={setNavbarIconView}
                     planModalView={planModalView}
                     setPlanModalView={setPlanModalView}
+                    bannerMessage={bannerMessage}
+                    setBannerMessage={setBannerMessage}
                     err={err}
                 />
             )}

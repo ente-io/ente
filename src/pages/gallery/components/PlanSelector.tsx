@@ -38,7 +38,7 @@ const LoaderOverlay = styled.div`
 interface Props {
     modalView: boolean;
     closeModal: any;
-    setBannerErrorCode;
+    setBannerMessage;
 }
 function PlanSelector(props: Props) {
     const [loading, setLoading] = useState(false);
@@ -56,12 +56,18 @@ function PlanSelector(props: Props) {
                 await subscriptionService.buySubscription(plan.stripeID);
             }
         } catch (err) {
-            props.setBannerErrorCode(err.message);
+            props.setBannerMessage({
+                message: constants.SUBSCRIPTION_PURCHASE_FAILED,
+                variant: 'danger',
+            });
             props.closeModal();
         } finally {
             setLoading(false);
             setTimeout(() => {
-                props.setBannerErrorCode('plan Updated');
+                props.setBannerMessage({
+                    message: constants.SUBSCRIPTION_UPDATE_SUCCESS,
+                    variant: 'success',
+                });
                 props.closeModal();
             }, 300);
         }

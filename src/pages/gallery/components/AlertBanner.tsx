@@ -1,15 +1,24 @@
-import React from 'react';
-import { Alert } from 'react-bootstrap';
+import { BannerMessage } from 'pages/_app';
+import React, { useState } from 'react';
+import { Alert, Fade } from 'react-bootstrap';
 
-import { ErrorBannerMessage } from 'utils/common/errorUtil';
-
-export default function AlertBanner({ bannerErrorCode }) {
+interface Props {
+    bannerMessage: BannerMessage;
+    setBannerMessage;
+}
+export default function AlertBanner(props: Props) {
+    setTimeout(() => props.setBannerMessage(null), 5000);
     return (
         <Alert
-            variant={'danger'}
-            style={{ display: bannerErrorCode ? 'block' : 'none' }}
+            variant={props.bannerMessage?.variant}
+            style={{
+                textAlign: 'center',
+            }}
+            onClose={() => props.setBannerMessage(null)}
+            dismissible
+            show={props.bannerMessage != null}
         >
-            {ErrorBannerMessage(bannerErrorCode)}
+            {props.bannerMessage?.message}
         </Alert>
     );
 }
