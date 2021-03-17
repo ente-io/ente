@@ -25,8 +25,9 @@ import {
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
 import { Alert, Button, Jumbotron } from 'react-bootstrap';
-import subscriptionService, { Plan } from 'services/subscriptionService';
+import subscriptionService from 'services/subscriptionService';
 import PlanSelector from './components/PlanSelector';
+import { planIsActive } from 'utils/billingUtil';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -137,8 +138,6 @@ export default function Gallery(props: Props) {
     const [bannerErrorCode, setBannerErrorCode] = useState<number>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
-    const [plans, setPlans] = useState<Plan[]>(null);
-
     const loadingBar = useRef(null);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -154,8 +153,6 @@ export default function Gallery(props: Props) {
                 collections,
                 data
             );
-            const plans = await subscriptionService.getPlans();
-            await subscriptionService.getUserSubscription();
             const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
                 nonEmptyCollections,
                 data
@@ -163,10 +160,8 @@ export default function Gallery(props: Props) {
             setData(data);
             setCollections(nonEmptyCollections);
             setCollectionAndItsLatestFile(collectionAndItsLatestFile);
-            setPlans(plans);
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
-
             await syncWithRemote();
             setIsFirstLoad(false);
         };
@@ -184,6 +179,9 @@ export default function Gallery(props: Props) {
             data
         );
         const favItemIds = await getFavItemIds(data);
+        await subscriptionService.updatePlans();
+        await subscriptionService.syncSubscription();
+
         setCollections(nonEmptyCollections);
         if (isUpdated) {
             setData(data);
@@ -355,7 +353,7 @@ export default function Gallery(props: Props) {
                 </div>
             )}
             <AlertBanner bannerErrorCode={bannerErrorCode} />
-            {!subscriptionService.hasActivePaidPlan() && (
+            {!planIsActive() && (
                 <Button
                     id="checkout"
                     variant="primary"
@@ -367,7 +365,6 @@ export default function Gallery(props: Props) {
                 </Button>
             )}
             <PlanSelector
-                plans={plans}
                 modalView={props.planModalView}
                 closeModal={() => props.setPlanModalView(false)}
                 setBannerErrorCode={setBannerErrorCode}
