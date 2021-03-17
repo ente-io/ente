@@ -15,6 +15,8 @@ import {
 } from 'utils/billingUtil';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
+    padding-top: 20px;
+    border-radius: 10%;
     height: 192px;
     width: 250px;
     border: 1px solid #404040;
@@ -80,21 +82,27 @@ function PlanSelector(props: Props) {
             }}
             selected={plan.androidID === subscription?.productID}
         >
-            <span
-                style={{
-                    color: '#ECECEC',
-                    fontWeight: 900,
-                    fontSize: '72px',
-                }}
-            >
-                {convertBytesToGBs(plan.storage, 0)}
-            </span>
-            <span
-                style={{ color: '#858585', fontSize: '24px', fontWeight: 900 }}
-            >
-                {' '}
-                GB
-            </span>
+            <div>
+                <span
+                    style={{
+                        color: '#ECECEC',
+                        fontWeight: 900,
+                        fontSize: '72px',
+                    }}
+                >
+                    {convertBytesToGBs(plan.storage, 0)}
+                </span>
+                <span
+                    style={{
+                        color: '#858585',
+                        fontSize: '24px',
+                        fontWeight: 900,
+                    }}
+                >
+                    {' '}
+                    GB
+                </span>
+            </div>
             <div
                 style={{
                     color: '#ECECEC',
@@ -104,18 +112,7 @@ function PlanSelector(props: Props) {
             >
                 {`${plan.price} / ${constants.MONTH}`}
             </div>
-            {plan.androidID === subscription?.productID && (
-                <div
-                    style={{
-                        color: '#ECECEC',
-                        lineHeight: '24px',
-                        fontSize: '24px',
-                        marginTop: '20px',
-                    }}
-                >
-                    current plan
-                </div>
-            )}
+            {plan.androidID === subscription?.productID && 'active'}
         </PlanIcon>
     ));
     return (

@@ -360,7 +360,7 @@ export default function Gallery(props: Props) {
             {!hasActivePaidPlan() && (
                 <Button
                     id="checkout"
-                    variant="primary"
+                    variant="success"
                     size="lg"
                     block
                     onClick={() => props.setPlanModalView(true)}
