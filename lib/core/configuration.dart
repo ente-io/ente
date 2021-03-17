@@ -11,7 +11,6 @@ import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/private_key_attributes.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/utils/hex.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:photos/utils/crypto_util.dart';
 
@@ -99,12 +98,6 @@ class Configuration {
       Sodium.bin2base64(encryptedSecretKeyData.encryptedData),
       Sodium.bin2base64(encryptedSecretKeyData.nonce),
     );
-    final recoveryCode = HexEncoder().convert(kek);
-    final testingKek = HexDecoder().convert(recoveryCode);
-    _logger.info("Is equal? " + (Sodium.bin2base64(testingKek) == Sodium.bin2base64(kek)).toString());
-    _logger.info("Is equal? " + (testingKek == kek).toString());
-    _logger.info("RecoveryCode: " + recoveryCode);
-    _logger.info("RecoveryCode: " + Sodium.bin2base64(kek));
     final privateAttributes = PrivateKeyAttributes(
         Sodium.bin2base64(key), Sodium.bin2base64(keyPair.sk));
     return KeyGenResult(attributes, privateAttributes);
