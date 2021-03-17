@@ -12,7 +12,6 @@ import {
     getPlans,
     getUserSubscription,
     hasActivePaidPlan,
-    hadSubscribedEarlier,
 } from 'utils/billingUtil';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
@@ -48,7 +47,7 @@ function PlanSelector(props: Props) {
     const selectPlan = async (plan) => {
         try {
             setLoading(true);
-            if (hadSubscribedEarlier(subscription)) {
+            if (hasActivePaidPlan(subscription)) {
                 if (plan.androidID === subscription.productID) {
                     return;
                 }

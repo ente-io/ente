@@ -17,9 +17,9 @@ export function planIsActive(subscription?: Subscription): boolean {
     return subscription && subscription.expiryTime > Date.now() * 1000;
 }
 
-export function hadSubscribedEarlier(subscription?: Subscription) {
+export function isOnFreePlan(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
-    return subscription && subscription.productID !== FREE_PLAN;
+    return subscription && subscription.productID === FREE_PLAN;
 }
 
 export function getUserSubscription(): Subscription {

@@ -27,7 +27,7 @@ import AlertBanner from './components/AlertBanner';
 import { Alert, Button, Jumbotron } from 'react-bootstrap';
 import subscriptionService from 'services/subscriptionService';
 import PlanSelector from './components/PlanSelector';
-import { planIsActive } from 'utils/billingUtil';
+import { hasActivePaidPlan } from 'utils/billingUtil';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -353,7 +353,7 @@ export default function Gallery(props: Props) {
                 </div>
             )}
             <AlertBanner bannerErrorCode={bannerErrorCode} />
-            {!planIsActive() && (
+            {!hasActivePaidPlan() && (
                 <Button
                     id="checkout"
                     variant="primary"

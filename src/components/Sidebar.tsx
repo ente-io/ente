@@ -17,6 +17,7 @@ import {
     hasActivePaidPlan,
     convertBytesToGBs,
     getUserSubscription,
+    isOnFreePlan,
 } from 'utils/billingUtil';
 
 enum Action {
@@ -92,7 +93,7 @@ export default function Sidebar(props: Props) {
                 </h5>
                 <div style={{ color: '#959595' }}>
                     {planIsActive(subscription) ? (
-                        subscription?.productID == 'free' ? (
+                        isOnFreePlan(subscription) ? (
                             constants.FREE_SUBSCRIPTION_INFO(
                                 subscription?.expiryTime
                             )
