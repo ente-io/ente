@@ -99,6 +99,8 @@ const englishConstants = {
     ),
     LOGOUT: 'logout',
     LOGOUT_WARNING: 'sure you want to logout?',
+    CANCEL_SUBSCRIPTION_WARNING: 'sure you want to cancel your subscription?',
+    CANCEL_SUBSCRIPTION: 'cancel subscription',
     CANCEL: 'cancel',
     SUBSCRIBE: 'subscribe',
     MANAGE: 'manage',
