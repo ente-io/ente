@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
-import ConfirmLogout from 'components/ConfirmLogout';
+import ConfirmDialog from 'components/ConfirmDialog';
 import Spinner from 'react-bootstrap/Spinner';
 import subscriptionService, {
     Subscription,
@@ -12,22 +12,34 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getToken } from 'utils/common/key';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { Button } from 'react-bootstrap';
+import {
+    planIsActive,
+    hasActivePaidPlan,
+    convertBytesToGBs,
+    getUserSubscription,
+} from 'utils/billingUtil';
 
+enum Action {
+    logout = 'logout',
+    cancelSubscription = 'cancel_subscription',
+}
 interface Props {
     setNavbarIconView;
     setPlanModalView;
 }
 export default function Sidebar(props: Props) {
-    const [logoutModalView, setLogoutModalView] = useState(false);
-    function showLogoutModal() {
-        setLogoutModalView(true);
-    }
-    function closeLogoutModal() {
-        setLogoutModalView(false);
+    const [confirmModalView, setConfirmModalView] = useState(false);
+    function closeConfirmModal() {
+        setConfirmModalView(false);
     }
     const [usage, SetUsage] = useState<string>(null);
-    const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
-    const user = getData(LS_KEYS.USER);
+    const [action, setAction] = useState<string>(null);
+    const [user, setUser] = useState(null);
+    const [subscription, setSubscription] = useState<Subscription>(null);
+    useEffect(() => {
+        setUser(getData(LS_KEYS.USER));
+        setSubscription(getUserSubscription());
+    }, []);
     const [isOpen, setIsOpen] = useState(false);
     useEffect(() => {
         const main = async () => {
@@ -37,17 +49,27 @@ export default function Sidebar(props: Props) {
             const usage = await subscriptionService.getUsage();
 
             SetUsage(usage);
+            setSubscription(getUserSubscription());
         };
         main();
     }, [isOpen]);
 
     const logout = async () => {
-        setLogoutModalView(false);
+        setConfirmModalView(false);
         setIsOpen(false);
         props.setNavbarIconView(false);
         logoutUser();
     };
 
+    const cancelSubscription = async () => {
+        setConfirmModalView(false);
+        setIsOpen(false);
+        await subscriptionService.cancelSubscription();
+    };
+
+    let callback = [];
+    callback[Action.logout] = logout;
+    callback[Action.cancelSubscription] = cancelSubscription;
     function openFeedbackURL() {
         const feedbackURL: string =
             getEndpoint() + '/users/feedback?token=' + getToken();
@@ -69,7 +91,7 @@ export default function Sidebar(props: Props) {
                     {constants.SUBSCRIPTION_PLAN}
                 </h5>
                 <div style={{ color: '#959595' }}>
-                    {subscriptionService.planIsActive(subscription) ? (
+                    {planIsActive(subscription) ? (
                         subscription?.productID == 'free' ? (
                             constants.FREE_SUBSCRIPTION_INFO(
                                 subscription?.expiryTime
@@ -87,12 +109,28 @@ export default function Sidebar(props: Props) {
                 <Button
                     variant="success"
                     size="sm"
-                    onClick={() => props.setPlanModalView(true)}
+                    onClick={() => {
+                        setIsOpen(false);
+                        props.setPlanModalView(true);
+                    }}
                 >
-                    {subscriptionService.hasActivePaidPlan()
+                    {hasActivePaidPlan(subscription)
                         ? constants.MANAGE
                         : constants.SUBSCRIBE}
                 </Button>
+                {hasActivePaidPlan(subscription) && (
+                    <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => {
+                            setAction(Action.cancelSubscription);
+                            setConfirmModalView(true);
+                        }}
+                        style={{ marginLeft: '10px' }}
+                    >
+                        {constants.CANCEL_SUBSCRIPTION}
+                    </Button>
+                )}
             </div>
             <div style={{ outline: 'none', marginTop: '30px' }}>
                 <h5 style={{ marginBottom: '12px' }}>
@@ -103,11 +141,7 @@ export default function Sidebar(props: Props) {
                         constants.USAGE_INFO(
                             usage,
                             Math.ceil(
-                                Number(
-                                    subscriptionService.convertBytesToGBs(
-                                        subscription?.storage
-                                    )
-                                )
+                                Number(convertBytesToGBs(subscription?.storage))
                             )
                         )
                     ) : (
@@ -138,10 +172,11 @@ export default function Sidebar(props: Props) {
                 </a>
             </h5>
             <>
-                <ConfirmLogout
-                    show={logoutModalView}
-                    onHide={closeLogoutModal}
-                    logout={logout}
+                <ConfirmDialog
+                    show={confirmModalView}
+                    onHide={closeConfirmModal}
+                    callback={callback}
+                    action={action}
                 />
                 <h5
                     style={{
@@ -149,7 +184,10 @@ export default function Sidebar(props: Props) {
                         color: '#F96C6C',
                         marginTop: '30px',
                     }}
-                    onClick={showLogoutModal}
+                    onClick={() => {
+                        setAction(Action.logout);
+                        setConfirmModalView(true);
+                    }}
                 >
                     logout
                 </h5>
