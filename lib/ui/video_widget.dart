@@ -99,7 +99,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   Widget build(BuildContext context) {
     final content = _videoPlayerController != null &&
-            _videoPlayerController.value.initialized
+            _videoPlayerController.value.isInitialized
         ? _getVideoPlayer()
         : _getLoadingWidget();
     return VisibilityDetector(

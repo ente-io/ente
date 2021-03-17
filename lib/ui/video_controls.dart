@@ -238,7 +238,7 @@ class _VideoControlsState extends State<VideoControls> {
       } else {
         _cancelAndRestartTimer();
 
-        if (!controller.value.initialized) {
+        if (!controller.value.isInitialized) {
           controller.initialize().then((_) {
             controller.play();
           });
