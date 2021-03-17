@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
-function ConfirmLogout({ logout, ...props }) {
+function ConfirmDialog({ callback, action, ...props }) {
     return (
         <Modal
             {...props}
@@ -12,18 +12,18 @@ function ConfirmLogout({ logout, ...props }) {
         >
             <Modal.Body style={{ padding: '24px' }}>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    {constants.LOGOUT_WARNING}
+                    {constants[`${String(action).toUpperCase()}_WARNING`]}
                 </Modal.Title>
             </Modal.Body>
             <Modal.Footer style={{ borderTop: 'none' }}>
                 <Button variant="secondary" onClick={props.onHide}>
-                    {constants.CANCEL}
+                    {constants.CLOSE}
                 </Button>
-                <Button variant="danger" onClick={logout}>
-                    {constants.LOGOUT}
+                <Button variant="danger" onClick={callback[action]}>
+                    {constants[String(action).toUpperCase()]}
                 </Button>
             </Modal.Footer>
         </Modal>
     );
 }
-export default ConfirmLogout;
+export default ConfirmDialog;
