@@ -3,6 +3,7 @@ export enum LS_KEYS {
     SESSION = 'session',
     KEY_ATTRIBUTES = 'keyAttributes',
     SUBSCRIPTION = 'subscription',
+    PLANS = 'plans',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {
@@ -21,9 +22,10 @@ export const getData = (key: LS_KEYS) => {
         ) {
             return null;
         }
-        return JSON.parse(localStorage.getItem(key));
+        const data = localStorage.getItem(key);
+        return data && JSON.parse(data);
     } catch (e) {
-        console.log('Failed to Parse JSON');
+        console.error('Failed to Parse JSON');
     }
 };
 
