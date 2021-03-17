@@ -15,6 +15,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -117,6 +118,9 @@ class SyncService {
     } on StorageLimitExceededError {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
           error: StorageLimitExceededError()));
+    } on UnauthorizedError {
+      _logger.info("Logging user out");
+      Bus.instance.fire(TriggerLogoutEvent());
     } catch (e, s) {
       if (e is DioError && e.type == DioErrorType.DEFAULT) {
         final errorCode = e.error?.osError?.errorCode;

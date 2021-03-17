@@ -10,6 +10,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
+import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/file.dart';
@@ -30,6 +31,7 @@ import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ui/sign_in_header_widget.dart';
 import 'package:photos/ui/sync_indicator.dart';
+import 'package:photos/utils/dialog_util.dart';
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
@@ -57,6 +59,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   StreamSubscription<PermissionGrantedEvent> _permissionGrantedEvent;
   StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
+  StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
 
   @override
@@ -89,6 +92,37 @@ class _HomeWidgetState extends State<HomeWidget> {
     _subscriptionPurchaseEvent =
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
+    });
+    _triggerLogoutEvent =
+        Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
+      AlertDialog alert = AlertDialog(
+        title: Text("session expired"),
+        content: Text("please login again"),
+        actions: [
+          TextButton(
+            child: Text(
+              "ok",
+              style: TextStyle(
+                color: Theme.of(context).buttonColor,
+              ),
+            ),
+            onPressed: () async {
+              Navigator.of(context).pop();
+              final dialog = createProgressDialog(context, "logging out...");
+              await dialog.show();
+              await Configuration.instance.logout();
+              await dialog.hide();
+            },
+          ),
+        ],
+      );
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return alert;
+        },
+      );
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
@@ -276,6 +310,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _photosUpdatedEvent.cancel();
     _permissionGrantedEvent.cancel();
     _subscriptionPurchaseEvent.cancel();
+    _triggerLogoutEvent.cancel();
     _loggedOutEvent.cancel();
     super.dispose();
   }

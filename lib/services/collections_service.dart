@@ -7,6 +7,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/collections_db.dart';
@@ -211,18 +212,17 @@ class CollectionsService {
     }
   }
 
-  Future<List<Collection>> _fetchCollections(int sinceTime) {
-    return _dio
-        .get(
-      Configuration.instance.getHttpEndpoint() + "/collections",
-      queryParameters: {
-        "sinceTime": sinceTime,
-      },
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-    )
-        .then((response) {
-      final collections = List<Collection>();
+  Future<List<Collection>> _fetchCollections(int sinceTime) async {
+    try {
+      final response = await _dio.get(
+        Configuration.instance.getHttpEndpoint() + "/collections",
+        queryParameters: {
+          "sinceTime": sinceTime,
+        },
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+      final List<Collection> collections = [];
       if (response != null) {
         final c = response.data["collections"];
         for (final collection in c) {
@@ -230,7 +230,12 @@ class CollectionsService {
         }
       }
       return collections;
-    });
+    } catch (e) {
+      if (e is DioError && e.response?.statusCode == 401) {
+        throw UnauthorizedError();
+      }
+      throw e;
+    }
   }
 
   Collection getCollectionByID(int collectionID) {
