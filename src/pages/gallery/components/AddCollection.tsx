@@ -73,7 +73,7 @@ export default function AddCollection({
                             />
                         </Form.Group>
                         <Button
-                            variant="primary"
+                            variant="success"
                             type="submit"
                             style={{ width: '100%' }}
                         >

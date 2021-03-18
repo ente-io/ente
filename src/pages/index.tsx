@@ -89,7 +89,7 @@ export default function Home() {
                                     </FormControl.Feedback>
                                 </Form.Group>
                                 <Button
-                                    variant="primary"
+                                    variant="success"
                                     type="submit"
                                     block
                                     disabled={loading}

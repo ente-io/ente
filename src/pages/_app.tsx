@@ -91,7 +91,6 @@ const GlobalStyles = createGlobalStyle`
     .modal .card {
         background-color: #202020;
         border: none;
-       
     }
     .modal .card > div {
         border-radius: 30px;
@@ -112,15 +111,15 @@ const GlobalStyles = createGlobalStyle`
         background-size: cover;
         border: none;
     }
-    .btn-primary{
+    .btn-success , btn:focus {
         background: #2dc262;
         border-color: #29a354;
     }
-    .btn-primary:hover {
+    .btn-success:hover {
         background-color: #29a354;
         border-color: #2dc262;
     }
-    .btn-primary:disabled {
+    .btn-success:disabled {
         background-color: #69b383;
     }
     .card {
@@ -261,7 +260,7 @@ export default function App({ Component, pageProps, err }) {
             </Navbar>
             {loading ? (
                 <Container>
-                    <Spinner animation="border" role="status" variant="primary">
+                    <Spinner animation="border" role="status" variant="success">
                         <span className="sr-only">Loading...</span>
                     </Spinner>
                 </Container>

@@ -389,7 +389,7 @@ export default function Gallery(props: Props) {
             {!isFirstLoad && data.length == 0 ? (
                 <Jumbotron>
                     <Image alt="vault" src="/vault.png" />
-                    <Button variant="primary" onClick={props.openFileUploader}>
+                    <Button variant="success" onClick={props.openFileUploader}>
                         {constants.UPLOAD_FIRST_PHOTO}
                     </Button>
                 </Jumbotron>

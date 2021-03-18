@@ -106,7 +106,7 @@ export default function Home() {
                                     {constants.DATA_DISCLAIMER}
                                 </DisclaimerContainer>
                                 <Button
-                                    variant="primary"
+                                    variant="success"
                                     type="submit"
                                     block
                                     disabled={loading}
