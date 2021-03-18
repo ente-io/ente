@@ -116,8 +116,9 @@ interface Props {
     getInputProps;
     openFileUploader;
     acceptedFiles;
-    uploadModalView;
-    closeUploadModal;
+    collectionSelectorView;
+    closeCollectionSelector;
+    showCollectionSelector;
     setNavbarIconView;
     err;
 }
@@ -360,8 +361,8 @@ export default function Gallery(props: Props) {
                 selectCollection={selectCollection}
             />
             <Upload
-                uploadModalView={props.uploadModalView}
-                closeUploadModal={props.closeUploadModal}
+                collectionSelectorView={props.collectionSelectorView}
+                closeCollectionSelector={props.closeCollectionSelector}
                 collectionAndItsLatestFile={collectionAndItsLatestFile}
                 refetchData={syncWithRemote}
                 setBannerErrorCode={setBannerErrorCode}

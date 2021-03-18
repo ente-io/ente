@@ -181,13 +181,13 @@ export default function App({ Component, pageProps, err }) {
     const [user, setUser] = useState();
     const [loading, setLoading] = useState(false);
     const [navbarIconView, setNavbarIconView] = useState(false);
-    const [uploadModalView, setUploadModalView] = useState(false);
+    const [collectionSelectorView, setCollectionSelectorView] = useState(false);
 
-    function closeUploadModal() {
-        setUploadModalView(false);
+    function closeCollectionSelector() {
+        setCollectionSelectorView(false);
     }
-    function showUploadModal() {
-        setUploadModalView(true);
+    function showCollectionSelector() {
+        setCollectionSelectorView(true);
     }
 
     useEffect(() => {
@@ -213,7 +213,7 @@ export default function App({ Component, pageProps, err }) {
     }, []);
 
     const onDropAccepted = useCallback(() => {
-        showUploadModal();
+        showCollectionSelector();
     }, []);
     const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
         noClick: true,
@@ -253,9 +253,9 @@ export default function App({ Component, pageProps, err }) {
                     getInputProps={getInputProps}
                     openFileUploader={open}
                     acceptedFiles={acceptedFiles}
-                    uploadModalView={uploadModalView}
-                    showUploadModal={showUploadModal}
-                    closeUploadModal={closeUploadModal}
+                    collectionSelectorView={collectionSelectorView}
+                    showCollectionSelector={showCollectionSelector}
+                    closeCollectionSelector={closeCollectionSelector}
                     setNavbarIconView={setNavbarIconView}
                     err={err}
                 />
