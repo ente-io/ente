@@ -120,10 +120,23 @@ const englishConstants = {
             </p>
         </>
     ),
-    PAID_SUBSCRIPTION_INFO: (expiryTime) => (
+    RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
                 your subscription will renew on{' '}
+                {new Date(expiryTime / 1000).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                })}
+            </p>
+        </>
+    ),
+
+    RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
+        <>
+            <p>
+                your subscription will be cancelled on{' '}
                 {new Date(expiryTime / 1000).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
@@ -141,7 +154,7 @@ const englishConstants = {
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email ?',
     CHOOSE_PLAN: 'choose your subscription plan',
-    MANAGE_PLAN: 'manage your subscription plan',
+    MANAGE_PLAN: 'update your subscription plan',
     MONTH: 'month',
     SUBSCRIPTION_CANCEL_FAILED: 'failed to cancel subscription',
     SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
