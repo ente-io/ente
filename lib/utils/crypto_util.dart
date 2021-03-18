@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'dart:io' as io;
@@ -18,15 +17,6 @@ Uint8List cryptoSecretboxEasy(Map<String, dynamic> args) {
 Uint8List cryptoSecretboxOpenEasy(Map<String, dynamic> args) {
   return Sodium.cryptoSecretboxOpenEasy(
       args["cipher"], args["nonce"], args["key"]);
-}
-
-Uint8List cryptoPwhashStr(Map<String, dynamic> args) {
-  return Sodium.cryptoPwhashStr(
-      args["input"], args["opsLimit"], args["memLimit"]);
-}
-
-bool cryptoPwhashStrVerify(Map<String, dynamic> args) {
-  return Sodium.cryptoPwhashStrVerify(args["hash"], args["input"]) == 0;
 }
 
 EncryptionResult chachaEncryptFile(Map<String, dynamic> args) {
@@ -201,22 +191,6 @@ class CryptoUtil {
         Sodium.cryptoPwhashOpslimitInteractive,
         Sodium.cryptoPwhashMemlimitInteractive,
         Sodium.cryptoPwhashAlgDefault);
-  }
-
-  static Future<String> hash(Uint8List input) async {
-    Sodium.init();
-    final args = Map<String, dynamic>();
-    args["input"] = input;
-    args["opsLimit"] = Sodium.cryptoPwhashOpslimitSensitive;
-    args["memLimit"] = Sodium.cryptoPwhashMemlimitModerate;
-    return utf8.decode(await _computer.compute(cryptoPwhashStr, param: args));
-  }
-
-  static Future<bool> verifyHash(Uint8List input, String hash) async {
-    final args = Map<String, dynamic>();
-    args["input"] = input;
-    args["hash"] = utf8.encode(hash);
-    return await _computer.compute(cryptoPwhashStrVerify, param: args);
   }
 
   static Future<KeyPair> generateKeyPair() async {

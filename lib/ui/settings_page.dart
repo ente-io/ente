@@ -525,9 +525,6 @@ class DebugWidget extends StatelessWidget {
           Text("KEK Salt", style: TextStyle(fontWeight: FontWeight.bold)),
           Text(keyAttributes.kekSalt),
           Padding(padding: EdgeInsets.all(12)),
-          Text("KEK Hash", style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(keyAttributes.kekHash),
-          Padding(padding: EdgeInsets.all(12)),
         ]),
       ),
       actions: [

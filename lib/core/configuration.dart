@@ -119,16 +119,12 @@ class Configuration {
     // Encrypt the key with this derived key
     final encryptedKeyData = CryptoUtil.encryptSync(key, kek);
 
-    // Hash the password so that its correctness can be compared later
-    final kekHash = await CryptoUtil.hash(kek);
-
     // Generate a public-private keypair and encrypt the latter
     final keyPair = await CryptoUtil.generateKeyPair();
     final encryptedSecretKeyData = CryptoUtil.encryptSync(keyPair.sk, key);
 
     final attributes = KeyAttributes(
       Sodium.bin2base64(kekSalt),
-      kekHash,
       Sodium.bin2base64(encryptedKeyData.encryptedData),
       Sodium.bin2base64(encryptedKeyData.nonce),
       Sodium.bin2base64(keyPair.pk),
@@ -144,14 +140,13 @@ class Configuration {
       String password, KeyAttributes attributes) async {
     final kek = CryptoUtil.deriveKey(
         utf8.encode(password), Sodium.base642bin(attributes.kekSalt));
-    bool correctPassword = await CryptoUtil.verifyHash(kek, attributes.kekHash);
-    if (!correctPassword) {
+    var key;
+    try {
+      key = CryptoUtil.decryptSync(Sodium.base642bin(attributes.encryptedKey),
+          kek, Sodium.base642bin(attributes.keyDecryptionNonce));
+    } catch (e) {
       throw Exception("Incorrect password");
     }
-    final key = CryptoUtil.decryptSync(
-        Sodium.base642bin(attributes.encryptedKey),
-        kek,
-        Sodium.base642bin(attributes.keyDecryptionNonce));
     final secretKey = CryptoUtil.decryptSync(
         Sodium.base642bin(attributes.encryptedSecretKey),
         key,

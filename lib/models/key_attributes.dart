@@ -2,7 +2,6 @@ import 'dart:convert';
 
 class KeyAttributes {
   final String kekSalt;
-  final String kekHash;
   final String encryptedKey;
   final String keyDecryptionNonce;
   final String publicKey;
@@ -11,7 +10,6 @@ class KeyAttributes {
 
   KeyAttributes(
     this.kekSalt,
-    this.kekHash,
     this.encryptedKey,
     this.keyDecryptionNonce,
     this.publicKey,
@@ -21,7 +19,6 @@ class KeyAttributes {
 
   KeyAttributes copyWith({
     String kekSalt,
-    String kekHash,
     String encryptedKey,
     String keyDecryptionNonce,
     String publicKey,
@@ -30,7 +27,6 @@ class KeyAttributes {
   }) {
     return KeyAttributes(
       kekSalt ?? this.kekSalt,
-      kekHash ?? this.kekHash,
       encryptedKey ?? this.encryptedKey,
       keyDecryptionNonce ?? this.keyDecryptionNonce,
       publicKey ?? this.publicKey,
@@ -42,7 +38,6 @@ class KeyAttributes {
   Map<String, dynamic> toMap() {
     return {
       'kekSalt': kekSalt,
-      'kekHash': kekHash,
       'encryptedKey': encryptedKey,
       'keyDecryptionNonce': keyDecryptionNonce,
       'publicKey': publicKey,
@@ -56,7 +51,6 @@ class KeyAttributes {
 
     return KeyAttributes(
       map['kekSalt'],
-      map['kekHash'],
       map['encryptedKey'],
       map['keyDecryptionNonce'],
       map['publicKey'],
@@ -72,7 +66,7 @@ class KeyAttributes {
 
   @override
   String toString() {
-    return 'KeyAttributes(kekSalt: $kekSalt, kekHash: $kekHash, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, publicKey: $publicKey, encryptedSecretKey: $encryptedSecretKey, secretKeyDecryptionNonce: $secretKeyDecryptionNonce)';
+    return 'KeyAttributes(kekSalt: $kekSalt, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, publicKey: $publicKey, encryptedSecretKey: $encryptedSecretKey, secretKeyDecryptionNonce: $secretKeyDecryptionNonce)';
   }
 
   @override
@@ -81,7 +75,6 @@ class KeyAttributes {
 
     return o is KeyAttributes &&
         o.kekSalt == kekSalt &&
-        o.kekHash == kekHash &&
         o.encryptedKey == encryptedKey &&
         o.keyDecryptionNonce == keyDecryptionNonce &&
         o.publicKey == publicKey &&
@@ -92,7 +85,6 @@ class KeyAttributes {
   @override
   int get hashCode {
     return kekSalt.hashCode ^
-        kekHash.hashCode ^
         encryptedKey.hashCode ^
         keyDecryptionNonce.hashCode ^
         publicKey.hashCode ^
