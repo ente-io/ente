@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Modal } from 'react-bootstrap';
-import AddCollection from './AddCollection';
+import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
@@ -15,19 +15,20 @@ export const CollectionIcon = styled.div`
     border-radius: 34px;
     outline: none;
 `;
-
-function CollectionSelector({
-    collectionAndItsLatestFile,
-    uploadFiles,
-    uploadModalView,
-    closeUploadModal,
-    suggestedCollectionName,
-}) {
-    const CollectionIcons: JSX.Element[] = collectionAndItsLatestFile?.map(
+interface Props {
+    collectionAndItsLatestFile;
+    uploadFiles;
+    collectionSelectorView;
+    closeCollectionSelector;
+    showChoiceModal;
+    showCollectionCreateModal;
+}
+function CollectionSelector(props: Props) {
+    const CollectionIcons: JSX.Element[] = props.collectionAndItsLatestFile?.map(
         (item) => (
             <CollectionIcon
                 key={item.collection.id}
-                onClick={async () => await uploadFiles(item.collection)}
+                onClick={async () => await props.uploadFiles(item.collection)}
             >
                 <Card>
                     <PreviewCard
@@ -45,8 +46,8 @@ function CollectionSelector({
 
     return (
         <Modal
-            show={uploadModalView}
-            onHide={closeUploadModal}
+            show={props.collectionSelectorView}
+            onHide={props.closeCollectionSelector}
             dialogClassName="modal-90w"
             style={{ maxWidth: '100%' }}
         >
@@ -62,13 +63,7 @@ function CollectionSelector({
                     flexWrap: 'wrap',
                 }}
             >
-                <AddCollection
-                    uploadFiles={uploadFiles}
-                    autoFilledName={suggestedCollectionName}
-                    triggerCreateCollectionOpen={
-                        CollectionIcons && CollectionIcons.length == 0
-                    }
-                />
+                <AddCollectionButton showChoiceModal={props.showChoiceModal} />
                 {CollectionIcons}
             </Modal.Body>
         </Modal>
