@@ -114,7 +114,26 @@ class Configuration {
     // Derive a key from the password that will be used to encrypt and
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
-    final kek = CryptoUtil.deriveKey(utf8.encode(password), kekSalt);
+    int memLimit = Sodium.cryptoPwhashMemlimitSensitive;
+    final opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
+    var kek;
+    try {
+      kek = await CryptoUtil.deriveKey(
+        utf8.encode(password),
+        kekSalt,
+        memLimit,
+        opsLimit,
+      );
+    } catch (e) {
+      _logger.info("Reducing memory utilization");
+      memLimit = Sodium.cryptoPwhashMemlimitModerate;
+      kek = await CryptoUtil.deriveKey(
+        utf8.encode(password),
+        kekSalt,
+        memLimit,
+        opsLimit,
+      );
+    }
 
     // Encrypt the key with this derived key
     final encryptedKeyData = CryptoUtil.encryptSync(key, kek);
@@ -130,6 +149,8 @@ class Configuration {
       Sodium.bin2base64(keyPair.pk),
       Sodium.bin2base64(encryptedSecretKeyData.encryptedData),
       Sodium.bin2base64(encryptedSecretKeyData.nonce),
+      memLimit,
+      opsLimit,
     );
     final privateAttributes = PrivateKeyAttributes(
         Sodium.bin2base64(key), Sodium.bin2base64(keyPair.sk));
@@ -138,8 +159,12 @@ class Configuration {
 
   Future<void> decryptAndSaveKey(
       String password, KeyAttributes attributes) async {
-    final kek = CryptoUtil.deriveKey(
-        utf8.encode(password), Sodium.base642bin(attributes.kekSalt));
+    final kek = await CryptoUtil.deriveKey(
+      utf8.encode(password),
+      Sodium.base642bin(attributes.kekSalt),
+      attributes.memLimit,
+      attributes.opsLimit,
+    );
     var key;
     try {
       key = CryptoUtil.decryptSync(Sodium.base642bin(attributes.encryptedKey),

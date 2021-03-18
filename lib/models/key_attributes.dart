@@ -7,6 +7,8 @@ class KeyAttributes {
   final String publicKey;
   final String encryptedSecretKey;
   final String secretKeyDecryptionNonce;
+  final int memLimit;
+  final int opsLimit;
 
   KeyAttributes(
     this.kekSalt,
@@ -15,25 +17,9 @@ class KeyAttributes {
     this.publicKey,
     this.encryptedSecretKey,
     this.secretKeyDecryptionNonce,
+    this.memLimit,
+    this.opsLimit,
   );
-
-  KeyAttributes copyWith({
-    String kekSalt,
-    String encryptedKey,
-    String keyDecryptionNonce,
-    String publicKey,
-    String encryptedSecretKey,
-    String secretKeyDecryptionNonce,
-  }) {
-    return KeyAttributes(
-      kekSalt ?? this.kekSalt,
-      encryptedKey ?? this.encryptedKey,
-      keyDecryptionNonce ?? this.keyDecryptionNonce,
-      publicKey ?? this.publicKey,
-      encryptedSecretKey ?? this.encryptedSecretKey,
-      secretKeyDecryptionNonce ?? this.secretKeyDecryptionNonce,
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -43,6 +29,8 @@ class KeyAttributes {
       'publicKey': publicKey,
       'encryptedSecretKey': encryptedSecretKey,
       'secretKeyDecryptionNonce': secretKeyDecryptionNonce,
+      'memLimit': memLimit,
+      'opsLimit': opsLimit,
     };
   }
 
@@ -56,6 +44,8 @@ class KeyAttributes {
       map['publicKey'],
       map['encryptedSecretKey'],
       map['secretKeyDecryptionNonce'],
+      map['memLimit'],
+      map['opsLimit'],
     );
   }
 
@@ -63,32 +53,4 @@ class KeyAttributes {
 
   factory KeyAttributes.fromJson(String source) =>
       KeyAttributes.fromMap(json.decode(source));
-
-  @override
-  String toString() {
-    return 'KeyAttributes(kekSalt: $kekSalt, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce, publicKey: $publicKey, encryptedSecretKey: $encryptedSecretKey, secretKeyDecryptionNonce: $secretKeyDecryptionNonce)';
-  }
-
-  @override
-  bool operator ==(Object o) {
-    if (identical(this, o)) return true;
-
-    return o is KeyAttributes &&
-        o.kekSalt == kekSalt &&
-        o.encryptedKey == encryptedKey &&
-        o.keyDecryptionNonce == keyDecryptionNonce &&
-        o.publicKey == publicKey &&
-        o.encryptedSecretKey == encryptedSecretKey &&
-        o.secretKeyDecryptionNonce == secretKeyDecryptionNonce;
-  }
-
-  @override
-  int get hashCode {
-    return kekSalt.hashCode ^
-        encryptedKey.hashCode ^
-        keyDecryptionNonce.hashCode ^
-        publicKey.hashCode ^
-        encryptedSecretKey.hashCode ^
-        secretKeyDecryptionNonce.hashCode;
-  }
 }

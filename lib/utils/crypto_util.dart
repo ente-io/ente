@@ -19,6 +19,17 @@ Uint8List cryptoSecretboxOpenEasy(Map<String, dynamic> args) {
       args["cipher"], args["nonce"], args["key"]);
 }
 
+Uint8List cryptoPwHash(Map<String, dynamic> args) {
+  return Sodium.cryptoPwhash(
+    Sodium.cryptoSecretboxKeybytes,
+    args["password"],
+    args["salt"],
+    args["opsLimit"],
+    args["memLimit"],
+    Sodium.cryptoPwhashAlgDefault,
+  );
+}
+
 EncryptionResult chachaEncryptFile(Map<String, dynamic> args) {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final logger = Logger("ChaChaEncrypt");
@@ -183,14 +194,18 @@ class CryptoUtil {
     return Sodium.randombytesBuf(Sodium.cryptoPwhashSaltbytes);
   }
 
-  static Uint8List deriveKey(Uint8List password, Uint8List salt) {
-    return Sodium.cryptoPwhash(
-        Sodium.cryptoSecretboxKeybytes,
-        password,
-        salt,
-        Sodium.cryptoPwhashOpslimitInteractive,
-        Sodium.cryptoPwhashMemlimitInteractive,
-        Sodium.cryptoPwhashAlgDefault);
+  static Future<Uint8List> deriveKey(
+    Uint8List password,
+    Uint8List salt,
+    int memLimit,
+    int opsLimit,
+  ) {
+    return _computer.compute(cryptoPwHash, param: {
+      "password": password,
+      "salt": salt,
+      "memLimit": memLimit,
+      "opsLimit": opsLimit,
+    });
   }
 
   static Future<KeyPair> generateKeyPair() async {
