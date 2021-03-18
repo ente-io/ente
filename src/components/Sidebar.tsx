@@ -65,16 +65,16 @@ export default function Sidebar(props: Props) {
     const cancelSubscription = async () => {
         try {
             await billingService.cancelSubscription();
+            props.setBannerMessage({
+                message: constants.SUBSCRIPTION_CANCEL_SUCCESS,
+                variant: 'secondary',
+            });
         } catch (e) {
             props.setBannerMessage({
                 message: constants.SUBSCRIPTION_CANCEL_FAILED,
                 variant: 'danger',
             });
         }
-        props.setBannerMessage({
-            message: constants.SUBSCRIPTION_CANCEL_SUCCESS,
-            variant: 'secondary',
-        });
         setConfirmModalView(false);
         setIsOpen(false);
     };
