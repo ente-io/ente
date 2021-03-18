@@ -47,6 +47,7 @@ function PlanSelector(props: Props) {
     const subscription = getUserSubscription();
     const plans = getPlans();
     const selectPlan = async (plan) => {
+        var bannerMessage;
         try {
             setLoading(true);
             if (hasActivePaidPlan(subscription)) {
@@ -57,21 +58,21 @@ function PlanSelector(props: Props) {
             } else {
                 await subscriptionService.buySubscription(plan.stripeID);
             }
+            bannerMessage = {
+                message: constants.SUBSCRIPTION_UPDATE_SUCCESS,
+                variant: 'success',
+            };
         } catch (err) {
-            props.setBannerMessage({
+            bannerMessage = {
                 message: constants.SUBSCRIPTION_PURCHASE_FAILED,
                 variant: 'danger',
-            });
-            props.closeModal();
+            };
         } finally {
             setLoading(false);
             setTimeout(() => {
-                props.setBannerMessage({
-                    message: constants.SUBSCRIPTION_UPDATE_SUCCESS,
-                    variant: 'success',
-                });
                 props.closeModal();
-            }, 300);
+                props.setBannerMessage(bannerMessage);
+            }, 700);
         }
     };
     const PlanIcons: JSX.Element[] = plans?.map((plan) => (

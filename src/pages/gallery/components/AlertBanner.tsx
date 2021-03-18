@@ -7,7 +7,6 @@ interface Props {
     setBannerMessage;
 }
 export default function AlertBanner(props: Props) {
-    setTimeout(() => props.setBannerMessage(null), 5000);
     return (
         <Alert
             variant={props.bannerMessage?.variant}
