@@ -61,6 +61,10 @@ function PlanSelector(props: Props) {
                 message: constants.SUBSCRIPTION_UPDATE_SUCCESS,
                 variant: 'success',
             };
+            setLoading(false);
+            await new Promise((resolve) =>
+                setTimeout(() => resolve(null), 400)
+            );
         } catch (err) {
             bannerMessage = {
                 message: constants.SUBSCRIPTION_PURCHASE_FAILED,
@@ -68,10 +72,8 @@ function PlanSelector(props: Props) {
             };
         } finally {
             setLoading(false);
-            setTimeout(() => {
-                props.closeModal();
-                props.setBannerMessage(bannerMessage);
-            }, 700);
+            props.closeModal();
+            props.setBannerMessage(bannerMessage);
         }
     };
     const PlanIcons: JSX.Element[] = plans?.map((plan) => (

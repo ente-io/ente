@@ -63,8 +63,6 @@ export default function Sidebar(props: Props) {
     };
 
     const cancelSubscription = async () => {
-        setConfirmModalView(false);
-        setIsOpen(false);
         try {
             await billingService.cancelSubscription();
         } catch (e) {
@@ -77,6 +75,8 @@ export default function Sidebar(props: Props) {
             message: constants.SUBSCRIPTION_CANCEL_SUCCESS,
             variant: 'secondary',
         });
+        setConfirmModalView(false);
+        setIsOpen(false);
     };
 
     let callback = new Map<string, Function>();

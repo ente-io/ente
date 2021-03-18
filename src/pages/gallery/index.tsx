@@ -23,11 +23,11 @@ import {
     getNonEmptyCollections,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import AlertBanner from './components/AlertBanner';
 import { Alert, Button, Jumbotron } from 'react-bootstrap';
 import billingService from 'services/billingService';
 import PlanSelector from './components/PlanSelector';
 import { isSubscribed } from 'utils/billingUtil';
+import MessageDialog from './components/MessageDialog';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -353,9 +353,9 @@ export default function Gallery(props: Props) {
                     </Alert>
                 </div>
             )}
-            <AlertBanner
+            <MessageDialog
                 bannerMessage={props.bannerMessage}
-                setBannerMessage={props.setBannerMessage}
+                onHide={() => props.setBannerMessage(null)}
             />
             {!isSubscribed() && (
                 <Button
