@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
-function ConfirmDialog({ callback, action, ...props }) {
+interface Props {
+    callback?: Map<string, Function>;
+    action: string;
+    show: boolean;
+    onHide: MouseEventHandler<HTMLElement>;
+}
+function ConfirmDialog(props: Props) {
+    const { callback, action, ...rest } = props;
     return (
         <Modal
-            {...props}
+            {...rest}
             size="lg"
             aria-labelledby="contained-modal-title-vcenter"
             centered
@@ -19,9 +26,11 @@ function ConfirmDialog({ callback, action, ...props }) {
                 <Button variant="secondary" onClick={props.onHide}>
                     {constants.CLOSE}
                 </Button>
-                <Button variant="danger" onClick={callback[action]}>
-                    {constants[String(action).toUpperCase()]}
-                </Button>
+                {action && (
+                    <Button variant="danger" onClick={callback[action]}>
+                        {constants[String(action).toUpperCase()]}
+                    </Button>
+                )}
             </Modal.Footer>
         </Modal>
     );

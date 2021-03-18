@@ -79,7 +79,7 @@ export default function Sidebar(props: Props) {
         });
     };
 
-    let callback = [];
+    let callback = new Map<string, Function>();
     callback[Action.logout] = logout;
     callback[Action.cancelSubscription] = cancelSubscription;
     function openFeedbackURL() {
