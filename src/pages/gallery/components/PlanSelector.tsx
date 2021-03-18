@@ -11,7 +11,9 @@ import {
     convertBytesToGBs,
     getPlans,
     getUserSubscription,
-    hasActivePaidPlan,
+    hasPaidPlan,
+    hasRenewingPaidPlan,
+    isUserRenewingPlan,
 } from 'utils/billingUtil';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
@@ -50,8 +52,8 @@ function PlanSelector(props: Props) {
         var bannerMessage;
         try {
             setLoading(true);
-            if (hasActivePaidPlan(subscription)) {
-                if (plan.androidID === subscription.productID) {
+            if (hasPaidPlan(subscription)) {
+                if (isUserRenewingPlan(plan, subscription)) {
                     return;
                 }
                 await subscriptionService.updateSubscription(plan.stripeID);
@@ -81,7 +83,7 @@ function PlanSelector(props: Props) {
             onClick={() => {
                 selectPlan(plan);
             }}
-            selected={plan.androidID === subscription?.productID}
+            selected={isUserRenewingPlan(plan, subscription)}
         >
             <div>
                 <span
@@ -113,7 +115,7 @@ function PlanSelector(props: Props) {
             >
                 {`${plan.price} / ${constants.MONTH}`}
             </div>
-            {plan.androidID === subscription?.productID && 'active'}
+            {isUserRenewingPlan(plan, subscription) && 'active'}
         </PlanIcon>
     ));
     return (
@@ -125,7 +127,7 @@ function PlanSelector(props: Props) {
         >
             <Modal.Header closeButton>
                 <Modal.Title style={{ marginLeft: '12px' }}>
-                    {hasActivePaidPlan(subscription)
+                    {hasRenewingPaidPlan(subscription)
                         ? constants.MANAGE_PLAN
                         : constants.CHOOSE_PLAN}
                 </Modal.Title>
