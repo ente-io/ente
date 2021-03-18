@@ -4,22 +4,31 @@ import { getData, LS_KEYS } from './storage/localStorage';
 export function convertBytesToGBs(bytes, precision?): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
 }
-export function hasActivePaidPlan(subscription?: Subscription) {
+export function hasPaidPlan(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
     return (
         subscription &&
-        planIsActive(subscription) &&
+        isPlanActive(subscription) &&
         subscription.productID !== FREE_PLAN
     );
 }
-export function planIsActive(subscription?: Subscription): boolean {
+
+export function hasRenewingPaidPlan(subscription?: Subscription) {
+    subscription = subscription ?? getUserSubscription();
+    return hasPaidPlan(subscription) && !isPlanCancelled(subscription);
+}
+export function isPlanActive(subscription?: Subscription): boolean {
     subscription = subscription ?? getUserSubscription();
     return subscription && subscription.expiryTime > Date.now() * 1000;
 }
 
 export function isOnFreePlan(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
-    return subscription && subscription.productID === FREE_PLAN;
+    return (
+        subscription &&
+        isPlanActive(subscription) &&
+        subscription.productID === FREE_PLAN
+    );
 }
 
 export function isPlanCancelled(subscription?: Subscription) {
@@ -33,4 +42,10 @@ export function getUserSubscription(): Subscription {
 
 export function getPlans(): Plan[] {
     return getData(LS_KEYS.PLANS);
+}
+export function isUserRenewingPlan(plan: Plan, subscription: Subscription) {
+    return (
+        plan.androidID === subscription.productID &&
+        !isPlanCancelled(subscription)
+    );
 }
