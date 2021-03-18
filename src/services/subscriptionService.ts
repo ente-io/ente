@@ -13,6 +13,7 @@ export interface Subscription {
     originalTransactionID: string;
     expiryTime: number;
     paymentProvider: string;
+    isCancelled: boolean;
 }
 export interface Plan {
     id: string;
@@ -82,6 +83,7 @@ class SubscriptionService {
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
             console.log(e);
+            throw e;
         }
     }
 
@@ -94,6 +96,8 @@ class SubscriptionService {
                     'X-Auth-Token': getToken(),
                 }
             );
+            const subscription = response.data['subscription'];
+            setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
             console.log(e);
             throw e;
