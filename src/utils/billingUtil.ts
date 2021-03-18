@@ -22,6 +22,11 @@ export function isOnFreePlan(subscription?: Subscription) {
     return subscription && subscription.productID === FREE_PLAN;
 }
 
+export function isPlanCancelled(subscription?: Subscription) {
+    subscription = subscription ?? getUserSubscription();
+    return subscription && subscription.isCancelled;
+}
+
 export function getUserSubscription(): Subscription {
     return getData(LS_KEYS.SUBSCRIPTION);
 }
