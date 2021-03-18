@@ -16,7 +16,6 @@ export interface Subscription {
     isCancelled: boolean;
 }
 export interface Plan {
-    id: string;
     androidID: string;
     iosID: string;
     storage: number;
@@ -97,6 +96,7 @@ class SubscriptionService {
                 }
             );
             const subscription = response.data['subscription'];
+            console.log(subscription);
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
             console.log(e);
