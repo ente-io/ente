@@ -222,10 +222,7 @@ export default function App({ Component, pageProps, err }) {
         accept: 'image/*, video/*, application/json, ',
     });
     return (
-        <FullScreenDropZone
-            getRootProps={getRootProps}
-            getInputProps={getInputProps}
-        >
+        <>
             <Head>
                 <title>{constants.TITLE}</title>
                 <script async src={`https://sa.ente.io/latest.js`} />
@@ -252,6 +249,8 @@ export default function App({ Component, pageProps, err }) {
                 </Container>
             ) : (
                 <Component
+                    getRootProps={getRootProps}
+                    getInputProps={getInputProps}
                     openFileUploader={open}
                     acceptedFiles={acceptedFiles}
                     uploadModalView={uploadModalView}
@@ -261,6 +260,6 @@ export default function App({ Component, pageProps, err }) {
                     err={err}
                 />
             )}
-        </FullScreenDropZone>
+        </>
     );
 }

@@ -25,6 +25,7 @@ import {
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
 import { Alert, Button, Jumbotron } from 'react-bootstrap';
+import FullScreenDropZone from 'components/FullScreenDropZone';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -111,6 +112,8 @@ const DateContainer = styled.div`
 `;
 
 interface Props {
+    getRootProps;
+    getInputProps;
     openFileUploader;
     acceptedFiles;
     uploadModalView;
@@ -337,7 +340,10 @@ export default function Gallery(props: Props) {
     };
 
     return (
-        <>
+        <FullScreenDropZone
+            getRootProps={props.getRootProps}
+            getInputProps={props.getInputProps}
+        >
             <LoadingBar color="#2dc262" ref={loadingBar} />
             {isFirstLoad && (
                 <div className="text-center">
@@ -526,6 +532,6 @@ export default function Gallery(props: Props) {
                     {constants.INSTALL_MOBILE_APP()}
                 </Alert>
             )}
-        </>
+        </FullScreenDropZone>
     );
 }

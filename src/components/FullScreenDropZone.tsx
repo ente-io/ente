@@ -19,7 +19,8 @@ const DropDiv = styled.div`
 
 const Overlay = styled.div<{ isDragActive: boolean }>`
     border-width: 8px;
-
+    left: 0;
+    top: 0;
     outline: none;
     transition: border 0.24s ease-in-out;
     height: 100%;
