@@ -13,9 +13,9 @@ export function hasPaidPlan(subscription?: Subscription) {
     );
 }
 
-export function hasRenewingPaidPlan(subscription?: Subscription) {
+export function isSubscribed(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
-    return hasPaidPlan(subscription) && !isPlanCancelled(subscription);
+    return hasPaidPlan(subscription) && !isSubscriptionCancelled(subscription);
 }
 export function isPlanActive(subscription?: Subscription): boolean {
     subscription = subscription ?? getUserSubscription();
@@ -31,7 +31,7 @@ export function isOnFreePlan(subscription?: Subscription) {
     );
 }
 
-export function isPlanCancelled(subscription?: Subscription) {
+export function isSubscriptionCancelled(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
     return subscription && subscription.isCancelled;
 }
@@ -46,6 +46,6 @@ export function getPlans(): Plan[] {
 export function isUserRenewingPlan(plan: Plan, subscription: Subscription) {
     return (
         plan.androidID === subscription.productID &&
-        !isPlanCancelled(subscription)
+        !isSubscriptionCancelled(subscription)
     );
 }

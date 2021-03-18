@@ -9,7 +9,7 @@ import {
     getPlans,
     getUserSubscription,
     hasPaidPlan,
-    hasRenewingPaidPlan,
+    isSubscribed,
     isUserRenewingPlan,
 } from 'utils/billingUtil';
 
@@ -124,7 +124,7 @@ function PlanSelector(props: Props) {
         >
             <Modal.Header closeButton>
                 <Modal.Title style={{ marginLeft: '12px' }}>
-                    {hasRenewingPaidPlan(subscription)
+                    {isSubscribed(subscription)
                         ? constants.MANAGE_PLAN
                         : constants.CHOOSE_PLAN}
                 </Modal.Title>

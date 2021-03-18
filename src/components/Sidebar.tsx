@@ -15,8 +15,8 @@ import {
     convertBytesToGBs,
     getUserSubscription,
     isOnFreePlan,
-    isPlanCancelled,
-    hasRenewingPaidPlan,
+    isSubscriptionCancelled,
+    isSubscribed,
 } from 'utils/billingUtil';
 
 enum Action {
@@ -108,7 +108,7 @@ export default function Sidebar(props: Props) {
                             constants.FREE_SUBSCRIPTION_INFO(
                                 subscription?.expiryTime
                             )
-                        ) : isPlanCancelled(subscription) ? (
+                        ) : isSubscriptionCancelled(subscription) ? (
                             constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
                                 subscription?.expiryTime
                             )
@@ -122,7 +122,7 @@ export default function Sidebar(props: Props) {
                     )}
                 </div>
                 <div style={{ display: 'flex' }}>
-                    {hasRenewingPaidPlan(subscription) ? (
+                    {isSubscribed(subscription) ? (
                         <>
                             <Button
                                 variant="success"
