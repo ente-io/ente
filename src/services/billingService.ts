@@ -24,7 +24,7 @@ export interface Plan {
     stripeID: string;
 }
 export const FREE_PLAN = 'free';
-class SubscriptionService {
+class billingService {
     private stripe;
     constructor() {
         let publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -168,4 +168,4 @@ class SubscriptionService {
     }
 }
 
-export default new SubscriptionService();
+export default new billingService();

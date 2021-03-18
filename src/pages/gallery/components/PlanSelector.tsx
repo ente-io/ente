@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Spinner } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
-import subscriptionService, {
-    Plan,
-    Subscription,
-} from 'services/subscriptionService';
+import billingService, { Plan, Subscription } from 'services/billingService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import {
     convertBytesToGBs,
@@ -56,9 +53,9 @@ function PlanSelector(props: Props) {
                 if (isUserRenewingPlan(plan, subscription)) {
                     return;
                 }
-                await subscriptionService.updateSubscription(plan.stripeID);
+                await billingService.updateSubscription(plan.stripeID);
             } else {
-                await subscriptionService.buySubscription(plan.stripeID);
+                await billingService.buySubscription(plan.stripeID);
             }
             bannerMessage = {
                 message: constants.SUBSCRIPTION_UPDATE_SUCCESS,

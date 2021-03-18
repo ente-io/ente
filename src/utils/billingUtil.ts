@@ -1,4 +1,4 @@
-import { FREE_PLAN, Plan, Subscription } from 'services/subscriptionService';
+import { FREE_PLAN, Plan, Subscription } from 'services/billingService';
 import { getData, LS_KEYS } from './storage/localStorage';
 
 export function convertBytesToGBs(bytes, precision?): string {

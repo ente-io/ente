@@ -25,7 +25,7 @@ import {
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
 import { Alert, Button, Jumbotron } from 'react-bootstrap';
-import subscriptionService from 'services/subscriptionService';
+import billingService from 'services/billingService';
 import PlanSelector from './components/PlanSelector';
 import { hasRenewingPaidPlan } from 'utils/billingUtil';
 
@@ -180,8 +180,8 @@ export default function Gallery(props: Props) {
             data
         );
         const favItemIds = await getFavItemIds(data);
-        await subscriptionService.updatePlans();
-        await subscriptionService.syncSubscription();
+        await billingService.updatePlans();
+        await billingService.syncSubscription();
 
         setCollections(nonEmptyCollections);
         if (isUpdated) {

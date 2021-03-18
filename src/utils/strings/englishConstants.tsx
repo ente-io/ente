@@ -1,4 +1,4 @@
-import { Subscription } from 'services/subscriptionService';
+import { Subscription } from 'services/billingService';
 import { template } from './vernacularStrings';
 
 /**

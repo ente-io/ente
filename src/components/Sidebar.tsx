@@ -3,9 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { slide as Menu } from 'react-burger-menu';
 import ConfirmDialog from 'components/ConfirmDialog';
 import Spinner from 'react-bootstrap/Spinner';
-import subscriptionService, {
-    Subscription,
-} from 'services/subscriptionService';
+import billingService, { Subscription } from 'services/billingService';
 import constants from 'utils/strings/constants';
 import { logoutUser } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -49,7 +47,7 @@ export default function Sidebar(props: Props) {
             if (!isOpen) {
                 return;
             }
-            const usage = await subscriptionService.getUsage();
+            const usage = await billingService.getUsage();
 
             SetUsage(usage);
             setSubscription(getUserSubscription());
@@ -68,7 +66,7 @@ export default function Sidebar(props: Props) {
         setConfirmModalView(false);
         setIsOpen(false);
         try {
-            await subscriptionService.cancelSubscription();
+            await billingService.cancelSubscription();
         } catch (e) {
             props.setBannerMessage({
                 message: constants.SUBSCRIPTION_CANCEL_FAILED,

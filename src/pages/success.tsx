@@ -2,9 +2,7 @@ import Container from 'components/Container';
 import router from 'next/router';
 import { useEffect, useState } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
-import subscriptionService, {
-    Subscription,
-} from 'services/subscriptionService';
+import billingService, { Subscription } from 'services/billingService';
 import constants from 'utils/strings/constants';
 
 export default function SuccessRedirect() {
@@ -14,7 +12,7 @@ export default function SuccessRedirect() {
         const sessionId = urlParams.get('session_id');
         if (sessionId) {
             (async () => {
-                const subscription = await subscriptionService.verifySubscription(
+                const subscription = await billingService.verifySubscription(
                     sessionId
                 );
                 setSubscription(subscription);
@@ -28,7 +26,7 @@ export default function SuccessRedirect() {
                     <>
                         <h1>Your payment succeeded</h1>
                         <h4>
-                            {constants.PAID_SUBSCRIPTION_INFO(
+                            {constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
                                 subscription?.expiryTime
                             )}
                         </h4>
