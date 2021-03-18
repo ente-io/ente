@@ -13,11 +13,12 @@ import { getToken } from 'utils/common/key';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { Button } from 'react-bootstrap';
 import {
-    planIsActive,
-    hasActivePaidPlan,
+    isPlanActive,
     convertBytesToGBs,
     getUserSubscription,
     isOnFreePlan,
+    isPlanCancelled,
+    hasRenewingPaidPlan,
 } from 'utils/billingUtil';
 
 enum Action {
@@ -104,13 +105,17 @@ export default function Sidebar(props: Props) {
                     {constants.SUBSCRIPTION_PLAN}
                 </h5>
                 <div style={{ color: '#959595' }}>
-                    {planIsActive(subscription) ? (
+                    {isPlanActive(subscription) ? (
                         isOnFreePlan(subscription) ? (
                             constants.FREE_SUBSCRIPTION_INFO(
                                 subscription?.expiryTime
                             )
+                        ) : isPlanCancelled(subscription) ? (
+                            constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
+                                subscription?.expiryTime
+                            )
                         ) : (
-                            constants.PAID_SUBSCRIPTION_INFO(
+                            constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
                                 subscription?.expiryTime
                             )
                         )
@@ -118,34 +123,47 @@ export default function Sidebar(props: Props) {
                         <p>{constants.SUBSCRIPTION_EXPIRED}</p>
                     )}
                 </div>
-
-                <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() => {
-                        setIsOpen(false);
-                        props.setPlanModalView(true);
-                    }}
-                >
-                    {hasActivePaidPlan(subscription)
-                        ? constants.MANAGE
-                        : constants.SUBSCRIBE}
-                </Button>
-                {hasActivePaidPlan(subscription) && (
-                    <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => {
-                            setAction(Action.cancelSubscription);
-                            setConfirmModalView(true);
-                        }}
-                        style={{ marginLeft: '10px' }}
-                    >
-                        {constants.CANCEL_SUBSCRIPTION}
-                    </Button>
-                )}
+                <div style={{ display: 'flex' }}>
+                    {hasRenewingPaidPlan(subscription) ? (
+                        <>
+                            <Button
+                                variant="success"
+                                size="sm"
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    props.setPlanModalView(true);
+                                }}
+                            >
+                                {constants.MANAGE}
+                            </Button>
+                            <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() => {
+                                    setAction(Action.cancelSubscription);
+                                    setConfirmModalView(true);
+                                }}
+                                style={{ marginLeft: '10px' }}
+                            >
+                                {constants.CANCEL_SUBSCRIPTION}
+                            </Button>
+                        </>
+                    ) : (
+                        <Button
+                            variant="success"
+                            size="sm"
+                            onClick={() => {
+                                setIsOpen(false);
+                                props.setPlanModalView(true);
+                            }}
+                        >
+                            {constants.SUBSCRIBE}
+                        </Button>
+                    )}
+                </div>
             </div>
-            <div style={{ outline: 'none', marginTop: '30px' }}>
+            <div style={{ outline: 'none', marginTop: '30px' }}></div>
+            <div>
                 <h5 style={{ marginBottom: '12px' }}>
                     {constants.USAGE_DETAILS}
                 </h5>
