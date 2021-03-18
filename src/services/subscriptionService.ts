@@ -81,7 +81,7 @@ class SubscriptionService {
             const subscription = response.data['subscription'];
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            console.log(e);
+            console.error(e);
             throw e;
         }
     }
@@ -96,10 +96,9 @@ class SubscriptionService {
                 }
             );
             const subscription = response.data['subscription'];
-            console.log(subscription);
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            console.log(e);
+            console.error(e);
             throw e;
         }
     }
