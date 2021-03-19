@@ -65,17 +65,14 @@ export default function Upload(props: Props) {
         let collectionWiseFiles = new Map<string, any>();
         for (let file of props.acceptedFiles) {
             const filePath = file.path;
-            const folderPath = filePath.substr(
-                0,
-                filePath.lastIndexOf('/') - 1
-            );
+            const folderPath = filePath.substr(0, filePath.lastIndexOf('/'));
             const folderName = folderPath.substr(
                 folderPath.lastIndexOf('/') + 1
             );
             if (!collectionWiseFiles.has(folderName)) {
-                collectionWiseFiles[folderName] = new Array<File>();
+                collectionWiseFiles.set(folderName, new Array<File>());
             }
-            collectionWiseFiles[folderName].push(file);
+            collectionWiseFiles.get(folderName).push(file);
         }
         return collectionWiseFiles;
     }
