@@ -5,7 +5,7 @@ import constants from 'utils/strings/constants';
 interface Props {
     createCollectionView;
     setCreateCollectionView;
-    genAutoFilledName;
+    autoFilledName;
     uploadFiles;
 }
 export default function CreateCollection(props: Props) {
@@ -18,14 +18,13 @@ export default function CreateCollection(props: Props) {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        props.setCreateCollectionView(false);
         await props.uploadFiles(albumName, null);
     };
     useEffect(() => {
-        setAlbumName(props.genAutoFilledName());
-        setTimeout(() => {
-            inputRef.current && inputRef.current.focus();
-        }, 1);
-    }, []);
+        setAlbumName(props.autoFilledName);
+        inputRef.current && inputRef.current.focus();
+    }, [props.autoFilledName]);
     return (
         <Modal
             show={props.createCollectionView}

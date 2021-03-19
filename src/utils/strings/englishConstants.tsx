@@ -138,7 +138,7 @@ const englishConstants = {
     CHANGE_EMAIL: 'change email ?',
     UPLOAD_STRATEGY_CHOICE:
         'the folder you are trying to upload has sub-folders ,please select the upload strategy you would want to use',
-    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'single collection for each folder',
+    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'single collection for all folder',
     UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'a collection for each folder',
 };
 

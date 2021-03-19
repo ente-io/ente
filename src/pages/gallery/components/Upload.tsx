@@ -31,16 +31,27 @@ export default function Upload(props: Props) {
     const [uploadErrors, setUploadErrors] = useState<Error[]>([]);
     const [createCollectionView, setCreateCollectionView] = useState(false);
     const [choiceModalView, setChoiceModalView] = useState(false);
-
+    const [suggestedCollectionName, setSuggestedCollectionName] = useState('');
     useEffect(() => {
+        if (!props.collectionSelectorView) {
+            return;
+        }
         if (
             props.collectionAndItsLatestFile &&
-            props.collectionAndItsLatestFile.length == 0 &&
-            props.collectionSelectorView
+            props.collectionAndItsLatestFile.length == 0
         ) {
-            setChoiceModalView(true);
+            setCreateCollectionView(true);
         }
-    }, [props.acceptedFiles]);
+        setSuggestedCollectionName(getSuggestedCollectionName());
+        init();
+    }, [props.collectionSelectorView]);
+
+    const init = () => {
+        setUploadStage(UPLOAD_STAGES.START);
+        setFileCounter({ current: 0, total: 0 });
+        setPercentComplete(0);
+    };
+
     function getSuggestedCollectionName() {
         if (props.acceptedFiles.length == 0) {
             return '';
@@ -164,7 +175,7 @@ export default function Upload(props: Props) {
             <CreateCollection
                 createCollectionView={createCollectionView}
                 setCreateCollectionView={setCreateCollectionView}
-                genAutoFilledName={getSuggestedCollectionName}
+                autoFilledName={suggestedCollectionName}
                 uploadFiles={uploadFilesToNewCollections}
             />
             <ChoiceModal

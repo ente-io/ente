@@ -14,7 +14,6 @@ function ChoiceModal({
     showCollectionCreateModal,
     ...props
 }: Props) {
-    console.log(props.show);
     return (
         <Modal
             {...props}
