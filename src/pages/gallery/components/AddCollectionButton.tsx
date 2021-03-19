@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, Card, Form, Modal } from 'react-bootstrap';
+import React from 'react';
+import { Card } from 'react-bootstrap';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 import { CollectionIcon } from './CollectionSelector';
@@ -12,6 +12,7 @@ const ImageContainer = styled.div`
     align-items: center;
     justify-content: center;
     font-size: 42px;
+    cursor: pointer;
 `;
 
 export default function AddCollectionButton({ showChoiceModal }) {
