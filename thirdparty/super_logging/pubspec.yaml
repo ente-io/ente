@@ -15,7 +15,7 @@ dependencies:
   device_info: ^0.4.1+4
   logging: ^0.11.4
   sentry: ^3.0.1
-  intl: ^0.16.1
+  intl: ^0.17.0
   path: ^1.6.4
   path_provider: ^1.6.0
 
