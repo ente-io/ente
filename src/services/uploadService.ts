@@ -24,6 +24,10 @@ const WEST_DIRECTION = 'W';
 const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
 const CHUNKS_COMBINED_FOR_UPLOAD = 2;
 
+export interface FileWithCollection {
+    file: File;
+    collection: collection;
+}
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
     chunkCount: number;
@@ -99,14 +103,13 @@ class UploadService {
     private filesCompleted: number;
     private totalFileCount: number;
     private metadataMap: Map<string, Object>;
-    private filesToBeUploaded: File[];
+    private filesToBeUploaded: FileWithCollection[];
     private progressBarProps;
     private uploadErrors: Error[];
     private setUploadErrors;
 
     public async uploadFiles(
-        receivedFiles: File[],
-        collection: collection,
+        filesWithCollectionToUpload: FileWithCollection[],
         token: string,
         progressBarProps,
         setUploadErrors
@@ -122,16 +125,17 @@ class UploadService {
             this.progressBarProps = progressBarProps;
 
             let metadataFiles: File[] = [];
-            let actualFiles: File[] = [];
-            receivedFiles.forEach((file) => {
+            let actualFiles: FileWithCollection[] = [];
+            filesWithCollectionToUpload.forEach((fileWithCollection) => {
+                let file = fileWithCollection.file;
                 if (
                     file.type.substr(0, 5) === TYPE_IMAGE ||
                     file.type.substr(0, 5) === TYPE_VIDEO
                 ) {
-                    actualFiles.push(file);
+                    actualFiles.push(fileWithCollection);
                 }
                 if (file.name.slice(-4) == TYPE_JSON) {
-                    metadataFiles.push(file);
+                    metadataFiles.push(fileWithCollection.file);
                 }
             });
             this.totalFileCount = actualFiles.length;
@@ -164,7 +168,6 @@ class UploadService {
                         await new CryptoWorker(),
                         new FileReader(),
                         this.filesToBeUploaded.pop(),
-                        collection,
                         token
                     )
                 );
@@ -183,10 +186,10 @@ class UploadService {
     private async uploader(
         worker: any,
         reader: FileReader,
-        rawFile: File,
-        collection: collection,
+        fileWithCollection: FileWithCollection,
         token: string
     ) {
+        let { file: rawFile, collection } = fileWithCollection;
         try {
             let file: FileInMemory = await this.readFile(reader, rawFile);
             let {
@@ -227,7 +230,6 @@ class UploadService {
                 worker,
                 reader,
                 this.filesToBeUploaded.pop(),
-                collection,
                 token
             );
         }

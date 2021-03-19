@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { UPLOAD_STAGES } from 'services/uploadService';
+import { FileWithCollection, UPLOAD_STAGES } from 'services/uploadService';
 import { getToken } from 'utils/common/key';
 import CollectionSelector from './CollectionSelector';
 import UploadProgress from './UploadProgress';
@@ -77,24 +77,21 @@ export default function Upload(props: Props) {
         return collectionWiseFiles;
     }
 
-    const init = () => {
-        setProgressView(false);
-        setUploadStage(UPLOAD_STAGES.START);
-        setFileCounter({ current: 0, total: 0 });
-        setPercentComplete(0);
-    };
-
-    const uploadFilesToExistingCollection = async (collection, files) => {
+    const uploadFilesToExistingCollection = async (collection) => {
         try {
             const token = getToken();
-            setPercentComplete(0);
             setProgressView(true);
             props.closeCollectionSelector();
+            setChoiceModalView(false);
 
-            files = files ?? props.acceptedFiles;
+            let filesWithCollectionToUpload: FileWithCollection[] = props.acceptedFiles.map(
+                (file) => ({
+                    file,
+                    collection,
+                })
+            );
             await UploadService.uploadFiles(
-                props.acceptedFiles,
-                collection,
+                filesWithCollectionToUpload,
                 token,
                 {
                     setPercentComplete,
@@ -106,6 +103,7 @@ export default function Upload(props: Props) {
         } catch (err) {
             props.setBannerErrorCode(err.message);
         } finally {
+            setProgressView(false);
             props.refetchData();
         }
     };
@@ -114,18 +112,42 @@ export default function Upload(props: Props) {
         strategy: UPLOAD_STRATEGY,
         collectionName
     ) => {
-        let collectionFiles: Map<string, any>;
-        if (strategy == UPLOAD_STRATEGY.SINGLE_COLLECTION) {
-            collectionFiles = new Map<string, any>([
-                collectionName,
-                props.acceptedFiles,
-            ]);
-        } else {
-            collectionFiles = getCollectionWiseFiles();
-        }
-        for (let [collectionName, files] of collectionFiles) {
-            let collection = await createAlbum(collectionName);
-            await uploadFilesToExistingCollection(collection, files);
+        try {
+            const token = getToken();
+            setProgressView(true);
+            props.closeCollectionSelector();
+            setChoiceModalView(false);
+            let collectionWiseFiles: Map<string, any>;
+            if (strategy == UPLOAD_STRATEGY.SINGLE_COLLECTION) {
+                collectionWiseFiles = new Map<string, any>([
+                    collectionName,
+                    props.acceptedFiles,
+                ]);
+            } else {
+                collectionWiseFiles = getCollectionWiseFiles();
+            }
+            let filesWithCollectionToUpload = new Array<FileWithCollection>();
+            for (let [collectionName, files] of collectionWiseFiles) {
+                let collection = await createAlbum(collectionName);
+                for (let file of files) {
+                    filesWithCollectionToUpload.push({ collection, file });
+                }
+            }
+            await UploadService.uploadFiles(
+                filesWithCollectionToUpload,
+                token,
+                {
+                    setPercentComplete,
+                    setFileCounter,
+                    setUploadStage,
+                },
+                setUploadErrors
+            );
+        } catch (err) {
+            props.setBannerErrorCode(err.message);
+        } finally {
+            setProgressView(false);
+            props.refetchData();
         }
     };
 
