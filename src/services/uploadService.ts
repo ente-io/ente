@@ -446,6 +446,8 @@ class UploadService {
             const metadataJSON: object = await new Promise(
                 (resolve, reject) => {
                     const reader = new FileReader();
+                    reader.onabort = () => reject('file reading was aborted');
+                    reader.onerror = () => reject('file reading has failed');
                     reader.onload = () => {
                         let result =
                             typeof reader.result !== 'string'
@@ -458,20 +460,27 @@ class UploadService {
             );
 
             const metaDataObject = {};
+            if (!metadataJSON) {
+                return;
+            }
             metaDataObject['creationTime'] =
+                metadataJSON['photoTakenTime'] &&
                 metadataJSON['photoTakenTime']['timestamp'] * 1000000;
             metaDataObject['modificationTime'] =
+                metadataJSON['modificationTime'] &&
                 metadataJSON['modificationTime']['timestamp'] * 1000000;
 
             let locationData = null;
             if (
-                metadataJSON['geoData']['latitude'] != 0.0 ||
-                metadataJSON['geoData']['longitude'] != 0.0
+                metadataJSON['geoData'] &&
+                (metadataJSON['geoData']['latitude'] != 0.0 ||
+                    metadataJSON['geoData']['longitude'] != 0.0)
             ) {
                 locationData = metadataJSON['geoData'];
             } else if (
-                metadataJSON['geoDataExif']['latitude'] != 0.0 ||
-                metadataJSON['geoDataExif']['longitude'] != 0.0
+                metadataJSON['geoDataExif'] &&
+                (metadataJSON['geoDataExif']['latitude'] != 0.0 ||
+                    metadataJSON['geoDataExif']['longitude'] != 0.0)
             ) {
                 locationData = metadataJSON['geoDataExif'];
             }
