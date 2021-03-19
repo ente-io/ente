@@ -102,6 +102,7 @@ class UploadService {
     private perFileProgress: number;
     private filesCompleted: number;
     private totalFileCount: number;
+    private fileProgress: Map<string, number>;
     private metadataMap: Map<string, Object>;
     private filesToBeUploaded: FileWithCollection[];
     private progressBarProps;
@@ -119,6 +120,7 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.START);
 
             this.filesCompleted = 0;
+            this.fileProgress = new Map<string, number>();
             this.uploadErrors = [];
             this.setUploadErrors = setUploadErrors;
             this.metadataMap = new Map<string, object>();
@@ -190,6 +192,7 @@ class UploadService {
         token: string
     ) {
         let { file: rawFile, collection } = fileWithCollection;
+        this.fileProgress.set(rawFile.name, 0);
         try {
             let file: FileInMemory = await this.readFile(reader, rawFile);
             let {
@@ -216,6 +219,7 @@ class UploadService {
             await this.uploadFile(uploadFile, token);
             uploadFile = null;
             this.filesCompleted++;
+            this.fileProgress.set(rawFile.name, 100);
             this.changeProgressBarProps();
         } catch (e) {
             console.error('file upload failed with error', e);
@@ -224,6 +228,7 @@ class UploadService {
                 `Uploading Failed for File - ${rawFile.name}`
             );
             this.uploadErrors.push(error);
+            this.fileProgress.set(rawFile.name, -1);
         }
         if (this.filesToBeUploaded.length > 0) {
             await this.uploader(
@@ -236,13 +241,18 @@ class UploadService {
     }
 
     private changeProgressBarProps() {
-        const { setPercentComplete, setFileCounter } = this.progressBarProps;
+        const {
+            setPercentComplete,
+            setFileCounter,
+            setFileProgress,
+        } = this.progressBarProps;
         setFileCounter({
             current: this.filesCompleted + 1,
             total: this.totalFileCount,
         });
         setPercentComplete(this.filesCompleted * this.perFileProgress);
         this.setUploadErrors(this.uploadErrors);
+        setFileProgress(this.fileProgress);
     }
 
     private async readFile(reader: FileReader, receivedFile: File) {

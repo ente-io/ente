@@ -2,17 +2,20 @@ import React from 'react';
 import { Alert, Button, Modal, ProgressBar } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
-export default function UploadProgress({
-    fileCounter,
-    uploadStage,
-    now,
-    uploadErrors,
-    closeModal,
-    ...props
-}) {
+interface Props {
+    fileCounter;
+    uploadStage;
+    now;
+    uploadErrors;
+    closeModal;
+    fileProgress: Map<string, number>;
+    show;
+    onHide;
+}
+export default function UploadProgress(props: Props) {
     return (
         <Modal
-            {...props}
+            show={props.show}
             size="lg"
             aria-labelledby="contained-modal-title-vcenter"
             centered
@@ -25,41 +28,48 @@ export default function UploadProgress({
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {now === 100 ? (
+                {props.now === 100 ? (
                     <Alert variant="success">{constants.UPLOAD[3]}</Alert>
                 ) : (
                     <>
                         <Alert variant="info">
-                            {constants.UPLOAD[uploadStage]}{' '}
-                            {fileCounter?.total != 0
-                                ? `${fileCounter?.current} ${constants.OF} ${fileCounter?.total}`
+                            {constants.UPLOAD[props.uploadStage]}{' '}
+                            {props.fileCounter?.total != 0
+                                ? `${props.fileCounter?.current} ${constants.OF} ${props.fileCounter?.total}`
                                 : ''}
                         </Alert>
-                        <ProgressBar animated now={now} />
+                        <ProgressBar animated now={props.now} />
                     </>
                 )}
-                {uploadErrors && uploadErrors.length > 0 && (
-                    <>
-                        <Alert variant="danger">
-                            <div
-                                style={{
-                                    overflow: 'auto',
-                                    height: '100px',
-                                }}
-                            >
-                                {uploadErrors.map((error, index) => (
-                                    <li key={index}>{error.message}</li>
-                                ))}
-                            </div>
-                        </Alert>
-                    </>
+                {props.fileProgress && (
+                    <div
+                        style={{
+                            overflow: 'auto',
+                            height: '100px',
+                        }}
+                    >
+                        {(() => {
+                            let items = [];
+                            for (let [
+                                fileName,
+                                progress,
+                            ] of props.fileProgress) {
+                                items.push(
+                                    <li key={fileName}>
+                                        ({progress} {fileName})
+                                    </li>
+                                );
+                            }
+                            return items;
+                        })()}
+                    </div>
                 )}
-                {now === 100 && (
+                {props.now === 100 && (
                     <Modal.Footer>
                         <Button
                             variant="dark"
                             style={{ width: '100%' }}
-                            onClick={closeModal}
+                            onClick={props.closeModal}
                         >
                             {constants.CLOSE}
                         </Button>

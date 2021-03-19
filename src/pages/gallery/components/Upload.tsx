@@ -184,6 +184,7 @@ export default function Upload(props: Props) {
                 fileCounter={fileCounter}
                 uploadStage={uploadStage}
                 uploadErrors={uploadErrors}
+                fileProgress={fileProgress}
                 show={progressView}
                 closeModal={() => setProgressView(false)}
                 onHide={init}
