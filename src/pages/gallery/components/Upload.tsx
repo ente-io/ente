@@ -27,6 +27,7 @@ export default function Upload(props: Props) {
         UPLOAD_STAGES.START
     );
     const [fileCounter, setFileCounter] = useState({ current: 0, total: 0 });
+    const [fileProgress, setFileProgress] = useState(new Map<string, number>());
     const [percentComplete, setPercentComplete] = useState(0);
     const [uploadErrors, setUploadErrors] = useState<Error[]>([]);
     const [createCollectionView, setCreateCollectionView] = useState(false);
@@ -90,32 +91,15 @@ export default function Upload(props: Props) {
 
     const uploadFilesToExistingCollection = async (collection) => {
         try {
-            const token = getToken();
-            setProgressView(true);
-            props.closeCollectionSelector();
-            setChoiceModalView(false);
-
             let filesWithCollectionToUpload: FileWithCollection[] = props.acceptedFiles.map(
                 (file) => ({
                     file,
                     collection,
                 })
             );
-            await UploadService.uploadFiles(
-                filesWithCollectionToUpload,
-                token,
-                {
-                    setPercentComplete,
-                    setFileCounter,
-                    setUploadStage,
-                },
-                setUploadErrors
-            );
-        } catch (err) {
-            props.setBannerErrorCode(err.message);
-        } finally {
-            setProgressView(false);
-            props.refetchData();
+            await uploadFiles(filesWithCollectionToUpload);
+        } catch (e) {
+            console.error('Failed to upload files to existing collections', e);
         }
     };
 
@@ -124,10 +108,6 @@ export default function Upload(props: Props) {
         collectionName
     ) => {
         try {
-            const token = getToken();
-            setProgressView(true);
-            props.closeCollectionSelector();
-            setChoiceModalView(false);
             let collectionWiseFiles: Map<string, any>;
             if (strategy == UPLOAD_STRATEGY.SINGLE_COLLECTION) {
                 collectionWiseFiles = new Map<string, any>([
@@ -144,6 +124,20 @@ export default function Upload(props: Props) {
                     filesWithCollectionToUpload.push({ collection, file });
                 }
             }
+        } catch (e) {
+            console.error('Failed to upload files to new collections', e);
+        }
+    };
+
+    const uploadFiles = async (
+        filesWithCollectionToUpload: FileWithCollection[]
+    ) => {
+        try {
+            const token = getToken();
+            setProgressView(true);
+            props.closeCollectionSelector();
+            setChoiceModalView(false);
+
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
                 token,
@@ -151,6 +145,7 @@ export default function Upload(props: Props) {
                     setPercentComplete,
                     setFileCounter,
                     setUploadStage,
+                    setFileProgress,
                 },
                 setUploadErrors
             );
