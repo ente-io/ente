@@ -7,8 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/utils/auth_util.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/services/billing_service.dart';
@@ -37,6 +39,7 @@ class SettingsPage extends StatelessWidget {
   Widget _getBody() {
     final contents = [
       BackupSettingsWidget(),
+      SecuritySectionWidget(),
       SupportSectionWidget(),
       InfoSectionWidget(),
       AccountSectionWidget(),
@@ -248,6 +251,51 @@ class _BackedUpFoldersWidgetState extends State<BackedUpFoldersWidget> {
         }
         return loadWidget;
       },
+    );
+  }
+}
+
+class SecuritySectionWidget extends StatefulWidget {
+  SecuritySectionWidget({Key key}) : super(key: key);
+
+  @override
+  _SecuritySectionWidgetState createState() => _SecuritySectionWidgetState();
+}
+
+class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: [
+          Padding(padding: EdgeInsets.all(12)),
+          SettingsSectionTitle("security"),
+          Container(
+            height: 36,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("lockscreen"),
+                Switch(
+                  value: Configuration.instance.shouldShowLockScreen(),
+                  onChanged: (value) async {
+                    final result = await requestAuthentication();
+                    if (result) {
+                      Configuration.instance.setShouldShowLockScreen(value);
+                      setState(() {});
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

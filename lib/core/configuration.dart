@@ -42,6 +42,7 @@ class Configuration {
   static const secretKeyKey = "secret_key";
   static const keyAttributesKey = "key_attributes";
   static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
+  static const keyShouldShowLockScreen = "should_show_lock_screen";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
 
   SharedPreferences _preferences;
@@ -335,5 +336,17 @@ class Configuration {
     if (value) {
       SyncService.instance.sync();
     }
+  }
+
+  bool shouldShowLockScreen() {
+    if (_preferences.containsKey(keyShouldShowLockScreen)) {
+      return _preferences.getBool(keyShouldShowLockScreen);
+    } else {
+      return false;
+    }
+  }
+
+  Future<void> setShouldShowLockScreen(bool value) {
+    return _preferences.setBool(keyShouldShowLockScreen, value);
   }
 }
