@@ -80,8 +80,8 @@ export default function Sidebar(props: Props) {
     };
 
     let callback = new Map<string, Function>();
-    callback[Action.logout] = logout;
-    callback[Action.cancelSubscription] = cancelSubscription;
+    callback.set(Action.logout, logout);
+    callback.set(Action.cancelSubscription, cancelSubscription);
     function openFeedbackURL() {
         const feedbackURL: string =
             getEndpoint() + '/users/feedback?token=' + getToken();
