@@ -54,11 +54,19 @@ const englishConstants = {
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
-        2: 'uploading your files',
-        3: 'files uploaded successfully!',
+        2: (fileCounter) =>
+            `${fileCounter.finished} of ${fileCounter.total} files successfully uploaded`,
+        3: 'files uploaded completed!',
     },
-    UPLOADING_FILES: `uploading files`,
-    OF: 'of',
+    UPLOADING_FILES: `upload`,
+    FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
+    FILE_UPLOAD_PROGRESS: (name, progress) => (
+        <h5 id={name}>
+            uploading <strong>{name}</strong>
+            {` - `}
+            {progress !== -1 ? progress + '%' : 'failed'}
+        </h5>
+    ),
     SUBSCRIPTION_EXPIRED:
         'your subscription has expired, please renew it form the mobile app',
     STORAGE_QUOTA_EXCEEDED:

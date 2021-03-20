@@ -1,5 +1,6 @@
 import React from 'react';
 import { Alert, Button, Modal, ProgressBar } from 'react-bootstrap';
+import { UPLOAD_STAGES } from 'services/uploadService';
 import constants from 'utils/strings/constants';
 
 interface Props {
@@ -13,6 +14,16 @@ interface Props {
     onHide;
 }
 export default function UploadProgress(props: Props) {
+    let fileProgressStatuses = [];
+    for (let [fileName, progress] of props.fileProgress) {
+        if (progress === 100) {
+            continue;
+        }
+        fileProgressStatuses.push({ fileName, progress });
+    }
+    fileProgressStatuses.sort((a, b) => {
+        if (b.progress !== -1 && a.progress === -1) return 1;
+    });
     return (
         <Modal
             show={props.show}
@@ -28,40 +39,35 @@ export default function UploadProgress(props: Props) {
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                <div style={{ textAlign: 'center' }}>
+                    <h4>
+                        {props.uploadStage == UPLOAD_STAGES.UPLOADING
+                            ? constants.UPLOAD[props.uploadStage](
+                                  props.fileCounter
+                              )
+                            : constants.UPLOAD[props.uploadStage]}
+                    </h4>
+                </div>
                 {props.now === 100 ? (
-                    <Alert variant="success">{constants.UPLOAD[3]}</Alert>
-                ) : (
-                    <>
-                        <Alert variant="info">
-                            {constants.UPLOAD[props.uploadStage]}{' '}
-                            {props.fileCounter?.total != 0
-                                ? `${props.fileCounter?.current} ${constants.OF} ${props.fileCounter?.total}`
-                                : ''}
+                    fileProgressStatuses.length !== 0 && (
+                        <Alert variant="warning">
+                            {constants.FAILED_UPLOAD_FILE_LIST}
                         </Alert>
-                        <ProgressBar animated now={props.now} />
-                    </>
+                    )
+                ) : (
+                    <ProgressBar now={props.now} />
                 )}
-                {props.fileProgress && (
+                {fileProgressStatuses && (
                     <div
                         style={{
+                            marginTop: '10px',
                             overflow: 'auto',
-                            height: '100px',
+                            maxHeight: '200px',
                         }}
                     >
-                        {(() => {
-                            let items = [];
-                            for (let [
-                                fileName,
-                                progress,
-                            ] of props.fileProgress) {
-                                items.push(
-                                    <li key={fileName}>
-                                        ({progress} {fileName})
-                                    </li>
-                                );
-                            }
-                            return items;
-                        })()}
+                        {fileProgressStatuses.map(({ fileName, progress }) =>
+                            constants.FILE_UPLOAD_PROGRESS(fileName, progress)
+                        )}
                     </div>
                 )}
                 {props.now === 100 && (

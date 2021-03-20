@@ -124,6 +124,7 @@ export default function Upload(props: Props) {
                     filesWithCollectionToUpload.push({ collection, file });
                 }
             }
+            await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
             console.error('Failed to upload files to new collections', e);
         }
@@ -152,7 +153,6 @@ export default function Upload(props: Props) {
         } catch (err) {
             props.setBannerErrorCode(err.message);
         } finally {
-            setProgressView(false);
             props.refetchData();
         }
     };
