@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FileWithCollection, UPLOAD_STAGES } from 'services/uploadService';
 import { getToken } from 'utils/common/key';
 import CollectionSelector from './CollectionSelector';

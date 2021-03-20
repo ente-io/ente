@@ -15,15 +15,17 @@ interface Props {
 }
 export default function UploadProgress(props: Props) {
     let fileProgressStatuses = [];
-    for (let [fileName, progress] of props.fileProgress) {
-        if (progress === 100) {
-            continue;
+    if (props.fileProgress) {
+        for (let [fileName, progress] of props.fileProgress) {
+            if (progress === 100) {
+                continue;
+            }
+            fileProgressStatuses.push({ fileName, progress });
         }
-        fileProgressStatuses.push({ fileName, progress });
+        fileProgressStatuses.sort((a, b) => {
+            if (b.progress !== -1 && a.progress === -1) return 1;
+        });
     }
-    fileProgressStatuses.sort((a, b) => {
-        if (b.progress !== -1 && a.progress === -1) return 1;
-    });
     return (
         <Modal
             show={props.show}
