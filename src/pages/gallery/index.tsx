@@ -25,6 +25,7 @@ import {
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
 import { Alert, Button, Jumbotron } from 'react-bootstrap';
+import Delete from 'components/delete';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -118,7 +119,26 @@ interface Props {
     setNavbarIconView;
     err;
 }
-export default function Gallery(props: Props) {
+
+const DeleteBtn = styled.button`
+    border: none;
+    background-color: #ff6666;
+    position: fixed;
+    z-index: 1;
+    bottom: 10px;
+    right: 10px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    color: #fff;
+`;
+
+type selectedState = {
+    [k:number]: boolean;
+    count: number;
+}
+
+export default function Gallery(props) {
     const router = useRouter();
     const [collections, setCollections] = useState<collection[]>([]);
     const [
@@ -133,6 +153,7 @@ export default function Gallery(props: Props) {
     const [bannerErrorCode, setBannerErrorCode] = useState<number>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
+    const [selected, setSelected] = useState<selectedState>({ count: 0 });
 
     const loadingBar = useRef(null);
     useEffect(() => {
@@ -245,6 +266,14 @@ export default function Gallery(props: Props) {
         setOpen(true);
     };
 
+    const handleSelect = (id: number) => (checked: boolean) => {
+        setSelected({
+            ...selected,
+            [id]: checked,
+            count: checked ? selected.count + 1: selected.count - 1,
+        });
+    }
+
     const getThumbnail = (file: file[], index: number) => {
         return (
             <PreviewCard
@@ -252,6 +281,10 @@ export default function Gallery(props: Props) {
                 data={file[index]}
                 updateUrl={updateUrl(file[index].dataIndex)}
                 onClick={onThumbnailClick(index)}
+                selectable
+                onSelect={handleSelect(file[index].id)}
+                selected={selected[file[index].id]}
+                selectOnClick={selected.count > 0}
             />
         );
     };
@@ -526,6 +559,7 @@ export default function Gallery(props: Props) {
                     {constants.INSTALL_MOBILE_APP()}
                 </Alert>
             )}
+            {selected.count && <DeleteBtn><Delete /></DeleteBtn>}
         </>
     );
 }
