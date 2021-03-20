@@ -145,10 +145,10 @@ const GlobalStyles = createGlobalStyle`
     } 
     .bm-burger-button {
         position: fixed;
-        width: 28px;
-        height: 20px;
-        left: 36px;
-        margin-top: 30px;
+        width: 26px;
+        height: 22px;
+        left: 16px;
+        top: 22px;
     }
     .bm-burger-bars {
         background: #bdbdbd;
@@ -169,10 +169,10 @@ const Image = styled.img`
     margin-right: 5px;
 `;
 
-const FlexContainer = styled.div`
+const FlexContainer = styled.div<{sideMargin: boolean}>`
     flex: 1;
     text-align: center;
-    margin: 16px;
+    ${props => props.sideMargin && 'margin-left: 48px;'}
 `;
 
 sentryInit();
@@ -235,7 +235,7 @@ export default function App({ Component, pageProps, err }) {
                 <Sidebar setNavbarIconView={setNavbarIconView} />
             </div>
             <Navbar>
-                <FlexContainer>
+                <FlexContainer sideMargin={navbarIconView}>
                     <Image
                         style={{ height: '24px' }}
                         alt="logo"
