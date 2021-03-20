@@ -80,6 +80,7 @@ interface ProcessedFile {
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: fileAttribute;
+    filename: string;
 }
 interface BackupedFile extends ProcessedFile {}
 
@@ -193,6 +194,7 @@ class UploadService {
     ) {
         let { file: rawFile, collection } = fileWithCollection;
         this.fileProgress.set(rawFile.name, 0);
+        this.changeProgressBarProps();
         try {
             let file: FileInMemory = await this.readFile(reader, rawFile);
             let {
@@ -247,10 +249,16 @@ class UploadService {
             setFileProgress,
         } = this.progressBarProps;
         setFileCounter({
-            current: this.filesCompleted + 1,
+            finished: this.filesCompleted,
             total: this.totalFileCount,
         });
-        setPercentComplete(this.filesCompleted * this.perFileProgress);
+        let percentComplete = 0;
+        if (this.fileProgress) {
+            for (let [_, progress] of this.fileProgress) {
+                percentComplete += (this.perFileProgress * progress) / 100;
+            }
+        }
+        setPercentComplete(percentComplete);
         this.setUploadErrors(this.uploadErrors);
         setFileProgress(this.fileProgress);
     }
@@ -343,6 +351,7 @@ class UploadService {
                     file: encryptedFiledata,
                     thumbnail: encryptedThumbnail,
                     metadata: encryptedMetadata,
+                    filename: file.metadata.title,
                 },
                 fileKey: encryptedKey,
             };
@@ -405,13 +414,15 @@ class UploadService {
                 const fileUploadURL = await this.getUploadURL(token);
                 file.file.objectKey = await this.putFile(
                     fileUploadURL,
-                    file.file.encryptedData
+                    file.file.encryptedData,
+                    file.filename
                 );
             }
             const thumbnailUploadURL = await this.getUploadURL(token);
             file.thumbnail.objectKey = await this.putFile(
                 thumbnailUploadURL,
-                file.thumbnail.encryptedData as Uint8Array
+                file.thumbnail.encryptedData as Uint8Array,
+                null
             );
             delete file.file.encryptedData;
             delete file.thumbnail.encryptedData;
@@ -699,10 +710,20 @@ class UploadService {
 
     private async putFile(
         fileUploadURL: UploadURL,
-        file: Uint8Array
+        file: Uint8Array,
+        filename: string
     ): Promise<string> {
         try {
-            await HTTPService.put(fileUploadURL.url, file);
+            await HTTPService.put(fileUploadURL.url, file, null, null, {
+                onUploadProgress: (event) => {
+                    filename &&
+                        this.fileProgress.set(
+                            filename,
+                            Math.round((50 * event.loaded) / event.total)
+                        );
+                    this.changeProgressBarProps();
+                },
+            });
             return fileUploadURL.objectKey;
         } catch (e) {
             console.error('putFile to dataStore failed ', e);
