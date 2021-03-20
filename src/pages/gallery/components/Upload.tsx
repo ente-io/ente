@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FileWithCollection, UPLOAD_STAGES } from 'services/uploadService';
 import { getToken } from 'utils/common/key';
 import CollectionSelector from './CollectionSelector';
@@ -21,6 +21,11 @@ export enum UPLOAD_STRATEGY {
     SINGLE_COLLECTION,
     COLLECTION_PER_FOLDER,
 }
+
+interface AnalysisResult {
+    suggestedCollectionName: string;
+    multipleFolders: boolean;
+}
 export default function Upload(props: Props) {
     const [progressView, setProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
@@ -32,7 +37,11 @@ export default function Upload(props: Props) {
     const [uploadErrors, setUploadErrors] = useState<Error[]>([]);
     const [createCollectionView, setCreateCollectionView] = useState(false);
     const [choiceModalView, setChoiceModalView] = useState(false);
-    const [suggestedCollectionName, setSuggestedCollectionName] = useState('');
+    const [
+        fileAnalysisResult,
+        setFileAnalysisResult,
+    ] = useState<AnalysisResult>(null);
+    const [triggerFocus, setTriggerFocus] = useState(false);
     useEffect(() => {
         if (!props.collectionSelectorView) {
             return;
@@ -43,7 +52,7 @@ export default function Upload(props: Props) {
         ) {
             setCreateCollectionView(true);
         }
-        setSuggestedCollectionName(getSuggestedCollectionName());
+        setFileAnalysisResult(analyseUploadFiles());
         init();
     }, [props.collectionSelectorView]);
 
@@ -53,9 +62,9 @@ export default function Upload(props: Props) {
         setPercentComplete(0);
     };
 
-    function getSuggestedCollectionName() {
+    function analyseUploadFiles() {
         if (props.acceptedFiles.length == 0) {
-            return '';
+            return {} as AnalysisResult;
         }
         const paths: string[] = props.acceptedFiles.map((file) => file.path);
         paths.sort();
@@ -63,6 +72,8 @@ export default function Upload(props: Props) {
             lastPath = paths[paths.length - 1],
             L = firstPath.length,
             i = 0;
+        const firstFileFolder = firstPath.substr(0, firstPath.lastIndexOf('/'));
+        const lastFileFolder = lastPath.substr(0, lastPath.lastIndexOf('/'));
         while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
         let commonPathPrefix = firstPath.substring(0, i);
         if (commonPathPrefix) {
@@ -71,7 +82,10 @@ export default function Upload(props: Props) {
                 commonPathPrefix.lastIndexOf('/') - 1
             );
         }
-        return commonPathPrefix;
+        return {
+            suggestedCollectionName: commonPathPrefix,
+            multipleFolders: firstFileFolder !== lastFileFolder,
+        };
     }
     function getCollectionWiseFiles() {
         let collectionWiseFiles = new Map<string, any>();
@@ -156,28 +170,34 @@ export default function Upload(props: Props) {
             props.refetchData();
         }
     };
-
+    const nextModal = () => {
+        setTriggerFocus((prev) => !prev);
+        fileAnalysisResult.multipleFolders
+            ? setChoiceModalView(true)
+            : setCreateCollectionView(true);
+    };
     return (
         <>
             <CollectionSelector
                 collectionAndItsLatestFile={props.collectionAndItsLatestFile}
                 uploadFiles={uploadFilesToExistingCollection}
-                showChoiceModal={() => setChoiceModalView(true)}
+                showNextModal={nextModal}
                 collectionSelectorView={props.collectionSelectorView}
                 closeCollectionSelector={props.closeCollectionSelector}
-                showCollectionCreateModal={() => setCreateCollectionView(true)}
             />
             <CreateCollection
                 createCollectionView={createCollectionView}
                 setCreateCollectionView={setCreateCollectionView}
-                autoFilledName={suggestedCollectionName}
+                autoFilledName={fileAnalysisResult?.suggestedCollectionName}
                 uploadFiles={uploadFilesToNewCollections}
+                triggerFocus={triggerFocus}
             />
             <ChoiceModal
                 show={choiceModalView}
                 onHide={() => setChoiceModalView(false)}
                 uploadFiles={uploadFilesToNewCollections}
                 showCollectionCreateModal={() => setCreateCollectionView(true)}
+                setTriggerFocus={setTriggerFocus}
             />
             <UploadProgress
                 now={percentComplete}

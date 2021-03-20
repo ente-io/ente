@@ -8,10 +8,12 @@ interface Props {
     show;
     onHide;
     showCollectionCreateModal;
+    setTriggerFocus;
 }
 function ChoiceModal({
     uploadFiles,
     showCollectionCreateModal,
+    setTriggerFocus,
     ...props
 }: Props) {
     return (
@@ -22,32 +24,44 @@ function ChoiceModal({
             centered
         >
             <Modal.Body style={{ padding: '24px' }}>
-                <Modal.Title id="contained-modal-title-vcenter">
+                <Modal.Header
+                    style={{
+                        borderColor: 'rgb(16, 176, 2)',
+                        fontSize: '20px',
+                        marginBottom: '20px',
+                    }}
+                    id="contained-modal-title-vcenter"
+                    closeButton
+                >
                     {constants.UPLOAD_STRATEGY_CHOICE}
-                </Modal.Title>
-            </Modal.Body>
-            <Modal.Footer style={{ borderTop: 'none' }}>
-                <Button
-                    variant="success"
-                    onClick={() => {
-                        props.onHide();
-                        showCollectionCreateModal();
+                </Modal.Header>
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'space-around',
+                        paddingBottom: '20px',
                     }}
                 >
-                    {constants.UPLOAD_STRATEGY_SINGLE_COLLECTION}
-                </Button>
-                <Button
-                    variant="success"
-                    onClick={() =>
-                        uploadFiles(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER)
-                    }
-                >
-                    {constants.UPLOAD_STRATEGY_COLLECTION_PER_FOLDER}
-                </Button>
-                <Button variant="secondary" onClick={props.onHide}>
-                    {constants.CANCEL}
-                </Button>
-            </Modal.Footer>
+                    <Button
+                        variant="success"
+                        onClick={() => {
+                            props.onHide();
+                            setTriggerFocus((prev) => !prev);
+                            showCollectionCreateModal();
+                        }}
+                    >
+                        {constants.UPLOAD_STRATEGY_SINGLE_COLLECTION}
+                    </Button>
+                    <Button
+                        variant="success"
+                        onClick={() =>
+                            uploadFiles(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER)
+                        }
+                    >
+                        {constants.UPLOAD_STRATEGY_COLLECTION_PER_FOLDER}
+                    </Button>
+                </div>
+            </Modal.Body>
         </Modal>
     );
 }

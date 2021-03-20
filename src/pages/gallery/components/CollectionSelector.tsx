@@ -20,8 +20,7 @@ interface Props {
     uploadFiles;
     collectionSelectorView;
     closeCollectionSelector;
-    showChoiceModal;
-    showCollectionCreateModal;
+    showNextModal;
 }
 function CollectionSelector(props: Props) {
     const CollectionIcons: JSX.Element[] = props.collectionAndItsLatestFile?.map(
@@ -52,9 +51,7 @@ function CollectionSelector(props: Props) {
             style={{ maxWidth: '100%' }}
         >
             <Modal.Header closeButton>
-                <Modal.Title style={{ marginLeft: '12px' }}>
-                    {constants.SELECT_COLLECTION}
-                </Modal.Title>
+                <Modal.Title>{constants.SELECT_COLLECTION}</Modal.Title>
             </Modal.Header>
             <Modal.Body
                 style={{
@@ -63,7 +60,7 @@ function CollectionSelector(props: Props) {
                     flexWrap: 'wrap',
                 }}
             >
-                <AddCollectionButton showChoiceModal={props.showChoiceModal} />
+                <AddCollectionButton showChoiceModal={props.showNextModal} />
                 {CollectionIcons}
             </Modal.Body>
         </Modal>

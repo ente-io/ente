@@ -7,15 +7,14 @@ interface Props {
     setCreateCollectionView;
     autoFilledName;
     uploadFiles;
+    triggerFocus;
 }
 export default function CreateCollection(props: Props) {
     const [albumName, setAlbumName] = useState('');
-    const inputRef = useRef<HTMLInputElement>(null);
-
     const handleChange = (event) => {
         setAlbumName(event.target.value);
     };
-
+    const collectionNameInputRef = useRef(null);
     const handleSubmit = async (event) => {
         event.preventDefault();
         props.setCreateCollectionView(false);
@@ -23,8 +22,14 @@ export default function CreateCollection(props: Props) {
     };
     useEffect(() => {
         setAlbumName(props.autoFilledName);
-        inputRef.current && inputRef.current.focus();
     }, [props.autoFilledName]);
+
+    useEffect(() => {
+        setTimeout(() => {
+            console.log(collectionNameInputRef);
+            collectionNameInputRef.current?.focus();
+        }, 200);
+    }, [props.triggerFocus]);
     return (
         <Modal
             show={props.createCollectionView}
@@ -45,7 +50,7 @@ export default function CreateCollection(props: Props) {
                             placeholder={constants.ALBUM_NAME}
                             value={albumName}
                             onChange={handleChange}
-                            ref={inputRef}
+                            ref={collectionNameInputRef}
                         />
                     </Form.Group>
                     <Button
