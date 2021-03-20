@@ -111,6 +111,8 @@ export default function Sidebar(props: Props) {
                 <a
                     href="mailto:contact@ente.io"
                     style={{ textDecoration: 'inherit', color: 'inherit' }}
+                    target="_blank"
+                    rel="noreferrer noopener"
                 >
                     support
                 </a>
