@@ -209,8 +209,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           var header;
-          if (_selectedFiles.files.isEmpty &&
-              Configuration.instance.hasConfiguredAccount()) {
+          if (_selectedFiles.files.isEmpty) {
             header = Container(
               margin: EdgeInsets.only(top: 12),
               child: Stack(

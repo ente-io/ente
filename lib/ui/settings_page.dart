@@ -9,6 +9,7 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/ui/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/core/configuration.dart';
@@ -37,12 +38,25 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _getBody() {
-    final contents = [
-      BackupSettingsWidget(),
+    final hasLoggedIn = Configuration.instance.getToken() != null;
+    final List<Widget> contents = [];
+    if (hasLoggedIn) {
+      contents.addAll([
+        BackupSettingsWidget(),
+        Padding(padding: EdgeInsets.all(12)),
+      ]);
+    }
+    contents.addAll([
       SecuritySectionWidget(),
+      Padding(padding: EdgeInsets.all(12)),
       SupportSectionWidget(),
+      Padding(padding: EdgeInsets.all(12)),
       InfoSectionWidget(),
-      AccountSectionWidget(),
+    ]);
+    if (hasLoggedIn) {
+      contents.add(AccountSectionWidget());
+    }
+    contents.add(
       FutureBuilder(
         future: _getAppVersion(),
         builder: (context, snapshot) {
@@ -61,10 +75,10 @@ class SettingsPage extends StatelessWidget {
           return Container();
         },
       ),
-    ];
-    // if (kDebugMode) {
-    //   contents.add(DebugWidget());
-    // }
+    );
+    if (kDebugMode) {
+      contents.add(DebugWidget());
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -273,7 +287,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     return Container(
       child: Column(
         children: [
-          Padding(padding: EdgeInsets.all(12)),
           SettingsSectionTitle("security"),
           Container(
             height: 36,
@@ -337,7 +350,6 @@ class SupportSectionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Column(children: [
-        Padding(padding: EdgeInsets.all(12)),
         SettingsSectionTitle("support"),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -345,11 +357,13 @@ class SupportSectionWidget extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return WebPage(
-                      "roadmap",
-                      Configuration.instance.getHttpEndpoint() +
-                          "/users/roadmap?token=" +
-                          Configuration.instance.getToken());
+                  final endpoint = Configuration.instance.getHttpEndpoint() +
+                      "/users/roadmap";
+                  final isLoggedIn = Configuration.instance.getToken() != null;
+                  final url = isLoggedIn
+                      ? endpoint + "?token=" + Configuration.instance.getToken()
+                      : ROADMAP_URL;
+                  return WebPage("roadmap", url);
                 },
               ),
             );
@@ -421,7 +435,6 @@ class InfoSectionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Column(children: [
-        Padding(padding: EdgeInsets.all(12)),
         SettingsSectionTitle("about"),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -612,7 +625,7 @@ class SettingsTextItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(padding: EdgeInsets.all(6)),
+        Padding(padding: EdgeInsets.all(Platform.isIOS ? 4 : 6)),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -620,7 +633,7 @@ class SettingsTextItem extends StatelessWidget {
             Icon(icon),
           ],
         ),
-        Padding(padding: EdgeInsets.all(6)),
+        Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 6)),
       ],
     );
   }
