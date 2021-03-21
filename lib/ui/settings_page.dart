@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
@@ -284,35 +285,121 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> children = [];
+    children.addAll([
+      SettingsSectionTitle("security"),
+      Container(
+        height: 36,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("lockscreen"),
+            Switch(
+              value: Configuration.instance.shouldShowLockScreen(),
+              onChanged: (value) async {
+                AppLock.of(context).disable();
+                final result = await requestAuthentication();
+                if (result) {
+                  AppLock.of(context).setEnabled(value);
+                  Configuration.instance.setShouldShowLockScreen(value);
+                  setState(() {});
+                } else {
+                  AppLock.of(context).setEnabled(
+                      Configuration.instance.shouldShowLockScreen());
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    ]);
+    if (Platform.isAndroid) {
+      children.addAll([
+        Padding(padding: EdgeInsets.all(4)),
+        Divider(height: 4),
+        Padding(padding: EdgeInsets.all(4)),
+        Container(
+          height: 36,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("hide from recents"),
+              Switch(
+                value: Configuration.instance.shouldHideFromRecents(),
+                onChanged: (value) async {
+                  if (value) {
+                    AlertDialog alert = AlertDialog(
+                      title: Text("hide from recents?"),
+                      content: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "hiding from the task switcher will prevent you from taking screenshots in this app.",
+                              style: TextStyle(
+                                height: 1.5,
+                              ),
+                            ),
+                            Padding(padding: EdgeInsets.all(8)),
+                            Text(
+                              "are you sure?",
+                              style: TextStyle(
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          child:
+                              Text("no", style: TextStyle(color: Colors.white)),
+                          onPressed: () {
+                            Navigator.of(context, rootNavigator: true)
+                                .pop('dialog');
+                          },
+                        ),
+                        TextButton(
+                          child: Text("yes",
+                              style: TextStyle(
+                                  color: Colors.white.withOpacity(0.8))),
+                          onPressed: () async {
+                            Navigator.of(context, rootNavigator: true)
+                                .pop('dialog');
+                            await Configuration.instance
+                                .setShouldHideFromRecents(true);
+                            await FlutterWindowManager.addFlags(
+                                FlutterWindowManager.FLAG_SECURE);
+                            setState(() {});
+                          },
+                        ),
+                      ],
+                    );
+
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return alert;
+                      },
+                    );
+                  } else {
+                    await Configuration.instance
+                        .setShouldHideFromRecents(false);
+                    await FlutterWindowManager.clearFlags(
+                        FlutterWindowManager.FLAG_SECURE);
+                    setState(() {});
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ]);
+    }
     return Container(
       child: Column(
-        children: [
-          SettingsSectionTitle("security"),
-          Container(
-            height: 36,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("lockscreen"),
-                Switch(
-                  value: Configuration.instance.shouldShowLockScreen(),
-                  onChanged: (value) async {
-                    AppLock.of(context).disable();
-                    final result = await requestAuthentication();
-                    if (result) {
-                      AppLock.of(context).setEnabled(value);
-                      Configuration.instance.setShouldShowLockScreen(value);
-                      setState(() {});
-                    } else {
-                      AppLock.of(context).setEnabled(
-                          Configuration.instance.shouldShowLockScreen());
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
+        children: children,
       ),
     );
   }

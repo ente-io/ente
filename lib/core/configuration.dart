@@ -43,6 +43,7 @@ class Configuration {
   static const keyAttributesKey = "key_attributes";
   static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
   static const keyShouldShowLockScreen = "should_show_lock_screen";
+  static const keyShouldHideFromRecents = "should_hide_from_recents";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
 
   SharedPreferences _preferences;
@@ -348,5 +349,17 @@ class Configuration {
 
   Future<void> setShouldShowLockScreen(bool value) {
     return _preferences.setBool(keyShouldShowLockScreen, value);
+  }
+
+  bool shouldHideFromRecents() {
+    if (_preferences.containsKey(keyShouldHideFromRecents)) {
+      return _preferences.getBool(keyShouldHideFromRecents);
+    } else {
+      return false;
+    }
+  }
+
+  Future<void> setShouldHideFromRecents(bool value) {
+    return _preferences.setBool(keyShouldHideFromRecents, value);
   }
 }

@@ -78,6 +78,7 @@ dependencies:
     git: https://github.com/deakjahn/huge_listview.git
   package_info_plus: ^0.6.4
   local_auth: ^1.1.0
+  flutter_windowmanager: ^0.0.2
 
 dev_dependencies:
   flutter_test:
