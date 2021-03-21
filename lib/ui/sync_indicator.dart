@@ -40,7 +40,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
 
   @override
   Widget build(BuildContext context) {
-    if (Configuration.instance.hasConfiguredAccount() && _event != null && _event.status != SyncStatus.applying_local_diff) {
+    if (Configuration.instance.hasConfiguredAccount() && _event != null) {
       if (_event.status == SyncStatus.completed) {
         Future.delayed(Duration(milliseconds: 3000), () {
           if (mounted) {
