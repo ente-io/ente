@@ -82,15 +82,14 @@ class UserService {
   Future<void> getCredentials(BuildContext context, String ott) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
-    await _dio.get(
-      _config.getHttpEndpoint() + "/users/credentials",
-      queryParameters: {
-        "email": _config.getEmail(),
-        "ott": ott,
-      },
-    ).catchError((e) async {
-      _logger.severe(e);
-    }).then((response) async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/credentials",
+        queryParameters: {
+          "email": _config.getEmail(),
+          "ott": ott,
+        },
+      );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
         await _saveConfiguration(response);
@@ -113,7 +112,11 @@ class UserService {
         showErrorDialog(
             context, "oops", "verification failed, please try again");
       }
-    });
+    } catch (e) {
+      await dialog.hide();
+      _logger.severe(e);
+      showErrorDialog(context, "oops", "verification failed, please try again");
+    }
   }
 
   Future<void> setupAttributes(BuildContext context, String password) async {
