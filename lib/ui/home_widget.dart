@@ -35,9 +35,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
-  final String title;
-
-  const HomeWidget(this.title, {Key key}) : super(key: key);
+  const HomeWidget({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
