@@ -31,12 +31,10 @@ class Configuration {
   static final _logger = Logger("Configuration");
   final kTempFolderDeletionTimeBuffer = Duration(days: 1).inMicroseconds;
 
-  static const endpointKey = "endpoint";
   static const userIDKey = "user_id";
   static const emailKey = "email";
   static const nameKey = "name";
   static const tokenKey = "token";
-  static const hasOptedForE2EKey = "has_opted_for_e2e_encryption";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyKey = "key";
   static const secretKeyKey = "secret_key";
@@ -229,30 +227,11 @@ class Configuration {
     await _preferences.setInt(userIDKey, userID);
   }
 
-  Future<void> setOptInForE2E(bool hasOptedForE2E) async {
-    await _preferences.setBool(hasOptedForE2EKey, hasOptedForE2E);
-  }
-
-  bool hasOptedForE2E() {
-    return true;
-    // return _preferences.getBool(hasOptedForE2EKey);
-  }
-
   Set<String> getPathsToBackUp() {
     if (_preferences.containsKey(foldersToBackUpKey)) {
       return _preferences.getStringList(foldersToBackUpKey).toSet();
     } else {
-      final foldersToBackUp = Set<String>();
-      foldersToBackUp.add("Camera");
-      foldersToBackUp.add("Recents");
-      foldersToBackUp.add("DCIM");
-      foldersToBackUp.add("Download");
-      foldersToBackUp.add("Downloads");
-      foldersToBackUp.add("Screenshot");
-      foldersToBackUp.add("Screenshots");
-      foldersToBackUp.add("Selfies");
-      foldersToBackUp.add("Portrait");
-      return foldersToBackUp;
+      return Set<String>();
     }
   }
 
