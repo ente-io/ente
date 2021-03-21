@@ -35,9 +35,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
-  final String title;
-
-  const HomeWidget(this.title, {Key key}) : super(key: key);
+  const HomeWidget({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -107,7 +105,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               ),
             ),
             onPressed: () async {
-              Navigator.of(context).pop();
+              Navigator.of(context, rootNavigator: true).pop('dialog');
               final dialog = createProgressDialog(context, "logging out...");
               await dialog.show();
               await Configuration.instance.logout();
@@ -211,8 +209,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           var header;
-          if (_selectedFiles.files.isEmpty &&
-              Configuration.instance.hasConfiguredAccount()) {
+          if (_selectedFiles.files.isEmpty) {
             header = Container(
               margin: EdgeInsets.only(top: 12),
               child: Stack(

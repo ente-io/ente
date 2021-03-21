@@ -231,6 +231,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           child: Text("remove"),
           isDestructiveAction: true,
           onPressed: () async {
+            Navigator.of(context, rootNavigator: true).pop();
             final dialog = createProgressDialog(context, "removing files...");
             await dialog.show();
             try {
@@ -238,11 +239,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   widget.collection.id, widget.selectedFiles.files.toList());
               await dialog.hide();
               widget.selectedFiles.clearAll();
-              Navigator.of(context).pop();
             } catch (e, s) {
               _logger.severe(e, s);
               await dialog.hide();
-              Navigator.of(context).pop();
               showGenericErrorDialog(context);
             }
           },

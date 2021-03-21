@@ -326,7 +326,7 @@ class _DetailPageState extends State<DetailPage> {
             FlatButton(
               child: Text('ok'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context, rootNavigator: true).pop('dialog');
               },
             ),
           ],

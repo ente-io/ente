@@ -437,18 +437,25 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  FlatButton(
-                    child: Text("review plans"),
+                  TextButton(
+                    child: Text(
+                      "review plans",
+                      style: TextStyle(color: Theme.of(context).buttonColor),
+                    ),
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      Navigator.of(context, rootNavigator: true).pop('dialog');
                     },
                   ),
-                  FlatButton(
-                    child: Text("ok"),
+                  TextButton(
+                    child: Text(
+                      "ok",
+                      style: TextStyle(color: Colors.white),
+                    ),
                     onPressed: () {
                       if (widget.isOnboarding) {
                         Bus.instance.fire(SubscriptionPurchasedEvent());
                       }
+                      Navigator.of(context, rootNavigator: true).pop('dialog');
                       Navigator.of(context).popUntil((route) => route.isFirst);
                     },
                   ),
@@ -671,35 +678,6 @@ class SubscriptionPlanWidget extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class SubsriptionSuccessfulDialog extends StatelessWidget {
-  const SubsriptionSuccessfulDialog({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text("success!",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          )),
-      content: SingleChildScrollView(
-        child: Column(children: [
-          Text("your photos and videos will now be backed up"),
-          Padding(padding: EdgeInsets.all(6)),
-          Text("the first sync might take a while, please bear with us"),
-        ]),
-      ),
-      actions: [
-        FlatButton(
-          child: Text("ok"),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
     );
   }
 }

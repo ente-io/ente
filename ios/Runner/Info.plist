@@ -47,7 +47,9 @@
 		<true/>
 	</dict>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Please grant access to your photos so that we can organize, encrypt and backup them up.</string>
+	<string>Please allow access to your photos so that ente can encrypt and backup them up.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Please allow ente to lock itself with FaceID or TouchID</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

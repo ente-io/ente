@@ -160,13 +160,13 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         FlatButton(
           child: Text("change"),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context, rootNavigator: true).pop();
           },
         ),
         FlatButton(
           child: Text("confirm"),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context, rootNavigator: true).pop();
             UserService.instance
                 .setupAttributes(context, _passwordController1.text);
           },

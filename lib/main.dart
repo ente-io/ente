@@ -11,7 +11,9 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/home_widget.dart';
+import 'package:photos/ui/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:super_logging/super_logging.dart';
@@ -20,6 +22,27 @@ import 'package:logging/logging.dart';
 final _logger = Logger("main");
 
 Completer<void> _initializationStatus;
+
+final themeData = ThemeData(
+  fontFamily: 'Ubuntu',
+  brightness: Brightness.dark,
+  hintColor: Colors.grey,
+  accentColor: Color.fromRGBO(45, 194, 98, 1.0),
+  buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
+  buttonTheme: ButtonThemeData().copyWith(
+    buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
+  ),
+  toggleableActiveColor: Colors.green[400],
+  scaffoldBackgroundColor: Colors.black,
+  backgroundColor: Colors.black,
+  appBarTheme: AppBarTheme().copyWith(
+    color: Color.fromRGBO(10, 20, 20, 1.0),
+  ),
+  cardColor: Color.fromRGBO(25, 25, 25, 1.0),
+  dialogTheme: DialogTheme().copyWith(
+    backgroundColor: Color.fromRGBO(20, 20, 20, 1.0),
+  ),
+);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +55,12 @@ Future<void> _runInForeground() async {
     _logger.info("Starting app in foreground");
     await _init(false);
     _sync();
-    runApp(MyApp());
+    runApp(AppLock(
+      builder: (args) => EnteApp(),
+      lockScreen: LockScreen(),
+      enabled: Configuration.instance.shouldShowLockScreen(),
+      themeData: themeData,
+    ));
   });
 }
 
@@ -104,13 +132,30 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
   ));
 }
 
-class MyApp extends StatelessWidget with WidgetsBindingObserver {
-  final _title = 'ente';
+class EnteApp extends StatelessWidget with WidgetsBindingObserver {
+  static const _homeWidget = const HomeWidget();
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addObserver(this);
+    _configureBackgroundFetch();
+    return MaterialApp(
+      title: "ente",
+      theme: themeData,
+      home: _homeWidget,
+      debugShowCheckedModeBanner: false,
+    );
+  }
 
-    // Configure BackgroundFetch.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _logger.info("App resumed");
+      _sync();
+    }
+  }
+
+  void _configureBackgroundFetch() {
     BackgroundFetch.configure(
         BackgroundFetchConfig(
           minimumFetchInterval: 15,
@@ -130,39 +175,5 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
     }).catchError((e) {
       _logger.info('[BackgroundFetch] configure ERROR: $e');
     });
-
-    return MaterialApp(
-      title: _title,
-      theme: ThemeData(
-        fontFamily: 'Ubuntu',
-        brightness: Brightness.dark,
-        hintColor: Colors.grey,
-        accentColor: Color.fromRGBO(45, 194, 98, 1.0),
-        buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
-        buttonTheme: ButtonThemeData().copyWith(
-          buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
-        ),
-        toggleableActiveColor: Colors.green[400],
-        scaffoldBackgroundColor: Colors.black,
-        backgroundColor: Colors.black,
-        appBarTheme: AppBarTheme().copyWith(
-          color: Color.fromRGBO(10, 20, 20, 1.0),
-        ),
-        cardColor: Color.fromRGBO(25, 25, 25, 1.0),
-        dialogTheme: DialogTheme().copyWith(
-          backgroundColor: Color.fromRGBO(20, 20, 20, 1.0),
-        ),
-      ),
-      home: HomeWidget(_title),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _logger.info("App resumed");
-      _sync();
-    }
   }
 }

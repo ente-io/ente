@@ -41,7 +41,7 @@ class _SharingDialogState extends State<SharingDialog> {
       _showEntryField = true;
     } else {
       for (final user in _sharees) {
-        children.add(EmailItemWidget(widget.collection.id, user.email));
+        children.add(EmailItemWidget(widget.collection, user.email));
       }
     }
     if (_showEntryField) {
@@ -169,7 +169,7 @@ class _SharingDialogState extends State<SharingDialog> {
       await dialog.hide();
     }
     if (publicKey == null) {
-      Navigator.of(context).pop();
+      Navigator.of(context, rootNavigator: true).pop('dialog');
       final dialog = AlertDialog(
         title: Text("Invite to ente?"),
         content: Text("Looks like " +
@@ -234,7 +234,7 @@ class _SharingDialogState extends State<SharingDialog> {
               FlatButton(
                 child: Text("ok"),
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context, rootNavigator: true).pop();
                 },
               ),
             ],
@@ -255,11 +255,11 @@ class _SharingDialogState extends State<SharingDialog> {
 }
 
 class EmailItemWidget extends StatelessWidget {
-  final int collectionID;
+  final Collection collection;
   final String email;
 
   const EmailItemWidget(
-    this.collectionID,
+    this.collection,
     this.email, {
     Key key,
   }) : super(key: key);
@@ -284,7 +284,8 @@ class EmailItemWidget extends StatelessWidget {
             final dialog = createProgressDialog(context, "please wait...");
             await dialog.show();
             try {
-              await CollectionsService.instance.unshare(collectionID, email);
+              await CollectionsService.instance.unshare(collection.id, email);
+              collection.sharees.removeWhere((user) => user.email == email);
               await dialog.hide();
               showToast("stopped sharing with " + email + ".");
               Navigator.of(context).pop();

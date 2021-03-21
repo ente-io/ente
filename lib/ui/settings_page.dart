@@ -7,8 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/core/constants.dart';
+import 'package:photos/ui/app_lock.dart';
+import 'package:photos/utils/auth_util.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/services/billing_service.dart';
@@ -35,11 +39,25 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _getBody() {
-    final contents = [
-      BackupSettingsWidget(),
+    final hasLoggedIn = Configuration.instance.getToken() != null;
+    final List<Widget> contents = [];
+    if (hasLoggedIn) {
+      contents.addAll([
+        BackupSettingsWidget(),
+        Padding(padding: EdgeInsets.all(12)),
+      ]);
+    }
+    contents.addAll([
+      SecuritySectionWidget(),
+      Padding(padding: EdgeInsets.all(12)),
       SupportSectionWidget(),
+      Padding(padding: EdgeInsets.all(12)),
       InfoSectionWidget(),
-      AccountSectionWidget(),
+    ]);
+    if (hasLoggedIn) {
+      contents.add(AccountSectionWidget());
+    }
+    contents.add(
       FutureBuilder(
         future: _getAppVersion(),
         builder: (context, snapshot) {
@@ -58,10 +76,10 @@ class SettingsPage extends StatelessWidget {
           return Container();
         },
       ),
-    ];
-    // if (kDebugMode) {
-    //   contents.add(DebugWidget());
-    // }
+    );
+    if (kDebugMode && hasLoggedIn) {
+      contents.add(DebugWidget());
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -171,7 +189,7 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
         FlatButton(
           child: Text("OK"),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),
       ],
@@ -252,6 +270,141 @@ class _BackedUpFoldersWidgetState extends State<BackedUpFoldersWidget> {
   }
 }
 
+class SecuritySectionWidget extends StatefulWidget {
+  SecuritySectionWidget({Key key}) : super(key: key);
+
+  @override
+  _SecuritySectionWidgetState createState() => _SecuritySectionWidgetState();
+}
+
+class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> children = [];
+    children.addAll([
+      SettingsSectionTitle("security"),
+      Container(
+        height: 36,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("lockscreen"),
+            Switch(
+              value: Configuration.instance.shouldShowLockScreen(),
+              onChanged: (value) async {
+                AppLock.of(context).disable();
+                final result = await requestAuthentication();
+                if (result) {
+                  AppLock.of(context).setEnabled(value);
+                  Configuration.instance.setShouldShowLockScreen(value);
+                  setState(() {});
+                } else {
+                  AppLock.of(context).setEnabled(
+                      Configuration.instance.shouldShowLockScreen());
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    ]);
+    if (Platform.isAndroid) {
+      children.addAll([
+        Padding(padding: EdgeInsets.all(4)),
+        Divider(height: 4),
+        Padding(padding: EdgeInsets.all(4)),
+        Container(
+          height: 36,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("hide from recents"),
+              Switch(
+                value: Configuration.instance.shouldHideFromRecents(),
+                onChanged: (value) async {
+                  if (value) {
+                    AlertDialog alert = AlertDialog(
+                      title: Text("hide from recents?"),
+                      content: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "hiding from the task switcher will prevent you from taking screenshots in this app.",
+                              style: TextStyle(
+                                height: 1.5,
+                              ),
+                            ),
+                            Padding(padding: EdgeInsets.all(8)),
+                            Text(
+                              "are you sure?",
+                              style: TextStyle(
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          child:
+                              Text("no", style: TextStyle(color: Colors.white)),
+                          onPressed: () {
+                            Navigator.of(context, rootNavigator: true)
+                                .pop('dialog');
+                          },
+                        ),
+                        TextButton(
+                          child: Text("yes",
+                              style: TextStyle(
+                                  color: Colors.white.withOpacity(0.8))),
+                          onPressed: () async {
+                            Navigator.of(context, rootNavigator: true)
+                                .pop('dialog');
+                            await Configuration.instance
+                                .setShouldHideFromRecents(true);
+                            await FlutterWindowManager.addFlags(
+                                FlutterWindowManager.FLAG_SECURE);
+                            setState(() {});
+                          },
+                        ),
+                      ],
+                    );
+
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return alert;
+                      },
+                    );
+                  } else {
+                    await Configuration.instance
+                        .setShouldHideFromRecents(false);
+                    await FlutterWindowManager.clearFlags(
+                        FlutterWindowManager.FLAG_SECURE);
+                    setState(() {});
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ]);
+    }
+    return Container(
+      child: Column(
+        children: children,
+      ),
+    );
+  }
+}
+
 class SettingsSectionTitle extends StatelessWidget {
   final String title;
   const SettingsSectionTitle(this.title, {Key key}) : super(key: key);
@@ -284,7 +437,6 @@ class SupportSectionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Column(children: [
-        Padding(padding: EdgeInsets.all(12)),
         SettingsSectionTitle("support"),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -292,11 +444,13 @@ class SupportSectionWidget extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return WebPage(
-                      "roadmap",
-                      Configuration.instance.getHttpEndpoint() +
-                          "/users/roadmap?token=" +
-                          Configuration.instance.getToken());
+                  final endpoint = Configuration.instance.getHttpEndpoint() +
+                      "/users/roadmap";
+                  final isLoggedIn = Configuration.instance.getToken() != null;
+                  final url = isLoggedIn
+                      ? endpoint + "?token=" + Configuration.instance.getToken()
+                      : ROADMAP_URL;
+                  return WebPage("roadmap", url);
                 },
               ),
             );
@@ -368,7 +522,6 @@ class InfoSectionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Column(children: [
-        Padding(padding: EdgeInsets.all(12)),
         SettingsSectionTitle("about"),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -449,7 +602,7 @@ class AccountSectionWidget extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    Navigator.of(context, rootNavigator: true).pop('dialog');
                   },
                 ),
                 TextButton(
@@ -460,6 +613,7 @@ class AccountSectionWidget extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
+                    Navigator.of(context, rootNavigator: true).pop('dialog');
                     final dialog =
                         createProgressDialog(context, "logging out...");
                     await dialog.show();
@@ -500,7 +654,7 @@ class DebugWidget extends StatelessWidget {
             _showKeyAttributesDialog(context);
           },
           child: SettingsTextItem(
-              text: "Key Attributes", icon: Icons.navigate_next),
+              text: "key attributes", icon: Icons.navigate_next),
         ),
       ]),
     );
@@ -531,7 +685,7 @@ class DebugWidget extends StatelessWidget {
         FlatButton(
           child: Text("OK"),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),
       ],
@@ -559,7 +713,7 @@ class SettingsTextItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(padding: EdgeInsets.all(6)),
+        Padding(padding: EdgeInsets.all(Platform.isIOS ? 4 : 6)),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -567,7 +721,7 @@ class SettingsTextItem extends StatelessWidget {
             Icon(icon),
           ],
         ),
-        Padding(padding: EdgeInsets.all(6)),
+        Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 6)),
       ],
     );
   }

@@ -99,8 +99,7 @@ class SyncService {
     bool successful = false;
     try {
       await _doSync();
-      if (_lastSyncStatusEvent != null &&
-          _lastSyncStatusEvent.status != SyncStatus.applying_local_diff) {
+      if (_lastSyncStatusEvent != null) {
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
       }
       successful = true;
@@ -225,7 +224,6 @@ class SyncService {
         DateTime.fromMicrosecondsSinceEpoch(toTime).toString());
     final files = await getDeviceFiles(fromTime, toTime);
     if (files.isNotEmpty) {
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applying_local_diff));
       _logger.info("Fetched " + files.length.toString() + " files.");
       final updatedFiles =
           files.where((file) => existingLocalFileIDs.contains(file.localID));

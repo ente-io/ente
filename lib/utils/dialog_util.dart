@@ -29,7 +29,7 @@ void showErrorDialog(BuildContext context, String title, String content) {
       FlatButton(
         child: Text("ok"),
         onPressed: () {
-          Navigator.of(context).pop();
+          Navigator.of(context, rootNavigator: true).pop('dialog');
         },
       ),
     ],

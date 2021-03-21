@@ -200,9 +200,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
   }
 
   String _getRefreshingText() {
-    if (_event == null ||
-        _event.status == SyncStatus.applying_local_diff ||
-        _event.status == SyncStatus.applying_remote_diff) {
+    if (_event.status == SyncStatus.applying_remote_diff) {
       return "syncing...";
     }
     if (_event.status == SyncStatus.preparing_for_upload) {
