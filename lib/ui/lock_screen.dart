@@ -26,7 +26,7 @@ class _LockScreenState extends State<LockScreen> {
                   padding: const EdgeInsets.only(top: 24),
                   child: loadWidget,
                 )
-              : (
+              : RaisedButton(
                   child: Text(
                     "unlock",
                     style: TextStyle(
