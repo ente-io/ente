@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -21,13 +22,13 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
 
   @override
   Widget build(Object context) {
-    var gallery = Gallery(
-      asyncLoader: (_, __) =>
-          FilesDB.instance.getAllInPath(widget.folder.path),
+    final gallery = Gallery(
+      asyncLoader: (_, __) => FilesDB.instance.getAllInPath(widget.folder.path),
       shouldLoadAll: true,
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       tagPrefix: "device_folder:" + widget.folder.path,
       selectedFiles: _selectedFiles,
+      headerWidget: _getHeaderWidget(),
     );
     return Scaffold(
       appBar: GalleryAppBarWidget(
@@ -37,6 +38,39 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
         path: widget.folder.thumbnail.deviceFolder,
       ),
       body: gallery,
+    );
+  }
+
+  Widget _getHeaderWidget() {
+    final isBackedUp =
+        Configuration.instance.getPathsToBackUp().contains(widget.folder.path);
+    return Container(
+      padding: EdgeInsets.only(left: 12, right: 12),
+      color: Colors.grey.withOpacity(0.15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          isBackedUp
+              ? Text("backup enabled")
+              : Text(
+                  "backup disabled",
+                  style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                ),
+          Switch(
+            value: isBackedUp,
+            onChanged: (value) async {
+              final current = Configuration.instance.getPathsToBackUp();
+              if (value) {
+                current.add(widget.folder.path);
+              } else {
+                current.remove(widget.folder.path);
+              }
+              Configuration.instance.setPathsToBackUp(current);
+              setState(() {});
+            },
+          ),
+        ],
+      ),
     );
   }
 }
