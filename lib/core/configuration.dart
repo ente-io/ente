@@ -187,10 +187,6 @@ class Configuration {
     return "https://api.ente.io";
   }
 
-  Future<void> setEndpoint(String endpoint) async {
-    await _preferences.setString(endpointKey, endpoint);
-  }
-
   String getToken() {
     if (_cachedToken == null) {
       _cachedToken = _preferences.getString(tokenKey);
