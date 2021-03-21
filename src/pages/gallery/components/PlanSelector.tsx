@@ -12,6 +12,7 @@ import {
     isSubscribed,
     isUserRenewingPlan,
 } from 'utils/billingUtil';
+import PreviewProration from 'components/PreviewProration';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     padding-top: 20px;
@@ -45,6 +46,11 @@ function PlanSelector(props: Props) {
     const [loading, setLoading] = useState(false);
     const subscription = getUserSubscription();
     const plans = getPlans();
+    const [previewProrationView, setPreviewProrationView] = useState(false);
+    function closePreviewProration() {
+        setPreviewProrationView(false);
+    }
+    const [selectedPlan, setSelectedPlan] = useState<Plan>(null);
     const selectPlan = async (plan) => {
         var bannerMessage;
         try {
@@ -53,28 +59,33 @@ function PlanSelector(props: Props) {
                 if (isUserRenewingPlan(plan, subscription)) {
                     return;
                 }
-                await billingService.updateSubscription(plan.stripeID);
+                setSelectedPlan(plan);
+                setPreviewProrationView(true);
             } else {
                 await billingService.buySubscription(plan.stripeID);
             }
-            bannerMessage = {
-                message: constants.SUBSCRIPTION_UPDATE_SUCCESS,
-                variant: 'success',
-            };
-            setLoading(false);
-            await new Promise((resolve) =>
-                setTimeout(() => resolve(null), 400)
-            );
         } catch (err) {
             bannerMessage = {
                 message: constants.SUBSCRIPTION_PURCHASE_FAILED,
                 variant: 'danger',
             };
+            props.setBannerMessage(bannerMessage);
         } finally {
             setLoading(false);
             props.closeModal();
-            props.setBannerMessage(bannerMessage);
         }
+    };
+
+    const updateSubscription = async () => {
+        setPreviewProrationView(false);
+        await billingService.updateSubscription(selectedPlan.stripeID);
+        let bannerMessage = {
+            message: constants.SUBSCRIPTION_UPDATE_SUCCESS,
+            variant: 'success',
+        };
+        setLoading(false);
+        await new Promise((resolve) => setTimeout(() => resolve(null), 400));
+        props.setBannerMessage(bannerMessage);
     };
     const PlanIcons: JSX.Element[] = plans?.map((plan) => (
         <PlanIcon
@@ -118,35 +129,43 @@ function PlanSelector(props: Props) {
         </PlanIcon>
     ));
     return (
-        <Modal
-            show={props.modalView}
-            onHide={props.closeModal}
-            dialogClassName="modal-90w"
-            style={{ maxWidth: '100%' }}
-        >
-            <Modal.Header closeButton>
-                <Modal.Title style={{ marginLeft: '12px' }}>
-                    {isSubscribed(subscription)
-                        ? constants.MANAGE_PLAN
-                        : constants.CHOOSE_PLAN}
-                </Modal.Title>
-            </Modal.Header>
-            <Modal.Body
-                style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    minHeight: '150px',
-                }}
+        <>
+            <Modal
+                show={props.modalView}
+                onHide={props.closeModal}
+                dialogClassName="modal-90w"
+                style={{ maxWidth: '100%' }}
             >
-                {PlanIcons}
-                {(!plans || loading) && (
-                    <LoaderOverlay>
-                        <Spinner animation="border" />
-                    </LoaderOverlay>
-                )}
-            </Modal.Body>
-        </Modal>
+                <Modal.Header closeButton>
+                    <Modal.Title style={{ marginLeft: '12px' }}>
+                        {isSubscribed(subscription)
+                            ? constants.MANAGE_PLAN
+                            : constants.CHOOSE_PLAN}
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        minHeight: '150px',
+                    }}
+                >
+                    {PlanIcons}
+                    {(!plans || loading) && (
+                        <LoaderOverlay>
+                            <Spinner animation="border" />
+                        </LoaderOverlay>
+                    )}
+                </Modal.Body>
+            </Modal>
+            <PreviewProration
+                show={previewProrationView}
+                closePreview={closePreviewProration}
+                selectedPlan={selectedPlan}
+                updateSubscription={updateSubscription}
+            />
+        </>
     );
 }
 

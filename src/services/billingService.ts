@@ -23,6 +23,18 @@ export interface Plan {
     period: string;
     stripeID: string;
 }
+
+export interface Invoice {
+    lines: {
+        data: Array<{
+            amount: number;
+            currency: string;
+            description: string;
+        }>;
+    };
+    total: number;
+    created: number;
+}
 export const FREE_PLAN = 'free';
 class billingService {
     private stripe;
@@ -83,6 +95,26 @@ class billingService {
         } catch (e) {
             console.error(e);
             throw e;
+        }
+    }
+
+    public async previewProration(productID) {
+        try {
+            const response = await HTTPService.post(
+                `${ENDPOINT}/billing/stripe/preview-proration`,
+                {
+                    productID,
+                },
+                null,
+                {
+                    'X-Auth-Token': getToken(),
+                }
+            );
+            const invoice: Invoice = response.data['invoice'];
+            // setData(LS_KEYS.SUBSCRIPTION, subscription);
+            return invoice;
+        } catch (e) {
+            console.error(e);
         }
     }
 

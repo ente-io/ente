@@ -1,7 +1,6 @@
 import { BannerMessage } from 'pages/_app';
 import React, { MouseEventHandler } from 'react';
 import { Alert, Button, CloseButton, Modal } from 'react-bootstrap';
-import constants from 'utils/strings/constants';
 
 interface Props {
     bannerMessage: BannerMessage;

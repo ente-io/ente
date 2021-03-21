@@ -27,7 +27,7 @@ function ConfirmDialog(props: Props) {
                     {constants.CLOSE}
                 </Button>
                 {action && (
-                    <Button variant="danger" onClick={callback[action]}>
+                    <Button variant="danger" onClick={callback.get(action)}>
                         {constants[String(action).toUpperCase()]}
                     </Button>
                 )}
