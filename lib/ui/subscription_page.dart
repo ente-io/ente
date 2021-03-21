@@ -438,13 +438,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
-                    child: Text("review plans"),
+                    child: Text(
+                      "review plans",
+                      style: TextStyle(color: Theme.of(context).buttonColor),
+                    ),
                     onPressed: () {
                       Navigator.of(context, rootNavigator: true).pop('dialog');
                     },
                   ),
                   TextButton(
-                    child: Text("ok"),
+                    child: Text(
+                      "ok",
+                      style: TextStyle(color: Colors.white),
+                    ),
                     onPressed: () {
                       if (widget.isOnboarding) {
                         Bus.instance.fire(SubscriptionPurchasedEvent());
