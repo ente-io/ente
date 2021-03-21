@@ -526,6 +526,7 @@ class AccountSectionWidget extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
+                    Navigator.of(context, rootNavigator: true).pop('dialog');
                     final dialog =
                         createProgressDialog(context, "logging out...");
                     await dialog.show();
