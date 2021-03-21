@@ -1,7 +1,9 @@
 import 'package:local_auth/auth_strings.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:logging/logging.dart';
 
 Future<bool> requestAuthentication() async {
+  Logger("AuthUtil").info("Requesting authentication");
   return await LocalAuthentication().authenticate(
       localizedReason: "please authenticate to view your memories",
       androidAuthStrings: AndroidAuthMessages(

@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/ui/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
@@ -284,10 +284,15 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 Switch(
                   value: Configuration.instance.shouldShowLockScreen(),
                   onChanged: (value) async {
+                    AppLock.of(context).disable();
                     final result = await requestAuthentication();
                     if (result) {
+                      AppLock.of(context).setEnabled(value);
                       Configuration.instance.setShouldShowLockScreen(value);
                       setState(() {});
+                    } else {
+                      AppLock.of(context).setEnabled(
+                          Configuration.instance.shouldShowLockScreen());
                     }
                   },
                 ),
