@@ -567,9 +567,9 @@ export default function Gallery(props: Props) {
             <ConfirmDialog
                 show={deleteConfirmView}
                 onHide={() => setDeleteConfirmView(false)}
-                callback={() => {
+                callback={async () => {
+                    await deleteFiles(selected, syncWithRemote);
                     setDeleteConfirmView(false);
-                    deleteFiles(selected, syncWithRemote);
                 }}
                 action={CONFIRM_ACTION.DELETE}
             />
