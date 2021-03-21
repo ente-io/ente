@@ -1,6 +1,5 @@
 import sodium, { StateAddress } from 'libsodium-wrappers';
-
-export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
+import { ENCRYPTION_CHUNK_SIZE } from 'types';
 
 export async function decryptChaChaOneShot(
     data: Uint8Array,

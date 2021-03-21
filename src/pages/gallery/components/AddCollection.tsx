@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, Card, Form, Modal } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 import { CollectionIcon } from './CollectionSelector';

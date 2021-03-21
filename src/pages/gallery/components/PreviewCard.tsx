@@ -126,7 +126,6 @@ export default function PreviewCard(props: IProps) {
     };
 
     const handleSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-        e.stopPropagation();
         onSelect?.(e.target.checked);
     }
 
@@ -141,7 +140,7 @@ export default function PreviewCard(props: IProps) {
             selected={selected}
             {...(selectable ? useLongPress(longPressCallback,500) : {})}
         >
-            {selectable && <Check type='checkbox' checked={selected} onChange={handleSelect}/>}
+            {selectable && <Check type='checkbox' checked={selected} onChange={handleSelect} onClick={e => e.stopPropagation()}/>}
             {(data?.msrc || imgSrc) && <img src={data?.msrc || imgSrc} />}
             {data?.metadata.fileType === 1 && <PlayCircleOutline />}
         </Cont>

@@ -125,10 +125,10 @@ const DeleteBtn = styled.button`
     background-color: #ff6666;
     position: fixed;
     z-index: 1;
-    bottom: 100px;
-    right: 100px;
-    width: 75px;
-    height: 75px;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     color: #fff;
 `;
