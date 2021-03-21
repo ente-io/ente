@@ -107,16 +107,24 @@ const englishConstants = {
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
-                you are on the <strong>free</strong> plan {' '} that expires on {' '}
-                {new Date(expiryTime / 1000).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
+                you are on the <strong>free</strong> plan that expires on{' '}
+                {new Date(expiryTime / 1000).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                })}
             </p>
         </>
     ),
     PAID_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
-                your subscription will renew on {' '}
-                {new Date(expiryTime / 1000).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
+                your subscription will renew on{' '}
+                {new Date(expiryTime / 1000).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                })}
             </p>
         </>
     ),
@@ -128,6 +136,8 @@ const englishConstants = {
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email ?',
+    DELETE_WARNING: 'sure you want to delete selected files?',
+    DELETE: 'delete',
 };
 
 export default englishConstants;
