@@ -14,7 +14,6 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/ui/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/subscription_page.dart';
@@ -41,9 +40,9 @@ class SettingsPage extends StatelessWidget {
   Widget _getBody() {
     final hasLoggedIn = Configuration.instance.getToken() != null;
     final List<Widget> contents = [];
-    if (hasLoggedIn) {
+    if (!hasLoggedIn) {
       contents.addAll([
-        BackupSettingsWidget(),
+        AccountSettingsWidget(),
         Padding(padding: EdgeInsets.all(12)),
       ]);
     }
@@ -54,9 +53,6 @@ class SettingsPage extends StatelessWidget {
       Padding(padding: EdgeInsets.all(12)),
       InfoSectionWidget(),
     ]);
-    if (hasLoggedIn) {
-      contents.add(AccountSectionWidget());
-    }
     contents.add(
       FutureBuilder(
         future: _getAppVersion(),
@@ -96,14 +92,14 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-class BackupSettingsWidget extends StatefulWidget {
-  BackupSettingsWidget({Key key}) : super(key: key);
+class AccountSettingsWidget extends StatefulWidget {
+  AccountSettingsWidget({Key key}) : super(key: key);
 
   @override
-  BackupSettingsWidgetState createState() => BackupSettingsWidgetState();
+  AccountSettingsWidgetState createState() => AccountSettingsWidgetState();
 }
 
-class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
+class AccountSettingsWidgetState extends State<AccountSettingsWidget> {
   double _usageInGBs;
 
   @override
@@ -117,14 +113,23 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
     return Container(
       child: Column(
         children: [
-          SettingsSectionTitle("backup"),
+          SettingsSectionTitle("account"),
+          Padding(
+            padding: EdgeInsets.all(4),
+          ),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () async {
-              _showFoldersDialog(context);
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return SubscriptionPage();
+                  },
+                ),
+              );
             },
             child: SettingsTextItem(
-                text: "backed up folders", icon: Icons.navigate_next),
+                text: "subscription plan", icon: Icons.navigate_next),
           ),
           Divider(height: 4),
           Padding(padding: EdgeInsets.all(4)),
@@ -146,21 +151,6 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
           ),
           Padding(padding: EdgeInsets.all(4)),
           Divider(height: 4),
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () async {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return SubscriptionPage();
-                  },
-                ),
-              );
-            },
-            child: SettingsTextItem(
-                text: "subscription plan", icon: Icons.navigate_next),
-          ),
-          Divider(height: 4),
           Padding(padding: EdgeInsets.all(8)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -176,30 +166,57 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
               ),
             ],
           ),
+          Padding(padding: EdgeInsets.all(8)),
+          Divider(height: 4),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () async {
+              AlertDialog alert = AlertDialog(
+                title: Text("logout"),
+                content: Text("are you sure you want to logout?"),
+                actions: [
+                  TextButton(
+                    child: Text(
+                      "no",
+                      style: TextStyle(
+                        color: Theme.of(context).buttonColor,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true).pop('dialog');
+                    },
+                  ),
+                  TextButton(
+                    child: Text(
+                      "yes, logout",
+                      style: TextStyle(
+                        color: Colors.red,
+                      ),
+                    ),
+                    onPressed: () async {
+                      Navigator.of(context, rootNavigator: true).pop('dialog');
+                      final dialog =
+                          createProgressDialog(context, "logging out...");
+                      await dialog.show();
+                      await Configuration.instance.logout();
+                      await dialog.hide();
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                  ),
+                ],
+              );
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return alert;
+                },
+              );
+            },
+            child: SettingsTextItem(text: "logout", icon: Icons.navigate_next),
+          ),
         ],
       ),
-    );
-  }
-
-  void _showFoldersDialog(BuildContext context) async {
-    AlertDialog alert = AlertDialog(
-      title: Text("select folders to back up"),
-      content: BackedUpFoldersWidget(),
-      actions: [
-        FlatButton(
-          child: Text("OK"),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
     );
   }
 
@@ -211,62 +228,6 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
         });
       }
     });
-  }
-}
-
-class BackedUpFoldersWidget extends StatefulWidget {
-  const BackedUpFoldersWidget({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  _BackedUpFoldersWidgetState createState() => _BackedUpFoldersWidgetState();
-}
-
-class _BackedUpFoldersWidgetState extends State<BackedUpFoldersWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<String>>(
-      future: FilesDB.instance.getLocalPaths(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          snapshot.data.sort((first, second) {
-            return first.toLowerCase().compareTo(second.toLowerCase());
-          });
-          final backedUpFolders = Configuration.instance.getPathsToBackUp();
-          final foldersWidget = List<Widget>();
-          for (final folder in snapshot.data) {
-            foldersWidget.add(CheckboxListTile(
-              value: backedUpFolders.contains(folder),
-              dense: true,
-              title: Text(folder),
-              controlAffinity: ListTileControlAffinity.leading,
-              onChanged: (value) async {
-                if (value) {
-                  backedUpFolders.add(folder);
-                } else {
-                  backedUpFolders.remove(folder);
-                }
-                await Configuration.instance.setPathsToBackUp(backedUpFolders);
-                setState(() {});
-              },
-            ));
-          }
-          final scrollController = ScrollController();
-          return Container(
-            child: Scrollbar(
-              isAlwaysShown: true,
-              controller: scrollController,
-              child: SingleChildScrollView(
-                child: Column(children: foldersWidget),
-                controller: scrollController,
-              ),
-            ),
-          );
-        }
-        return loadWidget;
-      },
-    );
   }
 }
 
@@ -288,6 +249,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     final List<Widget> children = [];
     children.addAll([
       SettingsSectionTitle("security"),
+      Padding(
+        padding: EdgeInsets.all(4),
+      ),
       Container(
         height: 36,
         child: Row(
@@ -572,67 +536,6 @@ class InfoSectionWidget extends StatelessWidget {
           },
           child:
               SettingsTextItem(text: "source code", icon: Icons.navigate_next),
-        ),
-      ]),
-    );
-  }
-}
-
-class AccountSectionWidget extends StatelessWidget {
-  const AccountSectionWidget({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Column(children: [
-        Padding(padding: EdgeInsets.all(12)),
-        SettingsSectionTitle("account"),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            AlertDialog alert = AlertDialog(
-              title: Text("logout"),
-              content: Text("are you sure you want to logout?"),
-              actions: [
-                TextButton(
-                  child: Text(
-                    "no",
-                    style: TextStyle(
-                      color: Theme.of(context).buttonColor,
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context, rootNavigator: true).pop('dialog');
-                  },
-                ),
-                TextButton(
-                  child: Text(
-                    "yes, logout",
-                    style: TextStyle(
-                      color: Colors.red,
-                    ),
-                  ),
-                  onPressed: () async {
-                    Navigator.of(context, rootNavigator: true).pop('dialog');
-                    final dialog =
-                        createProgressDialog(context, "logging out...");
-                    await dialog.show();
-                    await Configuration.instance.logout();
-                    await dialog.hide();
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  },
-                ),
-              ],
-            );
-
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return alert;
-              },
-            );
-          },
-          child: SettingsTextItem(text: "logout", icon: Icons.navigate_next),
         ),
       ]),
     );
