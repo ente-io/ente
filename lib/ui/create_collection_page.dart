@@ -185,7 +185,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         FlatButton(
           child: Text("ok"),
           onPressed: () async {
-            Navigator.pop(context);
+            Navigator.of(context, rootNavigator: true).pop('dialog');
             final collection = await _createAlbum(_albumName);
             if (collection != null) {
               if (await _addToCollection(collection.id)) {

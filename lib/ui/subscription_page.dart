@@ -437,18 +437,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  FlatButton(
+                  TextButton(
                     child: Text("review plans"),
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      Navigator.of(context, rootNavigator: true).pop('dialog');
                     },
                   ),
-                  FlatButton(
+                  TextButton(
                     child: Text("ok"),
                     onPressed: () {
                       if (widget.isOnboarding) {
                         Bus.instance.fire(SubscriptionPurchasedEvent());
                       }
+                      Navigator.of(context, rootNavigator: true).pop('dialog');
                       Navigator.of(context).popUntil((route) => route.isFirst);
                     },
                   ),
@@ -671,35 +672,6 @@ class SubscriptionPlanWidget extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class SubsriptionSuccessfulDialog extends StatelessWidget {
-  const SubsriptionSuccessfulDialog({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text("success!",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          )),
-      content: SingleChildScrollView(
-        child: Column(children: [
-          Text("your photos and videos will now be backed up"),
-          Padding(padding: EdgeInsets.all(6)),
-          Text("the first sync might take a while, please bear with us"),
-        ]),
-      ),
-      actions: [
-        FlatButton(
-          child: Text("ok"),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
     );
   }
 }

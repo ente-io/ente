@@ -76,7 +76,7 @@ class SettingsPage extends StatelessWidget {
         },
       ),
     );
-    if (kDebugMode) {
+    if (kDebugMode && hasLoggedIn) {
       contents.add(DebugWidget());
     }
     return SingleChildScrollView(
@@ -188,7 +188,7 @@ class BackupSettingsWidgetState extends State<BackupSettingsWidget> {
         FlatButton(
           child: Text("OK"),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),
       ],
@@ -515,7 +515,7 @@ class AccountSectionWidget extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    Navigator.of(context, rootNavigator: true).pop('dialog');
                   },
                 ),
                 TextButton(
@@ -566,7 +566,7 @@ class DebugWidget extends StatelessWidget {
             _showKeyAttributesDialog(context);
           },
           child: SettingsTextItem(
-              text: "Key Attributes", icon: Icons.navigate_next),
+              text: "key attributes", icon: Icons.navigate_next),
         ),
       ]),
     );
@@ -597,7 +597,7 @@ class DebugWidget extends StatelessWidget {
         FlatButton(
           child: Text("OK"),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),
       ],

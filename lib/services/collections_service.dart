@@ -177,18 +177,26 @@ class CollectionsService {
     SyncService.instance.syncWithRemote(silently: true);
   }
 
-  Future<void> unshare(int collectionID, String email) {
-    return _dio
-        .post(
-          Configuration.instance.getHttpEndpoint() + "/collections/unshare",
-          data: {
-            "collectionID": collectionID,
-            "email": email,
-          },
-          options: Options(
-              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-        )
-        .then((value) => SyncService.instance.syncWithRemote(silently: true));
+  Future<void> unshare(int collectionID, String email) async {
+    try {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/collections/unshare",
+        data: {
+          "collectionID": collectionID,
+          "email": email,
+        },
+        options: Options(
+            headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+      );
+      _collectionIDToCollections[collectionID]
+          .sharees
+          .removeWhere((user) => user.email == email);
+      _db.insert([_collectionIDToCollections[collectionID]]);
+    } catch (e) {
+      _logger.severe(e);
+      throw e;
+    }
+    SyncService.instance.syncWithRemote(silently: true);
   }
 
   Uint8List getCollectionKey(int collectionID) {

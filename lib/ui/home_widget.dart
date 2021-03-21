@@ -105,7 +105,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               ),
             ),
             onPressed: () async {
-              Navigator.of(context).pop();
+              Navigator.of(context, rootNavigator: true).pop('dialog');
               final dialog = createProgressDialog(context, "logging out...");
               await dialog.show();
               await Configuration.instance.logout();
