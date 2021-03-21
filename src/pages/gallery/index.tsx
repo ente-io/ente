@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { file, syncData, localFiles } from 'services/fileService';
+import { file, syncData, localFiles, deleteFiles } from 'services/fileService';
 import PreviewCard from './components/PreviewCard';
-import { getActualKey, getToken } from 'utils/common/key';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -26,6 +25,7 @@ import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
 import { Alert, Button, Jumbotron } from 'react-bootstrap';
 import Delete from 'components/Delete';
+import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -125,20 +125,20 @@ const DeleteBtn = styled.button`
     background-color: #ff6666;
     position: fixed;
     z-index: 1;
-    bottom: 10px;
-    right: 10px;
-    width: 50px;
-    height: 50px;
+    bottom: 100px;
+    right: 100px;
+    width: 75px;
+    height: 75px;
     border-radius: 50%;
     color: #fff;
 `;
 
-type selectedState = {
-    [k:number]: boolean;
+export type selectedState = {
+    [k: number]: boolean;
     count: number;
-}
+};
 
-export default function Gallery(props) {
+export default function Gallery(props: Props) {
     const router = useRouter();
     const [collections, setCollections] = useState<collection[]>([]);
     const [
@@ -154,7 +154,7 @@ export default function Gallery(props) {
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
-
+    const [deleteConfirmView, setDeleteConfirmView] = useState(false);
     const loadingBar = useRef(null);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -270,9 +270,9 @@ export default function Gallery(props) {
         setSelected({
             ...selected,
             [id]: checked,
-            count: checked ? selected.count + 1: selected.count - 1,
+            count: checked ? selected.count + 1 : selected.count - 1,
         });
-    }
+    };
 
     const getThumbnail = (file: file[], index: number) => {
         return (
@@ -559,7 +559,20 @@ export default function Gallery(props) {
                     {constants.INSTALL_MOBILE_APP()}
                 </Alert>
             )}
-            {selected.count && <DeleteBtn><Delete /></DeleteBtn>}
+            {selected.count && (
+                <DeleteBtn onClick={() => setDeleteConfirmView(true)}>
+                    <Delete />
+                </DeleteBtn>
+            )}
+            <ConfirmDialog
+                show={deleteConfirmView}
+                onHide={() => setDeleteConfirmView(false)}
+                callback={() => {
+                    setDeleteConfirmView(false);
+                    deleteFiles(selected, syncWithRemote);
+                }}
+                action={CONFIRM_ACTION.DELETE}
+            />
         </>
     );
 }
