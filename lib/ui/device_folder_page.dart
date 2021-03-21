@@ -5,7 +5,6 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 
