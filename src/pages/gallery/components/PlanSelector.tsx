@@ -77,15 +77,25 @@ function PlanSelector(props: Props) {
     };
 
     const updateSubscription = async () => {
-        setPreviewProrationView(false);
-        await billingService.updateSubscription(selectedPlan.stripeID);
-        let bannerMessage = {
-            message: constants.SUBSCRIPTION_UPDATE_SUCCESS,
-            variant: 'success',
-        };
-        setLoading(false);
-        await new Promise((resolve) => setTimeout(() => resolve(null), 400));
-        props.setBannerMessage(bannerMessage);
+        try {
+            setPreviewProrationView(false);
+            await billingService.updateSubscription(selectedPlan.stripeID);
+            let bannerMessage = {
+                message: constants.SUBSCRIPTION_UPDATE_SUCCESS,
+                variant: 'success',
+            };
+            setLoading(false);
+            await new Promise((resolve) =>
+                setTimeout(() => resolve(null), 400)
+            );
+            props.setBannerMessage(bannerMessage);
+        } catch (err) {
+            let bannerMessage = {
+                message: constants.SUBSCRIPTION_PURCHASE_FAILED,
+                variant: 'danger',
+            };
+            props.setBannerMessage(bannerMessage);
+        }
     };
     const PlanIcons: JSX.Element[] = plans?.map((plan) => (
         <PlanIcon
