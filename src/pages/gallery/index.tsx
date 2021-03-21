@@ -570,6 +570,7 @@ export default function Gallery(props: Props) {
                 callback={async () => {
                     await deleteFiles(selected, syncWithRemote);
                     setDeleteConfirmView(false);
+                    setSelected({count: 0});
                 }}
                 action={CONFIRM_ACTION.DELETE}
             />
