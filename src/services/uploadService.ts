@@ -132,6 +132,10 @@ class UploadService {
             let actualFiles: FileWithCollection[] = [];
             filesWithCollectionToUpload.forEach((fileWithCollection) => {
                 let file = fileWithCollection.file;
+                if (file?.name.substr(0, 1) == '.') {
+                    //ignore files with name starting with .
+                    return;
+                }
                 if (
                     file.type.substr(0, 5) === TYPE_IMAGE ||
                     file.type.substr(0, 5) === TYPE_VIDEO ||
