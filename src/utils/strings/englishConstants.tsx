@@ -58,7 +58,7 @@ const englishConstants = {
             `${fileCounter.finished} of ${fileCounter.total} files successfully uploaded`,
         3: 'files uploaded completed!',
     },
-    UPLOADING_FILES: `upload`,
+    UPLOADING_FILES: `file upload`,
     FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
     FILE_UPLOAD_PROGRESS: (name, progress) => (
         <h5 id={name}>
