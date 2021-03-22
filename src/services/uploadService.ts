@@ -402,13 +402,18 @@ class UploadService {
         try {
             if (isDataStream(file.file.encryptedData)) {
                 const { chunkCount, stream } = file.file.encryptedData;
+                const uploadPartCount = Math.ceil(
+                    chunkCount / CHUNKS_COMBINED_FOR_UPLOAD
+                );
                 const filePartUploadURLs = await this.fetchMultipartUploadURLs(
                     token,
-                    Math.ceil(chunkCount / CHUNKS_COMBINED_FOR_UPLOAD)
+                    uploadPartCount
                 );
                 file.file.objectKey = await this.putFileInParts(
                     filePartUploadURLs,
-                    stream
+                    stream,
+                    file.filename,
+                    uploadPartCount
                 );
             } else {
                 const fileUploadURL = await this.getUploadURL(token);
@@ -714,16 +719,13 @@ class UploadService {
         filename: string
     ): Promise<string> {
         try {
-            await HTTPService.put(fileUploadURL.url, file, null, null, {
-                onUploadProgress: (event) => {
-                    filename &&
-                        this.fileProgress.set(
-                            filename,
-                            Math.round((50 * event.loaded) / event.total)
-                        );
-                    this.changeProgressBarProps();
-                },
-            });
+            await HTTPService.put(
+                fileUploadURL.url,
+                file,
+                null,
+                null,
+                this.trackUploadProgress(filename)
+            );
             return fileUploadURL.objectKey;
         } catch (e) {
             console.error('putFile to dataStore failed ', e);
@@ -733,9 +735,12 @@ class UploadService {
 
     private async putFileInParts(
         multipartUploadURLs: MultipartUploadURLs,
-        file: ReadableStream<Uint8Array>
+        file: ReadableStream<Uint8Array>,
+        filename: string,
+        uploadPartCount: number
     ) {
         let streamEncryptedFileReader = file.getReader();
+        let percentPerPart = Math.round(90 / (uploadPartCount + 1));
         const resParts = [];
         for (const [
             index,
@@ -760,7 +765,13 @@ class UploadService {
             } else {
                 uploadChunk = chunk1;
             }
-            const response = await HTTPService.put(fileUploadURL, uploadChunk);
+            const response = await HTTPService.put(
+                fileUploadURL,
+                uploadChunk,
+                null,
+                null,
+                this.trackUploadProgress(filename, percentPerPart, index)
+            );
             resParts.push({
                 PartNumber: index + 1,
                 ETag: response.headers.etag,
@@ -777,6 +788,21 @@ class UploadService {
         return multipartUploadURLs.objectKey;
     }
 
+    private trackUploadProgress(filename, percentPerPart = 90, index = 0) {
+        return {
+            onUploadProgress: (event) => {
+                filename &&
+                    this.fileProgress.set(
+                        filename,
+                        Math.round(
+                            percentPerPart * index +
+                                (percentPerPart * event.loaded) / event.total
+                        )
+                    );
+                this.changeProgressBarProps();
+            },
+        };
+    }
     private async getExifData(
         reader: FileReader,
         receivedFile: File,
