@@ -31,7 +31,7 @@ import FullScreenDropZone from 'components/FullScreenDropZone';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
-
+const A_DAY = 24 * 60 * 60 * 1000;
 enum ITEM_TYPE {
     TIME = 'TIME',
     TILE = 'TILE',
@@ -449,9 +449,19 @@ export default function Gallery(props: Props) {
                                     );
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TIME,
-                                        date: dateTimeFormat.format(
-                                            currentDate
-                                        ),
+                                        date: isSameDay(
+                                            new Date(currentDate),
+                                            new Date()
+                                        )
+                                            ? 'Today'
+                                            : isSameDay(
+                                                  new Date(currentDate),
+                                                  new Date(Date.now() - A_DAY)
+                                              )
+                                            ? 'Yesterday'
+                                            : dateTimeFormat.format(
+                                                  currentDate
+                                              ),
                                     });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TILE,
