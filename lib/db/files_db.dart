@@ -291,6 +291,9 @@ class FilesDB {
 
   Future<List<File>> getFilesToBeUploadedWithinFolders(
       Set<String> folders) async {
+    if (folders.isEmpty) {
+      return [];
+    }
     final db = await instance.database;
     String inParam = "";
     for (final folder in folders) {
@@ -321,6 +324,27 @@ class FilesDB {
       uploadedFileIDs.add(row[columnUploadedFileID]);
     }
     return uploadedFileIDs;
+  }
+
+  Future<int> getNumberOfFilesToBeUploadedOrUpdated(Set<String> folders) async {
+    if (folders.isEmpty) {
+      return 0;
+    }
+    final db = await instance.database;
+    String inParam = "";
+    for (final folder in folders) {
+      inParam += "'" + folder + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final rows = await db.query(
+      table,
+      columns: [columnUploadedFileID],
+      where:
+          '($columnLocalID IS NOT NULL AND $columnUploadedFileID IS NOT NULL AND $columnUpdationTime IS NOT NULL AND $columnIsDeleted = 0)',
+      orderBy: '$columnCreationTime DESC',
+      distinct: true,
+    );
+    return rows.length;
   }
 
   Future<int> getNumberOfUploadedFiles() async {
