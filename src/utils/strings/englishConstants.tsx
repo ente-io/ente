@@ -55,17 +55,17 @@ const englishConstants = {
         0: 'preparing to upload',
         1: 'reading google metadata files',
         2: (fileCounter) =>
-            `${fileCounter.finished} of ${fileCounter.total} files successfully uploaded`,
-        3: 'files uploaded completed!',
+            `${fileCounter.finished} / ${fileCounter.total} files backed up`,
+        3: 'backup complete!',
     },
     UPLOADING_FILES: `file upload`,
     FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
     FILE_UPLOAD_PROGRESS: (name, progress) => (
-        <h5 id={name}>
-            uploading <strong>{name}</strong>
+        <div id={name}>
+            <strong>{name}</strong>
             {` - `}
             {progress !== -1 ? progress + '%' : 'failed'}
-        </h5>
+        </div>
     ),
     SUBSCRIPTION_EXPIRED:
         'your subscription has expired, please renew it form the mobile app',
@@ -144,10 +144,9 @@ const englishConstants = {
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email ?',
-    UPLOAD_STRATEGY_CHOICE:
-        'the folder you are trying to upload has sub-folders ,please select the upload strategy you would want to use',
-    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'single collection for all folder',
-    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'a collection for each folder',
+    UPLOAD_STRATEGY_CHOICE: 'you are attempting to upload multiple folders, please choose between',
+    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for all folders',
+    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for each folder',
 };
 
 export default englishConstants;

@@ -161,6 +161,9 @@ const GlobalStyles = createGlobalStyle`
     .bm-cross {
         background: #fff;
     }
+    .bg-upload-progress-bar {
+        background-color: #2dc262;
+    }
 `;
 
 const Image = styled.img`

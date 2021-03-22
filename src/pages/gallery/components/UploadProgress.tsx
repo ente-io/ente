@@ -38,19 +38,14 @@ export default function UploadProgress(props: Props) {
             }
             dialogClassName="ente-modal"
         >
-            <Modal.Header>
-                <Modal.Title id="contained-modal-title-vcenter">
-                    {constants.UPLOADING_FILES}
-                </Modal.Title>
-            </Modal.Header>
             <Modal.Body>
-                <div style={{ textAlign: 'center' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', marginTop: '12px' }}>
                     <h4>
                         {props.uploadStage == UPLOAD_STAGES.UPLOADING
                             ? props.fileCounter.total > 1 &&
-                              constants.UPLOAD[props.uploadStage](
-                                  props.fileCounter
-                              )
+                            constants.UPLOAD[props.uploadStage](
+                                props.fileCounter
+                            )
                             : constants.UPLOAD[props.uploadStage]}
                     </h4>
                 </div>
@@ -61,7 +56,7 @@ export default function UploadProgress(props: Props) {
                         </Alert>
                     )
                 ) : (
-                    <ProgressBar now={props.now} />
+                    <ProgressBar now={props.now} animated variant={'upload-progress-bar'} />
                 )}
                 {fileProgressStatuses && (
                     <div
@@ -72,12 +67,14 @@ export default function UploadProgress(props: Props) {
                         }}
                     >
                         {fileProgressStatuses.map(({ fileName, progress }) =>
-                            constants.FILE_UPLOAD_PROGRESS(fileName, progress)
+                            <div style={{ marginTop: '12px' }}>
+                                {constants.FILE_UPLOAD_PROGRESS(fileName, progress)}
+                            </div>
                         )}
                     </div>
                 )}
                 {props.now === 100 && (
-                    <Modal.Footer>
+                    <Modal.Footer style={{ border: 'none' }}>
                         <Button
                             variant="dark"
                             style={{ width: '100%' }}
