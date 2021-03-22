@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
@@ -22,9 +24,11 @@ class _BackupFolderSelectionWidgetState
   void initState() {
     _backedupFolders = Configuration.instance.getPathsToBackUp();
     if (_backedupFolders.length == 0) {
-      _backedupFolders.add("Camera");
-      _backedupFolders.add("Recents");
-      _backedupFolders.add("DCIM");
+      if (Platform.isAndroid) {
+        _backedupFolders.add("Camera");
+      } else {
+        _backedupFolders.add("Recents");
+      }
     }
     super.initState();
   }
