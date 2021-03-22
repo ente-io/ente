@@ -23,7 +23,7 @@ const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
 const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
 const CHUNKS_COMBINED_FOR_UPLOAD = 5;
-
+const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 export interface FileWithCollection {
     file: File;
     collection: collection;
@@ -740,7 +740,9 @@ class UploadService {
         uploadPartCount: number
     ) {
         let streamEncryptedFileReader = file.getReader();
-        let percentPerPart = Math.round(90 / uploadPartCount);
+        let percentPerPart = Math.round(
+            RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount
+        );
         const resParts = [];
         for (const [
             index,
@@ -783,7 +785,11 @@ class UploadService {
         return multipartUploadURLs.objectKey;
     }
 
-    private trackUploadProgress(filename, percentPerPart = 90, index = 0) {
+    private trackUploadProgress(
+        filename,
+        percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
+        index = 0
+    ) {
         return {
             onUploadProgress: (event) => {
                 filename &&
