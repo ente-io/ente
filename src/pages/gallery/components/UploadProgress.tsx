@@ -47,7 +47,8 @@ export default function UploadProgress(props: Props) {
                 <div style={{ textAlign: 'center' }}>
                     <h4>
                         {props.uploadStage == UPLOAD_STAGES.UPLOADING
-                            ? constants.UPLOAD[props.uploadStage](
+                            ? props.fileCounter.total > 1 &&
+                              constants.UPLOAD[props.uploadStage](
                                   props.fileCounter
                               )
                             : constants.UPLOAD[props.uploadStage]}
