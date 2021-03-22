@@ -83,7 +83,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
           folderName, path, await filesDB.getLastCreatedFileInPath(path)));
     }
     folders.sort((first, second) =>
-        second.thumbnail.updationTime.compareTo(first.thumbnail.updationTime));
+        second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime));
     final collectionsWithThumbnail = List<CollectionWithThumbnail>();
     final collections = collectionsService.getCollections();
     for (final c in collections) {
