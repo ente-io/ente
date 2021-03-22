@@ -121,6 +121,13 @@ const GlobalStyles = createGlobalStyle`
     .btn-primary:disabled {
         background-color: #69b383;
     }
+    .btn-outline-success {
+        color: #2dc262;
+        border-color: #2dc262;
+    }
+    .btn-outline-success:hover {
+        background: #2dc262;
+    }
     .card {
         background-color: #242424;
         color: #fff;

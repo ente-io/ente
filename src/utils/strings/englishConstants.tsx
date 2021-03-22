@@ -143,10 +143,11 @@ const englishConstants = {
     ),
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CHANGE: 'change',
-    CHANGE_EMAIL: 'change email ?',
-    UPLOAD_STRATEGY_CHOICE: 'you are attempting to upload multiple folders, please choose between',
-    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for all folders',
-    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for each folder',
+    CHANGE_EMAIL: 'change email?',
+    UPLOAD_STRATEGY_CHOICE: 'you are uploading multiple folders, would you like us to create',
+    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
+    OR: 'or',
+    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
 };
 
 export default englishConstants;
