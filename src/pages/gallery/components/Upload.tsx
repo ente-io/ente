@@ -105,6 +105,9 @@ export default function Upload(props: Props) {
 
     const uploadFilesToExistingCollection = async (collection) => {
         try {
+            props.closeCollectionSelector();
+            setProgressView(true);
+
             let filesWithCollectionToUpload: FileWithCollection[] = props.acceptedFiles.map(
                 (file) => ({
                     file,
@@ -122,15 +125,16 @@ export default function Upload(props: Props) {
         collectionName
     ) => {
         try {
-            let collectionWiseFiles: Map<string, any>;
+            setChoiceModalView(false);
+            props.closeCollectionSelector();
+            setProgressView(true);
+
             if (strategy == UPLOAD_STRATEGY.SINGLE_COLLECTION) {
-                collectionWiseFiles = new Map<string, any>([
-                    collectionName,
-                    props.acceptedFiles,
-                ]);
-            } else {
-                collectionWiseFiles = getCollectionWiseFiles();
+                let collection = await createAlbum(collectionName);
+
+                return await uploadFilesToExistingCollection(collection);
             }
+            const collectionWiseFiles = getCollectionWiseFiles();
             let filesWithCollectionToUpload = new Array<FileWithCollection>();
             for (let [collectionName, files] of collectionWiseFiles) {
                 let collection = await createAlbum(collectionName);
@@ -149,9 +153,6 @@ export default function Upload(props: Props) {
     ) => {
         try {
             const token = getToken();
-            setProgressView(true);
-            props.closeCollectionSelector();
-            setChoiceModalView(false);
 
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
@@ -186,6 +187,7 @@ export default function Upload(props: Props) {
                 showNextModal={nextModal}
                 collectionSelectorView={props.collectionSelectorView}
                 closeCollectionSelector={props.closeCollectionSelector}
+                loading={props.acceptedFiles.length === 0}
             />
             <CreateCollection
                 createCollectionView={createCollectionView}

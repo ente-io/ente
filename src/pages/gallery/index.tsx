@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { file, syncData, localFiles } from 'services/fileService';
 import PreviewCard from './components/PreviewCard';
-import { getActualKey, getToken } from 'utils/common/key';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -344,6 +343,7 @@ export default function Gallery(props: Props) {
         <FullScreenDropZone
             getRootProps={props.getRootProps}
             getInputProps={props.getInputProps}
+            showCollectionSelector={props.showCollectionSelector}
         >
             <LoadingBar color="#2dc262" ref={loadingBar} />
             {isFirstLoad && (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Modal } from 'react-bootstrap';
+import { Card, Modal, Spinner } from 'react-bootstrap';
 import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
 import constants from 'utils/strings/constants';
@@ -15,12 +15,29 @@ export const CollectionIcon = styled.div`
     border-radius: 34px;
     outline: none;
 `;
+
+const LoadingOverlay = styled.div`
+    left: 0;
+    top: 0;
+    outline: none;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: 900;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9;
+`;
 interface Props {
     collectionAndItsLatestFile;
     uploadFiles;
     collectionSelectorView;
     closeCollectionSelector;
     showNextModal;
+    loading;
 }
 function CollectionSelector(props: Props) {
     const CollectionIcons: JSX.Element[] = props.collectionAndItsLatestFile?.map(
@@ -62,6 +79,11 @@ function CollectionSelector(props: Props) {
             >
                 <AddCollectionButton showChoiceModal={props.showNextModal} />
                 {CollectionIcons}
+                {props.loading && (
+                    <LoadingOverlay>
+                        <Spinner animation="border" />
+                    </LoadingOverlay>
+                )}
             </Modal.Body>
         </Modal>
     );

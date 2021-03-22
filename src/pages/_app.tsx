@@ -11,7 +11,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 
 import UploadButton from 'pages/gallery/components/UploadButton';
-import FullScreenDropZone from 'components/FullScreenDropZone';
 import { sentryInit } from '../utils/sentry';
 import { useDropzone } from 'react-dropzone';
 import Sidebar from 'components/Sidebar';
@@ -212,13 +211,9 @@ export default function App({ Component, pageProps, err }) {
         });
     }, []);
 
-    const onDropAccepted = useCallback(() => {
-        showCollectionSelector();
-    }, []);
     const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
         noClick: true,
         noKeyboard: true,
-        onDropAccepted,
         accept: 'image/*, video/*, application/json, ',
     });
     return (
