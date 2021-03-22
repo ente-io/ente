@@ -16,7 +16,9 @@ import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/ui/backup_folder_selection_widget.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
@@ -90,6 +92,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     _subscriptionPurchaseEvent =
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
+      if (Configuration.instance.getPathsToBackUp().isEmpty) {
+        _showBackupFolderSelectionDialog();
+      }
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
@@ -126,12 +131,17 @@ class _HomeWidgetState extends State<HomeWidget> {
       setState(() {});
     });
     _initDeepLinks();
+    if (Configuration.instance.getPathsToBackUp().isEmpty &&
+        BillingService.instance.hasActiveSubscription()) {
+      _showBackupFolderSelectionDialog();
+    }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget");
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(0),
@@ -299,6 +309,24 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     _logger.info("Filtered down to " + filteredPhotos.length.toString());
     return filteredPhotos;
+  }
+
+  void _showBackupFolderSelectionDialog() {
+    Future.delayed(
+      Duration.zero,
+      () => showDialog(
+        context: context,
+        builder: (context) {
+          return WillPopScope(
+            onWillPop: () async => false,
+            child: AlertDialog(
+              content: const BackupFolderSelectionWidget(),
+            ),
+          );
+        },
+        barrierDismissible: false,
+      ),
+    );
   }
 
   @override
