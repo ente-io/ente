@@ -18,6 +18,7 @@ const MIN_THUMBNAIL_SIZE = 50000;
 const MAX_CONCURRENT_UPLOADS = 4;
 const TYPE_IMAGE = 'image';
 const TYPE_VIDEO = 'video';
+const TYPE_HEIC = 'HEIC';
 const TYPE_JSON = 'json';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
@@ -133,7 +134,8 @@ class UploadService {
                 let file = fileWithCollection.file;
                 if (
                     file.type.substr(0, 5) === TYPE_IMAGE ||
-                    file.type.substr(0, 5) === TYPE_VIDEO
+                    file.type.substr(0, 5) === TYPE_VIDEO ||
+                    (file.type.length === 0 && file.name.endsWith(TYPE_HEIC))
                 ) {
                     actualFiles.push(fileWithCollection);
                 }
@@ -280,6 +282,13 @@ class UploadService {
                     break;
                 default:
                     fileType = FILE_TYPE.OTHERS;
+            }
+            if (
+                fileType === FILE_TYPE.OTHERS &&
+                receivedFile.type.length === 0 &&
+                receivedFile.name.endsWith(TYPE_HEIC)
+            ) {
+                fileType = FILE_TYPE.IMAGE;
             }
 
             const { location, creationTime } = await this.getExifData(
@@ -529,7 +538,10 @@ class UploadService {
             let canvas = document.createElement('canvas');
             let canvas_CTX = canvas.getContext('2d');
             let imageURL = null;
-            if (file.type.match(TYPE_IMAGE)) {
+            if (
+                file.type.match(TYPE_IMAGE) ||
+                (file.type.length == 0 && file.name.endsWith(TYPE_HEIC))
+            ) {
                 let image = new Image();
                 imageURL = URL.createObjectURL(file);
                 image.setAttribute('src', imageURL);
