@@ -22,8 +22,12 @@ const TYPE_JSON = 'json';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
 const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
-const CHUNKS_COMBINED_FOR_UPLOAD = 2;
-
+const CHUNKS_COMBINED_FOR_UPLOAD = 5;
+const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
+export interface FileWithCollection {
+    file: File;
+    collection: collection;
+}
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
     chunkCount: number;
@@ -76,6 +80,7 @@ interface ProcessedFile {
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: fileAttribute;
+    filename: string;
 }
 interface BackupedFile extends ProcessedFile {}
 
@@ -98,15 +103,15 @@ class UploadService {
     private perFileProgress: number;
     private filesCompleted: number;
     private totalFileCount: number;
+    private fileProgress: Map<string, number>;
     private metadataMap: Map<string, Object>;
-    private filesToBeUploaded: File[];
+    private filesToBeUploaded: FileWithCollection[];
     private progressBarProps;
     private uploadErrors: Error[];
     private setUploadErrors;
 
     public async uploadFiles(
-        receivedFiles: File[],
-        collection: collection,
+        filesWithCollectionToUpload: FileWithCollection[],
         token: string,
         progressBarProps,
         setUploadErrors
@@ -116,22 +121,24 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.START);
 
             this.filesCompleted = 0;
+            this.fileProgress = new Map<string, number>();
             this.uploadErrors = [];
             this.setUploadErrors = setUploadErrors;
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
 
             let metadataFiles: File[] = [];
-            let actualFiles: File[] = [];
-            receivedFiles.forEach((file) => {
+            let actualFiles: FileWithCollection[] = [];
+            filesWithCollectionToUpload.forEach((fileWithCollection) => {
+                let file = fileWithCollection.file;
                 if (
                     file.type.substr(0, 5) === TYPE_IMAGE ||
                     file.type.substr(0, 5) === TYPE_VIDEO
                 ) {
-                    actualFiles.push(file);
+                    actualFiles.push(fileWithCollection);
                 }
                 if (file.name.slice(-4) == TYPE_JSON) {
-                    metadataFiles.push(file);
+                    metadataFiles.push(fileWithCollection.file);
                 }
             });
             this.totalFileCount = actualFiles.length;
@@ -164,7 +171,6 @@ class UploadService {
                         await new CryptoWorker(),
                         new FileReader(),
                         this.filesToBeUploaded.pop(),
-                        collection,
                         token
                     )
                 );
@@ -183,10 +189,12 @@ class UploadService {
     private async uploader(
         worker: any,
         reader: FileReader,
-        rawFile: File,
-        collection: collection,
+        fileWithCollection: FileWithCollection,
         token: string
     ) {
+        let { file: rawFile, collection } = fileWithCollection;
+        this.fileProgress.set(rawFile.name, 0);
+        this.changeProgressBarProps();
         try {
             let file: FileInMemory = await this.readFile(reader, rawFile);
             let {
@@ -213,6 +221,7 @@ class UploadService {
             await this.uploadFile(uploadFile, token);
             uploadFile = null;
             this.filesCompleted++;
+            this.fileProgress.set(rawFile.name, 100);
             this.changeProgressBarProps();
         } catch (e) {
             console.error('file upload failed with error', e);
@@ -221,26 +230,37 @@ class UploadService {
                 `Uploading Failed for File - ${rawFile.name}`
             );
             this.uploadErrors.push(error);
+            this.fileProgress.set(rawFile.name, -1);
         }
         if (this.filesToBeUploaded.length > 0) {
             await this.uploader(
                 worker,
                 reader,
                 this.filesToBeUploaded.pop(),
-                collection,
                 token
             );
         }
     }
 
     private changeProgressBarProps() {
-        const { setPercentComplete, setFileCounter } = this.progressBarProps;
+        const {
+            setPercentComplete,
+            setFileCounter,
+            setFileProgress,
+        } = this.progressBarProps;
         setFileCounter({
-            current: this.filesCompleted + 1,
+            finished: this.filesCompleted,
             total: this.totalFileCount,
         });
-        setPercentComplete(this.filesCompleted * this.perFileProgress);
+        let percentComplete = 0;
+        if (this.fileProgress) {
+            for (let [_, progress] of this.fileProgress) {
+                percentComplete += (this.perFileProgress * progress) / 100;
+            }
+        }
+        setPercentComplete(percentComplete);
         this.setUploadErrors(this.uploadErrors);
+        setFileProgress(this.fileProgress);
     }
 
     private async readFile(reader: FileReader, receivedFile: File) {
@@ -331,6 +351,7 @@ class UploadService {
                     file: encryptedFiledata,
                     thumbnail: encryptedThumbnail,
                     metadata: encryptedMetadata,
+                    filename: file.metadata.title,
                 },
                 fileKey: encryptedKey,
             };
@@ -381,25 +402,32 @@ class UploadService {
         try {
             if (isDataStream(file.file.encryptedData)) {
                 const { chunkCount, stream } = file.file.encryptedData;
+                const uploadPartCount = Math.ceil(
+                    chunkCount / CHUNKS_COMBINED_FOR_UPLOAD
+                );
                 const filePartUploadURLs = await this.fetchMultipartUploadURLs(
                     token,
-                    Math.ceil(chunkCount / CHUNKS_COMBINED_FOR_UPLOAD)
+                    uploadPartCount
                 );
                 file.file.objectKey = await this.putFileInParts(
                     filePartUploadURLs,
-                    stream
+                    stream,
+                    file.filename,
+                    uploadPartCount
                 );
             } else {
                 const fileUploadURL = await this.getUploadURL(token);
                 file.file.objectKey = await this.putFile(
                     fileUploadURL,
-                    file.file.encryptedData
+                    file.file.encryptedData,
+                    file.filename
                 );
             }
             const thumbnailUploadURL = await this.getUploadURL(token);
             file.thumbnail.objectKey = await this.putFile(
                 thumbnailUploadURL,
-                file.thumbnail.encryptedData as Uint8Array
+                file.thumbnail.encryptedData as Uint8Array,
+                null
             );
             delete file.file.encryptedData;
             delete file.thumbnail.encryptedData;
@@ -696,10 +724,17 @@ class UploadService {
 
     private async putFile(
         fileUploadURL: UploadURL,
-        file: Uint8Array
+        file: Uint8Array,
+        filename: string
     ): Promise<string> {
         try {
-            await HTTPService.put(fileUploadURL.url, file);
+            await HTTPService.put(
+                fileUploadURL.url,
+                file,
+                null,
+                null,
+                this.trackUploadProgress(filename)
+            );
             return fileUploadURL.objectKey;
         } catch (e) {
             console.error('putFile to dataStore failed ', e);
@@ -709,34 +744,40 @@ class UploadService {
 
     private async putFileInParts(
         multipartUploadURLs: MultipartUploadURLs,
-        file: ReadableStream<Uint8Array>
+        file: ReadableStream<Uint8Array>,
+        filename: string,
+        uploadPartCount: number
     ) {
         let streamEncryptedFileReader = file.getReader();
+        let percentPerPart = Math.round(
+            RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount
+        );
         const resParts = [];
         for (const [
             index,
             fileUploadURL,
         ] of multipartUploadURLs.partURLs.entries()) {
-            let {
-                done: done1,
-                value: chunk1,
-            } = await streamEncryptedFileReader.read();
-            if (done1) {
-                break;
+            let combinedChunks = [];
+            for (let i = 0; i < CHUNKS_COMBINED_FOR_UPLOAD; i++) {
+                let {
+                    done,
+                    value: chunk,
+                } = await streamEncryptedFileReader.read();
+                if (done) {
+                    break;
+                }
+                for (let index = 0; index < chunk.length; index++) {
+                    combinedChunks.push(chunk[index]);
+                }
             }
-            let {
-                done: done2,
-                value: chunk2,
-            } = await streamEncryptedFileReader.read();
-            let uploadChunk: Uint8Array;
-            if (!done2) {
-                uploadChunk = new Uint8Array(chunk1.length + chunk2.length);
-                uploadChunk.set(chunk1);
-                uploadChunk.set(chunk2, chunk1.length);
-            } else {
-                uploadChunk = chunk1;
-            }
-            const response = await HTTPService.put(fileUploadURL, uploadChunk);
+            let uploadChunk = Uint8Array.from(combinedChunks);
+            const response = await HTTPService.put(
+                fileUploadURL,
+                uploadChunk,
+                null,
+                null,
+                this.trackUploadProgress(filename, percentPerPart, index)
+            );
             resParts.push({
                 PartNumber: index + 1,
                 ETag: response.headers.etag,
@@ -753,6 +794,25 @@ class UploadService {
         return multipartUploadURLs.objectKey;
     }
 
+    private trackUploadProgress(
+        filename,
+        percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
+        index = 0
+    ) {
+        return {
+            onUploadProgress: (event) => {
+                filename &&
+                    this.fileProgress.set(
+                        filename,
+                        Math.round(
+                            percentPerPart * index +
+                                (percentPerPart * event.loaded) / event.total
+                        )
+                    );
+                this.changeProgressBarProps();
+            },
+        };
+    }
     private async getExifData(
         reader: FileReader,
         receivedFile: File,
