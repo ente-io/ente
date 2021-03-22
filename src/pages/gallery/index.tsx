@@ -27,6 +27,8 @@ import { Alert, Button, Jumbotron } from 'react-bootstrap';
 import Delete from 'components/Delete';
 import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import FullScreenDropZone from 'components/FullScreenDropZone';
+import Sidebar from 'components/Sidebar';
+import UploadButton from './components/UploadButton';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -402,6 +404,8 @@ export default function Gallery(props: Props) {
                 setBannerErrorCode={setBannerErrorCode}
                 acceptedFiles={props.acceptedFiles}
             />
+            <Sidebar />
+            <UploadButton openFileUploader={props.openFileUploader} />
             {!isFirstLoad && data.length == 0 ? (
                 <Jumbotron>
                     <Image alt="vault" src="/vault.png" />

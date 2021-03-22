@@ -12,10 +12,7 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getToken } from 'utils/common/key';
 import { getEndpoint } from 'utils/common/apiUtil';
 
-interface Props {
-    setNavbarIconView;
-}
-export default function Sidebar(props: Props) {
+export default function Sidebar() {
     const [logoutModalView, setLogoutModalView] = useState(false);
     function showLogoutModal() {
         setLogoutModalView(true);
@@ -41,7 +38,6 @@ export default function Sidebar(props: Props) {
     const logout = async () => {
         setLogoutModalView(false);
         setIsOpen(false);
-        props.setNavbarIconView(false);
         logoutUser();
     };
 

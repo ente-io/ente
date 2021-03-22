@@ -151,14 +151,17 @@ const GlobalStyles = createGlobalStyle`
     } 
     .bm-burger-button {
         position: fixed;
-        width: 26px;
-        height: 22px;
-        left: 16px;
-        top: 22px;
+        width: 28px;
+        height: 20px;
+        top:25px;
+        left: 32px;
     }
     .bm-burger-bars {
         background: #bdbdbd;
     }
+    .bm-menu-wrap {
+        top:0px;
+      }
     .bm-menu {
         background: #131313;
         padding: 2.5em 1.5em 0;
@@ -238,9 +241,7 @@ export default function App({ Component, pageProps, err }) {
                 <script async src={`https://sa.ente.io/latest.js`} />
             </Head>
             <GlobalStyles />
-            <div style={{ display: navbarIconView ? 'block' : 'none' }}>
-                <Sidebar setNavbarIconView={setNavbarIconView} />
-            </div>
+
             <Navbar>
                 <FlexContainer sideMargin={navbarIconView}>
                     <Image
@@ -249,7 +250,6 @@ export default function App({ Component, pageProps, err }) {
                         src="/icon.svg"
                     />
                 </FlexContainer>
-                {navbarIconView && <UploadButton openFileUploader={open} />}
             </Navbar>
             {loading ? (
                 <Container>
