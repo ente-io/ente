@@ -22,7 +22,7 @@ const TYPE_JSON = 'json';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
 const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
-const CHUNKS_COMBINED_FOR_UPLOAD = 2;
+const CHUNKS_COMBINED_FOR_UPLOAD = 5;
 
 export interface FileWithCollection {
     file: File;
@@ -740,31 +740,26 @@ class UploadService {
         uploadPartCount: number
     ) {
         let streamEncryptedFileReader = file.getReader();
-        let percentPerPart = Math.round(90 / (uploadPartCount + 1));
+        let percentPerPart = Math.round(90 / uploadPartCount);
         const resParts = [];
         for (const [
             index,
             fileUploadURL,
         ] of multipartUploadURLs.partURLs.entries()) {
-            let {
-                done: done1,
-                value: chunk1,
-            } = await streamEncryptedFileReader.read();
-            if (done1) {
-                break;
+            let combinedChunks = [];
+            for (let i = 0; i < CHUNKS_COMBINED_FOR_UPLOAD; i++) {
+                let {
+                    done,
+                    value: chunk,
+                } = await streamEncryptedFileReader.read();
+                if (done) {
+                    break;
+                }
+                for (let index = 0; index < chunk.length; index++) {
+                    combinedChunks.push(chunk[index]);
+                }
             }
-            let {
-                done: done2,
-                value: chunk2,
-            } = await streamEncryptedFileReader.read();
-            let uploadChunk: Uint8Array;
-            if (!done2) {
-                uploadChunk = new Uint8Array(chunk1.length + chunk2.length);
-                uploadChunk.set(chunk1);
-                uploadChunk.set(chunk2, chunk1.length);
-            } else {
-                uploadChunk = chunk1;
-            }
+            let uploadChunk = Uint8Array.from(combinedChunks);
             const response = await HTTPService.put(
                 fileUploadURL,
                 uploadChunk,
