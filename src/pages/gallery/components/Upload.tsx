@@ -50,9 +50,9 @@ export default function Upload(props: Props) {
             props.collectionAndItsLatestFile &&
             props.collectionAndItsLatestFile.length == 0
         ) {
-            setCreateCollectionView(true);
+            props.closeCollectionSelector();
+            nextModal();
         }
-        setFileAnalysisResult(analyseUploadFiles());
         init();
     }, [props.collectionSelectorView]);
 
@@ -64,7 +64,7 @@ export default function Upload(props: Props) {
 
     function analyseUploadFiles() {
         if (props.acceptedFiles.length == 0) {
-            return {} as AnalysisResult;
+            return null;
         }
         const paths: string[] = props.acceptedFiles.map((file) => file.path);
         paths.sort();
@@ -171,10 +171,12 @@ export default function Upload(props: Props) {
         }
     };
     const nextModal = () => {
+        let fileAnalysisResult = analyseUploadFiles();
         setTriggerFocus((prev) => !prev);
         fileAnalysisResult.multipleFolders
             ? setChoiceModalView(true)
             : setCreateCollectionView(true);
+        setFileAnalysisResult(fileAnalysisResult);
     };
     return (
         <>
