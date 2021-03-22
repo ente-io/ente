@@ -7,7 +7,7 @@ import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Button from 'react-bootstrap/Button';
-import { putAttributes } from 'services/userService';
+import { logoutUser, putAttributes } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
@@ -112,7 +112,10 @@ export default function Generate() {
             {/* <Image alt="vault" src="/vault.png" style={{ paddingBottom: '40px' }} /> */}
             <Card style={{ maxWidth: '540px', padding: '20px' }}>
                 <Card.Body>
-                    <div className="text-center" style={{ marginBottom: '40px' }}>
+                    <div
+                        className="text-center"
+                        style={{ marginBottom: '40px' }}
+                    >
                         <p>{constants.ENTER_ENC_PASSPHRASE}</p>
                         {constants.PASSPHRASE_DISCLAIMER()}
                     </div>
@@ -144,7 +147,7 @@ export default function Generate() {
                                         onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                            errors.passphrase
+                                                errors.passphrase
                                         )}
                                         autoFocus={true}
                                         disabled={loading}
@@ -171,12 +174,22 @@ export default function Generate() {
                                         {errors.confirm}
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Button type="submit" block disabled={loading} style={{ marginTop: '28px' }}>
+                                <Button
+                                    type="submit"
+                                    block
+                                    disabled={loading}
+                                    style={{ marginTop: '28px' }}
+                                >
                                     {constants.SET_PASSPHRASE}
                                 </Button>
                             </Form>
                         )}
                     </Formik>
+                    <div className="text-center" style={{ marginTop: '20px' }}>
+                        <a href="#" onClick={logoutUser}>
+                            {constants.LOGOUT}
+                        </a>
+                    </div>
                 </Card.Body>
             </Card>
         </Container>
