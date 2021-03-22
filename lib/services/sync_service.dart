@@ -66,9 +66,7 @@ class SyncService {
     });
 
     Bus.instance.on<SyncStatusUpdate>().listen((event) {
-      if (event.status != SyncStatus.in_progress) {
-        _logger.info("Sync status received " + event.toString());
-      }
+      _logger.info("Sync status received " + event.toString());
       _lastSyncStatusEvent = event;
     });
   }
@@ -123,7 +121,7 @@ class SyncService {
     } catch (e, s) {
       if (e is DioError && e.type == DioErrorType.DEFAULT) {
         final errorCode = e.error?.osError?.errorCode;
-        if (errorCode == 111 || errorCode == 7) {
+        if (errorCode == 111 || errorCode == 101 || errorCode == 7) {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
               reason: "waiting for network..."));
           return false;
