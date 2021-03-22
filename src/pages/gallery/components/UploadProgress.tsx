@@ -29,10 +29,13 @@ export default function UploadProgress(props: Props) {
     return (
         <Modal
             show={props.show}
+            onHide={props.closeModal}
             size="lg"
             aria-labelledby="contained-modal-title-vcenter"
             centered
-            backdrop="static"
+            backdrop={
+                props.uploadStage !== UPLOAD_STAGES.FINISH ? 'static' : 'true'
+            }
             dialogClassName="ente-modal"
         >
             <Modal.Header>
