@@ -26,7 +26,6 @@ export default function CreateCollection(props: Props) {
 
     useEffect(() => {
         setTimeout(() => {
-            console.log(collectionNameInputRef);
             collectionNameInputRef.current?.focus();
         }, 200);
     }, [props.triggerFocus]);
