@@ -8,7 +8,7 @@ import { checkConnectivity } from 'utils/common/utilFunctions';
 import { ErrorHandler } from 'utils/common/errorUtil';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 import * as convert from 'xml-js';
-import { ENCRYPTION_CHUNK_SIZE } from 'utils/crypto/libsodium';
+import { ENCRYPTION_CHUNK_SIZE } from 'types';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;

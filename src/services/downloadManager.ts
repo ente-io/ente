@@ -5,7 +5,6 @@ import { getEndpoint, getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
 import { getFileExtension, runningInBrowser } from 'utils/common/utilFunctions';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 
-const heic2any = runningInBrowser() && require('heic2any');
 const TYPE_HEIC = 'heic';
 
 class DownloadManager {
@@ -170,6 +169,7 @@ class DownloadManager {
     }
 
     private async convertHEIC2JPEG(fileBlob): Promise<Blob> {
+        const heic2any = runningInBrowser() && require('heic2any');
         return await heic2any({
             blob: fileBlob,
             toType: 'image/jpeg',

@@ -2,7 +2,18 @@ import React from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
-function ConfirmLogout({ logout, ...props }) {
+export enum CONFIRM_ACTION {
+    LOGOUT = 'LOGOUT',
+    DELETE = 'DELETE',
+}
+
+export interface Props {
+    callback: () => void;
+    action: CONFIRM_ACTION;
+    show: boolean;
+    onHide: () => void;
+}
+function ConfirmDialog({ callback, action, ...props }: Props) {
     return (
         <Modal
             {...props}
@@ -12,18 +23,18 @@ function ConfirmLogout({ logout, ...props }) {
         >
             <Modal.Body style={{ padding: '24px' }}>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    {constants.LOGOUT_WARNING}
+                    {constants[`${action}_WARNING`]}
                 </Modal.Title>
             </Modal.Body>
             <Modal.Footer style={{ borderTop: 'none' }}>
                 <Button variant="secondary" onClick={props.onHide}>
                     {constants.CANCEL}
                 </Button>
-                <Button variant="danger" onClick={logout}>
-                    {constants.LOGOUT}
+                <Button variant="danger" onClick={callback}>
+                    {constants[action]}
                 </Button>
             </Modal.Footer>
         </Modal>
     );
 }
-export default ConfirmLogout;
+export default ConfirmDialog;

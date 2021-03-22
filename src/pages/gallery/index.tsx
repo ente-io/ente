@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { file, syncData, localFiles } from 'services/fileService';
+import { file, syncData, localFiles, deleteFiles } from 'services/fileService';
 import PreviewCard from './components/PreviewCard';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
@@ -24,6 +24,8 @@ import {
 import constants from 'utils/strings/constants';
 import AlertBanner from './components/AlertBanner';
 import { Alert, Button, Jumbotron } from 'react-bootstrap';
+import Delete from 'components/Delete';
+import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 
 const DATE_CONTAINER_HEIGHT = 45;
@@ -121,6 +123,25 @@ interface Props {
     setNavbarIconView;
     err;
 }
+
+const DeleteBtn = styled.button`
+    border: none;
+    background-color: #ff6666;
+    position: fixed;
+    z-index: 1;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    color: #fff;
+`;
+
+export type selectedState = {
+    [k: number]: boolean;
+    count: number;
+};
+
 export default function Gallery(props: Props) {
     const router = useRouter();
     const [collections, setCollections] = useState<collection[]>([]);
@@ -136,7 +157,8 @@ export default function Gallery(props: Props) {
     const [bannerErrorCode, setBannerErrorCode] = useState<number>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
-
+    const [selected, setSelected] = useState<selectedState>({ count: 0 });
+    const [deleteConfirmView, setDeleteConfirmView] = useState(false);
     const loadingBar = useRef(null);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -248,6 +270,14 @@ export default function Gallery(props: Props) {
         setOpen(true);
     };
 
+    const handleSelect = (id: number) => (checked: boolean) => {
+        setSelected({
+            ...selected,
+            [id]: checked,
+            count: checked ? selected.count + 1 : selected.count - 1,
+        });
+    };
+
     const getThumbnail = (file: file[], index: number) => {
         return (
             <PreviewCard
@@ -255,6 +285,10 @@ export default function Gallery(props: Props) {
                 data={file[index]}
                 updateUrl={updateUrl(file[index].dataIndex)}
                 onClick={onThumbnailClick(index)}
+                selectable
+                onSelect={handleSelect(file[index].id)}
+                selected={selected[file[index].id]}
+                selectOnClick={selected.count > 0}
             />
         );
     };
@@ -448,7 +482,7 @@ export default function Gallery(props: Props) {
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                        ITEM_TYPE.TIME
+                                            ITEM_TYPE.TIME
                                             ? DATE_CONTAINER_HEIGHT
                                             : IMAGE_CONTAINER_HEIGHT
                                     }
@@ -465,14 +499,14 @@ export default function Gallery(props: Props) {
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                        ITEM_TYPE.TIME
+                                                            ITEM_TYPE.TIME
                                                             ? 1
                                                             : columns
                                                     }
                                                 >
                                                     {timeStampList[index]
                                                         .itemType ===
-                                                    ITEM_TYPE.TIME ? (
+                                                        ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
                                                                 timeStampList[
@@ -491,7 +525,7 @@ export default function Gallery(props: Props) {
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                        idx
+                                                                    idx
                                                                 );
                                                             }
                                                         )
@@ -533,6 +567,21 @@ export default function Gallery(props: Props) {
                     {constants.INSTALL_MOBILE_APP()}
                 </Alert>
             )}
+            {selected.count && (
+                <DeleteBtn onClick={() => setDeleteConfirmView(true)}>
+                    <Delete />
+                </DeleteBtn>
+            )}
+            <ConfirmDialog
+                show={deleteConfirmView}
+                onHide={() => setDeleteConfirmView(false)}
+                callback={async () => {
+                    await deleteFiles(selected, syncWithRemote);
+                    setDeleteConfirmView(false);
+                    setSelected({ count: 0 });
+                }}
+                action={CONFIRM_ACTION.DELETE}
+            />
         </FullScreenDropZone>
     );
 }

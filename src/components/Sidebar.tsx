@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
-import ConfirmLogout from 'components/ConfirmLogout';
+import ConfirmLogout, { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import Spinner from 'react-bootstrap/Spinner';
 import subscriptionService, {
     Subscription,
@@ -111,6 +111,8 @@ export default function Sidebar(props: Props) {
                 <a
                     href="mailto:contact@ente.io"
                     style={{ textDecoration: 'inherit', color: 'inherit' }}
+                    target="_blank"
+                    rel="noreferrer noopener"
                 >
                     support
                 </a>
@@ -119,7 +121,8 @@ export default function Sidebar(props: Props) {
                 <ConfirmLogout
                     show={logoutModalView}
                     onHide={closeLogoutModal}
-                    logout={logout}
+                    callback={logout}
+                    action={CONFIRM_ACTION.LOGOUT}
                 />
                 <h5
                     style={{

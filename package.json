@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build-analyze": "ANALYZE=true next build",
     "postbuild": "next-on-netlify",
     "start": "next start"
   },

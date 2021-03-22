@@ -144,6 +144,8 @@ const englishConstants = {
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email?',
+    DELETE_WARNING: 'sure you want to delete selected files?',
+    DELETE: 'delete',
     UPLOAD_STRATEGY_CHOICE: 'you are uploading multiple folders, would you like us to create',
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
     OR: 'or',
