@@ -11,7 +11,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 
 import UploadButton from 'pages/gallery/components/UploadButton';
-import FullScreenDropZone from 'components/FullScreenDropZone';
 import { sentryInit } from '../utils/sentry';
 import { useDropzone } from 'react-dropzone';
 import Sidebar from 'components/Sidebar';
@@ -122,6 +121,13 @@ const GlobalStyles = createGlobalStyle`
     .btn-primary:disabled {
         background-color: #69b383;
     }
+    .btn-outline-success {
+        color: #2dc262;
+        border-color: #2dc262;
+    }
+    .btn-outline-success:hover {
+        background: #2dc262;
+    }
     .card {
         background-color: #242424;
         color: #fff;
@@ -162,6 +168,9 @@ const GlobalStyles = createGlobalStyle`
     .bm-cross {
         background: #fff;
     }
+    .bg-upload-progress-bar {
+        background-color: #2dc262;
+    }
 `;
 
 const Image = styled.img`
@@ -181,13 +190,13 @@ export default function App({ Component, pageProps, err }) {
     const [user, setUser] = useState();
     const [loading, setLoading] = useState(false);
     const [navbarIconView, setNavbarIconView] = useState(false);
-    const [uploadModalView, setUploadModalView] = useState(false);
+    const [collectionSelectorView, setCollectionSelectorView] = useState(false);
 
-    function closeUploadModal() {
-        setUploadModalView(false);
+    function closeCollectionSelector() {
+        setCollectionSelectorView(false);
     }
-    function showUploadModal() {
-        setUploadModalView(true);
+    function showCollectionSelector() {
+        setCollectionSelectorView(true);
     }
 
     useEffect(() => {
@@ -212,20 +221,13 @@ export default function App({ Component, pageProps, err }) {
         });
     }, []);
 
-    const onDropAccepted = useCallback(() => {
-        showUploadModal();
-    }, []);
     const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
         noClick: true,
         noKeyboard: true,
-        onDropAccepted,
         accept: 'image/*, video/*, application/json, ',
     });
     return (
-        <FullScreenDropZone
-            getRootProps={getRootProps}
-            getInputProps={getInputProps}
-        >
+        <>
             <Head>
                 <title>{constants.TITLE}</title>
                 <script async src={`https://sa.ente.io/latest.js`} />
@@ -252,15 +254,17 @@ export default function App({ Component, pageProps, err }) {
                 </Container>
             ) : (
                 <Component
+                    getRootProps={getRootProps}
+                    getInputProps={getInputProps}
                     openFileUploader={open}
                     acceptedFiles={acceptedFiles}
-                    uploadModalView={uploadModalView}
-                    showUploadModal={showUploadModal}
-                    closeUploadModal={closeUploadModal}
+                    collectionSelectorView={collectionSelectorView}
+                    showCollectionSelector={showCollectionSelector}
+                    closeCollectionSelector={closeCollectionSelector}
                     setNavbarIconView={setNavbarIconView}
                     err={err}
                 />
             )}
-        </FullScreenDropZone>
+        </>
     );
 }

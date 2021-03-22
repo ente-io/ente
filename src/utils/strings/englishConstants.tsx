@@ -54,11 +54,19 @@ const englishConstants = {
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
-        2: 'uploading your files',
-        3: 'files uploaded successfully!',
+        2: (fileCounter) =>
+            `${fileCounter.finished} / ${fileCounter.total} files backed up`,
+        3: 'backup complete!',
     },
-    UPLOADING_FILES: `uploading files`,
-    OF: 'of',
+    UPLOADING_FILES: `file upload`,
+    FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
+    FILE_UPLOAD_PROGRESS: (name, progress) => (
+        <div id={name}>
+            <strong>{name}</strong>
+            {` - `}
+            {progress !== -1 ? progress + '%' : 'failed'}
+        </div>
+    ),
     SUBSCRIPTION_EXPIRED:
         'your subscription has expired, please renew it form the mobile app',
     STORAGE_QUOTA_EXCEEDED:
@@ -135,9 +143,13 @@ const englishConstants = {
     ),
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CHANGE: 'change',
-    CHANGE_EMAIL: 'change email ?',
+    CHANGE_EMAIL: 'change email?',
     DELETE_WARNING: 'sure you want to delete selected files?',
     DELETE: 'delete',
+    UPLOAD_STRATEGY_CHOICE: 'you are uploading multiple folders, would you like us to create',
+    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
+    OR: 'or',
+    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
 };
 
 export default englishConstants;

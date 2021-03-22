@@ -26,6 +26,7 @@ import AlertBanner from './components/AlertBanner';
 import { Alert, Button, Jumbotron } from 'react-bootstrap';
 import Delete from 'components/Delete';
 import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
+import FullScreenDropZone from 'components/FullScreenDropZone';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -112,10 +113,13 @@ const DateContainer = styled.div`
 `;
 
 interface Props {
+    getRootProps;
+    getInputProps;
     openFileUploader;
     acceptedFiles;
-    uploadModalView;
-    closeUploadModal;
+    collectionSelectorView;
+    closeCollectionSelector;
+    showCollectionSelector;
     setNavbarIconView;
     err;
 }
@@ -370,7 +374,11 @@ export default function Gallery(props: Props) {
     };
 
     return (
-        <>
+        <FullScreenDropZone
+            getRootProps={props.getRootProps}
+            getInputProps={props.getInputProps}
+            showCollectionSelector={props.showCollectionSelector}
+        >
             <LoadingBar color="#2dc262" ref={loadingBar} />
             {isFirstLoad && (
                 <div className="text-center">
@@ -387,8 +395,8 @@ export default function Gallery(props: Props) {
                 selectCollection={selectCollection}
             />
             <Upload
-                uploadModalView={props.uploadModalView}
-                closeUploadModal={props.closeUploadModal}
+                collectionSelectorView={props.collectionSelectorView}
+                closeCollectionSelector={props.closeCollectionSelector}
                 collectionAndItsLatestFile={collectionAndItsLatestFile}
                 refetchData={syncWithRemote}
                 setBannerErrorCode={setBannerErrorCode}
@@ -474,7 +482,7 @@ export default function Gallery(props: Props) {
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                        ITEM_TYPE.TIME
+                                            ITEM_TYPE.TIME
                                             ? DATE_CONTAINER_HEIGHT
                                             : IMAGE_CONTAINER_HEIGHT
                                     }
@@ -491,14 +499,14 @@ export default function Gallery(props: Props) {
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                        ITEM_TYPE.TIME
+                                                            ITEM_TYPE.TIME
                                                             ? 1
                                                             : columns
                                                     }
                                                 >
                                                     {timeStampList[index]
                                                         .itemType ===
-                                                    ITEM_TYPE.TIME ? (
+                                                        ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
                                                                 timeStampList[
@@ -517,7 +525,7 @@ export default function Gallery(props: Props) {
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                        idx
+                                                                    idx
                                                                 );
                                                             }
                                                         )
@@ -570,10 +578,10 @@ export default function Gallery(props: Props) {
                 callback={async () => {
                     await deleteFiles(selected, syncWithRemote);
                     setDeleteConfirmView(false);
-                    setSelected({count: 0});
+                    setSelected({ count: 0 });
                 }}
                 action={CONFIRM_ACTION.DELETE}
             />
-        </>
+        </FullScreenDropZone>
     );
 }

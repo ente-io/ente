@@ -13,7 +13,7 @@ interface IQueryPrams {
  */
 class HTTPService {
     /**
-     * header object to be appened to all api calls.
+     * header object to be append to all api calls.
      */
     private headers: IHTTPHeaders = {
         'content-type': 'application/json',
@@ -54,16 +54,26 @@ class HTTPService {
     /**
      * Generic HTTP request.
      * This is done so that developer can use any functionality
-     * provided by axios. Here, only the set heards are spread
+     * provided by axios. Here, only the set headers are spread
      * over what was sent in config.
      */
-    public request(config: AxiosRequestConfig, customConfig?: any) {
-        // eslint-disable-next-line no-param-reassign
-        config.headers = {
-            ...this.headers,
-            ...config.headers,
-        };
-        return axios({ ...config, ...customConfig });
+    public async request(
+        config: AxiosRequestConfig,
+        customConfig?: any,
+        retryCounter = 2
+    ) {
+        try {
+            // eslint-disable-next-line no-param-reassign
+            config.headers = {
+                ...this.headers,
+                ...config.headers,
+            };
+            return await axios({ ...config, ...customConfig });
+        } catch (e) {
+            retryCounter > 0 &&
+                (await this.request(config, customConfig, retryCounter - 1));
+            throw e;
+        }
     }
 
     /**
