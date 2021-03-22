@@ -154,6 +154,10 @@ class FileUploader {
     }
   }
 
+  int queueSize() {
+    return _queue.length;
+  }
+
   void clearQueue(final Error reason) {
     final uploadsToBeRemoved = List<String>();
     _queue.entries

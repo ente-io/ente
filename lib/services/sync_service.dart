@@ -338,12 +338,7 @@ class SyncService {
       final future =
           _uploader.upload(file, file.collectionID).then((value) async {
         uploadCounter++;
-        final newTotal = await FilesDB.instance.getNumberOfUploadedFiles();
-        Bus.instance
-            .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
-            completed: newTotal - numberOfFilesCurrentlyUploaded,
-            total: totalUploads));
+        await _onFileUploaded(file, numberOfFilesCurrentlyUploaded);
       });
       futures.add(future);
     }
@@ -354,12 +349,7 @@ class SyncService {
           .id;
       final future = _uploader.upload(file, collectionID).then((value) async {
         uploadCounter++;
-        final newTotal = await FilesDB.instance.getNumberOfUploadedFiles();
-        Bus.instance
-            .fire(CollectionUpdatedEvent(collectionID: file.collectionID));
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
-            completed: newTotal - numberOfFilesCurrentlyUploaded,
-            total: totalUploads));
+        _onFileUploaded(file, numberOfFilesCurrentlyUploaded);
       });
       futures.add(future);
     }
@@ -376,15 +366,20 @@ class SyncService {
     } on SilentlyCancelUploadsError {
       // Do nothing
     } on UserCancelledUploadError {
-      totalUploads--;
-      final newTotal = await FilesDB.instance.getNumberOfUploadedFiles();
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
-          completed: newTotal - numberOfFilesCurrentlyUploaded,
-          total: totalUploads));
+      // Do nothing
     } catch (e) {
       throw e;
     }
     return uploadCounter > 0;
+  }
+
+  Future _onFileUploaded(File file, int numberOfFilesCurrentlyUploaded) async {
+    final newTotal = await FilesDB.instance.getNumberOfUploadedFiles();
+    Bus.instance.fire(CollectionUpdatedEvent(collectionID: file.collectionID));
+    final pendingCount = _uploader.queueSize();
+    final completed = newTotal - numberOfFilesCurrentlyUploaded;
+    Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
+        completed: completed, total: completed + pendingCount));
   }
 
   Future _storeDiff(List<File> diff, int collectionID) async {
