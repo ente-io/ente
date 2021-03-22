@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
+import { UPLOAD_STRATEGY } from './Upload';
 
 interface Props {
     createCollectionView;
     setCreateCollectionView;
     autoFilledName;
-    uploadFiles;
+    uploadFiles: (strategy: UPLOAD_STRATEGY, collectionName) => void;
     triggerFocus;
 }
 export default function CreateCollection(props: Props) {
@@ -18,7 +19,7 @@ export default function CreateCollection(props: Props) {
     const handleSubmit = async (event) => {
         event.preventDefault();
         props.setCreateCollectionView(false);
-        await props.uploadFiles(albumName, null);
+        await props.uploadFiles(UPLOAD_STRATEGY.SINGLE_COLLECTION, albumName);
     };
     useEffect(() => {
         setAlbumName(props.autoFilledName);
