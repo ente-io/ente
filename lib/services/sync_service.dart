@@ -174,6 +174,19 @@ class SyncService {
     _doSync();
   }
 
+  Future<void> onFoldersAdded(List<String> paths) async {
+    if (_existingSync != null) {
+      await _existingSync.future;
+    }
+    return sync();
+  }
+
+  void onFoldersRemoved(List<String> paths) {
+    _uploader.removeFromQueueWhere((file) {
+      return paths.contains(file.deviceFolder);
+    }, UserCancelledUploadError());
+  }
+
   Future<void> _doSync() async {
     await _syncWithDevice();
     await syncWithRemote();
@@ -310,7 +323,7 @@ class SyncService {
     _logger.info(updatedFileIDs.length.toString() + " files updated.");
 
     int uploadCounter = 0;
-    final totalUploads = filesToBeUploaded.length + updatedFileIDs.length;
+    int totalUploads = filesToBeUploaded.length + updatedFileIDs.length;
 
     if (totalUploads > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
@@ -362,6 +375,12 @@ class SyncService {
       // Do nothing
     } on SilentlyCancelUploadsError {
       // Do nothing
+    } on UserCancelledUploadError {
+      totalUploads--;
+      final newTotal = await FilesDB.instance.getNumberOfUploadedFiles();
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
+          completed: newTotal - numberOfFilesCurrentlyUploaded,
+          total: totalUploads));
     } catch (e) {
       throw e;
     }

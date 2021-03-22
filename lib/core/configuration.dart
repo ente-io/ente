@@ -231,12 +231,25 @@ class Configuration {
     }
   }
 
-  Future<void> setPathsToBackUp(Set<String> folders) async {
-    bool shouldSync =
-        !listEquals(getPathsToBackUp().toList(), folders.toList());
-    await _preferences.setStringList(foldersToBackUpKey, folders.toList());
-    if (shouldSync) {
-      SyncService.instance.sync();
+  Future<void> setPathsToBackUp(Set<String> newPaths) async {
+    final currentPaths = getPathsToBackUp();
+    List<String> added = [], removed = [];
+    for (final path in newPaths) {
+      if (!currentPaths.contains(path)) {
+        added.add(path);
+      }
+    }
+    for (final path in currentPaths) {
+      if (!newPaths.contains(path)) {
+        removed.add(path);
+      }
+    }
+    await _preferences.setStringList(foldersToBackUpKey, newPaths.toList());
+    if (added.isNotEmpty) {
+      SyncService.instance.onFoldersAdded(added);
+    }
+    if (removed.isNotEmpty) {
+      SyncService.instance.onFoldersRemoved(removed);
     }
   }
 

@@ -166,6 +166,20 @@ class FileUploader {
     }
   }
 
+  void removeFromQueueWhere(final bool Function(File) fn, final Error reason) {
+    List<String> uploadsToBeRemoved = [];
+    _queue.entries
+        .where((entry) => entry.value.status == UploadStatus.not_started)
+        .forEach((pendingUpload) {
+      if (fn(pendingUpload.value.file)) {
+        uploadsToBeRemoved.add(pendingUpload.key);
+      }
+    });
+    for (final id in uploadsToBeRemoved) {
+      _queue.remove(id).completer.completeError(reason);
+    }
+  }
+
   void _pollQueue() {
     if (SyncService.instance.shouldStopSync()) {
       clearQueue(SyncStopRequestedError());
