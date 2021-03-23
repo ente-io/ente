@@ -25,6 +25,16 @@ const WEST_DIRECTION = 'W';
 const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
 const CHUNKS_COMBINED_FOR_UPLOAD = 5;
 const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
+const NULL_LOCATION: Location = { latitude: null, longitude: null };
+
+interface Location {
+    latitude: number;
+    longitude: number;
+}
+interface ParsedEXIFData {
+    location: Location;
+    creationTime: number;
+}
 export interface FileWithCollection {
     file: File;
     collection: collection;
@@ -504,13 +514,20 @@ class UploadService {
             if (!metadataJSON) {
                 return;
             }
-            metaDataObject['creationTime'] =
+            if (
                 metadataJSON['photoTakenTime'] &&
-                metadataJSON['photoTakenTime']['timestamp'] * 1000000;
-            metaDataObject['modificationTime'] =
+                metadataJSON['photoTakenTime']['timestamp']
+            ) {
+                metaDataObject['creationTime'] =
+                    metadataJSON['photoTakenTime']['timestamp'] * 1000000;
+            }
+            if (
                 metadataJSON['modificationTime'] &&
-                metadataJSON['modificationTime']['timestamp'] * 1000000;
-
+                metadataJSON['modificationTime']['timestamp']
+            ) {
+                metaDataObject['modificationTime'] =
+                    metadataJSON['modificationTime']['timestamp'] * 1000000;
+            }
             let locationData = null;
             if (
                 metadataJSON['geoData'] &&
@@ -531,6 +548,7 @@ class UploadService {
             }
             this.metadataMap.set(metadataJSON['title'], metaDataObject);
         } catch (e) {
+            console.error(e);
             //ignore
         }
     }
@@ -833,11 +851,11 @@ class UploadService {
         reader: FileReader,
         receivedFile: File,
         fileType: FILE_TYPE
-    ) {
+    ): Promise<ParsedEXIFData> {
         try {
             if (fileType === FILE_TYPE.VIDEO) {
                 // Todo  extract exif data from videos
-                return { location: null, creationTime: null };
+                return { location: NULL_LOCATION, creationTime: null };
             }
             const exifData: any = await new Promise((resolve, reject) => {
                 reader.onload = () => {
@@ -846,10 +864,10 @@ class UploadService {
                 reader.readAsArrayBuffer(receivedFile);
             });
             if (!exifData) {
-                return { location: null, creationTime: null };
+                return { location: NULL_LOCATION, creationTime: null };
             }
             return {
-                location: this.getLocation(exifData),
+                location: this.getEXIFLocation(exifData),
                 creationTime: this.getUNIXTime(exifData),
             };
         } catch (e) {
@@ -871,9 +889,9 @@ class UploadService {
         return date.getTime() * 1000;
     }
 
-    private getLocation(exifData) {
+    private getEXIFLocation(exifData): Location {
         if (!exifData.GPSLatitude) {
-            return null;
+            return NULL_LOCATION;
         }
 
         let latDegree: number, latMinute: number, latSecond: number;
