@@ -70,7 +70,7 @@ class File {
     title = metadata["title"];
     deviceFolder = metadata["deviceFolder"];
     creationTime = metadata["creationTime"];
-    modificationTime = metadata["modificationTime"];
+    modificationTime = metadata["modificationTime"] ?? creationTime;
     final latitude = metadata["latitude"];
     final longitude = metadata["longitude"];
     if (latitude == null || longitude == null) {
