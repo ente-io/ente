@@ -50,11 +50,10 @@ export default function Upload(props: Props) {
             props.collectionAndItsLatestFile &&
             props.collectionAndItsLatestFile.length == 0
         ) {
-            props.closeCollectionSelector();
             nextModal();
         }
         init();
-    }, [props.collectionSelectorView]);
+    }, [props.acceptedFiles]);
 
     const init = () => {
         setUploadStage(UPLOAD_STAGES.START);
@@ -173,6 +172,9 @@ export default function Upload(props: Props) {
     };
     const nextModal = () => {
         let fileAnalysisResult = analyseUploadFiles();
+        if (!fileAnalysisResult) {
+            return;
+        }
         setTriggerFocus((prev) => !prev);
         fileAnalysisResult.multipleFolders
             ? setChoiceModalView(true)
