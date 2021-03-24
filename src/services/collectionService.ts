@@ -158,11 +158,7 @@ export const syncCollections = async () => {
         }
     }
     collections.sort((a, b) => b.updationTime - a.updationTime);
-    collections.sort((a, b) =>
-        a.type === CollectionType.favorites
-            ? Number.MIN_SAFE_INTEGER
-            : Number.MAX_SAFE_INTEGER
-    );
+    collections.sort((a, b) => (b.type === CollectionType.favorites ? 1 : 0));
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
     await localForage.setItem(COLLECTIONS, collections);
     return collections;
