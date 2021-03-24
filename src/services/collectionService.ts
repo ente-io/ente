@@ -28,7 +28,7 @@ export interface collection {
     name?: string;
     encryptedName?: string;
     nameDecryptionNonce?: string;
-    type: string;
+    type: CollectionType;
     attributes: collectionAttributes;
     sharees: user[];
     updationTime: number;
@@ -158,6 +158,11 @@ export const syncCollections = async () => {
         }
     }
     collections.sort((a, b) => b.updationTime - a.updationTime);
+    collections.sort((a, b) =>
+        a.type === CollectionType.favorites
+            ? Number.MIN_SAFE_INTEGER
+            : Number.MAX_SAFE_INTEGER
+    );
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
     await localForage.setItem(COLLECTIONS, collections);
     return collections;
