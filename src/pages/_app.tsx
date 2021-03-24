@@ -178,10 +178,10 @@ const Image = styled.img`
     margin-right: 5px;
 `;
 
-const FlexContainer = styled.div<{sideMargin: boolean}>`
+const FlexContainer = styled.div<{ sideMargin: boolean }>`
     flex: 1;
     text-align: center;
-    ${props => props.sideMargin && 'margin-left: 48px;'}
+    ${(props) => props.sideMargin && 'margin-left: 48px;'}
 `;
 
 sentryInit();
@@ -220,11 +220,16 @@ export default function App({ Component, pageProps, err }) {
             setLoading(false);
         });
     }, []);
-
+    const onDropAccepted = useCallback(() => {
+        if (acceptedFiles != null && !collectionSelectorView) {
+            showCollectionSelector();
+        }
+    }, []);
     const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
         noClick: true,
         noKeyboard: true,
         accept: 'image/*, video/*, application/json, ',
+        onDropAccepted,
     });
     return (
         <>
