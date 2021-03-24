@@ -588,7 +588,7 @@ class UploadService {
                 await new Promise(async (resolve) => {
                     let video = document.createElement('video');
                     imageURL = URL.createObjectURL(file);
-                    video.addEventListener('loadeddata', function () {
+                    video.addEventListener('timeupdate', function () {
                         const thumbnailWidth =
                             (video.videoWidth * THUMBNAIL_HEIGHT) /
                             video.videoHeight;
@@ -606,19 +606,14 @@ class UploadService {
                     });
                     video.preload = 'metadata';
                     video.src = imageURL;
-                    // Load video in Safari / IE11
-                    video.muted = true;
-                    video.playsInline = true;
-                    video.play();
+                    video.currentTime = 3;
+                    setTimeout(() => resolve(null), 4000);
                 });
             }
             URL.revokeObjectURL(imageURL);
-            if (canvas.toDataURL().length == 0) {
-                throw new Error('');
-            }
-            let thumbnailBlob: Blob = file,
-                attempts = 0;
-            let quality = 1;
+            let thumbnailBlob = null,
+                attempts = 0,
+                quality = 1;
 
             do {
                 attempts++;
@@ -632,9 +627,7 @@ class UploadService {
                         quality
                     );
                 });
-                if (!thumbnailBlob) {
-                    thumbnailBlob = file;
-                }
+                thumbnailBlob = thumbnailBlob ?? new Blob([]);
             } while (
                 thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
                 attempts <= MAX_ATTEMPTS
