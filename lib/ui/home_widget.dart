@@ -132,6 +132,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
     _initDeepLinks();
     if (Configuration.instance.getPathsToBackUp().isEmpty &&
+        Configuration.instance.hasConfiguredAccount() &&
         BillingService.instance.hasActiveSubscription()) {
       _showBackupFolderSelectionDialog();
     }
