@@ -53,7 +53,7 @@ export default function Upload(props: Props) {
             nextModal();
         }
         init();
-    }, [props.acceptedFiles]);
+    }, [props.acceptedFiles, props.collectionSelectorView]);
 
     const init = () => {
         setUploadStage(UPLOAD_STAGES.START);
