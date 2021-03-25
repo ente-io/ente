@@ -13,12 +13,13 @@ class ThumbnailWidget extends StatefulWidget {
   final File file;
   final BoxFit fit;
   final bool shouldShowSyncStatus;
-  const ThumbnailWidget(
+
+  ThumbnailWidget(
     this.file, {
     Key key,
     this.fit = BoxFit.cover,
     this.shouldShowSyncStatus = true,
-  }) : super(key: key);
+  }) : super(key: key ?? Key(file.generatedID.toString()));
   @override
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
 }
