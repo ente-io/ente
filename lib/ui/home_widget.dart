@@ -322,10 +322,12 @@ class _HomeWidgetState extends State<HomeWidget> {
             onWillPop: () async => false,
             child: AlertDialog(
               content: const BackupFolderSelectionWidget(),
+              backgroundColor: Colors.black.withOpacity(0.8),
             ),
           );
         },
         barrierDismissible: false,
+        barrierColor: Colors.black.withOpacity(0.85),
       ),
     );
   }
