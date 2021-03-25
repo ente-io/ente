@@ -42,6 +42,7 @@ class SyncService {
   Completer<bool> _existingSync;
   SharedPreferences _prefs;
   SyncStatusUpdate _lastSyncStatusEvent;
+  int _completedUploads = 0;
 
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
@@ -320,24 +321,19 @@ class SyncService {
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated();
     _logger.info(updatedFileIDs.length.toString() + " files updated.");
 
-    int uploadCounter = 0;
+    _completedUploads = 0;
     int totalUploads = filesToBeUploaded.length + updatedFileIDs.length;
 
     if (totalUploads > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
     }
 
-    final numberOfFilesCurrentlyUploaded =
-        await FilesDB.instance.getNumberOfUploadedFiles();
-
     final futures = List<Future>();
     for (final uploadedFileID in updatedFileIDs) {
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
-      final future =
-          _uploader.upload(file, file.collectionID).then((value) async {
-        uploadCounter++;
-        await _onFileUploaded(file, numberOfFilesCurrentlyUploaded);
-      });
+      final future = _uploader
+          .upload(file, file.collectionID)
+          .then((uploadedFile) => _onFileUploaded(uploadedFile));
       futures.add(future);
     }
 
@@ -345,10 +341,9 @@ class SyncService {
       final collectionID = (await CollectionsService.instance
               .getOrCreateForPath(file.deviceFolder))
           .id;
-      final future = _uploader.upload(file, collectionID).then((value) async {
-        uploadCounter++;
-        _onFileUploaded(file, numberOfFilesCurrentlyUploaded);
-      });
+      final future = _uploader
+          .upload(file, collectionID)
+          .then((uploadedFile) => _onFileUploaded(uploadedFile));
       futures.add(future);
     }
     try {
@@ -368,16 +363,19 @@ class SyncService {
     } catch (e) {
       throw e;
     }
-    return uploadCounter > 0;
+    return _completedUploads > 0;
   }
 
-  Future _onFileUploaded(File file, int numberOfFilesCurrentlyUploaded) async {
-    final newTotal = await FilesDB.instance.getNumberOfUploadedFiles();
+  void _onFileUploaded(File file) {
     Bus.instance.fire(CollectionUpdatedEvent(collectionID: file.collectionID));
+    _completedUploads++;
     final pendingCount = _uploader.queueSize();
-    final completed = newTotal - numberOfFilesCurrentlyUploaded;
+    final total = _completedUploads + pendingCount;
+    if (_completedUploads == total) {
+      return;
+    }
     Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
-        completed: completed, total: completed + pendingCount));
+        completed: _completedUploads, total: total));
   }
 
   Future _storeDiff(List<File> diff, int collectionID) async {

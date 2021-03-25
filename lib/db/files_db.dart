@@ -326,19 +326,6 @@ class FilesDB {
     return uploadedFileIDs;
   }
 
-  Future<int> getNumberOfUploadedFiles() async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      columns: [columnUploadedFileID],
-      where:
-          '($columnLocalID IS NOT NULL AND $columnUploadedFileID IS NOT NULL AND $columnUpdationTime IS NOT NULL AND $columnIsDeleted = 0)',
-      orderBy: '$columnCreationTime DESC',
-      distinct: true,
-    );
-    return rows.length;
-  }
-
   Future<File> getUploadedFileInAnyCollection(int uploadedFileID) async {
     final db = await instance.database;
     final results = await db.query(
