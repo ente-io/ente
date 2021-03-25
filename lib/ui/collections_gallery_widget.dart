@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
@@ -36,6 +37,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   final _logger = Logger("CollectionsGallery");
   StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
+  StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
 
   @override
@@ -49,6 +51,10 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       setState(() {});
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
+      setState(() {});
+    });
+    _backupFoldersUpdatedEvent =
+        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
       setState(() {});
     });
     super.initState();
@@ -299,6 +305,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     _localFilesSubscription.cancel();
     _collectionUpdatesSubscription.cancel();
     _loggedOutEvent.cancel();
+    _backupFoldersUpdatedEvent.cancel();
     super.dispose();
   }
 

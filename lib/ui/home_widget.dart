@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
@@ -44,7 +45,6 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
-  static final importantItemsFilter = ImportantItemsFilter();
   final _logger = Logger("HomeWidgetState");
   final _deviceFolderGalleryWidget = CollectionsGalleryWidget();
   final _sharedCollectionGallery = SharedCollectionGallery();
@@ -61,6 +61,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
   StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
+  StreamSubscription<BackupFoldersUpdatedEvent> _collectionUpdatedEvent;
 
   @override
   void initState() {
@@ -128,6 +129,10 @@ class _HomeWidgetState extends State<HomeWidget> {
       );
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
+      setState(() {});
+    });
+    _collectionUpdatedEvent =
+        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
       setState(() {});
     });
     _initDeepLinks();
@@ -303,8 +308,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   List<File> _getFilteredPhotos(List<File> unfilteredFiles) {
     _logger.info("Filtering " + unfilteredFiles.length.toString());
     final List<File> filteredPhotos = List<File>();
+    final filter = ImportantItemsFilter();
     for (File file in unfilteredFiles) {
-      if (importantItemsFilter.shouldInclude(file)) {
+      if (filter.shouldInclude(file)) {
         filteredPhotos.add(file);
       }
     }
@@ -340,6 +346,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _subscriptionPurchaseEvent.cancel();
     _triggerLogoutEvent.cancel();
     _loggedOutEvent.cancel();
+    _collectionUpdatedEvent.cancel();
     super.dispose();
   }
 }
