@@ -332,9 +332,9 @@ class SyncService {
     final futures = List<Future>();
     for (final uploadedFileID in updatedFileIDs) {
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
-      final future = _uploader
-          .upload(file, file.collectionID)
-          .then((uploadedFile) async => await _onFileUploaded(uploadedFile, alreadyUploaded, toBeUploaded));
+      final future = _uploader.upload(file, file.collectionID).then(
+          (uploadedFile) async => await _onFileUploaded(
+              uploadedFile, alreadyUploaded, toBeUploaded));
       futures.add(future);
     }
 
@@ -342,9 +342,9 @@ class SyncService {
       final collectionID = (await CollectionsService.instance
               .getOrCreateForPath(file.deviceFolder))
           .id;
-      final future = _uploader
-          .upload(file, collectionID)
-          .then((uploadedFile) async => await _onFileUploaded(uploadedFile, alreadyUploaded, toBeUploaded));
+      final future = _uploader.upload(file, collectionID).then(
+          (uploadedFile) async => await _onFileUploaded(
+              uploadedFile, alreadyUploaded, toBeUploaded));
       futures.add(future);
     }
     try {
@@ -367,14 +367,12 @@ class SyncService {
     return _completedUploads > 0;
   }
 
-  Future<void> _onFileUploaded(File file, int alreadyUploaded, int toBeUploadedInThisSession) async {
-    // total number of files uploaded since the start of this upload session (currentlyUploaded - initiallyUploaded)
-    //                   divided by
-    // total number of files to be uploaded
+  Future<void> _onFileUploaded(
+      File file, int alreadyUploaded, int toBeUploadedInThisSession) async {
     Bus.instance.fire(CollectionUpdatedEvent(collectionID: file.collectionID));
     _completedUploads++;
-    final completed = await FilesDB.instance.getNumberOfUploadedFiles() -
-        alreadyUploaded;
+    final completed =
+        await FilesDB.instance.getNumberOfUploadedFiles() - alreadyUploaded;
     if (completed == toBeUploadedInThisSession) {
       return;
     }
