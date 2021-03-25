@@ -131,8 +131,13 @@ class AccountSettingsWidgetState extends State<AccountSettingsWidget> {
             child: SettingsTextItem(
                 text: "subscription plan", icon: Icons.navigate_next),
           ),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(2)),
           Divider(height: 4),
-          Padding(padding: EdgeInsets.all(4)),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(4)),
           Container(
             height: 36,
             child: Row(
@@ -149,9 +154,13 @@ class AccountSettingsWidgetState extends State<AccountSettingsWidget> {
               ],
             ),
           ),
-          Padding(padding: EdgeInsets.all(4)),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(4)),
           Divider(height: 4),
-          Padding(padding: EdgeInsets.all(8)),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(6))
+              : Padding(padding: EdgeInsets.all(8)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -166,7 +175,9 @@ class AccountSettingsWidgetState extends State<AccountSettingsWidget> {
               ),
             ],
           ),
-          Padding(padding: EdgeInsets.all(8)),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(6))
+              : Padding(padding: EdgeInsets.all(8)),
           Divider(height: 4),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
@@ -624,7 +635,7 @@ class SettingsTextItem extends StatelessWidget {
             Icon(icon),
           ],
         ),
-        Padding(padding: EdgeInsets.all(Platform.isIOS ? 2 : 6)),
+        Padding(padding: EdgeInsets.all(Platform.isIOS ? 4 : 6)),
       ],
     );
   }
