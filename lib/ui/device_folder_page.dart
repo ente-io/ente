@@ -44,8 +44,26 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
   }
 
   Widget _getHeaderWidget() {
+    return BackupConfigurationHeaderWidget(widget.folder.path);
+  }
+}
+
+class BackupConfigurationHeaderWidget extends StatefulWidget {
+  final String path;
+
+  BackupConfigurationHeaderWidget(this.path, {Key key}) : super(key: key);
+
+  @override
+  _BackupConfigurationHeaderWidgetState createState() =>
+      _BackupConfigurationHeaderWidgetState();
+}
+
+class _BackupConfigurationHeaderWidgetState
+    extends State<BackupConfigurationHeaderWidget> {
+  @override
+  Widget build(BuildContext context) {
     final isBackedUp =
-        Configuration.instance.getPathsToBackUp().contains(widget.folder.path);
+        Configuration.instance.getPathsToBackUp().contains(widget.path);
     return Container(
       padding: EdgeInsets.only(left: 12, right: 12),
       color: Colors.grey.withOpacity(0.15),
@@ -63,9 +81,9 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
             onChanged: (value) async {
               final current = Configuration.instance.getPathsToBackUp();
               if (value) {
-                current.add(widget.folder.path);
+                current.add(widget.path);
               } else {
-                current.remove(widget.folder.path);
+                current.remove(widget.path);
               }
               Configuration.instance.setPathsToBackUp(current);
               setState(() {});
