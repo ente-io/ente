@@ -167,6 +167,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   }
 
   Widget _buildFolder(BuildContext context, DeviceFolder folder) {
+    final isBackedUp =
+        Configuration.instance.getPathsToBackUp().contains(folder.path);
     return GestureDetector(
       child: Container(
         height: 110,
@@ -178,9 +180,29 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               borderRadius: BorderRadius.circular(18.0),
               child: Container(
                 child: Hero(
-                    tag:
-                        "device_folder:" + folder.path + folder.thumbnail.tag(),
-                    child: ThumbnailWidget(folder.thumbnail)),
+                  tag: "device_folder:" + folder.path + folder.thumbnail.tag(),
+                  child: Stack(
+                    children: [
+                      ThumbnailWidget(
+                        folder.thumbnail,
+                        shouldShowSyncStatus: false,
+                      ),
+                      isBackedUp
+                          ? Container()
+                          : Align(
+                              alignment: Alignment.bottomRight,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(right: 8, bottom: 6),
+                                child: Icon(
+                                  Icons.cloud_off_outlined,
+                                  size: 18,
+                                ),
+                              ),
+                            )
+                    ],
+                  ),
+                ),
                 height: 110,
                 width: 110,
               ),

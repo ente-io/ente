@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/selected_files.dart';
@@ -87,6 +88,7 @@ class _BackupConfigurationHeaderWidgetState
               }
               Configuration.instance.setPathsToBackUp(current);
               setState(() {});
+              Bus.instance.fire(CollectionUpdatedEvent());
             },
           ),
         ],
