@@ -55,7 +55,6 @@ class SyncService {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       _uploader.clearQueue(SilentlyCancelUploadsError());
       sync();
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applying_remote_diff));
     });
 
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
@@ -98,7 +97,8 @@ class SyncService {
     bool successful = false;
     try {
       await _doSync();
-      if (_lastSyncStatusEvent != null) {
+      if (_lastSyncStatusEvent != null &&
+          _lastSyncStatusEvent.status != SyncStatus.completed) {
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
       }
       successful = true;
@@ -136,6 +136,7 @@ class SyncService {
     } finally {
       _existingSync.complete(successful);
       _existingSync = null;
+      _lastSyncStatusEvent = null;
       _logger.info("Syncing completed");
     }
     return successful;
@@ -322,18 +323,18 @@ class SyncService {
     _logger.info(updatedFileIDs.length.toString() + " files updated.");
 
     _completedUploads = 0;
-    int totalUploads = filesToBeUploaded.length + updatedFileIDs.length;
+    int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
 
-    if (totalUploads > 0) {
+    if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
     }
-
+    final alreadyUploaded = await FilesDB.instance.getNumberOfUploadedFiles();
     final futures = List<Future>();
     for (final uploadedFileID in updatedFileIDs) {
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
       final future = _uploader
           .upload(file, file.collectionID)
-          .then((uploadedFile) => _onFileUploaded(uploadedFile));
+          .then((uploadedFile) async => await _onFileUploaded(uploadedFile, alreadyUploaded, toBeUploaded));
       futures.add(future);
     }
 
@@ -343,7 +344,7 @@ class SyncService {
           .id;
       final future = _uploader
           .upload(file, collectionID)
-          .then((uploadedFile) => _onFileUploaded(uploadedFile));
+          .then((uploadedFile) async => await _onFileUploaded(uploadedFile, alreadyUploaded, toBeUploaded));
       futures.add(future);
     }
     try {
@@ -366,16 +367,19 @@ class SyncService {
     return _completedUploads > 0;
   }
 
-  void _onFileUploaded(File file) {
+  Future<void> _onFileUploaded(File file, int alreadyUploaded, int toBeUploadedInThisSession) async {
+    // total number of files uploaded since the start of this upload session (currentlyUploaded - initiallyUploaded)
+    //                   divided by
+    // total number of files to be uploaded
     Bus.instance.fire(CollectionUpdatedEvent(collectionID: file.collectionID));
     _completedUploads++;
-    final pendingCount = _uploader.queueSize();
-    final total = _completedUploads + pendingCount;
-    if (_completedUploads == total) {
+    final completed = await FilesDB.instance.getNumberOfUploadedFiles() -
+        alreadyUploaded;
+    if (completed == toBeUploadedInThisSession) {
       return;
     }
     Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
-        completed: _completedUploads, total: total));
+        completed: completed, total: toBeUploadedInThisSession));
   }
 
   Future _storeDiff(List<File> diff, int collectionID) async {
