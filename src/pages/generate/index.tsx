@@ -25,6 +25,12 @@ interface formValues {
     confirm: string;
 }
 
+interface KEK {
+    key: string;
+    opsLimit: number;
+    memLimit: number;
+}
+
 export default function Generate() {
     const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<string>();
@@ -54,14 +60,13 @@ export default function Generate() {
                 const cryptoWorker = await new CryptoWorker();
                 const key: string = await cryptoWorker.generateMasterKey();
                 const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
-                const kek: string = await cryptoWorker.deriveKey(
+                const kek: KEK = await cryptoWorker.deriveSensitiveKey(
                     passphrase,
                     kekSalt
                 );
-                const kekHash: string = await cryptoWorker.hash(kek);
                 const encryptedKeyAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(
                     key,
-                    kek
+                    kek.key
                 );
                 const keyPair = await cryptoWorker.generateKeyPair();
                 const encryptedKeyPairAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(
@@ -71,13 +76,14 @@ export default function Generate() {
 
                 const keyAttributes = {
                     kekSalt,
-                    kekHash: kekHash,
                     encryptedKey: encryptedKeyAttributes.encryptedData,
                     keyDecryptionNonce: encryptedKeyAttributes.nonce,
                     publicKey: keyPair.publicKey,
                     encryptedSecretKey:
                         encryptedKeyPairAttributes.encryptedData,
                     secretKeyDecryptionNonce: encryptedKeyPairAttributes.nonce,
+                    opsLimit: kek.opsLimit,
+                    memLimit: kek.memLimit,
                 };
                 await putAttributes(
                     token,

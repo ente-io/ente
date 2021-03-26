@@ -55,10 +55,12 @@ export default function Credentials() {
             const { passphrase } = values;
             const kek: string = await cryptoWorker.deriveKey(
                 passphrase,
-                keyAttributes.kekSalt
+                keyAttributes.kekSalt,
+                keyAttributes.opsLimit,
+                keyAttributes.memLimit,
             );
 
-            if (await cryptoWorker.verifyHash(keyAttributes.kekHash, kek)) {
+            try {
                 const key: string = await cryptoWorker.decryptB64(
                     keyAttributes.encryptedKey,
                     keyAttributes.keyDecryptionNonce,
@@ -73,7 +75,8 @@ export default function Credentials() {
                 setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
                 setData(LS_KEYS.SESSION, { sessionKey, sessionNonce });
                 router.push('/gallery');
-            } else {
+            } catch (e) {
+                console.error(e);
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
             }
         } catch (e) {
@@ -125,7 +128,7 @@ export default function Credentials() {
                                         onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                                errors.passphrase
+                                            errors.passphrase
                                         )}
                                         disabled={loading}
                                         autoFocus={true}

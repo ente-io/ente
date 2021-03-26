@@ -76,8 +76,12 @@ export class Crypto {
         return libsodium.verifyHash(hash, input);
     }
 
-    async deriveKey(passphrase, salt) {
-        return libsodium.deriveKey(passphrase, salt);
+    async deriveKey(passphrase, salt, opsLimit, memLimit) {
+        return libsodium.deriveKey(passphrase, salt, opsLimit, memLimit);
+    }
+
+    async deriveSensitiveKey(passphrase, salt) {
+        return libsodium.deriveSensitiveKey(passphrase, salt);
     }
 
     async decryptB64(data, nonce, key) {
@@ -102,10 +106,6 @@ export class Crypto {
 
     async generateSaltToDeriveKey() {
         return libsodium.generateSaltToDeriveKey();
-    }
-
-    async deriveKey(passphrase, salt) {
-        return libsodium.deriveKey(passphrase, salt);
     }
 
     async generateKeyPair() {
