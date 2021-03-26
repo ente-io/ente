@@ -6,7 +6,9 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class PasswordEntryPage extends StatefulWidget {
-  PasswordEntryPage({Key key}) : super(key: key);
+  final bool isUpdatePassword;
+
+  PasswordEntryPage({this.isUpdatePassword = false, Key key}) : super(key: key);
 
   @override
   _PasswordEntryPageState createState() => _PasswordEntryPageState();
@@ -23,8 +25,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Icon(Icons.lock),
-        title: Text("encryption password"),
+        title: Text(widget.isUpdatePassword
+            ? "change password"
+            : "encryption password"),
       ),
       body: _getBody(),
     );
@@ -114,7 +117,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       height: 64,
                       padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
                       child: button(
-                        "set password",
+                        widget.isUpdatePassword
+                            ? "change password"
+                            : "set password",
                         fontSize: 18,
                         onPressed: _passwordController1.text.isNotEmpty &&
                                 _passwordController2.text.isNotEmpty
@@ -167,8 +172,13 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           child: Text("confirm"),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
-            UserService.instance
-                .setupAttributes(context, _passwordController1.text);
+            if (widget.isUpdatePassword) {
+              UserService.instance
+                  .updateKeyAttributes(context, _passwordController1.text);
+            } else {
+              UserService.instance
+                  .setupAttributes(context, _passwordController1.text);
+            }
           },
         ),
       ],

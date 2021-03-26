@@ -114,26 +114,14 @@ class Configuration {
     // Derive a key from the password that will be used to encrypt and
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
-    int memLimit = Sodium.cryptoPwhashMemlimitSensitive;
+    final memLimit = Sodium.cryptoPwhashMemlimitSensitive;
     final opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
-    var kek;
-    try {
-      kek = await CryptoUtil.deriveKey(
-        utf8.encode(password),
-        kekSalt,
-        memLimit,
-        opsLimit,
-      );
-    } catch (e) {
-      _logger.info("Reducing memory utilization");
-      memLimit = Sodium.cryptoPwhashMemlimitModerate;
-      kek = await CryptoUtil.deriveKey(
-        utf8.encode(password),
-        kekSalt,
-        memLimit,
-        opsLimit,
-      );
-    }
+    final kek = await CryptoUtil.deriveKey(
+      utf8.encode(password),
+      kekSalt,
+      memLimit,
+      opsLimit,
+    );
 
     // Encrypt the key with this derived key
     final encryptedKeyData = CryptoUtil.encryptSync(key, kek);
@@ -155,6 +143,42 @@ class Configuration {
     final privateAttributes = PrivateKeyAttributes(
         Sodium.bin2base64(key), Sodium.bin2base64(keyPair.sk));
     return KeyGenResult(attributes, privateAttributes);
+  }
+
+  Future<KeyAttributes> updatePassword(String password) async {
+    // Get master key
+    final key = getKey();
+
+    // Derive a key from the password that will be used to encrypt and
+    // decrypt the master key
+    final kekSalt = CryptoUtil.getSaltToDeriveKey();
+    final memLimit = Sodium.cryptoPwhashMemlimitSensitive;
+    final opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
+    final kek = await CryptoUtil.deriveKey(
+      utf8.encode(password),
+      kekSalt,
+      memLimit,
+      opsLimit,
+    );
+
+    // Encrypt the key with this derived key
+    final encryptedKeyData = CryptoUtil.encryptSync(key, kek);
+
+    // User's public-private key pairs stay untouched since the master key
+    // has not changed
+    final existingAttributes = getKeyAttributes();
+
+    final attributes = KeyAttributes(
+      Sodium.bin2base64(kekSalt),
+      Sodium.bin2base64(encryptedKeyData.encryptedData),
+      Sodium.bin2base64(encryptedKeyData.nonce),
+      existingAttributes.publicKey,
+      existingAttributes.encryptedSecretKey,
+      existingAttributes.secretKeyDecryptionNonce,
+      memLimit,
+      opsLimit,
+    );
+    return attributes;
   }
 
   Future<void> decryptAndSaveKey(

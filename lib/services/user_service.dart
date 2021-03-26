@@ -122,26 +122,21 @@ class UserService {
   Future<void> setupAttributes(BuildContext context, String password) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
-    final result = await _config.generateKey(password);
-    final name = _config.getName();
-    await _dio
-        .put(
-      _config.getHttpEndpoint() + "/users/attributes",
-      data: {
-        "name": name,
-        "keyAttributes": result.keyAttributes.toMap(),
-      },
-      options: Options(
-        headers: {
-          "X-Auth-Token": _config.getToken(),
+    try {
+      final result = await _config.generateKey(password);
+      final name = _config.getName();
+      final response = await _dio.put(
+        _config.getHttpEndpoint() + "/users/attributes",
+        data: {
+          "name": name,
+          "keyAttributes": result.keyAttributes.toMap(),
         },
-      ),
-    )
-        .catchError((e) async {
-      await dialog.hide();
-      _logger.severe(e);
-      showGenericErrorDialog(context);
-    }).then((response) async {
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
         await _config.setKey(result.privateKeyAttributes.key);
@@ -158,7 +153,47 @@ class UserService {
       } else {
         showGenericErrorDialog(context);
       }
-    });
+    } catch (e) {
+      await dialog.hide();
+      _logger.severe(e);
+      showGenericErrorDialog(context);
+    }
+  }
+
+  Future<void> updateKeyAttributes(
+      BuildContext context, String password) async {
+    final dialog = createProgressDialog(context, "please wait...");
+    await dialog.show();
+    try {
+      final keyAttributes = await _config.updatePassword(password);
+      final response = await _dio.put(
+        _config.getHttpEndpoint() + "/users/key-attributes",
+        data: keyAttributes.toMap(),
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      await dialog.hide();
+      if (response != null && response.statusCode == 200) {
+        await _config.setKeyAttributes(keyAttributes);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return SubscriptionPage(isOnboarding: true);
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      } else {
+        showGenericErrorDialog(context);
+      }
+    } catch (e) {
+      await dialog.hide();
+      _logger.severe(e);
+      showGenericErrorDialog(context);
+    }
   }
 
   Future<void> _saveConfiguration(Response response) async {

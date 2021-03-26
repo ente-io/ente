@@ -12,6 +12,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/app_lock.dart';
+import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/billing_service.dart';
@@ -263,6 +264,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       Padding(
         padding: EdgeInsets.all(4),
       ),
+    ]);
+    children.addAll([
       Container(
         height: 36,
         child: Row(
@@ -371,6 +374,32 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           ),
         ),
       ]);
+    }
+    if (Configuration.instance.hasConfiguredAccount()) {
+      children.addAll(
+        [
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(4)),
+          Divider(height: 4),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () async {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return PasswordEntryPage(
+                      isUpdatePassword: true,
+                    );
+                  },
+                ),
+              );
+            },
+            child: SettingsTextItem(
+                text: "change password", icon: Icons.navigate_next),
+          ),
+        ],
+      );
     }
     return Container(
       child: Column(
