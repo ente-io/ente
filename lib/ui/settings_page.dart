@@ -385,6 +385,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () async {
+              final result = await requestAuthentication();
+              if (!result) {
+                return;
+              }
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (BuildContext context) {
