@@ -86,7 +86,7 @@ class FilesDB {
           $columnIsDeleted INTEGER DEFAULT 0,
           $columnCreationTime TEXT NOT NULL,
           $columnUpdationTime TEXT,
-          UNIQUE($columnUploadedFileID, $columnCollectionID)
+          UNIQUE($columnLocalID, $columnUploadedFileID, $columnCollectionID)
         );
       ''',
     ];
