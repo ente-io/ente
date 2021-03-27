@@ -2,7 +2,8 @@ import React from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
-function ChangeDisabledMessage(props) {
+function MessageDialog(props) {
+    console.log(props);
     return (
         <Modal
             {...props}
@@ -12,7 +13,7 @@ function ChangeDisabledMessage(props) {
         >
             <Modal.Body style={{ padding: '24px' }}>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    {constants.SUBSCRIPTION_CHANGE_DISABLED}
+                    {props.message}
                 </Modal.Title>
             </Modal.Body>
             <Modal.Footer style={{ borderTop: 'none' }}>
@@ -23,4 +24,4 @@ function ChangeDisabledMessage(props) {
         </Modal>
     );
 }
-export default ChangeDisabledMessage;
+export default MessageDialog;

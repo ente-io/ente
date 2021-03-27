@@ -108,8 +108,9 @@ const englishConstants = {
     LOGOUT: 'logout',
     LOGOUT_WARNING: 'sure you want to logout?',
     CANCEL: 'cancel',
-    SUBSCRIPTION_CHANGE_DISABLED:
-        'sorry, this operation is currently not supported on the web, please check your mobile app',
+    ELECTRON_APP_REQUIRED:
+        'sorry, this operation is currently not supported on the web, please install the desktop app',
+    EXPORT: 'export ',
     SUBSCRIPTION_PLAN: 'subscription plan',
     USAGE_DETAILS: 'usage',
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
@@ -146,7 +147,8 @@ const englishConstants = {
     CHANGE_EMAIL: 'change email?',
     DELETE_WARNING: 'sure you want to delete selected files?',
     DELETE: 'delete',
-    UPLOAD_STRATEGY_CHOICE: 'you are uploading multiple folders, would you like us to create',
+    UPLOAD_STRATEGY_CHOICE:
+        'you are uploading multiple folders, would you like us to create',
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
     OR: 'or',
     UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',

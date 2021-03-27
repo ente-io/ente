@@ -11,8 +11,14 @@ import { logoutUser } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getToken } from 'utils/common/key';
 import { getEndpoint } from 'utils/common/apiUtil';
-
-export default function Sidebar() {
+import exportService from 'services/exportService';
+import { file } from 'services/fileService';
+import MessageDialog from './MessageDialog';
+import isElectron from 'is-electron';
+interface Props {
+    files: file[];
+}
+export default function Sidebar(props: Props) {
     const [logoutModalView, setLogoutModalView] = useState(false);
     function showLogoutModal() {
         setLogoutModalView(true);
@@ -23,6 +29,7 @@ export default function Sidebar() {
     const [usage, SetUsage] = useState<string>(null);
     const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
     const [isOpen, setIsOpen] = useState(false);
+    const [messageModalView, setMessageModalView] = useState(false);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -113,6 +120,19 @@ export default function Sidebar() {
                     support
                 </a>
             </h5>
+            <>
+                <MessageDialog
+                    show={messageModalView}
+                    onHide={() => setMessageModalView(false)}
+                    message={constants.ELECTRON_APP_REQUIRED}
+                />
+                <h5
+                    style={{ cursor: 'pointer', marginTop: '30px' }}
+                    onClick={() => null}
+                >
+                    {constants.EXPORT}
+                </h5>
+            </>
             <>
                 <ConfirmLogout
                     show={logoutModalView}
