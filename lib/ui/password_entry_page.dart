@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
-import 'package:photos/core/network.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -35,6 +31,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             : "encryption password"),
       ),
       body: _getBody(),
+      resizeToAvoidBottomInset: false,
     );
   }
 
