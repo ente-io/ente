@@ -387,6 +387,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             onTap: () async {
               final result = await requestAuthentication();
               if (!result) {
+                showToast("please authenticate to change your password");
                 return;
               }
               Navigator.of(context).push(
