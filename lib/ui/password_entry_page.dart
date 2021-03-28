@@ -57,7 +57,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 // ),
                 Padding(padding: EdgeInsets.all(12)),
                 Text(
-                  "enter a password we can use to encrypt your data",
+                  "enter a" +
+                      (widget.isUpdatePassword ? " new " : " ") +
+                      "password we can use to encrypt your data",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     height: 1.3,
