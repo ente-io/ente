@@ -476,16 +476,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 }
 
-class BillingQuestionsWidget extends StatefulWidget {
-  const BillingQuestionsWidget({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  _BillingQuestionsWidgetState createState() => _BillingQuestionsWidgetState();
-}
-
-class _BillingQuestionsWidgetState extends State<BillingQuestionsWidget> {
+class BillingQuestionsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
