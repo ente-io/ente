@@ -7,6 +7,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/public_key.dart';
+import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/ott_verification_page.dart';
@@ -166,9 +167,16 @@ class UserService {
     await dialog.show();
     try {
       final keyAttributes = await _config.updatePassword(password);
+      final setKeyRequest = SetKeysRequest(
+        kekSalt: keyAttributes.kekSalt,
+        encryptedKey: keyAttributes.encryptedKey,
+        keyDecryptionNonce: keyAttributes.keyDecryptionNonce,
+        memLimit: keyAttributes.memLimit,
+        opsLimit: keyAttributes.opsLimit,
+      );
       final response = await _dio.put(
-        _config.getHttpEndpoint() + "/users/key-attributes",
-        data: keyAttributes.toMap(),
+        _config.getHttpEndpoint() + "/users/keys",
+        data: setKeyRequest.toMap(),
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),
@@ -178,14 +186,8 @@ class UserService {
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
         await _config.setKeyAttributes(keyAttributes);
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return SubscriptionPage(isOnboarding: true);
-            },
-          ),
-          (route) => route.isFirst,
-        );
+        showToast("password changed successfully");
+        Navigator.of(context).pop();
       } else {
         showGenericErrorDialog(context);
       }
