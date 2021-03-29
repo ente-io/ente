@@ -221,6 +221,8 @@ class RecoveryCodeDialog extends StatefulWidget {
 
 class _RecoveryCodeDialogState extends State<RecoveryCodeDialog> {
   bool _hasTriedToSave = false;
+  final _recoveryKeyFile = io.File(
+      Configuration.instance.getTempDirectory() + "ente-recovery-key.txt");
 
   @override
   Widget build(BuildContext context) {
@@ -313,13 +315,11 @@ class _RecoveryCodeDialogState extends State<RecoveryCodeDialog> {
   }
 
   Future _shareRecoveryKey(String recoveryKey) async {
-    final recoveryKeyFile = io.File(
-        Configuration.instance.getTempDirectory() + "ente-recovery-key.txt");
-    if (recoveryKeyFile.existsSync()) {
-      recoveryKeyFile.deleteSync();
+    if (_recoveryKeyFile.existsSync()) {
+      _recoveryKeyFile.deleteSync();
     }
-    recoveryKeyFile.writeAsStringSync(recoveryKey);
-    await Share.shareFiles([recoveryKeyFile.path]);
+    _recoveryKeyFile.writeAsStringSync(recoveryKey);
+    await Share.shareFiles([_recoveryKeyFile.path]);
     Future.delayed(Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
@@ -330,6 +330,9 @@ class _RecoveryCodeDialogState extends State<RecoveryCodeDialog> {
   }
 
   void _saveKeys() {
+    if (_recoveryKeyFile.existsSync()) {
+      _recoveryKeyFile.deleteSync();
+    }
     Navigator.of(context, rootNavigator: true).pop();
     if (widget.isUpdatePassword) {
       UserService.instance.updateKeyAttributes(context, widget.result);
