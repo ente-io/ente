@@ -56,7 +56,7 @@ export default function Sidebar(props: Props) {
     }
     function exportFiles() {
         if (isElectron()) {
-            exportService.selectDirectory();
+            exportService.exportFiles(props.files);
         } else {
             setMessageModalView(true);
         }

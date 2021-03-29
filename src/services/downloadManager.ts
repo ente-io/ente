@@ -96,8 +96,8 @@ class DownloadManager {
                 decryptedBlob = await this.convertHEIC2JPEG(decryptedBlob);
             }
             return new ReadableStream({
-                start(controller: ReadableStreamDefaultController) {
-                    controller.enqueue(decryptedBlob);
+                async start(controller: ReadableStreamDefaultController) {
+                    controller.enqueue(await decryptedBlob.arrayBuffer());
                     controller.close();
                 },
             });
