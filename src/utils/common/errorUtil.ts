@@ -8,6 +8,8 @@ export const errorCodes = {
     ERR_SESSION_EXPIRED: '401',
 };
 
+const AXIOS_NETWORK_ERROR = 'Network Error';
+
 export function ErrorHandler(error) {
     const errorCode = error.response?.status.toString();
     let errorMessage;
@@ -26,7 +28,10 @@ export function ErrorHandler(error) {
             setTimeout(logoutUser, 5000);
             break;
         default:
-            errorMessage = `Unknown Error - ${error} Encountered`;
+            errorMessage = `${constants.UNKNOWN_ERROR} ${error.message}`;
+    }
+    if (error.message === AXIOS_NETWORK_ERROR) {
+        errorMessage = constants.SYNC_FAILED;
     }
     throw new Error(errorMessage);
 }
