@@ -59,10 +59,8 @@ export const isTokenValid = async () => {
         await HTTPService.get(`${ENDPOINT}/users/heartbeat`, null, {
             'X-Auth-Token': getToken(),
         });
-        console.log('gg');
         return true;
     } catch (e) {
-        console.log('bg');
         return false;
     }
 };

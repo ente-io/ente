@@ -9,7 +9,6 @@ export const errorCodes = {
 };
 
 export function ErrorHandler(error) {
-    console.error(error);
     const errorCode = error.response?.status.toString();
     let errorMessage;
     switch (errorCode) {
