@@ -214,9 +214,10 @@ export default function Gallery(props: Props) {
             setCollectionAndItsLatestFile(collectionAndItsLatestFile);
             setFavItemIds(favItemIds);
             setSinceTime(new Date().getTime());
-            loadingBar.current?.complete();
         } catch (e) {
-            setBannerMessage(e);
+            setBannerMessage(e.message);
+        } finally {
+            loadingBar.current?.complete();
         }
     };
 

@@ -1,3 +1,4 @@
+import { logoutUser } from 'services/userService';
 import constants from 'utils/strings/constants';
 
 export const errorCodes = {
@@ -23,6 +24,7 @@ export function ErrorHandler(error) {
             break;
         case errorCodes.ERR_SESSION_EXPIRED:
             errorMessage = constants.SESSION_EXPIRED;
+            setTimeout(logoutUser, 5000);
             break;
         default:
             errorMessage = `Unknown Error - ${error} Encountered`;
