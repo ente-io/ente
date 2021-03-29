@@ -151,7 +151,8 @@ const englishConstants = {
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
     OR: 'or',
     UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
-    SESSION_EXPIRED: 'session expired please re-login',
+    SESSION_EXPIRED:
+        'your session has expired, you will be logged out in 5 seconds',
 };
 
 export default englishConstants;
