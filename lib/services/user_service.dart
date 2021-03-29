@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/models/key_attributes.dart';
+import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/subscription.dart';
@@ -120,11 +121,11 @@ class UserService {
     }
   }
 
-  Future<void> setupAttributes(BuildContext context, String password) async {
+  Future<void> setupAttributes(
+      BuildContext context, KeyGenResult result) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     try {
-      final result = await _config.generateKey(password);
       final name = _config.getName();
       final response = await _dio.put(
         _config.getHttpEndpoint() + "/users/attributes",
@@ -162,11 +163,11 @@ class UserService {
   }
 
   Future<void> updateKeyAttributes(
-      BuildContext context, String password) async {
+      BuildContext context, KeyGenResult result) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     try {
-      final keyAttributes = await _config.updatePassword(password);
+      final keyAttributes = result.keyAttributes;
       final setKeyRequest = SetKeysRequest(
         kekSalt: keyAttributes.kekSalt,
         encryptedKey: keyAttributes.encryptedKey,
