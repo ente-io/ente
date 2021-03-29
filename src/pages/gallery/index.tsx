@@ -156,7 +156,7 @@ export default function Gallery(props: Props) {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const fetching: { [k: number]: boolean } = {};
-    const [bannerErrorCode, setBannerErrorCode] = useState<number>(null);
+    const [bannerMessage, setBannerMessage] = useState<string>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
@@ -389,7 +389,7 @@ export default function Gallery(props: Props) {
                     </Alert>
                 </div>
             )}
-            <AlertBanner bannerErrorCode={bannerErrorCode} />
+            <AlertBanner bannerMessage={bannerMessage} />
 
             <Collections
                 collections={collections}
@@ -401,7 +401,7 @@ export default function Gallery(props: Props) {
                 closeCollectionSelector={props.closeCollectionSelector}
                 collectionAndItsLatestFile={collectionAndItsLatestFile}
                 refetchData={syncWithRemote}
-                setBannerErrorCode={setBannerErrorCode}
+                setBannerMessage={setBannerMessage}
                 acceptedFiles={props.acceptedFiles}
             />
             <Sidebar />
@@ -496,7 +496,7 @@ export default function Gallery(props: Props) {
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                            ITEM_TYPE.TIME
+                                        ITEM_TYPE.TIME
                                             ? DATE_CONTAINER_HEIGHT
                                             : IMAGE_CONTAINER_HEIGHT
                                     }
@@ -513,14 +513,14 @@ export default function Gallery(props: Props) {
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                            ITEM_TYPE.TIME
+                                                        ITEM_TYPE.TIME
                                                             ? 1
                                                             : columns
                                                     }
                                                 >
                                                     {timeStampList[index]
                                                         .itemType ===
-                                                        ITEM_TYPE.TIME ? (
+                                                    ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
                                                                 timeStampList[
@@ -539,7 +539,7 @@ export default function Gallery(props: Props) {
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                    idx
+                                                                        idx
                                                                 );
                                                             }
                                                         )

@@ -1,15 +1,13 @@
 import React from 'react';
 import Alert from 'react-bootstrap/Alert';
 
-import { ErrorBannerMessage } from 'utils/common/errorUtil';
-
-export default function AlertBanner({ bannerErrorCode }) {
+export default function AlertBanner({ bannerMessage }) {
     return (
         <Alert
             variant={'danger'}
-            style={{ display: bannerErrorCode ? 'block' : 'none' }}
+            style={{ display: bannerMessage ? 'block' : 'none' }}
         >
-            {ErrorBannerMessage(bannerErrorCode)}
+            {bannerMessage}
         </Alert>
     );
 }

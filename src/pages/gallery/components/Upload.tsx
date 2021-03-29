@@ -13,7 +13,7 @@ interface Props {
     closeCollectionSelector;
     collectionAndItsLatestFile;
     refetchData;
-    setBannerErrorCode;
+    setBannerMessage;
     acceptedFiles;
 }
 
@@ -165,9 +165,10 @@ export default function Upload(props: Props) {
                 setUploadErrors
             );
         } catch (err) {
-            props.setBannerErrorCode(err.message);
+            props.setBannerMessage(err.message);
         } finally {
             props.refetchData();
+            setProgressView(false);
         }
     };
     const nextModal = () => {
