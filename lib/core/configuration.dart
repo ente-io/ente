@@ -111,6 +111,13 @@ class Configuration {
     // Create a master key
     final key = CryptoUtil.generateKey();
 
+    // Create a recovery key
+    final recoveryKey = CryptoUtil.generateKey();
+
+    // Encrypt master key and recovery key with each other
+    final encryptedMasterKey = CryptoUtil.encryptSync(key, recoveryKey);
+    final encryptedRecoveryKey = CryptoUtil.encryptSync(recoveryKey, key);
+
     // Derive a key from the password that will be used to encrypt and
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
@@ -139,9 +146,13 @@ class Configuration {
       Sodium.bin2base64(encryptedSecretKeyData.nonce),
       memLimit,
       opsLimit,
+      Sodium.bin2base64(encryptedMasterKey.encryptedData),
+      Sodium.bin2base64(encryptedMasterKey.nonce),
+      Sodium.bin2base64(encryptedRecoveryKey.encryptedData),
+      Sodium.bin2base64(encryptedRecoveryKey.nonce),
     );
-    final privateAttributes = PrivateKeyAttributes(
-        Sodium.bin2base64(key), Sodium.bin2base64(keyPair.sk));
+    final privateAttributes = PrivateKeyAttributes(Sodium.bin2base64(key),
+        Sodium.bin2hex(recoveryKey), Sodium.bin2base64(keyPair.sk));
     return KeyGenResult(attributes, privateAttributes);
   }
 
@@ -168,17 +179,36 @@ class Configuration {
     // has not changed
     final existingAttributes = getKeyAttributes();
 
-    final attributes = KeyAttributes(
-      Sodium.bin2base64(kekSalt),
-      Sodium.bin2base64(encryptedKeyData.encryptedData),
-      Sodium.bin2base64(encryptedKeyData.nonce),
-      existingAttributes.publicKey,
-      existingAttributes.encryptedSecretKey,
-      existingAttributes.secretKeyDecryptionNonce,
-      memLimit,
-      opsLimit,
-    );
-    return attributes;
+    if (existingAttributes.recoveryKeyEncryptedWithMasterKey == null) {
+      // Create a recovery key
+      final recoveryKey = CryptoUtil.generateKey();
+
+      // Encrypt master key and recovery key with each other
+      final encryptedMasterKey = CryptoUtil.encryptSync(key, recoveryKey);
+      final encryptedRecoveryKey = CryptoUtil.encryptSync(recoveryKey, key);
+      return existingAttributes.copyWith(
+        kekSalt: Sodium.bin2base64(kekSalt),
+        encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData),
+        keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce),
+        memLimit: memLimit,
+        opsLimit: opsLimit,
+        masterKeyEncryptedWithRecoveryKey:
+            Sodium.bin2base64(encryptedMasterKey.encryptedData),
+        masterKeyDecryptionNonce: Sodium.bin2base64(encryptedMasterKey.nonce),
+        recoveryKeyEncryptedWithMasterKey:
+            Sodium.bin2base64(encryptedRecoveryKey.encryptedData),
+        recoveryKeyDecryptionNonce:
+            Sodium.bin2base64(encryptedRecoveryKey.encryptedData),
+      );
+    } else {
+      return existingAttributes.copyWith(
+        kekSalt: Sodium.bin2base64(kekSalt),
+        encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData),
+        keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce),
+        memLimit: memLimit,
+        opsLimit: opsLimit,
+      );
+    }
   }
 
   Future<void> decryptAndSaveKey(

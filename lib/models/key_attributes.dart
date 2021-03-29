@@ -9,6 +9,10 @@ class KeyAttributes {
   final String secretKeyDecryptionNonce;
   final int memLimit;
   final int opsLimit;
+  final String masterKeyEncryptedWithRecoveryKey;
+  final String masterKeyDecryptionNonce;
+  final String recoveryKeyEncryptedWithMasterKey;
+  final String recoveryKeyDecryptionNonce;
 
   KeyAttributes(
     this.kekSalt,
@@ -19,6 +23,10 @@ class KeyAttributes {
     this.secretKeyDecryptionNonce,
     this.memLimit,
     this.opsLimit,
+    this.masterKeyEncryptedWithRecoveryKey,
+    this.masterKeyDecryptionNonce,
+    this.recoveryKeyEncryptedWithMasterKey,
+    this.recoveryKeyDecryptionNonce,
   );
 
   Map<String, dynamic> toMap() {
@@ -31,12 +39,14 @@ class KeyAttributes {
       'secretKeyDecryptionNonce': secretKeyDecryptionNonce,
       'memLimit': memLimit,
       'opsLimit': opsLimit,
+      'masterKeyEncryptedWithRecoveryKey': masterKeyEncryptedWithRecoveryKey,
+      'masterKeyDecryptionNonce': masterKeyDecryptionNonce,
+      'recoveryKeyEncryptedWithMasterKey': recoveryKeyEncryptedWithMasterKey,
+      'recoveryKeyDecryptionNonce': recoveryKeyDecryptionNonce,
     };
   }
 
   factory KeyAttributes.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
     return KeyAttributes(
       map['kekSalt'],
       map['encryptedKey'],
@@ -46,6 +56,10 @@ class KeyAttributes {
       map['secretKeyDecryptionNonce'],
       map['memLimit'],
       map['opsLimit'],
+      map['masterKeyEncryptedWithRecoveryKey'],
+      map['masterKeyDecryptionNonce'],
+      map['recoveryKeyEncryptedWithMasterKey'],
+      map['recoveryKeyDecryptionNonce'],
     );
   }
 
@@ -53,4 +67,36 @@ class KeyAttributes {
 
   factory KeyAttributes.fromJson(String source) =>
       KeyAttributes.fromMap(json.decode(source));
+
+  KeyAttributes copyWith({
+    String kekSalt,
+    String encryptedKey,
+    String keyDecryptionNonce,
+    String publicKey,
+    String encryptedSecretKey,
+    String secretKeyDecryptionNonce,
+    int memLimit,
+    int opsLimit,
+    String masterKeyEncryptedWithRecoveryKey,
+    String masterKeyDecryptionNonce,
+    String recoveryKeyEncryptedWithMasterKey,
+    String recoveryKeyDecryptionNonce,
+  }) {
+    return KeyAttributes(
+      kekSalt ?? this.kekSalt,
+      encryptedKey ?? this.encryptedKey,
+      keyDecryptionNonce ?? this.keyDecryptionNonce,
+      publicKey ?? this.publicKey,
+      encryptedSecretKey ?? this.encryptedSecretKey,
+      secretKeyDecryptionNonce ?? this.secretKeyDecryptionNonce,
+      memLimit ?? this.memLimit,
+      opsLimit ?? this.opsLimit,
+      masterKeyEncryptedWithRecoveryKey ??
+          this.masterKeyEncryptedWithRecoveryKey,
+      masterKeyDecryptionNonce ?? this.masterKeyDecryptionNonce,
+      recoveryKeyEncryptedWithMasterKey ??
+          this.recoveryKeyEncryptedWithMasterKey,
+      recoveryKeyDecryptionNonce ?? this.recoveryKeyDecryptionNonce,
+    );
+  }
 }
