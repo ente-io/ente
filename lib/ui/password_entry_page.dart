@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -183,36 +185,58 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   Future<void> _showRecoveryCodeDialog() async {
-    final dialog = createProgressDialog(context, "generating keys...");
+    final dialog =
+        createProgressDialog(context, "generating encryption keys...");
     await dialog.show();
     try {
       final result =
           await Configuration.instance.generateKey(_passwordController1.text);
       await dialog.hide();
-      _showPasswordConfirmationDialog(result);
+      final onDone = () async {
+        final dialog = createProgressDialog(context, "please wait...");
+        await dialog.show();
+        try {
+          if (widget.isUpdatePassword) {
+            UserService.instance.updateKeyAttributes(context, result);
+          } else {
+            await UserService.instance.setupAttributes(result);
+            await dialog.hide();
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return SubscriptionPage(isOnboarding: true);
+                },
+              ),
+              (route) => route.isFirst,
+            );
+          }
+        } catch (e, s) {
+          Logger("PEP").severe(e, s);
+          await dialog.hide();
+          showGenericErrorDialog(context);
+        }
+      };
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return RecoveryCodeDialog(result, widget.isUpdatePassword, onDone);
+        },
+        barrierColor: Colors.black.withOpacity(0.85),
+        barrierDismissible: false,
+      );
     } catch (e) {
       await dialog.hide();
       showGenericErrorDialog(context);
     }
-  }
-
-  void _showPasswordConfirmationDialog(final KeyGenResult result) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return RecoveryCodeDialog(result, widget.isUpdatePassword);
-      },
-      barrierColor: Colors.black.withOpacity(0.85),
-      barrierDismissible: false,
-    );
   }
 }
 
 class RecoveryCodeDialog extends StatefulWidget {
   final KeyGenResult result;
   final bool isUpdatePassword;
+  final Function() onDone;
 
-  RecoveryCodeDialog(this.result, this.isUpdatePassword, {Key key})
+  RecoveryCodeDialog(this.result, this.isUpdatePassword, this.onDone, {Key key})
       : super(key: key);
 
   @override
@@ -329,15 +353,11 @@ class _RecoveryCodeDialogState extends State<RecoveryCodeDialog> {
     });
   }
 
-  void _saveKeys() {
+  void _saveKeys() async {
+    Navigator.of(context, rootNavigator: true).pop();
     if (_recoveryKeyFile.existsSync()) {
       _recoveryKeyFile.deleteSync();
     }
-    Navigator.of(context, rootNavigator: true).pop();
-    if (widget.isUpdatePassword) {
-      UserService.instance.updateKeyAttributes(context, widget.result);
-    } else {
-      UserService.instance.setupAttributes(context, widget.result);
-    }
+    widget.onDone();
   }
 }

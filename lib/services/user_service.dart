@@ -121,13 +121,10 @@ class UserService {
     }
   }
 
-  Future<void> setupAttributes(
-      BuildContext context, KeyGenResult result) async {
-    final dialog = createProgressDialog(context, "please wait...");
-    await dialog.show();
+  Future<void> setupAttributes(KeyGenResult result) async {
     try {
       final name = _config.getName();
-      final response = await _dio.put(
+      await _dio.put(
         _config.getHttpEndpoint() + "/users/attributes",
         data: {
           "name": name,
@@ -139,26 +136,12 @@ class UserService {
           },
         ),
       );
-      await dialog.hide();
-      if (response != null && response.statusCode == 200) {
-        await _config.setKey(result.privateKeyAttributes.key);
-        await _config.setSecretKey(result.privateKeyAttributes.secretKey);
-        await _config.setKeyAttributes(result.keyAttributes);
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return SubscriptionPage(isOnboarding: true);
-            },
-          ),
-          (route) => route.isFirst,
-        );
-      } else {
-        showGenericErrorDialog(context);
-      }
+      await _config.setKey(result.privateKeyAttributes.key);
+      await _config.setSecretKey(result.privateKeyAttributes.secretKey);
+      await _config.setKeyAttributes(result.keyAttributes);
     } catch (e) {
-      await dialog.hide();
       _logger.severe(e);
-      showGenericErrorDialog(context);
+      throw e;
     }
   }
 
