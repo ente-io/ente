@@ -4,6 +4,7 @@ export const errorCodes = {
     ERR_STORAGE_LIMIT_EXCEEDED: '426',
     ERR_NO_ACTIVE_SUBSCRIPTION: '402',
     ERR_NO_INTERNET_CONNECTION: '1',
+    ERR_SESSION_EXPIRED: '401',
 };
 
 export function ErrorHandler(error) {
@@ -11,7 +12,8 @@ export function ErrorHandler(error) {
         error.response?.status.toString() ==
             errorCodes.ERR_STORAGE_LIMIT_EXCEEDED ||
         error.response?.status.toString() ==
-            errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION
+            errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION ||
+        error.response?.status.toString() == errorCodes.ERR_SESSION_EXPIRED
     ) {
         throw new Error(error.response.status);
     } else {
