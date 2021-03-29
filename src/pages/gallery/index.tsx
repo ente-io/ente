@@ -418,7 +418,12 @@ export default function Gallery(props: Props) {
                 bannerMessage={bannerMessage}
                 setBannerMessage={setBannerMessage}
             />
-
+            <ConfirmDialog
+                show={confirmAction !== null}
+                onHide={() => setConfirmAction(null)}
+                callback={confirmCallbacks.get(confirmAction)}
+                action={confirmAction}
+            />
             <Collections
                 collections={collections}
                 selected={Number(router.query.collection)}
@@ -616,12 +621,6 @@ export default function Gallery(props: Props) {
                     <Delete />
                 </DeleteBtn>
             )}
-            <ConfirmDialog
-                show={confirmAction !== null}
-                onHide={() => setConfirmAction(null)}
-                callback={confirmCallbacks.get(confirmAction)}
-                action={confirmAction}
-            />
         </FullScreenDropZone>
     );
 }
