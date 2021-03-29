@@ -167,10 +167,7 @@ const removeDeletedCollectionFiles = async (
     return files;
 };
 
-export const deleteFiles = async (
-    clickedFiles: selectedState,
-    syncWithRemote
-) => {
+export const deleteFiles = async (clickedFiles: selectedState) => {
     try {
         let filesToDelete = [];
         for (let [key, val] of Object.entries(clickedFiles)) {
@@ -182,7 +179,6 @@ export const deleteFiles = async (
         if (!token) {
             throw new Error('Invalid token');
         }
-        console.log({ fileIDs: filesToDelete });
         await HTTPService.post(
             `${ENDPOINT}/files/delete`,
             { fileIDs: filesToDelete },
@@ -193,7 +189,5 @@ export const deleteFiles = async (
         );
     } catch (e) {
         console.error('delete failed');
-    } finally {
-        syncWithRemote();
     }
 };
