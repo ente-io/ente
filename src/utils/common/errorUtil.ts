@@ -8,22 +8,10 @@ export const errorCodes = {
 };
 
 export function ErrorHandler(error) {
-    if (
-        error.response?.status.toString() ==
-            errorCodes.ERR_STORAGE_LIMIT_EXCEEDED ||
-        error.response?.status.toString() ==
-            errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION ||
-        error.response?.status.toString() == errorCodes.ERR_SESSION_EXPIRED
-    ) {
-        throw new Error(error.response.status);
-    } else {
-        return;
-    }
-}
-
-export function ErrorBannerMessage(bannerErrorCode) {
+    console.error(error);
+    const errorCode = error.response?.status.toString();
     let errorMessage;
-    switch (bannerErrorCode) {
+    switch (errorCode) {
         case errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION:
             errorMessage = constants.SUBSCRIPTION_EXPIRED;
             break;
@@ -33,8 +21,11 @@ export function ErrorBannerMessage(bannerErrorCode) {
         case errorCodes.ERR_NO_INTERNET_CONNECTION:
             errorMessage = constants.NO_INTERNET_CONNECTION;
             break;
+        case errorCodes.ERR_SESSION_EXPIRED:
+            errorMessage = constants.SESSION_EXPIRED;
+            break;
         default:
-            errorMessage = `Unknown Error Code - ${bannerErrorCode} Encountered`;
+            errorMessage = `Unknown Error - ${error} Encountered`;
     }
-    return errorMessage;
+    throw new Error(errorMessage);
 }
