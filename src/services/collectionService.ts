@@ -105,7 +105,7 @@ const getCollections = async (
         );
         return await Promise.all(promises);
     } catch (e) {
-        console.error('getCollections failed- ', e.response);
+        console.error('getCollections failed- ', e);
         ErrorHandler(e);
     }
 };
