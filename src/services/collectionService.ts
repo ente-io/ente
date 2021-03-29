@@ -8,6 +8,7 @@ import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
 import { user } from './userService';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
+import { ErrorHandler } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();
 
@@ -105,6 +106,7 @@ const getCollections = async (
         return await Promise.all(promises);
     } catch (e) {
         console.error('getCollections failed- ', e.response);
+        ErrorHandler(e);
     }
 };
 

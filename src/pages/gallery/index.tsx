@@ -194,23 +194,30 @@ export default function Gallery(props: Props) {
     }, []);
 
     const syncWithRemote = async () => {
-        loadingBar.current?.continuousStart();
-        const collections = await syncCollections();
-        const { data, isUpdated } = await syncData(collections);
-        const nonEmptyCollections = getNonEmptyCollections(collections, data);
-        const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
-            nonEmptyCollections,
-            data
-        );
-        const favItemIds = await getFavItemIds(data);
-        setCollections(nonEmptyCollections);
-        if (isUpdated) {
-            setData(data);
+        try {
+            loadingBar.current?.continuousStart();
+            const collections = await syncCollections();
+            const { data, isUpdated } = await syncData(collections);
+            const nonEmptyCollections = getNonEmptyCollections(
+                collections,
+                data
+            );
+            const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
+                nonEmptyCollections,
+                data
+            );
+            const favItemIds = await getFavItemIds(data);
+            setCollections(nonEmptyCollections);
+            if (isUpdated) {
+                setData(data);
+            }
+            setCollectionAndItsLatestFile(collectionAndItsLatestFile);
+            setFavItemIds(favItemIds);
+            setSinceTime(new Date().getTime());
+            loadingBar.current?.complete();
+        } catch (e) {
+            setBannerMessage(e);
         }
-        setCollectionAndItsLatestFile(collectionAndItsLatestFile);
-        setFavItemIds(favItemIds);
-        setSinceTime(new Date().getTime());
-        loadingBar.current?.complete();
     };
 
     const updateUrl = (index: number) => (url: string) => {
