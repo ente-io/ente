@@ -1,5 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
+import * as electron from 'electron';
+const { dialog, ipcMain } = electron;
 
 function createWindow() {
     // Create the browser window.
@@ -12,7 +14,7 @@ function createWindow() {
     });
 
     // and load the index.html of the app.
-    mainWindow.loadURL('https://photos.ente.io');
+    mainWindow.loadURL('http://localhost:3000');
 
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
@@ -40,5 +42,24 @@ app.on('window-all-closed', () => {
     }
 });
 
+ipcMain.on('select-dir', async (event) => {
+    let dialogWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: {
+            nodeIntegration: false,
+            enableRemoteModule: false,
+            contextIsolation: true,
+            sandbox: true,
+        },
+    });
+    const result = await dialog.showOpenDialog(dialogWindow, {
+        properties: ['openDirectory'],
+    });
+    const dir =
+        result.filePaths && result.filePaths.length > 0 && result.filePaths[0];
+    dialogWindow.close();
+    event.returnValue = dir;
+});
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
