@@ -5,10 +5,11 @@ import constants from 'utils/strings/constants';
 export enum CONFIRM_ACTION {
     LOGOUT = 'LOGOUT',
     DELETE = 'DELETE',
+    SESSION_EXPIRED = 'SESSION_EXPIRED',
 }
 
 export interface Props {
-    callback: () => void;
+    callback: any;
     action: CONFIRM_ACTION;
     show: boolean;
     onHide: () => void;
