@@ -151,8 +151,9 @@ const englishConstants = {
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
     OR: 'or',
     UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
-    SESSION_EXPIRED:
-        'your session has expired, you will be logged out in 5 seconds',
+    SESSION_EXPIRED_WARNING:
+        'your session has expired, please re-login to continue',
+    SESSION_EXPIRED: 're-login',
     SYNC_FAILED:
         'failed to sync with remote server, please refresh page to try again',
 };

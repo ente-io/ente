@@ -24,8 +24,7 @@ export function ErrorHandler(error) {
             errorMessage = constants.NO_INTERNET_CONNECTION;
             break;
         case errorCodes.ERR_SESSION_EXPIRED:
-            errorMessage = constants.SESSION_EXPIRED;
-            setTimeout(logoutUser, 5000);
+            errorMessage = constants.SESSION_EXPIRED_WARNING;
             break;
         default:
             errorMessage = `${constants.UNKNOWN_ERROR} ${error.message}`;

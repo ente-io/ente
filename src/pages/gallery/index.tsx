@@ -30,7 +30,7 @@ import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
 import { checkConnectivity } from 'utils/common/utilFunctions';
-
+import { logoutUser } from 'services/userService';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
@@ -161,7 +161,7 @@ export default function Gallery(props: Props) {
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
-    const [deleteConfirmView, setDeleteConfirmView] = useState(false);
+    const [confirmAction, setConfirmAction] = useState<CONFIRM_ACTION>(null);
     const loadingBar = useRef(null);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -218,6 +218,9 @@ export default function Gallery(props: Props) {
             setSinceTime(new Date().getTime());
         } catch (e) {
             setBannerMessage(e.message);
+            if (e.message === constants.SESSION_EXPIRED_WARNING) {
+                setConfirmAction(CONFIRM_ACTION.SESSION_EXPIRED);
+            }
         } finally {
             loadingBar.current?.complete();
         }
@@ -384,6 +387,18 @@ export default function Gallery(props: Props) {
             first.getDate() === second.getDate()
         );
     };
+    const confirmCallbacks = new Map<string, Function>([
+        [
+            CONFIRM_ACTION.DELETE,
+            async function () {
+                await deleteFiles(selected);
+                syncWithRemote();
+                setConfirmAction(null);
+                setSelected({ count: 0 });
+            },
+        ],
+        [CONFIRM_ACTION.SESSION_EXPIRED, logoutUser],
+    ]);
 
     return (
         <FullScreenDropZone
@@ -595,19 +610,17 @@ export default function Gallery(props: Props) {
                 </Alert>
             )}
             {selected.count && (
-                <DeleteBtn onClick={() => setDeleteConfirmView(true)}>
+                <DeleteBtn
+                    onClick={() => setConfirmAction(CONFIRM_ACTION.DELETE)}
+                >
                     <Delete />
                 </DeleteBtn>
             )}
             <ConfirmDialog
-                show={deleteConfirmView}
-                onHide={() => setDeleteConfirmView(false)}
-                callback={async () => {
-                    await deleteFiles(selected, syncWithRemote);
-                    setDeleteConfirmView(false);
-                    setSelected({ count: 0 });
-                }}
-                action={CONFIRM_ACTION.DELETE}
+                show={confirmAction !== null}
+                onHide={() => setConfirmAction(null)}
+                callback={confirmCallbacks.get(confirmAction)}
+                action={confirmAction}
             />
         </FullScreenDropZone>
     );
