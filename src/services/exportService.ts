@@ -6,9 +6,15 @@ class ExportService {
     ElectronAPIs: any = runningInBrowser() && window['ElectronAPIs'];
     async exportFiles(files: file[]) {
         const dir = await this.ElectronAPIs.selectDirectory();
+        const exportedFiles: Set<number> = await this.ElectronAPIs.getExportedFiles();
         console.log(files);
         for (let file of files) {
-            await this.downloadAndSave(file, `${dir}/${file.metadata.title}`);
+            if (!exportedFiles.has(file.id)) {
+                await this.downloadAndSave(
+                    file,
+                    `${dir}/${file.metadata.title}`
+                );
+            }
         }
     }
 
