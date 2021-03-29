@@ -3,7 +3,6 @@ import { Button, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
 function MessageDialog(props) {
-    console.log(props);
     return (
         <Modal
             {...props}

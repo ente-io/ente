@@ -54,6 +54,13 @@ export default function Sidebar(props: Props) {
         var win = window.open(feedbackURL, '_blank');
         win.focus();
     }
+    function exportFiles() {
+        if (isElectron()) {
+            exportService.selectDirectory();
+        } else {
+            setMessageModalView(true);
+        }
+    }
 
     return (
         <Menu
@@ -128,7 +135,7 @@ export default function Sidebar(props: Props) {
                 />
                 <h5
                     style={{ cursor: 'pointer', marginTop: '30px' }}
-                    onClick={() => null}
+                    onClick={exportFiles}
                 >
                     {constants.EXPORT}
                 </h5>
