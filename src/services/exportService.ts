@@ -4,20 +4,20 @@ import { file } from './fileService';
 
 class ExportService {
     ElectronAPIs: any = runningInBrowser() && window['ElectronAPIs'];
-    async selectDirectory() {
+    async exportFiles(files: file[]) {
         const dir = await this.ElectronAPIs.selectDirectory();
-        console.log(dir);
-        return;
+        console.log(files);
+        for (let file of files) {
+            await this.downloadAndSave(file, `${dir}/${file.metadata.title}`);
+        }
     }
 
-    async exportFiles(files: file[], path) {
-        for (let file of files) {
-            const fileStream = await downloadManager.downloadFile(file);
-            this.ElectronAPIs.savetoDisk(
-                path + `/${file.metadata.title}`,
-                fileStream
-            );
-        }
+    async downloadAndSave(file: file, path) {
+        console.log(this.ElectronAPIs);
+
+        const fileStream = await downloadManager.downloadFile(file);
+
+        this.ElectronAPIs.saveToDisk(path, fileStream);
     }
 }
 export default new ExportService();
