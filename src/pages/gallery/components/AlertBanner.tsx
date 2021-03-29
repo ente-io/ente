@@ -1,11 +1,16 @@
 import React from 'react';
 import Alert from 'react-bootstrap/Alert';
 
-export default function AlertBanner({ bannerMessage }) {
+export default function AlertBanner({ bannerMessage, setBannerMessage }) {
     return (
         <Alert
             variant={'danger'}
-            style={{ display: bannerMessage ? 'block' : 'none' }}
+            dismissible
+            onClose={() => setBannerMessage(null)}
+            style={{
+                display: bannerMessage ? 'block' : 'none',
+                textAlign: 'center',
+            }}
         >
             {bannerMessage}
         </Alert>
