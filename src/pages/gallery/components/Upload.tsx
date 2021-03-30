@@ -151,11 +151,8 @@ export default function Upload(props: Props) {
         filesWithCollectionToUpload: FileWithCollection[]
     ) => {
         try {
-            const token = getToken();
-
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
-                token,
                 {
                     setPercentComplete,
                     setFileCounter,

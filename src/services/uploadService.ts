@@ -9,6 +9,7 @@ import { ErrorHandler } from 'utils/common/errorUtil';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 import * as convert from 'xml-js';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
+import { getToken } from 'utils/common/key';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;
@@ -123,7 +124,6 @@ class UploadService {
 
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
-        token: string,
         progressBarProps,
         setUploadErrors
     ) {
@@ -171,7 +171,7 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOADING);
             this.changeProgressBarProps();
             try {
-                await this.fetchUploadURLs(token);
+                await this.fetchUploadURLs();
             } catch (e) {
                 console.error('error fetching uploadURLs', e);
                 ErrorHandler(e);
@@ -186,8 +186,7 @@ class UploadService {
                     this.uploader(
                         await new CryptoWorker(),
                         new FileReader(),
-                        this.filesToBeUploaded.pop(),
-                        token
+                        this.filesToBeUploaded.pop()
                     )
                 );
             }
@@ -205,8 +204,7 @@ class UploadService {
     private async uploader(
         worker: any,
         reader: FileReader,
-        fileWithCollection: FileWithCollection,
-        token: string
+        fileWithCollection: FileWithCollection
     ) {
         let { file: rawFile, collection } = fileWithCollection;
         this.fileProgress.set(rawFile.name, 0);
@@ -222,8 +220,7 @@ class UploadService {
                 collection.key
             );
             let backupedFile: BackupedFile = await this.uploadToBucket(
-                encryptedFile,
-                token
+                encryptedFile
             );
             file = null;
             encryptedFile = null;
@@ -234,7 +231,7 @@ class UploadService {
             );
             encryptedKey = null;
             backupedFile = null;
-            await this.uploadFile(uploadFile, token);
+            await this.uploadFile(uploadFile);
             uploadFile = null;
             this.filesCompleted++;
             this.fileProgress.set(rawFile.name, 100);
@@ -249,12 +246,7 @@ class UploadService {
             this.fileProgress.set(rawFile.name, -1);
         }
         if (this.filesToBeUploaded.length > 0) {
-            await this.uploader(
-                worker,
-                reader,
-                this.filesToBeUploaded.pop(),
-                token
-            );
+            await this.uploader(worker, reader, this.filesToBeUploaded.pop());
         }
     }
 
@@ -418,10 +410,7 @@ class UploadService {
         };
     }
 
-    private async uploadToBucket(
-        file: ProcessedFile,
-        token: string
-    ): Promise<BackupedFile> {
+    private async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
         try {
             if (isDataStream(file.file.encryptedData)) {
                 const { chunkCount, stream } = file.file.encryptedData;
@@ -429,7 +418,6 @@ class UploadService {
                     chunkCount / CHUNKS_COMBINED_FOR_UPLOAD
                 );
                 const filePartUploadURLs = await this.fetchMultipartUploadURLs(
-                    token,
                     uploadPartCount
                 );
                 file.file.objectKey = await this.putFileInParts(
@@ -439,14 +427,14 @@ class UploadService {
                     uploadPartCount
                 );
             } else {
-                const fileUploadURL = await this.getUploadURL(token);
+                const fileUploadURL = await this.getUploadURL();
                 file.file.objectKey = await this.putFile(
                     fileUploadURL,
                     file.file.encryptedData,
                     file.filename
                 );
             }
-            const thumbnailUploadURL = await this.getUploadURL(token);
+            const thumbnailUploadURL = await this.getUploadURL();
             file.thumbnail.objectKey = await this.putFile(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData as Uint8Array,
@@ -476,8 +464,12 @@ class UploadService {
         return uploadFile;
     }
 
-    private async uploadFile(uploadFile: uploadFile, token) {
+    private async uploadFile(uploadFile: uploadFile) {
         try {
+            const token = getToken();
+            if (!token) {
+                return;
+            }
             const response = await HTTPService.post(
                 `${ENDPOINT}/files`,
                 uploadFile,
@@ -697,16 +689,20 @@ class UploadService {
         }
     }
 
-    private async getUploadURL(token: string) {
+    private async getUploadURL() {
         if (this.uploadURLs.length == 0) {
-            await this.fetchUploadURLs(token);
+            await this.fetchUploadURLs();
         }
         return this.uploadURLs.pop();
     }
 
-    private async fetchUploadURLs(token: string): Promise<void> {
+    private async fetchUploadURLs(): Promise<void> {
         try {
             if (!this.uploadURLFetchInProgress) {
+                const token = getToken();
+                if (!token) {
+                    return;
+                }
                 this.uploadURLFetchInProgress = HTTPService.get(
                     `${ENDPOINT}/files/upload-urls`,
                     {
@@ -730,10 +726,13 @@ class UploadService {
     }
 
     private async fetchMultipartUploadURLs(
-        token: string,
         count: number
     ): Promise<MultipartUploadURLs> {
         try {
+            const token = getToken();
+            if (!token) {
+                return;
+            }
             const response = await HTTPService.get(
                 `${ENDPOINT}/files/multipart-upload-urls`,
                 {
