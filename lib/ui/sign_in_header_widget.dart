@@ -8,6 +8,7 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/expansion_card.dart';
+import 'package:photos/ui/login_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
 import 'package:photos/ui/subscription_page.dart';
@@ -167,7 +168,7 @@ class _SignInHeaderState extends State<SignInHeader> {
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: RaisedButton(
                 child: Text(
-                  "subscribe",
+                  "sign up",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
@@ -205,9 +206,36 @@ class _SignInHeaderState extends State<SignInHeader> {
                 ),
               ),
             ),
-            Padding(padding: EdgeInsets.all(10)),
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(28),
+                child: Center(
+                  child: Text(
+                    "sign in",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).buttonColor,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                ),
+              ),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return LoginPage();
+                    },
+                  ),
+                );
+              },
+            ),
             Divider(
-              height: 2,
+              height: 4,
+              color: Theme.of(context).buttonColor.withOpacity(0.5),
             ),
           ],
         ),
