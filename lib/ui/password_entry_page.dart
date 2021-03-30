@@ -217,7 +217,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          return RecoveryKeyDialog(result, widget.isUpdatePassword, onDone);
+          return RecoveryKeyDialog(result, onDone);
         },
         barrierColor: Colors.black.withOpacity(0.85),
         barrierDismissible: false,

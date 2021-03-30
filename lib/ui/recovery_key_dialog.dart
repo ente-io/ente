@@ -11,11 +11,9 @@ import 'dart:io' as io;
 
 class RecoveryKeyDialog extends StatefulWidget {
   final KeyGenResult result;
-  final bool isUpdatePassword;
   final Function() onDone;
 
-  RecoveryKeyDialog(this.result, this.isUpdatePassword, this.onDone, {Key key})
-      : super(key: key);
+  RecoveryKeyDialog(this.result, this.onDone, {Key key}) : super(key: key);
 
   @override
   _RecoveryKeyDialogState createState() => _RecoveryKeyDialogState();
