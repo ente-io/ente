@@ -33,82 +33,73 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
   }
 
   Widget _getBody() {
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.fromLTRB(16, 40, 16, 16),
-        child: Column(
-          children: [
-            Image.asset(
-              "assets/vault.png",
-              width: 196,
-              height: 196,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
+          child: TextFormField(
+            decoration: InputDecoration(
+              hintText: "enter your password",
+              contentPadding: EdgeInsets.all(20),
             ),
-            Padding(padding: EdgeInsets.all(20)),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-              child: TextFormField(
-                decoration: InputDecoration(
-                  hintText: "enter your password",
-                  contentPadding: EdgeInsets.all(20),
-                ),
-                style: TextStyle(
-                  fontSize: 14,
-                ),
-                controller: _passwordController,
-                autofocus: false,
-                autocorrect: false,
-                obscureText: true,
-                keyboardType: TextInputType.visiblePassword,
-                onChanged: (_) {
-                  setState(() {});
-                },
-              ),
+            style: TextStyle(
+              fontSize: 14,
             ),
-            Padding(padding: EdgeInsets.all(12)),
-            Container(
-                padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-                width: double.infinity,
-                height: 64,
-                child: button(
-                  "sign in",
-                  fontSize: 18,
-                  onPressed: _passwordController.text.isNotEmpty
-                      ? () async {
-                          final dialog =
-                              createProgressDialog(context, "please wait...");
-                          await dialog.show();
-                          try {
-                            await Configuration.instance.decryptAndSaveKey(
-                                _passwordController.text,
-                                Configuration.instance.getKeyAttributes());
-                          } catch (e) {
-                            Logger("PRP").warning(e);
-                            await dialog.hide();
-                            showErrorDialog(context, "incorrect password",
-                                "please try again");
-                            return;
-                          }
-                          await dialog.hide();
-                          if (!BillingService.instance
-                              .hasActiveSubscription()) {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (BuildContext context) {
-                                  return SubscriptionPage(isOnboarding: true);
-                                },
-                              ),
-                            );
-                          } else {
-                            Bus.instance.fire(SubscriptionPurchasedEvent());
-                            Navigator.of(context)
-                                .popUntil((route) => route.isFirst);
-                          }
-                        }
-                      : null,
-                )),
-          ],
+            controller: _passwordController,
+            autofocus: false,
+            autocorrect: false,
+            obscureText: true,
+            keyboardType: TextInputType.visiblePassword,
+            onChanged: (_) {
+              setState(() {});
+            },
+          ),
         ),
-      ),
+        Padding(padding: EdgeInsets.all(12)),
+        Container(
+            padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+            width: double.infinity,
+            height: 64,
+            child: button(
+              "sign in",
+              fontSize: 18,
+              onPressed: _passwordController.text.isNotEmpty
+                  ? () async {
+                      final dialog =
+                          createProgressDialog(context, "please wait...");
+                      await dialog.show();
+                      try {
+                        await Configuration.instance.decryptAndSaveKey(
+                            _passwordController.text,
+                            Configuration.instance.getKeyAttributes());
+                      } catch (e) {
+                        Logger("PRP").warning(e);
+                        await dialog.hide();
+                        showErrorDialog(
+                            context, "incorrect password", "please try again");
+                        return;
+                      }
+                      await dialog.hide();
+                      if (!BillingService.instance.hasActiveSubscription()) {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return SubscriptionPage(isOnboarding: true);
+                            },
+                          ),
+                        );
+                      } else {
+                        Bus.instance.fire(SubscriptionPurchasedEvent());
+                        Navigator.of(context)
+                            .popUntil((route) => route.isFirst);
+                      }
+                    }
+                  : null,
+            )),
+      ],
     );
   }
 }
