@@ -86,6 +86,7 @@ class HTTPService {
             return await axios({ ...config, ...customConfig });
         } catch (e) {
             retryCounter > 0 &&
+                config.method !== 'GET' &&
                 (await this.request(config, customConfig, retryCounter - 1));
             throw e;
         }
