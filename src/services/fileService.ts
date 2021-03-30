@@ -7,6 +7,7 @@ import { DataStream, MetadataObject } from './uploadService';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 import { getToken } from 'utils/common/key';
 import { selectedState } from 'pages/gallery';
+import { ErrorHandler } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();
 const DIFF_LIMIT: number = 2500;
@@ -152,6 +153,7 @@ export const getFiles = async (
         return await Promise.all(promises);
     } catch (e) {
         console.error('Get files failed', e);
+        ErrorHandler(e);
     }
 };
 
@@ -167,10 +169,7 @@ const removeDeletedCollectionFiles = async (
     return files;
 };
 
-export const deleteFiles = async (
-    clickedFiles: selectedState,
-    syncWithRemote
-) => {
+export const deleteFiles = async (clickedFiles: selectedState) => {
     try {
         let filesToDelete = [];
         for (let [key, val] of Object.entries(clickedFiles)) {
@@ -180,9 +179,8 @@ export const deleteFiles = async (
         }
         const token = getToken();
         if (!token) {
-            throw new Error('Invalid token');
+            return;
         }
-        console.log({ fileIDs: filesToDelete });
         await HTTPService.post(
             `${ENDPOINT}/files/delete`,
             { fileIDs: filesToDelete },
@@ -193,7 +191,5 @@ export const deleteFiles = async (
         );
     } catch (e) {
         console.error('delete failed');
-    } finally {
-        syncWithRemote();
     }
 };

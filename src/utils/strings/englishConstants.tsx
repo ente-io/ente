@@ -146,10 +146,16 @@ const englishConstants = {
     CHANGE_EMAIL: 'change email?',
     DELETE_WARNING: 'sure you want to delete selected files?',
     DELETE: 'delete',
-    UPLOAD_STRATEGY_CHOICE: 'you are uploading multiple folders, would you like us to create',
+    UPLOAD_STRATEGY_CHOICE:
+        'you are uploading multiple folders, would you like us to create',
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
     OR: 'or',
     UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
+    SESSION_EXPIRED_WARNING:
+        'your session has expired, please login again to continue',
+    SESSION_EXPIRED: 'login',
+    SYNC_FAILED:
+        'failed to sync with remote server, please refresh page to try again',
 };
 
 export default englishConstants;

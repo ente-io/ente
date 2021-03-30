@@ -14,6 +14,7 @@ import {
     getOtt,
     logoutUser,
     clearFiles,
+    isTokenValid,
 } from 'services/userService';
 
 const Image = styled.img`
@@ -33,16 +34,24 @@ export default function Verify() {
     const router = useRouter();
 
     useEffect(() => {
-        router.prefetch('/credentials');
-        router.prefetch('/generate');
-        const user = getData(LS_KEYS.USER);
-        if (!user?.email) {
-            router.push('/');
-        } else if (user.token) {
-            router.push('/credentials');
-        } else {
-            setEmail(user.email);
-        }
+        const main = async () => {
+            router.prefetch('/credentials');
+            router.prefetch('/generate');
+            const user = getData(LS_KEYS.USER);
+            if (!user?.email) {
+                router.push('/');
+            } else if (user.token) {
+                console.log(user.token);
+                if (await isTokenValid()) {
+                    router.push('/credentials');
+                } else {
+                    logoutUser();
+                }
+            } else {
+                setEmail(user.email);
+            }
+        };
+        main();
     }, []);
 
     const onSubmit = async (
@@ -68,7 +77,7 @@ export default function Verify() {
                 router.push('/generate');
             }
         } catch (e) {
-            if (e?.response?.status === 401) {
+            if (e?.status === 401) {
                 setFieldError('ott', constants.INVALID_CODE);
             } else {
                 setFieldError('ott', `${constants.UNKNOWN_ERROR} ${e.message}`);

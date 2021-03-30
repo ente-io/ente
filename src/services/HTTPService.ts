@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
+import { clearData } from 'utils/storage/localStorage';
 
 interface IHTTPHeaders {
     [headerKey: string]: any;
@@ -12,6 +13,23 @@ interface IQueryPrams {
  * Service to manage all HTTP calls.
  */
 class HTTPService {
+    constructor() {
+        axios.interceptors.response.use(
+            (response) => {
+                return Promise.resolve(response);
+            },
+            (err) => {
+                if (!err.response) {
+                    return Promise.reject(err);
+                }
+                const response = err.response;
+                if (response?.status === 401) {
+                    clearData();
+                }
+                return Promise.reject(response);
+            }
+        );
+    }
     /**
      * header object to be append to all api calls.
      */
@@ -71,6 +89,7 @@ class HTTPService {
             return await axios({ ...config, ...customConfig });
         } catch (e) {
             retryCounter > 0 &&
+                config.method !== 'GET' &&
                 (await this.request(config, customConfig, retryCounter - 1));
             throw e;
         }
