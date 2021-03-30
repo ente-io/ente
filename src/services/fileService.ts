@@ -7,6 +7,7 @@ import { DataStream, MetadataObject } from './uploadService';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 import { getToken } from 'utils/common/key';
 import { selectedState } from 'pages/gallery';
+import { ErrorHandler } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();
 const DIFF_LIMIT: number = 2500;
@@ -152,6 +153,7 @@ export const getFiles = async (
         return await Promise.all(promises);
     } catch (e) {
         console.error('Get files failed', e);
+        ErrorHandler(e);
     }
 };
 

@@ -77,7 +77,7 @@ export default function Verify() {
                 router.push('/generate');
             }
         } catch (e) {
-            if (e?.response?.status === 401) {
+            if (e?.status === 401) {
                 setFieldError('ott', constants.INVALID_CODE);
             } else {
                 setFieldError('ott', `${constants.UNKNOWN_ERROR} ${e.message}`);
