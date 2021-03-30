@@ -125,9 +125,6 @@ export const syncCollections = async () => {
     const lastCollectionUpdationTime = await getCollectionUpdationTime();
     const key = await getActualKey(),
         token = getToken();
-    if (!token) {
-        return localCollections;
-    }
     const updatedCollections =
         (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
     if (updatedCollections.length == 0) {

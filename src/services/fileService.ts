@@ -177,7 +177,7 @@ export const deleteFiles = async (clickedFiles: selectedState) => {
         }
         const token = getToken();
         if (!token) {
-            throw new Error('Invalid token');
+            return;
         }
         await HTTPService.post(
             `${ENDPOINT}/files/delete`,
