@@ -12,7 +12,7 @@ const AXIOS_NETWORK_ERROR = 'Network Error';
 
 export function ErrorHandler(error) {
     const errorCode = error.response?.status.toString();
-    let errorMessage;
+    let errorMessage = null;
     switch (errorCode) {
         case errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION:
             errorMessage = constants.SUBSCRIPTION_EXPIRED;
@@ -26,11 +26,11 @@ export function ErrorHandler(error) {
         case errorCodes.ERR_SESSION_EXPIRED:
             errorMessage = constants.SESSION_EXPIRED_WARNING;
             break;
-        default:
-            errorMessage = `${constants.UNKNOWN_ERROR} ${error.message}`;
     }
     if (error.message === AXIOS_NETWORK_ERROR) {
         errorMessage = constants.SYNC_FAILED;
     }
-    throw new Error(errorMessage);
+    if (errorMessage) {
+        throw new Error(errorMessage);
+    }
 }
