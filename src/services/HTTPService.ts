@@ -18,12 +18,15 @@ class HTTPService {
             (response) => {
                 return Promise.resolve(response);
             },
-            (error) => {
-                if (error.status === 401) {
+            (err) => {
+                if (!err.response) {
+                    return Promise.reject(err);
+                }
+                const response = err.response;
+                if (response?.status === 401) {
                     clearData();
                 }
-
-                return Promise.reject(error);
+                return Promise.reject(response);
             }
         );
     }

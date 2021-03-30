@@ -387,7 +387,7 @@ export default function Gallery(props: Props) {
             first.getDate() === second.getDate()
         );
     };
-    const confirmCallbacks = new Map<string, Function>([
+    const confirmCallbacks = new Map<CONFIRM_ACTION, Function>([
         [
             CONFIRM_ACTION.DELETE,
             async function () {

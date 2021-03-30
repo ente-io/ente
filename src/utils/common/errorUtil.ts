@@ -1,4 +1,3 @@
-import { logoutUser } from 'services/userService';
 import constants from 'utils/strings/constants';
 
 export const errorCodes = {
@@ -11,7 +10,7 @@ export const errorCodes = {
 const AXIOS_NETWORK_ERROR = 'Network Error';
 
 export function ErrorHandler(error) {
-    const errorCode = error.response?.status.toString();
+    const errorCode = error.status?.toString();
     let errorMessage = null;
     switch (errorCode) {
         case errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION:
