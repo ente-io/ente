@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share/share.dart';
 import 'dart:io' as io;
 
 class RecoveryKeyDialog extends StatefulWidget {
-  final KeyGenResult result;
+  final String recoveryKey;
+  final String doneText;
   final Function() onDone;
 
-  RecoveryKeyDialog(this.result, this.onDone, {Key key}) : super(key: key);
+  RecoveryKeyDialog(this.recoveryKey, this.doneText, this.onDone, {Key key}) : super(key: key);
 
   @override
   _RecoveryKeyDialogState createState() => _RecoveryKeyDialogState();
@@ -26,7 +26,7 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final recoveryKey = widget.result.privateKeyAttributes.recoveryKey;
+    final recoveryKey = widget.recoveryKey;
     List<Widget> actions = [];
     if (!_hasTriedToSave) {
       actions.add(TextButton(
@@ -58,7 +58,7 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
       actions.add(
         TextButton(
           child: Text(
-            "continue",
+            widget.doneText,
             style: TextStyle(
               color: Colors.white,
             ),

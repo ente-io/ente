@@ -13,12 +13,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/password_entry_page.dart';
+import 'package:photos/ui/recovery_key_dialog.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/ui/web_page.dart';
+import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -261,11 +263,64 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     final List<Widget> children = [];
     children.addAll([
       SettingsSectionTitle("security"),
-      Padding(
-        padding: EdgeInsets.all(4),
-      ),
     ]);
+    if (Configuration.instance.hasConfiguredAccount()) {
+      children.addAll(
+        [
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () async {
+              final result = await requestAuthentication();
+              if (!result) {
+                showToast("please authenticate to view your recovery key");
+                return;
+              }
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return RecoveryKeyDialog(_getRecoveryKey(), "ok", () {});
+                },
+                barrierColor: Colors.black.withOpacity(0.85),
+                barrierDismissible: false,
+              );
+            },
+            child: SettingsTextItem(
+                text: "recovery key", icon: Icons.navigate_next),
+          ),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(4)),
+          Divider(height: 4),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () async {
+              final result = await requestAuthentication();
+              if (!result) {
+                showToast("please authenticate to change your password");
+                return;
+              }
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return PasswordEntryPage(
+                      isUpdatePassword: true,
+                    );
+                  },
+                ),
+              );
+            },
+            child: SettingsTextItem(
+                text: "change password", icon: Icons.navigate_next),
+          ),
+        ],
+      );
+    }
     children.addAll([
+      Padding(padding: EdgeInsets.all(2)),
+      Divider(height: 4),
+      Platform.isIOS
+          ? Padding(padding: EdgeInsets.all(2))
+          : Padding(padding: EdgeInsets.all(4)),
       Container(
         height: 36,
         child: Row(
@@ -375,42 +430,21 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ),
       ]);
     }
-    if (Configuration.instance.hasConfiguredAccount()) {
-      children.addAll(
-        [
-          Platform.isIOS
-              ? Padding(padding: EdgeInsets.all(2))
-              : Padding(padding: EdgeInsets.all(4)),
-          Divider(height: 4),
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () async {
-              final result = await requestAuthentication();
-              if (!result) {
-                showToast("please authenticate to change your password");
-                return;
-              }
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return PasswordEntryPage(
-                      isUpdatePassword: true,
-                    );
-                  },
-                ),
-              );
-            },
-            child: SettingsTextItem(
-                text: "change password", icon: Icons.navigate_next),
-          ),
-        ],
-      );
-    }
     return Container(
       child: Column(
         children: children,
       ),
     );
+  }
+
+  String _getRecoveryKey() {
+    final key = Configuration.instance.getKey();
+    final ka = Configuration.instance.getKeyAttributes();
+    final recoveryKey = CryptoUtil.decryptSync(
+        Sodium.base642bin(ka.recoveryKeyEncryptedWithMasterKey),
+        key,
+        Sodium.base642bin(ka.recoveryKeyDecryptionNonce));
+    return Sodium.bin2hex(recoveryKey);
   }
 }
 
