@@ -281,7 +281,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                   return RecoveryKeyDialog(_getRecoveryKey(), "ok", () {});
                 },
                 barrierColor: Colors.black.withOpacity(0.85),
-                barrierDismissible: false,
               );
             },
             child: SettingsTextItem(
