@@ -28,21 +28,20 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final appBar = AppBar(
-      title: Text(
-        "sign in",
-        style: TextStyle(
-          fontSize: 18,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "sign in",
+          style: TextStyle(
+            fontSize: 18,
+          ),
         ),
       ),
-    );
-    return Scaffold(
-      appBar: appBar,
-      body: _getBody(appBar.preferredSize.height),
+      body: _getBody(),
     );
   }
 
-  Widget _getBody(final appBarSize) {
+  Widget _getBody() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.center,
