@@ -3,10 +3,16 @@ import { Button, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
 export enum CONFIRM_ACTION {
-    LOGOUT = 'LOGOUT',
-    DELETE = 'DELETE',
-    SESSION_EXPIRED = 'SESSION_EXPIRED',
+    LOGOUT,
+    DELETE,
+    SESSION_EXPIRED,
 }
+
+const CONFIRM_ACTION_VALUES = [
+    { text: 'LOGOUT', type: 'danger' },
+    { text: 'DELETE', type: 'danger' },
+    { text: 'SESSION_EXPIRED', type: 'primary' },
+];
 
 export interface Props {
     callback: any;
@@ -27,7 +33,11 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
         >
             <Modal.Body style={{ padding: '24px' }}>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    {constants[`${action}_WARNING`]}
+                    {
+                        constants[
+                            `${CONFIRM_ACTION_VALUES[action]?.text}_WARNING`
+                        ]
+                    }
                 </Modal.Title>
             </Modal.Body>
             <Modal.Footer style={{ borderTop: 'none' }}>
@@ -36,8 +46,11 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
                         {constants.CANCEL}
                     </Button>
                 )}
-                <Button variant="danger" onClick={callback}>
-                    {constants[action]}
+                <Button
+                    variant={`${CONFIRM_ACTION_VALUES[action]?.type}`}
+                    onClick={callback}
+                >
+                    {constants[CONFIRM_ACTION_VALUES[action]?.text]}
                 </Button>
             </Modal.Footer>
         </Modal>
