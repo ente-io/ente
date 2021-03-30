@@ -152,7 +152,7 @@ const englishConstants = {
     OR: 'or',
     UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
     SESSION_EXPIRED_WARNING:
-        'your session has expired, please login to continue',
+        'your session has expired, please login again to continue',
     SESSION_EXPIRED: 'login',
     SYNC_FAILED:
         'failed to sync with remote server, please refresh page to try again',
