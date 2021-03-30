@@ -60,10 +60,19 @@ const getExportedFiles = async (dir: string) => {
     }
 };
 
+const sendNotification = (content: string) => {
+    ipcRenderer.send('send-notification', content);
+};
+const showOnTray = (item: any[]) => {
+    ipcRenderer.send('update-tray', item);
+};
+
 var windowObject: any = window;
 windowObject['ElectronAPIs'] = {
     saveToDisk,
     selectDirectory,
     updateExportRecord,
     getExportedFiles,
+    sendNotification,
+    showOnTray,
 };
