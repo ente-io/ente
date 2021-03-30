@@ -57,11 +57,6 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             padding: EdgeInsets.fromLTRB(16, 36, 16, 16),
             child: Column(
               children: [
-                // Image.asset(
-                //   "assets/vault.png",
-                //   width: 196,
-                //   height: 196,
-                // ),
                 Padding(padding: EdgeInsets.all(12)),
                 Text(
                   "enter a" +
