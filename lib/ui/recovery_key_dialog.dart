@@ -13,7 +13,8 @@ class RecoveryKeyDialog extends StatefulWidget {
   final String doneText;
   final Function() onDone;
 
-  RecoveryKeyDialog(this.recoveryKey, this.doneText, this.onDone, {Key key}) : super(key: key);
+  RecoveryKeyDialog(this.recoveryKey, this.doneText, this.onDone, {Key key})
+      : super(key: key);
 
   @override
   _RecoveryKeyDialogState createState() => _RecoveryKeyDialogState();
@@ -77,7 +78,9 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-                "if you forget your password, you can recover your data with this key"),
+              "if you forget your password, you can recover your data with this key",
+              style: TextStyle(height: 1.2),
+            ),
             Padding(padding: EdgeInsets.all(8)),
             GestureDetector(
               onTap: () async {
@@ -104,8 +107,11 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
             ),
             Padding(padding: EdgeInsets.all(8)),
             Text(
-              "please save this key in a safe place",
-              style: TextStyle(height: 1.2),
+              "we don't store this key",
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+            Text(
+              "so please save this in a safe place",
             ),
           ],
         ),
