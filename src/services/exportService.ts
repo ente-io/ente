@@ -54,7 +54,11 @@ class ExportService {
     async downloadAndSave(file: file, path) {
         const fileStream = await downloadManager.downloadFile(file);
 
-        this.ElectronAPIs.saveToDisk(path, fileStream);
+        this.ElectronAPIs.saveStreamToDisk(path, fileStream);
+        this.ElectronAPIs.saveFileToDisk(
+            `${path}.json`,
+            JSON.stringify(file.metadata, null, 2)
+        );
     }
     private sanitizeNames(name) {
         return name.replaceAll('/', '_').replaceAll(' ', '_');
