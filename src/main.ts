@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Tray, Notification } from 'electron';
+import { app, BrowserWindow, Menu, Tray, Notification, shell } from 'electron';
 import * as path from 'path';
 import * as electron from 'electron';
 const { dialog, ipcMain } = electron;
@@ -15,12 +15,13 @@ function createWindow() {
         },
         width: 800,
     });
+    mainWindow.setMenu(buildMenuBar());
 
     // and load the index.html of the app.
     mainWindow.loadURL('http://localhost:3000');
 
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
     mainWindow.on('minimize', function (event: any) {
         event.preventDefault();
         mainWindow.hide();
@@ -102,4 +103,34 @@ function buildContextMenu(items = new Array<any>()) {
         },
     ]);
     return contextMenu;
+}
+
+function buildMenuBar() {
+    return Menu.buildFromTemplate([
+        {
+            label: '   ',
+            enabled: false,
+        },
+        {
+            label: 'launch web-app',
+            toolTip: 'ente.io web client ',
+            click: function () {
+                shell.openExternal('https://photos.ente.io');
+            },
+        },
+        { type: 'separator' },
+        {
+            label: 'support',
+            click: function () {
+                shell.openExternal('mailto:contact@ente.io');
+            },
+        },
+        { type: 'separator' },
+        {
+            label: 'ente.io',
+            click: function () {
+                shell.openExternal('https://ente.io');
+            },
+        },
+    ]);
 }
