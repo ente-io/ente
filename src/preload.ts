@@ -73,8 +73,12 @@ const getExportedFiles = async (dir: string) => {
 const sendNotification = (content: string) => {
     ipcRenderer.send('send-notification', content);
 };
-const showOnTray = (item: any[]) => {
-    ipcRenderer.send('update-tray', item);
+const showOnTray = (content: string) => {
+    ipcRenderer.send('update-tray', content);
+};
+
+const registerStopExportListener = (abortExport: Function) => {
+    ipcRenderer.on('stop-export', () => abortExport());
 };
 
 var windowObject: any = window;
@@ -87,4 +91,5 @@ windowObject['ElectronAPIs'] = {
     getExportedFiles,
     sendNotification,
     showOnTray,
+    registerStopExportListener,
 };

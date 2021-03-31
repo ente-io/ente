@@ -84,9 +84,20 @@ ipcMain.on('send-notification', (event, args) => {
     new Notification(notification).show();
 });
 
-function buildContextMenu(items = new Array<any>()) {
+function buildContextMenu(export_progress: any = null) {
     const contextMenu = Menu.buildFromTemplate([
-        ...items.map((item) => ({ label: item.label, click: () => null })),
+        ...(export_progress
+            ? [
+                  {
+                      label: export_progress,
+                      click: () => mainWindow.show(),
+                  },
+                  {
+                      label: 'stop export',
+                      click: () => mainWindow.webContents.send('stop-export'),
+                  },
+              ]
+            : []),
         { type: 'separator' },
         {
             label: 'open ente',
