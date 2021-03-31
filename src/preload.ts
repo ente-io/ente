@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 import * as fs from 'promise-fs';
 import * as electron from 'electron';
 
-const { ipcRenderer, contextBridge } = electron;
+const { ipcRenderer } = electron;
 
 const EXPORT_FILE_NAME = 'export.txt';
 
@@ -73,7 +73,8 @@ const showOnTray = (item: any[]) => {
     ipcRenderer.send('update-tray', item);
 };
 
-contextBridge.exposeInMainWorld('ElectronAPIs', {
+var windowObject: any = window;
+windowObject['ElectronAPIs'] = {
     checkExistsAndCreateCollectionDir,
     saveToDisk,
     selectRootDirectory,
@@ -81,4 +82,4 @@ contextBridge.exposeInMainWorld('ElectronAPIs', {
     getExportedFiles,
     sendNotification,
     showOnTray,
-});
+};

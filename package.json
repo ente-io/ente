@@ -14,7 +14,7 @@
     "@types/promise-fs": "^2.1.1",
     "@typescript-eslint/eslint-plugin": "^4.20.0",
     "@typescript-eslint/parser": "^4.20.0",
-    "electron": "^12.0.2",
+    "electron": "^11.0.2",
     "eslint": "^7.23.0",
     "promise-fs": "^2.1.1",
     "typescript": "^4.2.3"
