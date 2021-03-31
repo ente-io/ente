@@ -97,7 +97,9 @@ class DownloadManager {
             }
             return new ReadableStream({
                 async start(controller: ReadableStreamDefaultController) {
-                    controller.enqueue(await decryptedBlob.arrayBuffer());
+                    controller.enqueue(
+                        new Uint8Array(await decryptedBlob.arrayBuffer())
+                    );
                     controller.close();
                 },
             });
