@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 import * as fs from 'promise-fs';
 import * as electron from 'electron';
 
-const { ipcRenderer } = electron;
+const { ipcRenderer, contextBridge } = electron;
 
 const EXPORT_FILE_NAME = 'export.txt';
 
@@ -67,12 +67,11 @@ const showOnTray = (item: any[]) => {
     ipcRenderer.send('update-tray', item);
 };
 
-var windowObject: any = window;
-windowObject['ElectronAPIs'] = {
+contextBridge.exposeInMainWorld('ElectronAPIs', {
     saveToDisk,
     selectDirectory,
     updateExportRecord,
     getExportedFiles,
     sendNotification,
     showOnTray,
-};
+});
