@@ -123,25 +123,18 @@ function buildMenuBar() {
             enabled: false,
         },
         {
-            label: 'launch web-app',
-            toolTip: 'ente.io web client ',
-            click: function () {
-                shell.openExternal('https://photos.ente.io');
-            },
-        },
-        { type: 'separator' },
-        {
-            label: 'support',
-            click: function () {
-                shell.openExternal('mailto:contact@ente.io');
-            },
-        },
-        { type: 'separator' },
-        {
-            label: 'ente.io',
-            click: function () {
-                shell.openExternal('https://ente.io');
-            },
+            label: 'help',
+            submenu: Menu.buildFromTemplate([
+                {
+                    label: 'faq',
+                    click: () => shell.openExternal('https://ente.io/faq/'),
+                },
+                {
+                    label: 'support',
+                    toolTip: 'ente.io web client ',
+                    click: () => shell.openExternal('mailto:contact@ente.io'),
+                },
+            ]),
         },
     ]);
 }
