@@ -27,10 +27,14 @@ const checkExistsAndCreateCollectionDir = async (dirPath: string) => {
     }
 };
 
-const saveToDisk = (path: string, fileStream: ReadableStream<any>) => {
+const saveStreamToDisk = (path: string, fileStream: ReadableStream<any>) => {
     const writeable = fs.createWriteStream(path);
     const readable = responseToReadable(fileStream);
     readable.pipe(writeable);
+};
+
+const saveFileToDisk = async (path: string, file: any) => {
+    await fs.writeFile(path, file);
 };
 
 const selectRootDirectory = async () => {
@@ -76,7 +80,8 @@ const showOnTray = (item: any[]) => {
 var windowObject: any = window;
 windowObject['ElectronAPIs'] = {
     checkExistsAndCreateCollectionDir,
-    saveToDisk,
+    saveStreamToDisk,
+    saveFileToDisk,
     selectRootDirectory,
     updateExportRecord,
     getExportedFiles,
