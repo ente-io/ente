@@ -5,11 +5,22 @@ import { file } from './fileService';
 
 enum ExportNotification {
     START = 'export started',
+    IN_PROGRESS = 'export already in progress',
     FINISH = 'export finished',
 }
 class ExportService {
     ElectronAPIs: any = runningInBrowser() && window['ElectronAPIs'];
+    exportInProgress: Promise<void> = null;
+
     async exportFiles(files: file[], collections: collection[]) {
+        if (this.exportInProgress) {
+            this.ElectronAPIs.sendNotification(ExportNotification.IN_PROGRESS);
+            return this.exportInProgress;
+        }
+        this.exportInProgress = this.fileExporter(files, collections);
+        return this.exportInProgress;
+    }
+    async fileExporter(files: file[], collections: collection[]) {
         try {
             const dir = await this.ElectronAPIs.selectRootDirectory();
             if (!dir) {
