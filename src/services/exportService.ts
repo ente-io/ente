@@ -21,9 +21,9 @@ class ExportService {
             );
             const collectionIDMap = new Map<number, string>();
             for (let collection of collections) {
-                let collectionFolderPath = `${dir}/${this.sanitizeNames(
-                    collection.name
-                )}_${collection.id}`;
+                let collectionFolderPath = `${dir}/${
+                    collection.id
+                }_${this.sanitizeNames(collection.name)}`;
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
                     collectionFolderPath
                 );
