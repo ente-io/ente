@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:progress_dialog/progress_dialog.dart';
+import 'package:photos/ui/progress_dialog.dart';
 
 ProgressDialog createProgressDialog(BuildContext context, String message) {
   final dialog = ProgressDialog(
     context,
     type: ProgressDialogType.Normal,
     isDismissible: false,
+    barrierColor: Colors.black.withOpacity(0.85),
   );
   dialog.style(
     message: message,
     messageTextStyle: TextStyle(color: Colors.white),
-    backgroundColor: Color.fromRGBO(25, 25, 25, 1.0),
+    backgroundColor: Color.fromRGBO(10, 10, 10, 1.0),
     progressWidget: loadWidget,
     borderRadius: 4.0,
     elevation: 10.0,

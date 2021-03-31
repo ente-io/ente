@@ -51,7 +51,6 @@ dependencies:
   video_player: ^2.0.0
   chewie: ^1.0.0
   cached_network_image: ^2.3.0-beta
-  progress_dialog: ^1.2.4
   animate_do: ^1.7.2
   flutter_cache_manager: ^1.4.1
   computer: ^1.0.2

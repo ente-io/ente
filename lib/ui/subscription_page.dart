@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ui/expansion_card.dart';
+import 'package:photos/ui/progress_dialog.dart';
 import 'package:photos/utils/date_time_util.dart';
-import 'package:progress_dialog/progress_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:photos/core/event_bus.dart';
