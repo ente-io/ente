@@ -15,8 +15,10 @@ import exportService from 'services/exportService';
 import { file } from 'services/fileService';
 import MessageDialog from './MessageDialog';
 import isElectron from 'is-electron';
+import { collection } from 'services/collectionService';
 interface Props {
     files: file[];
+    collections: collection[];
 }
 export default function Sidebar(props: Props) {
     const [logoutModalView, setLogoutModalView] = useState(false);
@@ -56,7 +58,7 @@ export default function Sidebar(props: Props) {
     }
     function exportFiles() {
         if (isElectron()) {
-            exportService.exportFiles(props.files);
+            exportService.exportFiles(props.files, props.collections);
         } else {
             setMessageModalView(true);
         }

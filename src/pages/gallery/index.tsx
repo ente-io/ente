@@ -404,7 +404,7 @@ export default function Gallery(props: Props) {
                 setBannerErrorCode={setBannerErrorCode}
                 acceptedFiles={props.acceptedFiles}
             />
-            <Sidebar files={data} />
+            <Sidebar files={data} collections={collections} />
             <UploadButton openFileUploader={props.openFileUploader} />
             {!isFirstLoad && data.length == 0 ? (
                 <Jumbotron>

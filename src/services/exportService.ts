@@ -1,4 +1,5 @@
 import { runningInBrowser } from 'utils/common/utilFunctions';
+import { collection } from './collectionService';
 import downloadManager from './downloadManager';
 import { file } from './fileService';
 
@@ -8,9 +9,9 @@ enum ExportNotification {
 }
 class ExportService {
     ElectronAPIs: any = runningInBrowser() && window['ElectronAPIs'];
-    async exportFiles(files: file[]) {
+    async exportFiles(files: file[], collections: collection[]) {
         try {
-            const dir = await this.ElectronAPIs.selectDirectory();
+            const dir = await this.ElectronAPIs.selectRootDirectory();
             if (!dir) {
                 // directory selector closed
                 return;
@@ -18,12 +19,26 @@ class ExportService {
             const exportedFiles: Set<string> = await this.ElectronAPIs.getExportedFiles(
                 dir
             );
+            const collectionIDMap = new Map<number, string>();
+            for (let collection of collections) {
+                let collectionFolderPath = `${dir}/${this.sanitizeNames(
+                    collection.name
+                )}_${collection.id}`;
+                await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
+                    collectionFolderPath
+                );
+                collectionIDMap.set(collection.id, collectionFolderPath);
+            }
             this.ElectronAPIs.sendNotification(ExportNotification.START);
             for (let [index, file] of files.entries()) {
-                const uid = `${file.id}_${file.metadata.title}`;
-                if (!exportedFiles.has(uid)) {
-                    await this.downloadAndSave(file, `${dir}/${uid}`);
-                    this.ElectronAPIs.updateExportRecord(dir, uid);
+                const uid = `${file.id}_${this.sanitizeNames(
+                    file.metadata.title
+                )}`;
+                const filePath =
+                    collectionIDMap.get(file.collectionID) + '/' + uid;
+                if (!exportedFiles.has(filePath)) {
+                    await this.downloadAndSave(file, filePath);
+                    this.ElectronAPIs.updateExportRecord(dir, filePath);
                 }
                 this.ElectronAPIs.showOnTray([
                     { label: `${index + 1} / ${files.length} files exported` },
@@ -40,6 +55,9 @@ class ExportService {
         const fileStream = await downloadManager.downloadFile(file);
 
         this.ElectronAPIs.saveToDisk(path, fileStream);
+    }
+    private sanitizeNames(name) {
+        return name.replaceAll('/', '_').replaceAll(' ', '_');
     }
 }
 export default new ExportService();
