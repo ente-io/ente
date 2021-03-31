@@ -21,13 +21,19 @@ const responseToReadable = (fileStream: any) => {
     return rs;
 };
 
+const checkExistsAndCreateCollectionDir = async (dirPath: string) => {
+    if (!fs.existsSync(dirPath)) {
+        await fs.mkdir(dirPath);
+    }
+};
+
 const saveToDisk = (path: string, fileStream: ReadableStream<any>) => {
     const writeable = fs.createWriteStream(path);
     const readable = responseToReadable(fileStream);
     readable.pipe(writeable);
 };
 
-const selectDirectory = async () => {
+const selectRootDirectory = async () => {
     try {
         return await ipcRenderer.sendSync('select-dir');
     } catch (e) {
@@ -68,8 +74,9 @@ const showOnTray = (item: any[]) => {
 };
 
 contextBridge.exposeInMainWorld('ElectronAPIs', {
+    checkExistsAndCreateCollectionDir,
     saveToDisk,
-    selectDirectory,
+    selectRootDirectory,
     updateExportRecord,
     getExportedFiles,
     sendNotification,
