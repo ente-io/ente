@@ -7,10 +7,12 @@ enum ExportNotification {
     START = 'export started',
     IN_PROGRESS = 'export already in progress',
     FINISH = 'export finished',
+    ABORT = 'export aborted',
 }
 class ExportService {
     ElectronAPIs: any = runningInBrowser() && window['ElectronAPIs'];
     exportInProgress: Promise<void> = null;
+    abortExport: boolean = false;
 
     async exportFiles(files: file[], collections: collection[]) {
         if (this.exportInProgress) {
@@ -30,6 +32,10 @@ class ExportService {
             const exportedFiles: Set<string> = await this.ElectronAPIs.getExportedFiles(
                 dir
             );
+            this.ElectronAPIs.showOnTray(`starting export`);
+            this.ElectronAPIs.registerStopExportListener(
+                () => (this.abortExport = true)
+            );
             const collectionIDMap = new Map<number, string>();
             for (let collection of collections) {
                 let collectionFolderPath = `${dir}/${
@@ -42,6 +48,9 @@ class ExportService {
             }
             this.ElectronAPIs.sendNotification(ExportNotification.START);
             for (let [index, file] of files.entries()) {
+                if (this.abortExport) {
+                    break;
+                }
                 const uid = `${file.id}_${this.sanitizeNames(
                     file.metadata.title
                 )}`;
@@ -51,14 +60,21 @@ class ExportService {
                     await this.downloadAndSave(file, filePath);
                     this.ElectronAPIs.updateExportRecord(dir, filePath);
                 }
-                this.ElectronAPIs.showOnTray([
-                    { label: `${index + 1} / ${files.length} files exported` },
-                ]);
+                this.ElectronAPIs.showOnTray(
+                    `exporting file ${index + 1} / ${files.length}`
+                );
             }
-            this.ElectronAPIs.sendNotification(ExportNotification.FINISH);
-            this.ElectronAPIs.showOnTray([]);
+            this.ElectronAPIs.sendNotification(
+                this.abortExport
+                    ? ExportNotification.ABORT
+                    : ExportNotification.FINISH
+            );
         } catch (e) {
             console.error(e);
+        } finally {
+            this.exportInProgress = null;
+            this.ElectronAPIs.showOnTray();
+            this.abortExport = false;
         }
     }
 
