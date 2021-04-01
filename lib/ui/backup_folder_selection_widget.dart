@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -71,6 +73,7 @@ class _BackupFolderSelectionWidgetState
                   ? null
                   : () {
                       Configuration.instance.setPathsToBackUp(_backedupFolders);
+                      Bus.instance.fire(BackupFoldersUpdatedEvent());
                       Navigator.pop(context);
                     },
               shape: RoundedRectangleBorder(

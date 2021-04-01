@@ -61,7 +61,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
   StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
-  StreamSubscription<BackupFoldersUpdatedEvent> _collectionUpdatedEvent;
+  StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
 
   @override
   void initState() {
@@ -131,7 +131,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
     });
-    _collectionUpdatedEvent =
+    _backupFoldersUpdatedEvent =
         Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
       setState(() {});
     });
@@ -346,7 +346,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _subscriptionPurchaseEvent.cancel();
     _triggerLogoutEvent.cancel();
     _loggedOutEvent.cancel();
-    _collectionUpdatedEvent.cancel();
+    _backupFoldersUpdatedEvent.cancel();
     super.dispose();
   }
 }
