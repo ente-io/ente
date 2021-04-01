@@ -270,21 +270,24 @@ export async function deriveKey(passphrase: string, salt: string, opsLimit: numb
 
 export async function deriveSensitiveKey(passphrase: string, salt: string) {
     await sodium.ready;
-    const key = await toB64(
-        sodium.crypto_pwhash(
-            sodium.crypto_secretbox_KEYBYTES,
-            await fromString(passphrase),
-            await fromB64(salt),
-            sodium.crypto_pwhash_OPSLIMIT_SENSITIVE,
-            sodium.crypto_pwhash_MEMLIMIT_SENSITIVE,
-            sodium.crypto_pwhash_ALG_DEFAULT
-        )
-    );
-    return {
-        'key': key,
-        'opsLimit': sodium.crypto_pwhash_OPSLIMIT_SENSITIVE,
-        'memLimit': sodium.crypto_pwhash_MEMLIMIT_SENSITIVE,
+    let opsLimit = sodium.crypto_pwhash_OPSLIMIT_SENSITIVE;
+    let memLimit = sodium.crypto_pwhash_MEMLIMIT_SENSITIVE;
+    while (memLimit > sodium.crypto_pwhash_MEMLIMIT_MIN &&
+        opsLimit < sodium.crypto_pwhash_OPSLIMIT_MAX) {
+        try {
+            const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
+            return {
+                'key': key,
+                'opsLimit': opsLimit,
+                'memLimit': memLimit,
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        opsLimit = opsLimit * 2;
+        memLimit = memLimit / 2;
     }
+    throw "unsupported operation";
 }
 
 export async function generateMasterKey() {
