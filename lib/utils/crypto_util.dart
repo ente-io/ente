@@ -101,6 +101,7 @@ class CryptoUtil {
 
   static init() {
     _computer.turnOn(workersCount: 4);
+    Sodium.init();
   }
 
   static EncryptionResult encryptSync(Uint8List source, Uint8List key) {
