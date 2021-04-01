@@ -195,6 +195,39 @@ class CryptoUtil {
     return Sodium.randombytesBuf(Sodium.cryptoPwhashSaltbytes);
   }
 
+  static Future<KeyPair> generateKeyPair() async {
+    return Sodium.cryptoBoxKeypair();
+  }
+
+  static Uint8List openSealSync(
+      Uint8List input, Uint8List publicKey, Uint8List secretKey) {
+    return Sodium.cryptoBoxSealOpen(input, publicKey, secretKey);
+  }
+
+  static Uint8List sealSync(Uint8List input, Uint8List publicKey) {
+    return Sodium.cryptoBoxSeal(input, publicKey);
+  }
+
+  static Future<DerivedKeyResult> deriveSensitiveKey(
+      Uint8List password, Uint8List salt) async {
+    final logger = Logger("pwhash");
+    int memLimit = Sodium.cryptoPwhashMemlimitSensitive;
+    int opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
+    Uint8List key;
+    while (memLimit > Sodium.cryptoPwhashMemlimitMin &&
+        opsLimit < Sodium.cryptoPwhashOpslimitMax) {
+      try {
+        key = await deriveKey(password, salt, memLimit, opsLimit);
+        return DerivedKeyResult(key, memLimit, opsLimit);
+      } catch (e, s) {
+        logger.severe(e, s);
+      }
+      memLimit = (memLimit / 2).round();
+      opsLimit = opsLimit * 2;
+    }
+    throw UnsupportedError("Cannot perform this operation on this device");
+  }
+
   static Future<Uint8List> deriveKey(
     Uint8List password,
     Uint8List salt,
@@ -208,17 +241,12 @@ class CryptoUtil {
       "opsLimit": opsLimit,
     });
   }
+}
 
-  static Future<KeyPair> generateKeyPair() async {
-    return Sodium.cryptoBoxKeypair();
-  }
+class DerivedKeyResult {
+  final Uint8List key;
+  final int memLimit;
+  final int opsLimit;
 
-  static Uint8List openSealSync(
-      Uint8List input, Uint8List publicKey, Uint8List secretKey) {
-    return Sodium.cryptoBoxSealOpen(input, publicKey, secretKey);
-  }
-
-  static Uint8List sealSync(Uint8List input, Uint8List publicKey) {
-    return Sodium.cryptoBoxSeal(input, publicKey);
-  }
+  DerivedKeyResult(this.key, this.memLimit, this.opsLimit);
 }

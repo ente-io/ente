@@ -124,17 +124,12 @@ class Configuration {
     // Derive a key from the password that will be used to encrypt and
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
-    final memLimit = Sodium.cryptoPwhashMemlimitSensitive;
-    final opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
-    final kek = await CryptoUtil.deriveKey(
-      utf8.encode(password),
-      kekSalt,
-      memLimit,
-      opsLimit,
-    );
+    final derivedKeyResult =
+        await CryptoUtil.deriveSensitiveKey(utf8.encode(password), kekSalt);
 
     // Encrypt the key with this derived key
-    final encryptedKeyData = CryptoUtil.encryptSync(masterKey, kek);
+    final encryptedKeyData =
+        CryptoUtil.encryptSync(masterKey, derivedKeyResult.key);
 
     // Generate a public-private keypair and encrypt the latter
     final keyPair = await CryptoUtil.generateKeyPair();
@@ -148,8 +143,8 @@ class Configuration {
       Sodium.bin2base64(keyPair.pk),
       Sodium.bin2base64(encryptedSecretKeyData.encryptedData),
       Sodium.bin2base64(encryptedSecretKeyData.nonce),
-      memLimit,
-      opsLimit,
+      derivedKeyResult.memLimit,
+      derivedKeyResult.opsLimit,
       Sodium.bin2base64(encryptedMasterKey.encryptedData),
       Sodium.bin2base64(encryptedMasterKey.nonce),
       Sodium.bin2base64(encryptedRecoveryKey.encryptedData),
@@ -167,17 +162,12 @@ class Configuration {
     // Derive a key from the password that will be used to encrypt and
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
-    final memLimit = Sodium.cryptoPwhashMemlimitSensitive;
-    final opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
-    final kek = await CryptoUtil.deriveKey(
-      utf8.encode(password),
-      kekSalt,
-      memLimit,
-      opsLimit,
-    );
+    final derivedKeyResult =
+        await CryptoUtil.deriveSensitiveKey(utf8.encode(password), kekSalt);
 
     // Encrypt the key with this derived key
-    final encryptedKeyData = CryptoUtil.encryptSync(masterKey, kek);
+    final encryptedKeyData =
+        CryptoUtil.encryptSync(masterKey, derivedKeyResult.key);
 
     final existingAttributes = getKeyAttributes();
 
@@ -185,8 +175,8 @@ class Configuration {
       kekSalt: Sodium.bin2base64(kekSalt),
       encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData),
       keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce),
-      memLimit: memLimit,
-      opsLimit: opsLimit,
+      memLimit: derivedKeyResult.memLimit,
+      opsLimit: derivedKeyResult.opsLimit,
     );
   }
 
