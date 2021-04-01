@@ -157,7 +157,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final widgets = List<Widget>();
     if (widget.isOnboarding) {
       widgets.add(Padding(
-        padding: const EdgeInsets.fromLTRB(12, 20, 12, 24),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
         child: Text(
           "ente encrypts and backs up your memories, so they're always available, even if you lose your device",
           style: TextStyle(
@@ -628,7 +628,7 @@ class SubscriptionPlanWidget extends StatelessWidget {
           Row(
             children: [
               Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.fromLTRB(20, 10, 36, 10),
                 child: Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0),
