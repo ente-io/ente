@@ -99,8 +99,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                 : null,
           ),
         ),
+        Padding(padding: EdgeInsets.all(30)),
         GestureDetector(
-          behavior: HitTestBehavior.translucent,
+          behavior: HitTestBehavior.opaque,
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -111,7 +112,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             );
           },
           child: Container(
-            padding: EdgeInsets.all(40),
+            padding: EdgeInsets.all(10),
             child: Center(
               child: Text(
                 "forgot password?",
