@@ -13,7 +13,7 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
   dialog.style(
     message: message,
     messageTextStyle: TextStyle(color: Colors.white),
-    backgroundColor: Color.fromRGBO(10, 10, 10, 1.0),
+    backgroundColor: Color.fromRGBO(20, 20, 20, 1.0),
     progressWidget: loadWidget,
     borderRadius: 4.0,
     elevation: 10.0,
