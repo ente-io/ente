@@ -90,7 +90,15 @@ export default function Generate() {
                     getData(LS_KEYS.USER).name,
                     keyAttributes
                 );
-                setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+
+                setData(
+                    LS_KEYS.KEY_ATTRIBUTES,
+                    await generateIntermediateKey(
+                        passphrase,
+                        keyAttributes,
+                        key
+                    )
+                );
 
                 const sessionKeyAttributes = await cryptoWorker.encryptToB64(
                     key
@@ -112,6 +120,29 @@ export default function Generate() {
         }
         setLoading(false);
     };
+
+    async function generateIntermediateKey(passphrase, keyAttributes, key) {
+        const cryptoWorker = await new CryptoWorker();
+        const intermediateKekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
+        const intermediateKek: KEK = await cryptoWorker.deriveIntermediateKey(
+            passphrase,
+            intermediateKekSalt
+        );
+        const encryptedKeyAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(
+            key,
+            intermediateKek.key
+        );
+        return {
+            intermediateKekSalt,
+            encryptedKey: encryptedKeyAttributes.encryptedData,
+            keyDecryptionNonce: encryptedKeyAttributes.nonce,
+            publicKey: keyAttributes.publicKey,
+            encryptedSecretKey: keyAttributes.encryptedSecretKey,
+            secretKeyDecryptionNonce: keyAttributes.secretKeyDecryptionNonce,
+            opsLimit: intermediateKek.opsLimit,
+            memLimit: intermediateKek.memLimit,
+        };
+    }
 
     return (
         <Container>
