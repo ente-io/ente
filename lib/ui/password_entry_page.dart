@@ -52,6 +52,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+        leading:
+            widget.mode == PasswordEntryMode.reset ? Icon(Icons.lock) : null,
       ),
       body: _getBody(title),
       resizeToAvoidBottomInset: false,
