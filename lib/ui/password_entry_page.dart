@@ -36,6 +36,7 @@ class PasswordEntryPage extends StatefulWidget {
 class _PasswordEntryPageState extends State<PasswordEntryPage> {
   static const kPasswordStrengthThreshold = 0.4;
 
+  final _logger = Logger("PasswordEntry");
   final _passwordController1 = TextEditingController(),
       _passwordController2 = TextEditingController();
   double _passwordStrength = 0;
@@ -218,7 +219,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
       }
-    } catch (e) {
+    } catch (e, s) {
+      _logger.severe(e, s);
       await dialog.hide();
       showGenericErrorDialog(context);
     }

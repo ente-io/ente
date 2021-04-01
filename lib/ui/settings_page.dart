@@ -286,8 +286,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               try {
                 recoveryKey = await _getOrCreateRecoveryKey();
                 await dialog.hide();
-              } catch (e) {
-                Logger("SecuritySection").severe(e);
+              } catch (e, s) {
+                Logger("SecuritySection").severe(e, s);
                 await dialog.hide();
                 showGenericErrorDialog(context);
                 return;
