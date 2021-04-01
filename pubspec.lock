@@ -581,10 +581,10 @@ packages:
   photo_manager:
     dependency: "direct main"
     description:
-      path: "thirdparty/flutter_photo_manager"
-      relative: true
-    source: path
-    version: "0.6.0-dev.8"
+      name: photo_manager
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.6"
   photo_view:
     dependency: "direct main"
     description:
@@ -962,5 +962,5 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.12.0-259.9.beta <3.0.0"
-  flutter: ">=1.24.0-0"
+  dart: ">=2.12.0 <3.0.0"
+  flutter: ">=2.0.0"
