@@ -27,29 +27,32 @@ import 'package:photos/utils/crypto_util.dart';
 
 class Configuration {
   Configuration._privateConstructor();
+
   static final Configuration instance = Configuration._privateConstructor();
-  static final _logger = Logger("Configuration");
+
+  static const emailKey = "email";
+  static const foldersToBackUpKey = "folders_to_back_up";
+  static const keyAttributesKey = "key_attributes";
+  static const keyKey = "key";
+  static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
+  static const keyShouldHideFromRecents = "should_hide_from_recents";
+  static const keyShouldShowLockScreen = "should_show_lock_screen";
+  static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
+  static const nameKey = "name";
+  static const secretKeyKey = "secret_key";
+  static const tokenKey = "token";
+  static const userIDKey = "user_id";
+
   final kTempFolderDeletionTimeBuffer = Duration(days: 1).inMicroseconds;
 
-  static const userIDKey = "user_id";
-  static const emailKey = "email";
-  static const nameKey = "name";
-  static const tokenKey = "token";
-  static const foldersToBackUpKey = "folders_to_back_up";
-  static const keyKey = "key";
-  static const secretKeyKey = "secret_key";
-  static const keyAttributesKey = "key_attributes";
-  static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
-  static const keyShouldShowLockScreen = "should_show_lock_screen";
-  static const keyShouldHideFromRecents = "should_hide_from_recents";
-  static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
+  static final _logger = Logger("Configuration");
 
-  SharedPreferences _preferences;
-  FlutterSecureStorage _secureStorage;
-  String _key;
   String _cachedToken;
-  String _secretKey;
   String _documentsDirectory;
+  String _key;
+  SharedPreferences _preferences;
+  String _secretKey;
+  FlutterSecureStorage _secureStorage;
   String _tempDirectory;
 
   Future<void> init() async {
@@ -109,14 +112,14 @@ class Configuration {
 
   Future<KeyGenResult> generateKey(String password) async {
     // Create a master key
-    final key = CryptoUtil.generateKey();
+    final masterKey = CryptoUtil.generateKey();
 
     // Create a recovery key
     final recoveryKey = CryptoUtil.generateKey();
 
     // Encrypt master key and recovery key with each other
-    final encryptedMasterKey = CryptoUtil.encryptSync(key, recoveryKey);
-    final encryptedRecoveryKey = CryptoUtil.encryptSync(recoveryKey, key);
+    final encryptedMasterKey = CryptoUtil.encryptSync(masterKey, recoveryKey);
+    final encryptedRecoveryKey = CryptoUtil.encryptSync(recoveryKey, masterKey);
 
     // Derive a key from the password that will be used to encrypt and
     // decrypt the master key
@@ -131,11 +134,12 @@ class Configuration {
     );
 
     // Encrypt the key with this derived key
-    final encryptedKeyData = CryptoUtil.encryptSync(key, kek);
+    final encryptedKeyData = CryptoUtil.encryptSync(masterKey, kek);
 
     // Generate a public-private keypair and encrypt the latter
     final keyPair = await CryptoUtil.generateKeyPair();
-    final encryptedSecretKeyData = CryptoUtil.encryptSync(keyPair.sk, key);
+    final encryptedSecretKeyData =
+        CryptoUtil.encryptSync(keyPair.sk, masterKey);
 
     final attributes = KeyAttributes(
       Sodium.bin2base64(kekSalt),
@@ -151,14 +155,14 @@ class Configuration {
       Sodium.bin2base64(encryptedRecoveryKey.encryptedData),
       Sodium.bin2base64(encryptedRecoveryKey.nonce),
     );
-    final privateAttributes = PrivateKeyAttributes(Sodium.bin2base64(key),
+    final privateAttributes = PrivateKeyAttributes(Sodium.bin2base64(masterKey),
         Sodium.bin2hex(recoveryKey), Sodium.bin2base64(keyPair.sk));
     return KeyGenResult(attributes, privateAttributes);
   }
 
   Future<KeyAttributes> updatePassword(String password) async {
     // Get master key
-    final key = getKey();
+    final masterKey = getKey();
 
     // Derive a key from the password that will be used to encrypt and
     // decrypt the master key
@@ -173,7 +177,7 @@ class Configuration {
     );
 
     // Encrypt the key with this derived key
-    final encryptedKeyData = CryptoUtil.encryptSync(key, kek);
+    final encryptedKeyData = CryptoUtil.encryptSync(masterKey, kek);
 
     // User's public-private key pairs stay untouched since the master key
     // has not changed
@@ -184,8 +188,9 @@ class Configuration {
       final recoveryKey = CryptoUtil.generateKey();
 
       // Encrypt master key and recovery key with each other
-      final encryptedMasterKey = CryptoUtil.encryptSync(key, recoveryKey);
-      final encryptedRecoveryKey = CryptoUtil.encryptSync(recoveryKey, key);
+      final encryptedMasterKey = CryptoUtil.encryptSync(masterKey, recoveryKey);
+      final encryptedRecoveryKey =
+          CryptoUtil.encryptSync(recoveryKey, masterKey);
       return existingAttributes.copyWith(
         kekSalt: Sodium.bin2base64(kekSalt),
         encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData),
@@ -232,6 +237,21 @@ class Configuration {
         Sodium.base642bin(attributes.secretKeyDecryptionNonce));
     await setKey(Sodium.bin2base64(key));
     await setSecretKey(Sodium.bin2base64(secretKey));
+  }
+
+  Future<void> recover(String recoveryKey) async {
+    final keyAttributes = getKeyAttributes();
+    var masterKey;
+    try {
+      masterKey = await CryptoUtil.decrypt(
+          Sodium.base642bin(keyAttributes.masterKeyEncryptedWithRecoveryKey),
+          Sodium.hex2bin(recoveryKey),
+          Sodium.base642bin(keyAttributes.masterKeyDecryptionNonce));
+    } catch (e) {
+      _logger.severe(e);
+      throw e;
+    }
+    await setKey(Sodium.bin2base64(masterKey));
   }
 
   String getHttpEndpoint() {

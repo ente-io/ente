@@ -302,7 +302,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 MaterialPageRoute(
                   builder: (BuildContext context) {
                     return PasswordEntryPage(
-                      isUpdatePassword: true,
+                      mode: PasswordEntryMode.update,
                     );
                   },
                 ),

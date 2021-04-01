@@ -12,11 +12,19 @@ import 'package:photos/ui/recovery_key_dialog.dart';
 import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/toast_util.dart';
+
+enum PasswordEntryMode {
+  set,
+  update,
+  reset,
+}
 
 class PasswordEntryPage extends StatefulWidget {
-  final bool isUpdatePassword;
+  final PasswordEntryMode mode;
 
-  PasswordEntryPage({this.isUpdatePassword = false, Key key}) : super(key: key);
+  PasswordEntryPage({this.mode = PasswordEntryMode.set, Key key})
+      : super(key: key);
 
   @override
   _PasswordEntryPageState createState() => _PasswordEntryPageState();
@@ -31,18 +39,22 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   @override
   Widget build(BuildContext context) {
+    String title = "set password";
+    if (widget.mode == PasswordEntryMode.update) {
+      title = "change password";
+    } else if (widget.mode == PasswordEntryMode.reset) {
+      title = "reset password";
+    }
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isUpdatePassword
-            ? "change password"
-            : "encryption password"),
+        title: Text(title),
       ),
-      body: _getBody(),
+      body: _getBody(title),
       resizeToAvoidBottomInset: false,
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(String buttonText) {
     return Column(
       children: [
         FlutterPasswordStrength(
@@ -60,7 +72,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 Padding(padding: EdgeInsets.all(12)),
                 Text(
                   "enter a" +
-                      (widget.isUpdatePassword ? " new " : " ") +
+                      (widget.mode != PasswordEntryMode.set ? " new " : " ") +
                       "password we can use to encrypt your data",
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -122,25 +134,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                   height: 64,
                   padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
                   child: button(
-                    widget.isUpdatePassword
-                        ? "change password"
-                        : "set password",
+                    buttonText,
                     fontSize: 18,
                     onPressed: _passwordController1.text.isNotEmpty &&
                             _passwordController2.text.isNotEmpty
-                        ? () {
-                            if (_passwordController1.text !=
-                                _passwordController2.text) {
-                              showErrorDialog(context, "uhm...",
-                                  "the passwords you entered don't match");
-                            } else if (_passwordStrength <
-                                kPasswordStrengthThreshold) {
-                              showErrorDialog(context, "weak password",
-                                  "the password you have chosen is too simple, please choose another one");
-                            } else {
-                              _showRecoveryCodeDialog();
-                            }
-                          }
+                        ? _onButtonPress
                         : null,
                   ),
                 ),
@@ -177,6 +175,38 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     );
   }
 
+  void _onButtonPress() {
+    if (_passwordController1.text != _passwordController2.text) {
+      showErrorDialog(
+          context, "uhm...", "the passwords you entered don't match");
+    } else if (_passwordStrength < kPasswordStrengthThreshold) {
+      showErrorDialog(context, "weak password",
+          "the password you have chosen is too simple, please choose another one");
+    } else {
+      if (widget.mode == PasswordEntryMode.set) {
+        _showRecoveryCodeDialog();
+      } else {
+        _updatePassword();
+      }
+    }
+  }
+
+  void _updatePassword() async {
+    final dialog = createProgressDialog(context, "please wait...");
+    await dialog.show();
+    try {
+      final keyAttributes = await Configuration.instance
+          .updatePassword(_passwordController1.text);
+      await UserService.instance.updateKeyAttributes(keyAttributes);
+      await dialog.hide();
+      showToast("password changed successfully");
+      Navigator.of(context).pop();
+    } catch (e) {
+      await dialog.hide();
+      showGenericErrorDialog(context);
+    }
+  }
+
   Future<void> _showRecoveryCodeDialog() async {
     final dialog =
         createProgressDialog(context, "generating encryption keys...");
@@ -189,20 +219,16 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         final dialog = createProgressDialog(context, "please wait...");
         await dialog.show();
         try {
-          if (widget.isUpdatePassword) {
-            UserService.instance.updateKeyAttributes(context, result);
-          } else {
-            await UserService.instance.setupAttributes(result);
-            await dialog.hide();
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return SubscriptionPage(isOnboarding: true);
-                },
-              ),
-              (route) => route.isFirst,
-            );
-          }
+          await UserService.instance.setAttributes(result);
+          await dialog.hide();
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return SubscriptionPage(isOnboarding: true);
+              },
+            ),
+            (route) => route.isFirst,
+          );
         } catch (e, s) {
           Logger("PEP").severe(e, s);
           await dialog.hide();

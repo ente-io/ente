@@ -121,7 +121,7 @@ class UserService {
     }
   }
 
-  Future<void> setupAttributes(KeyGenResult result) async {
+  Future<void> setAttributes(KeyGenResult result) async {
     try {
       final name = _config.getName();
       await _dio.put(
@@ -145,12 +145,8 @@ class UserService {
     }
   }
 
-  Future<void> updateKeyAttributes(
-      BuildContext context, KeyGenResult result) async {
-    final dialog = createProgressDialog(context, "please wait...");
-    await dialog.show();
+  Future<void> updateKeyAttributes(KeyAttributes keyAttributes) async {
     try {
-      final keyAttributes = result.keyAttributes;
       final setKeyRequest = SetKeysRequest(
         kekSalt: keyAttributes.kekSalt,
         encryptedKey: keyAttributes.encryptedKey,
@@ -158,7 +154,7 @@ class UserService {
         memLimit: keyAttributes.memLimit,
         opsLimit: keyAttributes.opsLimit,
       );
-      final response = await _dio.put(
+      await _dio.put(
         _config.getHttpEndpoint() + "/users/keys",
         data: setKeyRequest.toMap(),
         options: Options(
@@ -167,18 +163,10 @@ class UserService {
           },
         ),
       );
-      await dialog.hide();
-      if (response != null && response.statusCode == 200) {
-        await _config.setKeyAttributes(keyAttributes);
-        showToast("password changed successfully");
-        Navigator.of(context).pop();
-      } else {
-        showGenericErrorDialog(context);
-      }
+      await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
-      await dialog.hide();
       _logger.severe(e);
-      showGenericErrorDialog(context);
+      throw e;
     }
   }
 
