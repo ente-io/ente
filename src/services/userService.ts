@@ -56,7 +56,7 @@ export const clearFiles = async () => {
 
 export const isTokenValid = async () => {
     try {
-        await HTTPService.get(`${ENDPOINT}/users/heartbeat`, null, {
+        await HTTPService.get(`${ENDPOINT}/users/session-validity`, null, {
             'X-Auth-Token': getToken(),
         });
         return true;
