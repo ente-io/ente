@@ -454,7 +454,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   Future<String> _getOrCreateRecoveryKey() async {
     final key = _config.getKey();
-    if (_config.getKeyAttributes().recoveryKeyEncryptedWithMasterKey == null) {
+    final encryptedRecoveryKey =
+        _config.getKeyAttributes().recoveryKeyEncryptedWithMasterKey;
+    if (encryptedRecoveryKey == null || encryptedRecoveryKey.isEmpty) {
       final keyAttributes = await _config.createNewRecoveryKey();
       await UserService.instance.setRecoveryKey(keyAttributes);
     }
