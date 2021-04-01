@@ -78,7 +78,7 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "if you forget your password, you can recover your data with this key",
+              "if you forget your password, the only way you can recover your data is with this key",
               style: TextStyle(height: 1.2),
             ),
             Padding(padding: EdgeInsets.all(8)),
@@ -111,7 +111,7 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
             ),
             Padding(padding: EdgeInsets.all(8)),
             Text(
-              "so please save this in a safe place",
+              "please save this in a safe place",
             ),
           ],
         ),
