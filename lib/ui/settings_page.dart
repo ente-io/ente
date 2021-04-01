@@ -8,9 +8,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
+import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/recovery_key_dialog.dart';
@@ -253,6 +255,8 @@ class SecuritySectionWidget extends StatefulWidget {
 }
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
+  final _config = Configuration.instance;
+
   @override
   void initState() {
     super.initState();
@@ -264,7 +268,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     children.addAll([
       SettingsSectionTitle("security"),
     ]);
-    if (Configuration.instance.hasConfiguredAccount()) {
+    if (_config.hasConfiguredAccount()) {
       children.addAll(
         [
           GestureDetector(
@@ -275,10 +279,24 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 showToast("please authenticate to view your recovery key");
                 return;
               }
+
+              final dialog = createProgressDialog(context, "please wait...");
+              await dialog.show();
+              var recoveryKey;
+              try {
+                recoveryKey = await _getOrCreateRecoveryKey();
+                await dialog.hide();
+              } catch (e) {
+                Logger("SecuritySection").severe(e);
+                await dialog.hide();
+                showGenericErrorDialog(context);
+                return;
+              }
+
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return RecoveryKeyDialog(_getRecoveryKey(), "ok", () {});
+                  return RecoveryKeyDialog(recoveryKey, "ok", () {});
                 },
                 barrierColor: Colors.black.withOpacity(0.85),
               );
@@ -327,17 +345,17 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           children: [
             Text("lockscreen"),
             Switch(
-              value: Configuration.instance.shouldShowLockScreen(),
+              value: _config.shouldShowLockScreen(),
               onChanged: (value) async {
                 AppLock.of(context).disable();
                 final result = await requestAuthentication();
                 if (result) {
                   AppLock.of(context).setEnabled(value);
-                  Configuration.instance.setShouldShowLockScreen(value);
+                  _config.setShouldShowLockScreen(value);
                   setState(() {});
                 } else {
-                  AppLock.of(context).setEnabled(
-                      Configuration.instance.shouldShowLockScreen());
+                  AppLock.of(context)
+                      .setEnabled(_config.shouldShowLockScreen());
                 }
               },
             ),
@@ -357,7 +375,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             children: [
               Text("hide from recents"),
               Switch(
-                value: Configuration.instance.shouldHideFromRecents(),
+                value: _config.shouldHideFromRecents(),
                 onChanged: (value) async {
                   if (value) {
                     AlertDialog alert = AlertDialog(
@@ -399,8 +417,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                           onPressed: () async {
                             Navigator.of(context, rootNavigator: true)
                                 .pop('dialog');
-                            await Configuration.instance
-                                .setShouldHideFromRecents(true);
+                            await _config.setShouldHideFromRecents(true);
                             await FlutterWindowManager.addFlags(
                                 FlutterWindowManager.FLAG_SECURE);
                             setState(() {});
@@ -416,8 +433,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                       },
                     );
                   } else {
-                    await Configuration.instance
-                        .setShouldHideFromRecents(false);
+                    await _config.setShouldHideFromRecents(false);
                     await FlutterWindowManager.clearFlags(
                         FlutterWindowManager.FLAG_SECURE);
                     setState(() {});
@@ -436,13 +452,17 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     );
   }
 
-  String _getRecoveryKey() {
-    final key = Configuration.instance.getKey();
-    final ka = Configuration.instance.getKeyAttributes();
+  Future<String> _getOrCreateRecoveryKey() async {
+    final key = _config.getKey();
+    if (_config.getKeyAttributes().recoveryKeyEncryptedWithMasterKey == null) {
+      final keyAttributes = await _config.createNewRecoveryKey();
+      await UserService.instance.setRecoveryKey(keyAttributes);
+    }
+    final keyAttributes = _config.getKeyAttributes();
     final recoveryKey = CryptoUtil.decryptSync(
-        Sodium.base642bin(ka.recoveryKeyEncryptedWithMasterKey),
+        Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey),
         key,
-        Sodium.base642bin(ka.recoveryKeyDecryptionNonce));
+        Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce));
     return Sodium.bin2hex(recoveryKey);
   }
 }

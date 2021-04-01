@@ -9,6 +9,7 @@ import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/models/set_keys_request.dart';
+import 'package:photos/models/set_recovery_key_request.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/ott_verification_page.dart';
@@ -156,6 +157,30 @@ class UserService {
       await _dio.put(
         _config.getHttpEndpoint() + "/users/keys",
         data: setKeyRequest.toMap(),
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      await _config.setKeyAttributes(keyAttributes);
+    } catch (e) {
+      _logger.severe(e);
+      throw e;
+    }
+  }
+
+  Future<void> setRecoveryKey(KeyAttributes keyAttributes) async {
+    try {
+      final setRecoveryKeyRequest = SetRecoveryKeyRequest(
+        keyAttributes.masterKeyEncryptedWithRecoveryKey,
+        keyAttributes.masterKeyDecryptionNonce,
+        keyAttributes.recoveryKeyEncryptedWithMasterKey,
+        keyAttributes.recoveryKeyDecryptionNonce,
+      );
+      await _dio.put(
+        _config.getHttpEndpoint() + "/users/recovery-key",
+        data: setRecoveryKeyRequest.toMap(),
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),

@@ -179,41 +179,15 @@ class Configuration {
     // Encrypt the key with this derived key
     final encryptedKeyData = CryptoUtil.encryptSync(masterKey, kek);
 
-    // User's public-private key pairs stay untouched since the master key
-    // has not changed
     final existingAttributes = getKeyAttributes();
 
-    if (existingAttributes.recoveryKeyEncryptedWithMasterKey == null) {
-      // Create a recovery key
-      final recoveryKey = CryptoUtil.generateKey();
-
-      // Encrypt master key and recovery key with each other
-      final encryptedMasterKey = CryptoUtil.encryptSync(masterKey, recoveryKey);
-      final encryptedRecoveryKey =
-          CryptoUtil.encryptSync(recoveryKey, masterKey);
-      return existingAttributes.copyWith(
-        kekSalt: Sodium.bin2base64(kekSalt),
-        encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData),
-        keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce),
-        memLimit: memLimit,
-        opsLimit: opsLimit,
-        masterKeyEncryptedWithRecoveryKey:
-            Sodium.bin2base64(encryptedMasterKey.encryptedData),
-        masterKeyDecryptionNonce: Sodium.bin2base64(encryptedMasterKey.nonce),
-        recoveryKeyEncryptedWithMasterKey:
-            Sodium.bin2base64(encryptedRecoveryKey.encryptedData),
-        recoveryKeyDecryptionNonce:
-            Sodium.bin2base64(encryptedRecoveryKey.encryptedData),
-      );
-    } else {
-      return existingAttributes.copyWith(
-        kekSalt: Sodium.bin2base64(kekSalt),
-        encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData),
-        keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce),
-        memLimit: memLimit,
-        opsLimit: opsLimit,
-      );
-    }
+    return existingAttributes.copyWith(
+      kekSalt: Sodium.bin2base64(kekSalt),
+      encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData),
+      keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce),
+      memLimit: memLimit,
+      opsLimit: opsLimit,
+    );
   }
 
   Future<void> decryptAndSaveKey(
@@ -237,6 +211,27 @@ class Configuration {
         Sodium.base642bin(attributes.secretKeyDecryptionNonce));
     await setKey(Sodium.bin2base64(key));
     await setSecretKey(Sodium.bin2base64(secretKey));
+  }
+
+  Future<KeyAttributes> createNewRecoveryKey() async {
+    final masterKey = getKey();
+    final existingAttributes = getKeyAttributes();
+
+    // Create a recovery key
+    final recoveryKey = CryptoUtil.generateKey();
+
+    // Encrypt master key and recovery key with each other
+    final encryptedMasterKey = CryptoUtil.encryptSync(masterKey, recoveryKey);
+    final encryptedRecoveryKey = CryptoUtil.encryptSync(recoveryKey, masterKey);
+
+    return existingAttributes.copyWith(
+      masterKeyEncryptedWithRecoveryKey:
+          Sodium.bin2base64(encryptedMasterKey.encryptedData),
+      masterKeyDecryptionNonce: Sodium.bin2base64(encryptedMasterKey.nonce),
+      recoveryKeyEncryptedWithMasterKey:
+          Sodium.bin2base64(encryptedRecoveryKey.encryptedData),
+      recoveryKeyDecryptionNonce: Sodium.bin2base64(encryptedRecoveryKey.nonce),
+    );
   }
 
   Future<void> recover(String recoveryKey) async {
