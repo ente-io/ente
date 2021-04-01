@@ -1,7 +1,14 @@
-import { app, BrowserWindow, Menu, Tray, Notification, shell } from 'electron';
+import {
+    app,
+    BrowserWindow,
+    Menu,
+    Tray,
+    Notification,
+    shell,
+    dialog,
+    ipcMain,
+} from 'electron';
 import * as path from 'path';
-import * as electron from 'electron';
-const { dialog, ipcMain } = electron;
 
 let appIsQuitting = false;
 let tray: Tray;
@@ -10,10 +17,10 @@ function createWindow() {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
         height: 600,
+        width: 800,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
         },
-        width: 800,
     });
     mainWindow.setMenu(buildMenuBar());
 
