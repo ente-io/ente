@@ -9,6 +9,7 @@ import {
     ipcMain,
 } from 'electron';
 import * as path from 'path';
+import * as isDev from 'electron-is-dev';
 
 let appIsQuitting = false;
 let tray: Tray;
@@ -24,11 +25,13 @@ function createWindow() {
     });
     mainWindow.setMenu(buildMenuBar());
 
-    // and load the index.html of the app.
-    mainWindow.loadURL('http://localhost:3000');
-
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools();
+    if (isDev) {
+        mainWindow.loadURL('http://localhost:3000');
+        // Open the DevTools.
+        mainWindow.webContents.openDevTools();
+    } else {
+        mainWindow.loadURL('http://photos.ente.io');
+    }
     mainWindow.on('minimize', function (event: any) {
         event.preventDefault();
         mainWindow.hide();
