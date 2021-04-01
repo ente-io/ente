@@ -6,6 +6,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/subscription_purchased_event.dart';
+import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/recovery_key_dialog.dart';
@@ -201,6 +204,20 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       await dialog.hide();
       showToast("password changed successfully");
       Navigator.of(context).pop();
+      if (widget.mode == PasswordEntryMode.reset) {
+        if (!BillingService.instance.hasActiveSubscription()) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return SubscriptionPage(isOnboarding: true);
+              },
+            ),
+          );
+        } else {
+          Bus.instance.fire(SubscriptionPurchasedEvent());
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      }
     } catch (e) {
       await dialog.hide();
       showGenericErrorDialog(context);

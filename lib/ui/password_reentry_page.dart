@@ -25,7 +25,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "encryption password",
+          "password",
         ),
       ),
       body: _getBody(),
