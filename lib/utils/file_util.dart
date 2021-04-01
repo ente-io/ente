@@ -257,7 +257,8 @@ void _pollQueue() async {
         ThumbnailFileLruCache.put(item.file, data);
         item.completer.complete(data);
       } catch (e, s) {
-        _logger.severe("Downloading thumbnail failed", e, s);
+        _logger.severe(
+            "Failed to download thumbnail " + item.file.toString(), e, s);
         item.completer.completeError(e);
       }
       _currentlyDownloading--;
