@@ -7,6 +7,7 @@ import {
     shell,
     dialog,
     ipcMain,
+    nativeImage,
 } from 'electron';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
@@ -57,7 +58,9 @@ app.on('ready', () => {
         // dock icon is clicked and there are no other windows open.
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
-    tray = new Tray('resources/ente.png');
+    const imgPath = path.join(process.resourcesPath, 'tray_icon.png');
+    let trayIcon = nativeImage.createFromPath(imgPath);
+    tray = new Tray(trayIcon);
     tray.setToolTip('ente');
     tray.setContextMenu(buildContextMenu());
 });

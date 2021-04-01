@@ -1,6 +1,6 @@
 {
   "name": "electron-frame",
-  "productName": "electron frame",
+  "productName": "electron_frame",
   "version": "1.0.0",
   "private": true,
   "description": "Desktop client of ente",
@@ -8,11 +8,18 @@
   "build": {
     "appId": "io.ente.electron-frame",
     "linux": {
-      "target": "AppImage"
+      "target": "AppImage",
+      "category": "photography"
     },
-    "directories": {
-      "buildResources": "resources"
-    },
+    "extraFiles": [
+      {
+        "from": "build",
+        "to": "resources",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
     "publish": null
   },
   "scripts": {
