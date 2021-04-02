@@ -156,6 +156,7 @@ const englishConstants = {
     SESSION_EXPIRED: 'login',
     SYNC_FAILED:
         'failed to sync with remote server, please refresh page to try again',
+    PASSWORD_GENERATION_FAILED: `your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser`,
 };
 
 export default englishConstants;
