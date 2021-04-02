@@ -18,7 +18,7 @@ export async function generateIntermediateKey(
         key,
         intermediateKek.key
     );
-    const x = {
+    return {
         kekSalt: intermediateKekSalt,
         encryptedKey: encryptedKeyAttributes.encryptedData,
         keyDecryptionNonce: encryptedKeyAttributes.nonce,
@@ -28,5 +28,4 @@ export async function generateIntermediateKey(
         opsLimit: intermediateKek.opsLimit,
         memLimit: intermediateKek.memLimit,
     };
-    return x;
 }
