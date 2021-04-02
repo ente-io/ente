@@ -280,15 +280,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 return;
               }
 
-              final dialog = createProgressDialog(context, "please wait...");
-              await dialog.show();
               var recoveryKey;
               try {
                 recoveryKey = await _getOrCreateRecoveryKey();
-                await dialog.hide();
-              } catch (e, s) {
-                Logger("SecuritySection").severe(e, s);
-                await dialog.hide();
+              } catch (e) {
                 showGenericErrorDialog(context);
                 return;
               }
@@ -457,8 +452,17 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     final encryptedRecoveryKey =
         _config.getKeyAttributes().recoveryKeyEncryptedWithMasterKey;
     if (encryptedRecoveryKey == null || encryptedRecoveryKey.isEmpty) {
-      final keyAttributes = await _config.createNewRecoveryKey();
-      await UserService.instance.setRecoveryKey(keyAttributes);
+      final dialog = createProgressDialog(context, "please wait...");
+      await dialog.show();
+      try {
+        final keyAttributes = await _config.createNewRecoveryKey();
+        await UserService.instance.setRecoveryKey(keyAttributes);
+        await dialog.hide();
+      } catch (e, s) {
+        await dialog.hide();
+        Logger("SecuritySection").severe(e, s);
+        throw e;
+      }
     }
     final keyAttributes = _config.getKeyAttributes();
     final recoveryKey = CryptoUtil.decryptSync(
