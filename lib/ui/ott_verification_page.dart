@@ -93,13 +93,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               Padding(padding: EdgeInsets.all(8)),
               FlatButton(
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return EmailEntryPage();
-                        },
-                      ),
-                    );
+                    Navigator.of(context).pop();
                   },
                   child: Text(
                     "did not get email?",
