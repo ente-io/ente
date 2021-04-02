@@ -198,7 +198,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   void _updatePassword() async {
-    final dialog = createProgressDialog(context, "please wait...");
+    final dialog = createProgressDialog(context, "generating encryption keys...");
     await dialog.show();
     try {
       final keyAttributes = await Configuration.instance
