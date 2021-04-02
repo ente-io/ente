@@ -603,7 +603,7 @@ class FilesDB {
     final rows = await db.query(
       table,
       columns: [columnDeviceFolder],
-      where: '$columnLocalID IS NOT NULL',
+      where: '$columnLocalID IS NOT NULL AND $columnDeviceFolder IS NOT NULL',
       distinct: true,
     );
     List<String> result = List<String>();
