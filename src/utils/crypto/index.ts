@@ -7,7 +7,7 @@ export async function generateIntermediateKey(
     passphrase,
     keyAttributes,
     key
-): KeyAttributes {
+): Promise<KeyAttributes> {
     const cryptoWorker = await new CryptoWorker();
     const intermediateKekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
     const intermediateKek: KEK = await cryptoWorker.deriveIntermediateKey(

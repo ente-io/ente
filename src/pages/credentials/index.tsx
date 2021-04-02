@@ -9,7 +9,7 @@ import { Formik, FormikHelpers } from 'formik';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import * as Yup from 'yup';
-import { keyAttributes } from 'types';
+import { KeyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 import { logoutUser } from 'services/userService';
@@ -26,7 +26,7 @@ interface formValues {
 
 export default function Credentials() {
     const router = useRouter();
-    const [keyAttributes, setKeyAttributes] = useState<keyAttributes>();
+    const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -57,7 +57,7 @@ export default function Credentials() {
                 passphrase,
                 keyAttributes.kekSalt,
                 keyAttributes.opsLimit,
-                keyAttributes.memLimit,
+                keyAttributes.memLimit
             );
 
             try {
@@ -128,7 +128,7 @@ export default function Credentials() {
                                         onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                            errors.passphrase
+                                                errors.passphrase
                                         )}
                                         disabled={loading}
                                         autoFocus={true}

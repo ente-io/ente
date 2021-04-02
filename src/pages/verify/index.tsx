@@ -41,7 +41,6 @@ export default function Verify() {
             if (!user?.email) {
                 router.push('/');
             } else if (user.token) {
-                console.log(user.token);
                 if (await isTokenValid()) {
                     router.push('/credentials');
                 } else {

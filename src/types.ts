@@ -1,4 +1,4 @@
-export interface keyAttributes {
+export interface KeyAttributes {
     kekSalt: string;
     encryptedKey: string;
     keyDecryptionNonce: string;
