@@ -1,3 +1,4 @@
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { errorCodes } from './errorUtil';
 
 export function checkConnectivity() {
@@ -14,4 +15,10 @@ export function getFileExtension(fileName): string {
 
 export function runningInBrowser() {
     return typeof window !== 'undefined';
+}
+
+export const isFirstLogin = getData(LS_KEYS.IS_FIRST_LOGIN)?.status;
+
+export function setIsFirstLogin(status) {
+    setData(LS_KEYS.IS_FIRST_LOGIN, { status });
 }

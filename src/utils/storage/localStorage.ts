@@ -3,6 +3,7 @@ export enum LS_KEYS {
     SESSION = 'session',
     KEY_ATTRIBUTES = 'keyAttributes',
     SUBSCRIPTION = 'subscription',
+    IS_FIRST_LOGIN = 'isFirstLogin',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {
