@@ -3,7 +3,7 @@ import { B64EncryptionResult } from 'services/uploadService';
 import { KeyAttributes } from 'types';
 import CryptoWorker from './cryptoWorker';
 
-export async function generateIntermediateKey(
+export async function generateIntermediateKeyAttributes(
     passphrase,
     keyAttributes,
     key

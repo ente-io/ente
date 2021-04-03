@@ -13,7 +13,7 @@ import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { B64EncryptionResult } from 'services/uploadService';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
-import { generateIntermediateKey } from 'utils/crypto';
+import { generateIntermediateKeyAttributes } from 'utils/crypto';
 
 const Image = styled.img`
     width: 200px;
@@ -94,7 +94,7 @@ export default function Generate() {
 
                 setData(
                     LS_KEYS.KEY_ATTRIBUTES,
-                    await generateIntermediateKey(
+                    await generateIntermediateKeyAttributes(
                         passphrase,
                         keyAttributes,
                         key

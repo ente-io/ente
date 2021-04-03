@@ -14,7 +14,7 @@ import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker from 'utils/crypto/cryptoWorker';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin, setIsFirstLogin } from 'utils/common/utilFunctions';
-import { generateIntermediateKey } from 'utils/crypto';
+import { generateIntermediateKeyAttributes } from 'utils/crypto';
 
 const Image = styled.img`
     width: 200px;
@@ -69,12 +69,12 @@ export default function Credentials() {
                     kek
                 );
                 if (isFirstLogin()) {
-                    const intermediateKeyAttribute = await generateIntermediateKey(
+                    const intermediateKeyAttributes = await generateIntermediateKeyAttributes(
                         passphrase,
                         keyAttributes,
                         key
                     );
-                    setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttribute);
+                    setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttributes);
                     setIsFirstLogin(false);
                 }
                 const sessionKeyAttributes = await cryptoWorker.encryptToB64(
