@@ -17,7 +17,8 @@ export function runningInBrowser() {
     return typeof window !== 'undefined';
 }
 
-export const isFirstLogin = () => getData(LS_KEYS.IS_FIRST_LOGIN)?.status;
+export const isFirstLogin = () =>
+    getData(LS_KEYS.IS_FIRST_LOGIN)?.status ?? false;
 
 export function setIsFirstLogin(status) {
     setData(LS_KEYS.IS_FIRST_LOGIN, { status });
