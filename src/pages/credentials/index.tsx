@@ -13,7 +13,7 @@ import { KeyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker from 'utils/crypto';
 import { logoutUser } from 'services/userService';
-import { isFirstLogin, setIsFirstLogin } from 'utils/common/utilFunctions';
+import { isFirstLogin } from 'utils/common';
 import { generateIntermediateKeyAttributes } from 'utils/crypto';
 
 const Image = styled.img`

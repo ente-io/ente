@@ -2,7 +2,7 @@ import { getToken } from 'utils/common/key';
 import { file } from './fileService';
 import HTTPService from './HTTPService';
 import { getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
-import { getFileExtension, runningInBrowser } from 'utils/common/utilFunctions';
+import { getFileExtension, runningInBrowser } from 'utils/common';
 import CryptoWorker from 'utils/crypto';
 
 const TYPE_HEIC = 'heic';

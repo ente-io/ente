@@ -2,7 +2,7 @@ import { KEK } from 'pages/generate';
 import { B64EncryptionResult } from 'services/uploadService';
 import { KeyAttributes } from 'types';
 import * as Comlink from 'comlink';
-import { runningInBrowser } from 'utils/common/utilFunctions';
+import { runningInBrowser } from 'utils/common';
 
 const CryptoWorker: any =
     runningInBrowser() &&

@@ -29,11 +29,7 @@ import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
-import {
-    checkConnectivity,
-    isFirstLogin,
-    setIsFirstLogin,
-} from 'utils/common/utilFunctions';
+import { checkConnectivity, isFirstLogin, setIsFirstLogin } from 'utils/common';
 import { logoutUser } from 'services/userService';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;

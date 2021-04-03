@@ -4,7 +4,7 @@ import EXIF from 'exif-js';
 import { fileAttribute } from './fileService';
 import { collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
-import { checkConnectivity } from 'utils/common/utilFunctions';
+import { checkConnectivity } from 'utils/common';
 import { ErrorHandler } from 'utils/common/errorUtil';
 import CryptoWorker from 'utils/crypto';
 import * as convert from 'xml-js';
