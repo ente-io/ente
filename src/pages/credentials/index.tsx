@@ -75,7 +75,6 @@ export default function Credentials() {
                         key
                     );
                     setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttributes);
-                    setIsFirstLogin(false);
                 }
                 const sessionKeyAttributes = await cryptoWorker.encryptToB64(
                     key
