@@ -16,7 +16,7 @@ import {
     clearFiles,
     isTokenValid,
 } from 'services/userService';
-import { setIsFirstLogin } from 'utils/common';
+import { setIsFirstLogin } from 'utils/storage';
 
 const Image = styled.img`
     width: 350px;

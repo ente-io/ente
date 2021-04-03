@@ -11,10 +11,9 @@ import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import { KeyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
-import CryptoWorker from 'utils/crypto';
+import CryptoWorker, { generateIntermediateKeyAttributes } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
-import { isFirstLogin } from 'utils/common';
-import { generateIntermediateKeyAttributes } from 'utils/crypto';
+import { isFirstLogin } from 'utils/storage';
 
 const Image = styled.img`
     width: 200px;
