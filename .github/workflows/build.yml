@@ -2,8 +2,7 @@ name: Build/release
 
 on:
     push:
-        branches:
-            - release
+        branches: [main]
 
 jobs:
     release:
@@ -15,15 +14,15 @@ jobs:
 
         steps:
             - name: Check out Git repository
-              uses: actions/checkout@v1
+              uses: actions/checkout@v2
 
             - name: Install Node.js, NPM and Yarn
-              uses: actions/setup-node@v1
+              uses: actions/setup-node@v2.1.5
               with:
                   node-version: 10
 
             - name: Electron Builder Action
-              uses: samuelmeuli/action-electron-builder@v1.6.0s
+              uses: samuelmeuli/action-electron-builder@v1.6.0
               with:
                   # GitHub token, automatically provided to the action
                   # (No need to define this secret in the repo settings)
