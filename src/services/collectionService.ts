@@ -7,7 +7,7 @@ import HTTPService from './HTTPService';
 import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
 import { user } from './userService';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import CryptoWorker from 'utils/crypto';
 import { ErrorHandler } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();

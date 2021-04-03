@@ -1,4 +1,4 @@
-import { runningInBrowser } from 'utils/common/utilFunctions';
+import { runningInBrowser } from 'utils/common';
 import englishConstants from './englishConstants';
 
 /** Enums of supported locale */

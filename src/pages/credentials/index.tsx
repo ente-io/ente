@@ -9,10 +9,12 @@ import { Formik, FormikHelpers } from 'formik';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import * as Yup from 'yup';
-import { keyAttributes } from 'types';
+import { KeyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import CryptoWorker, { generateIntermediateKeyAttributes } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
+import { isFirstLogin } from 'utils/storage';
+import { Spinner } from 'react-bootstrap';
 
 const Image = styled.img`
     width: 200px;
@@ -26,7 +28,7 @@ interface formValues {
 
 export default function Credentials() {
     const router = useRouter();
-    const [keyAttributes, setKeyAttributes] = useState<keyAttributes>();
+    const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -57,7 +59,7 @@ export default function Credentials() {
                 passphrase,
                 keyAttributes.kekSalt,
                 keyAttributes.opsLimit,
-                keyAttributes.memLimit,
+                keyAttributes.memLimit
             );
 
             try {
@@ -66,6 +68,14 @@ export default function Credentials() {
                     keyAttributes.keyDecryptionNonce,
                     kek
                 );
+                if (isFirstLogin()) {
+                    const intermediateKeyAttributes = await generateIntermediateKeyAttributes(
+                        passphrase,
+                        keyAttributes,
+                        key
+                    );
+                    setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttributes);
+                }
                 const sessionKeyAttributes = await cryptoWorker.encryptToB64(
                     key
                 );
@@ -128,7 +138,7 @@ export default function Credentials() {
                                         onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                            errors.passphrase
+                                                errors.passphrase
                                         )}
                                         disabled={loading}
                                         autoFocus={true}
@@ -138,7 +148,11 @@ export default function Credentials() {
                                     </Form.Control.Feedback>
                                 </Form.Group>
                                 <Button block type="submit" disabled={loading}>
-                                    {constants.VERIFY_PASSPHRASE}
+                                    {loading ? (
+                                        <Spinner animation="border" />
+                                    ) : (
+                                        constants.VERIFY_PASSPHRASE
+                                    )}
                                 </Button>
                                 <br />
                                 <div>

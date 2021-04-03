@@ -12,7 +12,9 @@ import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { B64EncryptionResult } from 'services/uploadService';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import CryptoWorker from 'utils/crypto';
+import { generateIntermediateKeyAttributes } from 'utils/crypto';
+import { Spinner } from 'react-bootstrap';
 
 const Image = styled.img`
     width: 200px;
@@ -25,7 +27,7 @@ interface formValues {
     confirm: string;
 }
 
-interface KEK {
+export interface KEK {
     key: string;
     opsLimit: number;
     memLimit: number;
@@ -99,7 +101,15 @@ export default function Generate() {
                     getData(LS_KEYS.USER).name,
                     keyAttributes
                 );
-                setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+
+                setData(
+                    LS_KEYS.KEY_ATTRIBUTES,
+                    await generateIntermediateKeyAttributes(
+                        passphrase,
+                        keyAttributes,
+                        key
+                    )
+                );
 
                 const sessionKeyAttributes = await cryptoWorker.encryptToB64(
                     key
@@ -196,7 +206,11 @@ export default function Generate() {
                                     disabled={loading}
                                     style={{ marginTop: '28px' }}
                                 >
-                                    {constants.SET_PASSPHRASE}
+                                    {loading ? (
+                                        <Spinner animation="border" />
+                                    ) : (
+                                        constants.SET_PASSPHRASE
+                                    )}
                                 </Button>
                             </Form>
                         )}

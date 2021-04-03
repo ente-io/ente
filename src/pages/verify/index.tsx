@@ -16,6 +16,7 @@ import {
     clearFiles,
     isTokenValid,
 } from 'services/userService';
+import { setIsFirstLogin } from 'utils/storage';
 
 const Image = styled.img`
     width: 350px;
@@ -41,7 +42,6 @@ export default function Verify() {
             if (!user?.email) {
                 router.push('/');
             } else if (user.token) {
-                console.log(user.token);
                 if (await isTokenValid()) {
                     router.push('/credentials');
                 } else {
@@ -71,6 +71,7 @@ export default function Verify() {
             keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
             subscription && setData(LS_KEYS.SUBSCRIPTION, subscription);
             clearFiles();
+            setIsFirstLogin(true);
             if (resp.data.keyAttributes?.encryptedKey) {
                 router.push('/credentials');
             } else {

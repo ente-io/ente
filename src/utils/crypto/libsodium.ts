@@ -294,6 +294,25 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
     throw null;
 }
 
+export async function deriveIntermediateKey(passphrase: string, salt: string) {
+    await sodium.ready;
+    const key = await toB64(
+        sodium.crypto_pwhash(
+            sodium.crypto_secretbox_KEYBYTES,
+            await fromString(passphrase),
+            await fromB64(salt),
+            sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
+            sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
+            sodium.crypto_pwhash_ALG_DEFAULT
+        )
+    );
+    return {
+        key: key,
+        opsLimit: sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
+        memLimit: sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
+    };
+}
+
 export async function generateMasterKey() {
     await sodium.ready;
     return await toB64(sodium.crypto_kdf_keygen());

@@ -1,5 +1,5 @@
 import HTTPService from './HTTPService';
-import { keyAttributes } from 'types';
+import { KeyAttributes } from 'types';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';
@@ -29,7 +29,7 @@ export const verifyOtt = (email: string, ott: string) => {
 export const putAttributes = (
     token: string,
     name: string,
-    keyAttributes: keyAttributes
+    keyAttributes: KeyAttributes
 ) => {
     console.log('name ' + name);
     return HTTPService.put(

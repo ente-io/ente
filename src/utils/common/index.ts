@@ -1,3 +1,4 @@
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { errorCodes } from './errorUtil';
 
 export function checkConnectivity() {

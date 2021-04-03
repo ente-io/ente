@@ -29,7 +29,8 @@ import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
-import { checkConnectivity } from 'utils/common/utilFunctions';
+import { checkConnectivity } from 'utils/common';
+import { isFirstLogin, setIsFirstLogin } from 'utils/storage';
 import { logoutUser } from 'services/userService';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -170,7 +171,8 @@ export default function Gallery(props: Props) {
             return;
         }
         const main = async () => {
-            setIsFirstLoad((await getCollectionUpdationTime()) == 0);
+            setIsFirstLoad(isFirstLogin());
+            setIsFirstLogin(false);
             const data = await localFiles();
             const collections = await getLocalCollections();
             const nonEmptyCollections = getNonEmptyCollections(
