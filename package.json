@@ -10,7 +10,8 @@
     "linux": {
       "target": [
         "AppImage"
-      ]
+      ],
+      "category": "Photography"
     },
     "dmg": {
       "icon": false
@@ -34,6 +35,7 @@
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
     "start": "yarn build && electron ./app/main.js",
+    "test-release": "electron-builder",
     "release": "electron-builder -mwl"
   },
   "author": "abhinav@ente.io",
