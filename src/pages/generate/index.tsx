@@ -61,10 +61,19 @@ export default function Generate() {
                 const cryptoWorker = await new CryptoWorker();
                 const key: string = await cryptoWorker.generateMasterKey();
                 const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
-                const kek: KEK = await cryptoWorker.deriveSensitiveKey(
-                    passphrase,
-                    kekSalt
-                );
+                let kek: KEK;
+                try {
+                    kek = await cryptoWorker.deriveSensitiveKey(
+                        passphrase,
+                        kekSalt
+                    );
+                } catch (e) {
+                    setFieldError(
+                        'confirm',
+                        constants.PASSWORD_GENERATION_FAILED
+                    );
+                    return;
+                }
                 const encryptedKeyAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(
                     key,
                     kek.key
@@ -118,8 +127,9 @@ export default function Generate() {
                 'passphrase',
                 `${constants.UNKNOWN_ERROR} ${e.message}`
             );
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
