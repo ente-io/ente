@@ -12,7 +12,7 @@ import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { B64EncryptionResult } from 'services/uploadService';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import CryptoWorker from 'utils/crypto';
 import { generateIntermediateKeyAttributes } from 'utils/crypto';
 
 const Image = styled.img`

@@ -4,7 +4,7 @@ import localForage from 'utils/storage/localForage';
 
 import { collection } from './collectionService';
 import { DataStream, MetadataObject } from './uploadService';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import CryptoWorker from 'utils/crypto';
 import { getToken } from 'utils/common/key';
 import { selectedState } from 'pages/gallery';
 import { ErrorHandler } from 'utils/common/errorUtil';

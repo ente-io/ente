@@ -6,7 +6,7 @@ import { collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity } from 'utils/common/utilFunctions';
 import { ErrorHandler } from 'utils/common/errorUtil';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import CryptoWorker from 'utils/crypto';
 import * as convert from 'xml-js';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { getToken } from 'utils/common/key';

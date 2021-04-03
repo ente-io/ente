@@ -1,7 +1,12 @@
 import { KEK } from 'pages/generate';
 import { B64EncryptionResult } from 'services/uploadService';
 import { KeyAttributes } from 'types';
-import CryptoWorker from './cryptoWorker';
+import * as Comlink from 'comlink';
+import { runningInBrowser } from 'utils/common/utilFunctions';
+
+const CryptoWorker: any =
+    runningInBrowser() &&
+    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 
 export async function generateIntermediateKeyAttributes(
     passphrase,
@@ -29,3 +34,5 @@ export async function generateIntermediateKeyAttributes(
         memLimit: intermediateKek.memLimit,
     };
 }
+
+export default CryptoWorker;
