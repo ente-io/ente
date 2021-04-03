@@ -11,6 +11,7 @@ import {
 } from 'electron';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
+import { autoUpdater } from 'electron-updater';
 
 let appIsQuitting = false;
 let tray: Tray;
@@ -54,6 +55,7 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
+    autoUpdater.checkForUpdatesAndNotify();
     mainWindow = createWindow();
 
     app.on('activate', function () {
