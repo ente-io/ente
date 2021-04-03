@@ -14,6 +14,7 @@ import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { B64EncryptionResult } from 'services/uploadService';
 import CryptoWorker from 'utils/crypto';
 import { generateIntermediateKeyAttributes } from 'utils/crypto';
+import { Spinner } from 'react-bootstrap';
 
 const Image = styled.img`
     width: 200px;
@@ -205,7 +206,11 @@ export default function Generate() {
                                     disabled={loading}
                                     style={{ marginTop: '28px' }}
                                 >
-                                    {constants.SET_PASSPHRASE}
+                                    {loading ? (
+                                        <Spinner animation="border" />
+                                    ) : (
+                                        constants.SET_PASSPHRASE
+                                    )}
                                 </Button>
                             </Form>
                         )}

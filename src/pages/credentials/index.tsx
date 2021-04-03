@@ -14,6 +14,7 @@ import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, { generateIntermediateKeyAttributes } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
+import { Spinner } from 'react-bootstrap';
 
 const Image = styled.img`
     width: 200px;
@@ -147,7 +148,11 @@ export default function Credentials() {
                                     </Form.Control.Feedback>
                                 </Form.Group>
                                 <Button block type="submit" disabled={loading}>
-                                    {constants.VERIFY_PASSPHRASE}
+                                    {loading ? (
+                                        <Spinner animation="border" />
+                                    ) : (
+                                        constants.VERIFY_PASSPHRASE
+                                    )}
                                 </Button>
                                 <br />
                                 <div>
