@@ -15,6 +15,8 @@ import * as isDev from 'electron-is-dev';
 let appIsQuitting = false;
 let tray: Tray;
 let mainWindow: BrowserWindow;
+const imgPath = path.join(process.resourcesPath, 'taskbar-icon.png');
+let appIcon = nativeImage.createFromPath(imgPath);
 function createWindow() {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
@@ -23,6 +25,7 @@ function createWindow() {
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
         },
+        icon: appIcon,
     });
     mainWindow.setMenu(buildMenuBar());
 
@@ -58,9 +61,7 @@ app.on('ready', () => {
         // dock icon is clicked and there are no other windows open.
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
-    const imgPath = path.join(process.resourcesPath, 'tray_icon.png');
-    let trayIcon = nativeImage.createFromPath(imgPath);
-    tray = new Tray(trayIcon);
+    tray = new Tray(appIcon);
     tray.setToolTip('ente');
     tray.setContextMenu(buildContextMenu());
 });
