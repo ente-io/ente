@@ -1,4 +1,4 @@
-import { runningInBrowser } from 'utils/common/utilFunctions';
+import { runningInBrowser } from 'utils/common';
 import { collection } from './collectionService';
 import downloadManager from './downloadManager';
 import { file } from './fileService';
