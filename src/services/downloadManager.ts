@@ -59,7 +59,10 @@ class DownloadManager {
         try {
             if (!this.fileDownloads.get(file.id)) {
                 const download = (async () => {
-                    return await this.downloadFile(file);
+                    const fileStream = await this.downloadFile(file);
+                    return URL.createObjectURL(
+                        await new Response(fileStream).blob()
+                    );
                 })();
                 this.fileDownloads.set(file.id, download);
             }
@@ -69,7 +72,7 @@ class DownloadManager {
         }
     };
 
-    private async downloadFile(file: file) {
+    async downloadFile(file: file) {
         const worker = await new CryptoWorker();
         const token = getToken();
         if (!token) {
@@ -92,7 +95,14 @@ class DownloadManager {
             if (getFileExtension(file.metadata.title) === TYPE_HEIC) {
                 decryptedBlob = await this.convertHEIC2JPEG(decryptedBlob);
             }
-            return URL.createObjectURL(new Blob([decryptedBlob]));
+            return new ReadableStream({
+                async start(controller: ReadableStreamDefaultController) {
+                    controller.enqueue(
+                        new Uint8Array(await decryptedBlob.arrayBuffer())
+                    );
+                    controller.close();
+                },
+            });
         } else {
             const resp = await fetch(getFileUrl(file.id), {
                 headers: {
@@ -164,7 +174,7 @@ class DownloadManager {
                     push();
                 },
             });
-            return URL.createObjectURL(await new Response(stream).blob());
+            return stream;
         }
     }
 

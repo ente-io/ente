@@ -108,8 +108,9 @@ const englishConstants = {
     LOGOUT: 'logout',
     LOGOUT_WARNING: 'sure you want to logout?',
     CANCEL: 'cancel',
-    SUBSCRIPTION_CHANGE_DISABLED:
-        'sorry, this operation is currently not supported on the web, please check your mobile app',
+    ELECTRON_APP_REQUIRED:
+        'sorry, this operation is currently not supported on the web, please install the desktop app',
+    EXPORT: 'export ',
     SUBSCRIPTION_PLAN: 'subscription plan',
     USAGE_DETAILS: 'usage',
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
