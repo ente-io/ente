@@ -1,37 +1,28 @@
 import React, { useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
-import ConfirmLogout, { CONFIRM_ACTION } from 'components/ConfirmDialog';
+import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import Spinner from 'react-bootstrap/Spinner';
 import subscriptionService, {
     Subscription,
 } from 'services/subscriptionService';
 import constants from 'utils/strings/constants';
-import { logoutUser } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getToken } from 'utils/common/key';
 import { getEndpoint } from 'utils/common/apiUtil';
 import exportService from 'services/exportService';
 import { file } from 'services/fileService';
-import MessageDialog from './MessageDialog';
 import isElectron from 'is-electron';
 import { collection } from 'services/collectionService';
 interface Props {
     files: file[];
     collections: collection[];
+    setConfirmAction: any;
 }
 export default function Sidebar(props: Props) {
-    const [logoutModalView, setLogoutModalView] = useState(false);
-    function showLogoutModal() {
-        setLogoutModalView(true);
-    }
-    function closeLogoutModal() {
-        setLogoutModalView(false);
-    }
     const [usage, SetUsage] = useState<string>(null);
     const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
     const [isOpen, setIsOpen] = useState(false);
-    const [messageModalView, setMessageModalView] = useState(false);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -44,12 +35,6 @@ export default function Sidebar(props: Props) {
         main();
     }, [isOpen]);
 
-    const logout = async () => {
-        setLogoutModalView(false);
-        setIsOpen(false);
-        logoutUser();
-    };
-
     function openFeedbackURL() {
         const feedbackURL: string =
             getEndpoint() + '/users/feedback?token=' + getToken();
@@ -60,7 +45,7 @@ export default function Sidebar(props: Props) {
         if (isElectron()) {
             exportService.exportFiles(props.files, props.collections);
         } else {
-            setMessageModalView(true);
+            props.setConfirmAction(CONFIRM_ACTION.DOWNLOAD_APP);
         }
     }
 
@@ -129,37 +114,24 @@ export default function Sidebar(props: Props) {
                     support
                 </a>
             </h5>
-            <>
-                <MessageDialog
-                    show={messageModalView}
-                    onHide={() => setMessageModalView(false)}
-                    message={constants.ELECTRON_APP_REQUIRED}
-                />
-                <h5
-                    style={{ cursor: 'pointer', marginTop: '30px' }}
-                    onClick={exportFiles}
-                >
-                    {constants.EXPORT}
-                </h5>
-            </>
-            <>
-                <ConfirmLogout
-                    show={logoutModalView}
-                    onHide={closeLogoutModal}
-                    callback={logout}
-                    action={CONFIRM_ACTION.LOGOUT}
-                />
-                <h5
-                    style={{
-                        cursor: 'pointer',
-                        color: '#F96C6C',
-                        marginTop: '30px',
-                    }}
-                    onClick={showLogoutModal}
-                >
-                    logout
-                </h5>
-            </>
+
+            <h5
+                style={{ cursor: 'pointer', marginTop: '30px' }}
+                onClick={exportFiles}
+            >
+                {constants.EXPORT}
+            </h5>
+
+            <h5
+                style={{
+                    cursor: 'pointer',
+                    color: '#F96C6C',
+                    marginTop: '30px',
+                }}
+                onClick={() => props.setConfirmAction(CONFIRM_ACTION.LOGOUT)}
+            >
+                logout
+            </h5>
         </Menu>
     );
 }
