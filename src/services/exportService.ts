@@ -51,7 +51,7 @@ class ExportService {
                 if (this.abortExport) {
                     break;
                 }
-                const uid = `${file.id}_${this.sanitizeNames(
+                const uid = `${file.id}_${this.sanitizeName(
                     file.metadata.title
                 )}`;
                 const filePath =
