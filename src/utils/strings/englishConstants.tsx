@@ -108,8 +108,10 @@ const englishConstants = {
     LOGOUT: 'logout',
     LOGOUT_WARNING: 'sure you want to logout?',
     CANCEL: 'cancel',
-    ELECTRON_APP_REQUIRED:
+    DOWNLOAD_APP_WARNING:
         'sorry, this operation is currently not supported on the web, please install the desktop app',
+    DOWNLOAD_APP: 'download',
+    APP_DOWNLOAD_URL: 'https://github.com/ente-io/bhari-frame/releases/',
     EXPORT: 'export ',
     SUBSCRIPTION_PLAN: 'subscription plan',
     USAGE_DETAILS: 'usage',

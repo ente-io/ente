@@ -6,12 +6,14 @@ export enum CONFIRM_ACTION {
     LOGOUT,
     DELETE,
     SESSION_EXPIRED,
+    DOWNLOAD_APP,
 }
 
 const CONFIRM_ACTION_VALUES = [
     { text: 'LOGOUT', type: 'danger' },
     { text: 'DELETE', type: 'danger' },
     { text: 'SESSION_EXPIRED', type: 'primary' },
+    { text: 'DOWNLOAD_APP', type: 'primary' },
 ];
 
 export interface Props {
