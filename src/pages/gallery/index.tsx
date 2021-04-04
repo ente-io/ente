@@ -29,7 +29,9 @@ import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
-
+import { checkConnectivity } from 'utils/common';
+import { isFirstLogin, setIsFirstLogin } from 'utils/storage';
+import { logoutUser } from 'services/userService';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
@@ -156,11 +158,11 @@ export default function Gallery(props: Props) {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const fetching: { [k: number]: boolean } = {};
-    const [bannerErrorCode, setBannerErrorCode] = useState<number>(null);
+    const [bannerMessage, setBannerMessage] = useState<string>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
-    const [deleteConfirmView, setDeleteConfirmView] = useState(false);
+    const [confirmAction, setConfirmAction] = useState<CONFIRM_ACTION>(null);
     const loadingBar = useRef(null);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -169,7 +171,8 @@ export default function Gallery(props: Props) {
             return;
         }
         const main = async () => {
-            setIsFirstLoad((await getCollectionUpdationTime()) == 0);
+            setIsFirstLoad(isFirstLogin());
+            setIsFirstLogin(false);
             const data = await localFiles();
             const collections = await getLocalCollections();
             const nonEmptyCollections = getNonEmptyCollections(
@@ -194,23 +197,35 @@ export default function Gallery(props: Props) {
     }, []);
 
     const syncWithRemote = async () => {
-        loadingBar.current?.continuousStart();
-        const collections = await syncCollections();
-        const { data, isUpdated } = await syncData(collections);
-        const nonEmptyCollections = getNonEmptyCollections(collections, data);
-        const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
-            nonEmptyCollections,
-            data
-        );
-        const favItemIds = await getFavItemIds(data);
-        setCollections(nonEmptyCollections);
-        if (isUpdated) {
-            setData(data);
+        try {
+            checkConnectivity();
+            loadingBar.current?.continuousStart();
+            const collections = await syncCollections();
+            const { data, isUpdated } = await syncData(collections);
+            const nonEmptyCollections = getNonEmptyCollections(
+                collections,
+                data
+            );
+            const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
+                nonEmptyCollections,
+                data
+            );
+            const favItemIds = await getFavItemIds(data);
+            setCollections(nonEmptyCollections);
+            if (isUpdated) {
+                setData(data);
+            }
+            setCollectionAndItsLatestFile(collectionAndItsLatestFile);
+            setFavItemIds(favItemIds);
+            setSinceTime(new Date().getTime());
+        } catch (e) {
+            setBannerMessage(e.message);
+            if (e.message === constants.SESSION_EXPIRED_WARNING) {
+                setConfirmAction(CONFIRM_ACTION.SESSION_EXPIRED);
+            }
+        } finally {
+            loadingBar.current?.complete();
         }
-        setCollectionAndItsLatestFile(collectionAndItsLatestFile);
-        setFavItemIds(favItemIds);
-        setSinceTime(new Date().getTime());
-        loadingBar.current?.complete();
     };
 
     const updateUrl = (index: number) => (url: string) => {
@@ -374,6 +389,18 @@ export default function Gallery(props: Props) {
             first.getDate() === second.getDate()
         );
     };
+    const confirmCallbacks = new Map<CONFIRM_ACTION, Function>([
+        [
+            CONFIRM_ACTION.DELETE,
+            async function () {
+                await deleteFiles(selected);
+                syncWithRemote();
+                setConfirmAction(null);
+                setSelected({ count: 0 });
+            },
+        ],
+        [CONFIRM_ACTION.SESSION_EXPIRED, logoutUser],
+    ]);
 
     return (
         <FullScreenDropZone
@@ -389,8 +416,16 @@ export default function Gallery(props: Props) {
                     </Alert>
                 </div>
             )}
-            <AlertBanner bannerErrorCode={bannerErrorCode} />
-
+            <AlertBanner
+                bannerMessage={bannerMessage}
+                setBannerMessage={setBannerMessage}
+            />
+            <ConfirmDialog
+                show={confirmAction !== null}
+                onHide={() => setConfirmAction(null)}
+                callback={confirmCallbacks.get(confirmAction)}
+                action={confirmAction}
+            />
             <Collections
                 collections={collections}
                 selected={Number(router.query.collection)}
@@ -401,7 +436,7 @@ export default function Gallery(props: Props) {
                 closeCollectionSelector={props.closeCollectionSelector}
                 collectionAndItsLatestFile={collectionAndItsLatestFile}
                 refetchData={syncWithRemote}
-                setBannerErrorCode={setBannerErrorCode}
+                setBannerMessage={setBannerMessage}
                 acceptedFiles={props.acceptedFiles}
             />
             <Sidebar files={data} collections={collections} />
@@ -582,20 +617,12 @@ export default function Gallery(props: Props) {
                 </Alert>
             )}
             {selected.count && (
-                <DeleteBtn onClick={() => setDeleteConfirmView(true)}>
+                <DeleteBtn
+                    onClick={() => setConfirmAction(CONFIRM_ACTION.DELETE)}
+                >
                     <Delete />
                 </DeleteBtn>
             )}
-            <ConfirmDialog
-                show={deleteConfirmView}
-                onHide={() => setDeleteConfirmView(false)}
-                callback={async () => {
-                    await deleteFiles(selected, syncWithRemote);
-                    setDeleteConfirmView(false);
-                    setSelected({ count: 0 });
-                }}
-                action={CONFIRM_ACTION.DELETE}
-            />
         </FullScreenDropZone>
     );
 }

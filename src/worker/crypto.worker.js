@@ -84,6 +84,10 @@ export class Crypto {
         return libsodium.deriveSensitiveKey(passphrase, salt);
     }
 
+    async deriveIntermediateKey(passphrase, salt) {
+        return libsodium.deriveIntermediateKey(passphrase, salt);
+    }
+
     async decryptB64(data, nonce, key) {
         return libsodium.decryptB64(data, nonce, key);
     }

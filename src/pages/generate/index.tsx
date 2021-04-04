@@ -12,7 +12,9 @@ import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { B64EncryptionResult } from 'services/uploadService';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import CryptoWorker from 'utils/crypto';
+import { generateIntermediateKeyAttributes } from 'utils/crypto';
+import { Spinner } from 'react-bootstrap';
 
 const Image = styled.img`
     width: 200px;
@@ -25,7 +27,7 @@ interface formValues {
     confirm: string;
 }
 
-interface KEK {
+export interface KEK {
     key: string;
     opsLimit: number;
     memLimit: number;
@@ -60,10 +62,19 @@ export default function Generate() {
                 const cryptoWorker = await new CryptoWorker();
                 const key: string = await cryptoWorker.generateMasterKey();
                 const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
-                const kek: KEK = await cryptoWorker.deriveSensitiveKey(
-                    passphrase,
-                    kekSalt
-                );
+                let kek: KEK;
+                try {
+                    kek = await cryptoWorker.deriveSensitiveKey(
+                        passphrase,
+                        kekSalt
+                    );
+                } catch (e) {
+                    setFieldError(
+                        'confirm',
+                        constants.PASSWORD_GENERATION_FAILED
+                    );
+                    return;
+                }
                 const encryptedKeyAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(
                     key,
                     kek.key
@@ -90,7 +101,15 @@ export default function Generate() {
                     getData(LS_KEYS.USER).name,
                     keyAttributes
                 );
-                setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+
+                setData(
+                    LS_KEYS.KEY_ATTRIBUTES,
+                    await generateIntermediateKeyAttributes(
+                        passphrase,
+                        keyAttributes,
+                        key
+                    )
+                );
 
                 const sessionKeyAttributes = await cryptoWorker.encryptToB64(
                     key
@@ -109,8 +128,9 @@ export default function Generate() {
                 'passphrase',
                 `${constants.UNKNOWN_ERROR} ${e.message}`
             );
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (
@@ -186,7 +206,11 @@ export default function Generate() {
                                     disabled={loading}
                                     style={{ marginTop: '28px' }}
                                 >
-                                    {constants.SET_PASSPHRASE}
+                                    {loading ? (
+                                        <Spinner animation="border" />
+                                    ) : (
+                                        constants.SET_PASSPHRASE
+                                    )}
                                 </Button>
                             </Form>
                         )}

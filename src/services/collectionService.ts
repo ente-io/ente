@@ -7,7 +7,8 @@ import HTTPService from './HTTPService';
 import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
 import { user } from './userService';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import CryptoWorker from 'utils/crypto';
+import { ErrorHandler } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();
 
@@ -104,7 +105,8 @@ const getCollections = async (
         );
         return await Promise.all(promises);
     } catch (e) {
-        console.error('getCollections failed- ', e.response);
+        console.error('getCollections failed- ', e);
+        ErrorHandler(e);
     }
 };
 
@@ -123,9 +125,6 @@ export const syncCollections = async () => {
     const lastCollectionUpdationTime = await getCollectionUpdationTime();
     const key = await getActualKey(),
         token = getToken();
-    if (!token) {
-        return localCollections;
-    }
     const updatedCollections =
         (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
     if (updatedCollections.length == 0) {

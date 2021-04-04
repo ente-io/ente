@@ -1,10 +1,11 @@
 import HTTPService from './HTTPService';
-import { keyAttributes } from 'types';
+import { KeyAttributes } from 'types';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';
 import { clearData } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
+import { getToken } from 'utils/common/key';
 
 const ENDPOINT = getEndpoint();
 
@@ -28,7 +29,7 @@ export const verifyOtt = (email: string, ott: string) => {
 export const putAttributes = (
     token: string,
     name: string,
-    keyAttributes: keyAttributes
+    keyAttributes: KeyAttributes
 ) => {
     console.log('name ' + name);
     return HTTPService.put(
@@ -51,4 +52,15 @@ export const logoutUser = async () => {
 
 export const clearFiles = async () => {
     await localForage.clear();
+};
+
+export const isTokenValid = async () => {
+    try {
+        await HTTPService.get(`${ENDPOINT}/users/session-validity`, null, {
+            'X-Auth-Token': getToken(),
+        });
+        return true;
+    } catch (e) {
+        return false;
+    }
 };

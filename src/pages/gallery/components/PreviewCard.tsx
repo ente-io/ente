@@ -20,6 +20,7 @@ interface IProps {
 const Check = styled.input`
     appearance: none;
     position: absolute;
+    right: 0;
     opacity: 0;
     outline: none;
 
@@ -28,14 +29,14 @@ const Check = styled.input`
         width: 16px;
         height: 16px;
         border: 2px solid #fff;
-        background-color: rgba(0,0,0,0.5);
+        background-color: rgba(0, 0, 0, 0.5);
         display: inline-block;
         border-radius: 50%;
         vertical-align: bottom;
         margin: 8px 8px;
         text-align: center;
         line-height: 16px;
-        transition: background-color .3s ease;
+        transition: background-color 0.3s ease;
     }
     &::after {
         content: '';
@@ -45,7 +46,7 @@ const Check = styled.input`
         border-bottom: 2px solid #fff;
         transform: translate(-18px, 8px);
         opacity: 0;
-        transition: transform .3s ease;
+        transition: transform 0.3s ease;
         position: absolute;
     }
 
@@ -66,7 +67,7 @@ const Check = styled.input`
     }
 `;
 
-const Cont = styled.div<{ disabled: boolean, selected: boolean }>`
+const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
     background: #222;
     display: flex;
     width: fit-content;
@@ -81,7 +82,7 @@ const Cont = styled.div<{ disabled: boolean, selected: boolean }>`
         max-width: 100%;
         min-height: 100%;
         flex: 1;
-        ${props => props.selected && 'border: 5px solid #2dc262;'}
+        ${(props) => props.selected && 'border: 5px solid #2dc262;'}
     }
 
     & > svg {
@@ -103,7 +104,16 @@ const Cont = styled.div<{ disabled: boolean, selected: boolean }>`
 
 export default function PreviewCard(props: IProps) {
     const [imgSrc, setImgSrc] = useState<string>();
-    const { data, onClick, updateUrl, forcedEnable, selectable, selected, onSelect, selectOnClick } = props;
+    const {
+        data,
+        onClick,
+        updateUrl,
+        forcedEnable,
+        selectable,
+        selected,
+        onSelect,
+        selectOnClick,
+    } = props;
 
     useEffect(() => {
         if (data && !data.msrc) {
@@ -127,20 +137,27 @@ export default function PreviewCard(props: IProps) {
 
     const handleSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         onSelect?.(e.target.checked);
-    }
+    };
 
     const longPressCallback = () => {
         onSelect(!selected);
-    }
+    };
 
     return (
         <Cont
             onClick={handleClick}
             disabled={!forcedEnable && !data?.msrc && !imgSrc}
             selected={selected}
-            {...(selectable ? useLongPress(longPressCallback,500) : {})}
+            {...(selectable ? useLongPress(longPressCallback, 500) : {})}
         >
-            {selectable && <Check type='checkbox' checked={selected} onChange={handleSelect} onClick={e => e.stopPropagation()}/>}
+            {selectable && (
+                <Check
+                    type="checkbox"
+                    checked={selected}
+                    onChange={handleSelect}
+                    onClick={(e) => e.stopPropagation()}
+                />
+            )}
             {(data?.msrc || imgSrc) && <img src={data?.msrc || imgSrc} />}
             {data?.metadata.fileType === 1 && <PlayCircleOutline />}
         </Cont>

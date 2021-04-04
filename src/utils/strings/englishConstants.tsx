@@ -152,6 +152,12 @@ const englishConstants = {
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
     OR: 'or',
     UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
+    SESSION_EXPIRED_WARNING:
+        'your session has expired, please login again to continue',
+    SESSION_EXPIRED: 'login',
+    SYNC_FAILED:
+        'failed to sync with remote server, please refresh page to try again',
+    PASSWORD_GENERATION_FAILED: `your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser`,
 };
 
 export default englishConstants;

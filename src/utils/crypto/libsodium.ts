@@ -254,7 +254,12 @@ export async function hash(input: string) {
     );
 }
 
-export async function deriveKey(passphrase: string, salt: string, opsLimit: number, memLimit: number) {
+export async function deriveKey(
+    passphrase: string,
+    salt: string,
+    opsLimit: number,
+    memLimit: number
+) {
     await sodium.ready;
     return await toB64(
         sodium.crypto_pwhash(
@@ -270,21 +275,42 @@ export async function deriveKey(passphrase: string, salt: string, opsLimit: numb
 
 export async function deriveSensitiveKey(passphrase: string, salt: string) {
     await sodium.ready;
+    const minMemLimit = sodium.crypto_pwhash_MEMLIMIT_MIN;
+    let opsLimit = sodium.crypto_pwhash_OPSLIMIT_SENSITIVE;
+    let memLimit = sodium.crypto_pwhash_MEMLIMIT_SENSITIVE;
+    while (memLimit > minMemLimit) {
+        try {
+            const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
+            return {
+                key,
+                opsLimit,
+                memLimit,
+            };
+        } catch (e) {
+            opsLimit = opsLimit * 2;
+            memLimit = memLimit / 2;
+        }
+    }
+    throw null;
+}
+
+export async function deriveIntermediateKey(passphrase: string, salt: string) {
+    await sodium.ready;
     const key = await toB64(
         sodium.crypto_pwhash(
             sodium.crypto_secretbox_KEYBYTES,
             await fromString(passphrase),
             await fromB64(salt),
-            sodium.crypto_pwhash_OPSLIMIT_SENSITIVE,
-            sodium.crypto_pwhash_MEMLIMIT_SENSITIVE,
+            sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
+            sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
             sodium.crypto_pwhash_ALG_DEFAULT
         )
     );
     return {
-        'key': key,
-        'opsLimit': sodium.crypto_pwhash_OPSLIMIT_SENSITIVE,
-        'memLimit': sodium.crypto_pwhash_MEMLIMIT_SENSITIVE,
-    }
+        key: key,
+        opsLimit: sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
+        memLimit: sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
+    };
 }
 
 export async function generateMasterKey() {
