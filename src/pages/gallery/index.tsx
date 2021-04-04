@@ -400,6 +400,15 @@ export default function Gallery(props: Props) {
             },
         ],
         [CONFIRM_ACTION.SESSION_EXPIRED, logoutUser],
+        [CONFIRM_ACTION.LOGOUT, logoutUser],
+        [
+            CONFIRM_ACTION.DOWNLOAD_APP,
+            function () {
+                var win = window.open(constants.APP_DOWNLOAD_URL, '_blank');
+                win.focus();
+                setConfirmAction(null);
+            },
+        ],
     ]);
 
     return (
@@ -439,7 +448,11 @@ export default function Gallery(props: Props) {
                 setBannerMessage={setBannerMessage}
                 acceptedFiles={props.acceptedFiles}
             />
-            <Sidebar files={data} collections={collections} />
+            <Sidebar
+                files={data}
+                collections={collections}
+                setConfirmAction={setConfirmAction}
+            />
             <UploadButton openFileUploader={props.openFileUploader} />
             {!isFirstLoad && data.length == 0 ? (
                 <Jumbotron>
