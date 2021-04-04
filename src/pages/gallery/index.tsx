@@ -220,7 +220,7 @@ export default function Gallery(props: Props) {
             setSinceTime(new Date().getTime());
         } catch (e) {
             setBannerMessage(e.message);
-            if (e.message === constants.SESSION_EXPIRED_WARNING) {
+            if (e.message === constants.SESSION_EXPIRED_MESSAGE) {
                 setConfirmAction(CONFIRM_ACTION.SESSION_EXPIRED);
             }
         } finally {

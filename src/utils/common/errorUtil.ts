@@ -23,7 +23,7 @@ export function ErrorHandler(error) {
             errorMessage = constants.NO_INTERNET_CONNECTION;
             break;
         case errorCodes.ERR_SESSION_EXPIRED:
-            errorMessage = constants.SESSION_EXPIRED_WARNING;
+            errorMessage = constants.SESSION_EXPIRED_MESSAGE;
             break;
     }
     if (error.message === AXIOS_NETWORK_ERROR) {
