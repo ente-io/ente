@@ -37,7 +37,7 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
                 <Modal.Title id="contained-modal-title-vcenter">
                     {
                         constants[
-                            `${CONFIRM_ACTION_VALUES[action]?.text}_WARNING`
+                            `${CONFIRM_ACTION_VALUES[action]?.text}_MESSAGE`
                         ]
                     }
                 </Modal.Title>
