@@ -23,6 +23,8 @@ PODS:
     - Flutter
   - flutter_sodium (0.0.1):
     - Flutter
+  - flutter_user_agent (1.2.2):
+    - Flutter
   - flutter_webview_plugin (0.0.1):
     - Flutter
   - fluttercontactpicker (3.1.1):
@@ -89,6 +91,7 @@ DEPENDENCIES:
   - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
+  - flutter_user_agent (from `.symlinks/plugins/flutter_user_agent/ios`)
   - flutter_webview_plugin (from `.symlinks/plugins/flutter_webview_plugin/ios`)
   - fluttercontactpicker (from `.symlinks/plugins/fluttercontactpicker/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
@@ -138,6 +141,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   flutter_sodium:
     :path: ".symlinks/plugins/flutter_sodium/ios"
+  flutter_user_agent:
+    :path: ".symlinks/plugins/flutter_user_agent/ios"
   flutter_webview_plugin:
     :path: ".symlinks/plugins/flutter_webview_plugin/ios"
   fluttercontactpicker:
@@ -181,6 +186,7 @@ SPEC CHECKSUMS:
   flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
   flutter_sodium: c84426b4de738514b5b66cfdeb8a06634e72fe0b
+  flutter_user_agent: 27c45d034dc31b80948d29998cea52cd3a7bf936
   flutter_webview_plugin: ed9e8a6a96baf0c867e90e1bce2673913eeac694
   fluttercontactpicker: ff27c428495f982a1b04a6c3015052bfff25bb05
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58

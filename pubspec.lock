@@ -326,6 +326,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.9.3"
+  flutter_user_agent:
+    dependency: "direct main"
+    description:
+      name: flutter_user_agent
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.2"
   flutter_web_plugins:
     dependency: transitive
     description: flutter

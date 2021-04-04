@@ -7,6 +7,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/network.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/memories_service.dart';
@@ -96,6 +97,7 @@ Future<void> _init(bool isBackground) async {
   _logger.info("Initializing...");
   InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
+  await Network.instance.init();
   await Configuration.instance.init();
   await BillingService.instance.init();
   await CollectionsService.instance.init();

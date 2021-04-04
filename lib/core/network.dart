@@ -3,13 +3,17 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_user_agent/flutter_user_agent.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:super_logging/super_logging.dart';
 
 class Network {
-  final _dio = Dio();
+  Dio _dio;
 
-  Network._privateConstructor() {
+  Future<void> init() async {
+    await FlutterUserAgent.init();
+    _dio = Dio(BaseOptions(
+        headers: {HttpHeaders.userAgentHeader: FlutterUserAgent.userAgent}));
     _dio.interceptors.add(PrettyDioLogger(
         requestHeader: false,
         responseHeader: false,
@@ -27,6 +31,8 @@ class Network {
           }
         }));
   }
+
+  Network._privateConstructor();
   static Network instance = Network._privateConstructor();
 
   Dio getDio() => _dio;
