@@ -40,7 +40,7 @@ class ExportService {
             for (let collection of collections) {
                 let collectionFolderPath = `${dir}/${
                     collection.id
-                }_${this.sanitizeNames(collection.name)}`;
+                }_${this.sanitizeName(collection.name)}`;
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
                     collectionFolderPath
                 );
@@ -80,14 +80,13 @@ class ExportService {
 
     async downloadAndSave(file: file, path) {
         const fileStream = await downloadManager.downloadFile(file);
-
         this.ElectronAPIs.saveStreamToDisk(path, fileStream);
         this.ElectronAPIs.saveFileToDisk(
             `${path}.json`,
             JSON.stringify(file.metadata, null, 2)
         );
     }
-    private sanitizeNames(name) {
+    private sanitizeName(name) {
         return name.replaceAll('/', '_').replaceAll(' ', '_');
     }
 }
