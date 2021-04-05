@@ -106,7 +106,7 @@ class BillingService {
       await setSubscription(subscription);
       return subscription;
     } on DioError catch (e) {
-      if (e.response.statusCode == 404) {
+      if (e.response != null && e.response.statusCode == 404) {
         _prefs.remove(subscriptionKey);
       }
       throw e;
