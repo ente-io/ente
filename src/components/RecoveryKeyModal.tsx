@@ -64,12 +64,13 @@ function RecoveryKeyModal(props: Props) {
                 </Button>
                 <Button
                     variant="success"
-                    onClick={() =>
+                    onClick={() => {
                         downloadAsFile(
                             constants.RECOVERY_KEY_FILENAME,
                             recoveryKey
-                        )
-                    }
+                        );
+                        props.onHide();
+                    }}
                 >
                     {constants.SAVE}
                 </Button>
