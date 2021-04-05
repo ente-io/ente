@@ -46,7 +46,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     if (_event.status == SyncStatus.error) {
       return _getErrorWidget();
     }
-    if (_event.status == SyncStatus.applied_local_diff ||
+    if (_event.status == SyncStatus.completed_first_gallery_import ||
         _event.status == SyncStatus.completed) {
       Future.delayed(Duration(milliseconds: 3000), () {
         if (mounted) {
@@ -197,8 +197,8 @@ class _SyncIndicatorState extends State<SyncIndicator> {
   }
 
   String _getRefreshingText() {
-    if (_event.status == SyncStatus.applying_local_diff ||
-        _event.status == SyncStatus.applied_local_diff) {
+    if (_event.status == SyncStatus.started_first_gallery_import ||
+        _event.status == SyncStatus.completed_first_gallery_import) {
       return "loading gallery...";
     }
     if (_event.status == SyncStatus.applying_remote_diff) {

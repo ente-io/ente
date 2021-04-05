@@ -216,7 +216,7 @@ class SyncService {
           lastDBUpdationTime, syncStartTime, existingLocalFileIDs);
     } else {
       // Load from 0 - 01.01.2010
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applying_local_diff));
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.started_first_gallery_import));
       var startTime = 0;
       var toYear = 2010;
       var toTime = DateTime(toYear).microsecondsSinceEpoch;
@@ -227,7 +227,7 @@ class SyncService {
         toTime = DateTime(toYear).microsecondsSinceEpoch;
       }
       await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applied_local_diff));
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed_first_gallery_import));
     }
   }
 

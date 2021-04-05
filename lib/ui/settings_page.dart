@@ -45,7 +45,7 @@ class SettingsPage extends StatelessWidget {
   Widget _getBody() {
     final hasLoggedIn = Configuration.instance.getToken() != null;
     final List<Widget> contents = [];
-    if (hasLoggedIn) {
+    if (!hasLoggedIn) {
       contents.addAll([
         AccountSettingsWidget(),
         Padding(padding: EdgeInsets.all(12)),
