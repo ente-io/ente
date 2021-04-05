@@ -10,7 +10,7 @@ interface Props {
         title?: string;
         ok?: boolean;
         staticBackdrop?: boolean;
-        cancel?: { text: string };
+        cancel?: { text: string; action?: any };
         proceed?: { text: string; action: any };
     };
 }
@@ -39,7 +39,10 @@ export function MessageDialog({ attributes, children, ...props }: Props) {
                         </Button>
                     )}
                     {attributes.cancel && (
-                        <Button variant="outline-danger" onClick={props.onHide}>
+                        <Button
+                            variant="outline-danger"
+                            onClick={attributes.cancel.action ?? props.onHide}
+                        >
                             {attributes.cancel.text}
                         </Button>
                     )}
