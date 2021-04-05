@@ -69,7 +69,7 @@ export const getRecoveryKey = async () => {
                 masterKey
             );
         } else {
-            recoveryKey = createNewRecoveryKey();
+            recoveryKey = await createNewRecoveryKey();
         }
         recoveryKey = await cryptoWorker.toHex(recoveryKey);
     } catch (e) {
