@@ -73,7 +73,7 @@ export default function Generate() {
         <PasswordForm
             callback={onSubmit}
             buttonText={constants.CHANGE_PASSWORD}
-            cancel={() => router.push('/gallery')}
+            back={() => router.push('/gallery')}
         />
     );
 }

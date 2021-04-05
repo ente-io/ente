@@ -12,6 +12,7 @@ import { Spinner } from 'react-bootstrap';
 interface Props {
     callback: (passphrase: any, setFieldError: any) => Promise<void>;
     buttonText: string;
+    back: () => void;
 }
 interface formValues {
     passphrase: string;
@@ -122,6 +123,11 @@ function SetPassword(props: Props) {
                             </Form>
                         )}
                     </Formik>
+                    <div className="text-center" style={{ marginTop: '20px' }}>
+                        <Button variant="link" onClick={props.back}>
+                            {constants.GO_BACK}
+                        </Button>
+                    </div>
                 </Card.Body>
             </Card>
         </Container>

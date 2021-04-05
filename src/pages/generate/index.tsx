@@ -88,7 +88,7 @@ export default function Generate() {
             <PasswordForm
                 callback={onSubmit}
                 buttonText={constants.SET_PASSPHRASE}
-                cancel={logoutUser}
+                back={logoutUser}
             />
         </>
     );
