@@ -130,6 +130,12 @@ export default function Sidebar(props: Props) {
                 {constants.CHANGE_PASSWORD}
             </h5>
             <h5
+                style={{ cursor: 'pointer', marginTop: '30px' }}
+                onClick={() => null}
+            >
+                {constants.DOWNLOAD_RECOVERY_KEY}
+            </h5>
+            <h5
                 style={{
                     cursor: 'pointer',
                     color: '#F96C6C',

@@ -162,6 +162,7 @@ const englishConstants = {
     PASSWORD_GENERATION_FAILED: `your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser`,
     CHANGE_PASSWORD: 'change password',
     GO_BACK: 'go back',
+    DOWNLOAD_RECOVERY_KEY: 'recovery key',
 };
 
 export default englishConstants;
