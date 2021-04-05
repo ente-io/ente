@@ -6,3 +6,10 @@ export const isFirstLogin = () =>
 export function setIsFirstLogin(status) {
     setData(LS_KEYS.IS_FIRST_LOGIN, { status });
 }
+
+export const justSignedUp = () =>
+    getData(LS_KEYS.JUST_SIGNED_UP)?.status ?? true;
+
+export function setJustSignedUp(status) {
+    setData(LS_KEYS.JUST_SIGNED_UP, { status });
+}
