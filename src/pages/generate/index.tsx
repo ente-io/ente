@@ -21,9 +21,9 @@ export interface KEK {
 export default function Generate() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
-    const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
 
     useEffect(() => {
+        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         router.prefetch('/gallery');
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
@@ -63,7 +63,7 @@ export default function Generate() {
         const keyPair = await cryptoWorker.generateKeyPair();
         const encryptedKeyPairAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(
             keyPair.privateKey,
-            key
+            masterKey
         );
 
         const keyAttributes: KeyAttributes = {
@@ -86,7 +86,7 @@ export default function Generate() {
         await generateAndSaveIntermediateKeyAttributes(
             passphrase,
             keyAttributes,
-            key
+            masterKey
         );
 
         setSessionKeys(masterKey);
