@@ -9,13 +9,19 @@ interface Props {
     attributes?: {
         title?: string;
         ok?: boolean;
+        staticBackdrop?: boolean;
         cancel?: { text: string };
         proceed?: { text: string; action: any };
     };
 }
 export function MessageDialog({ attributes, children, ...props }: Props) {
     return (
-        <Modal {...props} size="lg" centered>
+        <Modal
+            {...props}
+            size="lg"
+            centered
+            backdrop={attributes?.staticBackdrop ? 'static' : 'true'}
+        >
             <Modal.Body>
                 {attributes?.title && (
                     <Modal.Title>
