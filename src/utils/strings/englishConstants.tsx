@@ -173,6 +173,11 @@ const englishConstants = {
     ),
     RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
     FORGOT_PASSWORD: 'forgot password?',
+    RECOVER_ACCOUNT: 'recover account',
+    RETURN_RECOVERY_KEY_HINT: 'recovery key',
+    RECOVER: 'recover',
+    NO_RECOVERY_KEY: 'no recovery key?',
+    INCORRECT_RECOVERY_KEY: 'incorrect recovery key',
 };
 
 export default englishConstants;

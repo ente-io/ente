@@ -6,7 +6,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import { KeyAttributes } from 'types';
@@ -156,7 +156,10 @@ export default function Credentials() {
                                         flexDirection: 'column',
                                     }}
                                 >
-                                    <Button variant="link">
+                                    <Button
+                                        variant="link"
+                                        onClick={() => router.push('/recover')}
+                                    >
                                         {constants.FORGOT_PASSWORD}
                                     </Button>
                                     <Button variant="link" onClick={logoutUser}>
