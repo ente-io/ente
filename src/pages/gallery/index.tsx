@@ -32,6 +32,7 @@ import UploadButton from './components/UploadButton';
 import { checkConnectivity } from 'utils/common';
 import { isFirstLogin, setIsFirstLogin } from 'utils/storage';
 import { logoutUser } from 'services/userService';
+import { MessageDialog } from 'components/MessageDailog';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
@@ -163,6 +164,7 @@ export default function Gallery(props: Props) {
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
     const [confirmAction, setConfirmAction] = useState<CONFIRM_ACTION>(null);
+    const [requestFailed, setRequestFailed] = useState(false);
     const loadingBar = useRef(null);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -435,6 +437,14 @@ export default function Gallery(props: Props) {
                 callback={confirmCallbacks.get(confirmAction)}
                 action={confirmAction}
             />
+            <MessageDialog
+                show={requestFailed}
+                onHide={() => setRequestFailed(false)}
+                attributes={{
+                    title: constants.UNKNOWN_ERROR,
+                    ok: true,
+                }}
+            />
             <Collections
                 collections={collections}
                 selected={Number(router.query.collection)}
@@ -452,6 +462,7 @@ export default function Gallery(props: Props) {
                 files={data}
                 collections={collections}
                 setConfirmAction={setConfirmAction}
+                somethingWentWrong={() => setRequestFailed(true)}
             />
             <UploadButton openFileUploader={props.openFileUploader} />
             {!isFirstLoad && data.length == 0 ? (
