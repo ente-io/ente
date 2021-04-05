@@ -45,10 +45,9 @@ export const putAttributes = (
     name: string,
     keyAttributes: KeyAttributes
 ) => {
-    console.log('name ' + name);
     return HTTPService.put(
         `${ENDPOINT}/users/attributes`,
-        { name: name, keyAttributes: keyAttributes },
+        { name: name ? name : '', keyAttributes: keyAttributes },
         null,
         {
             'X-Auth-Token': token,
