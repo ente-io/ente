@@ -104,12 +104,10 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
     if (!_loadedFinalImage) {
       getFileFromServer(_photo).then((file) {
-        _onFinalImageLoaded(
-            Image.file(
-              file,
-              gaplessPlayback: true,
-            ).image,
-            context);
+        _onFinalImageLoaded(Image.file(
+          file,
+          gaplessPlayback: true,
+        ).image);
       });
     }
   }
@@ -158,7 +156,7 @@ class _ZoomableImageState extends State<ZoomableImage>
       _loadingFinalImage = true;
       final cachedFile = FileLruCache.get(_photo);
       if (cachedFile != null && cachedFile.existsSync()) {
-        _onFinalImageLoaded(Image.file(cachedFile).image, context);
+        _onFinalImageLoaded(Image.file(cachedFile).image);
       } else {
         _photo.getAsset().then((asset) async {
           if (asset == null || !(await asset.exists)) {
@@ -175,7 +173,7 @@ class _ZoomableImageState extends State<ZoomableImage>
           }
           asset.file.then((file) {
             if (mounted) {
-              _onFinalImageLoaded(Image.file(file).image, context);
+              _onFinalImageLoaded(Image.file(file).image);
               FileLruCache.put(_photo, file);
             }
           });
@@ -198,7 +196,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
   }
 
-  void _onFinalImageLoaded(ImageProvider imageProvider, BuildContext context) {
+  void _onFinalImageLoaded(ImageProvider imageProvider) {
     if (mounted) {
       precacheImage(imageProvider, context).then((value) {
         if (mounted) {
