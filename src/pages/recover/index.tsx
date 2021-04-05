@@ -6,11 +6,12 @@ import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
 import CryptoWorker, { setSessionKeys } from 'utils/crypto';
 import PassPhraseForm from 'components/PassphraseForm';
+import { MessageDialog } from 'components/MessageDailog';
 
-export default function Credentials() {
+export default function Recover() {
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
-
+    const [messageDialogView, SetMessageDialogView] = useState(false);
     useEffect(() => {
         router.prefetch('/gallery');
         const user = getData(LS_KEYS.USER);
@@ -41,17 +42,29 @@ export default function Credentials() {
     };
 
     return (
-        <PassPhraseForm
-            callback={recover}
-            fieldType="text"
-            title={constants.RECOVER_ACCOUNT}
-            placeholder={constants.RETURN_RECOVERY_KEY_HINT}
-            buttonText={constants.RECOVER}
-            alternateOption={{
-                text: constants.NO_RECOVERY_KEY,
-                click: () => null,
-            }}
-            back={() => null}
-        />
+        <>
+            <PassPhraseForm
+                callback={recover}
+                fieldType="text"
+                title={constants.RECOVER_ACCOUNT}
+                placeholder={constants.RETURN_RECOVERY_KEY_HINT}
+                buttonText={constants.RECOVER}
+                alternateOption={{
+                    text: constants.NO_RECOVERY_KEY,
+                    click: () => SetMessageDialogView(true),
+                }}
+                back={router.back}
+            />
+            <MessageDialog
+                show={messageDialogView}
+                onHide={() => SetMessageDialogView(false)}
+                attributes={{
+                    title: constants.SORRY,
+                    close: { text: constants.OK },
+                }}
+            >
+                {constants.NO_RECOVERY_KEY_MESSAGE}
+            </MessageDialog>
+        </>
     );
 }

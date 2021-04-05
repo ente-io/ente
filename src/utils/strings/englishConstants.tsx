@@ -178,6 +178,10 @@ const englishConstants = {
     RECOVER: 'recover',
     NO_RECOVERY_KEY: 'no recovery key?',
     INCORRECT_RECOVERY_KEY: 'incorrect recovery key',
+    SORRY: 'sorry',
+    NO_RECOVERY_KEY_MESSAGE:
+        'due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
+    OK: 'ok',
 };
 
 export default englishConstants;
