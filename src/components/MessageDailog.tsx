@@ -17,7 +17,7 @@ export function MessageDialog({ attributes, children, ...props }: Props) {
     return (
         <Modal {...props} size="lg" centered>
             <Modal.Body>
-                {attributes.title && (
+                {attributes?.title && (
                     <Modal.Title>
                         <strong>{attributes.title}</strong>
                         <hr />
@@ -25,26 +25,28 @@ export function MessageDialog({ attributes, children, ...props }: Props) {
                 )}
                 {children}
             </Modal.Body>
-            <Modal.Footer style={{ borderTop: 'none' }}>
-                {attributes.ok && (
-                    <Button variant="secondary" onClick={props.onHide}>
-                        {constants.OK}
-                    </Button>
-                )}
-                {attributes.cancel && (
-                    <Button variant="danger" onClick={props.onHide}>
-                        {attributes.cancel.text}
-                    </Button>
-                )}
-                {attributes.proceed && (
-                    <Button
-                        variant="success"
-                        onClick={attributes.proceed.action}
-                    >
-                        {attributes.proceed.text}
-                    </Button>
-                )}
-            </Modal.Footer>
+            {attributes && (
+                <Modal.Footer style={{ borderTop: 'none' }}>
+                    {attributes.ok && (
+                        <Button variant="secondary" onClick={props.onHide}>
+                            {constants.OK}
+                        </Button>
+                    )}
+                    {attributes.cancel && (
+                        <Button variant="danger" onClick={props.onHide}>
+                            {attributes.cancel.text}
+                        </Button>
+                    )}
+                    {attributes.proceed && (
+                        <Button
+                            variant="success"
+                            onClick={attributes.proceed.action}
+                        >
+                            {attributes.proceed.text}
+                        </Button>
+                    )}
+                </Modal.Footer>
+            )}
         </Modal>
     );
 }
