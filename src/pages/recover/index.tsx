@@ -60,7 +60,7 @@ export default function Recover() {
                 onHide={() => SetMessageDialogView(false)}
                 attributes={{
                     title: constants.SORRY,
-                    close: { text: constants.OK },
+                    ok: true,
                 }}
             >
                 {constants.NO_RECOVERY_KEY_MESSAGE}

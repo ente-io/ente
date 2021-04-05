@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Modal } from 'react-bootstrap';
+import constants from 'utils/strings/constants';
 
 interface Props {
     show: boolean;
@@ -7,7 +8,8 @@ interface Props {
     onHide: () => void;
     attributes?: {
         title?: string;
-        close?: { text: string };
+        ok?: boolean;
+        cancel?: { text: string };
         proceed?: { text: string; action: any };
     };
 }
@@ -24,9 +26,14 @@ export function MessageDialog({ attributes, children, ...props }: Props) {
                 {children}
             </Modal.Body>
             <Modal.Footer style={{ borderTop: 'none' }}>
-                {attributes.close && (
+                {attributes.ok && (
+                    <Button variant="secondary" onClick={props.onHide}>
+                        {constants.OK}
+                    </Button>
+                )}
+                {attributes.cancel && (
                     <Button variant="danger" onClick={props.onHide}>
-                        {attributes.close.text}
+                        {attributes.cancel.text}
                     </Button>
                 )}
                 {attributes.proceed && (

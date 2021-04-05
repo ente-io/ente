@@ -28,7 +28,7 @@ function RecoveryKeyModal(props: Props) {
             {...props}
             attributes={{
                 title: constants.DOWNLOAD_RECOVERY_KEY,
-                close: { text: constants.SAVE_LATER, action: props.onHide },
+                cancel: { text: constants.SAVE_LATER },
                 proceed: {
                     text: constants.SAVE,
                     action: () => {
