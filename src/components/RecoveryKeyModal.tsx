@@ -16,7 +16,7 @@ function RecoveryKeyModal(props: Props) {
             return;
         }
         const main = async () => {
-            const recoveryKey = null; //await getRecoveryKey();
+            const recoveryKey = await getRecoveryKey();
 
             setRecoveryKey(recoveryKey);
         };
