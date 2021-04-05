@@ -19,6 +19,7 @@ interface formValues {
 }
 interface Props {
     callback: (passphrase: string, setFieldError) => void;
+    fieldType: string;
     title: string;
     placeholder: string;
     buttonText: string;
@@ -66,7 +67,7 @@ export default function PassPhraseForm(props: Props) {
                             <Form noValidate onSubmit={handleSubmit}>
                                 <Form.Group>
                                     <Form.Control
-                                        type="text"
+                                        type={props.fieldType}
                                         placeholder={props.placeholder}
                                         value={values.passphrase}
                                         onChange={handleChange('passphrase')}
