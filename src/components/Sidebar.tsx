@@ -127,18 +127,6 @@ export default function Sidebar(props: Props) {
                     width: '100%',
                 }}
             ></div>
-            <h5
-                style={{ cursor: 'pointer', marginTop: '30px' }}
-                onClick={exportFiles}
-            >
-                {constants.EXPORT}
-            </h5>
-            <h5
-                style={{ cursor: 'pointer', marginTop: '30px' }}
-                onClick={() => router.push('changePassword')}
-            >
-                {constants.CHANGE_PASSWORD}
-            </h5>
             <>
                 <RecoveryKeyModal
                     show={modalView}
@@ -152,6 +140,18 @@ export default function Sidebar(props: Props) {
                     {constants.DOWNLOAD_RECOVERY_KEY}
                 </h5>
             </>
+            <h5
+                style={{ cursor: 'pointer', marginTop: '30px' }}
+                onClick={() => router.push('changePassword')}
+            >
+                {constants.CHANGE_PASSWORD}
+            </h5>
+            <h5
+                style={{ cursor: 'pointer', marginTop: '30px' }}
+                onClick={exportFiles}
+            >
+                {constants.EXPORT}
+            </h5>
             <div
                 style={{
                     height: '1px',
