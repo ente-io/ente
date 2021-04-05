@@ -132,6 +132,12 @@ const GlobalStyles = createGlobalStyle`
     .btn-outline-danger {
         border-width: 2px;
     }
+    .btn-outline-secondary {
+        border-width: 2px;
+    }
+    .btn-outline-primary {
+        border-width: 2px;
+    }
     .card {
         background-color: #242424;
         color: #fff;
