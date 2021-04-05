@@ -120,8 +120,10 @@ class SyncService {
       _logger.info("Logging user out");
       Bus.instance.fire(TriggerLogoutEvent());
     } catch (e, s) {
-      if (e is DioError && e.type == DioErrorType.DEFAULT) {
-        final errorCode = e.error?.osError?.errorCode;
+      if (e is DioError &&
+          e.type == DioErrorType.DEFAULT &&
+          e.error.osError != null) {
+        final errorCode = e.error.osError?.errorCode;
         if (errorCode == 111 || errorCode == 101 || errorCode == 7) {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
               reason: "waiting for network..."));
@@ -216,7 +218,8 @@ class SyncService {
           lastDBUpdationTime, syncStartTime, existingLocalFileIDs);
     } else {
       // Load from 0 - 01.01.2010
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.started_first_gallery_import));
+      Bus.instance
+          .fire(SyncStatusUpdate(SyncStatus.started_first_gallery_import));
       var startTime = 0;
       var toYear = 2010;
       var toTime = DateTime(toYear).microsecondsSinceEpoch;
@@ -227,7 +230,8 @@ class SyncService {
         toTime = DateTime(toYear).microsecondsSinceEpoch;
       }
       await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed_first_gallery_import));
+      Bus.instance
+          .fire(SyncStatusUpdate(SyncStatus.completed_first_gallery_import));
     }
   }
 
