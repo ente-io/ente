@@ -150,10 +150,18 @@ export default function Credentials() {
                                     )}
                                 </Button>
                                 <br />
-                                <div>
-                                    <a href="#" onClick={logoutUser}>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                    }}
+                                >
+                                    <Button variant="link">
+                                        {constants.FORGOT_PASSWORD}
+                                    </Button>
+                                    <Button variant="link" onClick={logoutUser}>
                                         {constants.LOGOUT}
-                                    </a>
+                                    </Button>
                                 </div>
                             </Form>
                         )}
