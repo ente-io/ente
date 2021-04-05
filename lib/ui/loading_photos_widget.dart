@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/ui/loading_widget.dart';
 
 class LoadingPhotosWidget extends StatelessWidget {
+  const LoadingPhotosWidget({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Center(
