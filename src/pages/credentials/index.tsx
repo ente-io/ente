@@ -12,7 +12,7 @@ import * as Yup from 'yup';
 import { KeyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, {
-    generateIntermediateKeyAttributes,
+    generateAndSaveIntermediateKeyAttributes,
     setSessionKeys,
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
@@ -72,12 +72,11 @@ export default function Credentials() {
                     kek
                 );
                 if (isFirstLogin()) {
-                    const intermediateKeyAttributes = await generateIntermediateKeyAttributes(
+                    generateAndSaveIntermediateKeyAttributes(
                         passphrase,
                         keyAttributes,
                         key
                     );
-                    setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttributes);
                 }
                 setSessionKeys(key);
                 router.push('/gallery');

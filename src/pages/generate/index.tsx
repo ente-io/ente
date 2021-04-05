@@ -14,7 +14,7 @@ import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { B64EncryptionResult } from 'services/uploadService';
 import CryptoWorker, {
     setSessionKeys,
-    generateIntermediateKeyAttributes,
+    generateAndSaveIntermediateKeyAttributes,
 } from 'utils/crypto';
 import { Spinner } from 'react-bootstrap';
 
@@ -103,14 +103,10 @@ export default function Generate() {
                     getData(LS_KEYS.USER).name,
                     keyAttributes
                 );
-
-                setData(
-                    LS_KEYS.KEY_ATTRIBUTES,
-                    await generateIntermediateKeyAttributes(
-                        passphrase,
-                        keyAttributes,
-                        key
-                    )
+                await generateAndSaveIntermediateKeyAttributes(
+                    passphrase,
+                    keyAttributes,
+                    key
                 );
 
                 setSessionKeys(key);

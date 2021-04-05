@@ -10,11 +10,11 @@ const CryptoWorker: any =
     runningInBrowser() &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 
-export async function generateIntermediateKeyAttributes(
+export async function generateAndSaveIntermediateKeyAttributes(
     passphrase,
     keyAttributes,
     key
-): Promise<KeyAttributes> {
+) {
     const cryptoWorker = await new CryptoWorker();
     const intermediateKekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
     const intermediateKek: KEK = await cryptoWorker.deriveIntermediateKey(
@@ -25,7 +25,8 @@ export async function generateIntermediateKeyAttributes(
         key,
         intermediateKek.key
     );
-    return {
+
+    const updatedKeyAttributes = {
         kekSalt: intermediateKekSalt,
         encryptedKey: encryptedKeyAttributes.encryptedData,
         keyDecryptionNonce: encryptedKeyAttributes.nonce,
@@ -35,6 +36,7 @@ export async function generateIntermediateKeyAttributes(
         opsLimit: intermediateKek.opsLimit,
         memLimit: intermediateKek.memLimit,
     };
+    setData(LS_KEYS.KEY_ATTRIBUTES, updatedKeyAttributes);
 }
 
 export const setSessionKeys = async (key: string) => {
