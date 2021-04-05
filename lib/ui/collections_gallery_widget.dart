@@ -281,12 +281,19 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     } else {
       return Container(
         padding: EdgeInsets.fromLTRB(28, 12, 28, 46),
-        child: OutlineButton(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.0),
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18.0),
+            ),
+            side: BorderSide(
+              width: 1,
+              color: Theme.of(context).accentColor.withOpacity(0.4),
+            ),
           ),
           child: Icon(
             Icons.add,
+            color: Theme.of(context).accentColor.withOpacity(0.7),
           ),
           onPressed: () async {
             await showToast(
