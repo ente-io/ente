@@ -368,5 +368,5 @@ export async function toHex(input: string) {
 
 export async function fromHex(input: string) {
     await sodium.ready;
-    return sodium.from_hex(input);
+    return await toB64(sodium.from_hex(input));
 }
