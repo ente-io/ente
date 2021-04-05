@@ -36,7 +36,7 @@ function RecoveryKeyModal(props: Props) {
                         alignItems: 'center',
                         justifyContent: 'center',
                         background: '#1a1919',
-                        height: '200px',
+                        height: '150px',
                         padding: '40px',
                         color: 'white',
                         margin: '20px 0',
