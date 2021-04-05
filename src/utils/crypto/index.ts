@@ -4,7 +4,8 @@ import { KeyAttributes } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
 import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
-import { LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getActualKey } from 'utils/common/key';
 
 const CryptoWorker: any =
     runningInBrowser() &&
@@ -50,7 +51,34 @@ export const setSessionKeys = async (key: string) => {
 };
 
 export const getRecoveryKey = async () => {
-    return 'dsadsadsadasdq3ds7a6d5sa76ds7ad5s7a6d57sa6d57s6ad57sdsadsadsadasdq3ds7a6d5sa76ds7ad5s7a6d57sa6d57s6ad57sa6d5sa76das7d45dsadsadsadasdq3ds7a6d5sa76ds7ad5s7a6d57sa6d57s6ad57sa6d5sa76das7d45a6d5sa76das7d45';
+    let recoveryKey = null;
+    try {
+        const cryptoWorker = await new CryptoWorker();
+
+        const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const {
+            recoveryKeyEncryptedWithMasterKey,
+            recoveryKeyDecryptionNonce,
+        } = keyAttributes;
+        const masterKey = await getActualKey();
+        if (recoveryKeyEncryptedWithMasterKey) {
+            recoveryKey = await cryptoWorker.decryptB64(
+                recoveryKeyEncryptedWithMasterKey,
+                recoveryKeyDecryptionNonce,
+                masterKey
+            );
+        } else {
+            recoveryKey = generateRecoveryKey();
+        }
+        recoveryKey = await cryptoWorker.toHex(recoveryKey);
+    } catch (e) {
+        console.error('getRecoveryKey failed', e);
+    } finally {
+        return recoveryKey;
+    }
 };
 
+function generateRecoveryKey() {
+    return 'dsadsadsadasdq3ds7a6d5sa76ds7ad5s7a6d57sa6d57s6ad57sdsadsadsadasdq3ds7a6d5sa76ds7ad5s7a6d57sa6d57s6ad57sa6d5sa76das7d45dsadsadsadasdq3ds7a6d5sa76ds7ad5s7a6d57sa6d57s6ad57sa6d5sa76das7d45a6d5sa76das7d45';
+}
 export default CryptoWorker;
