@@ -3,6 +3,8 @@ import { B64EncryptionResult } from 'services/uploadService';
 import { KeyAttributes } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
+import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
+import { LS_KEYS, setData } from 'utils/storage/localStorage';
 
 const CryptoWorker: any =
     runningInBrowser() &&
@@ -34,5 +36,15 @@ export async function generateIntermediateKeyAttributes(
         memLimit: intermediateKek.memLimit,
     };
 }
+
+export const setSessionKeys = async (key: string) => {
+    const cryptoWorker = await new CryptoWorker();
+    const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
+    const sessionKey = sessionKeyAttributes.key;
+    const sessionNonce = sessionKeyAttributes.nonce;
+    const encryptionKey = sessionKeyAttributes.encryptedData;
+    setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
+    setData(LS_KEYS.SESSION, { sessionKey, sessionNonce });
+};
 
 export default CryptoWorker;

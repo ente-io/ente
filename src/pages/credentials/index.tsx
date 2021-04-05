@@ -11,7 +11,10 @@ import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import { KeyAttributes } from 'types';
 import { setKey, SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
-import CryptoWorker, { generateIntermediateKeyAttributes } from 'utils/crypto';
+import CryptoWorker, {
+    generateIntermediateKeyAttributes,
+    setSessionKeys,
+} from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
 import { Spinner } from 'react-bootstrap';
@@ -76,14 +79,7 @@ export default function Credentials() {
                     );
                     setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttributes);
                 }
-                const sessionKeyAttributes = await cryptoWorker.encryptToB64(
-                    key
-                );
-                const sessionKey = sessionKeyAttributes.key;
-                const sessionNonce = sessionKeyAttributes.nonce;
-                const encryptionKey = sessionKeyAttributes.encryptedData;
-                setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
-                setData(LS_KEYS.SESSION, { sessionKey, sessionNonce });
+                setSessionKeys(key);
                 router.push('/gallery');
             } catch (e) {
                 console.error(e);

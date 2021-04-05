@@ -12,8 +12,10 @@ import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { B64EncryptionResult } from 'services/uploadService';
-import CryptoWorker from 'utils/crypto';
-import { generateIntermediateKeyAttributes } from 'utils/crypto';
+import CryptoWorker, {
+    setSessionKeys,
+    generateIntermediateKeyAttributes,
+} from 'utils/crypto';
 import { Spinner } from 'react-bootstrap';
 
 const Image = styled.img`
@@ -111,14 +113,7 @@ export default function Generate() {
                     )
                 );
 
-                const sessionKeyAttributes = await cryptoWorker.encryptToB64(
-                    key
-                );
-                const sessionKey = sessionKeyAttributes.key;
-                const sessionNonce = sessionKeyAttributes.nonce;
-                const encryptionKey = sessionKeyAttributes.encryptedData;
-                setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
-                setData(LS_KEYS.SESSION, { sessionKey, sessionNonce });
+                setSessionKeys(key);
                 router.push('/gallery');
             } else {
                 setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
