@@ -160,7 +160,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               SyncService.instance.hasGrantedPermissions()
                   ? (SyncService.instance.hasScannedDisk()
                       ? _getMainGalleryWidget()
-                      : LoadingPhotosWidget())
+                      : const LoadingPhotosWidget())
                   : GrantPermissionsWidget(),
               _deviceFolderGalleryWidget,
               _sharedCollectionGallery,
@@ -364,8 +364,8 @@ class HeaderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Logger("Header").info("Building header widget");
     const list = [
-      _syncIndicator,
       _signInHeader,
+      _syncIndicator,
       _memoriesWidget,
     ];
     return Column(children: list);

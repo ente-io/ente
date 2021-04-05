@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/sync_status_update_event.dart';
@@ -20,6 +19,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
   SyncStatusUpdate _event;
   double _containerHeight = 48;
   StreamSubscription<SyncStatusUpdate> _subscription;
+  static const _inProgressIcon = CircularProgressIndicator(strokeWidth: 2);
 
   @override
   void initState() {
@@ -40,67 +40,64 @@ class _SyncIndicatorState extends State<SyncIndicator> {
 
   @override
   Widget build(BuildContext context) {
-    if (Configuration.instance.hasConfiguredAccount() && _event != null) {
-      if (_event.status == SyncStatus.completed) {
-        Future.delayed(Duration(milliseconds: 3000), () {
-          if (mounted) {
-            setState(() {
-              _containerHeight = 0;
-            });
-          }
-        });
-      } else {
-        _containerHeight = 48;
-      }
-      if (_event.status == SyncStatus.error) {
-        return _getErrorWidget();
-      } else {
-        var icon;
-        if (_event.status == SyncStatus.completed) {
-          icon = Icon(
+    if (_event == null) {
+      return Container();
+    }
+    if (_event.status == SyncStatus.error) {
+      return _getErrorWidget();
+    }
+    if (_event.status == SyncStatus.applied_local_diff ||
+        _event.status == SyncStatus.completed) {
+      Future.delayed(Duration(milliseconds: 3000), () {
+        if (mounted) {
+          setState(() {
+            _containerHeight = 0;
+          });
+        }
+      });
+    } else {
+      _containerHeight = 48;
+    }
+    final icon = _event.status == SyncStatus.completed
+        ? Icon(
             Icons.cloud_done_outlined,
             color: Theme.of(context).accentColor,
-          );
-        } else {
-          icon = CircularProgressIndicator(strokeWidth: 2);
-        }
-        return AnimatedContainer(
-          duration: Duration(milliseconds: 300),
-          height: _containerHeight,
-          width: double.infinity,
-          padding: EdgeInsets.all(8),
-          alignment: Alignment.center,
-          child: SingleChildScrollView(
-            physics: NeverScrollableScrollPhysics(),
-            child: Column(
+          )
+        : _inProgressIcon;
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      height: _containerHeight,
+      width: double.infinity,
+      padding: EdgeInsets.all(8),
+      alignment: Alignment.center,
+      child: SingleChildScrollView(
+        physics: NeverScrollableScrollPhysics(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(2),
-                      width: 22,
-                      height: 22,
-                      child: icon,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 4, 0, 0),
-                      child: Text(_getRefreshingText()),
-                    ),
-                  ],
+                Container(
+                  padding: EdgeInsets.all(2),
+                  width: 22,
+                  height: 22,
+                  child: icon,
                 ),
-                Padding(padding: EdgeInsets.all(4)),
-                Divider(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 0, 0),
+                  child: Text(_getRefreshingText()),
+                ),
               ],
             ),
-          ),
-        );
-      }
-    }
-    return Container();
+            Padding(padding: EdgeInsets.all(4)),
+            Divider(),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _getErrorWidget() {
@@ -200,6 +197,10 @@ class _SyncIndicatorState extends State<SyncIndicator> {
   }
 
   String _getRefreshingText() {
+    if (_event.status == SyncStatus.applying_local_diff ||
+        _event.status == SyncStatus.applied_local_diff) {
+      return "loading gallery...";
+    }
     if (_event.status == SyncStatus.applying_remote_diff) {
       return "syncing...";
     }

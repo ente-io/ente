@@ -24,6 +24,8 @@ class SyncStatusUpdate extends Event {
 }
 
 enum SyncStatus {
+  applying_local_diff,
+  applied_local_diff,
   applying_remote_diff,
   preparing_for_upload,
   in_progress,
