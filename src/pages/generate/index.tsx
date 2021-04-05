@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import constants from 'utils/strings/constants';
-import * as Yup from 'yup';
 import { logoutUser, putAttributes } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
+import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { B64EncryptionResult } from 'services/uploadService';
 import CryptoWorker, {
     setSessionKeys,
     generateAndSaveIntermediateKeyAttributes,
 } from 'utils/crypto';
 import PasswordForm from 'components/PasswordForm';
-
-interface formValues {
-    passphrase: string;
-    confirm: string;
-}
+import { KeyAttributes } from 'types';
 
 export interface KEK {
     key: string;
@@ -24,7 +19,6 @@ export interface KEK {
 }
 
 export default function Generate() {
-    const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<string>();
     const router = useRouter();
     const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -43,7 +37,8 @@ export default function Generate() {
 
     const onSubmit = async (passphrase, setFieldError) => {
         const cryptoWorker = await new CryptoWorker();
-        const key: string = await cryptoWorker.generateMasterKey();
+        const masterKey: string = await cryptoWorker.generateEncryptionKey();
+        const recoveryKey: string = await cryptoWorker.generateEncryptionKey();
         const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
         let kek: KEK;
         try {
@@ -52,25 +47,40 @@ export default function Generate() {
             setFieldError('confirm', constants.PASSWORD_GENERATION_FAILED);
             return;
         }
-        const encryptedKeyAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(
-            key,
+        const masterKeyEncryptedWithKek: B64EncryptionResult = await cryptoWorker.encryptToB64(
+            masterKey,
             kek.key
         );
+        const masterKeyEncryptedWithRecoveryKey: B64EncryptionResult = await cryptoWorker.encryptToB64(
+            masterKey,
+            recoveryKey
+        );
+        const recoveryKeyEncryptedWithMasterKey: B64EncryptionResult = await cryptoWorker.encryptToB64(
+            recoveryKey,
+            masterKey
+        );
+
         const keyPair = await cryptoWorker.generateKeyPair();
         const encryptedKeyPairAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(
             keyPair.privateKey,
             key
         );
 
-        const keyAttributes = {
+        const keyAttributes: KeyAttributes = {
             kekSalt,
-            encryptedKey: encryptedKeyAttributes.encryptedData,
-            keyDecryptionNonce: encryptedKeyAttributes.nonce,
+            encryptedKey: masterKeyEncryptedWithKek.encryptedData,
+            keyDecryptionNonce: masterKeyEncryptedWithKek.nonce,
             publicKey: keyPair.publicKey,
             encryptedSecretKey: encryptedKeyPairAttributes.encryptedData,
             secretKeyDecryptionNonce: encryptedKeyPairAttributes.nonce,
             opsLimit: kek.opsLimit,
             memLimit: kek.memLimit,
+            masterKeyEncryptedWithRecoveryKey:
+                masterKeyEncryptedWithRecoveryKey.encryptedData,
+            masterKeyDecryptionNonce: masterKeyEncryptedWithRecoveryKey.nonce,
+            recoveryKeyEncryptedWithMasterKey:
+                recoveryKeyEncryptedWithMasterKey.encryptedData,
+            recoveryKeyDecryptionNonce: recoveryKeyEncryptedWithMasterKey.nonce,
         };
         await putAttributes(token, getData(LS_KEYS.USER).name, keyAttributes);
         await generateAndSaveIntermediateKeyAttributes(
@@ -79,7 +89,7 @@ export default function Generate() {
             key
         );
 
-        setSessionKeys(key);
+        setSessionKeys(masterKey);
         router.push('/gallery');
     };
 

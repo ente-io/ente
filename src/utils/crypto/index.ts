@@ -14,7 +14,7 @@ const CryptoWorker: any =
 
 export async function generateAndSaveIntermediateKeyAttributes(
     passphrase,
-    keyAttributes,
+    existingKeyAttributes,
     key
 ) {
     const cryptoWorker = await new CryptoWorker();
@@ -28,16 +28,13 @@ export async function generateAndSaveIntermediateKeyAttributes(
         intermediateKek.key
     );
 
-    const updatedKeyAttributes = {
+    const updatedKeyAttributes = Object.assign(existingKeyAttributes, {
         kekSalt: intermediateKekSalt,
         encryptedKey: encryptedKeyAttributes.encryptedData,
         keyDecryptionNonce: encryptedKeyAttributes.nonce,
-        publicKey: keyAttributes.publicKey,
-        encryptedSecretKey: keyAttributes.encryptedSecretKey,
-        secretKeyDecryptionNonce: keyAttributes.secretKeyDecryptionNonce,
         opsLimit: intermediateKek.opsLimit,
         memLimit: intermediateKek.memLimit,
-    };
+    });
     setData(LS_KEYS.KEY_ATTRIBUTES, updatedKeyAttributes);
 }
 

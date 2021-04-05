@@ -117,7 +117,7 @@ function SetPassword(props: Props) {
                                     {loading ? (
                                         <Spinner animation="border" />
                                     ) : (
-                                        constants.CHANGE_PASSWORD
+                                        props.buttonText
                                     )}
                                 </Button>
                             </Form>
