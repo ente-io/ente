@@ -3,12 +3,12 @@ import { Button, Modal } from 'react-bootstrap';
 
 interface Props {
     show: boolean;
-    children;
+    children?: any;
     onHide: () => void;
-    attributes: {
-        title: string;
-        close: { text: string; action: any };
-        proceed: { text: string; action: any };
+    attributes?: {
+        title?: string;
+        close?: { text: string };
+        proceed?: { text: string; action: any };
     };
 }
 export function MessageDialog({ attributes, children, ...props }: Props) {
@@ -25,7 +25,7 @@ export function MessageDialog({ attributes, children, ...props }: Props) {
             </Modal.Body>
             <Modal.Footer style={{ borderTop: 'none' }}>
                 {attributes.close && (
-                    <Button variant="danger" onClick={attributes.close.action}>
+                    <Button variant="danger" onClick={props.onHide}>
                         {attributes.close.text}
                     </Button>
                 )}
