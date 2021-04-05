@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Spinner } from 'react-bootstrap';
 import { downloadAsFile } from 'utils/common';
 import { getRecoveryKey } from 'utils/crypto';
+import { setJustSignedUp } from 'utils/storage';
 import constants from 'utils/strings/constants';
 import { MessageDialog } from './MessageDailog';
 
@@ -27,27 +28,31 @@ function RecoveryKeyModal(props: Props) {
         main();
     }, [props.show]);
 
+    function onSaveClick() {
+        downloadAsFile(constants.RECOVERY_KEY_FILENAME, recoveryKey);
+        onSaveLaterClick();
+    }
+    function onSaveLaterClick() {
+        props.onHide();
+        setJustSignedUp(false);
+    }
     return (
         <MessageDialog
             {...props}
             attributes={{
                 title: constants.DOWNLOAD_RECOVERY_KEY,
-                cancel: { text: constants.SAVE_LATER },
+                cancel: {
+                    text: constants.SAVE_LATER,
+                    action: onSaveLaterClick,
+                },
+                staticBackdrop: true,
                 proceed: {
                     text: constants.SAVE,
-                    action: () => {
-                        downloadAsFile(
-                            constants.RECOVERY_KEY_FILENAME,
-                            recoveryKey
-                        );
-                        props.onHide();
-                    },
+                    action: onSaveClick,
                 },
             }}
         >
-            <p>
-                {constants.RECOVERY_KEY_DESCRIPTION}
-            </p>
+            <p>{constants.RECOVERY_KEY_DESCRIPTION}</p>
             <div
                 style={{
                     display: 'flex',
@@ -74,9 +79,7 @@ function RecoveryKeyModal(props: Props) {
                     <Spinner animation="border" />
                 )}
             </div>
-            <p>
-                {constants.KEY_NOT_STORED_DISCLAIMER}
-            </p>
+            <p>{constants.KEY_NOT_STORED_DISCLAIMER}</p>
         </MessageDialog>
     );
 }

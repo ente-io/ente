@@ -16,6 +16,7 @@ import isElectron from 'is-electron';
 import { collection } from 'services/collectionService';
 import { useRouter } from 'next/router';
 import RecoveryKeyModal from './RecoveryKeyModal';
+import { justSignedUp } from 'utils/storage';
 interface Props {
     files: file[];
     collections: collection[];
@@ -26,7 +27,7 @@ export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
     const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
     const [isOpen, setIsOpen] = useState(false);
-    const [modalView, setModalView] = useState(false);
+    const [modalView, setModalView] = useState(justSignedUp());
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -67,11 +68,11 @@ export default function Sidebar(props: Props) {
                 <div style={{ color: '#959595' }}>
                     {subscription?.productID == 'free'
                         ? constants.FREE_SUBSCRIPTION_INFO(
-                            subscription?.expiryTime
-                        )
+                              subscription?.expiryTime
+                          )
                         : constants.PAID_SUBSCRIPTION_INFO(
-                            subscription?.expiryTime
-                        )}
+                              subscription?.expiryTime
+                          )}
                 </div>
             </div>
             <div style={{ outline: 'none', marginTop: '30px' }}>

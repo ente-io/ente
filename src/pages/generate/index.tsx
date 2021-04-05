@@ -11,6 +11,7 @@ import CryptoWorker, {
 } from 'utils/crypto';
 import PasswordForm from 'components/PasswordForm';
 import { KeyAttributes } from 'types';
+import { setJustSignedUp } from 'utils/storage';
 
 export interface KEK {
     key: string;
@@ -90,6 +91,7 @@ export default function Generate() {
         );
 
         setSessionKeys(masterKey);
+        setJustSignedUp(true);
         router.push('/gallery');
     };
 
