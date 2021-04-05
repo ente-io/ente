@@ -11,15 +11,16 @@ export interface Props {
 function RecoveryKeyModal(props: Props) {
     const [recoveryKey, setRecoveryKey] = useState(null);
     useEffect(() => {
+        if (!props.show) {
+            return;
+        }
         const main = async () => {
             const recoveryKey = await getRecoveryKey();
-            console.log(recoveryKey);
 
             setRecoveryKey(recoveryKey);
         };
         main();
     }, [props.show]);
-    console.log(recoveryKey);
 
     return (
         <Modal {...props} size="lg" centered>
