@@ -14,6 +14,13 @@ export interface UpdatedKey {
     memLimit: number;
     opsLimit: number;
 }
+
+export interface RecoveryKey {
+    masterKeyEncryptedWithRecoveryKey: string;
+    masterKeyDecryptionNonce: string;
+    recoveryKeyEncryptedWithMasterKey: string;
+    recoveryKeyDecryptionNonce: string;
+}
 const ENDPOINT = getEndpoint();
 
 export interface user {
@@ -53,6 +60,17 @@ export const setKeys = (token: string, updatedKey: UpdatedKey) => {
     return HTTPService.put(`${ENDPOINT}/users/keys`, updatedKey, null, {
         'X-Auth-Token': token,
     });
+};
+
+export const SetRecoveryKey = (token: string, recoveryKey: RecoveryKey) => {
+    return HTTPService.put(
+        `${ENDPOINT}/users/recovery-key`,
+        recoveryKey,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
 };
 
 export const logoutUser = async () => {
