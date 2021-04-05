@@ -104,8 +104,8 @@ export class Crypto {
         return libsodium.encryptUTF8(data, key);
     }
 
-    async generateMasterKey() {
-        return libsodium.generateMasterKey();
+    async generateEncryptionKey() {
+        return libsodium.generateEncryptionKey();
     }
 
     async generateSaltToDeriveKey() {

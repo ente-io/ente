@@ -313,7 +313,7 @@ export async function deriveIntermediateKey(passphrase: string, salt: string) {
     };
 }
 
-export async function generateMasterKey() {
+export async function generateEncryptionKey() {
     await sodium.ready;
     return await toB64(sodium.crypto_kdf_keygen());
 }
