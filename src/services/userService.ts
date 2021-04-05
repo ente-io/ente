@@ -7,6 +7,13 @@ import { clearData } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 
+export interface UpdatedKey {
+    kekSalt: string;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    memLimit: number;
+    opsLimit: number;
+}
 const ENDPOINT = getEndpoint();
 
 export interface user {
@@ -40,6 +47,12 @@ export const putAttributes = (
             'X-Auth-Token': token,
         }
     );
+};
+
+export const setKeys = (token: string, updatedKey: UpdatedKey) => {
+    return HTTPService.put(`${ENDPOINT}/users/keys`, updatedKey, null, {
+        'X-Auth-Token': token,
+    });
 };
 
 export const logoutUser = async () => {
