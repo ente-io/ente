@@ -7,6 +7,10 @@ export interface KeyAttributes {
     publicKey: string;
     encryptedSecretKey: string;
     secretKeyDecryptionNonce: string;
+    masterKeyEncryptedWithRecoveryKey: string;
+    masterKeyDecryptionNonce: string;
+    recoveryKeyEncryptedWithMasterKey: string;
+    recoveryKeyDecryptionNonce: string;
 }
 
 export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
