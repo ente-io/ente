@@ -124,9 +124,13 @@ const GlobalStyles = createGlobalStyle`
     .btn-outline-success {
         color: #2dc262;
         border-color: #2dc262;
+        border-width: 2px;
     }
     .btn-outline-success:hover {
         background: #2dc262;
+    }
+    .btn-outline-danger {
+        border-width: 2px;
     }
     .card {
         background-color: #242424;

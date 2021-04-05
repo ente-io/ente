@@ -33,13 +33,13 @@ export function MessageDialog({ attributes, children, ...props }: Props) {
                         </Button>
                     )}
                     {attributes.cancel && (
-                        <Button variant="danger" onClick={props.onHide}>
+                        <Button variant="outline-danger" onClick={props.onHide}>
                             {attributes.cancel.text}
                         </Button>
                     )}
                     {attributes.proceed && (
                         <Button
-                            variant="success"
+                            variant="outline-success"
                             onClick={attributes.proceed.action}
                         >
                             {attributes.proceed.text}
