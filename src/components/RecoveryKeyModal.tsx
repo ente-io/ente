@@ -45,7 +45,9 @@ function RecoveryKeyModal(props: Props) {
                 },
             }}
         >
-            {constants.PASSPHRASE_DISCLAIMER()}
+            <p>
+                {constants.RECOVERY_KEY_DESCRIPTION}
+            </p>
             <div
                 style={{
                     display: 'flex',
@@ -63,7 +65,7 @@ function RecoveryKeyModal(props: Props) {
                         style={{
                             wordWrap: 'break-word',
                             overflowWrap: 'break-word',
-                            minWidth: '40%',
+                            minWidth: '30%',
                         }}
                     >
                         {recoveryKey}
@@ -72,7 +74,9 @@ function RecoveryKeyModal(props: Props) {
                     <Spinner animation="border" />
                 )}
             </div>
-            {constants.KEY_NOT_STORED_DISCLAIMER()}
+            <p>
+                {constants.KEY_NOT_STORED_DISCLAIMER}
+            </p>
         </MessageDialog>
     );
 }
