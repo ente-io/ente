@@ -150,7 +150,8 @@ const GlobalStyles = createGlobalStyle`
         margin-top: 50px;
     }
     .alert-success {
-        background-color: #c4ffd6;
+        background-color: #a9f7ff;
+        color: #000000;
     }
     .alert-primary {
         background-color: #c4ffd6;

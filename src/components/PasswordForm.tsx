@@ -43,7 +43,6 @@ function SetPassword(props: Props) {
     };
     return (
         <Container>
-            {/* <Image alt="vault" src="/vault.png" style={{ paddingBottom: '40px' }} /> */}
             <Card style={{ maxWidth: '540px', padding: '20px' }}>
                 <Card.Body>
                     <div
@@ -81,7 +80,7 @@ function SetPassword(props: Props) {
                                         onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                                errors.passphrase
+                                            errors.passphrase
                                         )}
                                         autoFocus={true}
                                         disabled={loading}

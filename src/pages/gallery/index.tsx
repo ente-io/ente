@@ -103,16 +103,6 @@ const ListContainer = styled.div<{ columns: number }>`
     }
 `;
 
-const Image = styled.img`
-    width: 200px;
-    max-width: 100%;
-    display: block;
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 20px;
-`;
-
 const DateContainer = styled.div`
     padding-top: 15px;
 `;
@@ -467,8 +457,7 @@ export default function Gallery(props: Props) {
             <UploadButton openFileUploader={props.openFileUploader} />
             {!isFirstLoad && data.length == 0 ? (
                 <Jumbotron>
-                    <Image alt="vault" src="/vault.png" />
-                    <Button variant="primary" onClick={props.openFileUploader}>
+                    <Button variant="outline-success" onClick={props.openFileUploader} style={{ paddingLeft: '32px', paddingRight: '32px', paddingTop: '12px', paddingBottom: '12px' }}>
                         {constants.UPLOAD_FIRST_PHOTO}
                     </Button>
                 </Jumbotron>
@@ -518,13 +507,13 @@ export default function Gallery(props: Props) {
                                         )
                                             ? 'Today'
                                             : isSameDay(
-                                                  new Date(currentDate),
-                                                  new Date(Date.now() - A_DAY)
-                                              )
-                                            ? 'Yesterday'
-                                            : dateTimeFormat.format(
-                                                  currentDate
-                                              ),
+                                                new Date(currentDate),
+                                                new Date(Date.now() - A_DAY)
+                                            )
+                                                ? 'Yesterday'
+                                                : dateTimeFormat.format(
+                                                    currentDate
+                                                ),
                                     });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TILE,
@@ -555,7 +544,7 @@ export default function Gallery(props: Props) {
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                        ITEM_TYPE.TIME
+                                            ITEM_TYPE.TIME
                                             ? DATE_CONTAINER_HEIGHT
                                             : IMAGE_CONTAINER_HEIGHT
                                     }
@@ -572,14 +561,14 @@ export default function Gallery(props: Props) {
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                        ITEM_TYPE.TIME
+                                                            ITEM_TYPE.TIME
                                                             ? 1
                                                             : columns
                                                     }
                                                 >
                                                     {timeStampList[index]
                                                         .itemType ===
-                                                    ITEM_TYPE.TIME ? (
+                                                        ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
                                                                 timeStampList[
@@ -598,7 +587,7 @@ export default function Gallery(props: Props) {
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                        idx
+                                                                    idx
                                                                 );
                                                             }
                                                         )
