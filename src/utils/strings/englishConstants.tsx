@@ -163,6 +163,14 @@ const englishConstants = {
     CHANGE_PASSWORD: 'change password',
     GO_BACK: 'go back',
     DOWNLOAD_RECOVERY_KEY: 'recovery key',
+    SAVE_LATER: 'save later',
+    SAVE: 'save',
+    KEY_NOT_STORED_DISCLAIMER: () => (
+        <>
+            <p>we don't store this key</p>
+            <p>so please save this key in a safe place</p>
+        </>
+    ),
 };
 
 export default englishConstants;

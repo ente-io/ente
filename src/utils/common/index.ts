@@ -16,3 +16,7 @@ export function getFileExtension(fileName): string {
 export function runningInBrowser() {
     return typeof window !== 'undefined';
 }
+
+export function downloadAsFile(key: string) {
+    console.log('recovery key downloaded');
+}

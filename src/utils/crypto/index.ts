@@ -49,4 +49,8 @@ export const setSessionKeys = async (key: string) => {
     setData(LS_KEYS.SESSION, { sessionKey, sessionNonce });
 };
 
+export const getRecoveryKey = async () => {
+    return 'dsadsadsadasdq3ds7a6d5sa76ds7ad5s7a6d57sa6d57s6ad57sdsadsadsadasdq3ds7a6d5sa76ds7ad5s7a6d57sa6d57s6ad57sa6d5sa76das7d45dsadsadsadasdq3ds7a6d5sa76ds7ad5s7a6d57sa6d57s6ad57sa6d5sa76das7d45a6d5sa76das7d45';
+};
+
 export default CryptoWorker;
