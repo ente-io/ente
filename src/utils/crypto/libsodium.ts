@@ -365,3 +365,8 @@ export async function toHex(input: string) {
     await sodium.ready;
     return sodium.to_hex(input);
 }
+
+export async function fromHex(input: string) {
+    await sodium.ready;
+    return sodium.from_hex(input);
+}
