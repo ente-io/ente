@@ -15,6 +15,7 @@ import { file } from 'services/fileService';
 import isElectron from 'is-electron';
 import { collection } from 'services/collectionService';
 import { useRouter } from 'next/router';
+import RecoveryKeyModal from './RecoveryKeyModal';
 interface Props {
     files: file[];
     collections: collection[];
@@ -24,6 +25,7 @@ export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
     const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
     const [isOpen, setIsOpen] = useState(false);
+    const [modalView, setModalView] = useState(false);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -129,12 +131,18 @@ export default function Sidebar(props: Props) {
             >
                 {constants.CHANGE_PASSWORD}
             </h5>
-            <h5
-                style={{ cursor: 'pointer', marginTop: '30px' }}
-                onClick={() => null}
-            >
-                {constants.DOWNLOAD_RECOVERY_KEY}
-            </h5>
+            <>
+                <RecoveryKeyModal
+                    show={modalView}
+                    onHide={() => setModalView(false)}
+                />
+                <h5
+                    style={{ cursor: 'pointer', marginTop: '30px' }}
+                    onClick={() => setModalView(true)}
+                >
+                    {constants.DOWNLOAD_RECOVERY_KEY}
+                </h5>
+            </>
             <h5
                 style={{
                     cursor: 'pointer',
