@@ -54,6 +54,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   final PageController _pageController = PageController();
   final _future = FileRepository.instance.loadFiles();
   int _selectedTabIndex = 0;
+  Widget _headerWidgetWithSettingsButton;
 
   StreamSubscription<LocalPhotosUpdatedEvent> _photosUpdatedEvent;
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
@@ -66,6 +67,15 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void initState() {
     _logger.info("Building initstate");
+    _headerWidgetWithSettingsButton = Container(
+      margin: const EdgeInsets.only(top: 12),
+      child: Stack(
+        children: [
+          _headerWidget,
+          _settingsButton,
+        ],
+      ),
+    );
     _photosUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       _logger.info("Building because local photos updated");
@@ -226,15 +236,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (snapshot.hasData) {
           var header;
           if (_selectedFiles.files.isEmpty) {
-            header = Container(
-              margin: EdgeInsets.only(top: 12),
-              child: Stack(
-                children: [
-                  _headerWidget,
-                  _settingsButton,
-                ],
-              ),
-            );
+            header = _headerWidgetWithSettingsButton;
           } else {
             header = _headerWidget;
           }

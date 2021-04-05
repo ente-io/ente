@@ -158,46 +158,46 @@ class _GalleryState extends State<Gallery> {
         cacheExtent: 1500,
         addAutomaticKeepAlives: true,
       );
-      return gallery;
-    }
-    gallery = DraggableScrollbar.semicircle(
-      key: _scrollKey,
-      initialScrollIndex: _lastIndex,
-      labelTextBuilder: (position) {
-        final index =
-            min((position * itemCount).floor(), _collatedFiles.length - 1);
-        return Text(
-          getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
-              _collatedFiles[index][0].creationTime)),
-          style: TextStyle(
-            color: Colors.black,
-            backgroundColor: Colors.white,
-            fontSize: 14,
-          ),
-        );
-      },
-      labelConstraints: BoxConstraints.tightFor(width: 100.0, height: 36.0),
-      onChange: (position) {
-        final index =
-            min((position * itemCount).floor(), _collatedFiles.length - 1);
-        if (index == _lastIndex) {
-          return;
-        }
-        _lastIndex = index;
-        _itemScrollController.jumpTo(index: index);
-      },
-      child: ScrollablePositionedList.builder(
-        itemCount: itemCount,
-        itemBuilder: _buildListItem,
-        itemScrollController: _itemScrollController,
+    } else {
+      gallery = DraggableScrollbar.semicircle(
+        key: _scrollKey,
         initialScrollIndex: _lastIndex,
-        minCacheExtent: 1500,
-        addAutomaticKeepAlives: true,
-        physics: _MaxVelocityPhysics(velocityThreshold: 128),
-        itemPositionsListener: _itemPositionsListener,
-      ),
-      itemCount: itemCount,
-    );
+        labelTextBuilder: (position) {
+          final index =
+              min((position * itemCount).floor(), _collatedFiles.length - 1);
+          return Text(
+            getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
+                _collatedFiles[index][0].creationTime)),
+            style: TextStyle(
+              color: Colors.black,
+              backgroundColor: Colors.white,
+              fontSize: 14,
+            ),
+          );
+        },
+        labelConstraints: BoxConstraints.tightFor(width: 100.0, height: 36.0),
+        onChange: (position) {
+          final index =
+              min((position * itemCount).floor(), _collatedFiles.length - 1);
+          if (index == _lastIndex) {
+            return;
+          }
+          _lastIndex = index;
+          _itemScrollController.jumpTo(index: index);
+        },
+        child: ScrollablePositionedList.builder(
+          itemCount: itemCount,
+          itemBuilder: _buildListItem,
+          itemScrollController: _itemScrollController,
+          initialScrollIndex: _lastIndex,
+          minCacheExtent: 1500,
+          addAutomaticKeepAlives: true,
+          physics: _MaxVelocityPhysics(velocityThreshold: 128),
+          itemPositionsListener: _itemPositionsListener,
+        ),
+        itemCount: itemCount,
+      );
+    }
     if (widget.isHomePageGallery) {
       gallery = Container(
         margin: const EdgeInsets.only(bottom: 50),
