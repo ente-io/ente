@@ -16,7 +16,7 @@ const CONFIRM_ACTION_VALUES = [
     { text: 'DOWNLOAD_APP', type: 'primary' },
 ];
 
-export interface Props {
+interface Props {
     callback: any;
     action: CONFIRM_ACTION;
     show: boolean;
