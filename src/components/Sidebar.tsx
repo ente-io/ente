@@ -14,6 +14,7 @@ import exportService from 'services/exportService';
 import { file } from 'services/fileService';
 import isElectron from 'is-electron';
 import { collection } from 'services/collectionService';
+import { useRouter } from 'next/router';
 interface Props {
     files: file[];
     collections: collection[];
@@ -48,6 +49,7 @@ export default function Sidebar(props: Props) {
             props.setConfirmAction(CONFIRM_ACTION.DOWNLOAD_APP);
         }
     }
+    const router = useRouter();
 
     return (
         <Menu
@@ -121,7 +123,12 @@ export default function Sidebar(props: Props) {
             >
                 {constants.EXPORT}
             </h5>
-
+            <h5
+                style={{ cursor: 'pointer', marginTop: '30px' }}
+                onClick={() => router.push('changePassword')}
+            >
+                {constants.CHANGE_PASSWORD}
+            </h5>
             <h5
                 style={{
                     cursor: 'pointer',
