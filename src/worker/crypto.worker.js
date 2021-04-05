@@ -131,6 +131,9 @@ export class Crypto {
     async fromB64(string) {
         return libsodium.fromB64(string);
     }
+    async toHex(string) {
+        return libsodium.toHex(string);
+    }
 }
 
 Comlink.expose(Crypto);
