@@ -112,7 +112,7 @@ const englishConstants = {
         'sorry, this operation is currently not supported on the web, please install the desktop app',
     DOWNLOAD_APP: 'download',
     APP_DOWNLOAD_URL: 'https://github.com/ente-io/bhari-frame/releases/',
-    EXPORT: 'export ',
+    EXPORT: 'export data',
     SUBSCRIPTION_PLAN: 'subscription plan',
     USAGE_DETAILS: 'usage',
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (

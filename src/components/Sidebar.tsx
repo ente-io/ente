@@ -67,11 +67,11 @@ export default function Sidebar(props: Props) {
                 <div style={{ color: '#959595' }}>
                     {subscription?.productID == 'free'
                         ? constants.FREE_SUBSCRIPTION_INFO(
-                              subscription?.expiryTime
-                          )
+                            subscription?.expiryTime
+                        )
                         : constants.PAID_SUBSCRIPTION_INFO(
-                              subscription?.expiryTime
-                          )}
+                            subscription?.expiryTime
+                        )}
                 </div>
             </div>
             <div style={{ outline: 'none', marginTop: '30px' }}>
@@ -119,7 +119,14 @@ export default function Sidebar(props: Props) {
                     support
                 </a>
             </h5>
-
+            <div
+                style={{
+                    height: '1px',
+                    marginTop: '40px',
+                    background: '#242424',
+                    width: '100%',
+                }}
+            ></div>
             <h5
                 style={{ cursor: 'pointer', marginTop: '30px' }}
                 onClick={exportFiles}
@@ -145,6 +152,14 @@ export default function Sidebar(props: Props) {
                     {constants.DOWNLOAD_RECOVERY_KEY}
                 </h5>
             </>
+            <div
+                style={{
+                    height: '1px',
+                    marginTop: '40px',
+                    background: '#242424',
+                    width: '100%',
+                }}
+            ></div>
             <h5
                 style={{
                     cursor: 'pointer',
