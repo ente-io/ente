@@ -32,7 +32,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("add memories"),
+        title: Text("add files"),
       ),
       body: _getBody(context),
     );
@@ -46,7 +46,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(
-                    top: 16, bottom: 12, left: 24, right: 24),
+                    top: 30, bottom: 12, left: 40, right: 40),
                 child: OutlineButton.icon(
                   padding: EdgeInsets.all(20),
                   icon: Icon(Icons.create_new_folder_outlined),
@@ -63,19 +63,22 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
           ],
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 8, 16),
+          padding: const EdgeInsets.fromLTRB(40, 24, 40, 20),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
               "to an existing album",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColorLight,
+                color: Theme.of(context).primaryColorLight.withOpacity(0.8),
               ),
             ),
           ),
         ),
-        _getExistingCollectionsWidget(),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+          child: _getExistingCollectionsWidget(),
+        ),
       ],
     );
   }
