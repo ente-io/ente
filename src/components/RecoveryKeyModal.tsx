@@ -11,7 +11,7 @@ interface Props {
     onHide: () => void;
     somethingWentWrong: any;
 }
-function RecoveryKeyModal(props: Props) {
+function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
     const [recoveryKey, setRecoveryKey] = useState(null);
     useEffect(() => {
         if (!props.show) {
@@ -20,7 +20,7 @@ function RecoveryKeyModal(props: Props) {
         const main = async () => {
             const recoveryKey = await getRecoveryKey();
             if (!recoveryKey) {
-                props.somethingWentWrong();
+                somethingWentWrong();
                 props.onHide();
             }
             setRecoveryKey(recoveryKey);
