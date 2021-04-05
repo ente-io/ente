@@ -191,17 +191,12 @@ export default function Generate() {
                                     {loading ? (
                                         <Spinner animation="border" />
                                     ) : (
-                                        constants.SET_PASSPHRASE
+                                        constants.CHANGE_PASSWORD
                                     )}
                                 </Button>
                             </Form>
                         )}
                     </Formik>
-                    <div className="text-center" style={{ marginTop: '20px' }}>
-                        <Button variant="link" onClick={() => router.push('/')}>
-                            {constants.LOGOUT}
-                        </Button>
-                    </div>
                 </Card.Body>
             </Card>
         </Container>
