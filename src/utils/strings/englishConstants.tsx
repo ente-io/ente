@@ -171,6 +171,7 @@ const englishConstants = {
             <p>so please save this key in a safe place</p>
         </>
     ),
+    RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
 };
 
 export default englishConstants;
