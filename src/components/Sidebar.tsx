@@ -20,6 +20,7 @@ interface Props {
     files: file[];
     collections: collection[];
     setConfirmAction: any;
+    somethingWentWrong: any;
 }
 export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
@@ -135,6 +136,7 @@ export default function Sidebar(props: Props) {
                 <RecoveryKeyModal
                     show={modalView}
                     onHide={() => setModalView(false)}
+                    somethingWentWrong={props.somethingWentWrong}
                 />
                 <h5
                     style={{ cursor: 'pointer', marginTop: '30px' }}

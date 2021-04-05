@@ -8,6 +8,7 @@ import { MessageDialog } from './MessageDailog';
 interface Props {
     show: boolean;
     onHide: () => void;
+    somethingWentWrong: any;
 }
 function RecoveryKeyModal(props: Props) {
     const [recoveryKey, setRecoveryKey] = useState(null);
@@ -17,7 +18,10 @@ function RecoveryKeyModal(props: Props) {
         }
         const main = async () => {
             const recoveryKey = await getRecoveryKey();
-
+            if (!recoveryKey) {
+                props.somethingWentWrong();
+                props.onHide();
+            }
             setRecoveryKey(recoveryKey);
         };
         main();
