@@ -43,6 +43,7 @@ export default function Credentials() {
     return (
         <PassPhraseForm
             callback={recover}
+            fieldType="text"
             title={constants.RECOVER_ACCOUNT}
             placeholder={constants.RETURN_RECOVERY_KEY_HINT}
             buttonText={constants.RECOVER}
