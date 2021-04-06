@@ -5,6 +5,13 @@ import { getToken } from 'utils/common/key';
 import { runningInBrowser } from 'utils/common/utilFunctions';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
 import { convertBytesToGBs } from 'utils/billingUtil';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
+
+enum PAYMENT_INTENT_STATUS {
+    SUCCEEDED = 'succeeded',
+    REQUIRE_ACTION = 'requires_action',
+    REQUIRE_PAYMENT_METHOD = 'requires_payment_method',
+}
 export interface Subscription {
     id: number;
     userID: number;
@@ -24,23 +31,20 @@ export interface Plan {
     stripeID: string;
 }
 
-export interface Invoice {
-    lines: {
-        data: Array<{
-            amount: number;
-            currency: string;
-            description: string;
-        }>;
-    };
-    total: number;
-    created: number;
+export interface SubscriptionUpdateResponse {
+    subscription: Subscription;
+    status: PAYMENT_INTENT_STATUS;
+    clientSecret: string;
 }
 export const FREE_PLAN = 'free';
 class billingService {
-    private stripe;
+    private stripe: Stripe;
     constructor() {
         let publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-        this.stripe = runningInBrowser() && window['Stripe'](publishableKey);
+        const main = async () => {
+            this.stripe = await loadStripe(publishableKey);
+        };
+        runningInBrowser() && main();
     }
     public async updatePlans() {
         try {
@@ -90,11 +94,33 @@ class billingService {
                     'X-Auth-Token': getToken(),
                 }
             );
-            const subscription = response.data['subscription'];
-            setData(LS_KEYS.SUBSCRIPTION, subscription);
+            const subscriptionUpdateResponse: SubscriptionUpdateResponse =
+                response.data['subscriptionUpdateResponse'];
+            console.log(subscriptionUpdateResponse);
+            switch (subscriptionUpdateResponse.status) {
+                case PAYMENT_INTENT_STATUS.SUCCEEDED:
+                    await this.acknowledgeSubscriptionUpdate();
+                    break;
+                case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
+                    throw new Error(
+                        PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD
+                    );
+                case PAYMENT_INTENT_STATUS.REQUIRE_ACTION:
+                    const { error } = await this.stripe.confirmCardPayment(
+                        subscriptionUpdateResponse.clientSecret
+                    );
+                    if (error) {
+                        throw error;
+                    } else {
+                        await this.acknowledgeSubscriptionUpdate();
+                    }
+                    break;
+            }
         } catch (e) {
             console.error(e);
             throw e;
+        } finally {
+            await this.syncSubscription();
         }
     }
 
@@ -164,7 +190,7 @@ class billingService {
             console.error('unable to get customer portal url');
         }
     }
-    async getUsage() {
+    public async getUsage() {
         try {
             const response = await HTTPService.get(
                 `${ENDPOINT}/billing/usage`,
@@ -176,6 +202,20 @@ class billingService {
             return convertBytesToGBs(response.data.usage);
         } catch (e) {
             console.error('error getting usage', e);
+        }
+    }
+    private async acknowledgeSubscriptionUpdate() {
+        try {
+            await HTTPService.post(
+                `${ENDPOINT}/billing/stripe/acknowledge-subscription-update`,
+                null,
+                null,
+                {
+                    'X-Auth-Token': getToken(),
+                }
+            );
+        } catch (e) {
+            console.error('error acknowledging subscription update', e);
         }
     }
 }
