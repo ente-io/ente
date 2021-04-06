@@ -118,8 +118,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         child: Column(
           children: [
             Padding(padding: EdgeInsets.all(6)),
-            SectionTitle("device folders"),
-            Padding(padding: EdgeInsets.all(6)),
+            SectionTitle("on device"),
+            Padding(padding: EdgeInsets.all(8)),
             items.folders.isEmpty
                 ? Padding(
                     padding: const EdgeInsets.all(22),
@@ -147,12 +147,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   ),
             Divider(),
             Padding(padding: EdgeInsets.all(10)),
-            SectionTitle("backed-up memories"),
-            Padding(padding: EdgeInsets.all(14)),
+            SectionTitle("on ente"),
+            Padding(padding: EdgeInsets.all(12)),
             BillingService.instance.hasActiveSubscription()
                 ? GridView.builder(
                     shrinkWrap: true,
-                    padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+                    padding: EdgeInsets.fromLTRB(0, 0, 12, 0),
                     physics: ScrollPhysics(), // to disable GridView's scrolling
                     itemBuilder: (context, index) {
                       return _buildCollection(
