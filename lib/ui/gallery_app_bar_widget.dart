@@ -85,7 +85,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             : Text(
                 widget.title,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.60),
+                  color: Colors.white.withOpacity(0.80),
                 ),
               ),
         actions: _getDefaultActions(context),
