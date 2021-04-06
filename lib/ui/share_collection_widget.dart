@@ -171,16 +171,16 @@ class _SharingDialogState extends State<SharingDialog> {
     if (publicKey == null) {
       Navigator.of(context, rootNavigator: true).pop('dialog');
       final dialog = AlertDialog(
-        title: Text("Invite to ente?"),
-        content: Text("Looks like " +
+        title: Text("invite to ente?"),
+        content: Text("looks like " +
             email +
-            " hasn't signed up for ente yet. Would you like to invite them?"),
+            " hasn't signed up for ente yet. would you like to invite them?"),
         actions: [
           FlatButton(
             child: Text("Invite"),
             onPressed: () {
               shareText(
-                  "Hey, I have some photos to show you. Please install https://ente.io/app so that I can share them privately.");
+                  "Hey, I have some photos to share. Please install https://ente.io so that I can share them privately.");
             },
           ),
         ],
