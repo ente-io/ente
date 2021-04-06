@@ -215,7 +215,7 @@ export const AddCollection = async (
         const worker = await new CryptoWorker();
         const encryptionKey = await getActualKey();
         const token = getToken();
-        const collectionKey: string = await worker.generateMasterKey();
+        const collectionKey: string = await worker.generateEncryptionKey();
         const {
             encryptedData: encryptedKey,
             nonce: keyDecryptionNonce,
