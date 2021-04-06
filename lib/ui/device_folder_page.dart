@@ -67,6 +67,7 @@ class _BackupConfigurationHeaderWidgetState
         Configuration.instance.getPathsToBackUp().contains(widget.path);
     return Container(
       padding: EdgeInsets.only(left: 12, right: 12),
+      margin: EdgeInsets.only(bottom: 12),
       color: Colors.grey.withOpacity(0.15),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
