@@ -2183,6 +2183,18 @@
     jsonwebtoken "^8.5.1"
     path-to-regexp "^6.1.0"
 
+"@stripe/react-stripe-js@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@stripe/react-stripe-js/-/react-stripe-js-1.4.0.tgz#a67e72202297fc409dc2c8c4f3fb98e0b61fa06d"
+  integrity sha512-Pz5QmG8PgJ3pi8gOWxlngk+ns63p2L1Ds192fn55ykZNRKfGz3G6sfssUVThHn/NAt2Hp1eCEsy/hvlKnXJI6g==
+  dependencies:
+    prop-types "^15.7.2"
+
+"@stripe/stripe-js@^1.13.2":
+  version "1.13.2"
+  resolved "https://registry.yarnpkg.com/@stripe/stripe-js/-/stripe-js-1.13.2.tgz#bb2f561085b5dd091355df871d432b8e1fd467f6"
+  integrity sha512-fycUk7ECukNc31lD5apcrUgdRC1BfiIacs+CpacoCjOgo3ablolnWCvDQWMmVWtODYa8bBv2dlBla+Edc5OvZg==
+
 "@types/classnames@^2.2.10":
   version "2.2.11"
   resolved "https://registry.yarnpkg.com/@types/classnames/-/classnames-2.2.11.tgz#2521cc86f69d15c5b90664e4829d84566052c1cf"

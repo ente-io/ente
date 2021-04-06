@@ -237,9 +237,6 @@ export default function App({ Component, pageProps, err }) {
                 <title>{constants.TITLE}</title>
                 <script async src={`https://sa.ente.io/latest.js`} />
             </Head>
-            <Head>
-                <script src="https://js.stripe.com/v3/"></script>
-            </Head>
             <GlobalStyles />
             <div style={{ display: navbarIconView ? 'block' : 'none' }}>
                 <Sidebar
