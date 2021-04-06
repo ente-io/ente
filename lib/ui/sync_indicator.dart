@@ -47,7 +47,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
       return _getErrorWidget();
     }
     if (_event.status == SyncStatus.completed_first_gallery_import ||
-        _event.status == SyncStatus.completed) {
+        _event.status == SyncStatus.completed_backup) {
       Future.delayed(Duration(milliseconds: 3000), () {
         if (mounted) {
           setState(() {
@@ -58,7 +58,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     } else {
       _containerHeight = 48;
     }
-    final icon = _event.status == SyncStatus.completed
+    final icon = _event.status == SyncStatus.completed_backup
         ? Icon(
             Icons.cloud_done_outlined,
             color: Theme.of(context).accentColor,
@@ -216,7 +216,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     if (_event.status == SyncStatus.paused) {
       return _event.reason;
     }
-    if (_event.status == SyncStatus.completed) {
+    if (_event.status == SyncStatus.completed_backup) {
       if (_event.wasStopped) {
         return "sync stopped";
       } else {

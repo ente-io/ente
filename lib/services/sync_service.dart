@@ -98,8 +98,10 @@ class SyncService {
     try {
       await _doSync();
       if (_lastSyncStatusEvent != null &&
-          _lastSyncStatusEvent.status != SyncStatus.completed) {
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed));
+          _lastSyncStatusEvent.status !=
+              SyncStatus.completed_first_gallery_import &&
+          _lastSyncStatusEvent.status != SyncStatus.completed_backup) {
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed_backup));
       }
       successful = true;
     } on WiFiUnavailableError {
@@ -109,7 +111,7 @@ class SyncService {
     } on SyncStopRequestedError {
       _syncStopRequested = false;
       Bus.instance
-          .fire(SyncStatusUpdate(SyncStatus.completed, wasStopped: true));
+          .fire(SyncStatusUpdate(SyncStatus.completed_backup, wasStopped: true));
     } on NoActiveSubscriptionError {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
           error: NoActiveSubscriptionError()));

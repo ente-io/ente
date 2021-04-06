@@ -30,6 +30,6 @@ enum SyncStatus {
   preparing_for_upload,
   in_progress,
   paused,
-  completed,
+  completed_backup,
   error,
 }
