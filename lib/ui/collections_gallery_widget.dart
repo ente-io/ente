@@ -126,7 +126,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     child: nothingToSeeHere,
                   )
                 : Container(
-                    height: 160,
+                    height: 170,
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: items.folders.isEmpty
@@ -145,6 +145,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                             ),
                     ),
                   ),
+            Padding(padding: EdgeInsets.all(10)),
             Divider(),
             Padding(padding: EdgeInsets.all(10)),
             SectionTitle("on ente"),
@@ -177,8 +178,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         Configuration.instance.getPathsToBackUp().contains(folder.path);
     return GestureDetector(
       child: Container(
-        height: 110,
-        width: 132,
+        height: 140,
+        width: 142,
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
@@ -209,12 +210,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     ],
                   ),
                 ),
-                height: 110,
-                width: 110,
+                height: 120,
+                width: 120,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(6.0),
+              padding: const EdgeInsets.only(top: 10),
               child: Text(
                 folder.name,
                 style: TextStyle(

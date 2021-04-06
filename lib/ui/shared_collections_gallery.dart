@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
@@ -17,6 +19,8 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/shared_collection_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
+import 'package:photos/utils/share_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class SharedCollectionGallery extends StatefulWidget {
   const SharedCollectionGallery({Key key}) : super(key: key);
@@ -114,7 +118,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                       crossAxisCount: 2,
                     ),
                   )
-                : nothingToSeeHere,
+                : _getIncomingCollectionEmptyState(),
             Padding(padding: EdgeInsets.all(16)),
             Divider(height: 0),
             Padding(padding: EdgeInsets.all(14)),
@@ -134,7 +138,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                       itemCount: collections.outgoing.length,
                     ),
                   )
-                : nothingToSeeHere,
+                : _getOutgoingCollectionEmptyState(),
           ],
         ),
       ),
@@ -297,6 +301,109 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
       collection,
       thumbnail,
       lastUpdatedFile,
+    );
+  }
+
+  Widget _getIncomingCollectionEmptyState() {
+    return Container(
+      padding: EdgeInsets.only(top: 10),
+      child: Column(
+        children: [
+          Text(
+            "no one is sharing with you!",
+            style: TextStyle(color: Colors.white.withOpacity(0.6)),
+          ),
+          Container(
+            padding: EdgeInsets.fromLTRB(28, 20, 28, 46),
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+                side: BorderSide(
+                  width: 1,
+                  color: Theme.of(context).accentColor.withOpacity(0.4),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.outgoing_mail,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                  Padding(padding: EdgeInsets.all(4)),
+                  Text(
+                    "invite",
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                  ),
+                ],
+              ),
+              onPressed: () async {
+                shareText("Check out https://ente.io");
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _getOutgoingCollectionEmptyState() {
+    return Container(
+      padding: EdgeInsets.only(top: 10),
+      child: Column(
+        children: [
+          Text(
+            "you aren't sharing anything!",
+            style: TextStyle(color: Colors.white.withOpacity(0.6)),
+          ),
+          Container(
+            padding: EdgeInsets.fromLTRB(28, 20, 28, 46),
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+                side: BorderSide(
+                  width: 1,
+                  color: Theme.of(context).accentColor.withOpacity(0.4),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.person_add,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                  Padding(padding: EdgeInsets.all(4)),
+                  Text(
+                    "share",
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                  ),
+                ],
+              ),
+              onPressed: () async {
+                await showToast("select an album on ente to share",
+                    toastLength: Toast.LENGTH_LONG);
+                Bus.instance.fire(
+                    TabChangedEvent(1, TabChangedEventSource.collections_page));
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
