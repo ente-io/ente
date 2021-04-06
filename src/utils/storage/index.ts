@@ -8,7 +8,7 @@ export function setIsFirstLogin(status) {
 }
 
 export const justSignedUp = () =>
-    getData(LS_KEYS.JUST_SIGNED_UP)?.status ?? true;
+    getData(LS_KEYS.JUST_SIGNED_UP)?.status ?? false;
 
 export function setJustSignedUp(status) {
     setData(LS_KEYS.JUST_SIGNED_UP, { status });
