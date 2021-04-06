@@ -292,11 +292,14 @@ class _GalleryState extends State<Gallery> {
     }
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(6, 8, 0, 8),
+      padding: const EdgeInsets.fromLTRB(10, 8, 0, 10),
       alignment: Alignment.centerLeft,
       child: Text(
         title,
-        style: TextStyle(fontSize: 16),
+        style: TextStyle(
+          fontSize: 14,
+          color: Colors.white.withOpacity(0.85),
+        ),
       ),
     );
   }
