@@ -310,7 +310,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
       child: Column(
         children: [
           Text(
-            "no one is sharing with you!",
+            "no one is sharing with you",
             style: TextStyle(color: Colors.white.withOpacity(0.6)),
           ),
           Container(
@@ -360,7 +360,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
       child: Column(
         children: [
           Text(
-            "you aren't sharing anything!",
+            "you aren't sharing anything",
             style: TextStyle(color: Colors.white.withOpacity(0.6)),
           ),
           Container(
