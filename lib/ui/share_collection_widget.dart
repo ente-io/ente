@@ -67,8 +67,9 @@ class _SharingDialogState extends State<SharingDialog> {
     } else {
       children.add(Container(
         width: 220,
+        height: 50,
         child: button(
-          "Add",
+          "add",
           onPressed: () {
             _addEmailToCollection(_email);
           },
@@ -133,7 +134,10 @@ class _SharingDialogState extends State<SharingDialog> {
             ),
           ),
           IconButton(
-              icon: Icon(Icons.attach_email_outlined),
+              icon: Icon(
+                Icons.contact_mail_outlined,
+                color: Theme.of(context).buttonColor,
+              ),
               onPressed: () async {
                 final emailContact =
                     await FlutterContactPicker.pickEmailContact(
@@ -177,7 +181,7 @@ class _SharingDialogState extends State<SharingDialog> {
             " hasn't signed up for ente yet. would you like to invite them?"),
         actions: [
           FlatButton(
-            child: Text("Invite"),
+            child: Text("invite"),
             onPressed: () {
               shareText(
                   "Hey, I have some photos to share. Please install https://ente.io so that I can share them privately.");
