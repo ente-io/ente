@@ -12,7 +12,6 @@ import {
     isSubscribed,
     isUserRenewingPlan,
 } from 'utils/billingUtil';
-import PreviewProration from 'components/PreviewProration';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     padding-top: 20px;
@@ -46,11 +45,6 @@ function PlanSelector(props: Props) {
     const [loading, setLoading] = useState(false);
     const subscription = getUserSubscription();
     const plans = getPlans();
-    const [previewProrationView, setPreviewProrationView] = useState(false);
-    function closePreviewProration() {
-        setPreviewProrationView(false);
-    }
-    const [selectedPlan, setSelectedPlan] = useState<Plan>(null);
     const selectPlan = async (plan) => {
         var bannerMessage;
         try {
@@ -59,8 +53,7 @@ function PlanSelector(props: Props) {
                 if (isUserRenewingPlan(plan, subscription)) {
                     return;
                 }
-                setSelectedPlan(plan);
-                setPreviewProrationView(true);
+                await updateSubscription(plan);
             } else {
                 await billingService.buySubscription(plan.stripeID);
             }
@@ -76,10 +69,9 @@ function PlanSelector(props: Props) {
         }
     };
 
-    const updateSubscription = async () => {
+    const updateSubscription = async (plan) => {
         try {
-            setPreviewProrationView(false);
-            await billingService.updateSubscription(selectedPlan.stripeID);
+            await billingService.updateSubscription(plan.stripeID);
             let bannerMessage = {
                 message: constants.SUBSCRIPTION_UPDATE_SUCCESS,
                 variant: 'success',
@@ -139,43 +131,35 @@ function PlanSelector(props: Props) {
         </PlanIcon>
     ));
     return (
-        <>
-            <Modal
-                show={props.modalView}
-                onHide={props.closeModal}
-                dialogClassName="modal-90w"
-                style={{ maxWidth: '100%' }}
+        <Modal
+            show={props.modalView}
+            onHide={props.closeModal}
+            dialogClassName="modal-90w"
+            style={{ maxWidth: '100%' }}
+        >
+            <Modal.Header closeButton>
+                <Modal.Title style={{ marginLeft: '12px' }}>
+                    {isSubscribed(subscription)
+                        ? constants.MANAGE_PLAN
+                        : constants.CHOOSE_PLAN}
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    minHeight: '150px',
+                }}
             >
-                <Modal.Header closeButton>
-                    <Modal.Title style={{ marginLeft: '12px' }}>
-                        {isSubscribed(subscription)
-                            ? constants.MANAGE_PLAN
-                            : constants.CHOOSE_PLAN}
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        flexWrap: 'wrap',
-                        minHeight: '150px',
-                    }}
-                >
-                    {PlanIcons}
-                    {(!plans || loading) && (
-                        <LoaderOverlay>
-                            <Spinner animation="border" />
-                        </LoaderOverlay>
-                    )}
-                </Modal.Body>
-            </Modal>
-            <PreviewProration
-                show={previewProrationView}
-                closePreview={closePreviewProration}
-                selectedPlan={selectedPlan}
-                updateSubscription={updateSubscription}
-            />
-        </>
+                {PlanIcons}
+                {(!plans || loading) && (
+                    <LoaderOverlay>
+                        <Spinner animation="border" />
+                    </LoaderOverlay>
+                )}
+            </Modal.Body>
+        </Modal>
     );
 }
 

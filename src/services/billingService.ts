@@ -98,26 +98,6 @@ class billingService {
         }
     }
 
-    public async previewProration(productID) {
-        try {
-            const response = await HTTPService.post(
-                `${ENDPOINT}/billing/stripe/preview-proration`,
-                {
-                    productID,
-                },
-                null,
-                {
-                    'X-Auth-Token': getToken(),
-                }
-            );
-            const invoice: Invoice = response.data['invoice'];
-            // setData(LS_KEYS.SUBSCRIPTION, subscription);
-            return invoice;
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
     public async cancelSubscription() {
         try {
             const response = await HTTPService.get(
