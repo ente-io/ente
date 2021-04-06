@@ -313,7 +313,7 @@ export async function deriveIntermediateKey(passphrase: string, salt: string) {
     };
 }
 
-export async function generateMasterKey() {
+export async function generateEncryptionKey() {
     await sodium.ready;
     return await toB64(sodium.crypto_kdf_keygen());
 }
@@ -360,4 +360,13 @@ export async function toB64(input: Uint8Array) {
 export async function fromString(input: string) {
     await sodium.ready;
     return sodium.from_string(input);
+}
+export async function toHex(input: string) {
+    await sodium.ready;
+    return sodium.to_hex(await fromB64(input));
+}
+
+export async function fromHex(input: string) {
+    await sodium.ready;
+    return await toB64(sodium.from_hex(input));
 }

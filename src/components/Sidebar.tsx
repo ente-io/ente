@@ -14,15 +14,20 @@ import exportService from 'services/exportService';
 import { file } from 'services/fileService';
 import isElectron from 'is-electron';
 import { collection } from 'services/collectionService';
+import { useRouter } from 'next/router';
+import RecoveryKeyModal from './RecoveryKeyModal';
+import { justSignedUp } from 'utils/storage';
 interface Props {
     files: file[];
     collections: collection[];
     setConfirmAction: any;
+    somethingWentWrong: any;
 }
 export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
     const subscription: Subscription = getData(LS_KEYS.SUBSCRIPTION);
     const [isOpen, setIsOpen] = useState(false);
+    const [modalView, setModalView] = useState(justSignedUp());
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -48,6 +53,7 @@ export default function Sidebar(props: Props) {
             props.setConfirmAction(CONFIRM_ACTION.DOWNLOAD_APP);
         }
     }
+    const router = useRouter();
 
     return (
         <Menu
@@ -114,14 +120,47 @@ export default function Sidebar(props: Props) {
                     support
                 </a>
             </h5>
-
+            <div
+                style={{
+                    height: '1px',
+                    marginTop: '40px',
+                    background: '#242424',
+                    width: '100%',
+                }}
+            ></div>
+            <>
+                <RecoveryKeyModal
+                    show={modalView}
+                    onHide={() => setModalView(false)}
+                    somethingWentWrong={props.somethingWentWrong}
+                />
+                <h5
+                    style={{ cursor: 'pointer', marginTop: '30px' }}
+                    onClick={() => setModalView(true)}
+                >
+                    {constants.DOWNLOAD_RECOVERY_KEY}
+                </h5>
+            </>
+            <h5
+                style={{ cursor: 'pointer', marginTop: '30px' }}
+                onClick={() => router.push('changePassword')}
+            >
+                {constants.CHANGE_PASSWORD}
+            </h5>
             <h5
                 style={{ cursor: 'pointer', marginTop: '30px' }}
                 onClick={exportFiles}
             >
                 {constants.EXPORT}
             </h5>
-
+            <div
+                style={{
+                    height: '1px',
+                    marginTop: '40px',
+                    background: '#242424',
+                    width: '100%',
+                }}
+            ></div>
             <h5
                 style={{
                     cursor: 'pointer',

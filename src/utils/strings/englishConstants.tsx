@@ -112,7 +112,7 @@ const englishConstants = {
         'sorry, this operation is currently not supported on the web, please install the desktop app',
     DOWNLOAD_APP: 'download',
     APP_DOWNLOAD_URL: 'https://github.com/ente-io/bhari-frame/releases/',
-    EXPORT: 'export ',
+    EXPORT: 'export data',
     SUBSCRIPTION_PLAN: 'subscription plan',
     USAGE_DETAILS: 'usage',
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
@@ -160,6 +160,24 @@ const englishConstants = {
     SYNC_FAILED:
         'failed to sync with remote server, please refresh page to try again',
     PASSWORD_GENERATION_FAILED: `your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser`,
+    CHANGE_PASSWORD: 'change password',
+    GO_BACK: 'go back',
+    DOWNLOAD_RECOVERY_KEY: 'recovery key',
+    SAVE_LATER: 'save later',
+    SAVE: 'save',
+    RECOVERY_KEY_DESCRIPTION: 'if you forget your password, the only way you can recover your data is with this key',
+    KEY_NOT_STORED_DISCLAIMER: 'we don\'t store this key, so please save this in a safe place',
+    RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
+    FORGOT_PASSWORD: 'forgot password?',
+    RECOVER_ACCOUNT: 'recover account',
+    RETURN_RECOVERY_KEY_HINT: 'recovery key',
+    RECOVER: 'recover',
+    NO_RECOVERY_KEY: 'no recovery key?',
+    INCORRECT_RECOVERY_KEY: 'incorrect recovery key',
+    SORRY: 'sorry',
+    NO_RECOVERY_KEY_MESSAGE:
+        'due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
+    OK: 'ok',
 };
 
 export default englishConstants;

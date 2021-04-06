@@ -13,10 +13,10 @@ const CONFIRM_ACTION_VALUES = [
     { text: 'LOGOUT', type: 'danger' },
     { text: 'DELETE', type: 'danger' },
     { text: 'SESSION_EXPIRED', type: 'primary' },
-    { text: 'DOWNLOAD_APP', type: 'primary' },
+    { text: 'DOWNLOAD_APP', type: 'success' },
 ];
 
-export interface Props {
+interface Props {
     callback: any;
     action: CONFIRM_ACTION;
     show: boolean;
@@ -37,19 +37,19 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
                 <Modal.Title id="contained-modal-title-vcenter">
                     {
                         constants[
-                            `${CONFIRM_ACTION_VALUES[action]?.text}_MESSAGE`
+                        `${CONFIRM_ACTION_VALUES[action]?.text}_MESSAGE`
                         ]
                     }
                 </Modal.Title>
             </Modal.Body>
             <Modal.Footer style={{ borderTop: 'none' }}>
                 {action != CONFIRM_ACTION.SESSION_EXPIRED && (
-                    <Button variant="secondary" onClick={props.onHide}>
+                    <Button variant="outline-secondary" onClick={props.onHide}>
                         {constants.CANCEL}
                     </Button>
                 )}
                 <Button
-                    variant={`${CONFIRM_ACTION_VALUES[action]?.type}`}
+                    variant={`outline-${CONFIRM_ACTION_VALUES[action]?.type}`}
                     onClick={callback}
                 >
                     {constants[CONFIRM_ACTION_VALUES[action]?.text]}
