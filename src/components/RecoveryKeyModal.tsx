@@ -4,7 +4,7 @@ import { downloadAsFile } from 'utils/common';
 import { getRecoveryKey } from 'utils/crypto';
 import { setJustSignedUp } from 'utils/storage';
 import constants from 'utils/strings/constants';
-import { MessageDialog } from './MessageDialog';
+import MessageDialog from './MessageDialog';
 
 interface Props {
     show: boolean;

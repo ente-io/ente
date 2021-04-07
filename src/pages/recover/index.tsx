@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
 import CryptoWorker, { setSessionKeys } from 'utils/crypto';
 import PassPhraseForm from 'components/PassphraseForm';
-import { MessageDialog } from 'components/MessageDialog';
+import MessageDialog from 'components/MessageDialog';
 
 export default function Recover() {
     const router = useRouter();
