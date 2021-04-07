@@ -110,23 +110,23 @@ const GlobalStyles = createGlobalStyle`
         background-size: cover;
         border: none;
     }
-    .btn-success , btn:focus {
+    .btn-primary , btn-primary:focus {
         background: #2dc262;
         border-color: #29a354;
     }
-    .btn-success:hover {
+    .btn-primary:hover {
         background-color: #29a354;
         border-color: #2dc262;
     }
-    .btn-success:disabled {
+    .btn-primary:disabled {
         background-color: #69b383;
     }
-    .btn-outline-success {
+    .btn-outline-primary {
         color: #2dc262;
         border-color: #2dc262;
         border-width: 2px;
     }
-    .btn-outline-success:hover {
+    .btn-outline-primary:hover {
         background: #2dc262;
     }
     .btn-outline-danger {
