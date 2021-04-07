@@ -6,15 +6,19 @@ export interface MessageAttributes {
     title?: string;
     staticBackdrop?: boolean;
     close?: { text?: string; variant?: string };
-    proceed?: { text: string; action: any };
+    proceed?: { text: string; action: any; variant?: string };
 }
 interface Props {
     show: boolean;
     children?: any;
     onHide: () => void;
-    attributes?: MessageAttributes;
+    attributes: MessageAttributes;
 }
-export function MessageDialog({ attributes, children, ...props }: Props) {
+export default function MessageDialog({
+    attributes,
+    children,
+    ...props
+}: Props) {
     return (
         <Modal
             {...props}
@@ -48,7 +52,9 @@ export function MessageDialog({ attributes, children, ...props }: Props) {
                     )}
                     {attributes.proceed && (
                         <Button
-                            variant="outline-success"
+                            variant={`outline-${
+                                attributes.proceed?.variant ?? 'success'
+                            }`}
                             onClick={attributes.proceed.action}
                         >
                             {attributes.proceed.text}
