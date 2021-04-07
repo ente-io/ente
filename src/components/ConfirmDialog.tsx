@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
+import MessageDialog from './MessageDialog';
 
 export enum CONFIRM_ACTION {
     LOGOUT,
@@ -26,38 +26,26 @@ interface Props {
 }
 function ConfirmDialog({ callback, action, ...props }: Props) {
     return (
-        <Modal
-            {...props}
-            size="lg"
-            aria-labelledby="contained-modal-title-vcenter"
-            centered
-            backdrop={
-                action == CONFIRM_ACTION.SESSION_EXPIRED ? 'static' : 'true'
-            }
-        >
-            <Modal.Body style={{ padding: '24px' }}>
-                <Modal.Title id="contained-modal-title-vcenter">
-                    {
+        <>
+            <MessageDialog
+                {...props}
+                attributes={{
+                    title:
                         constants[
                             `${CONFIRM_ACTION_VALUES[action]?.text}_MESSAGE`
-                        ]
-                    }
-                </Modal.Title>
-            </Modal.Body>
-            <Modal.Footer style={{ borderTop: 'none' }}>
-                {action != CONFIRM_ACTION.SESSION_EXPIRED && (
-                    <Button variant="outline-secondary" onClick={props.onHide}>
-                        {constants.CANCEL}
-                    </Button>
-                )}
-                <Button
-                    variant={`outline-${CONFIRM_ACTION_VALUES[action]?.type}`}
-                    onClick={callback}
-                >
-                    {constants[CONFIRM_ACTION_VALUES[action]?.text]}
-                </Button>
-            </Modal.Footer>
-        </Modal>
+                        ],
+                    proceed: {
+                        text: constants[CONFIRM_ACTION_VALUES[action]?.text],
+                        action: callback,
+                        variant: CONFIRM_ACTION_VALUES[action]?.type,
+                    },
+                    close: action !== CONFIRM_ACTION.SESSION_EXPIRED && {
+                        text: constants.CLOSE,
+                    },
+                    staticBackdrop: action === CONFIRM_ACTION.SESSION_EXPIRED,
+                }}
+            />
+        </>
     );
 }
 export default ConfirmDialog;
