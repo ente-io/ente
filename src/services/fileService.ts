@@ -4,8 +4,10 @@ import localForage from 'utils/storage/localForage';
 
 import { collection } from './collectionService';
 import { DataStream, MetadataObject } from './uploadService';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import CryptoWorker from 'utils/crypto';
 import { getToken } from 'utils/common/key';
+import { selectedState } from 'pages/gallery';
+import { ErrorHandler } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();
 const DIFF_LIMIT: number = 2500;
@@ -151,6 +153,7 @@ export const getFiles = async (
         return await Promise.all(promises);
     } catch (e) {
         console.error('Get files failed', e);
+        ErrorHandler(e);
     }
 };
 
@@ -164,4 +167,29 @@ const removeDeletedCollectionFiles = async (
     }
     files = files.filter((file) => syncedCollectionIds.has(file.collectionID));
     return files;
+};
+
+export const deleteFiles = async (clickedFiles: selectedState) => {
+    try {
+        let filesToDelete = [];
+        for (let [key, val] of Object.entries(clickedFiles)) {
+            if (typeof val === 'boolean' && val) {
+                filesToDelete.push(Number(key));
+            }
+        }
+        const token = getToken();
+        if (!token) {
+            return;
+        }
+        await HTTPService.post(
+            `${ENDPOINT}/files/delete`,
+            { fileIDs: filesToDelete },
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        console.error('delete failed');
+    }
 };

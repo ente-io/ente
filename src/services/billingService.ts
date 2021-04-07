@@ -2,7 +2,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 const ENDPOINT = getEndpoint();
 import { getToken } from 'utils/common/key';
-import { runningInBrowser } from 'utils/common/utilFunctions';
+import { runningInBrowser } from 'utils/common/';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
 import { convertBytesToGBs } from 'utils/billingUtil';
 import { loadStripe, Stripe } from '@stripe/stripe-js';

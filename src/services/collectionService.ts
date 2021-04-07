@@ -7,7 +7,8 @@ import HTTPService from './HTTPService';
 import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
 import { user } from './userService';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import CryptoWorker from 'utils/crypto';
+import { ErrorHandler } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();
 
@@ -28,7 +29,7 @@ export interface collection {
     name?: string;
     encryptedName?: string;
     nameDecryptionNonce?: string;
-    type: string;
+    type: CollectionType;
     attributes: collectionAttributes;
     sharees: user[];
     updationTime: number;
@@ -104,7 +105,8 @@ const getCollections = async (
         );
         return await Promise.all(promises);
     } catch (e) {
-        console.error('getCollections failed- ', e.response);
+        console.error('getCollections failed- ', e);
+        ErrorHandler(e);
     }
 };
 
@@ -123,9 +125,6 @@ export const syncCollections = async () => {
     const lastCollectionUpdationTime = await getCollectionUpdationTime();
     const key = await getActualKey(),
         token = getToken();
-    if (!token) {
-        return localCollections;
-    }
     const updatedCollections =
         (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
     if (updatedCollections.length == 0) {
@@ -158,6 +157,7 @@ export const syncCollections = async () => {
         }
     }
     collections.sort((a, b) => b.updationTime - a.updationTime);
+    collections.sort((a, b) => (b.type === CollectionType.favorites ? 1 : 0));
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
     await localForage.setItem(COLLECTIONS, collections);
     return collections;
@@ -215,7 +215,7 @@ export const AddCollection = async (
         const worker = await new CryptoWorker();
         const encryptionKey = await getActualKey();
         const token = getToken();
-        const collectionKey: string = await worker.generateMasterKey();
+        const collectionKey: string = await worker.generateEncryptionKey();
         const {
             encryptedData: encryptedKey,
             nonce: keyDecryptionNonce,

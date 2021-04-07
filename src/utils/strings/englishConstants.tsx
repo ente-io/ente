@@ -55,12 +55,21 @@ const englishConstants = {
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
-        2: 'uploading your files',
-        3: 'files uploaded successfully!',
+        2: (fileCounter) =>
+            `${fileCounter.finished} / ${fileCounter.total} files backed up`,
+        3: 'backup complete!',
     },
-    UPLOADING_FILES: `uploading files`,
-    OF: 'of',
+    UPLOADING_FILES: `file upload`,
+    FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
+    FILE_UPLOAD_PROGRESS: (name, progress) => (
+        <div id={name}>
+            <strong>{name}</strong>
+            {` - `}
+            {progress !== -1 ? progress + '%' : 'failed'}
+        </div>
+    ),
     SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew it',
+
     STORAGE_QUOTA_EXCEEDED:
         'you have exceeded your storage quota, please upgrade your plan from the mobile app',
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
@@ -98,14 +107,19 @@ const englishConstants = {
         </div>
     ),
     LOGOUT: 'logout',
-    LOGOUT_WARNING: 'sure you want to logout?',
-    CANCEL_SUBSCRIPTION_WARNING: 'sure you want to cancel your subscription?',
+    CANCEL_SUBSCRIPTION_MESSAGE: 'sure you want to cancel your subscription?',
     CANCEL_SUBSCRIPTION: 'cancel subscription',
     CANCEL: 'cancel',
     SUBSCRIBE: 'subscribe',
     MANAGE: 'manage',
     SUBSCRIPTION_CHANGE_DISABLED:
         'sorry, this operation is currently not supported on the web, please check your mobile app',
+    LOGOUT_MESSAGE: 'sure you want to logout?',
+    DOWNLOAD_APP_MESSAGE:
+        'sorry, this operation is currently not supported on the web, please install the desktop app',
+    DOWNLOAD_APP: 'download',
+    APP_DOWNLOAD_URL: 'https://github.com/ente-io/bhari-frame/releases/',
+    EXPORT: 'export data',
     SUBSCRIPTION_PLAN: 'subscription plan',
     USAGE_DETAILS: 'usage',
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
@@ -162,6 +176,39 @@ const englishConstants = {
         'subscription purchase failed , please try again later',
     SUBSCRIPTION_UPDATE_SUCCESS:
         'your subscription plan is successfully updated',
+    DELETE_MESSAGE: 'sure you want to delete selected files?',
+    DELETE: 'delete',
+    UPLOAD_STRATEGY_CHOICE:
+        'you are uploading multiple folders, would you like us to create',
+    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
+    OR: 'or',
+    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
+    SESSION_EXPIRED_MESSAGE:
+        'your session has expired, please login again to continue',
+    SESSION_EXPIRED: 'login',
+    SYNC_FAILED:
+        'failed to sync with remote server, please refresh page to try again',
+    PASSWORD_GENERATION_FAILED: `your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser`,
+    CHANGE_PASSWORD: 'change password',
+    GO_BACK: 'go back',
+    DOWNLOAD_RECOVERY_KEY: 'recovery key',
+    SAVE_LATER: 'save later',
+    SAVE: 'save',
+    RECOVERY_KEY_DESCRIPTION:
+        'if you forget your password, the only way you can recover your data is with this key',
+    KEY_NOT_STORED_DISCLAIMER:
+        "we don't store this key, so please save this in a safe place",
+    RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
+    FORGOT_PASSWORD: 'forgot password?',
+    RECOVER_ACCOUNT: 'recover account',
+    RETURN_RECOVERY_KEY_HINT: 'recovery key',
+    RECOVER: 'recover',
+    NO_RECOVERY_KEY: 'no recovery key?',
+    INCORRECT_RECOVERY_KEY: 'incorrect recovery key',
+    SORRY: 'sorry',
+    NO_RECOVERY_KEY_MESSAGE:
+        'due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
+    OK: 'ok',
 };
 
 export default englishConstants;

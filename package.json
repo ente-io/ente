@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build-analyze": "ANALYZE=true next build",
     "postbuild": "next-on-netlify",
     "start": "next start"
   },
@@ -21,6 +22,7 @@
     "formik": "^2.1.5",
     "heic2any": "^0.0.3",
     "http-proxy-middleware": "^1.0.5",
+    "is-electron": "^2.2.0",
     "libsodium-wrappers": "^0.7.8",
     "localforage": "^1.9.0",
     "next": "9.5.3",

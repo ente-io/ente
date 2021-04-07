@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { file, syncData, localFiles } from 'services/fileService';
+import { file, syncData, localFiles, deleteFiles } from 'services/fileService';
 import PreviewCard from './components/PreviewCard';
-import { getActualKey, getToken } from 'utils/common/key';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -27,12 +26,21 @@ import { Alert, Button, Jumbotron } from 'react-bootstrap';
 import billingService from 'services/billingService';
 import PlanSelector from './components/PlanSelector';
 import { isSubscribed } from 'utils/billingUtil';
-import MessageDialog from './components/MessageDialog';
 
+import Delete from 'components/Delete';
+import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
+import FullScreenDropZone from 'components/FullScreenDropZone';
+import Sidebar from 'components/Sidebar';
+import UploadButton from './components/UploadButton';
+import { checkConnectivity } from 'utils/common';
+import { isFirstLogin, setIsFirstLogin } from 'utils/storage';
+import { logoutUser } from 'services/userService';
+import { MessageAttributes, MessageDialog } from 'components/MessageDialog';
+import AlertBanner from './components/AlertBanner';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
-
+const A_DAY = 24 * 60 * 60 * 1000;
 enum ITEM_TYPE {
     TIME = 'TIME',
     TILE = 'TILE',
@@ -99,32 +107,39 @@ const ListContainer = styled.div<{ columns: number }>`
     }
 `;
 
-const Image = styled.img`
-    width: 200px;
-    max-width: 100%;
-    display: block;
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 20px;
-`;
-
 const DateContainer = styled.div`
     padding-top: 15px;
 `;
 
 interface Props {
+    getRootProps;
+    getInputProps;
     openFileUploader;
     acceptedFiles;
-    uploadModalView;
-    closeUploadModal;
-    setNavbarIconView;
+    collectionSelectorView;
+    closeCollectionSelector;
+    showCollectionSelector;
     err;
-    planModalView;
-    setPlanModalView;
-    bannerMessage;
-    setBannerMessage;
 }
+
+const DeleteBtn = styled.button`
+    border: none;
+    background-color: #ff6666;
+    position: fixed;
+    z-index: 1;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    color: #fff;
+`;
+
+export type selectedState = {
+    [k: number]: boolean;
+    count: number;
+};
+
 export default function Gallery(props: Props) {
     const router = useRouter();
     const [collections, setCollections] = useState<collection[]>([]);
@@ -137,8 +152,14 @@ export default function Gallery(props: Props) {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const fetching: { [k: number]: boolean } = {};
+    const [bannerMessage, setBannerMessage] = useState<string>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
+    const [selected, setSelected] = useState<selectedState>({ count: 0 });
+    const [confirmAction, setConfirmAction] = useState<CONFIRM_ACTION>(null);
+    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
+    const [planModalView, setPlanModalView] = useState(false);
+
     const loadingBar = useRef(null);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -147,7 +168,8 @@ export default function Gallery(props: Props) {
             return;
         }
         const main = async () => {
-            setIsFirstLoad((await getCollectionUpdationTime()) == 0);
+            setIsFirstLoad(isFirstLogin());
+            setIsFirstLogin(false);
             const data = await localFiles();
             const collections = await getLocalCollections();
             const nonEmptyCollections = getNonEmptyCollections(
@@ -167,30 +189,40 @@ export default function Gallery(props: Props) {
             setIsFirstLoad(false);
         };
         main();
-        props.setNavbarIconView(true);
     }, []);
 
     const syncWithRemote = async () => {
-        loadingBar.current?.continuousStart();
-        const collections = await syncCollections();
-        const { data, isUpdated } = await syncData(collections);
-        const nonEmptyCollections = getNonEmptyCollections(collections, data);
-        const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
-            nonEmptyCollections,
-            data
-        );
-        const favItemIds = await getFavItemIds(data);
-        await billingService.updatePlans();
-        await billingService.syncSubscription();
-
-        setCollections(nonEmptyCollections);
-        if (isUpdated) {
-            setData(data);
+        try {
+            checkConnectivity();
+            loadingBar.current?.continuousStart();
+            const collections = await syncCollections();
+            const { data, isUpdated } = await syncData(collections);
+            await billingService.updatePlans();
+            await billingService.syncSubscription();
+            const nonEmptyCollections = getNonEmptyCollections(
+                collections,
+                data
+            );
+            const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
+                nonEmptyCollections,
+                data
+            );
+            const favItemIds = await getFavItemIds(data);
+            setCollections(nonEmptyCollections);
+            if (isUpdated) {
+                setData(data);
+            }
+            setCollectionAndItsLatestFile(collectionAndItsLatestFile);
+            setFavItemIds(favItemIds);
+            setSinceTime(new Date().getTime());
+        } catch (e) {
+            setBannerMessage(e.message);
+            if (e.message === constants.SESSION_EXPIRED_MESSAGE) {
+                setConfirmAction(CONFIRM_ACTION.SESSION_EXPIRED);
+            }
+        } finally {
+            loadingBar.current?.complete();
         }
-        setCollectionAndItsLatestFile(collectionAndItsLatestFile);
-        setFavItemIds(favItemIds);
-        setSinceTime(new Date().getTime());
-        loadingBar.current?.complete();
     };
 
     const updateUrl = (index: number) => (url: string) => {
@@ -252,6 +284,14 @@ export default function Gallery(props: Props) {
         setOpen(true);
     };
 
+    const handleSelect = (id: number) => (checked: boolean) => {
+        setSelected({
+            ...selected,
+            [id]: checked,
+            count: checked ? selected.count + 1 : selected.count - 1,
+        });
+    };
+
     const getThumbnail = (file: file[], index: number) => {
         return (
             <PreviewCard
@@ -259,6 +299,10 @@ export default function Gallery(props: Props) {
                 data={file[index]}
                 updateUrl={updateUrl(file[index].dataIndex)}
                 onClick={onThumbnailClick(index)}
+                selectable
+                onSelect={handleSelect(file[index].id)}
+                selected={selected[file[index].id]}
+                selectOnClick={selected.count > 0}
             />
         );
     };
@@ -342,9 +386,52 @@ export default function Gallery(props: Props) {
             first.getDate() === second.getDate()
         );
     };
+    const confirmCallbacks = new Map<CONFIRM_ACTION, Function>([
+        [
+            CONFIRM_ACTION.DELETE,
+            async function () {
+                await deleteFiles(selected);
+                syncWithRemote();
+                setConfirmAction(null);
+                setSelected({ count: 0 });
+            },
+        ],
+        [CONFIRM_ACTION.SESSION_EXPIRED, logoutUser],
+        [CONFIRM_ACTION.LOGOUT, logoutUser],
+        [
+            CONFIRM_ACTION.DOWNLOAD_APP,
+            function () {
+                var win = window.open(constants.APP_DOWNLOAD_URL, '_blank');
+                win.focus();
+                setConfirmAction(null);
+            },
+        ],
+        [
+            CONFIRM_ACTION.CANCEL_SUBSCRIPTION,
+            async function () {
+                try {
+                    await billingService.cancelSubscription();
+                    setDialogMessage({
+                        title: constants.SUBSCRIPTION_CANCEL_SUCCESS,
+                        close: { variant: 'success' },
+                    });
+                } catch (e) {
+                    setDialogMessage({
+                        title: constants.SUBSCRIPTION_CANCEL_FAILED,
+                        close: { variant: 'danger' },
+                    });
+                }
+                setConfirmAction(null);
+            },
+        ],
+    ]);
 
     return (
-        <>
+        <FullScreenDropZone
+            getRootProps={props.getRootProps}
+            getInputProps={props.getInputProps}
+            showCollectionSelector={props.showCollectionSelector}
+        >
             <LoadingBar color="#2dc262" ref={loadingBar} />
             {isFirstLoad && (
                 <div className="text-center">
@@ -353,25 +440,33 @@ export default function Gallery(props: Props) {
                     </Alert>
                 </div>
             )}
-            <MessageDialog
-                bannerMessage={props.bannerMessage}
-                onHide={() => props.setBannerMessage(null)}
-            />
             {!isSubscribed() && (
                 <Button
                     id="checkout"
                     variant="success"
                     size="lg"
                     block
-                    onClick={() => props.setPlanModalView(true)}
+                    onClick={() => setPlanModalView(true)}
                 >
                     {constants.SUBSCRIBE}
                 </Button>
             )}
             <PlanSelector
-                modalView={props.planModalView}
-                closeModal={() => props.setPlanModalView(false)}
-                setBannerMessage={props.setBannerMessage}
+                modalView={planModalView}
+                closeModal={() => setPlanModalView(false)}
+                setDialogMessage={setDialogMessage}
+            />
+            <AlertBanner bannerMessage={bannerMessage} />
+            <ConfirmDialog
+                show={confirmAction !== null}
+                onHide={() => setConfirmAction(null)}
+                callback={confirmCallbacks.get(confirmAction)}
+                action={confirmAction}
+            />
+            <MessageDialog
+                show={dialogMessage != null}
+                onHide={() => setDialogMessage(null)}
+                attributes={dialogMessage}
             />
             <Collections
                 collections={collections}
@@ -379,20 +474,48 @@ export default function Gallery(props: Props) {
                 selectCollection={selectCollection}
             />
             <Upload
-                uploadModalView={props.uploadModalView}
-                closeUploadModal={props.closeUploadModal}
+                collectionSelectorView={props.collectionSelectorView}
+                closeCollectionSelector={props.closeCollectionSelector}
                 collectionAndItsLatestFile={collectionAndItsLatestFile}
                 refetchData={syncWithRemote}
-                setBannerMessage={props.setBannerMessage}
+                setBannerMessage={setBannerMessage}
                 acceptedFiles={props.acceptedFiles}
             />
+            <Sidebar
+                files={data}
+                collections={collections}
+                setConfirmAction={setConfirmAction}
+                somethingWentWrong={() =>
+                    setDialogMessage({
+                        title: constants.UNKNOWN_ERROR,
+                        close: { variant: 'danger' },
+                    })
+                }
+                setPlanModalView={setPlanModalView}
+                setBannerMessage={setBannerMessage}
+            />
+            <UploadButton openFileUploader={props.openFileUploader} />
             {!isFirstLoad && data.length == 0 ? (
-                <Jumbotron>
-                    <Image alt="vault" src="/vault.png" />
-                    <Button variant="success" onClick={props.openFileUploader}>
+                <div
+                    style={{
+                        height: '60%',
+                        display: 'grid',
+                        placeItems: 'center',
+                    }}
+                >
+                    <Button
+                        variant="outline-success"
+                        onClick={props.openFileUploader}
+                        style={{
+                            paddingLeft: '32px',
+                            paddingRight: '32px',
+                            paddingTop: '12px',
+                            paddingBottom: '12px',
+                        }}
+                    >
                         {constants.UPLOAD_FIRST_PHOTO}
                     </Button>
-                </Jumbotron>
+                </div>
             ) : filteredData.length ? (
                 <Container>
                     <AutoSizer>
@@ -433,9 +556,19 @@ export default function Gallery(props: Props) {
                                     );
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TIME,
-                                        date: dateTimeFormat.format(
-                                            currentDate
-                                        ),
+                                        date: isSameDay(
+                                            new Date(currentDate),
+                                            new Date()
+                                        )
+                                            ? 'Today'
+                                            : isSameDay(
+                                                  new Date(currentDate),
+                                                  new Date(Date.now() - A_DAY)
+                                              )
+                                            ? 'Yesterday'
+                                            : dateTimeFormat.format(
+                                                  currentDate
+                                              ),
                                     });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TILE,
@@ -551,6 +684,13 @@ export default function Gallery(props: Props) {
                     {constants.INSTALL_MOBILE_APP()}
                 </Alert>
             )}
-        </>
+            {selected.count && (
+                <DeleteBtn
+                    onClick={() => setConfirmAction(CONFIRM_ACTION.DELETE)}
+                >
+                    <Delete />
+                </DeleteBtn>
+            )}
+        </FullScreenDropZone>
     );
 }

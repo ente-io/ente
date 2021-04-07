@@ -1,4 +1,4 @@
-import { runningInBrowser } from 'utils/common/utilFunctions';
+import { runningInBrowser } from 'utils/common';
 const localForage: LocalForage = runningInBrowser() && require('localforage');
 
 if (runningInBrowser()) {

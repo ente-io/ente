@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Modal } from 'react-bootstrap';
-import AddCollection from './AddCollection';
+import { Card, Modal, Spinner } from 'react-bootstrap';
+import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
@@ -16,18 +16,35 @@ export const CollectionIcon = styled.div`
     outline: none;
 `;
 
-function CollectionSelector({
-    collectionAndItsLatestFile,
-    uploadFiles,
-    uploadModalView,
-    closeUploadModal,
-    suggestedCollectionName,
-}) {
-    const CollectionIcons: JSX.Element[] = collectionAndItsLatestFile?.map(
+const LoadingOverlay = styled.div`
+    left: 0;
+    top: 0;
+    outline: none;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-weight: 900;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9;
+`;
+interface Props {
+    collectionAndItsLatestFile;
+    uploadFiles;
+    collectionSelectorView;
+    closeCollectionSelector;
+    showNextModal;
+    loading;
+}
+function CollectionSelector(props: Props) {
+    const CollectionIcons: JSX.Element[] = props.collectionAndItsLatestFile?.map(
         (item) => (
             <CollectionIcon
                 key={item.collection.id}
-                onClick={async () => await uploadFiles(item.collection)}
+                onClick={async () => await props.uploadFiles(item.collection)}
             >
                 <Card>
                     <PreviewCard
@@ -45,15 +62,13 @@ function CollectionSelector({
 
     return (
         <Modal
-            show={uploadModalView}
-            onHide={closeUploadModal}
+            show={props.collectionSelectorView}
+            onHide={props.closeCollectionSelector}
             dialogClassName="modal-90w"
             style={{ maxWidth: '100%' }}
         >
             <Modal.Header closeButton>
-                <Modal.Title style={{ marginLeft: '12px' }}>
-                    {constants.SELECT_COLLECTION}
-                </Modal.Title>
+                <Modal.Title>{constants.SELECT_COLLECTION}</Modal.Title>
             </Modal.Header>
             <Modal.Body
                 style={{
@@ -62,14 +77,13 @@ function CollectionSelector({
                     flexWrap: 'wrap',
                 }}
             >
-                <AddCollection
-                    uploadFiles={uploadFiles}
-                    autoFilledName={suggestedCollectionName}
-                    triggerCreateCollectionOpen={
-                        CollectionIcons && CollectionIcons.length == 0
-                    }
-                />
+                <AddCollectionButton showChoiceModal={props.showNextModal} />
                 {CollectionIcons}
+                {props.loading && (
+                    <LoadingOverlay>
+                        <Spinner animation="border" />
+                    </LoadingOverlay>
+                )}
             </Modal.Body>
         </Modal>
     );

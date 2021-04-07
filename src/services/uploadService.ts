@@ -4,11 +4,12 @@ import EXIF from 'exif-js';
 import { fileAttribute } from './fileService';
 import { collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
-import { checkConnectivity } from 'utils/common/utilFunctions';
+import { checkConnectivity } from 'utils/common';
 import { ErrorHandler } from 'utils/common/errorUtil';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import CryptoWorker from 'utils/crypto';
 import * as convert from 'xml-js';
-import { ENCRYPTION_CHUNK_SIZE } from 'utils/crypto/libsodium';
+import { ENCRYPTION_CHUNK_SIZE } from 'types';
+import { getToken } from 'utils/common/key';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;
@@ -18,12 +19,27 @@ const MIN_THUMBNAIL_SIZE = 50000;
 const MAX_CONCURRENT_UPLOADS = 4;
 const TYPE_IMAGE = 'image';
 const TYPE_VIDEO = 'video';
+const TYPE_HEIC = 'HEIC';
 const TYPE_JSON = 'json';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
 const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
-const CHUNKS_COMBINED_FOR_UPLOAD = 2;
+const CHUNKS_COMBINED_FOR_UPLOAD = 5;
+const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
+const NULL_LOCATION: Location = { latitude: null, longitude: null };
 
+interface Location {
+    latitude: number;
+    longitude: number;
+}
+interface ParsedEXIFData {
+    location: Location;
+    creationTime: number;
+}
+export interface FileWithCollection {
+    file: File;
+    collection: collection;
+}
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
     chunkCount: number;
@@ -76,6 +92,7 @@ interface ProcessedFile {
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: fileAttribute;
+    filename: string;
 }
 interface BackupedFile extends ProcessedFile {}
 
@@ -98,16 +115,15 @@ class UploadService {
     private perFileProgress: number;
     private filesCompleted: number;
     private totalFileCount: number;
+    private fileProgress: Map<string, number>;
     private metadataMap: Map<string, Object>;
-    private filesToBeUploaded: File[];
+    private filesToBeUploaded: FileWithCollection[];
     private progressBarProps;
     private uploadErrors: Error[];
     private setUploadErrors;
 
     public async uploadFiles(
-        receivedFiles: File[],
-        collection: collection,
-        token: string,
+        filesWithCollectionToUpload: FileWithCollection[],
         progressBarProps,
         setUploadErrors
     ) {
@@ -116,22 +132,29 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.START);
 
             this.filesCompleted = 0;
+            this.fileProgress = new Map<string, number>();
             this.uploadErrors = [];
             this.setUploadErrors = setUploadErrors;
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
 
             let metadataFiles: File[] = [];
-            let actualFiles: File[] = [];
-            receivedFiles.forEach((file) => {
+            let actualFiles: FileWithCollection[] = [];
+            filesWithCollectionToUpload.forEach((fileWithCollection) => {
+                let file = fileWithCollection.file;
+                if (file?.name.substr(0, 1) == '.') {
+                    //ignore files with name starting with .
+                    return;
+                }
                 if (
                     file.type.substr(0, 5) === TYPE_IMAGE ||
-                    file.type.substr(0, 5) === TYPE_VIDEO
+                    file.type.substr(0, 5) === TYPE_VIDEO ||
+                    (file.type.length === 0 && file.name.endsWith(TYPE_HEIC))
                 ) {
-                    actualFiles.push(file);
+                    actualFiles.push(fileWithCollection);
                 }
                 if (file.name.slice(-4) == TYPE_JSON) {
-                    metadataFiles.push(file);
+                    metadataFiles.push(fileWithCollection.file);
                 }
             });
             this.totalFileCount = actualFiles.length;
@@ -148,7 +171,7 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOADING);
             this.changeProgressBarProps();
             try {
-                await this.fetchUploadURLs(token);
+                await this.fetchUploadURLs();
             } catch (e) {
                 console.error('error fetching uploadURLs', e);
                 ErrorHandler(e);
@@ -163,9 +186,7 @@ class UploadService {
                     this.uploader(
                         await new CryptoWorker(),
                         new FileReader(),
-                        this.filesToBeUploaded.pop(),
-                        collection,
-                        token
+                        this.filesToBeUploaded.pop()
                     )
                 );
             }
@@ -183,10 +204,11 @@ class UploadService {
     private async uploader(
         worker: any,
         reader: FileReader,
-        rawFile: File,
-        collection: collection,
-        token: string
+        fileWithCollection: FileWithCollection
     ) {
+        let { file: rawFile, collection } = fileWithCollection;
+        this.fileProgress.set(rawFile.name, 0);
+        this.changeProgressBarProps();
         try {
             let file: FileInMemory = await this.readFile(reader, rawFile);
             let {
@@ -198,8 +220,7 @@ class UploadService {
                 collection.key
             );
             let backupedFile: BackupedFile = await this.uploadToBucket(
-                encryptedFile,
-                token
+                encryptedFile
             );
             file = null;
             encryptedFile = null;
@@ -210,9 +231,10 @@ class UploadService {
             );
             encryptedKey = null;
             backupedFile = null;
-            await this.uploadFile(uploadFile, token);
+            await this.uploadFile(uploadFile);
             uploadFile = null;
             this.filesCompleted++;
+            this.fileProgress.set(rawFile.name, 100);
             this.changeProgressBarProps();
         } catch (e) {
             console.error('file upload failed with error', e);
@@ -221,26 +243,32 @@ class UploadService {
                 `Uploading Failed for File - ${rawFile.name}`
             );
             this.uploadErrors.push(error);
+            this.fileProgress.set(rawFile.name, -1);
         }
         if (this.filesToBeUploaded.length > 0) {
-            await this.uploader(
-                worker,
-                reader,
-                this.filesToBeUploaded.pop(),
-                collection,
-                token
-            );
+            await this.uploader(worker, reader, this.filesToBeUploaded.pop());
         }
     }
 
     private changeProgressBarProps() {
-        const { setPercentComplete, setFileCounter } = this.progressBarProps;
+        const {
+            setPercentComplete,
+            setFileCounter,
+            setFileProgress,
+        } = this.progressBarProps;
         setFileCounter({
-            current: this.filesCompleted + 1,
+            finished: this.filesCompleted,
             total: this.totalFileCount,
         });
-        setPercentComplete(this.filesCompleted * this.perFileProgress);
+        let percentComplete = 0;
+        if (this.fileProgress) {
+            for (let [_, progress] of this.fileProgress) {
+                percentComplete += (this.perFileProgress * progress) / 100;
+            }
+        }
+        setPercentComplete(percentComplete);
         this.setUploadErrors(this.uploadErrors);
+        setFileProgress(this.fileProgress);
     }
 
     private async readFile(reader: FileReader, receivedFile: File) {
@@ -260,6 +288,13 @@ class UploadService {
                     break;
                 default:
                     fileType = FILE_TYPE.OTHERS;
+            }
+            if (
+                fileType === FILE_TYPE.OTHERS &&
+                receivedFile.type.length === 0 &&
+                receivedFile.name.endsWith(TYPE_HEIC)
+            ) {
+                fileType = FILE_TYPE.IMAGE;
             }
 
             const { location, creationTime } = await this.getExifData(
@@ -331,6 +366,7 @@ class UploadService {
                     file: encryptedFiledata,
                     thumbnail: encryptedThumbnail,
                     metadata: encryptedMetadata,
+                    filename: file.metadata.title,
                 },
                 fileKey: encryptedKey,
             };
@@ -374,32 +410,35 @@ class UploadService {
         };
     }
 
-    private async uploadToBucket(
-        file: ProcessedFile,
-        token: string
-    ): Promise<BackupedFile> {
+    private async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
         try {
             if (isDataStream(file.file.encryptedData)) {
                 const { chunkCount, stream } = file.file.encryptedData;
+                const uploadPartCount = Math.ceil(
+                    chunkCount / CHUNKS_COMBINED_FOR_UPLOAD
+                );
                 const filePartUploadURLs = await this.fetchMultipartUploadURLs(
-                    token,
-                    Math.ceil(chunkCount / CHUNKS_COMBINED_FOR_UPLOAD)
+                    uploadPartCount
                 );
                 file.file.objectKey = await this.putFileInParts(
                     filePartUploadURLs,
-                    stream
+                    stream,
+                    file.filename,
+                    uploadPartCount
                 );
             } else {
-                const fileUploadURL = await this.getUploadURL(token);
+                const fileUploadURL = await this.getUploadURL();
                 file.file.objectKey = await this.putFile(
                     fileUploadURL,
-                    file.file.encryptedData
+                    file.file.encryptedData,
+                    file.filename
                 );
             }
-            const thumbnailUploadURL = await this.getUploadURL(token);
+            const thumbnailUploadURL = await this.getUploadURL();
             file.thumbnail.objectKey = await this.putFile(
                 thumbnailUploadURL,
-                file.thumbnail.encryptedData as Uint8Array
+                file.thumbnail.encryptedData as Uint8Array,
+                null
             );
             delete file.file.encryptedData;
             delete file.thumbnail.encryptedData;
@@ -425,8 +464,12 @@ class UploadService {
         return uploadFile;
     }
 
-    private async uploadFile(uploadFile: uploadFile, token) {
+    private async uploadFile(uploadFile: uploadFile) {
         try {
+            const token = getToken();
+            if (!token) {
+                return;
+            }
             const response = await HTTPService.post(
                 `${ENDPOINT}/files`,
                 uploadFile,
@@ -446,6 +489,8 @@ class UploadService {
             const metadataJSON: object = await new Promise(
                 (resolve, reject) => {
                     const reader = new FileReader();
+                    reader.onabort = () => reject('file reading was aborted');
+                    reader.onerror = () => reject('file reading has failed');
                     reader.onload = () => {
                         let result =
                             typeof reader.result !== 'string'
@@ -458,20 +503,34 @@ class UploadService {
             );
 
             const metaDataObject = {};
-            metaDataObject['creationTime'] =
-                metadataJSON['photoTakenTime']['timestamp'] * 1000000;
-            metaDataObject['modificationTime'] =
-                metadataJSON['modificationTime']['timestamp'] * 1000000;
-
+            if (!metadataJSON) {
+                return;
+            }
+            if (
+                metadataJSON['photoTakenTime'] &&
+                metadataJSON['photoTakenTime']['timestamp']
+            ) {
+                metaDataObject['creationTime'] =
+                    metadataJSON['photoTakenTime']['timestamp'] * 1000000;
+            }
+            if (
+                metadataJSON['modificationTime'] &&
+                metadataJSON['modificationTime']['timestamp']
+            ) {
+                metaDataObject['modificationTime'] =
+                    metadataJSON['modificationTime']['timestamp'] * 1000000;
+            }
             let locationData = null;
             if (
-                metadataJSON['geoData']['latitude'] != 0.0 ||
-                metadataJSON['geoData']['longitude'] != 0.0
+                metadataJSON['geoData'] &&
+                (metadataJSON['geoData']['latitude'] != 0.0 ||
+                    metadataJSON['geoData']['longitude'] != 0.0)
             ) {
                 locationData = metadataJSON['geoData'];
             } else if (
-                metadataJSON['geoDataExif']['latitude'] != 0.0 ||
-                metadataJSON['geoDataExif']['longitude'] != 0.0
+                metadataJSON['geoDataExif'] &&
+                (metadataJSON['geoDataExif']['latitude'] != 0.0 ||
+                    metadataJSON['geoDataExif']['longitude'] != 0.0)
             ) {
                 locationData = metadataJSON['geoDataExif'];
             }
@@ -481,6 +540,7 @@ class UploadService {
             }
             this.metadataMap.set(metadataJSON['title'], metaDataObject);
         } catch (e) {
+            console.error(e);
             //ignore
         }
     }
@@ -492,7 +552,10 @@ class UploadService {
             let canvas = document.createElement('canvas');
             let canvas_CTX = canvas.getContext('2d');
             let imageURL = null;
-            if (file.type.match(TYPE_IMAGE)) {
+            if (
+                file.type.match(TYPE_IMAGE) ||
+                (file.type.length == 0 && file.name.endsWith(TYPE_HEIC))
+            ) {
                 let image = new Image();
                 imageURL = URL.createObjectURL(file);
                 image.setAttribute('src', imageURL);
@@ -517,7 +580,7 @@ class UploadService {
                 await new Promise(async (resolve) => {
                     let video = document.createElement('video');
                     imageURL = URL.createObjectURL(file);
-                    video.addEventListener('loadeddata', function () {
+                    video.addEventListener('timeupdate', function () {
                         const thumbnailWidth =
                             (video.videoWidth * THUMBNAIL_HEIGHT) /
                             video.videoHeight;
@@ -535,19 +598,14 @@ class UploadService {
                     });
                     video.preload = 'metadata';
                     video.src = imageURL;
-                    // Load video in Safari / IE11
-                    video.muted = true;
-                    video.playsInline = true;
-                    video.play();
+                    video.currentTime = 3;
+                    setTimeout(() => resolve(null), 4000);
                 });
             }
             URL.revokeObjectURL(imageURL);
-            if (canvas.toDataURL().length == 0) {
-                throw new Error('');
-            }
-            let thumbnailBlob: Blob = file,
-                attempts = 0;
-            let quality = 1;
+            let thumbnailBlob = null,
+                attempts = 0,
+                quality = 1;
 
             do {
                 attempts++;
@@ -561,9 +619,7 @@ class UploadService {
                         quality
                     );
                 });
-                if (!thumbnailBlob) {
-                    thumbnailBlob = file;
-                }
+                thumbnailBlob = thumbnailBlob ?? new Blob([]);
             } while (
                 thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
                 attempts <= MAX_ATTEMPTS
@@ -633,16 +689,20 @@ class UploadService {
         }
     }
 
-    private async getUploadURL(token: string) {
+    private async getUploadURL() {
         if (this.uploadURLs.length == 0) {
-            await this.fetchUploadURLs(token);
+            await this.fetchUploadURLs();
         }
         return this.uploadURLs.pop();
     }
 
-    private async fetchUploadURLs(token: string): Promise<void> {
+    private async fetchUploadURLs(): Promise<void> {
         try {
             if (!this.uploadURLFetchInProgress) {
+                const token = getToken();
+                if (!token) {
+                    return;
+                }
                 this.uploadURLFetchInProgress = HTTPService.get(
                     `${ENDPOINT}/files/upload-urls`,
                     {
@@ -666,10 +726,13 @@ class UploadService {
     }
 
     private async fetchMultipartUploadURLs(
-        token: string,
         count: number
     ): Promise<MultipartUploadURLs> {
         try {
+            const token = getToken();
+            if (!token) {
+                return;
+            }
             const response = await HTTPService.get(
                 `${ENDPOINT}/files/multipart-upload-urls`,
                 {
@@ -687,10 +750,17 @@ class UploadService {
 
     private async putFile(
         fileUploadURL: UploadURL,
-        file: Uint8Array
+        file: Uint8Array,
+        filename: string
     ): Promise<string> {
         try {
-            await HTTPService.put(fileUploadURL.url, file);
+            await HTTPService.put(
+                fileUploadURL.url,
+                file,
+                null,
+                null,
+                this.trackUploadProgress(filename)
+            );
             return fileUploadURL.objectKey;
         } catch (e) {
             console.error('putFile to dataStore failed ', e);
@@ -700,34 +770,40 @@ class UploadService {
 
     private async putFileInParts(
         multipartUploadURLs: MultipartUploadURLs,
-        file: ReadableStream<Uint8Array>
+        file: ReadableStream<Uint8Array>,
+        filename: string,
+        uploadPartCount: number
     ) {
         let streamEncryptedFileReader = file.getReader();
+        let percentPerPart = Math.round(
+            RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount
+        );
         const resParts = [];
         for (const [
             index,
             fileUploadURL,
         ] of multipartUploadURLs.partURLs.entries()) {
-            let {
-                done: done1,
-                value: chunk1,
-            } = await streamEncryptedFileReader.read();
-            if (done1) {
-                break;
+            let combinedChunks = [];
+            for (let i = 0; i < CHUNKS_COMBINED_FOR_UPLOAD; i++) {
+                let {
+                    done,
+                    value: chunk,
+                } = await streamEncryptedFileReader.read();
+                if (done) {
+                    break;
+                }
+                for (let index = 0; index < chunk.length; index++) {
+                    combinedChunks.push(chunk[index]);
+                }
             }
-            let {
-                done: done2,
-                value: chunk2,
-            } = await streamEncryptedFileReader.read();
-            let uploadChunk: Uint8Array;
-            if (!done2) {
-                uploadChunk = new Uint8Array(chunk1.length + chunk2.length);
-                uploadChunk.set(chunk1);
-                uploadChunk.set(chunk2, chunk1.length);
-            } else {
-                uploadChunk = chunk1;
-            }
-            const response = await HTTPService.put(fileUploadURL, uploadChunk);
+            let uploadChunk = Uint8Array.from(combinedChunks);
+            const response = await HTTPService.put(
+                fileUploadURL,
+                uploadChunk,
+                null,
+                null,
+                this.trackUploadProgress(filename, percentPerPart, index)
+            );
             resParts.push({
                 PartNumber: index + 1,
                 ETag: response.headers.etag,
@@ -744,15 +820,34 @@ class UploadService {
         return multipartUploadURLs.objectKey;
     }
 
+    private trackUploadProgress(
+        filename,
+        percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
+        index = 0
+    ) {
+        return {
+            onUploadProgress: (event) => {
+                filename &&
+                    this.fileProgress.set(
+                        filename,
+                        Math.round(
+                            percentPerPart * index +
+                                (percentPerPart * event.loaded) / event.total
+                        )
+                    );
+                this.changeProgressBarProps();
+            },
+        };
+    }
     private async getExifData(
         reader: FileReader,
         receivedFile: File,
         fileType: FILE_TYPE
-    ) {
+    ): Promise<ParsedEXIFData> {
         try {
             if (fileType === FILE_TYPE.VIDEO) {
                 // Todo  extract exif data from videos
-                return { location: null, creationTime: null };
+                return { location: NULL_LOCATION, creationTime: null };
             }
             const exifData: any = await new Promise((resolve, reject) => {
                 reader.onload = () => {
@@ -761,10 +856,10 @@ class UploadService {
                 reader.readAsArrayBuffer(receivedFile);
             });
             if (!exifData) {
-                return { location: null, creationTime: null };
+                return { location: NULL_LOCATION, creationTime: null };
             }
             return {
-                location: this.getLocation(exifData),
+                location: this.getEXIFLocation(exifData),
                 creationTime: this.getUNIXTime(exifData),
             };
         } catch (e) {
@@ -786,9 +881,9 @@ class UploadService {
         return date.getTime() * 1000;
     }
 
-    private getLocation(exifData) {
+    private getEXIFLocation(exifData): Location {
         if (!exifData.GPSLatitude) {
-            return null;
+            return NULL_LOCATION;
         }
 
         let latDegree: number, latMinute: number, latSecond: number;

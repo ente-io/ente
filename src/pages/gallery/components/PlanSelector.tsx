@@ -39,56 +39,42 @@ const LoaderOverlay = styled.div`
 interface Props {
     modalView: boolean;
     closeModal: any;
-    setBannerMessage;
+    setDialogMessage;
 }
 function PlanSelector(props: Props) {
     const [loading, setLoading] = useState(false);
     const subscription = getUserSubscription();
     const plans = getPlans();
     const selectPlan = async (plan) => {
-        var bannerMessage;
         try {
             setLoading(true);
             if (hasPaidPlan(subscription)) {
                 if (isUserRenewingPlan(plan, subscription)) {
                     return;
                 }
-                await updateSubscription(plan);
+                await billingService.updateSubscription(plan.stripeID);
+                setLoading(false);
+                await new Promise((resolve) =>
+                    setTimeout(() => resolve(null), 400)
+                );
             } else {
                 await billingService.buySubscription(plan.stripeID);
             }
+            props.setDialogMessage({
+                title: constants.SUBSCRIPTION_UPDATE_SUCCESS,
+                close: { variant: 'success' },
+            });
         } catch (err) {
-            bannerMessage = {
-                message: constants.SUBSCRIPTION_PURCHASE_FAILED,
-                variant: 'danger',
-            };
-            props.setBannerMessage(bannerMessage);
+            props.setDialogMessage({
+                title: constants.SUBSCRIPTION_PURCHASE_FAILED,
+                close: { variant: 'danger' },
+            });
         } finally {
             setLoading(false);
             props.closeModal();
         }
     };
 
-    const updateSubscription = async (plan) => {
-        try {
-            await billingService.updateSubscription(plan.stripeID);
-            let bannerMessage = {
-                message: constants.SUBSCRIPTION_UPDATE_SUCCESS,
-                variant: 'success',
-            };
-            setLoading(false);
-            await new Promise((resolve) =>
-                setTimeout(() => resolve(null), 400)
-            );
-            props.setBannerMessage(bannerMessage);
-        } catch (err) {
-            let bannerMessage = {
-                message: constants.SUBSCRIPTION_PURCHASE_FAILED,
-                variant: 'danger',
-            };
-            props.setBannerMessage(bannerMessage);
-        }
-    };
     const PlanIcons: JSX.Element[] = plans?.map((plan) => (
         <PlanIcon
             key={plan.stripeID}

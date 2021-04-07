@@ -11,7 +11,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 
 import UploadButton from 'pages/gallery/components/UploadButton';
-import FullScreenDropZone from 'components/FullScreenDropZone';
 import { sentryInit } from '../utils/sentry';
 import { useDropzone } from 'react-dropzone';
 import Sidebar from 'components/Sidebar';
@@ -122,6 +121,23 @@ const GlobalStyles = createGlobalStyle`
     .btn-success:disabled {
         background-color: #69b383;
     }
+    .btn-outline-success {
+        color: #2dc262;
+        border-color: #2dc262;
+        border-width: 2px;
+    }
+    .btn-outline-success:hover {
+        background: #2dc262;
+    }
+    .btn-outline-danger {
+        border-width: 2px;
+    }
+    .btn-outline-secondary {
+        border-width: 2px;
+    }
+    .btn-outline-primary {
+        border-width: 2px;
+    }
     .card {
         background-color: #242424;
         color: #fff;
@@ -134,7 +150,8 @@ const GlobalStyles = createGlobalStyle`
         margin-top: 50px;
     }
     .alert-success {
-        background-color: #c4ffd6;
+        background-color: #a9f7ff;
+        color: #000000;
     }
     .alert-primary {
         background-color: #c4ffd6;
@@ -147,12 +164,15 @@ const GlobalStyles = createGlobalStyle`
         position: fixed;
         width: 28px;
         height: 20px;
-        left: 36px;
-        margin-top: 30px;
+        top:25px;
+        left: 32px;
     }
     .bm-burger-bars {
         background: #bdbdbd;
     }
+    .bm-menu-wrap {
+        top:0px;
+      }
     .bm-menu {
         background: #131313;
         padding: 2.5em 1.5em 0;
@@ -161,6 +181,9 @@ const GlobalStyles = createGlobalStyle`
     }
     .bm-cross {
         background: #fff;
+    }
+    .bg-upload-progress-bar {
+        background-color: #2dc262;
     }
 `;
 
@@ -172,7 +195,6 @@ const Image = styled.img`
 const FlexContainer = styled.div`
     flex: 1;
     text-align: center;
-    margin: 16px;
 `;
 
 export interface BannerMessage {
@@ -183,23 +205,17 @@ export interface BannerMessage {
 sentryInit();
 export default function App({ Component, pageProps, err }) {
     const router = useRouter();
-    const [user, setUser] = useState();
     const [loading, setLoading] = useState(false);
-    const [navbarIconView, setNavbarIconView] = useState(false);
-    const [uploadModalView, setUploadModalView] = useState(false);
-    const [planModalView, setPlanModalView] = useState(false);
-    const [bannerMessage, setBannerMessage] = useState<BannerMessage>(null);
+    const [collectionSelectorView, setCollectionSelectorView] = useState(false);
 
-    function closeUploadModal() {
-        setUploadModalView(false);
+    function closeCollectionSelector() {
+        setCollectionSelectorView(false);
     }
-    function showUploadModal() {
-        setUploadModalView(true);
+    function showCollectionSelector() {
+        setCollectionSelectorView(true);
     }
 
     useEffect(() => {
-        const user = getData(LS_KEYS.USER);
-        setUser(user);
         console.log(
             `%c${constants.CONSOLE_WARNING_STOP}`,
             'color: red; font-size: 52px;'
@@ -213,38 +229,27 @@ export default function App({ Component, pageProps, err }) {
         });
 
         router.events.on('routeChangeComplete', () => {
-            const user = getData(LS_KEYS.USER);
-            setUser(user);
             setLoading(false);
         });
     }, []);
-
     const onDropAccepted = useCallback(() => {
-        showUploadModal();
+        if (acceptedFiles != null && !collectionSelectorView) {
+            showCollectionSelector();
+        }
     }, []);
     const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
         noClick: true,
         noKeyboard: true,
-        onDropAccepted,
         accept: 'image/*, video/*, application/json, ',
+        onDropAccepted,
     });
     return (
-        <FullScreenDropZone
-            getRootProps={getRootProps}
-            getInputProps={getInputProps}
-        >
+        <>
             <Head>
                 <title>{constants.TITLE}</title>
                 <script async src={`https://sa.ente.io/latest.js`} />
             </Head>
             <GlobalStyles />
-            <div style={{ display: navbarIconView ? 'block' : 'none' }}>
-                <Sidebar
-                    setNavbarIconView={setNavbarIconView}
-                    setPlanModalView={setPlanModalView}
-                    setBannerMessage={setBannerMessage}
-                />
-            </div>
             <Navbar>
                 <FlexContainer>
                     <Image
@@ -253,7 +258,6 @@ export default function App({ Component, pageProps, err }) {
                         src="/icon.svg"
                     />
                 </FlexContainer>
-                {navbarIconView && <UploadButton openFileUploader={open} />}
             </Navbar>
             {loading ? (
                 <Container>
@@ -263,19 +267,16 @@ export default function App({ Component, pageProps, err }) {
                 </Container>
             ) : (
                 <Component
+                    getRootProps={getRootProps}
+                    getInputProps={getInputProps}
                     openFileUploader={open}
                     acceptedFiles={acceptedFiles}
-                    uploadModalView={uploadModalView}
-                    showUploadModal={showUploadModal}
-                    closeUploadModal={closeUploadModal}
-                    setNavbarIconView={setNavbarIconView}
-                    planModalView={planModalView}
-                    setPlanModalView={setPlanModalView}
-                    bannerMessage={bannerMessage}
-                    setBannerMessage={setBannerMessage}
+                    collectionSelectorView={collectionSelectorView}
+                    showCollectionSelector={showCollectionSelector}
+                    closeCollectionSelector={closeCollectionSelector}
                     err={err}
                 />
             )}
-        </FullScreenDropZone>
+        </>
     );
 }

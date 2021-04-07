@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
-import ConfirmDialog from 'components/ConfirmDialog';
+import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import Spinner from 'react-bootstrap/Spinner';
 import billingService, { Subscription } from 'services/billingService';
 import constants from 'utils/strings/constants';
-import { logoutUser } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getToken } from 'utils/common/key';
 import { getEndpoint } from 'utils/common/apiUtil';
@@ -19,20 +18,23 @@ import {
     isSubscribed,
 } from 'utils/billingUtil';
 
-enum Action {
-    logout = 'logout',
-    cancelSubscription = 'cancel_subscription',
-}
+import exportService from 'services/exportService';
+import { file } from 'services/fileService';
+import isElectron from 'is-electron';
+import { collection } from 'services/collectionService';
+import { useRouter } from 'next/router';
+import RecoveryKeyModal from './RecoveryKeyModal';
+import { justSignedUp } from 'utils/storage';
+
 interface Props {
-    setNavbarIconView;
+    files: file[];
+    collections: collection[];
+    setConfirmAction: any;
+    somethingWentWrong: any;
     setPlanModalView;
     setBannerMessage;
 }
 export default function Sidebar(props: Props) {
-    const [confirmModalView, setConfirmModalView] = useState(false);
-    function closeConfirmModal() {
-        setConfirmModalView(false);
-    }
     const [usage, SetUsage] = useState<string>(null);
     const [action, setAction] = useState<string>(null);
     const [user, setUser] = useState(null);
@@ -42,6 +44,7 @@ export default function Sidebar(props: Props) {
         setSubscription(getUserSubscription());
     }, []);
     const [isOpen, setIsOpen] = useState(false);
+    const [modalView, setModalView] = useState(justSignedUp());
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -55,39 +58,20 @@ export default function Sidebar(props: Props) {
         main();
     }, [isOpen]);
 
-    const logout = async () => {
-        setConfirmModalView(false);
-        setIsOpen(false);
-        props.setNavbarIconView(false);
-        logoutUser();
-    };
-
-    const cancelSubscription = async () => {
-        try {
-            await billingService.cancelSubscription();
-            props.setBannerMessage({
-                message: constants.SUBSCRIPTION_CANCEL_SUCCESS,
-                variant: 'secondary',
-            });
-        } catch (e) {
-            props.setBannerMessage({
-                message: constants.SUBSCRIPTION_CANCEL_FAILED,
-                variant: 'danger',
-            });
-        }
-        setConfirmModalView(false);
-        setIsOpen(false);
-    };
-
-    let callback = new Map<string, Function>();
-    callback.set(Action.logout, logout);
-    callback.set(Action.cancelSubscription, cancelSubscription);
     function openFeedbackURL() {
         const feedbackURL: string =
             getEndpoint() + '/users/feedback?token=' + getToken();
         var win = window.open(feedbackURL, '_blank');
         win.focus();
     }
+    function exportFiles() {
+        if (isElectron()) {
+            exportService.exportFiles(props.files, props.collections);
+        } else {
+            props.setConfirmAction(CONFIRM_ACTION.DOWNLOAD_APP);
+        }
+    }
+    const router = useRouter();
 
     return (
         <Menu
@@ -138,8 +122,9 @@ export default function Sidebar(props: Props) {
                                 variant="danger"
                                 size="sm"
                                 onClick={() => {
-                                    setAction(Action.cancelSubscription);
-                                    setConfirmModalView(true);
+                                    props.setConfirmAction(
+                                        CONFIRM_ACTION.CANCEL_SUBSCRIPTION
+                                    );
                                 }}
                                 style={{ marginLeft: '10px' }}
                             >
@@ -196,31 +181,54 @@ export default function Sidebar(props: Props) {
                 <a
                     href="mailto:contact@ente.io"
                     style={{ textDecoration: 'inherit', color: 'inherit' }}
+                    target="_blank"
+                    rel="noreferrer noopener"
                 >
                     support
                 </a>
             </h5>
-            <>
-                <ConfirmDialog
-                    show={confirmModalView}
-                    onHide={closeConfirmModal}
-                    callback={callback}
-                    action={action}
-                />
-                <h5
-                    style={{
-                        cursor: 'pointer',
-                        color: '#F96C6C',
-                        marginTop: '30px',
-                    }}
-                    onClick={() => {
-                        setAction(Action.logout);
-                        setConfirmModalView(true);
-                    }}
-                >
-                    logout
-                </h5>
-            </>
+
+            <RecoveryKeyModal
+                show={modalView}
+                onHide={() => setModalView(false)}
+                somethingWentWrong={props.somethingWentWrong}
+            />
+            <h5
+                style={{ cursor: 'pointer', marginTop: '30px' }}
+                onClick={() => setModalView(true)}
+            >
+                {constants.DOWNLOAD_RECOVERY_KEY}
+            </h5>
+            <h5
+                style={{ cursor: 'pointer', marginTop: '30px' }}
+                onClick={() => router.push('changePassword')}
+            >
+                {constants.CHANGE_PASSWORD}
+            </h5>
+            <h5
+                style={{ cursor: 'pointer', marginTop: '30px' }}
+                onClick={exportFiles}
+            >
+                {constants.EXPORT}
+            </h5>
+            <div
+                style={{
+                    height: '1px',
+                    marginTop: '40px',
+                    background: '#242424',
+                    width: '100%',
+                }}
+            ></div>
+            <h5
+                style={{
+                    cursor: 'pointer',
+                    color: '#F96C6C',
+                    marginTop: '30px',
+                }}
+                onClick={() => props.setConfirmAction(CONFIRM_ACTION.LOGOUT)}
+            >
+                logout
+            </h5>
         </Menu>
     );
 }

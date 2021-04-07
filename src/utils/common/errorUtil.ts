@@ -4,24 +4,15 @@ export const errorCodes = {
     ERR_STORAGE_LIMIT_EXCEEDED: '426',
     ERR_NO_ACTIVE_SUBSCRIPTION: '402',
     ERR_NO_INTERNET_CONNECTION: '1',
+    ERR_SESSION_EXPIRED: '401',
 };
 
-export function ErrorHandler(error) {
-    if (
-        error.response?.status.toString() ==
-            errorCodes.ERR_STORAGE_LIMIT_EXCEEDED ||
-        error.response?.status.toString() ==
-            errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION
-    ) {
-        throw new Error(error.response.status);
-    } else {
-        return;
-    }
-}
+const AXIOS_NETWORK_ERROR = 'Network Error';
 
-export function ErrorBannerMessage(bannerErrorCode) {
-    let errorMessage;
-    switch (bannerErrorCode) {
+export function ErrorHandler(error) {
+    const errorCode = error.status?.toString();
+    let errorMessage = null;
+    switch (errorCode) {
         case errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION:
             errorMessage = constants.SUBSCRIPTION_EXPIRED;
             break;
@@ -31,8 +22,14 @@ export function ErrorBannerMessage(bannerErrorCode) {
         case errorCodes.ERR_NO_INTERNET_CONNECTION:
             errorMessage = constants.NO_INTERNET_CONNECTION;
             break;
-        default:
-            errorMessage = `Unknown Error Code - ${bannerErrorCode} Encountered`;
+        case errorCodes.ERR_SESSION_EXPIRED:
+            errorMessage = constants.SESSION_EXPIRED_MESSAGE;
+            break;
     }
-    return errorMessage;
+    if (error.message === AXIOS_NETWORK_ERROR) {
+        errorMessage = constants.SYNC_FAILED;
+    }
+    if (errorMessage) {
+        throw new Error(errorMessage);
+    }
 }

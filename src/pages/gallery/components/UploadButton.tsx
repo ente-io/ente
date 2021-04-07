@@ -1,9 +1,17 @@
 import React from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
 
 function UploadButton({ openFileUploader }) {
     return (
-        <div onClick={openFileUploader} style={{ marginRight: '12px' }}>
+        <div
+            onClick={openFileUploader}
+            style={{
+                position: 'absolute',
+                right: '30px',
+                top: '20px',
+                zIndex: 100,
+                cursor: 'pointer',
+            }}
+        >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"

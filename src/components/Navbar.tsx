@@ -1,12 +1,11 @@
 import styled from 'styled-components';
 
 const Navbar = styled.div`
-    padding: 8px 12px;
     font-size: 20px;
     line-height: 2rem;
     background-color: #111;
     color: #fff;
-    min-height: 56px;
+    min-height: 64px;
     display: flex;
     align-items: center;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);

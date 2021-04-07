@@ -14,7 +14,9 @@ import {
     getOtt,
     logoutUser,
     clearFiles,
+    isTokenValid,
 } from 'services/userService';
+import { setIsFirstLogin } from 'utils/storage';
 
 const Image = styled.img`
     width: 350px;
@@ -33,16 +35,23 @@ export default function Verify() {
     const router = useRouter();
 
     useEffect(() => {
-        router.prefetch('/credentials');
-        router.prefetch('/generate');
-        const user = getData(LS_KEYS.USER);
-        if (!user?.email) {
-            router.push('/');
-        } else if (user.token) {
-            router.push('/credentials');
-        } else {
-            setEmail(user.email);
-        }
+        const main = async () => {
+            router.prefetch('/credentials');
+            router.prefetch('/generate');
+            const user = getData(LS_KEYS.USER);
+            if (!user?.email) {
+                router.push('/');
+            } else if (user.token) {
+                if (await isTokenValid()) {
+                    router.push('/credentials');
+                } else {
+                    logoutUser();
+                }
+            } else {
+                setEmail(user.email);
+            }
+        };
+        main();
     }, []);
 
     const onSubmit = async (
@@ -62,13 +71,14 @@ export default function Verify() {
             keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
             subscription && setData(LS_KEYS.SUBSCRIPTION, subscription);
             clearFiles();
+            setIsFirstLogin(true);
             if (resp.data.keyAttributes?.encryptedKey) {
                 router.push('/credentials');
             } else {
                 router.push('/generate');
             }
         } catch (e) {
-            if (e?.response?.status === 401) {
+            if (e?.status === 401) {
                 setFieldError('ott', constants.INVALID_CODE);
             } else {
                 setFieldError('ott', `${constants.UNKNOWN_ERROR} ${e.message}`);

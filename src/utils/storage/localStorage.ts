@@ -4,6 +4,8 @@ export enum LS_KEYS {
     KEY_ATTRIBUTES = 'keyAttributes',
     SUBSCRIPTION = 'subscription',
     PLANS = 'plans',
+    IS_FIRST_LOGIN = 'isFirstLogin',
+    JUST_SIGNED_UP = 'justSignedUp',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {

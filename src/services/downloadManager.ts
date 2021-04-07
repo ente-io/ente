@@ -1,11 +1,10 @@
 import { getToken } from 'utils/common/key';
 import { file } from './fileService';
 import HTTPService from './HTTPService';
-import { getEndpoint, getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
-import { getFileExtension, runningInBrowser } from 'utils/common/utilFunctions';
-import CryptoWorker from 'utils/crypto/cryptoWorker';
+import { getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
+import { getFileExtension, runningInBrowser } from 'utils/common';
+import CryptoWorker from 'utils/crypto';
 
-const heic2any = runningInBrowser() && require('heic2any');
 const TYPE_HEIC = 'heic';
 
 class DownloadManager {
@@ -60,7 +59,10 @@ class DownloadManager {
         try {
             if (!this.fileDownloads.get(file.id)) {
                 const download = (async () => {
-                    return await this.downloadFile(file);
+                    const fileStream = await this.downloadFile(file);
+                    return URL.createObjectURL(
+                        await new Response(fileStream).blob()
+                    );
                 })();
                 this.fileDownloads.set(file.id, download);
             }
@@ -70,7 +72,7 @@ class DownloadManager {
         }
     };
 
-    private async downloadFile(file: file) {
+    async downloadFile(file: file) {
         const worker = await new CryptoWorker();
         const token = getToken();
         if (!token) {
@@ -93,7 +95,14 @@ class DownloadManager {
             if (getFileExtension(file.metadata.title) === TYPE_HEIC) {
                 decryptedBlob = await this.convertHEIC2JPEG(decryptedBlob);
             }
-            return URL.createObjectURL(new Blob([decryptedBlob]));
+            return new ReadableStream({
+                async start(controller: ReadableStreamDefaultController) {
+                    controller.enqueue(
+                        new Uint8Array(await decryptedBlob.arrayBuffer())
+                    );
+                    controller.close();
+                },
+            });
         } else {
             const resp = await fetch(getFileUrl(file.id), {
                 headers: {
@@ -165,11 +174,12 @@ class DownloadManager {
                     push();
                 },
             });
-            return URL.createObjectURL(await new Response(stream).blob());
+            return stream;
         }
     }
 
     private async convertHEIC2JPEG(fileBlob): Promise<Blob> {
+        const heic2any = runningInBrowser() && require('heic2any');
         return await heic2any({
             blob: fileBlob,
             toType: 'image/jpeg',

@@ -1,36 +1,61 @@
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
-interface Props {
-    callback?: Map<string, Function>;
-    action: string;
-    show: boolean;
-    onHide: MouseEventHandler<HTMLElement>;
+export enum CONFIRM_ACTION {
+    LOGOUT,
+    DELETE,
+    SESSION_EXPIRED,
+    DOWNLOAD_APP,
+    CANCEL_SUBSCRIPTION,
 }
-function ConfirmDialog(props: Props) {
-    const { callback, action, ...rest } = props;
+
+const CONFIRM_ACTION_VALUES = [
+    { text: 'LOGOUT', type: 'danger' },
+    { text: 'DELETE', type: 'danger' },
+    { text: 'SESSION_EXPIRED', type: 'primary' },
+    { text: 'DOWNLOAD_APP', type: 'success' },
+    { text: 'CANCEL_SUBSCRIPTION', type: 'danger' },
+];
+
+interface Props {
+    callback: any;
+    action: CONFIRM_ACTION;
+    show: boolean;
+    onHide: () => void;
+}
+function ConfirmDialog({ callback, action, ...props }: Props) {
     return (
         <Modal
-            {...rest}
+            {...props}
             size="lg"
             aria-labelledby="contained-modal-title-vcenter"
             centered
+            backdrop={
+                action == CONFIRM_ACTION.SESSION_EXPIRED ? 'static' : 'true'
+            }
         >
             <Modal.Body style={{ padding: '24px' }}>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    {constants[`${String(action).toUpperCase()}_WARNING`]}
+                    {
+                        constants[
+                            `${CONFIRM_ACTION_VALUES[action]?.text}_MESSAGE`
+                        ]
+                    }
                 </Modal.Title>
             </Modal.Body>
             <Modal.Footer style={{ borderTop: 'none' }}>
-                <Button variant="secondary" onClick={props.onHide}>
-                    {constants.CLOSE}
-                </Button>
-                {action && (
-                    <Button variant="danger" onClick={callback.get(action)}>
-                        {constants[String(action).toUpperCase()]}
+                {action != CONFIRM_ACTION.SESSION_EXPIRED && (
+                    <Button variant="outline-secondary" onClick={props.onHide}>
+                        {constants.CANCEL}
                     </Button>
                 )}
+                <Button
+                    variant={`outline-${CONFIRM_ACTION_VALUES[action]?.type}`}
+                    onClick={callback}
+                >
+                    {constants[CONFIRM_ACTION_VALUES[action]?.text]}
+                </Button>
             </Modal.Footer>
         </Modal>
     );
