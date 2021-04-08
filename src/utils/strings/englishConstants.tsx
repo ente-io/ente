@@ -111,7 +111,7 @@ const englishConstants = {
     CANCEL_SUBSCRIPTION: 'cancel subscription',
     CANCEL: 'cancel',
     SUBSCRIBE: 'subscribe',
-    MANAGE: 'manage',
+    MANAGEMENT_PORTAL: 'manage payment method',
     SUBSCRIPTION_CHANGE_DISABLED:
         'sorry, this operation is currently not supported on the web, please check your mobile app',
     LOGOUT_MESSAGE: 'sure you want to logout?',

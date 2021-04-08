@@ -96,7 +96,6 @@ class billingService {
             );
             const subscriptionUpdateResponse: SubscriptionUpdateResponse =
                 response.data['subscriptionUpdateResponse'];
-            console.log(subscriptionUpdateResponse);
             switch (subscriptionUpdateResponse.status) {
                 case PAYMENT_INTENT_STATUS.SUCCEEDED:
                     await this.acknowledgeSubscriptionUpdate();
@@ -188,6 +187,7 @@ class billingService {
             window.location.href = response.data['url'];
         } catch (e) {
             console.error('unable to get customer portal url');
+            throw e;
         }
     }
     public async getUsage() {

@@ -36,7 +36,6 @@ interface Props {
 }
 export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
-    const [action, setAction] = useState<string>(null);
     const [user, setUser] = useState(null);
     const [subscription, setSubscription] = useState<Subscription>(null);
     useEffect(() => {
@@ -69,6 +68,14 @@ export default function Sidebar(props: Props) {
             exportService.exportFiles(props.files, props.collections);
         } else {
             props.setConfirmAction(CONFIRM_ACTION.DOWNLOAD_APP);
+        }
+    }
+    async function onManageClick(event) {
+        try {
+            event.preventDefault();
+            await billingService.redirectToCustomerPortal();
+        } catch (error) {
+            props.somethingWentWrong();
         }
     }
     const router = useRouter();
@@ -105,30 +112,47 @@ export default function Sidebar(props: Props) {
                         <p>{constants.SUBSCRIPTION_EXPIRED}</p>
                     )}
                 </div>
-                <div style={{ display: 'flex' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: '90px',
+                        justifyContent: 'space-around',
+                    }}
+                >
                     {isSubscribed(subscription) ? (
                         <>
+                            <div>
+                                <Button
+                                    variant="success"
+                                    size="sm"
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        props.setPlanModalView(true);
+                                    }}
+                                >
+                                    {constants.CHANGE}
+                                </Button>
+                                <Button
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => {
+                                        props.setConfirmAction(
+                                            CONFIRM_ACTION.CANCEL_SUBSCRIPTION
+                                        );
+                                    }}
+                                    style={{ marginLeft: '10px' }}
+                                >
+                                    {constants.CANCEL_SUBSCRIPTION}
+                                </Button>
+                            </div>
                             <Button
-                                variant="success"
+                                variant="secondary"
                                 size="sm"
-                                onClick={() => {
-                                    setIsOpen(false);
-                                    props.setPlanModalView(true);
-                                }}
+                                onClick={onManageClick}
+                                style={{ width: '88%' }}
                             >
-                                {constants.MANAGE}
-                            </Button>
-                            <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => {
-                                    props.setConfirmAction(
-                                        CONFIRM_ACTION.CANCEL_SUBSCRIPTION
-                                    );
-                                }}
-                                style={{ marginLeft: '10px' }}
-                            >
-                                {constants.CANCEL_SUBSCRIPTION}
+                                {constants.MANAGEMENT_PORTAL}
                             </Button>
                         </>
                     ) : (
