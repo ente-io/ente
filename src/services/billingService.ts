@@ -179,7 +179,7 @@ class billingService {
     public async redirectToCustomerPortal() {
         try {
             const response = await HTTPService.get(
-                `${ENDPOINT}/billing/customer-portal`,
+                `${ENDPOINT}/billing/stripe/customer-portal`,
                 null,
                 {
                     'X-Auth-Token': getToken(),
