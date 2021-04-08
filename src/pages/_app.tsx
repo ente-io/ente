@@ -110,23 +110,23 @@ const GlobalStyles = createGlobalStyle`
         background-size: cover;
         border: none;
     }
-    .btn-primary , btn-primary:focus {
+    .btn-success , btn-success:focus {
         background: #2dc262;
         border-color: #29a354;
     }
-    .btn-primary:hover {
+    .btn-success:hover {
         background-color: #29a354;
         border-color: #2dc262;
     }
-    .btn-primary:disabled {
+    .btn-success:disabled {
         background-color: #69b383;
     }
-    .btn-outline-primary {
+    .btn-outline-success {
         color: #2dc262;
         border-color: #2dc262;
         border-width: 2px;
     }
-    .btn-outline-primary:hover {
+    .btn-outline-success:hover {
         background: #2dc262;
     }
     .btn-outline-danger {
@@ -135,7 +135,7 @@ const GlobalStyles = createGlobalStyle`
     .btn-outline-secondary {
         border-width: 2px;
     }
-    .btn-outline-primary {
+    .btn-outline-success {
         border-width: 2px;
     }
     .card {

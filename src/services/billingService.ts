@@ -7,7 +7,7 @@ import { setData, LS_KEYS } from 'utils/storage/localStorage';
 import { convertBytesToGBs } from 'utils/billingUtil';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 
-enum PAYMENT_INTENT_STATUS {
+export enum PAYMENT_INTENT_STATUS {
     SUCCEEDED = 'succeeded',
     REQUIRE_ACTION = 'requires_action',
     REQUIRE_PAYMENT_METHOD = 'requires_payment_method',
