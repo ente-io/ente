@@ -424,6 +424,21 @@ export default function Gallery(props: Props) {
                 setConfirmAction(null);
             },
         ],
+        [
+            CONFIRM_ACTION.UPDATE_PAYMENT_METHOD,
+            async function (event) {
+                try {
+                    event.preventDefault();
+                    await billingService.redirectToCustomerPortal();
+                } catch (error) {
+                    setDialogMessage({
+                        title: constants.UNKNOWN_ERROR,
+                        close: { variant: 'danger' },
+                    });
+                }
+                setConfirmAction(null);
+            },
+        ],
     ]);
 
     return (
@@ -455,6 +470,7 @@ export default function Gallery(props: Props) {
                 modalView={planModalView}
                 closeModal={() => setPlanModalView(false)}
                 setDialogMessage={setDialogMessage}
+                setConfirmAction={setConfirmAction}
             />
             <AlertBanner bannerMessage={bannerMessage} />
             <ConfirmDialog

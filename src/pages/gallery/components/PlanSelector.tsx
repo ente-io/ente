@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { Modal, Spinner } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
-import billingService, { Plan, Subscription } from 'services/billingService';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import billingService, {
+    PAYMENT_INTENT_STATUS,
+    Plan,
+    Subscription,
+} from 'services/billingService';
 import {
     convertBytesToGBs,
     getPlans,
@@ -12,6 +15,7 @@ import {
     isSubscribed,
     isUserRenewingPlan,
 } from 'utils/billingUtil';
+import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     padding-top: 20px;
@@ -40,12 +44,13 @@ interface Props {
     modalView: boolean;
     closeModal: any;
     setDialogMessage;
+    setConfirmAction;
 }
 function PlanSelector(props: Props) {
     const [loading, setLoading] = useState(false);
-    const subscription = getUserSubscription();
+    const subscription: Subscription = getUserSubscription();
     const plans = getPlans();
-    const selectPlan = async (plan) => {
+    const selectPlan = async (plan: Plan) => {
         try {
             setLoading(true);
             if (hasPaidPlan(subscription)) {
@@ -65,10 +70,15 @@ function PlanSelector(props: Props) {
                 close: { variant: 'success' },
             });
         } catch (err) {
-            props.setDialogMessage({
-                title: constants.SUBSCRIPTION_PURCHASE_FAILED,
-                close: { variant: 'danger' },
-            });
+            console.log('dsadad');
+            if (err?.message !== PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD) {
+                props.setConfirmAction(CONFIRM_ACTION.UPDATE_PAYMENT_METHOD);
+            } else {
+                props.setDialogMessage({
+                    title: constants.SUBSCRIPTION_PURCHASE_FAILED,
+                    close: { variant: 'danger' },
+                });
+            }
         } finally {
             setLoading(false);
             props.closeModal();

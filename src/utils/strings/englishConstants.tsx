@@ -209,6 +209,9 @@ const englishConstants = {
     NO_RECOVERY_KEY_MESSAGE:
         'due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
     OK: 'ok',
+    UPDATE_PAYMENT_METHOD_MESSAGE:
+        'we are sorry, there was an error processing your payment, please try again with a different method',
+    UPDATE_PAYMENT_METHOD: 'update payment method',
 };
 
 export default englishConstants;

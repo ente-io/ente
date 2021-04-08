@@ -8,6 +8,7 @@ export enum CONFIRM_ACTION {
     SESSION_EXPIRED,
     DOWNLOAD_APP,
     CANCEL_SUBSCRIPTION,
+    UPDATE_PAYMENT_METHOD,
 }
 
 const CONFIRM_ACTION_VALUES = [
@@ -16,6 +17,7 @@ const CONFIRM_ACTION_VALUES = [
     { text: 'SESSION_EXPIRED', type: 'primary' },
     { text: 'DOWNLOAD_APP', type: 'success' },
     { text: 'CANCEL_SUBSCRIPTION', type: 'danger' },
+    { text: 'UPDATE_PAYMENT_METHOD', type: 'primary' },
 ];
 
 interface Props {
