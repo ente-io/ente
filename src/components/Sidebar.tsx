@@ -116,13 +116,11 @@ export default function Sidebar(props: Props) {
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        height: '90px',
-                        justifyContent: 'space-around',
                     }}
                 >
                     {isSubscribed(subscription) ? (
                         <>
-                            <div>
+                            <div style={{ marginBottom: '10px' }}>
                                 <Button
                                     variant="success"
                                     size="sm"

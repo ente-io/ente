@@ -145,7 +145,12 @@ export default function Verify() {
                                         {errors.ott}
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Button type="submit" block disabled={loading}>
+                                <Button
+                                    variant="success"
+                                    type="submit"
+                                    block
+                                    disabled={loading}
+                                >
                                     {constants.VERIFY}
                                 </Button>
                                 <br />
