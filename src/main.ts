@@ -16,9 +16,12 @@ import { autoUpdater } from 'electron-updater';
 let appIsQuitting = false;
 let tray: Tray;
 let mainWindow: BrowserWindow;
-const imgPath = path.join(process.resourcesPath, 'taskbar-icon.png');
-let appIcon = nativeImage.createFromPath(imgPath);
+
 function createWindow() {
+    const appImgPath = isDev
+        ? 'build/window-icon.png'
+        : path.join(process.resourcesPath, 'window-icon.png');
+    let appIcon = nativeImage.createFromPath(appImgPath);
     // Create the browser window.
     const mainWindow = new BrowserWindow({
         height: 600,
@@ -55,7 +58,9 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-    autoUpdater.checkForUpdatesAndNotify();
+    if (!isDev) {
+        autoUpdater.checkForUpdatesAndNotify();
+    }
     mainWindow = createWindow();
 
     app.on('activate', function () {
@@ -63,7 +68,11 @@ app.on('ready', () => {
         // dock icon is clicked and there are no other windows open.
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
-    tray = new Tray(appIcon);
+    const trayImgPath = isDev
+        ? 'build/taskbar-icon.png'
+        : path.join(process.resourcesPath, 'taskbar-icon.png');
+    let trayIcon = nativeImage.createFromPath(trayImgPath);
+    tray = new Tray(trayIcon);
     tray.setToolTip('ente');
     tray.setContextMenu(buildContextMenu());
 });
