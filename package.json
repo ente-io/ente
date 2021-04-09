@@ -1,23 +1,28 @@
 {
-  "name": "bhari-frame",
+  "name": "ente",
   "productName": "ente",
   "version": "1.0.0",
   "private": true,
   "description": "Desktop client of ente",
   "main": "app/main.js",
   "build": {
-    "appId": "io.ente.electron-frame",
+    "appId": "io.ente.bhari-frame",
+    "artifactName": "${productName}-${version}.${ext}",
     "linux": {
       "target": [
-        "AppImage"
+        "AppImage",
+        "deb",
+        "rpm"
       ],
+      "icon": "./build/icon.icns",
       "category": "Photography"
     },
-    "dmg": {
-      "icon": false
-    },
     "mac": {
+      "target": "dmg",
       "category": "public.app-category.photography"
+    },
+    "win": {
+      "target": "nsis"
     },
     "extraFiles": [
       {
@@ -38,7 +43,7 @@
     "test-release": "electron-builder",
     "release": "electron-builder -mwl --publish always"
   },
-  "author": "code@ente.io",
+  "author": "ente <code@ente.io>",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.20.0",
     "@typescript-eslint/parser": "^4.20.0",
