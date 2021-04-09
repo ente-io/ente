@@ -100,7 +100,7 @@ ipcMain.on('update-tray', (event, args) => {
 
 ipcMain.on('send-notification', (event, args) => {
     const notification = {
-        title: 'Ente Desktop',
+        title: 'ente',
         body: args,
     };
     new Notification(notification).show();
