@@ -103,7 +103,7 @@ ipcMain.on('update-tray', (event, args) => {
 
 ipcMain.on('send-notification', (event, args) => {
     const notification = {
-        title: 'electron frame | ente.io desktop-app',
+        title: 'Ente Desktop',
         body: args,
     };
     new Notification(notification).show();
