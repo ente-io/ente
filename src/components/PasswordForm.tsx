@@ -80,7 +80,7 @@ function SetPassword(props: Props) {
                                         onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                            errors.passphrase
+                                                errors.passphrase
                                         )}
                                         autoFocus={true}
                                         disabled={loading}
@@ -109,6 +109,7 @@ function SetPassword(props: Props) {
                                 </Form.Group>
                                 <Button
                                     type="submit"
+                                    variant="success"
                                     block
                                     disabled={loading}
                                     style={{ marginTop: '28px' }}

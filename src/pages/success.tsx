@@ -30,7 +30,10 @@ export default function SuccessRedirect() {
                                 subscription?.expiryTime
                             )}
                         </h4>
-                        <Button onClick={() => router.push('/gallery')}>
+                        <Button
+                            variant="success"
+                            onClick={() => router.push('/gallery')}
+                        >
                             Go Back To Gallery
                         </Button>
                     </>

@@ -164,7 +164,10 @@ function PlanSelector(props: Props) {
                             : constants.CHOOSE_PLAN}
                     </span>
                     <span>
-                        <Button onClick={togglePeriod}>
+                        <Button
+                            variant="outline-primary"
+                            onClick={togglePeriod}
+                        >
                             <div style={{ fontSize: '20px', width: '80px' }}>
                                 {planPeriod}
                                 {'ly'}
