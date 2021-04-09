@@ -84,8 +84,7 @@ function PlanSelector(props: Props) {
                 close: { variant: 'success' },
             });
         } catch (err) {
-            console.log('dsadad');
-            if (err?.message !== PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD) {
+            if (err?.message == PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD) {
                 props.setConfirmAction(CONFIRM_ACTION.UPDATE_PAYMENT_METHOD);
             } else {
                 props.setDialogMessage({
