@@ -26,6 +26,7 @@ function createWindow() {
     const mainWindow = new BrowserWindow({
         height: 600,
         width: 800,
+        backgroundColor: '#111111',
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
         },
@@ -40,10 +41,6 @@ function createWindow() {
     } else {
         mainWindow.loadURL('http://photos.ente.io');
     }
-    mainWindow.on('minimize', function (event: any) {
-        event.preventDefault();
-        mainWindow.hide();
-    });
     mainWindow.on('close', function (event) {
         if (!appIsQuitting) {
             event.preventDefault();
