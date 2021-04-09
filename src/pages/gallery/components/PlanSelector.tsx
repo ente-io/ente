@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Spinner } from 'react-bootstrap';
+import { Button, Modal, Spinner } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
 import billingService, {
@@ -46,10 +46,24 @@ interface Props {
     setDialogMessage;
     setConfirmAction;
 }
+enum PLAN_PERIOD {
+    MONTH = 'month',
+    YEAR = 'year',
+}
 function PlanSelector(props: Props) {
     const [loading, setLoading] = useState(false);
     const subscription: Subscription = getUserSubscription();
     const plans = getPlans();
+    const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(
+        PLAN_PERIOD.MONTH
+    );
+    const togglePeriod = () => {
+        setPlanPeriod((prevPeriod) =>
+            prevPeriod == PLAN_PERIOD.MONTH
+                ? PLAN_PERIOD.YEAR
+                : PLAN_PERIOD.MONTH
+        );
+    };
     const selectPlan = async (plan: Plan) => {
         try {
             setLoading(true);
@@ -85,47 +99,49 @@ function PlanSelector(props: Props) {
         }
     };
 
-    const PlanIcons: JSX.Element[] = plans?.map((plan) => (
-        <PlanIcon
-            key={plan.stripeID}
-            onClick={() => {
-                selectPlan(plan);
-            }}
-            selected={isUserRenewingPlan(plan, subscription)}
-        >
-            <div>
-                <span
+    const PlanIcons: JSX.Element[] = plans
+        .filter((plan) => plan.period == planPeriod)
+        ?.map((plan) => (
+            <PlanIcon
+                key={plan.stripeID}
+                onClick={() => {
+                    selectPlan(plan);
+                }}
+                selected={isUserRenewingPlan(plan, subscription)}
+            >
+                <div>
+                    <span
+                        style={{
+                            color: '#ECECEC',
+                            fontWeight: 900,
+                            fontSize: '72px',
+                        }}
+                    >
+                        {convertBytesToGBs(plan.storage, 0)}
+                    </span>
+                    <span
+                        style={{
+                            color: '#858585',
+                            fontSize: '24px',
+                            fontWeight: 900,
+                        }}
+                    >
+                        {' '}
+                        GB
+                    </span>
+                </div>
+                <div
                     style={{
                         color: '#ECECEC',
-                        fontWeight: 900,
-                        fontSize: '72px',
-                    }}
-                >
-                    {convertBytesToGBs(plan.storage, 0)}
-                </span>
-                <span
-                    style={{
-                        color: '#858585',
+                        lineHeight: '24px',
                         fontSize: '24px',
-                        fontWeight: 900,
                     }}
                 >
-                    {' '}
-                    GB
-                </span>
-            </div>
-            <div
-                style={{
-                    color: '#ECECEC',
-                    lineHeight: '24px',
-                    fontSize: '24px',
-                }}
-            >
-                {`${plan.price} / ${constants.MONTH}`}
-            </div>
-            {isUserRenewingPlan(plan, subscription) && 'active'}
-        </PlanIcon>
-    ));
+                    {`${plan.price} / ${plan.period}`}
+                </div>
+                {isUserRenewingPlan(plan, subscription) && 'active'}
+            </PlanIcon>
+        ));
     return (
         <Modal
             show={props.modalView}
@@ -133,11 +149,28 @@ function PlanSelector(props: Props) {
             dialogClassName="modal-90w"
             style={{ maxWidth: '100%' }}
         >
-            <Modal.Header closeButton>
-                <Modal.Title style={{ marginLeft: '12px' }}>
-                    {isSubscribed(subscription)
-                        ? constants.MANAGE_PLAN
-                        : constants.CHOOSE_PLAN}
+            <Modal.Header>
+                <Modal.Title
+                    style={{
+                        marginLeft: '12px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                    }}
+                >
+                    <span>
+                        {isSubscribed(subscription)
+                            ? constants.MANAGE_PLAN
+                            : constants.CHOOSE_PLAN}
+                    </span>
+                    <span>
+                        <Button onClick={togglePeriod}>
+                            <div style={{ fontSize: '20px', width: '80px' }}>
+                                {planPeriod}
+                                {'ly'}
+                            </div>
+                        </Button>
+                    </span>
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body
