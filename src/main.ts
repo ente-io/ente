@@ -31,16 +31,41 @@ function createWindow() {
             preload: path.join(__dirname, 'preload.js'),
         },
         icon: appIcon,
+        show: false, // don't show the main window
     });
     mainWindow.setMenu(buildMenuBar());
+    const splash = new BrowserWindow({
+        frame: false,
+        alwaysOnTop: true,
+        height: 600,
+        width: 800,
+        transparent: true,
+    });
 
     if (isDev) {
+        splash.loadFile(`../build/splash.html`);
         mainWindow.loadURL('http://localhost:3000');
         // Open the DevTools.
         mainWindow.webContents.openDevTools();
     } else {
+        splash.loadURL(
+            `file://${path.join(process.resourcesPath, 'splash.html')}`
+        );
         mainWindow.loadURL('http://photos.ente.io');
     }
+    mainWindow.webContents.on('did-fail-load', () => {
+        splash.close();
+        mainWindow.show();
+        isDev
+            ? mainWindow.loadFile(`../build/error.html`)
+            : splash.loadURL(
+                  `file://${path.join(process.resourcesPath, 'error.html')}`
+              );
+    });
+    mainWindow.once('ready-to-show', () => {
+        splash.destroy();
+        mainWindow.show();
+    });
     mainWindow.on('close', function (event) {
         if (!appIsQuitting) {
             event.preventDefault();
@@ -104,6 +129,11 @@ ipcMain.on('send-notification', (event, args) => {
         body: args,
     };
     new Notification(notification).show();
+});
+ipcMain.on('reload-window', (event, args) => {
+    let secondWindow = createWindow();
+    mainWindow.destroy();
+    mainWindow = secondWindow;
 });
 
 function buildContextMenu(export_progress: any = null) {

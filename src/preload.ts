@@ -81,6 +81,10 @@ const registerStopExportListener = (abortExport: Function) => {
     ipcRenderer.on('stop-export', () => abortExport());
 };
 
+const reloadWindow = () => {
+    ipcRenderer.send('reload-window');
+};
+
 var windowObject: any = window;
 windowObject['ElectronAPIs'] = {
     checkExistsAndCreateCollectionDir,
@@ -92,4 +96,5 @@ windowObject['ElectronAPIs'] = {
     sendNotification,
     showOnTray,
     registerStopExportListener,
+    reloadWindow,
 };
