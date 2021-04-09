@@ -99,7 +99,7 @@ function PlanSelector(props: Props) {
     };
 
     const PlanIcons: JSX.Element[] = plans
-        .filter((plan) => plan.period == planPeriod)
+        ?.filter((plan) => plan.period == planPeriod)
         ?.map((plan) => (
             <PlanIcon
                 key={plan.stripeID}
