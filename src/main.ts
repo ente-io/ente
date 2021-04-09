@@ -63,8 +63,8 @@ function createWindow() {
               );
     });
     mainWindow.once('ready-to-show', () => {
-        splash.destroy();
         mainWindow.show();
+        splash.destroy();
     });
     mainWindow.on('close', function (event) {
         if (!appIsQuitting) {
