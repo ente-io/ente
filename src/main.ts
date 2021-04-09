@@ -141,8 +141,11 @@ function buildContextMenu(export_progress: any = null) {
 function buildMenuBar() {
     return Menu.buildFromTemplate([
         {
-            label: '   ',
-            enabled: false,
+            label: '  ',
+            accelerator: 'CmdOrCtrl+R',
+            click() {
+                mainWindow.reload();
+            },
         },
         {
             label: 'help',
