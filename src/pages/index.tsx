@@ -96,6 +96,7 @@ export default function Home() {
                             </Form>
                         )}
                     </Formik>
+                    <br />
                     <Card.Link
                         href="#"
                         onClick={register}
