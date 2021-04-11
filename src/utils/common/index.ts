@@ -1,5 +1,6 @@
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { errorCodes } from './errorUtil';
+
+const TwoSecondInMillSeconds = 2000;
 
 export function checkConnectivity() {
     if (navigator.onLine) {
@@ -11,4 +12,10 @@ export function checkConnectivity() {
 
 export function runningInBrowser() {
     return typeof window !== 'undefined';
+}
+
+export async function WaitFor2Seconds() {
+    await new Promise((resolve) => {
+        setTimeout(() => resolve(null), TwoSecondInMillSeconds);
+    });
 }
