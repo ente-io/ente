@@ -177,7 +177,7 @@ class UploadService {
             }
 
             progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOADING);
-            this.changeProgressBarProps();
+            this.updateProgressBarUI();
             try {
                 await this.fetchUploadURLs();
             } catch (e) {
@@ -214,14 +214,15 @@ class UploadService {
         reader: FileReader,
         fileWithCollection: FileWithCollection
     ) {
+        this.updateProgressBarUI();
         let { file: rawFile, collection } = fileWithCollection;
         this.fileProgress.set(rawFile.name, 0);
-        this.changeProgressBarProps();
+        this.updateProgressBarUI();
         try {
             let file: FileInMemory = await this.readFile(reader, rawFile);
             if (this.fileAlreadyInCollection(file, collection)) {
                 this.fileProgress.set(rawFile.name, FILE_UPLOAD_SKIPPED);
-                this.changeProgressBarProps();
+                this.updateProgressBarUI();
                 await WaitFor2Seconds();
                 this.fileProgress.set(rawFile.name, FILE_UPLOAD_COMPLETED);
                 return;
@@ -259,7 +260,7 @@ class UploadService {
             this.fileProgress.set(rawFile.name, FILE_UPLOAD_FAILED);
         } finally {
             this.filesCompleted++;
-            this.changeProgressBarProps();
+            this.updateProgressBarUI();
             if (this.filesToBeUploaded.length > 0) {
                 await this.uploader(
                     worker,
@@ -270,7 +271,7 @@ class UploadService {
         }
     }
 
-    private changeProgressBarProps() {
+    private updateProgressBarUI() {
         const {
             setPercentComplete,
             setFileCounter,
@@ -887,7 +888,7 @@ class UploadService {
                                 (percentPerPart * event.loaded) / event.total
                         )
                     );
-                this.changeProgressBarProps();
+                this.updateProgressBarUI();
             },
         };
     }
