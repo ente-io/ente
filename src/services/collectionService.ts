@@ -204,14 +204,20 @@ export const getFavItemIds = async (files: file[]): Promise<Set<number>> => {
 };
 
 export const createAlbum = async (albumName: string) => {
-    return AddCollection(albumName, CollectionType.album);
+    return createCollection(albumName, CollectionType.album);
 };
 
-export const AddCollection = async (
+export const createCollection = async (
     collectionName: string,
     type: CollectionType
-) => {
+): Promise<collection> => {
     try {
+        const existingCollections = await getLocalCollections();
+        for (let collection of existingCollections) {
+            if (collection.name === collectionName) {
+                return collection;
+            }
+        }
         const worker = await new CryptoWorker();
         const encryptionKey = await getActualKey();
         const token = getToken();
@@ -243,7 +249,7 @@ export const AddCollection = async (
             updationTime: null,
             isDeleted: false,
         };
-        let createdCollection: collection = await createCollection(
+        let createdCollection: collection = await postCollection(
             newCollection,
             token
         );
@@ -257,7 +263,7 @@ export const AddCollection = async (
     }
 };
 
-const createCollection = async (
+const postCollection = async (
     collectionData: collection,
     token: string
 ): Promise<collection> => {
@@ -279,7 +285,7 @@ export const addToFavorites = async (file: file) => {
         FAV_COLLECTION
     );
     if (!favCollection) {
-        favCollection = await AddCollection(
+        favCollection = await createCollection(
             'Favorites',
             CollectionType.favorites
         );
