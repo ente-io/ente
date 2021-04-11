@@ -4,7 +4,7 @@ import EXIF from 'exif-js';
 import { fileAttribute } from './fileService';
 import { collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
-import { checkConnectivity } from 'utils/common';
+import { checkConnectivity, convertHEIC2JPEG, fileIsHEIC } from 'utils/common';
 import { ErrorHandler } from 'utils/common/errorUtil';
 import CryptoWorker from 'utils/crypto';
 import * as convert from 'xml-js';
@@ -552,14 +552,14 @@ class UploadService {
             let canvas = document.createElement('canvas');
             let canvas_CTX = canvas.getContext('2d');
             let imageURL = null;
-            if (
-                file.type.match(TYPE_IMAGE) ||
-                (file.type.length == 0 && file.name.endsWith(TYPE_HEIC))
-            ) {
+            if (file.type.match(TYPE_IMAGE) || fileIsHEIC(file.name)) {
+                if (fileIsHEIC(file.name)) {
+                    file = new File([await convertHEIC2JPEG(file)], null, null);
+                }
                 let image = new Image();
                 imageURL = URL.createObjectURL(file);
                 image.setAttribute('src', imageURL);
-                await new Promise((resolve) => {
+                await new Promise((resolve, reject) => {
                     image.onload = () => {
                         const thumbnailWidth =
                             (image.width * THUMBNAIL_HEIGHT) / image.height;
@@ -575,9 +575,10 @@ class UploadService {
                         image = undefined;
                         resolve(null);
                     };
+                    setTimeout(() => reject(null), 4000);
                 });
             } else {
-                await new Promise(async (resolve) => {
+                await new Promise(async (resolve, reject) => {
                     let video = document.createElement('video');
                     imageURL = URL.createObjectURL(file);
                     video.addEventListener('timeupdate', function () {
@@ -599,7 +600,7 @@ class UploadService {
                     video.preload = 'metadata';
                     video.src = imageURL;
                     video.currentTime = 3;
-                    setTimeout(() => resolve(null), 4000);
+                    setTimeout(() => reject(null), 4000);
                 });
             }
             URL.revokeObjectURL(imageURL);
