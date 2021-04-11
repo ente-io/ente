@@ -64,7 +64,16 @@ const englishConstants = {
         <div id={name}>
             <strong>{name}</strong>
             {` - `}
-            {progress !== -1 ? progress + '%' : 'failed'}
+            {(() => {
+                switch (progress) {
+                    case -1:
+                        return 'failed';
+                    case -2:
+                        return 'already uploaded, skipping...';
+                    default:
+                        return `${progress}%`;
+                }
+            })()}
         </div>
     ),
     SUBSCRIPTION_EXPIRED:
@@ -165,8 +174,10 @@ const englishConstants = {
     DOWNLOAD_RECOVERY_KEY: 'recovery key',
     SAVE_LATER: 'save later',
     SAVE: 'save',
-    RECOVERY_KEY_DESCRIPTION: 'if you forget your password, the only way you can recover your data is with this key',
-    KEY_NOT_STORED_DISCLAIMER: 'we don\'t store this key, so please save this in a safe place',
+    RECOVERY_KEY_DESCRIPTION:
+        'if you forget your password, the only way you can recover your data is with this key',
+    KEY_NOT_STORED_DISCLAIMER:
+        "we don't store this key, so please save this in a safe place",
     RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
     FORGOT_PASSWORD: 'forgot password?',
     RECOVER_ACCOUNT: 'recover account',
