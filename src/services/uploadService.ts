@@ -200,7 +200,7 @@ class UploadService {
             }
             await Promise.all(uploadProcesses);
             progressBarProps.setUploadStage(UPLOAD_STAGES.FINISH);
-            progressBarProps.setPercentComplete(100);
+            progressBarProps.setPercentComplete(FILE_UPLOAD_COMPLETED);
         } catch (e) {
             console.error('uploading failed with error', e);
             this.filesToBeUploaded = [];
@@ -214,7 +214,6 @@ class UploadService {
         reader: FileReader,
         fileWithCollection: FileWithCollection
     ) {
-        this.updateProgressBarUI();
         let { file: rawFile, collection } = fileWithCollection;
         this.fileProgress.set(rawFile.name, 0);
         this.updateProgressBarUI();
