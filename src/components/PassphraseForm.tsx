@@ -1,18 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import Container from 'components/Container';
-import styled from 'styled-components';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { useRouter } from 'next/router';
 import * as Yup from 'yup';
-import { KeyAttributes } from 'types';
-import CryptoWorker, { setSessionKeys } from 'utils/crypto';
-import { Spinner } from 'react-bootstrap';
-import { propTypes } from 'react-bootstrap/esm/Image';
+import SubmitButton from './SubmitButton';
 
 interface formValues {
     passphrase: string;
@@ -83,13 +77,11 @@ export default function PassPhraseForm(props: Props) {
                                         {errors.passphrase}
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Button block type="submit" disabled={loading}>
-                                    {loading ? (
-                                        <Spinner animation="border" />
-                                    ) : (
-                                        props.buttonText
-                                    )}
-                                </Button>
+                                <SubmitButton
+                                    buttonText={props.buttonText}
+                                    loading={loading}
+                                />
+
                                 <br />
                                 <div
                                     style={{

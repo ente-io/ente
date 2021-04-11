@@ -10,6 +10,7 @@ import * as Yup from 'yup';
 import { getOtt } from 'services/userService';
 import Container from 'components/Container';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
+import SubmitButton from 'components/SubmitButton';
 interface formValues {
     email: string;
 }
@@ -88,15 +89,10 @@ export default function Home() {
                                         {errors.email}
                                     </FormControl.Feedback>
                                 </Form.Group>
-                                <Button
-                                    variant="primary"
-                                    type="submit"
-                                    block
-                                    disabled={loading}
-                                    style={{ marginBottom: '12px' }}
-                                >
-                                    {constants.LOGIN}
-                                </Button>
+                                <SubmitButton
+                                    buttonText={constants.LOGIN}
+                                    loading={loading}
+                                />
                             </Form>
                         )}
                     </Formik>
