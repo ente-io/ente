@@ -21,7 +21,7 @@ const THUMBNAIL_HEIGHT = 720;
 const MAX_URL_REQUESTS = 50;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;
-const MAX_CONCURRENT_UPLOADS = 4;
+const MAX_CONCURRENT_UPLOADS = 2;
 const TYPE_IMAGE = 'image';
 const TYPE_VIDEO = 'video';
 const TYPE_HEIC = 'HEIC';
@@ -32,7 +32,7 @@ const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
 const CHUNKS_COMBINED_FOR_UPLOAD = 5;
 const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 const NULL_LOCATION: Location = { latitude: null, longitude: null };
-const FourSecondsInMillSeconds = 4000;
+const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
 const FILE_UPLOAD_FAILED = -1;
 const FILE_UPLOAD_SKIPPED = -2;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -641,7 +641,10 @@ class UploadService {
                         image = undefined;
                         resolve(null);
                     };
-                    setTimeout(() => reject(null), FourSecondsInMillSeconds);
+                    setTimeout(
+                        () => reject(null),
+                        WAIT_TIME_THUMBNAIL_GENERATION
+                    );
                 });
             } else {
                 await new Promise(async (resolve, reject) => {
@@ -666,7 +669,10 @@ class UploadService {
                     video.preload = 'metadata';
                     video.src = imageURL;
                     video.currentTime = 3;
-                    setTimeout(() => reject(null), FourSecondsInMillSeconds);
+                    setTimeout(
+                        () => reject(null),
+                        WAIT_TIME_THUMBNAIL_GENERATION
+                    );
                 });
             }
             URL.revokeObjectURL(imageURL);
