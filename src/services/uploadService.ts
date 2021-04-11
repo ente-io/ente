@@ -248,7 +248,6 @@ class UploadService {
             backupedFile = null;
             await this.uploadFile(uploadFile);
             uploadFile = null;
-            this.filesCompleted++;
             this.fileProgress.set(rawFile.name, FILE_UPLOAD_COMPLETED);
         } catch (e) {
             console.error('file upload failed with error', e);
@@ -259,6 +258,7 @@ class UploadService {
             this.uploadErrors.push(error);
             this.fileProgress.set(rawFile.name, FILE_UPLOAD_FAILED);
         } finally {
+            this.filesCompleted++;
             this.changeProgressBarProps();
             if (this.filesToBeUploaded.length > 0) {
                 await this.uploader(
