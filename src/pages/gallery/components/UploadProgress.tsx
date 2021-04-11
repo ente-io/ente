@@ -73,7 +73,7 @@ export default function UploadProgress(props: Props) {
                         style={{
                             marginTop: '10px',
                             overflow: 'auto',
-                            height: '250px',
+                            maxHeight: '250px',
                         }}
                     >
                         {fileProgressStatuses.map(({ fileName, progress }) => (
