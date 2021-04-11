@@ -165,7 +165,7 @@ export default function Sidebar(props: Props) {
                 style={{
                     cursor: 'pointer',
                     color: '#F96C6C',
-                    marginTop: '30px',
+                    margin: '30px 0',
                 }}
                 onClick={() => props.setConfirmAction(CONFIRM_ACTION.LOGOUT)}
             >

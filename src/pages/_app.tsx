@@ -110,15 +110,15 @@ const GlobalStyles = createGlobalStyle`
         background-size: cover;
         border: none;
     }
-    .btn-primary {
+    .btn-success {
         background: #2dc262;
         border-color: #29a354;
     }
-    .btn-primary:hover {
+    .btn-success:hover ,.btn-success:focus .btn-success:active{
         background-color: #29a354;
         border-color: #2dc262;
     }
-    .btn-primary:disabled {
+    .btn-success:disabled {
         background-color: #69b383;
     }
     .btn-outline-success {
@@ -129,13 +129,7 @@ const GlobalStyles = createGlobalStyle`
     .btn-outline-success:hover {
         background: #2dc262;
     }
-    .btn-outline-danger {
-        border-width: 2px;
-    }
-    .btn-outline-secondary {
-        border-width: 2px;
-    }
-    .btn-outline-primary {
+    .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
         border-width: 2px;
     }
     .card {
@@ -263,7 +257,7 @@ export default function App({ Component, pageProps, err }) {
             </Navbar>
             {loading ? (
                 <Container>
-                    <Spinner animation="border" role="status" variant="primary">
+                    <Spinner animation="border" role="status" variant="success">
                         <span className="sr-only">Loading...</span>
                     </Spinner>
                 </Container>
