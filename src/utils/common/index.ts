@@ -1,6 +1,8 @@
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { errorCodes } from './errorUtil';
 
+const TYPE_HEIC = 'heic';
+
 export function checkConnectivity() {
     if (navigator.onLine) {
         return true;
@@ -31,4 +33,17 @@ export function downloadAsFile(filename: string, content: string) {
     a.click();
 
     a.remove();
+}
+
+export async function convertHEIC2JPEG(fileBlob: Blob): Promise<Blob> {
+    const heic2any = runningInBrowser() && require('heic2any');
+    return await heic2any({
+        blob: fileBlob,
+        toType: 'image/jpeg',
+        quality: 1,
+    });
+}
+
+export function fileIsHEIC(name: string) {
+    return name.endsWith(TYPE_HEIC);
 }

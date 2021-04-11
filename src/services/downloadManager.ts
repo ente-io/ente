@@ -2,10 +2,8 @@ import { getToken } from 'utils/common/key';
 import { file } from './fileService';
 import HTTPService from './HTTPService';
 import { getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
-import { getFileExtension, runningInBrowser } from 'utils/common';
+import { convertHEIC2JPEG, fileIsHEIC, getFileExtension } from 'utils/common';
 import CryptoWorker from 'utils/crypto';
-
-const TYPE_HEIC = 'heic';
 
 class DownloadManager {
     private fileDownloads = new Map<number, Promise<string>>();
@@ -92,8 +90,8 @@ class DownloadManager {
             );
             let decryptedBlob = new Blob([decrypted]);
 
-            if (getFileExtension(file.metadata.title) === TYPE_HEIC) {
-                decryptedBlob = await this.convertHEIC2JPEG(decryptedBlob);
+            if (fileIsHEIC(file.metadata.title)) {
+                decryptedBlob = await convertHEIC2JPEG(decryptedBlob);
             }
             return new ReadableStream({
                 async start(controller: ReadableStreamDefaultController) {
@@ -176,15 +174,6 @@ class DownloadManager {
             });
             return stream;
         }
-    }
-
-    private async convertHEIC2JPEG(fileBlob): Promise<Blob> {
-        const heic2any = runningInBrowser() && require('heic2any');
-        return await heic2any({
-            blob: fileBlob,
-            toType: 'image/jpeg',
-            quality: 1,
-        });
     }
 }
 
