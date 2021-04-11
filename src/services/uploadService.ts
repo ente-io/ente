@@ -301,9 +301,9 @@ class UploadService {
         newFile: FileInMemory,
         collection: collection
     ): boolean {
-        for (let existingFile of this.existingFilesCollectionWise.get(
-            collection.id
-        )) {
+        const collectionFiles =
+            this.existingFilesCollectionWise.get(collection.id) ?? [];
+        for (let existingFile of collectionFiles) {
             if (this.areFilesSame(existingFile.metadata, newFile.metadata)) {
                 return true;
             }
