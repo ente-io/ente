@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { FileWithCollection, UPLOAD_STAGES } from 'services/uploadService';
-import { getToken } from 'utils/common/key';
 import CollectionSelector from './CollectionSelector';
 import UploadProgress from './UploadProgress';
 import UploadService from 'services/uploadService';
 import { createAlbum } from 'services/collectionService';
 import CreateCollection from './CreateCollection';
 import ChoiceModal from './ChoiceModal';
+import { file } from 'services/fileService';
 
 interface Props {
     collectionSelectorView: any;
@@ -15,6 +15,7 @@ interface Props {
     refetchData;
     setBannerMessage;
     acceptedFiles;
+    existingFiles: file[];
 }
 
 export enum UPLOAD_STRATEGY {
@@ -153,6 +154,7 @@ export default function Upload(props: Props) {
         try {
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
+                props.existingFiles,
                 {
                     setPercentComplete,
                     setFileCounter,

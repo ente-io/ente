@@ -2,8 +2,8 @@ import { getToken } from 'utils/common/key';
 import { file } from './fileService';
 import HTTPService from './HTTPService';
 import { getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
-import { convertHEIC2JPEG, fileIsHEIC, getFileExtension } from 'utils/common';
 import CryptoWorker from 'utils/crypto';
+import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
 
 class DownloadManager {
     private fileDownloads = new Map<number, Promise<string>>();

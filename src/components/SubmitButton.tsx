@@ -16,11 +16,8 @@ const SubmitButton = ({ loading, buttonText }: Props) => (
         {loading ? (
             <Spinner
                 as="span"
-                style={{
-                    height: '35px',
-                    width: '35px',
-                }}
                 animation="border"
+                style={{ width: '22px', height: '22px', borderWidth: '0.20em' }}
             />
         ) : (
             buttonText

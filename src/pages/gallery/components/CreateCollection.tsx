@@ -54,7 +54,7 @@ export default function CreateCollection(props: Props) {
                         />
                     </Form.Group>
                     <Button
-                        variant="primary"
+                        variant="success"
                         type="submit"
                         style={{ width: '100%' }}
                     >

@@ -448,6 +448,7 @@ export default function Gallery(props: Props) {
                 refetchData={syncWithRemote}
                 setBannerMessage={setBannerMessage}
                 acceptedFiles={props.acceptedFiles}
+                existingFiles={data}
             />
             <Sidebar
                 files={data}
