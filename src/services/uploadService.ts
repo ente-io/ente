@@ -297,12 +297,11 @@ class UploadService {
         collection: collection
     ): boolean {
         for (let existingFile of this.existingFiles) {
-            if (existingFile.collectionID === collection.id) {
-                if (
-                    this.areFilesSame(existingFile.metadata, newFile.metadata)
-                ) {
-                    return true;
-                }
+            if (
+                existingFile.collectionID === collection.id &&
+                this.areFilesSame(existingFile.metadata, newFile.metadata)
+            ) {
+                return true;
             }
         }
         return false;
