@@ -8,6 +8,7 @@ import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Button from 'react-bootstrap/Button';
 import { Spinner } from 'react-bootstrap';
+import SubmitButton from './SubmitButton';
 
 interface Props {
     callback: (passphrase: any, setFieldError: any) => Promise<void>;
@@ -80,7 +81,7 @@ function SetPassword(props: Props) {
                                         onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                            errors.passphrase
+                                                errors.passphrase
                                         )}
                                         autoFocus={true}
                                         disabled={loading}
@@ -107,18 +108,10 @@ function SetPassword(props: Props) {
                                         {errors.confirm}
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Button
-                                    type="submit"
-                                    block
-                                    disabled={loading}
-                                    style={{ marginTop: '28px' }}
-                                >
-                                    {loading ? (
-                                        <Spinner animation="border" />
-                                    ) : (
-                                        props.buttonText
-                                    )}
-                                </Button>
+                                <SubmitButton
+                                    buttonText={props.buttonText}
+                                    loading={loading}
+                                />
                             </Form>
                         )}
                     </Formik>

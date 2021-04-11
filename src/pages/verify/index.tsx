@@ -17,6 +17,7 @@ import {
     isTokenValid,
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
+import SubmitButton from 'components/SubmitButton';
 
 const Image = styled.img`
     width: 350px;
@@ -145,9 +146,10 @@ export default function Verify() {
                                         {errors.ott}
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Button type="submit" block disabled={loading}>
-                                    {constants.VERIFY}
-                                </Button>
+                                <SubmitButton
+                                    buttonText={constants.VERIFY}
+                                    loading={loading}
+                                />
                                 <br />
                                 {resend === 0 && (
                                     <a href="#" onClick={resendEmail}>

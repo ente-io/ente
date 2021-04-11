@@ -11,6 +11,7 @@ import { getOtt } from 'services/userService';
 import Container from 'components/Container';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { DisclaimerContainer } from 'components/Container';
+import SubmitButton from 'components/SubmitButton';
 
 interface FormValues {
     name: string;
@@ -105,14 +106,11 @@ export default function Home() {
                                 <DisclaimerContainer>
                                     {constants.DATA_DISCLAIMER}
                                 </DisclaimerContainer>
-                                <Button
-                                    variant="primary"
-                                    type="submit"
-                                    block
-                                    disabled={loading}
-                                >
-                                    {constants.SUBMIT}
-                                </Button>
+
+                                <SubmitButton
+                                    buttonText={constants.SUBMIT}
+                                    loading={loading}
+                                />
                             </Form>
                         )}
                     </Formik>
