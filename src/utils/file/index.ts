@@ -32,7 +32,7 @@ export function fileIsHEIC(name: string) {
     return name.endsWith(TYPE_HEIC);
 }
 
-export function sortFilesIntoCollection(files: file[]) {
+export function sortFilesIntoCollections(files: file[]) {
     const collectionWiseFiles = new Map<number, file[]>();
     for (let file of files) {
         if (!collectionWiseFiles.has(file.collectionID)) {

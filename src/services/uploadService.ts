@@ -13,7 +13,7 @@ import { getToken } from 'utils/common/key';
 import {
     fileIsHEIC,
     convertHEIC2JPEG,
-    sortFilesIntoCollection,
+    sortFilesIntoCollections,
 } from 'utils/file';
 const ENDPOINT = getEndpoint();
 
@@ -148,7 +148,7 @@ class UploadService {
             this.setUploadErrors = setUploadErrors;
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-            this.existingFilesCollectionWise = sortFilesIntoCollection(
+            this.existingFilesCollectionWise = sortFilesIntoCollections(
                 existingFiles
             );
 
