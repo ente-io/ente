@@ -94,7 +94,7 @@ interface ProcessedFile {
     metadata: fileAttribute;
     filename: string;
 }
-interface BackupedFile extends ProcessedFile {}
+interface BackupedFile extends Omit<ProcessedFile, 'filename'> {}
 
 interface uploadFile extends BackupedFile {
     collectionID: number;
@@ -412,6 +412,7 @@ class UploadService {
 
     private async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
         try {
+            let fileObjectKey, thumbnailObjectKey;
             if (isDataStream(file.file.encryptedData)) {
                 const { chunkCount, stream } = file.file.encryptedData;
                 const uploadPartCount = Math.ceil(
@@ -420,7 +421,7 @@ class UploadService {
                 const filePartUploadURLs = await this.fetchMultipartUploadURLs(
                     uploadPartCount
                 );
-                file.file.objectKey = await this.putFileInParts(
+                fileObjectKey = await this.putFileInParts(
                     filePartUploadURLs,
                     stream,
                     file.filename,
@@ -428,22 +429,31 @@ class UploadService {
                 );
             } else {
                 const fileUploadURL = await this.getUploadURL();
-                file.file.objectKey = await this.putFile(
+                fileObjectKey = await this.putFile(
                     fileUploadURL,
                     file.file.encryptedData,
                     file.filename
                 );
             }
             const thumbnailUploadURL = await this.getUploadURL();
-            file.thumbnail.objectKey = await this.putFile(
+            thumbnailObjectKey = await this.putFile(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData as Uint8Array,
                 null
             );
-            delete file.file.encryptedData;
-            delete file.thumbnail.encryptedData;
 
-            return file;
+            const backupedFile: BackupedFile = {
+                file: {
+                    decryptionHeader: file.file.decryptionHeader,
+                    objectKey: fileObjectKey,
+                },
+                thumbnail: {
+                    decryptionHeader: file.thumbnail.decryptionHeader,
+                    objectKey: thumbnailObjectKey,
+                },
+                metadata: file.metadata,
+            };
+            return backupedFile;
         } catch (e) {
             console.error('error uploading to bucket ', e);
             throw e;
@@ -461,6 +471,7 @@ class UploadService {
             keyDecryptionNonce: fileKey.nonce,
             ...backupedFile,
         };
+        uploadFile;
         return uploadFile;
     }
 
