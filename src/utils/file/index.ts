@@ -31,3 +31,14 @@ export async function convertHEIC2JPEG(fileBlob: Blob): Promise<Blob> {
 export function fileIsHEIC(name: string) {
     return name.endsWith(TYPE_HEIC);
 }
+
+export function sortFilesIntoCollection(files: file[]) {
+    const collectionWiseFiles = new Map<number, file[]>();
+    for (let file of files) {
+        if (!collectionWiseFiles.has(file.collectionID)) {
+            collectionWiseFiles.set(file.collectionID, new Array<file>());
+        }
+        collectionWiseFiles.get(file.collectionID).push(file);
+    }
+    return collectionWiseFiles;
+}

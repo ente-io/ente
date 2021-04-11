@@ -10,7 +10,11 @@ import CryptoWorker from 'utils/crypto';
 import * as convert from 'xml-js';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { getToken } from 'utils/common/key';
-import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
+import {
+    fileIsHEIC,
+    convertHEIC2JPEG,
+    sortFilesIntoCollection,
+} from 'utils/file';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;
@@ -126,7 +130,7 @@ class UploadService {
     private progressBarProps;
     private uploadErrors: Error[];
     private setUploadErrors;
-    private existingFiles: file[];
+    private existingFilesCollectionWise: Map<number, file[]>;
 
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
@@ -144,7 +148,9 @@ class UploadService {
             this.setUploadErrors = setUploadErrors;
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-            this.existingFiles = existingFiles;
+            this.existingFilesCollectionWise = sortFilesIntoCollection(
+                existingFiles
+            );
 
             let metadataFiles: File[] = [];
             let actualFiles: FileWithCollection[] = [];
@@ -295,11 +301,10 @@ class UploadService {
         newFile: FileInMemory,
         collection: collection
     ): boolean {
-        for (let existingFile of this.existingFiles) {
-            if (
-                existingFile.collectionID === collection.id &&
-                this.areFilesSame(existingFile.metadata, newFile.metadata)
-            ) {
+        for (let existingFile of this.existingFilesCollectionWise.get(
+            collection.id
+        )) {
+            if (this.areFilesSame(existingFile.metadata, newFile.metadata)) {
                 return true;
             }
         }
