@@ -4,12 +4,13 @@ import EXIF from 'exif-js';
 import { fileAttribute } from './fileService';
 import { collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
-import { checkConnectivity, convertHEIC2JPEG, fileIsHEIC } from 'utils/common';
+import { checkConnectivity } from 'utils/common';
 import { ErrorHandler } from 'utils/common/errorUtil';
 import CryptoWorker from 'utils/crypto';
 import * as convert from 'xml-js';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { getToken } from 'utils/common/key';
+import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;

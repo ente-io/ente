@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Spinner } from 'react-bootstrap';
-import { downloadAsFile } from 'utils/common';
+import { downloadAsFile } from 'utils/file';
 import { getRecoveryKey } from 'utils/crypto';
 import { setJustSignedUp } from 'utils/storage';
 import constants from 'utils/strings/constants';
