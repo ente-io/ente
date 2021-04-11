@@ -39,13 +39,19 @@ export default function UploadProgress(props: Props) {
             dialogClassName="ente-modal"
         >
             <Modal.Body>
-                <div style={{ textAlign: 'center', marginBottom: '20px', marginTop: '12px' }}>
+                <div
+                    style={{
+                        textAlign: 'center',
+                        marginBottom: '20px',
+                        marginTop: '12px',
+                    }}
+                >
                     <h4>
                         {props.uploadStage == UPLOAD_STAGES.UPLOADING
                             ? props.fileCounter.total > 1 &&
-                            constants.UPLOAD[props.uploadStage](
-                                props.fileCounter
-                            )
+                              constants.UPLOAD[props.uploadStage](
+                                  props.fileCounter
+                              )
                             : constants.UPLOAD[props.uploadStage]}
                     </h4>
                 </div>
@@ -56,21 +62,28 @@ export default function UploadProgress(props: Props) {
                         </Alert>
                     )
                 ) : (
-                    <ProgressBar now={props.now} animated variant={'upload-progress-bar'} />
+                    <ProgressBar
+                        now={props.now}
+                        animated
+                        variant={'upload-progress-bar'}
+                    />
                 )}
-                {fileProgressStatuses && (
+                {fileProgressStatuses?.length > 0 && (
                     <div
                         style={{
                             marginTop: '10px',
                             overflow: 'auto',
-                            maxHeight: '200px',
+                            height: '250px',
                         }}
                     >
-                        {fileProgressStatuses.map(({ fileName, progress }) =>
+                        {fileProgressStatuses.map(({ fileName, progress }) => (
                             <div style={{ marginTop: '12px' }}>
-                                {constants.FILE_UPLOAD_PROGRESS(fileName, progress)}
+                                {constants.FILE_UPLOAD_PROGRESS(
+                                    fileName,
+                                    progress
+                                )}
                             </div>
-                        )}
+                        ))}
                     </div>
                 )}
                 {props.now === 100 && (
