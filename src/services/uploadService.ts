@@ -559,7 +559,7 @@ class UploadService {
                 let image = new Image();
                 imageURL = URL.createObjectURL(file);
                 image.setAttribute('src', imageURL);
-                await new Promise((resolve) => {
+                await new Promise((resolve, reject) => {
                     image.onload = () => {
                         const thumbnailWidth =
                             (image.width * THUMBNAIL_HEIGHT) / image.height;
@@ -575,9 +575,10 @@ class UploadService {
                         image = undefined;
                         resolve(null);
                     };
+                    setTimeout(() => reject(null), 4000);
                 });
             } else {
-                await new Promise(async (resolve) => {
+                await new Promise(async (resolve, reject) => {
                     let video = document.createElement('video');
                     imageURL = URL.createObjectURL(file);
                     video.addEventListener('timeupdate', function () {
@@ -599,7 +600,7 @@ class UploadService {
                     video.preload = 'metadata';
                     video.src = imageURL;
                     video.currentTime = 3;
-                    setTimeout(() => resolve(null), 4000);
+                    setTimeout(() => reject(null), 4000);
                 });
             }
             URL.revokeObjectURL(imageURL);
