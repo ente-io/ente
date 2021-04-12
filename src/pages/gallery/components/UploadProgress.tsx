@@ -17,9 +17,6 @@ export default function UploadProgress(props: Props) {
     let fileProgressStatuses = [];
     if (props.fileProgress) {
         for (let [fileName, progress] of props.fileProgress) {
-            if (progress === 100) {
-                continue;
-            }
             fileProgressStatuses.push({ fileName, progress });
         }
         fileProgressStatuses.sort((a, b) => {

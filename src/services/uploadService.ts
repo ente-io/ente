@@ -6,7 +6,7 @@ import { collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity, WaitFor2Seconds } from 'utils/common';
 import { ErrorHandler } from 'utils/common/errorUtil';
-import CryptoWorker from 'utils/crypto';
+import { GetDedicatedCryptoWorker } from 'utils/crypto';
 import * as convert from 'xml-js';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { getToken } from 'utils/common/key';
@@ -21,7 +21,7 @@ const THUMBNAIL_HEIGHT = 720;
 const MAX_URL_REQUESTS = 50;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;
-const MAX_CONCURRENT_UPLOADS = 2;
+const MAX_CONCURRENT_UPLOADS = 4;
 const TYPE_IMAGE = 'image';
 const TYPE_VIDEO = 'video';
 const TYPE_HEIC = 'HEIC';
@@ -119,6 +119,7 @@ export enum UPLOAD_STAGES {
 }
 
 class UploadService {
+    private cryptoWorkers = [];
     private uploadURLs: UploadURL[] = [];
     private uploadURLFetchInProgress: Promise<any> = null;
     private perFileProgress: number;
@@ -131,7 +132,16 @@ class UploadService {
     private uploadErrors: Error[];
     private setUploadErrors;
     private existingFilesCollectionWise: Map<number, file[]>;
-
+    constructor() {
+        const main = async () => {
+            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+                this.cryptoWorkers.push(
+                    await new (GetDedicatedCryptoWorker())()
+                );
+            }
+        };
+        main();
+    }
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
         existingFiles: file[],
@@ -157,7 +167,7 @@ class UploadService {
             filesWithCollectionToUpload.forEach((fileWithCollection) => {
                 let file = fileWithCollection.file;
                 if (file?.name.substr(0, 1) == '.') {
-                    //ignore files with name starting with .
+                    //ignore files with name starting with . (hidden files)
                     return;
                 }
                 if (
@@ -171,18 +181,25 @@ class UploadService {
                     metadataFiles.push(fileWithCollection.file);
                 }
             });
-            this.totalFileCount = actualFiles.length;
-            this.perFileProgress = 100 / actualFiles.length;
             this.filesToBeUploaded = actualFiles;
 
             progressBarProps.setUploadStage(
                 UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
             );
+            this.totalFileCount = metadataFiles.length;
+            this.perFileProgress = 100 / metadataFiles.length;
+            this.filesCompleted = 0;
+
             for (const rawFile of metadataFiles) {
                 await this.seedMetadataMap(rawFile);
+                this.filesCompleted++;
+                this.updateProgressBarUI();
             }
 
             progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOADING);
+            this.totalFileCount = actualFiles.length;
+            this.perFileProgress = 100 / actualFiles.length;
+            this.filesCompleted = 0;
             this.updateProgressBarUI();
             try {
                 await this.fetchUploadURLs();
@@ -198,7 +215,7 @@ class UploadService {
             ) {
                 uploadProcesses.push(
                     this.uploader(
-                        await new CryptoWorker(),
+                        this.cryptoWorkers[i],
                         new FileReader(),
                         this.filesToBeUploaded.pop()
                     )
@@ -226,10 +243,12 @@ class UploadService {
         try {
             let file: FileInMemory = await this.readFile(reader, rawFile);
             if (this.fileAlreadyInCollection(file, collection)) {
+                // set progress to -2 indicating that file upload was skipped
                 this.fileProgress.set(rawFile.name, FILE_UPLOAD_SKIPPED);
                 this.updateProgressBarUI();
                 await WaitFor2Seconds();
-                this.fileProgress.set(rawFile.name, FILE_UPLOAD_COMPLETED);
+                // remove completed files for file progress list
+                this.fileProgress.delete(rawFile.name);
                 return;
             }
             let {
@@ -254,7 +273,7 @@ class UploadService {
             backupedFile = null;
             await this.uploadFile(uploadFile);
             uploadFile = null;
-            this.fileProgress.set(rawFile.name, FILE_UPLOAD_COMPLETED);
+            this.fileProgress.delete(rawFile.name);
         } catch (e) {
             console.error('file upload failed with error', e);
             ErrorHandler(e);
@@ -262,6 +281,7 @@ class UploadService {
                 `Uploading Failed for File - ${rawFile.name}`
             );
             this.uploadErrors.push(error);
+            // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
             this.fileProgress.set(rawFile.name, FILE_UPLOAD_FAILED);
         } finally {
             this.filesCompleted++;
@@ -286,9 +306,13 @@ class UploadService {
             finished: this.filesCompleted,
             total: this.totalFileCount,
         });
-        let percentComplete = 0;
+        let percentComplete = this.perFileProgress * this.filesCompleted;
         if (this.fileProgress) {
             for (let [_, progress] of this.fileProgress) {
+                //filter  negative indicator values during percentComplete calculation
+                if (progress < 0) {
+                    continue;
+                }
                 percentComplete += (this.perFileProgress * progress) / 100;
             }
         }
