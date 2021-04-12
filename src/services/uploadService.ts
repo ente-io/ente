@@ -6,7 +6,7 @@ import { collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity, WaitFor2Seconds } from 'utils/common';
 import { ErrorHandler } from 'utils/common/errorUtil';
-import { GetDedicatedCryptoWorker } from 'utils/crypto';
+import { getDedicatedCryptoWorker } from 'utils/crypto';
 import * as convert from 'xml-js';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { getToken } from 'utils/common/key';
@@ -134,10 +134,14 @@ class UploadService {
     private existingFilesCollectionWise: Map<number, file[]>;
     constructor() {
         const main = async () => {
-            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
-                this.cryptoWorkers.push(
-                    await new (GetDedicatedCryptoWorker())()
-                );
+            try {
+                for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+                    this.cryptoWorkers.push(
+                        await new (getDedicatedCryptoWorker())()
+                    );
+                }
+            } catch (e) {
+                // ignore
             }
         };
         main();

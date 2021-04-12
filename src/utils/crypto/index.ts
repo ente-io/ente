@@ -12,7 +12,7 @@ const CryptoWorker: any =
     runningInBrowser() &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 
-export const GetDedicatedCryptoWorker = (): any =>
+export const getDedicatedCryptoWorker = (): any =>
     runningInBrowser() &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 
