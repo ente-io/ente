@@ -12,6 +12,10 @@ const CryptoWorker: any =
     runningInBrowser() &&
     Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
 
+export const GetDedicatedCryptoWorker = (): any =>
+    runningInBrowser() &&
+    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
+
 export async function generateAndSaveIntermediateKeyAttributes(
     passphrase,
     existingKeyAttributes,

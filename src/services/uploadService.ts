@@ -6,7 +6,7 @@ import { collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity, WaitFor2Seconds } from 'utils/common';
 import { ErrorHandler } from 'utils/common/errorUtil';
-import CryptoWorker from 'utils/crypto';
+import { GetDedicatedCryptoWorker } from 'utils/crypto';
 import * as convert from 'xml-js';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { getToken } from 'utils/common/key';
@@ -21,7 +21,7 @@ const THUMBNAIL_HEIGHT = 720;
 const MAX_URL_REQUESTS = 50;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;
-const MAX_CONCURRENT_UPLOADS = 2;
+const MAX_CONCURRENT_UPLOADS = 4;
 const TYPE_IMAGE = 'image';
 const TYPE_VIDEO = 'video';
 const TYPE_HEIC = 'HEIC';
@@ -119,6 +119,7 @@ export enum UPLOAD_STAGES {
 }
 
 class UploadService {
+    private cryptoWorkers = [];
     private uploadURLs: UploadURL[] = [];
     private uploadURLFetchInProgress: Promise<any> = null;
     private perFileProgress: number;
@@ -131,7 +132,16 @@ class UploadService {
     private uploadErrors: Error[];
     private setUploadErrors;
     private existingFilesCollectionWise: Map<number, file[]>;
-
+    constructor() {
+        const main = async () => {
+            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+                this.cryptoWorkers.push(
+                    await new (GetDedicatedCryptoWorker())()
+                );
+            }
+        };
+        main();
+    }
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
         existingFiles: file[],
@@ -205,7 +215,7 @@ class UploadService {
             ) {
                 uploadProcesses.push(
                     this.uploader(
-                        await new CryptoWorker(),
+                        this.cryptoWorkers[i],
                         new FileReader(),
                         this.filesToBeUploaded.pop()
                     )
