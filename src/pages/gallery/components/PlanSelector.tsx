@@ -103,9 +103,9 @@ function PlanSelector(props: Props) {
         ?.map((plan) => (
             <PlanIcon
                 key={plan.stripeID}
-                onClick={() => {
-                    selectPlan(plan);
-                }}
+                onClick={() =>
+                    !isUserRenewingPlan(plan, subscription) && selectPlan(plan)
+                }
                 selected={isUserRenewingPlan(plan, subscription)}
             >
                 <div>
