@@ -99,7 +99,7 @@ class billingService {
                 response.data['subscriptionUpdateResponse'];
             switch (subscriptionUpdateResponse.status) {
                 case PAYMENT_INTENT_STATUS.SUCCEEDED:
-                    await this.acknowledgeSubscriptionUpdate();
+                    await this.verifySubscription(null);
                     break;
                 case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
                     throw new Error(
@@ -112,15 +112,13 @@ class billingService {
                     if (error) {
                         throw error;
                     } else {
-                        await this.acknowledgeSubscriptionUpdate();
+                        await this.verifySubscription(null);
                     }
                     break;
             }
         } catch (e) {
             console.error(e);
             throw e;
-        } finally {
-            await this.syncSubscription();
         }
     }
 
@@ -203,20 +201,6 @@ class billingService {
             return convertBytesToGBs(response.data.usage);
         } catch (e) {
             console.error('error getting usage', e);
-        }
-    }
-    private async acknowledgeSubscriptionUpdate() {
-        try {
-            await HTTPService.post(
-                `${ENDPOINT}/billing/stripe/acknowledge-subscription-update`,
-                null,
-                null,
-                {
-                    'X-Auth-Token': getToken(),
-                }
-            );
-        } catch (e) {
-            console.error('error acknowledging subscription update', e);
         }
     }
 }
