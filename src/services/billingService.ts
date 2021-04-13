@@ -23,6 +23,7 @@ export interface Subscription {
     isCancelled: boolean;
 }
 export interface Plan {
+    id: string;
     androidID: string;
     iosID: string;
     storage: number;
@@ -142,7 +143,7 @@ class billingService {
 
     private async createCheckoutSession(productID) {
         return HTTPService.post(
-            `${ENDPOINT}/billing/stripe/create-checkout-session`,
+            `${ENDPOINT}/billing/stripe/checkout-session`,
             {
                 productID,
             },
