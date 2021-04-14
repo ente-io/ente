@@ -16,6 +16,7 @@ import {
     isUserRenewingPlan,
 } from 'utils/billingUtil';
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
+import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     padding-top: 20px;
@@ -67,10 +68,7 @@ function PlanSelector(props: Props) {
     const selectPlan = async (plan: Plan) => {
         try {
             setLoading(true);
-            if (hasPaidPlan(subscription)) {
-                if (isUserRenewingPlan(plan, subscription)) {
-                    return;
-                }
+            if (false && hasPaidPlan(subscription)) {
                 await billingService.updateSubscription(plan.stripeID);
                 setLoading(false);
                 await new Promise((resolve) =>
@@ -84,13 +82,23 @@ function PlanSelector(props: Props) {
                 close: { variant: 'success' },
             });
         } catch (err) {
-            if (err?.message == PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD) {
-                props.setConfirmAction(CONFIRM_ACTION.UPDATE_PAYMENT_METHOD);
-            } else {
-                props.setDialogMessage({
-                    title: constants.SUBSCRIPTION_PURCHASE_FAILED,
-                    close: { variant: 'danger' },
-                });
+            switch (err?.message) {
+                case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
+                    props.setConfirmAction(
+                        CONFIRM_ACTION.UPDATE_PAYMENT_METHOD
+                    );
+                    break;
+                case SUBSCRIPTION_VERIFICATION_ERROR:
+                    props.setDialogMessage({
+                        title: constants.SUBSCRIPTION_VERIFICATION_FAILED,
+                        close: { variant: 'danger' },
+                    });
+                    break;
+                default:
+                    props.setDialogMessage({
+                        title: constants.SUBSCRIPTION_PURCHASE_FAILED,
+                        close: { variant: 'danger' },
+                    });
             }
         } finally {
             setLoading(false);

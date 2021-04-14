@@ -3,35 +3,55 @@ import router from 'next/router';
 import { useEffect, useState } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
 import billingService, { Subscription } from 'services/billingService';
+import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
 import constants from 'utils/strings/constants';
 
 export default function SuccessRedirect() {
-    const [subscription, setSubscription] = useState<Subscription>(null);
+    const [response, setResponse] = useState<{
+        subscription?: Subscription;
+        error?: string;
+    }>(null);
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
         if (sessionId) {
             (async () => {
-                const subscription = await billingService.verifySubscription(
-                    sessionId
-                );
-                setSubscription(subscription);
+                try {
+                    const subscription = await billingService.verifySubscription(
+                        sessionId
+                    );
+                    setResponse({ subscription });
+                } catch (e) {
+                    setResponse({ error: SUBSCRIPTION_VERIFICATION_ERROR });
+                }
             })();
         }
     }, []);
     return (
-        <Container style={{ color: '#fff' }}>
+        <Container style={{ textAlign: 'center', color: '#fff' }}>
             <div>
-                {subscription ? (
+                {response ? (
                     <>
-                        <h1>Your payment succeeded</h1>
-                        <h4>
-                            {constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
-                                subscription?.expiryTime
-                            )}
-                        </h4>
+                        {response.subscription && (
+                            <>
+                                <h1>Your payment succeeded</h1>
+                                <h4>
+                                    {constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
+                                        response.subscription?.expiryTime
+                                    )}
+                                </h4>
+                            </>
+                        )}
+                        {response.error && (
+                            <h4>
+                                {constants.SUBSCRIPTION_VERIFICATION_FAILED}
+                            </h4>
+                        )}
+                        <hr />
                         <Button
-                            variant="success"
+                            variant={
+                                response.subscription ? 'success' : 'primary'
+                            }
                             onClick={() => router.push('/gallery')}
                         >
                             Go Back To Gallery

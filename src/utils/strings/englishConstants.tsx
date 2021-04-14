@@ -172,6 +172,7 @@ const englishConstants = {
     MONTH: 'month',
     SUBSCRIPTION_CANCEL_FAILED: 'failed to cancel subscription',
     SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
+    SUBSCRIPTION_VERIFICATION_FAILED: `we were not able to verify your purchase, verification can take few hours`,
     SUBSCRIPTION_PURCHASE_FAILED:
         'subscription purchase failed , please try again later',
     SUBSCRIPTION_UPDATE_SUCCESS:

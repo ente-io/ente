@@ -6,6 +6,7 @@ import { runningInBrowser } from 'utils/common/';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
 import { convertBytesToGBs } from 'utils/billingUtil';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
+import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
 
 export enum PAYMENT_INTENT_STATUS {
     SUCCEEDED = 'succeeded',
@@ -99,7 +100,8 @@ class billingService {
                 response.data['subscriptionUpdateResponse'];
             switch (subscriptionUpdateResponse.status) {
                 case PAYMENT_INTENT_STATUS.SUCCEEDED:
-                    await this.verifySubscription(null);
+                    // subscription updated successfully
+                    // no-op required
                     break;
                 case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
                     throw new Error(
@@ -111,14 +113,17 @@ class billingService {
                     );
                     if (error) {
                         throw error;
-                    } else {
-                        await this.verifySubscription(null);
                     }
                     break;
             }
         } catch (e) {
             console.error(e);
             throw e;
+        }
+        try {
+            await this.verifySubscription();
+        } catch (e) {
+            throw new Error(SUBSCRIPTION_VERIFICATION_ERROR);
         }
     }
 
@@ -152,7 +157,9 @@ class billingService {
         );
     }
 
-    public async verifySubscription(sessionID): Promise<Subscription> {
+    public async verifySubscription(
+        sessionID: string = null
+    ): Promise<Subscription> {
         try {
             const response = await HTTPService.post(
                 `${ENDPOINT}/billing/verify-subscription`,
@@ -171,6 +178,7 @@ class billingService {
             return subscription;
         } catch (err) {
             console.error('Error while verifying subscription', err);
+            throw err;
         }
     }
 

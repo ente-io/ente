@@ -7,7 +7,10 @@ export const errorCodes = {
     ERR_SESSION_EXPIRED: '401',
 };
 
-const AXIOS_NETWORK_ERROR = 'Network Error';
+const AXIOS_NETWORK_ERROR = new Error('Network Error');
+
+export const SUBSCRIPTION_VERIFICATION_ERROR =
+    'Subscription verification failed';
 
 export function ErrorHandler(error) {
     const errorCode = error.status?.toString();
@@ -26,7 +29,7 @@ export function ErrorHandler(error) {
             errorMessage = constants.SESSION_EXPIRED_MESSAGE;
             break;
     }
-    if (error.message === AXIOS_NETWORK_ERROR) {
+    if (error.message === AXIOS_NETWORK_ERROR.message) {
         errorMessage = constants.SYNC_FAILED;
     }
     if (errorMessage) {

@@ -44,7 +44,6 @@ export function getPlans(): Plan[] {
     return getData(LS_KEYS.PLANS);
 }
 export function isUserRenewingPlan(plan: Plan, subscription: Subscription) {
-    console.log(plan.id, subscription.productID);
     return (
         plan.id === subscription.productID &&
         !isSubscriptionCancelled(subscription)
