@@ -242,7 +242,13 @@ export default function App({ Component, pageProps, err }) {
         <>
             <Head>
                 <title>{constants.TITLE}</title>
-                <script async src={`https://sa.ente.io/latest.js`} />
+                {/* Cloudflare Web Analytics */}
+                <script
+                    defer
+                    src="https://static.cloudflareinsights.com/beacon.min.js"
+                    data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
+                />
+                {/* End Cloudflare Web Analytics  */}
             </Head>
             <GlobalStyles />
 
