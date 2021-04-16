@@ -9,7 +9,7 @@ import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
 
 export enum PAYMENT_INTENT_STATUS {
-    SUCCEEDED = 'succeeded',
+    SUCCESS = 'success',
     REQUIRE_ACTION = 'requires_action',
     REQUIRE_PAYMENT_METHOD = 'requires_payment_method',
 }
@@ -96,10 +96,9 @@ class billingService {
                     'X-Auth-Token': getToken(),
                 }
             );
-            const subscriptionUpdateResponse: SubscriptionUpdateResponse =
-                response.data['subscriptionUpdateResponse'];
-            switch (subscriptionUpdateResponse.status) {
-                case PAYMENT_INTENT_STATUS.SUCCEEDED:
+            const result: SubscriptionUpdateResponse = response.data['result'];
+            switch (result.status) {
+                case PAYMENT_INTENT_STATUS.SUCCESS:
                     // subscription updated successfully
                     // no-op required
                     break;
@@ -109,7 +108,7 @@ class billingService {
                     );
                 case PAYMENT_INTENT_STATUS.REQUIRE_ACTION:
                     const { error } = await this.stripe.confirmCardPayment(
-                        subscriptionUpdateResponse.clientSecret
+                        result.clientSecret
                     );
                     if (error) {
                         throw error;
