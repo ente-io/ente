@@ -14,6 +14,7 @@ import {
     hasPaidPlan,
     isSubscribed,
     isUserRenewingPlan,
+    isSubscriptionCancelled,
 } from 'utils/billingUtil';
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
@@ -70,6 +71,9 @@ function PlanSelector(props: Props) {
             setLoading(true);
             if (hasPaidPlan(subscription)) {
                 await billingService.updateSubscription(plan.stripeID);
+                if (isSubscriptionCancelled(subscription)) {
+                    await billingService.activateSubscription();
+                }
                 setLoading(false);
                 await new Promise((resolve) =>
                     setTimeout(() => resolve(null), 400)

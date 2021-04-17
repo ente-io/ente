@@ -143,6 +143,23 @@ class billingService {
         }
     }
 
+    public async activateSubscription() {
+        try {
+            const response = await HTTPService.get(
+                `${ENDPOINT}/billing/stripe/activate-subscription`,
+                null,
+                {
+                    'X-Auth-Token': getToken(),
+                }
+            );
+            const subscription = response.data['subscription'];
+            setData(LS_KEYS.SUBSCRIPTION, subscription);
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
+    }
+
     private async createCheckoutSession(productID) {
         return HTTPService.post(
             `${ENDPOINT}/billing/stripe/checkout-session`,
