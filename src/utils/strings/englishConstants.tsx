@@ -65,7 +65,16 @@ const englishConstants = {
         <div id={name}>
             <strong>{name}</strong>
             {` - `}
-            {progress !== -1 ? progress + '%' : 'failed'}
+            {(() => {
+                switch (progress) {
+                    case -1:
+                        return 'failed';
+                    case -2:
+                        return 'already uploaded, skipping...';
+                    default:
+                        return `${progress}%`;
+                }
+            })()}
         </div>
     ),
     SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew it',

@@ -110,11 +110,11 @@ const GlobalStyles = createGlobalStyle`
         background-size: cover;
         border: none;
     }
-    .btn-success , btn-success:focus {
+    .btn-success {
         background: #2dc262;
         border-color: #29a354;
     }
-    .btn-success:hover {
+    .btn-success:hover ,.btn-success:focus .btn-success:active{
         background-color: #29a354;
         border-color: #2dc262;
     }
@@ -129,13 +129,7 @@ const GlobalStyles = createGlobalStyle`
     .btn-outline-success:hover {
         background: #2dc262;
     }
-    .btn-outline-danger {
-        border-width: 2px;
-    }
-    .btn-outline-secondary {
-        border-width: 2px;
-    }
-    .btn-outline-success {
+    .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
         border-width: 2px;
     }
     .card {
@@ -247,7 +241,13 @@ export default function App({ Component, pageProps, err }) {
         <>
             <Head>
                 <title>{constants.TITLE}</title>
-                <script async src={`https://sa.ente.io/latest.js`} />
+                {/* Cloudflare Web Analytics */}
+                <script
+                    defer
+                    src="https://static.cloudflareinsights.com/beacon.min.js"
+                    data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
+                />
+                {/* End Cloudflare Web Analytics  */}
             </Head>
             <GlobalStyles />
             <Navbar>

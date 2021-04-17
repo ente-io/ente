@@ -5,6 +5,7 @@ import constants from 'utils/strings/constants';
 import { Card, Form, Spinner } from 'react-bootstrap';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
+import SubmitButton from './SubmitButton';
 
 interface formValues {
     passphrase: string;
@@ -75,18 +76,11 @@ export default function PassPhraseForm(props: Props) {
                                         {errors.passphrase}
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Button
-                                    variant="success"
-                                    block
-                                    type="submit"
-                                    disabled={loading}
-                                >
-                                    {loading ? (
-                                        <Spinner animation="border" />
-                                    ) : (
-                                        props.buttonText
-                                    )}
-                                </Button>
+                                <SubmitButton
+                                    buttonText={props.buttonText}
+                                    loading={loading}
+                                />
+
                                 <br />
                                 <div
                                     style={{

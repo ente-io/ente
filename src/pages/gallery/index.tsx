@@ -64,6 +64,7 @@ const Container = styled.div`
     width: 100%;
     flex-wrap: wrap;
     margin: 0 auto;
+    margin-bottom: 40px;
 
     .pswp-thumbnail {
         display: inline-block;
@@ -496,6 +497,7 @@ export default function Gallery(props: Props) {
                 refetchData={syncWithRemote}
                 setBannerMessage={setBannerMessage}
                 acceptedFiles={props.acceptedFiles}
+                existingFiles={data}
             />
             <Sidebar
                 files={data}
