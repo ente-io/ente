@@ -68,7 +68,7 @@ function PlanSelector(props: Props) {
     const selectPlan = async (plan: Plan) => {
         try {
             setLoading(true);
-            if (false && hasPaidPlan(subscription)) {
+            if (hasPaidPlan(subscription)) {
                 await billingService.updateSubscription(plan.stripeID);
                 setLoading(false);
                 await new Promise((resolve) =>
