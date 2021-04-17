@@ -13,9 +13,9 @@ export const SUBSCRIPTION_VERIFICATION_ERROR =
     'Subscription verification failed';
 
 export function ErrorHandler(error) {
+    let errorMessage = null;
     try {
         const errorCode = error.status.toString();
-        let errorMessage = null;
         switch (errorCode) {
             case errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION:
                 errorMessage = constants.SUBSCRIPTION_EXPIRED;
@@ -30,13 +30,14 @@ export function ErrorHandler(error) {
                 errorMessage = constants.SESSION_EXPIRED_MESSAGE;
                 break;
         }
+        console.log(errorMessage);
         if (error.message === AXIOS_NETWORK_ERROR) {
             errorMessage = constants.SYNC_FAILED;
         }
-        if (errorMessage) {
-            throw new Error(errorMessage);
-        }
     } catch (e) {
         //ignore;
+    }
+    if (errorMessage) {
+        throw new Error(errorMessage);
     }
 }
