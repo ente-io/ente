@@ -10,7 +10,7 @@ import { getToken } from 'utils/common/key';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { Button } from 'react-bootstrap';
 import {
-    isPlanActive,
+    isSubscriptionActive,
     convertBytesToGBs,
     getUserSubscription,
     isOnFreePlan,
@@ -94,7 +94,7 @@ export default function Sidebar(props: Props) {
                     {constants.SUBSCRIPTION_PLAN}
                 </h5>
                 <div style={{ color: '#959595' }}>
-                    {isPlanActive(subscription) ? (
+                    {isSubscriptionActive(subscription) ? (
                         isOnFreePlan(subscription) ? (
                             constants.FREE_SUBSCRIPTION_INFO(
                                 subscription?.expiryTime

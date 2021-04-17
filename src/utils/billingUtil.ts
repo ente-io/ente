@@ -8,7 +8,7 @@ export function hasPaidPlan(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
     return (
         subscription &&
-        isPlanActive(subscription) &&
+        isSubscriptionActive(subscription) &&
         subscription.productID !== FREE_PLAN
     );
 }
@@ -17,7 +17,7 @@ export function isSubscribed(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
     return hasPaidPlan(subscription) && !isSubscriptionCancelled(subscription);
 }
-export function isPlanActive(subscription?: Subscription): boolean {
+export function isSubscriptionActive(subscription?: Subscription): boolean {
     subscription = subscription ?? getUserSubscription();
     return subscription && subscription.expiryTime > Date.now() * 1000;
 }
@@ -26,7 +26,7 @@ export function isOnFreePlan(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
     return (
         subscription &&
-        isPlanActive(subscription) &&
+        isSubscriptionActive(subscription) &&
         subscription.productID === FREE_PLAN
     );
 }
