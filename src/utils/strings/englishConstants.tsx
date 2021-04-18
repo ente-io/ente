@@ -226,8 +226,8 @@ const englishConstants = {
     YEARLY: 'yearly',
     SUBSCRIPTION_PURCHASE_CANCELLED: () => (
         <div>
-            <h1>Your purchase was Canceled</h1>
-            <h2>Redirecting back to gallery...</h2>
+            <h1>your purchase was canceled</h1>
+            <h2>redirecting back to gallery...</h2>
         </div>
     ),
 };
