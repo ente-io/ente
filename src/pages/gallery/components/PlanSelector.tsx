@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Spinner } from 'react-bootstrap';
-import dynamic from 'next/dynamic';
-const BootstrapSwitchButton = dynamic(
-    () => import('bootstrap-switch-button-react'),
-    {
-        ssr: false, // This line is important. It's what prevents server-side render
-    }
-);
-
+import { Form, Modal, Spinner } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
 import billingService, {
@@ -173,8 +165,8 @@ function PlanSelector(props: Props) {
                 <Modal.Title
                     style={{
                         marginLeft: '12px',
-                        display: 'flex',
                         width: '100%',
+                        textAlign: 'center',
                     }}
                 >
                     <span>
@@ -182,29 +174,53 @@ function PlanSelector(props: Props) {
                             ? constants.MANAGE_PLAN
                             : constants.CHOOSE_PLAN}
                     </span>
-                    <span style={{ marginLeft: '50px' }}>
-                        <BootstrapSwitchButton
-                            checked={planPeriod == PLAN_PERIOD.YEAR}
-                            width={150}
-                            onlabel={constants.YEARLY}
-                            onstyle="success"
-                            offstyle="primary"
-                            offlabel={constants.MONTHLY}
-                            size="lg"
-                            onChange={togglePeriod}
-                        />
-                    </span>
                 </Modal.Title>
             </Modal.Header>
-            <Modal.Body
-                style={{
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    flexWrap: 'wrap',
-                    minHeight: '150px',
-                }}
-            >
-                {PlanIcons}
+            <Modal.Body>
+                <div
+                    style={{
+                        display: 'flex',
+                        marginBottom: '30px',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <span
+                        style={{
+                            color: '#ECECEC',
+                            lineHeight: '24px',
+                            fontSize: '24px',
+                            paddingTop: '2px',
+                        }}
+                    >
+                        {constants.MONTHLY}
+                    </span>
+                    <Form.Switch
+                        id={`plan-period-toggler`}
+                        style={{ marginLeft: '15px' }}
+                        className={`custom-switch-md`}
+                        onChange={togglePeriod}
+                    />
+                    <span
+                        style={{
+                            color: '#ECECEC',
+                            lineHeight: '24px',
+                            fontSize: '24px',
+                            paddingTop: '2px',
+                        }}
+                    >
+                        {constants.YEARLY}
+                    </span>
+                </div>
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'space-around',
+                        flexWrap: 'wrap',
+                        minHeight: '150px',
+                    }}
+                >
+                    {PlanIcons}
+                </div>
                 {(!plans || loading) && (
                     <LoaderOverlay>
                         <Spinner animation="border" />
