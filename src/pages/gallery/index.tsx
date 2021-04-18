@@ -456,17 +456,6 @@ export default function Gallery(props: Props) {
                     </Alert>
                 </div>
             )}
-            {!isSubscribed() && (
-                <Button
-                    id="checkout"
-                    variant="success"
-                    size="lg"
-                    block
-                    onClick={() => setPlanModalView(true)}
-                >
-                    {constants.SUBSCRIBE}
-                </Button>
-            )}
             <PlanSelector
                 modalView={planModalView}
                 closeModal={() => setPlanModalView(false)}
