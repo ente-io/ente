@@ -199,7 +199,11 @@ const GlobalStyles = createGlobalStyle`
     .custom-switch.custom-switch-md .custom-control-input:checked ~ .custom-control-label::after {
         transform: translateX(calc(2.0rem - 0.25rem));
     }
-    
+    .bold-text{
+        color: #ECECEC;
+        line-height: 24px;
+        font-size: 24px;
+    }
 `;
 
 const Image = styled.img`

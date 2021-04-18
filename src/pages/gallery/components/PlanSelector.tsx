@@ -29,6 +29,7 @@ export const PlanIcon = styled.div<{ selected: boolean }>`
     font-size: 20px;
     cursor: ${(props) => (props.selected ? 'not-allowed' : 'pointer')};
     background: ${(props) => props.selected && '#404040'};
+    margin-top: 20px;
 `;
 
 const LoaderOverlay = styled.div`
@@ -119,7 +120,6 @@ function PlanSelector(props: Props) {
                     !isUserRenewingPlan(plan, subscription) && selectPlan(plan)
                 }
                 selected={isUserRenewingPlan(plan, subscription)}
-                style={{ marginBottom: '10px' }}
             >
                 <div>
                     <span
@@ -143,14 +143,8 @@ function PlanSelector(props: Props) {
                     </span>
                 </div>
                 <div
-                    style={{
-                        color: '#ECECEC',
-                        lineHeight: '24px',
-                        fontSize: '24px',
-                    }}
-                >
-                    {`${plan.price} / ${plan.period}`}
-                </div>
+                    className={`bold-text`}
+                >{`${plan.price} / ${plan.period}`}</div>
                 {isUserRenewingPlan(plan, subscription) && 'active'}
             </PlanIcon>
         ));
@@ -180,36 +174,17 @@ function PlanSelector(props: Props) {
                 <div
                     style={{
                         display: 'flex',
-                        marginBottom: '30px',
                         justifyContent: 'center',
                     }}
                 >
-                    <span
-                        style={{
-                            color: '#ECECEC',
-                            lineHeight: '24px',
-                            fontSize: '24px',
-                            paddingTop: '2px',
-                        }}
-                    >
-                        {constants.MONTHLY}
-                    </span>
+                    <span className={`bold-text`}>{constants.MONTHLY}</span>
                     <Form.Switch
                         id={`plan-period-toggler`}
-                        style={{ marginLeft: '15px' }}
+                        style={{ marginLeft: '15px', marginTop: '-4px' }}
                         className={`custom-switch-md`}
                         onChange={togglePeriod}
                     />
-                    <span
-                        style={{
-                            color: '#ECECEC',
-                            lineHeight: '24px',
-                            fontSize: '24px',
-                            paddingTop: '2px',
-                        }}
-                    >
-                        {constants.YEARLY}
-                    </span>
+                    <span className={`bold-text`}>{constants.YEARLY}</span>
                 </div>
                 <div
                     style={{
