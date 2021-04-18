@@ -122,7 +122,7 @@ export default function Sidebar(props: Props) {
                         <>
                             <div style={{ marginBottom: '10px' }}>
                                 <Button
-                                    variant="success"
+                                    variant="outline-success"
                                     size="sm"
                                     onClick={() => {
                                         setIsOpen(false);
@@ -132,7 +132,7 @@ export default function Sidebar(props: Props) {
                                     {constants.CHANGE}
                                 </Button>
                                 <Button
-                                    variant="danger"
+                                    variant="outline-danger"
                                     size="sm"
                                     onClick={() => {
                                         setIsOpen(false);
@@ -146,7 +146,7 @@ export default function Sidebar(props: Props) {
                                 </Button>
                             </div>
                             <Button
-                                variant="secondary"
+                                variant="outline-secondary"
                                 size="sm"
                                 onClick={onManageClick}
                                 style={{ width: '88%' }}
@@ -156,7 +156,7 @@ export default function Sidebar(props: Props) {
                         </>
                     ) : (
                         <Button
-                            variant="success"
+                            variant="outline-success"
                             size="sm"
                             onClick={() => {
                                 setIsOpen(false);
