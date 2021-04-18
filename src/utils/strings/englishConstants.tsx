@@ -222,6 +222,8 @@ const englishConstants = {
     UPDATE_PAYMENT_METHOD_MESSAGE:
         'we are sorry, there was an error processing your payment, please try again with a different method',
     UPDATE_PAYMENT_METHOD: 'update payment method',
+    MONTHLY: 'monthly',
+    YEARLY: 'yearly',
 };
 
 export default englishConstants;

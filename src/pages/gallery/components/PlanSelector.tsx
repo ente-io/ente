@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { Button, Modal, Spinner } from 'react-bootstrap';
+import { Modal, Spinner } from 'react-bootstrap';
+import dynamic from 'next/dynamic';
+const BootstrapSwitchButton = dynamic(
+    () => import('bootstrap-switch-button-react'),
+    {
+        ssr: false, // This line is important. It's what prevents server-side render
+    }
+);
+
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
 import billingService, {
@@ -119,6 +127,7 @@ function PlanSelector(props: Props) {
                     !isUserRenewingPlan(plan, subscription) && selectPlan(plan)
                 }
                 selected={isUserRenewingPlan(plan, subscription)}
+                style={{ marginBottom: '10px' }}
             >
                 <div>
                     <span
@@ -165,7 +174,6 @@ function PlanSelector(props: Props) {
                     style={{
                         marginLeft: '12px',
                         display: 'flex',
-                        justifyContent: 'space-between',
                         width: '100%',
                     }}
                 >
@@ -174,23 +182,24 @@ function PlanSelector(props: Props) {
                             ? constants.MANAGE_PLAN
                             : constants.CHOOSE_PLAN}
                     </span>
-                    <span>
-                        <Button
-                            variant="outline-primary"
-                            onClick={togglePeriod}
-                        >
-                            <div style={{ fontSize: '20px', width: '80px' }}>
-                                {planPeriod}
-                                {'ly'}
-                            </div>
-                        </Button>
+                    <span style={{ marginLeft: '50px' }}>
+                        <BootstrapSwitchButton
+                            checked={planPeriod == PLAN_PERIOD.YEAR}
+                            width={150}
+                            onlabel={constants.YEARLY}
+                            onstyle="success"
+                            offstyle="success"
+                            offlabel={constants.MONTHLY}
+                            size="lg"
+                            onChange={togglePeriod}
+                        />
                     </span>
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body
                 style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    justifyContent: 'space-around',
                     flexWrap: 'wrap',
                     minHeight: '150px',
                 }}
