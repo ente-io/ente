@@ -2,18 +2,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
-import Spinner from 'react-bootstrap/Spinner';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import Container from 'components/Container';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 
-import UploadButton from 'pages/gallery/components/UploadButton';
 import { sentryInit } from '../utils/sentry';
 import { useDropzone } from 'react-dropzone';
-import Sidebar from 'components/Sidebar';
+import EnteSpinner from 'components/EnteSpinner';
 
 const GlobalStyles = createGlobalStyle`
     html, body {
@@ -286,9 +283,9 @@ export default function App({ Component, pageProps, err }) {
             </Navbar>
             {loading ? (
                 <Container>
-                    <Spinner animation="border" role="status" variant="success">
+                    <EnteSpinner>
                         <span className="sr-only">Loading...</span>
-                    </Spinner>
+                    </EnteSpinner>
                 </Container>
             ) : (
                 <Component

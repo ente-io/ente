@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
-import Spinner from 'react-bootstrap/Spinner';
 import billingService, { Subscription } from 'services/billingService';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -25,6 +24,7 @@ import { collection } from 'services/collectionService';
 import { useRouter } from 'next/router';
 import RecoveryKeyModal from './RecoveryKeyModal';
 import { justSignedUp } from 'utils/storage';
+import EnteSpinner from './EnteSpinner';
 
 interface Props {
     files: file[];
@@ -182,7 +182,7 @@ export default function Sidebar(props: Props) {
                             )
                         )
                     ) : (
-                        <Spinner animation="border" />
+                        <EnteSpinner />
                     )}
                 </div>
             </div>

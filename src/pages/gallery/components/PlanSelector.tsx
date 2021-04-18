@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Form, Modal, Spinner } from 'react-bootstrap';
+import { Button, Form, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
 import billingService, {
@@ -19,6 +19,8 @@ import {
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
 import Container from 'components/Container';
+import { LoadingOverlay } from './CollectionSelector';
+import EnteSpinner from 'components/EnteSpinner';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     padding-top: 20px;
@@ -31,17 +33,6 @@ export const PlanIcon = styled.div<{ selected: boolean }>`
     cursor: ${(props) => (props.selected ? 'not-allowed' : 'pointer')};
     background: ${(props) => props.selected && '#404040'};
     margin-top: 20px;
-`;
-
-const LoaderOverlay = styled.div`
-    height: 100%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    position: absolute;
-    z-index: 9;
-    color: white;
-    align-items: center;
 `;
 
 interface Props {
@@ -157,7 +148,7 @@ function PlanSelector(props: Props) {
             style={{ maxWidth: '100%' }}
             backdrop={`static`}
         >
-            <Modal.Header>
+            <Modal.Header closeButton>
                 <Modal.Title
                     style={{
                         marginLeft: '12px',
@@ -196,13 +187,15 @@ function PlanSelector(props: Props) {
                         minHeight: '150px',
                     }}
                 >
-                    {PlanIcons}
+                    {!plans || loading ? (
+                        <LoadingOverlay>
+                            <EnteSpinner />
+                        </LoadingOverlay>
+                    ) : (
+                        PlanIcons
+                    )}
                 </div>
-                {(!plans || loading) && (
-                    <LoaderOverlay>
-                        <Spinner animation="border" />
-                    </LoaderOverlay>
-                )}
+
                 <Container>
                     <Button
                         variant="link"

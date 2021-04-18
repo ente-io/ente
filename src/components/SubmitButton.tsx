@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, Spinner } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
+import EnteSpinner from './EnteSpinner';
 
 interface Props {
     loading: boolean;
@@ -14,7 +15,7 @@ const SubmitButton = ({ loading, buttonText }: Props) => (
         style={{ padding: '0', height: '40px' }}
     >
         {loading ? (
-            <Spinner
+            <EnteSpinner
                 as="span"
                 animation="border"
                 style={{ width: '22px', height: '22px', borderWidth: '0.20em' }}

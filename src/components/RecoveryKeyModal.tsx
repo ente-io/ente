@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Spinner } from 'react-bootstrap';
 import { downloadAsFile } from 'utils/file';
 import { getRecoveryKey } from 'utils/crypto';
 import { setJustSignedUp } from 'utils/storage';
 import constants from 'utils/strings/constants';
 import MessageDialog from './MessageDialog';
+import EnteSpinner from './EnteSpinner';
 
 interface Props {
     show: boolean;
@@ -77,7 +77,7 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
                         {recoveryKey}
                     </div>
                 ) : (
-                    <Spinner animation="border" />
+                    <EnteSpinner />
                 )}
             </div>
             <p>{constants.KEY_NOT_STORED_DISCLAIMER}</p>

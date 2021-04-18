@@ -1,7 +1,8 @@
 import Container from 'components/Container';
+import EnteSpinner from 'components/EnteSpinner';
 import router from 'next/router';
 import { useEffect, useState } from 'react';
-import { Button, Spinner } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import billingService, { Subscription } from 'services/billingService';
 import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
 import constants from 'utils/strings/constants';
@@ -60,7 +61,7 @@ export default function SuccessRedirect() {
                         </Button>
                     </>
                 ) : (
-                    <Spinner animation="border" />
+                    <EnteSpinner />
                 )}
             </div>
         </Container>
