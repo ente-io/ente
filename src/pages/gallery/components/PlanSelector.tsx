@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Modal, Spinner } from 'react-bootstrap';
+import { Button, Form, Modal, Spinner } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
 import billingService, {
@@ -18,6 +18,7 @@ import {
 } from 'utils/billingUtil';
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
+import Container from 'components/Container';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     padding-top: 20px;
@@ -154,6 +155,7 @@ function PlanSelector(props: Props) {
             onHide={props.closeModal}
             dialogClassName="modal-90w"
             style={{ maxWidth: '100%' }}
+            backdrop={`static`}
         >
             <Modal.Header>
                 <Modal.Title
@@ -201,6 +203,16 @@ function PlanSelector(props: Props) {
                         <Spinner animation="border" />
                     </LoaderOverlay>
                 )}
+                <Container>
+                    <Button
+                        variant="link"
+                        className={'bold-text'}
+                        style={{ textDecoration: 'none' }}
+                        onClick={props.closeModal}
+                    >
+                        skip
+                    </Button>
+                </Container>
             </Modal.Body>
         </Modal>
     );
