@@ -25,6 +25,8 @@ export default function SuccessRedirect() {
                     setResponse({ error: SUBSCRIPTION_VERIFICATION_ERROR });
                 }
             })();
+        } else {
+            setResponse({ error: SUBSCRIPTION_VERIFICATION_ERROR });
         }
     }, []);
     return (

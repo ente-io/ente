@@ -224,6 +224,12 @@ const englishConstants = {
     UPDATE_PAYMENT_METHOD: 'update payment method',
     MONTHLY: 'monthly',
     YEARLY: 'yearly',
+    SUBSCRIPTION_PURCHASE_CANCELLED: () => (
+        <div>
+            <h1>Your purchase was Canceled</h1>
+            <h2>Redirecting back to gallery...</h2>
+        </div>
+    ),
 };
 
 export default englishConstants;

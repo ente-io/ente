@@ -188,7 +188,7 @@ function PlanSelector(props: Props) {
                             width={150}
                             onlabel={constants.YEARLY}
                             onstyle="success"
-                            offstyle="success"
+                            offstyle="primary"
                             offlabel={constants.MONTHLY}
                             size="lg"
                             onChange={togglePeriod}

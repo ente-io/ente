@@ -1,17 +1,15 @@
 import Container from 'components/Container';
 import router from 'next/router';
-import { Button } from 'react-bootstrap';
+import { useEffect } from 'react';
+import constants from 'utils/strings/constants';
 
 export default function CancelRedirect() {
+    useEffect(() => {
+        setTimeout(() => router.push('/gallery'), 1000);
+    }, []);
     return (
         <Container style={{ color: '#fff' }}>
-            <div>
-                <h1>Your payment was Canceled</h1>
-                <br />
-                <Button onClick={() => router.push('/gallery')}>
-                    Go Back To Gallery
-                </Button>
-            </div>
+            {constants.SUBSCRIPTION_PURCHASE_CANCELLED()}
         </Container>
     );
 }

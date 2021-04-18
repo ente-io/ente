@@ -135,6 +135,7 @@ export default function Sidebar(props: Props) {
                                     variant="danger"
                                     size="sm"
                                     onClick={() => {
+                                        setIsOpen(false);
                                         props.setConfirmAction(
                                             CONFIRM_ACTION.CANCEL_SUBSCRIPTION
                                         );
