@@ -17,6 +17,7 @@
     "@stripe/stripe-js": "^1.13.2",
     "axios": "^0.20.0",
     "bootstrap": "^4.5.2",
+    "bootstrap-switch-button-react": "^1.2.0",
     "comlink": "^4.3.0",
     "exif-js": "^2.3.0",
     "formik": "^2.1.5",
