@@ -142,23 +142,16 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<List<CollectionWithThumbnail>> _getCollectionsWithThumbnail() async {
-    final collectionsWithThumbnail = List<CollectionWithThumbnail>();
-    final collections = CollectionsService.instance.getCollections();
-    for (final c in collections) {
-      if (c.owner.id != Configuration.instance.getUserID()) {
-        continue;
+    final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
+    final latestCollectionFiles =
+        await FilesDB.instance.getLatestCollectionFiles();
+    for (final file in latestCollectionFiles) {
+      final c =
+          CollectionsService.instance.getCollectionByID(file.collectionID);
+      if (c.owner.id == Configuration.instance.getUserID()) {
+        collectionsWithThumbnail.add(CollectionWithThumbnail(c, file,
+            await FilesDB.instance.getLastModifiedFileInCollection(c.id)));
       }
-      var thumbnail = await FilesDB.instance.getLatestFileInCollection(c.id);
-      if (thumbnail == null) {
-        continue;
-      }
-      final lastUpdatedFile =
-          await FilesDB.instance.getLastModifiedFileInCollection(c.id);
-      collectionsWithThumbnail.add(CollectionWithThumbnail(
-        c,
-        thumbnail,
-        lastUpdatedFile,
-      ));
     }
     collectionsWithThumbnail.sort((first, second) {
       return second.lastUpdatedFile.updationTime

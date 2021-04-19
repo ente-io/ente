@@ -674,22 +674,6 @@ class FilesDB {
     return collectionMap.values.toList();
   }
 
-  Future<File> getLatestFileInCollection(int collectionID) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '$columnCollectionID = ? AND $columnIsDeleted = 0',
-      whereArgs: [collectionID],
-      orderBy: '$columnCreationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      return null;
-    }
-  }
-
   Future<File> getLastModifiedFileInCollection(int collectionID) async {
     final db = await instance.database;
     final rows = await db.query(
