@@ -90,27 +90,29 @@ class _BackupFolderSelectionWidgetState
   }
 
   Widget _getFolderList() {
-    return FutureBuilder<List<String>>(
-      future: FilesDB.instance.getLocalPaths(),
+    return FutureBuilder<List<File>>(
+      future: FilesDB.instance.getLatestLocalFiles(),
       builder: (context, snapshot) {
         Widget child;
         if (snapshot.hasData) {
           snapshot.data.sort((first, second) {
-            return first.toLowerCase().compareTo(second.toLowerCase());
+            return first.deviceFolder
+                .toLowerCase()
+                .compareTo(second.deviceFolder.toLowerCase());
           });
           final List<Widget> foldersWidget = [];
-          for (final folder in snapshot.data) {
+          for (final file in snapshot.data) {
             foldersWidget.add(Padding(
               padding: const EdgeInsets.all(4.0),
               child: CheckboxListTile(
-                value: _backedupFolders.contains(folder),
+                value: _backedupFolders.contains(file.deviceFolder),
                 title: Row(
                   children: [
-                    _getThumbnail(folder),
+                    _getThumbnail(file),
                     Padding(padding: EdgeInsets.all(8)),
                     Flexible(
                       child: Text(
-                        folder,
+                        file.deviceFolder,
                         style: TextStyle(fontSize: 16, height: 1.5),
                         overflow: TextOverflow.clip,
                       ),
@@ -119,9 +121,9 @@ class _BackupFolderSelectionWidgetState
                 ),
                 onChanged: (value) async {
                   if (value) {
-                    _backedupFolders.add(folder);
+                    _backedupFolders.add(file.deviceFolder);
                   } else {
-                    _backedupFolders.remove(folder);
+                    _backedupFolders.remove(file.deviceFolder);
                   }
                   setState(() {});
                 },
@@ -153,30 +155,17 @@ class _BackupFolderSelectionWidgetState
     );
   }
 
-  FutureBuilder<File> _getThumbnail(String folder) {
-    return FutureBuilder(
-      future: FilesDB.instance.getLastCreatedFileInPath(folder),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(4.0),
-            child: Container(
-              child: ThumbnailWidget(
-                snapshot.data,
-                shouldShowSyncStatus: false,
-              ),
-              height: 50,
-              width: 50,
-            ),
-          );
-        } else {
-          return Container(
-            height: 50,
-            width: 50,
-            child: loadWidget,
-          );
-        }
-      },
+  Widget _getThumbnail(File file) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4.0),
+      child: Container(
+        child: ThumbnailWidget(
+          file,
+          shouldShowSyncStatus: false,
+        ),
+        height: 50,
+        width: 50,
+      ),
     );
   }
 }
