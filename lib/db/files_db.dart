@@ -131,6 +131,7 @@ class FilesDB {
   }
 
   Future<void> insertMultiple(List<File> files) async {
+    final startTime = DateTime.now();
     final db = await instance.database;
     var batch = db.batch();
     int batchCounter = 0;
@@ -147,6 +148,15 @@ class FilesDB {
       batchCounter++;
     }
     await batch.commit(noResult: true);
+    final endTime = DateTime.now();
+    final duration = Duration(
+        microseconds:
+            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
+    _logger.info("Batch insert of " +
+        files.length.toString() +
+        " took " +
+        duration.inMilliseconds.toString() +
+        "ms.");
   }
 
   Future<File> getFile(int generatedID) async {
@@ -702,6 +712,9 @@ class FilesDB {
 
   Map<String, dynamic> _getRowForFile(File file) {
     final row = new Map<String, dynamic>();
+    if (file.generatedID != null) {
+      row[columnGeneratedID] = file.generatedID;
+    }
     row[columnLocalID] = file.localID;
     row[columnUploadedFileID] = file.uploadedFileID;
     row[columnOwnerID] = file.ownerID;
