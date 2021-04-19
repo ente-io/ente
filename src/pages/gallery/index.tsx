@@ -469,6 +469,7 @@ export default function Gallery(props: Props) {
                 setDialogMessage={setDialogMessage}
                 setConfirmAction={setConfirmAction}
                 setSelectedPlan={setSelectedPlan}
+                setLoading={setLoading}
             />
             <AlertBanner bannerMessage={bannerMessage} />
             <ConfirmDialog

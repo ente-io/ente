@@ -15,6 +15,7 @@ import {
     isSubscribed,
     isUserRenewingPlan,
     isSubscriptionCancelled,
+    updatePaymentMethod,
 } from 'utils/billingUtil';
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import { LoadingOverlay } from './CollectionSelector';
@@ -42,6 +43,7 @@ interface Props {
     setDialogMessage;
     setConfirmAction;
     setSelectedPlan;
+    setLoading;
 }
 enum PLAN_PERIOD {
     MONTH = 'month',
@@ -64,17 +66,6 @@ function PlanSelector(props: Props) {
     function onPlanSelect(plan: Plan) {
         props.setSelectedPlan(plan);
         props.setConfirmAction(CONFIRM_ACTION.UPDATE_SUBSCRIPTION);
-    }
-    async function onManageClick(event) {
-        try {
-            event.preventDefault();
-            await billingService.redirectToCustomerPortal();
-        } catch (error) {
-            props.setDialogMessage({
-                title: constants.UNKNOWN_ERROR,
-                close: { variant: 'danger' },
-            });
-        }
     }
 
     const PlanIcons: JSX.Element[] = plans
@@ -172,17 +163,23 @@ function PlanSelector(props: Props) {
                         <>
                             <LinkButton
                                 variant="secondary"
-                                onClick={onManageClick}
+                                onClick={(event) =>
+                                    updatePaymentMethod(
+                                        event,
+                                        props.setDialogMessage,
+                                        props.setLoading
+                                    )
+                                }
                             >
                                 {constants.MANAGEMENT_PORTAL}
                             </LinkButton>
                             <LinkButton
                                 variant="danger"
-                                onClick={() => {
+                                onClick={() =>
                                     props.setConfirmAction(
                                         CONFIRM_ACTION.CANCEL_SUBSCRIPTION
-                                    );
-                                }}
+                                    )
+                                }
                             >
                                 {constants.CANCEL_SUBSCRIPTION}
                             </LinkButton>
