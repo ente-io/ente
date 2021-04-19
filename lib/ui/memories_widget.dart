@@ -74,7 +74,10 @@ class _MemoriesWidgetState extends State<MemoriesWidget>
     for (final memories in collatedMemories) {
       memoryWidgets.add(MemoryWidget(memories: memories));
     }
-    return Row(children: memoryWidgets);
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(children: memoryWidgets),
+    );
   }
 
   List<List<Memory>> _collateMemories(List<Memory> memories) {
