@@ -46,8 +46,8 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
                         ],
                     proceed: {
                         text: constants[CONFIRM_ACTION_VALUES[action]?.text],
-                        action: () => {
-                            callback();
+                        action: async () => {
+                            await callback();
                             props.onHide();
                         },
                         variant: CONFIRM_ACTION_VALUES[action]?.type,
