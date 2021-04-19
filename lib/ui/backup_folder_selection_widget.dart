@@ -11,7 +11,10 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
 class BackupFolderSelectionWidget extends StatefulWidget {
-  const BackupFolderSelectionWidget({Key key}) : super(key: key);
+  final String buttonText;
+
+  const BackupFolderSelectionWidget(this.buttonText, {Key key})
+      : super(key: key);
 
   @override
   _BackupFolderSelectionWidgetState createState() =>
@@ -61,7 +64,7 @@ class _BackupFolderSelectionWidgetState
             height: 64,
             child: RaisedButton(
               child: Text(
-                "start backup",
+                widget.buttonText,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,

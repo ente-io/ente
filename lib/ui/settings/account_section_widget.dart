@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/billing_service.dart';
+import 'package:photos/ui/backup_folder_selection_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
@@ -48,6 +49,30 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             },
             child: SettingsTextItem(
                 text: "subscription plan", icon: Icons.navigate_next),
+          ),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(2)),
+          Divider(height: 4),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(4)),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () async {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    content: const BackupFolderSelectionWidget("set folders"),
+                    backgroundColor: Colors.black.withOpacity(0.8),
+                  );
+                },
+                barrierColor: Colors.black.withOpacity(0.85),
+              );
+            },
+            child: SettingsTextItem(
+                text: "backed up folders", icon: Icons.navigate_next),
           ),
           Platform.isIOS
               ? Padding(padding: EdgeInsets.all(2))
