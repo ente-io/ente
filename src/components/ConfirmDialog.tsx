@@ -21,6 +21,12 @@ const CONFIRM_ACTION_VALUES = [
     { text: 'UPDATE_SUBSCRIPTION', type: 'success' },
     { text: 'UPDATE_PAYMENT_METHOD', type: 'primary' },
 ];
+function inverseButtonType(type) {
+    if (type === 'success') return 'danger';
+    else {
+        return 'secondary';
+    }
+}
 
 interface Props {
     callback: any;
@@ -40,11 +46,17 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
                         ],
                     proceed: {
                         text: constants[CONFIRM_ACTION_VALUES[action]?.text],
-                        action: callback,
+                        action: () => {
+                            callback();
+                            props.onHide();
+                        },
                         variant: CONFIRM_ACTION_VALUES[action]?.type,
                     },
                     close: action !== CONFIRM_ACTION.SESSION_EXPIRED && {
                         text: constants.NO,
+                        variant: inverseButtonType(
+                            CONFIRM_ACTION_VALUES[action]?.type
+                        ),
                     },
                     staticBackdrop: true,
                 }}

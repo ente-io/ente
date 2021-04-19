@@ -43,7 +43,7 @@ export default function MessageDialog({
                     {attributes.close && (
                         <Button
                             variant={`outline-${
-                                attributes.close?.variant ?? 'danger'
+                                attributes.close?.variant ?? 'secondary'
                             }`}
                             onClick={props.onHide}
                             style={{
