@@ -26,14 +26,18 @@ export default function MessageDialog({
             centered
             backdrop={attributes?.staticBackdrop ? 'static' : 'true'}
         >
-            <Modal.Header>
+            <Modal.Header style={{ borderBottom: 'none' }}>
                 {attributes?.title && (
                     <Modal.Title>
                         <strong>{attributes.title}</strong>
                     </Modal.Title>
                 )}
             </Modal.Header>
-            <Modal.Body>{children && children}</Modal.Body>
+            {children && (
+                <Modal.Body style={{ borderTop: '1px solid #444' }}>
+                    {children}
+                </Modal.Body>
+            )}
             {attributes && (
                 <Modal.Footer style={{ borderTop: 'none' }}>
                     {attributes.close && (
