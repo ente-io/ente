@@ -1,6 +1,16 @@
+import constants from './constants';
+
 /**
  * Global English constants.
  */
+
+const dateString = function (date) {
+    return new Date(date / 1000).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+};
 const englishConstants = {
     COMPANY_NAME: 'ente',
     LOGIN: 'login',
@@ -134,36 +144,18 @@ const englishConstants = {
         <>
             <p>
                 you are on the <strong>free</strong> plan that expires on{' '}
-                {new Date(expiryTime / 1000).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                })}
+                {dateString(expiryTime)}
             </p>
         </>
     ),
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <>
-            <p>
-                your subscription will renew on{' '}
-                {new Date(expiryTime / 1000).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                })}
-            </p>
-        </>
+        <p>your subscription will renew on {dateString(expiryTime)}</p>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
-                your subscription will be cancelled on{' '}
-                {new Date(expiryTime / 1000).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                })}
+                your subscription will be cancelled on {dateString(expiryTime)}
             </p>
         </>
     ),
@@ -184,8 +176,18 @@ const englishConstants = {
     SUBSCRIPTION_VERIFICATION_FAILED: `we were not able to verify your purchase, verification can take few hours`,
     SUBSCRIPTION_PURCHASE_FAILED:
         'subscription purchase failed , please try again later',
-    SUBSCRIPTION_UPDATE_SUCCESS:
-        'your subscription plan is successfully updated',
+    SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
+        <h4>
+            <p>we've received your payment</p>
+            <p>
+                your subscription is valid till{' '}
+                <strong>{dateString(expiryTime)}</strong>
+            </p>
+        </h4>
+    ),
+
+    SUBSCRIPTION_PURCHASE_CANCELLED:
+        'your purchase was canceled, please try again if you want to subscribe',
     DELETE_MESSAGE: 'sure you want to delete selected files?',
     DELETE: 'delete',
     UPLOAD_STRATEGY_CHOICE:
@@ -224,12 +226,6 @@ const englishConstants = {
     UPDATE_PAYMENT_METHOD: 'update payment method',
     MONTHLY: 'monthly',
     YEARLY: 'yearly',
-    SUBSCRIPTION_PURCHASE_CANCELLED: () => (
-        <div>
-            <h1>your purchase was canceled</h1>
-            <h2>redirecting back to gallery...</h2>
-        </div>
-    ),
     REQUEST_FEATURE: 'request feature',
     SUPPORT: 'support',
     UPDATE_SUBSCRIPTION_MESSAGE: 'are you sure you want to change your plan?',
