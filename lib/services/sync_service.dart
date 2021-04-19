@@ -24,6 +24,7 @@ import 'package:photos/repositories/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/utils/file_sync_util.dart';
 import 'package:photos/utils/file_uploader.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'package:photos/models/file.dart';
@@ -420,12 +421,7 @@ class SyncService {
               foundMatchingCollection = true;
               file.generatedID = existingFile.generatedID;
               toBeInserted.add(file);
-              if (file.fileType == FileType.video) {
-                VideoCacheManager().removeFile(file.getDownloadUrl());
-              } else {
-                DefaultCacheManager().removeFile(file.getDownloadUrl());
-              }
-              ThumbnailCacheManager().removeFile(file.getThumbnailUrl());
+              clearCache(file);
               break;
             }
           }

@@ -387,3 +387,12 @@ Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
     quality: 25,
   );
 }
+
+void clearCache(File file) {
+  if (file.fileType == FileType.video) {
+    VideoCacheManager().removeFile(file.getDownloadUrl());
+  } else {
+    DefaultCacheManager().removeFile(file.getDownloadUrl());
+  }
+  ThumbnailCacheManager().removeFile(file.getThumbnailUrl());
+}
