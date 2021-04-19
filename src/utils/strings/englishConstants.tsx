@@ -175,6 +175,7 @@ const englishConstants = {
     ),
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CHANGE: 'change',
+    MANAGE: 'manage',
     CHANGE_EMAIL: 'change email ?',
     CHOOSE_PLAN: 'choose your subscription plan',
     MANAGE_PLAN: 'update your subscription plan',
@@ -230,6 +231,8 @@ const englishConstants = {
             <h2>redirecting back to gallery...</h2>
         </div>
     ),
+    REQUEST_FEATURE: 'request feature',
+    SUPPORT: 'support',
 };
 
 export default englishConstants;

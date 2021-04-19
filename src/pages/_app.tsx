@@ -94,6 +94,7 @@ const GlobalStyles = createGlobalStyle`
         margin: 0 0 5px 0;
     }
     .modal-content {
+        border-radius:15px;
         background-color:#202020 !important;
         color:#aaa;
     }
@@ -131,12 +132,12 @@ const GlobalStyles = createGlobalStyle`
     }
     .card {
         background-color: #242424;
-        color: #fff;
+        color: #d1d1d1;
         border-radius: 12px;
     }
     .jumbotron{
         background-color: #191919;
-        color: #fff;
+        color: #d1d1d1;
         text-align: center;
         margin-top: 50px;
     }
@@ -168,10 +169,10 @@ const GlobalStyles = createGlobalStyle`
         background: #131313;
         padding: 2.5em 1.5em 0;
         font-size: 1.15em;
-        color:#fff
+        color:#d1d1d1
     }
     .bm-cross {
-        background: #fff;
+        background: #d1d1d1;
     }
     .bg-upload-progress-bar {
         background-color: #2dc262;
@@ -183,18 +184,26 @@ const GlobalStyles = createGlobalStyle`
     
     .custom-switch.custom-switch-md .custom-control-label::before {
         height: 1.5rem;
+        background-color: #303030;
+        border: none;
         width: calc(2.5rem + 0.75rem);
         border-radius: 3rem;
     }
+    .custom-switch.custom-switch-md:active .custom-control-label::before {
+        background-color: #303030;
+    }
     
     .custom-switch.custom-switch-md .custom-control-label::after {
-        width: calc(1.5rem - 4px);
-        height: calc(1.5rem - 4px);
-        border-radius: calc(2rem - (1.5rem / 2));
+        top:2px;
+        background:#c4c4c4;
+        width: calc(2.0rem - 4px);
+        height: calc(2.0rem - 4px);
+        border-radius: calc(2rem - (2.0rem / 2));
     }
     
     .custom-switch.custom-switch-md .custom-control-input:checked ~ .custom-control-label::after {
         transform: translateX(calc(2.0rem - 0.25rem));
+        background:#c4c4c4;
     }
     .bold-text{
         color: #ECECEC;

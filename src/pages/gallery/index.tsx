@@ -77,7 +77,7 @@ const ListItem = styled.div`
     justify-content: center;
 `;
 
-const DeadCenter = styled.div`
+export const DeadCenter = styled.div`
     flex: 1;
     display: flex;
     justify-content: center;
@@ -422,6 +422,7 @@ export default function Gallery(props: Props) {
                         close: { variant: 'danger' },
                     });
                 }
+                setPlanModalView(false);
                 setConfirmAction(null);
             },
         ],
@@ -499,7 +500,6 @@ export default function Gallery(props: Props) {
                     })
                 }
                 setPlanModalView={setPlanModalView}
-                setBannerMessage={setBannerMessage}
             />
             <UploadButton openFileUploader={props.openFileUploader} />
             {!isFirstLoad && data.length == 0 ? (

@@ -18,21 +18,23 @@ import {
 } from 'utils/billingUtil';
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
-import Container from 'components/Container';
 import { LoadingOverlay } from './CollectionSelector';
 import EnteSpinner from 'components/EnteSpinner';
+import { DeadCenter } from '..';
+import LinkButton from './LinkButton';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     padding-top: 20px;
     border-radius: 10%;
     height: 192px;
     width: 250px;
-    border: 1px solid #404040;
+    border: 1px solid #868686;
+    margin: 10px;
     text-align: center;
     font-size: 20px;
     cursor: ${(props) => (props.selected ? 'not-allowed' : 'pointer')};
-    background: ${(props) => props.selected && '#404040'};
-    margin-top: 20px;
+    border-color: ${(props) => props.selected && '#56e066'};
+    border-width: 3px;
 `;
 
 interface Props {
@@ -103,6 +105,18 @@ function PlanSelector(props: Props) {
         }
     };
 
+    async function onManageClick(event) {
+        try {
+            event.preventDefault();
+            await billingService.redirectToCustomerPortal();
+        } catch (error) {
+            props.setDialogMessage({
+                title: constants.UNKNOWN_ERROR,
+                close: { variant: 'danger' },
+            });
+        }
+    }
+
     const PlanIcons: JSX.Element[] = plans
         ?.filter((plan) => plan.period == planPeriod)
         ?.map((plan) => (
@@ -164,27 +178,24 @@ function PlanSelector(props: Props) {
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <span className={`bold-text`}>{constants.MONTHLY}</span>
-                    <Form.Switch
-                        id={`plan-period-toggler`}
-                        style={{ marginLeft: '15px', marginTop: '-4px' }}
-                        className={`custom-switch-md`}
-                        onChange={togglePeriod}
-                    />
-                    <span className={`bold-text`}>{constants.YEARLY}</span>
-                </div>
+                <DeadCenter>
+                    <div style={{ display: 'flex' }}>
+                        <span className={`bold-text`}>{constants.MONTHLY}</span>
+                        <Form.Switch
+                            id={`plan-period-toggler`}
+                            style={{ marginLeft: '15px', marginTop: '-4px' }}
+                            className={`custom-switch-md`}
+                            onChange={togglePeriod}
+                        />
+                        <span className={`bold-text`}>{constants.YEARLY}</span>
+                    </div>
+                </DeadCenter>
                 <div
                     style={{
                         display: 'flex',
                         justifyContent: 'space-around',
                         flexWrap: 'wrap',
-                        minHeight: '150px',
+                        margin: '4% 0',
                     }}
                 >
                     {!plans || loading ? (
@@ -195,17 +206,35 @@ function PlanSelector(props: Props) {
                         PlanIcons
                     )}
                 </div>
-
-                <Container>
-                    <Button
-                        variant="link"
-                        className={'bold-text'}
-                        style={{ textDecoration: 'none' }}
-                        onClick={props.closeModal}
-                    >
-                        skip
-                    </Button>
-                </Container>
+                <DeadCenter style={{ marginBottom: '30px' }}>
+                    {isSubscribed(subscription) ? (
+                        <>
+                            <LinkButton
+                                variant="secondary"
+                                onClick={onManageClick}
+                            >
+                                {constants.MANAGEMENT_PORTAL}
+                            </LinkButton>
+                            <LinkButton
+                                variant="danger"
+                                onClick={() => {
+                                    props.setConfirmAction(
+                                        CONFIRM_ACTION.CANCEL_SUBSCRIPTION
+                                    );
+                                }}
+                            >
+                                {constants.CANCEL_SUBSCRIPTION}
+                            </LinkButton>
+                        </>
+                    ) : (
+                        <LinkButton
+                            variant="secondary"
+                            onClick={props.closeModal}
+                        >
+                            skip
+                        </LinkButton>
+                    )}
+                </DeadCenter>
             </Modal.Body>
         </Modal>
     );

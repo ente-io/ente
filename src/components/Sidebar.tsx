@@ -25,6 +25,7 @@ import { useRouter } from 'next/router';
 import RecoveryKeyModal from './RecoveryKeyModal';
 import { justSignedUp } from 'utils/storage';
 import EnteSpinner from './EnteSpinner';
+import LinkButton from 'pages/gallery/components/LinkButton';
 
 interface Props {
     files: file[];
@@ -32,7 +33,6 @@ interface Props {
     setConfirmAction: any;
     somethingWentWrong: any;
     setPlanModalView;
-    setBannerMessage;
 }
 export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
@@ -63,6 +63,13 @@ export default function Sidebar(props: Props) {
         var win = window.open(feedbackURL, '_blank');
         win.focus();
     }
+    function openSupportMail() {
+        var a = document.createElement('a');
+        a.href = 'mailto:contact@ente.io';
+        a.target = '_blank';
+        a.rel = 'noreferrer noopener';
+        a.click();
+    }
     function exportFiles() {
         if (isElectron()) {
             exportService.exportFiles(props.files, props.collections);
@@ -70,14 +77,7 @@ export default function Sidebar(props: Props) {
             props.setConfirmAction(CONFIRM_ACTION.DOWNLOAD_APP);
         }
     }
-    async function onManageClick(event) {
-        try {
-            event.preventDefault();
-            await billingService.redirectToCustomerPortal();
-        } catch (error) {
-            props.somethingWentWrong();
-        }
-    }
+
     const router = useRouter();
 
     return (
@@ -119,41 +119,18 @@ export default function Sidebar(props: Props) {
                     }}
                 >
                     {isSubscribed(subscription) ? (
-                        <>
-                            <div style={{ marginBottom: '10px' }}>
-                                <Button
-                                    variant="outline-success"
-                                    size="sm"
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        props.setPlanModalView(true);
-                                    }}
-                                >
-                                    {constants.CHANGE}
-                                </Button>
-                                <Button
-                                    variant="outline-danger"
-                                    size="sm"
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        props.setConfirmAction(
-                                            CONFIRM_ACTION.CANCEL_SUBSCRIPTION
-                                        );
-                                    }}
-                                    style={{ marginLeft: '10px' }}
-                                >
-                                    {constants.CANCEL_SUBSCRIPTION}
-                                </Button>
-                            </div>
+                        <div style={{ marginBottom: '10px' }}>
                             <Button
                                 variant="outline-secondary"
                                 size="sm"
-                                onClick={onManageClick}
-                                style={{ width: '88%' }}
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    props.setPlanModalView(true);
+                                }}
                             >
-                                {constants.MANAGEMENT_PORTAL}
+                                {constants.MANAGE}
                             </Button>
-                        </>
+                        </div>
                     ) : (
                         <Button
                             variant="outline-success"
@@ -194,46 +171,26 @@ export default function Sidebar(props: Props) {
                     width: '100%',
                 }}
             ></div>
-            <h5
-                style={{ cursor: 'pointer', marginTop: '40px' }}
-                onClick={openFeedbackURL}
-            >
-                request feature
-            </h5>
-            <h5 style={{ cursor: 'pointer', marginTop: '30px' }}>
-                <a
-                    href="mailto:contact@ente.io"
-                    style={{ textDecoration: 'inherit', color: 'inherit' }}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                >
-                    support
-                </a>
-            </h5>
-
-            <RecoveryKeyModal
-                show={modalView}
-                onHide={() => setModalView(false)}
-                somethingWentWrong={props.somethingWentWrong}
-            />
-            <h5
-                style={{ cursor: 'pointer', marginTop: '30px' }}
-                onClick={() => setModalView(true)}
-            >
-                {constants.DOWNLOAD_RECOVERY_KEY}
-            </h5>
-            <h5
-                style={{ cursor: 'pointer', marginTop: '30px' }}
-                onClick={() => router.push('changePassword')}
-            >
+            <LinkButton onClick={openFeedbackURL}>
+                {constants.REQUEST_FEATURE}
+            </LinkButton>
+            <LinkButton onClick={openSupportMail}>
+                {constants.SUPPORT}
+            </LinkButton>
+            <>
+                <RecoveryKeyModal
+                    show={modalView}
+                    onHide={() => setModalView(false)}
+                    somethingWentWrong={props.somethingWentWrong}
+                />
+                <LinkButton onClick={() => setModalView(true)}>
+                    {constants.DOWNLOAD_RECOVERY_KEY}
+                </LinkButton>
+            </>
+            <LinkButton onClick={() => router.push('changePassword')}>
                 {constants.CHANGE_PASSWORD}
-            </h5>
-            <h5
-                style={{ cursor: 'pointer', marginTop: '30px' }}
-                onClick={exportFiles}
-            >
-                {constants.EXPORT}
-            </h5>
+            </LinkButton>
+            <LinkButton onClick={exportFiles}>{constants.EXPORT}</LinkButton>
             <div
                 style={{
                     height: '1px',
@@ -242,16 +199,12 @@ export default function Sidebar(props: Props) {
                     width: '100%',
                 }}
             ></div>
-            <h5
-                style={{
-                    cursor: 'pointer',
-                    color: '#F96C6C',
-                    margin: '30px 0',
-                }}
+            <LinkButton
+                variant="danger"
                 onClick={() => props.setConfirmAction(CONFIRM_ACTION.LOGOUT)}
             >
                 logout
-            </h5>
+            </LinkButton>
         </Menu>
     );
 }
