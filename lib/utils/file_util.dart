@@ -335,7 +335,6 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
 }
 
 Future<io.File> _downloadAndDecryptThumbnail(File file) async {
-  _logger.info("Downloading thumbnail for " + file.title);
   final temporaryPath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       "_thumbnail.decrypted";
