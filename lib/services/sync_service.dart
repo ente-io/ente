@@ -48,7 +48,7 @@ class SyncService {
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kLastBackgroundUploadDetectedTime =
       "last_background_upload_detected_time";
-  static const kDiffLimit = 1000;
+  static const kDiffLimit = 2500;
   static const kBackgroundUploadPollFrequency = Duration(seconds: 1);
 
   SyncService._privateConstructor() {
@@ -389,13 +389,14 @@ class SyncService {
   }
 
   Future _storeDiff(List<File> diff, int collectionID) async {
+    List<File> toBeInserted = [];
     for (File file in diff) {
       final existingFiles = await _db.getMatchingFiles(
           file.title, file.deviceFolder, file.creationTime);
       if (existingFiles == null) {
         // File uploaded from a different device
         file.localID = null;
-        await _db.insert(file);
+        toBeInserted.add(file);
       } else {
         // File exists on device
         file.localID = existingFiles[0]
@@ -410,7 +411,7 @@ class SyncService {
                 file.uploadedFileID.toString());
             file.updationTime = null;
           }
-          await _db.update(file);
+          toBeInserted.add(file);
         } else {
           bool foundMatchingCollection = false;
           for (final existingFile in existingFiles) {
@@ -418,7 +419,7 @@ class SyncService {
                 file.uploadedFileID == existingFile.uploadedFileID) {
               foundMatchingCollection = true;
               file.generatedID = existingFile.generatedID;
-              await _db.update(file);
+              toBeInserted.add(file);
               if (file.fileType == FileType.video) {
                 VideoCacheManager().removeFile(file.getDownloadUrl());
               } else {
@@ -430,12 +431,15 @@ class SyncService {
           }
           if (!foundMatchingCollection) {
             // Added to a new collection
-            await _db.insert(file);
+            toBeInserted.add(file);
           }
         }
       }
+    }
+    await _db.insertMultiple(toBeInserted);
+    if (toBeInserted.length > 0) {
       await _collectionsService.setCollectionSyncTime(
-          collectionID, file.updationTime);
+          collectionID, toBeInserted[toBeInserted.length - 1].updationTime);
     }
   }
 
