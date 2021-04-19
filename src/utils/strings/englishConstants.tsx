@@ -235,6 +235,7 @@ const englishConstants = {
     UPDATE_SUBSCRIPTION_MESSAGE: 'are you sure you want to change your plan?',
     UPDATE_SUBSCRIPTION: 'update',
     CONFIRM: 'confirm',
+    ACTIVE: 'active',
 };
 
 export default englishConstants;

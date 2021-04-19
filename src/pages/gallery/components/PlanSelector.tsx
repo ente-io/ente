@@ -103,7 +103,7 @@ function PlanSelector(props: Props) {
                 <div
                     className={`bold-text`}
                 >{`${plan.price} / ${plan.period}`}</div>
-                {isUserRenewingPlan(plan, subscription) && 'active'}
+                {isUserRenewingPlan(plan, subscription) && constants.ACTIVE}
             </PlanIcon>
         ));
     return (

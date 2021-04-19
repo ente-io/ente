@@ -38,7 +38,7 @@ interface Props {
     onHide: () => void;
 }
 function ConfirmDialog({ callback, action, ...props }: Props) {
-    if (!action) {
+    if (action == null) {
         return null;
     }
     return (
@@ -58,7 +58,7 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
                         variant: CONFIRM_ACTION_VALUES[action]?.type,
                     },
                     close: action !== CONFIRM_ACTION.SESSION_EXPIRED && {
-                        text: constants.NO,
+                        text: constants.CANCEL,
                         variant: inverseButtonType(
                             CONFIRM_ACTION_VALUES[action]?.type
                         ),
