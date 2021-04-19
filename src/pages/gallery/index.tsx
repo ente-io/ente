@@ -23,9 +23,13 @@ import {
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import { Alert, Button, Jumbotron } from 'react-bootstrap';
-import billingService from 'services/billingService';
+import billingService, { Plan } from 'services/billingService';
 import PlanSelector from './components/PlanSelector';
-import { isSubscribed } from 'utils/billingUtil';
+import {
+    buySubscription,
+    cancelSubscription,
+    isSubscribed,
+} from 'utils/billingUtil';
 
 import Delete from 'components/Delete';
 import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
@@ -160,6 +164,8 @@ export default function Gallery(props: Props) {
     const [confirmAction, setConfirmAction] = useState<CONFIRM_ACTION>(null);
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [planModalView, setPlanModalView] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState<Plan>(null);
+    const [loading, setLoading] = useState(false);
 
     const loadingBar = useRef(null);
     useEffect(() => {
@@ -387,13 +393,16 @@ export default function Gallery(props: Props) {
             first.getDate() === second.getDate()
         );
     };
+
+    const closePlanSelectorModal = function () {
+        setPlanModalView(false);
+    };
     const confirmCallbacks = new Map<CONFIRM_ACTION, Function>([
         [
             CONFIRM_ACTION.DELETE,
             async function () {
                 await deleteFiles(selected);
                 syncWithRemote();
-                setConfirmAction(null);
                 setSelected({ count: 0 });
             },
         ],
@@ -404,27 +413,27 @@ export default function Gallery(props: Props) {
             function () {
                 var win = window.open(constants.APP_DOWNLOAD_URL, '_blank');
                 win.focus();
-                setConfirmAction(null);
             },
         ],
         [
             CONFIRM_ACTION.CANCEL_SUBSCRIPTION,
-            async function () {
-                try {
-                    await billingService.cancelSubscription();
-                    setDialogMessage({
-                        title: constants.SUBSCRIPTION_CANCEL_SUCCESS,
-                        close: { variant: 'success' },
-                    });
-                } catch (e) {
-                    setDialogMessage({
-                        title: constants.SUBSCRIPTION_CANCEL_FAILED,
-                        close: { variant: 'danger' },
-                    });
-                }
-                setPlanModalView(false);
-                setConfirmAction(null);
-            },
+            cancelSubscription.bind(
+                null,
+                setDialogMessage,
+                closePlanSelectorModal,
+                setConfirmAction
+            ),
+        ],
+        [
+            CONFIRM_ACTION.UPDATE_SUBSCRIPTION,
+            buySubscription.bind(
+                null,
+                selectedPlan,
+                setDialogMessage,
+                setLoading,
+                setConfirmAction,
+                closePlanSelectorModal
+            ),
         ],
         [
             CONFIRM_ACTION.UPDATE_PAYMENT_METHOD,
@@ -462,6 +471,7 @@ export default function Gallery(props: Props) {
                 closeModal={() => setPlanModalView(false)}
                 setDialogMessage={setDialogMessage}
                 setConfirmAction={setConfirmAction}
+                setSelectedPlan={setSelectedPlan}
             />
             <AlertBanner bannerMessage={bannerMessage} />
             <ConfirmDialog

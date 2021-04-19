@@ -49,7 +49,6 @@ enum PLAN_PERIOD {
     YEAR = 'year',
 }
 function PlanSelector(props: Props) {
-    const [loading, setLoading] = useState(false);
     const subscription: Subscription = getUserSubscription();
     const plans = getPlans();
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(
@@ -62,52 +61,11 @@ function PlanSelector(props: Props) {
                 : PLAN_PERIOD.MONTH
         );
     };
-    const selectPlan = async (plan: Plan) => {
-        // props.setSelectedPlan(plan);
-        props.setConfirmAction(CONFIRM_ACTION.UPDATE_SUBSCRIPTION);
-        try {
-            setLoading(true);
-            if (hasPaidPlan(subscription)) {
-                await billingService.updateSubscription(plan.stripeID);
-                if (isSubscriptionCancelled(subscription)) {
-                    await billingService.activateSubscription();
-                }
-                setLoading(false);
-                await new Promise((resolve) =>
-                    setTimeout(() => resolve(null), 400)
-                );
-            } else {
-                await billingService.buySubscription(plan.stripeID);
-            }
-            props.setDialogMessage({
-                title: constants.SUBSCRIPTION_UPDATE_SUCCESS,
-                close: { variant: 'success' },
-            });
-        } catch (err) {
-            switch (err?.message) {
-                case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
-                    props.setConfirmAction(
-                        CONFIRM_ACTION.UPDATE_PAYMENT_METHOD
-                    );
-                    break;
-                case SUBSCRIPTION_VERIFICATION_ERROR:
-                    props.setDialogMessage({
-                        title: constants.SUBSCRIPTION_VERIFICATION_FAILED,
-                        close: { variant: 'danger' },
-                    });
-                    break;
-                default:
-                    props.setDialogMessage({
-                        title: constants.SUBSCRIPTION_PURCHASE_FAILED,
-                        close: { variant: 'danger' },
-                    });
-            }
-        } finally {
-            setLoading(false);
-            props.closeModal();
-        }
-    };
 
+    function onPlanSelect(plan: Plan) {
+        props.setSelectedPlan(plan);
+        props.setConfirmAction(CONFIRM_ACTION.UPDATE_SUBSCRIPTION);
+    }
     async function onManageClick(event) {
         try {
             event.preventDefault();
@@ -126,7 +84,8 @@ function PlanSelector(props: Props) {
             <PlanIcon
                 key={plan.stripeID}
                 onClick={() =>
-                    !isUserRenewingPlan(plan, subscription) && selectPlan(plan)
+                    !isUserRenewingPlan(plan, subscription) &&
+                    onPlanSelect(plan)
                 }
                 selected={isUserRenewingPlan(plan, subscription)}
             >
@@ -201,7 +160,7 @@ function PlanSelector(props: Props) {
                         margin: '4% 0',
                     }}
                 >
-                    {!plans || loading ? (
+                    {!plans ? (
                         <LoadingOverlay>
                             <EnteSpinner />
                         </LoadingOverlay>
