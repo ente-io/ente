@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/services/user_service.dart';
 
 class OTTVerificationPage extends StatefulWidget {
