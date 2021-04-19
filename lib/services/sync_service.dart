@@ -425,7 +425,7 @@ class SyncService {
               } else {
                 DefaultCacheManager().removeFile(file.getDownloadUrl());
               }
-              ThumbnailCacheManager().removeFile(file.getDownloadUrl());
+              ThumbnailCacheManager().removeFile(file.getThumbnailUrl());
               break;
             }
           }
