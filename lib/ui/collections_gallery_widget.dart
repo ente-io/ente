@@ -13,6 +13,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/models/device_folder.dart';
@@ -91,16 +92,23 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     }
     folders.sort((first, second) =>
         second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime));
-    final collectionsWithThumbnail = List<CollectionWithThumbnail>();
-    final collections = collectionsService.getCollections();
-    for (final c in collections) {
-      if (c.owner.id == userID) {
-        final thumbnail = await filesDB.getLatestFileInCollection(c.id);
-        if (thumbnail == null) {
+
+    final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
+    final latestCollectionFiles = await filesDB.getLatestCollectionFiles();
+    // TODO: Do this de-duplication within the SQL Query
+    final collectionMap = Map<int, File>();
+    for (final file in latestCollectionFiles) {
+      if (collectionMap.containsKey(file.collectionID)) {
+        if (collectionMap[file.collectionID].updationTime < file.updationTime) {
           continue;
         }
-        collectionsWithThumbnail
-            .add(CollectionWithThumbnail(c, thumbnail, null));
+      }
+      collectionMap[file.collectionID] = file;
+    }
+    for (final file in collectionMap.values) {
+      final c = collectionsService.getCollectionByID(file.collectionID);
+      if (c.owner.id == userID) {
+        collectionsWithThumbnail.add(CollectionWithThumbnail(c, file, null));
       }
     }
     collectionsWithThumbnail.sort((first, second) {

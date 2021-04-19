@@ -646,6 +646,23 @@ class FilesDB {
     return _convertToFiles(rows);
   }
 
+  Future<List<File>> getLatestCollectionFiles() async {
+    final db = await instance.database;
+    final rows = await db.rawQuery('''
+      SELECT $table.*
+      FROM $table
+      INNER JOIN
+        (
+          SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
+          FROM $table
+          GROUP BY $columnCollectionID
+        ) latest_files
+        ON $table.$columnCollectionID = latest_files.$columnCollectionID
+        AND $table.$columnCreationTime = latest_files.max_creation_time;
+    ''');
+    return _convertToFiles(rows);
+  }
+
   Future<File> getLatestFileInCollection(int collectionID) async {
     final db = await instance.database;
     final rows = await db.query(
