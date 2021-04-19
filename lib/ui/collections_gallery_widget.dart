@@ -44,6 +44,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   void initState() {
     _localFilesSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      _logger.info("Files updated");
       setState(() {});
     });
     _collectionUpdatesSubscription =
@@ -63,6 +64,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    _logger.info("Building ");
     return FutureBuilder<CollectionItems>(
       future: _getCollections(),
       builder: (context, snapshot) {
@@ -78,15 +80,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   }
 
   Future<CollectionItems> _getCollections() async {
+    var startTime = DateTime.now();
     final filesDB = FilesDB.instance;
     final collectionsService = CollectionsService.instance;
     final userID = Configuration.instance.getUserID();
-    final folders = List<DeviceFolder>();
-    final paths = await filesDB.getLocalPaths();
-    for (final path in paths) {
-      final folderName = p.basename(path);
-      folders.add(DeviceFolder(
-          folderName, path, await filesDB.getLastCreatedFileInPath(path)));
+    final List<DeviceFolder> folders = [];
+    final latestLocalFiles = await filesDB.getLatestLocalFiles();
+    for (final file in latestLocalFiles) {
+      folders.add(DeviceFolder(file.deviceFolder, file.deviceFolder, file));
     }
     folders.sort((first, second) =>
         second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime));
@@ -94,8 +95,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     final collections = collectionsService.getCollections();
     for (final c in collections) {
       if (c.owner.id == userID) {
-        final thumbnail =
-            await FilesDB.instance.getLatestFileInCollection(c.id);
+        final thumbnail = await filesDB.getLatestFileInCollection(c.id);
         if (thumbnail == null) {
           continue;
         }
@@ -108,6 +108,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
           .compareTo(first.thumbnail.updationTime);
     });
 
+    var endTime = DateTime.now();
+    var duration = Duration(
+        microseconds:
+            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
+    _logger.info("Total time taken: " + duration.inMilliseconds.toString());
     return CollectionItems(folders, collectionsWithThumbnail);
   }
 

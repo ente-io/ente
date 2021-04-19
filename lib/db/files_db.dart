@@ -221,6 +221,7 @@ class FilesDB {
       table,
       where: '$columnIsDeleted = 0',
       orderBy: '$columnCreationTime DESC',
+      limit: 100,
     );
     return _convertToFiles(results);
   }
@@ -640,6 +641,24 @@ class FilesDB {
       result.add(row[columnDeviceFolder]);
     }
     return result;
+  }
+
+  Future<List<File>> getLatestLocalFiles() async {
+    final db = await instance.database;
+    final rows = await db.rawQuery('''
+      SELECT $table.*
+      FROM $table
+      INNER JOIN
+        (
+          SELECT $columnDeviceFolder, MAX($columnCreationTime) AS max_creation_time
+          FROM $table
+          GROUP BY $columnDeviceFolder
+        ) latest_files
+        ON $table.$columnDeviceFolder = latest_files.$columnDeviceFolder
+        AND $table.$columnCreationTime = latest_files.max_creation_time
+        AND $table.$columnLocalID IS NOT NULL;
+    ''');
+    return _convertToFiles(rows);
   }
 
   Future<File> getLatestFileInCollection(int collectionID) async {
