@@ -51,26 +51,32 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder<SharedCollections>(
-      future: Future.value(CollectionsService.instance.getCollections())
-          .then((collections) async {
-        final outgoing = List<CollectionWithThumbnail>();
-        final incoming = List<CollectionWithThumbnail>();
-        for (final collection in collections) {
-          if (collection.owner.id == Configuration.instance.getUserID()) {
-            if (collection.sharees.length > 0) {
-              final withThumbnail =
-                  await _getCollectionWithThumbnail(collection);
-              if (withThumbnail.thumbnail != null) {
-                outgoing.add(withThumbnail);
-              }
-            } else {
-              continue;
+      future: Future.value(FilesDB.instance.getLatestCollectionFiles())
+          .then((files) async {
+        var startTime = DateTime.now();
+        final List<CollectionWithThumbnail> outgoing = [];
+        final List<CollectionWithThumbnail> incoming = [];
+        for (final file in files) {
+          final c =
+              CollectionsService.instance.getCollectionByID(file.collectionID);
+          if (c.owner.id == Configuration.instance.getUserID()) {
+            if (c.sharees.length > 0) {
+              outgoing.add(
+                CollectionWithThumbnail(
+                  c,
+                  file,
+                  await FilesDB.instance.getLastModifiedFileInCollection(c.id),
+                ),
+              );
             }
           } else {
-            final withThumbnail = await _getCollectionWithThumbnail(collection);
-            if (withThumbnail.thumbnail != null) {
-              incoming.add(withThumbnail);
-            }
+            incoming.add(
+              CollectionWithThumbnail(
+                c,
+                file,
+                await FilesDB.instance.getLastModifiedFileInCollection(c.id),
+              ),
+            );
           }
         }
         outgoing.sort((first, second) {
@@ -81,6 +87,12 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           return second.lastUpdatedFile.updationTime
               .compareTo(first.lastUpdatedFile.updationTime);
         });
+
+        var endTime = DateTime.now();
+        var duration = Duration(
+            microseconds: endTime.microsecondsSinceEpoch -
+                startTime.microsecondsSinceEpoch);
+        _logger.info("Total time taken: " + duration.inMilliseconds.toString());
         return SharedCollections(outgoing, incoming);
       }),
       builder: (context, snapshot) {
@@ -288,19 +300,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           ),
         );
       },
-    );
-  }
-
-  Future<CollectionWithThumbnail> _getCollectionWithThumbnail(
-      Collection collection) async {
-    final thumbnail =
-        await FilesDB.instance.getLatestFileInCollection(collection.id);
-    final lastUpdatedFile =
-        await FilesDB.instance.getLastModifiedFileInCollection(collection.id);
-    return CollectionWithThumbnail(
-      collection,
-      thumbnail,
-      lastUpdatedFile,
     );
   }
 
