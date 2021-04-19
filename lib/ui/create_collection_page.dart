@@ -39,47 +39,50 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Widget _getBody(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    top: 30, bottom: 12, left: 40, right: 40),
-                child: OutlineButton.icon(
-                  padding: EdgeInsets.all(20),
-                  icon: Icon(Icons.create_new_folder_outlined),
-                  label: Text(
-                    "to a new album",
-                    style: Theme.of(context).textTheme.bodyText1,
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      top: 30, bottom: 12, left: 40, right: 40),
+                  child: OutlineButton.icon(
+                    padding: EdgeInsets.all(20),
+                    icon: Icon(Icons.create_new_folder_outlined),
+                    label: Text(
+                      "to a new album",
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
+                    onPressed: () {
+                      _showNameAlbumDialog();
+                    },
                   ),
-                  onPressed: () {
-                    _showNameAlbumDialog();
-                  },
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(40, 24, 40, 20),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "to an existing album",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColorLight.withOpacity(0.8),
                 ),
               ),
             ),
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(40, 24, 40, 20),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "to an existing album",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColorLight.withOpacity(0.8),
-              ),
-            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
-          child: _getExistingCollectionsWidget(),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+            child: _getExistingCollectionsWidget(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -90,14 +93,13 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else if (snapshot.hasData) {
-          return Flexible(
-            child: ListView.builder(
-              itemBuilder: (context, index) {
-                return _buildCollectionItem(snapshot.data[index]);
-              },
-              itemCount: snapshot.data.length,
-              shrinkWrap: true,
-            ),
+          return ListView.builder(
+            itemBuilder: (context, index) {
+              return _buildCollectionItem(snapshot.data[index]);
+            },
+            itemCount: snapshot.data.length,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
           );
         } else {
           return loadWidget;
