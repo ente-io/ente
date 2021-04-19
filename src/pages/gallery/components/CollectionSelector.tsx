@@ -29,8 +29,8 @@ export const LoadingOverlay = styled.div`
     color: #fff;
     font-weight: 900;
     position: absolute;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 9;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9000;
 `;
 interface Props {
     collectionAndItsLatestFile;

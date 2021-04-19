@@ -17,7 +17,6 @@ import {
     isSubscriptionCancelled,
 } from 'utils/billingUtil';
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
-import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
 import { LoadingOverlay } from './CollectionSelector';
 import EnteSpinner from 'components/EnteSpinner';
 import { DeadCenter } from '..';

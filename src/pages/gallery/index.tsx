@@ -41,6 +41,8 @@ import { isFirstLogin, setIsFirstLogin } from 'utils/storage';
 import { logoutUser } from 'services/userService';
 import AlertBanner from './components/AlertBanner';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
+import { LoadingOverlay } from './components/CollectionSelector';
+import EnteSpinner from 'components/EnteSpinner';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
@@ -458,6 +460,11 @@ export default function Gallery(props: Props) {
             getInputProps={props.getInputProps}
             showCollectionSelector={props.showCollectionSelector}
         >
+            {loading && (
+                <LoadingOverlay>
+                    <EnteSpinner />
+                </LoadingOverlay>
+            )}
             <LoadingBar color="#2dc262" ref={loadingBar} />
             {isFirstLoad && (
                 <div className="text-center">
