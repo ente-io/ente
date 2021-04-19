@@ -29,6 +29,7 @@ import {
     buySubscription,
     cancelSubscription,
     isSubscribed,
+    updatePaymentMethod,
 } from 'utils/billingUtil';
 
 import Delete from 'components/Delete';
@@ -36,13 +37,14 @@ import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
-import { checkConnectivity } from 'utils/common';
+import { checkConnectivity, downloadApp } from 'utils/common';
 import { isFirstLogin, setIsFirstLogin } from 'utils/storage';
 import { logoutUser } from 'services/userService';
 import AlertBanner from './components/AlertBanner';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import { LoadingOverlay } from './components/CollectionSelector';
 import EnteSpinner from 'components/EnteSpinner';
+import { fileDelete } from 'utils/file';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
@@ -399,31 +401,24 @@ export default function Gallery(props: Props) {
     const closePlanSelectorModal = function () {
         setPlanModalView(false);
     };
+    const clearSelection = function () {
+        setSelected({ count: 0 });
+    };
     const confirmCallbacks = new Map<CONFIRM_ACTION, Function>([
         [
             CONFIRM_ACTION.DELETE,
-            async function () {
-                await deleteFiles(selected);
-                syncWithRemote();
-                setSelected({ count: 0 });
-            },
+            fileDelete.bind(null, selected, clearSelection, syncWithRemote),
         ],
         [CONFIRM_ACTION.SESSION_EXPIRED, logoutUser],
         [CONFIRM_ACTION.LOGOUT, logoutUser],
-        [
-            CONFIRM_ACTION.DOWNLOAD_APP,
-            function () {
-                var win = window.open(constants.APP_DOWNLOAD_URL, '_blank');
-                win.focus();
-            },
-        ],
+        [CONFIRM_ACTION.DOWNLOAD_APP, downloadApp],
         [
             CONFIRM_ACTION.CANCEL_SUBSCRIPTION,
             cancelSubscription.bind(
                 null,
                 setDialogMessage,
                 closePlanSelectorModal,
-                setConfirmAction
+                setLoading
             ),
         ],
         [
@@ -439,18 +434,13 @@ export default function Gallery(props: Props) {
         ],
         [
             CONFIRM_ACTION.UPDATE_PAYMENT_METHOD,
-            async function (event) {
-                try {
-                    event.preventDefault();
-                    await billingService.redirectToCustomerPortal();
-                } catch (error) {
-                    setDialogMessage({
-                        title: constants.UNKNOWN_ERROR,
-                        close: { variant: 'danger' },
-                    });
-                }
-                setConfirmAction(null);
-            },
+            (event) =>
+                updatePaymentMethod.bind(
+                    null,
+                    event,
+                    setDialogMessage,
+                    setLoading
+                ),
         ],
     ]);
 

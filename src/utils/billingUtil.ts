@@ -111,9 +111,10 @@ export async function buySubscription(
 export async function cancelSubscription(
     setDialogMessage,
     closePlanSelectorModal,
-    setConfirmAction
+    setLoading
 ) {
     try {
+        setLoading(true);
         await billingService.cancelSubscription();
         setDialogMessage({
             title: constants.SUBSCRIPTION_CANCEL_SUCCESS,
@@ -124,7 +125,22 @@ export async function cancelSubscription(
             title: constants.SUBSCRIPTION_CANCEL_FAILED,
             close: { variant: 'danger' },
         });
+    } finally {
+        closePlanSelectorModal();
+        setLoading(false);
     }
-    closePlanSelectorModal();
-    setConfirmAction(null);
+}
+export async function updatePaymentMethod(event, setDialogMessage, setLoading) {
+    try {
+        setLoading(true);
+        event.preventDefault();
+        await billingService.redirectToCustomerPortal();
+    } catch (error) {
+        setDialogMessage({
+            title: constants.UNKNOWN_ERROR,
+            close: { variant: 'danger' },
+        });
+    } finally {
+        setLoading(true);
+    }
 }
