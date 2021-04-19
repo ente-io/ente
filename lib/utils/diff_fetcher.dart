@@ -15,7 +15,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 
 class DiffFetcher {
-  final _logger = Logger("FileDownloader");
+  final _logger = Logger("DiffFetcher");
   final _dio = Network.instance.getDio();
 
   Future<Diff> getEncryptedFilesDiff(
@@ -45,11 +45,13 @@ class DiffFetcher {
               file.uploadedFileID = item["id"];
               file.collectionID = item["collectionID"];
               if (item["isDeleted"]) {
-                await FilesDB.instance.deleteFromCollection(
-                    file.uploadedFileID, file.collectionID);
-                Bus.instance.fire(
-                    CollectionUpdatedEvent(collectionID: file.collectionID));
-                FileRepository.instance.reloadFiles();
+                if (existingFiles.contains(file.uploadedFileID)) {
+                  await FilesDB.instance.deleteFromCollection(
+                      file.uploadedFileID, file.collectionID);
+                  Bus.instance.fire(
+                      CollectionUpdatedEvent(collectionID: file.collectionID));
+                  FileRepository.instance.reloadFiles();
+                }
                 continue;
               }
               file.updationTime = item["updationTime"];
