@@ -7,13 +7,13 @@ export interface MessageAttributes {
     staticBackdrop?: boolean;
     close?: { text?: string; variant?: string };
     proceed?: { text: string; action: any; variant?: string };
+    content?: any;
 }
-interface Props {
+type Props = React.PropsWithChildren<{
     show: boolean;
-    children?: any;
     onHide: () => void;
     attributes: MessageAttributes;
-}
+}>;
 export default function MessageDialog({
     attributes,
     children,
@@ -33,9 +33,9 @@ export default function MessageDialog({
                     </Modal.Title>
                 )}
             </Modal.Header>
-            {children && (
+            {(children || attributes?.content) && (
                 <Modal.Body style={{ borderTop: '1px solid #444' }}>
-                    {children}
+                    {children ? children : attributes?.content}
                 </Modal.Body>
             )}
             {attributes && (
