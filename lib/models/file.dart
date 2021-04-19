@@ -71,8 +71,8 @@ class File {
     deviceFolder = metadata["deviceFolder"];
     creationTime = metadata["creationTime"];
     modificationTime = metadata["modificationTime"] ?? creationTime;
-    final latitude = metadata["latitude"];
-    final longitude = metadata["longitude"];
+    final latitude = double.tryParse(metadata["latitude"].toString());
+    final longitude = double.tryParse(metadata["longitude"].toString());
     if (latitude == null || longitude == null) {
       location = null;
     } else {
