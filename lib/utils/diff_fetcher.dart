@@ -37,6 +37,9 @@ class DiffFetcher {
           if (response != null) {
             Bus.instance.fire(RemoteSyncEvent(true));
             final diff = response.data["diff"] as List;
+            final startTime = DateTime.now();
+            final existingFiles =
+                await FilesDB.instance.getUploadedFileIDs(collectionID);
             for (final item in diff) {
               final file = File();
               file.uploadedFileID = item["id"];
@@ -50,11 +53,13 @@ class DiffFetcher {
                 continue;
               }
               file.updationTime = item["updationTime"];
-              final existingFile = await FilesDB.instance
-                  .getUploadedFile(file.uploadedFileID, file.collectionID);
-              if (existingFile != null &&
-                  existingFile.updationTime == file.updationTime) {
-                continue;
+              if (existingFiles.contains(file.uploadedFileID)) {
+                final existingFile = await FilesDB.instance
+                    .getUploadedFile(file.uploadedFileID, file.collectionID);
+                if (existingFile != null &&
+                    existingFile.updationTime == file.updationTime) {
+                  continue;
+                }
               }
               file.ownerID = item["ownerID"];
               file.encryptedKey = item["encryptedKey"];
@@ -74,6 +79,16 @@ class DiffFetcher {
               file.applyMetadata(metadata);
               files.add(file);
             }
+
+            final endTime = DateTime.now();
+            _logger.info("time for parsing " +
+                files.length.toString() +
+                ": " +
+                Duration(
+                        microseconds: (endTime.microsecondsSinceEpoch -
+                            startTime.microsecondsSinceEpoch))
+                    .inMilliseconds
+                    .toString());
             return Diff(files, diff.length);
           } else {
             Bus.instance.fire(RemoteSyncEvent(false));

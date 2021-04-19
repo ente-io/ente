@@ -175,6 +175,24 @@ class FilesDB {
     return _convertToFiles(results)[0];
   }
 
+  Future<Set<int>> getUploadedFileIDs(int collectionID) async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      columns: [columnUploadedFileID],
+      where: '$columnCollectionID = ?',
+      whereArgs: [
+        collectionID,
+      ],
+    );
+    final ids = Set<int>();
+    ;
+    for (final result in results) {
+      ids.add(result[columnUploadedFileID]);
+    }
+    return ids;
+  }
+
   Future<List<File>> getDeduplicatedFiles() async {
     _logger.info("Getting files for collection");
     final db = await instance.database;
