@@ -45,6 +45,7 @@ export function getPlans(): Plan[] {
 }
 export function isUserRenewingPlan(plan: Plan, subscription: Subscription) {
     return (
+        isSubscriptionActive(subscription) &&
         plan.id === subscription.productID &&
         !isSubscriptionCancelled(subscription)
     );
