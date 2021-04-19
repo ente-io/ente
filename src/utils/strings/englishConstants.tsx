@@ -1,6 +1,3 @@
-import { Subscription } from 'services/billingService';
-import { template } from './vernacularStrings';
-
 /**
  * Global English constants.
  */
@@ -117,7 +114,8 @@ const englishConstants = {
         </div>
     ),
     LOGOUT: 'logout',
-    CANCEL_SUBSCRIPTION_MESSAGE: 'sure you want to cancel your subscription?',
+    CANCEL_SUBSCRIPTION_MESSAGE:
+        'all of your data will be deleted from our servers at the end of this billing period. are you sure that you want to unsubscribe?',
     CANCEL_SUBSCRIPTION: 'cancel subscription',
     CANCEL: 'cancel',
     SUBSCRIBE: 'subscribe',
@@ -236,6 +234,7 @@ const englishConstants = {
     SUPPORT: 'support',
     UPDATE_SUBSCRIPTION_MESSAGE: 'are you sure you want to change your plan?',
     UPDATE_SUBSCRIPTION: 'update',
+    CONFIRM: 'confirm',
 };
 
 export default englishConstants;
