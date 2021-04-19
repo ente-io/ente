@@ -660,7 +660,18 @@ class FilesDB {
         ON $table.$columnCollectionID = latest_files.$columnCollectionID
         AND $table.$columnCreationTime = latest_files.max_creation_time;
     ''');
-    return _convertToFiles(rows);
+    final files = _convertToFiles(rows);
+    // TODO: Do this de-duplication within the SQL Query
+    final collectionMap = Map<int, File>();
+    for (final file in files) {
+      if (collectionMap.containsKey(file.collectionID)) {
+        if (collectionMap[file.collectionID].updationTime < file.updationTime) {
+          continue;
+        }
+      }
+      collectionMap[file.collectionID] = file;
+    }
+    return collectionMap.values.toList();
   }
 
   Future<File> getLatestFileInCollection(int collectionID) async {

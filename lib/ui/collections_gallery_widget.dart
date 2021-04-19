@@ -13,7 +13,6 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/models/device_folder.dart';
@@ -22,7 +21,6 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/device_folder_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
-import 'package:path/path.dart' as p;
 import 'package:photos/utils/toast_util.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
@@ -95,17 +93,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
 
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
     final latestCollectionFiles = await filesDB.getLatestCollectionFiles();
-    // TODO: Do this de-duplication within the SQL Query
-    final collectionMap = Map<int, File>();
     for (final file in latestCollectionFiles) {
-      if (collectionMap.containsKey(file.collectionID)) {
-        if (collectionMap[file.collectionID].updationTime < file.updationTime) {
-          continue;
-        }
-      }
-      collectionMap[file.collectionID] = file;
-    }
-    for (final file in collectionMap.values) {
       final c = collectionsService.getCollectionByID(file.collectionID);
       if (c.owner.id == userID) {
         collectionsWithThumbnail.add(CollectionWithThumbnail(c, file, null));
