@@ -48,7 +48,7 @@ class SyncService {
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kLastBackgroundUploadDetectedTime =
       "last_background_upload_detected_time";
-  static const kDiffLimit = 200;
+  static const kDiffLimit = 1000;
   static const kBackgroundUploadPollFrequency = Duration(seconds: 1);
 
   SyncService._privateConstructor() {
@@ -110,8 +110,8 @@ class SyncService {
           SyncStatusUpdate(SyncStatus.paused, reason: "waiting for WiFi..."));
     } on SyncStopRequestedError {
       _syncStopRequested = false;
-      Bus.instance
-          .fire(SyncStatusUpdate(SyncStatus.completed_backup, wasStopped: true));
+      Bus.instance.fire(
+          SyncStatusUpdate(SyncStatus.completed_backup, wasStopped: true));
     } on NoActiveSubscriptionError {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
           error: NoActiveSubscriptionError()));
