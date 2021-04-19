@@ -84,6 +84,9 @@ const GlobalStyles = createGlobalStyle`
         color: #aaa;
         text-shadow: none;
     }
+    .modal-backdrop {
+        z-index:2000;
+    }
     .modal .card {
         background-color: #202020;
         border: none;
