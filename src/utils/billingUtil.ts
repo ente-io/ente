@@ -8,6 +8,7 @@ import billingService, {
 } from 'services/billingService';
 import { SUBSCRIPTION_VERIFICATION_ERROR } from './common/errorUtil';
 import { getData, LS_KEYS } from './storage/localStorage';
+import { MessageAttributes } from 'components/MessageDialog';
 
 export function convertBytesToGBs(bytes, precision?): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
@@ -82,7 +83,9 @@ export async function buySubscription(
             await billingService.buySubscription(plan.stripeID);
         }
         setDialogMessage({
-            title: constants.SUBSCRIPTION_UPDATE_SUCCESS,
+            title: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
+                getUserSubscription()
+            ),
             close: { variant: 'success' },
         });
     } catch (err) {
@@ -142,5 +145,36 @@ export async function updatePaymentMethod(event, setDialogMessage, setLoading) {
         });
     } finally {
         setLoading(true);
+    }
+}
+
+export async function checkSubscriptionPurchase(
+    setDialogMessage: React.Dispatch<React.SetStateAction<MessageAttributes>>
+) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    if (sessionId === '-1') {
+        setDialogMessage({
+            title: constants.SUBSCRIPTION_PURCHASE_CANCELLED,
+            close: { variant: 'danger' },
+        });
+    } else if (sessionId) {
+        try {
+            const subscription = await billingService.verifySubscription(
+                sessionId
+            );
+            setDialogMessage({
+                title: 'thank u',
+                close: { variant: 'success' },
+                content: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
+                    subscription?.expiryTime
+                ),
+            });
+        } catch (e) {
+            setDialogMessage({
+                title: SUBSCRIPTION_VERIFICATION_ERROR,
+                close: {},
+            });
+        }
     }
 }

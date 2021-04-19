@@ -28,6 +28,7 @@ import PlanSelector from './components/PlanSelector';
 import {
     buySubscription,
     cancelSubscription,
+    checkSubscriptionPurchase,
     isSubscribed,
     updatePaymentMethod,
 } from 'utils/billingUtil';
@@ -196,6 +197,7 @@ export default function Gallery(props: Props) {
             setCollectionAndItsLatestFile(collectionAndItsLatestFile);
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
+            await checkSubscriptionPurchase(setDialogMessage);
             await syncWithRemote();
             setIsFirstLoad(false);
         };
