@@ -370,6 +370,9 @@ class HeaderWidget extends StatelessWidget {
       _syncIndicator,
       _memoriesWidget,
     ];
-    return Column(children: list);
+    return Column(
+      children: list,
+      crossAxisAlignment: CrossAxisAlignment.start,
+    );
   }
 }
