@@ -51,6 +51,7 @@ const englishConstants = {
     SELECT_COLLECTION: `select an album to upload to`,
     CREATE_COLLECTION: `create album`,
     CLOSE: 'close',
+    NO: 'no',
     NOTHING_HERE: `nothing to see here, yet 👀`,
     UPLOAD: {
         0: 'preparing to upload',
@@ -125,7 +126,7 @@ const englishConstants = {
         'sorry, this operation is currently not supported on the web, please check your mobile app',
     LOGOUT_MESSAGE: 'sure you want to logout?',
     DOWNLOAD_APP_MESSAGE:
-        'sorry, this operation is currently not supported on the web, please install the desktop app',
+        'sorry, this operation is currently not supported on the web, do you want to download the desktop app',
     DOWNLOAD_APP: 'download',
     APP_DOWNLOAD_URL: 'https://github.com/ente-io/bhari-frame/releases/',
     EXPORT: 'export data',
@@ -233,6 +234,8 @@ const englishConstants = {
     ),
     REQUEST_FEATURE: 'request feature',
     SUPPORT: 'support',
+    UPDATE_SUBSCRIPTION_MESSAGE: 'are you sure you want to change your plan?',
+    UPDATE_SUBSCRIPTION: 'update',
 };
 
 export default englishConstants;

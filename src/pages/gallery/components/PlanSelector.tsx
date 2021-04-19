@@ -42,6 +42,7 @@ interface Props {
     closeModal: any;
     setDialogMessage;
     setConfirmAction;
+    setSelectedPlan;
 }
 enum PLAN_PERIOD {
     MONTH = 'month',
@@ -62,6 +63,8 @@ function PlanSelector(props: Props) {
         );
     };
     const selectPlan = async (plan: Plan) => {
+        // props.setSelectedPlan(plan);
+        props.setConfirmAction(CONFIRM_ACTION.UPDATE_SUBSCRIPTION);
         try {
             setLoading(true);
             if (hasPaidPlan(subscription)) {

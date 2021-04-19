@@ -8,6 +8,7 @@ export enum CONFIRM_ACTION {
     SESSION_EXPIRED,
     DOWNLOAD_APP,
     CANCEL_SUBSCRIPTION,
+    UPDATE_SUBSCRIPTION,
     UPDATE_PAYMENT_METHOD,
 }
 
@@ -17,6 +18,7 @@ const CONFIRM_ACTION_VALUES = [
     { text: 'SESSION_EXPIRED', type: 'primary' },
     { text: 'DOWNLOAD_APP', type: 'success' },
     { text: 'CANCEL_SUBSCRIPTION', type: 'danger' },
+    { text: 'UPDATE_SUBSCRIPTION', type: 'success' },
     { text: 'UPDATE_PAYMENT_METHOD', type: 'primary' },
 ];
 
@@ -42,9 +44,9 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
                         variant: CONFIRM_ACTION_VALUES[action]?.type,
                     },
                     close: action !== CONFIRM_ACTION.SESSION_EXPIRED && {
-                        text: constants.CLOSE,
+                        text: constants.NO,
                     },
-                    staticBackdrop: action === CONFIRM_ACTION.SESSION_EXPIRED,
+                    staticBackdrop: true,
                 }}
             />
         </>
