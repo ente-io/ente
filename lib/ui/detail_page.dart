@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/file.dart';
@@ -268,7 +269,10 @@ class _DetailPageState extends State<DetailPage> {
             children: [
               Icon(Icons.folder_outlined),
               Padding(padding: EdgeInsets.all(4)),
-              Text(file.deviceFolder),
+              Text(file.deviceFolder ??
+                  CollectionsService.instance
+                      .getCollectionByID(file.collectionID)
+                      .name),
             ],
           ),
           Padding(padding: EdgeInsets.all(4)),
