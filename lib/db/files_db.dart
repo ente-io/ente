@@ -139,6 +139,7 @@ class FilesDB {
       if (batchCounter == 400) {
         await batch.commit();
         batch = db.batch();
+        batchCounter = 0;
       }
       batch.insert(
         table,
