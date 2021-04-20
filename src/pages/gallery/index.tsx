@@ -181,7 +181,7 @@ export default function Gallery(props: Props) {
         const main = async () => {
             setIsFirstLoad(isFirstLogin());
             if (justSignedUp()) {
-                setConfirmAction(CONFIRM_ACTION.UPDATE_SUBSCRIPTION);
+                setPlanModalView(true);
             }
             setIsFirstLogin(false);
             const data = await localFiles();
