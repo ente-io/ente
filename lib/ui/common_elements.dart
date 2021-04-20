@@ -33,3 +33,5 @@ RaisedButton button(
     ),
   );
 }
+
+final emptyContainer = Container();

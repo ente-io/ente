@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/repositories/file_repository.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/file_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -26,6 +27,28 @@ class ThumbnailWidget extends StatefulWidget {
 
 class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   static final _logger = Logger("ThumbnailWidget");
+
+  static final kVideoIconOverlay = Container(
+    height: 64,
+    child: Icon(
+      Icons.play_circle_outline,
+      size: 40,
+      color: Colors.white70,
+    ),
+  );
+
+  static final kUnsyncedIconOverlay = Align(
+    alignment: Alignment.bottomRight,
+    child: Padding(
+      padding: const EdgeInsets.only(right: 8, bottom: 4),
+      child: Icon(
+        Icons.cloud_off_outlined,
+        size: 18,
+        color: Colors.white.withOpacity(0.8),
+      ),
+    ),
+  );
+
   static final Widget loadingWidget = Container(
     alignment: Alignment.center,
     color: Colors.grey[900],
@@ -68,14 +91,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         content = Stack(
           children: [
             image,
-            Container(
-              height: 64,
-              child: Icon(
-                Icons.play_circle_outline,
-                size: 40,
-                color: Colors.white70,
-              ),
-            ),
+            kVideoIconOverlay,
           ],
           fit: StackFit.expand,
         );
@@ -92,18 +108,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           child: content,
         ),
         widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
-            ? Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 8, bottom: 4),
-                  child: Icon(
-                    Icons.cloud_off_outlined,
-                    size: 18,
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                ),
-              )
-            : Container(),
+            ? kUnsyncedIconOverlay
+            : emptyContainer,
       ],
       fit: StackFit.expand,
     );
