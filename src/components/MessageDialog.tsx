@@ -19,15 +19,18 @@ export default function MessageDialog({
     children,
     ...props
 }: Props) {
+    if (!attributes) {
+        return <Modal />;
+    }
     return (
         <Modal
             {...props}
             size="lg"
             centered
-            backdrop={attributes?.staticBackdrop ? 'static' : 'true'}
+            backdrop={attributes.staticBackdrop ? 'static' : 'true'}
         >
             <Modal.Header style={{ borderBottom: 'none' }}>
-                {attributes?.title && (
+                {attributes.title && (
                     <Modal.Title>
                         <strong>{attributes.title}</strong>
                     </Modal.Title>
@@ -35,38 +38,36 @@ export default function MessageDialog({
             </Modal.Header>
             {(children || attributes?.content) && (
                 <Modal.Body style={{ borderTop: '1px solid #444' }}>
-                    {children ? children : attributes?.content}
+                    {children ? children : <h5>{attributes.content}</h5>}
                 </Modal.Body>
             )}
-            {attributes && (
-                <Modal.Footer style={{ borderTop: 'none' }}>
-                    {attributes.close && (
-                        <Button
-                            variant={`outline-${
-                                attributes.close?.variant ?? 'secondary'
-                            }`}
-                            onClick={props.onHide}
-                            style={{
-                                padding: '6px 3em',
-                                marginRight: '20px',
-                            }}
-                        >
-                            {attributes.close?.text ?? constants.OK}
-                        </Button>
-                    )}
-                    {attributes.proceed && (
-                        <Button
-                            variant={`outline-${
-                                attributes.proceed?.variant ?? 'success'
-                            }`}
-                            onClick={attributes.proceed.action}
-                            style={{ padding: '6px 3em', marginRight: '20px' }}
-                        >
-                            {attributes.proceed.text}
-                        </Button>
-                    )}
-                </Modal.Footer>
-            )}
+            <Modal.Footer style={{ borderTop: 'none' }}>
+                {attributes.close && (
+                    <Button
+                        variant={`outline-${
+                            attributes.close?.variant ?? 'secondary'
+                        }`}
+                        onClick={props.onHide}
+                        style={{
+                            padding: '6px 3em',
+                            marginRight: '20px',
+                        }}
+                    >
+                        {attributes.close?.text ?? constants.OK}
+                    </Button>
+                )}
+                {attributes.proceed && (
+                    <Button
+                        variant={`outline-${
+                            attributes.proceed?.variant ?? 'success'
+                        }`}
+                        onClick={attributes.proceed.action}
+                        style={{ padding: '6px 3em', marginRight: '20px' }}
+                    >
+                        {attributes.proceed.text}
+                    </Button>
+                )}
+            </Modal.Footer>
         </Modal>
     );
 }
