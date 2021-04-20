@@ -29,7 +29,7 @@ class ScrollBarThumb extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(20, 12, 20, 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: Colors.grey[850],
+              color: backgroundColor,
             ),
             child: Text(
               title,

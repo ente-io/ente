@@ -140,7 +140,7 @@ class _GalleryState extends State<Gallery> {
               return getMonthAndYear(
                   DateTime.fromMicrosecondsSinceEpoch(collatedTimes[index][0]));
             },
-            thumbBackgroundColor: Colors.grey[900],
+            thumbBackgroundColor: Color(0xFF151515),
             thumbDrawColor: Colors.white.withOpacity(0.5),
             velocityThreshold: 128,
           );
