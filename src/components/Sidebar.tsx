@@ -89,12 +89,34 @@ export default function Sidebar(props: Props) {
             itemListElement="div"
         >
             <div style={{ marginBottom: '12px', outline: 'none' }}>
-                Hi {user?.email} !!
+                {user?.email}
             </div>
             <div style={{ outline: 'none' }}>
-                <h5 style={{ marginBottom: '12px' }}>
-                    {constants.SUBSCRIPTION_PLAN}
-                </h5>
+                <div style={{ display: 'flex' }}>
+                    <h5 style={{ margin: '4px 0 12px 2px' }}>
+                        {constants.SUBSCRIPTION_PLAN}
+                    </h5>
+                    <div style={{ marginLeft: '10px' }}>
+                        {
+                            <Button
+                                variant={
+                                    isSubscribed(subscription)
+                                        ? 'outline-secondary'
+                                        : 'outline-success'
+                                }
+                                size="sm"
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    props.setPlanModalView(true);
+                                }}
+                            >
+                                {isSubscribed(subscription)
+                                    ? constants.MANAGE
+                                    : constants.SUBSCRIBE}
+                            </Button>
+                        }
+                    </div>
+                </div>
                 <div style={{ color: '#959595' }}>
                     {isSubscriptionActive(subscription) ? (
                         isOnFreePlan(subscription) ? (
@@ -112,38 +134,6 @@ export default function Sidebar(props: Props) {
                         )
                     ) : (
                         <p>{constants.SUBSCRIPTION_EXPIRED}</p>
-                    )}
-                </div>
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                    }}
-                >
-                    {isSubscribed(subscription) ? (
-                        <div style={{ marginBottom: '10px' }}>
-                            <Button
-                                variant="outline-secondary"
-                                size="sm"
-                                onClick={() => {
-                                    setIsOpen(false);
-                                    props.setPlanModalView(true);
-                                }}
-                            >
-                                {constants.MANAGE}
-                            </Button>
-                        </div>
-                    ) : (
-                        <Button
-                            variant="outline-success"
-                            size="sm"
-                            onClick={() => {
-                                setIsOpen(false);
-                                props.setPlanModalView(true);
-                            }}
-                        >
-                            {constants.SUBSCRIBE}
-                        </Button>
                     )}
                 </div>
             </div>
