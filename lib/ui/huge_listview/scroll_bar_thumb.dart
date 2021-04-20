@@ -24,15 +24,16 @@ class ScrollBarThumb extends StatelessWidget {
         FadeTransition(
           opacity: animation,
           child: Container(
-            padding: EdgeInsets.all(8),
+            padding: EdgeInsets.fromLTRB(20, 12, 20, 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.grey[850],
             ),
             child: Text(
               title,
               style: TextStyle(
-                color: Colors.black,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
                 backgroundColor: Colors.transparent,
                 fontSize: 14,
               ),
@@ -40,7 +41,7 @@ class ScrollBarThumb extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: EdgeInsets.all(2),
+          padding: EdgeInsets.all(12),
         ),
         CustomPaint(
           foregroundPainter: _ArrowCustomPainter(drawColor),
