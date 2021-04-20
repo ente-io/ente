@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
@@ -241,8 +242,10 @@ class _HomeWidgetState extends State<HomeWidget> {
             header = _headerWidget;
           }
           return Gallery(
-            syncLoader: () {
-              return _getFilteredPhotos(FileRepository.instance.files);
+            creationTimesFuture: FilesDB.instance.getAllCreationTimes(),
+            asyncLoader: (creationStartTime, creationEndTime, {limit}) {
+              return FilesDB.instance
+                  .getFiles(creationStartTime, creationEndTime, limit: limit);
             },
             reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
             tagPrefix: "home_gallery",

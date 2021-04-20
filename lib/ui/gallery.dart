@@ -3,24 +3,24 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/ui/detail_page.dart';
-import 'package:photos/ui/draggable_scrollbar.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
+import 'package:photos/ui/huge_listview/huge_listview.dart';
+import 'package:photos/ui/huge_listview/lazy_loading_gallery.dart';
+import 'package:photos/ui/huge_listview/place_holder_widget.dart';
+import 'package:photos/ui/huge_listview/scroll_bar_thumb.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class Gallery extends StatefulWidget {
-  final List<File> Function() syncLoader;
-  final Future<List<File>> Function(File lastFile, int limit) asyncLoader;
-  final bool shouldLoadAll;
+  final Future<List<File>> Function(int creationStartTime, int creationEndTime,
+      {int limit}) asyncLoader;
+  final Future<List<int>> creationTimesFuture;
   final Stream<Event> reloadEvent;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
@@ -28,13 +28,12 @@ class Gallery extends StatefulWidget {
   final bool isHomePageGallery;
 
   Gallery({
-    this.syncLoader,
-    this.asyncLoader,
-    this.shouldLoadAll = false,
-    this.reloadEvent,
-    this.headerWidget,
+    @required this.asyncLoader,
+    @required this.creationTimesFuture,
     @required this.selectedFiles,
     @required this.tagPrefix,
+    this.reloadEvent,
+    this.headerWidget,
     this.isHomePageGallery = false,
   });
 
@@ -45,381 +44,178 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
-  static final int kLoadLimit = 200;
-  static final int kEagerLoadTrigger = 10;
+  static final int kPageSize = 10;
 
   final Logger _logger = Logger("Gallery");
-  final List<List<File>> _collatedFiles = List<List<File>>();
-  final _itemScrollController = ItemScrollController();
-  final _itemPositionsListener = ItemPositionsListener.create();
-  final _scrollKey = GlobalKey<DraggableScrollbarState>();
+  final _cache = Map<int, Future<List<List<File>>>>();
 
-  ScrollController _scrollController = ScrollController();
-  double _scrollOffset = 0;
-  bool _requiresLoad = false;
-  bool _hasLoadedAll = false;
-  bool _isLoadingNext = false;
-  bool _hasDraggableScrollbar = false;
-  List<File> _files;
-  int _lastIndex = 0;
+  int _pageIndex = 0;
+  final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
   @override
   void initState() {
-    _requiresLoad = true;
     if (widget.reloadEvent != null) {
       widget.reloadEvent.listen((event) {
-        _logger.info("Building gallery because reload event fired updated");
+        _logger.info("Building gallery because reload event fired");
         if (mounted) {
           setState(() {
-            _requiresLoad = true;
+            _cache.clear();
           });
         }
       });
     }
     widget.selectedFiles.addListener(() {
       _logger.info("Building gallery because selected files updated");
-      setState(() {
-        _requiresLoad = false;
-        if (!_hasDraggableScrollbar) {
-          _saveScrollPosition();
-        }
-      });
+      setState(() {});
     });
-    if (widget.asyncLoader == null || widget.shouldLoadAll) {
-      _hasLoadedAll = true;
-    }
-    _itemPositionsListener.itemPositions.addListener(_updateScrollbar);
     super.initState();
   }
 
   @override
   void dispose() {
-    _itemPositionsListener.itemPositions.removeListener(_updateScrollbar);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     _logger.info("Building " + widget.tagPrefix);
-    if (!_requiresLoad) {
-      return _onDataLoaded();
-    }
-    if (widget.syncLoader != null) {
-      _files = widget.syncLoader();
-      return _onDataLoaded();
-    }
-    return FutureBuilder<List<File>>(
-      future: widget.asyncLoader(null, kLoadLimit),
-      builder: (context, snapshot) {
+    return FutureBuilder(
+      future: widget.creationTimesFuture,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
-          _requiresLoad = false;
-          _files = snapshot.data;
-          return _onDataLoaded();
-        } else if (snapshot.hasError) {
-          _requiresLoad = false;
-          return Center(child: Text(snapshot.error.toString()));
-        } else {
-          return Center(child: loadWidget);
-        }
-      },
-    );
-  }
-
-  Widget _onDataLoaded() {
-    if (_files.isEmpty) {
-      final children = List<Widget>();
-      if (widget.headerWidget != null) {
-        children.add(widget.headerWidget);
-      }
-      children.add(Expanded(child: nothingToSeeHere));
-      return CustomScrollView(
-        slivers: [
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: children,
-            ),
-          )
-        ],
-      );
-    }
-    _collateFiles();
-    final itemCount =
-        _collatedFiles.length + (widget.headerWidget == null ? 1 : 2);
-    _hasDraggableScrollbar = itemCount > 25 || _files.length > 50;
-    var gallery;
-    if (!_hasDraggableScrollbar) {
-      _scrollController = ScrollController(initialScrollOffset: _scrollOffset);
-      gallery = ListView.builder(
-        itemCount: itemCount,
-        itemBuilder: _buildListItem,
-        controller: _scrollController,
-        cacheExtent: 1500,
-        addAutomaticKeepAlives: true,
-      );
-    } else {
-      gallery = DraggableScrollbar.semicircle(
-        key: _scrollKey,
-        initialScrollIndex: _lastIndex,
-        labelTextBuilder: (position) {
-          final index =
-              min((position * itemCount).floor(), _collatedFiles.length - 1);
-          return Text(
-            getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
-                _collatedFiles[index][0].creationTime)),
-            style: TextStyle(
-              color: Colors.black,
-              backgroundColor: Colors.white,
-              fontSize: 14,
-            ),
+          final creationTimes = snapshot.data;
+          final collatedTimes = _collateCreationTimes(creationTimes);
+          _logger.info("Days fetched " + collatedTimes.length.toString());
+          var gallery;
+          gallery = HugeListView<List<File>>(
+            key: _hugeListViewKey,
+            controller: ItemScrollController(),
+            pageSize: kPageSize,
+            startIndex: _pageIndex,
+            totalCount: collatedTimes.length,
+            isDraggableScrollbarEnabled: collatedTimes.length > 30,
+            pageFuture: (pageIndex) {
+              _pageIndex = pageIndex;
+              if (!_cache.containsKey(pageIndex)) {
+                final endTimeIndex =
+                    min(pageIndex * kPageSize, collatedTimes.length - 1);
+                final endTime = collatedTimes[endTimeIndex][0];
+                final startTimeIndex =
+                    min((pageIndex + 1) * kPageSize, collatedTimes.length - 1);
+                final startTime = collatedTimes[startTimeIndex]
+                    [collatedTimes[startTimeIndex].length - 1];
+                _cache[pageIndex] = widget
+                    .asyncLoader(startTime, endTime)
+                    .then((files) => _clubFiles(files));
+              }
+              return _cache[pageIndex];
+            },
+            placeholderBuilder: (context, pageIndex) {
+              var day = getDayWidget(collatedTimes[pageIndex][0]);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  children: [
+                    day,
+                    PlaceHolderWidget(collatedTimes[pageIndex].length),
+                  ],
+                ),
+              );
+            },
+            waitBuilder: (_) {
+              return loadWidget;
+            },
+            emptyResultBuilder: (_) {
+              return nothingToSeeHere;
+            },
+            itemBuilder: (context, index, files) {
+              var gallery;
+              gallery = LazyLoadingGallery(
+                  files, widget.selectedFiles, widget.tagPrefix);
+              if (widget.headerWidget != null && index == 0) {
+                gallery = Column(children: [widget.headerWidget, gallery]);
+              }
+              return gallery;
+            },
+            labelTextBuilder: (int index) {
+              return getMonthAndYear(
+                  DateTime.fromMicrosecondsSinceEpoch(collatedTimes[index][0]));
+            },
+            thumbBackgroundColor: Colors.grey[900],
+            thumbDrawColor: Colors.white.withOpacity(0.5),
+            velocityThreshold: 128,
           );
-        },
-        labelConstraints: BoxConstraints.tightFor(width: 100.0, height: 36.0),
-        onChange: (position) {
-          final index =
-              min((position * itemCount).floor(), _collatedFiles.length - 1);
-          if (index == _lastIndex) {
-            return;
+          if (widget.isHomePageGallery) {
+            gallery = Container(
+              margin: const EdgeInsets.only(bottom: 50),
+              child: gallery,
+            );
+            if (widget.selectedFiles.files.isNotEmpty) {
+              gallery = Stack(children: [
+                gallery,
+                Container(
+                  height: 60,
+                  child: GalleryAppBarWidget(
+                    GalleryAppBarType.homepage,
+                    null,
+                    widget.selectedFiles,
+                  ),
+                ),
+              ]);
+            }
           }
-          _lastIndex = index;
-          _itemScrollController.jumpTo(index: index);
-        },
-        child: ScrollablePositionedList.builder(
-          itemCount: itemCount,
-          itemBuilder: _buildListItem,
-          itemScrollController: _itemScrollController,
-          initialScrollIndex: _lastIndex,
-          minCacheExtent: 1500,
-          addAutomaticKeepAlives: true,
-          physics: _MaxVelocityPhysics(velocityThreshold: 128),
-          itemPositionsListener: _itemPositionsListener,
-        ),
-        itemCount: itemCount,
-      );
-    }
-    if (widget.isHomePageGallery) {
-      gallery = Container(
-        margin: const EdgeInsets.only(bottom: 50),
-        child: gallery,
-      );
-      if (widget.selectedFiles.files.isNotEmpty) {
-        gallery = Stack(children: [
-          gallery,
-          Container(
-            height: 60,
-            child: GalleryAppBarWidget(
-              GalleryAppBarType.homepage,
-              null,
-              widget.selectedFiles,
-            ),
-          ),
-        ]);
-      }
-    }
-    return gallery;
-  }
-
-  Widget _buildListItem(BuildContext context, int index) {
-    if (_shouldLoadNextItems(index)) {
-      // Eagerly load next batch
-      _loadNextItems();
-    }
-    var fileIndex;
-    if (widget.headerWidget != null) {
-      if (index == 0) {
-        return widget.headerWidget;
-      }
-      fileIndex = index - 1;
-    } else {
-      fileIndex = index;
-    }
-    if (fileIndex == _collatedFiles.length) {
-      if (widget.asyncLoader != null) {
-        if (!_hasLoadedAll) {
+          return gallery;
+        } else {
           return loadWidget;
-        } else {
-          return Container();
-        }
-      }
-    }
-    if (fileIndex < 0 || fileIndex >= _collatedFiles.length) {
-      return Container();
-    }
-    var files = _collatedFiles[fileIndex];
-    return Column(
-      children: <Widget>[_getDay(files[0].creationTime), _getGallery(files)],
-    );
-  }
-
-  bool _shouldLoadNextItems(int index) =>
-      widget.asyncLoader != null &&
-      !_isLoadingNext &&
-      (index >= _collatedFiles.length - kEagerLoadTrigger) &&
-      !_hasLoadedAll;
-
-  void _loadNextItems() {
-    _isLoadingNext = true;
-    widget.asyncLoader(_files[_files.length - 1], kLoadLimit).then((files) {
-      setState(() {
-        _isLoadingNext = false;
-        _saveScrollPosition();
-        if (files.length < kLoadLimit) {
-          _hasLoadedAll = true;
-        }
-        _files.addAll(files);
-      });
-    });
-  }
-
-  void _saveScrollPosition() {
-    _scrollOffset = _scrollController.offset;
-  }
-
-  Widget _getDay(int timestamp) {
-    final date = DateTime.fromMicrosecondsSinceEpoch(timestamp);
-    final now = DateTime.now();
-    var title = getDayAndMonth(date);
-    if (date.year == now.year && date.month == now.month) {
-      if (date.day == now.day) {
-        title = "Today";
-      } else if (date.day == now.day - 1) {
-        title = "Yesterday";
-      }
-    }
-    if (date.year != DateTime.now().year) {
-      title += " " + date.year.toString();
-    }
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(10, 8, 0, 10),
-      alignment: Alignment.centerLeft,
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.white.withOpacity(0.85),
-        ),
-      ),
-    );
-  }
-
-  Widget _getGallery(List<File> files) {
-    return GridView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.only(bottom: 12),
-      physics:
-          NeverScrollableScrollPhysics(), // to disable GridView's scrolling
-      itemBuilder: (context, index) {
-        return _buildFile(context, files[index]);
-      },
-      itemCount: files.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-      ),
-    );
-  }
-
-  Widget _buildFile(BuildContext context, File file) {
-    return GestureDetector(
-      onTap: () {
-        if (widget.selectedFiles.files.isNotEmpty) {
-          _selectFile(file);
-        } else {
-          _routeToDetailPage(file, context);
         }
       },
-      onLongPress: () {
-        HapticFeedback.lightImpact();
-        _selectFile(file);
-      },
-      child: Container(
-        margin: const EdgeInsets.all(2.0),
-        decoration: BoxDecoration(
-          border: widget.selectedFiles.files.contains(file)
-              ? Border.all(
-                  width: 4.0,
-                  color: Theme.of(context).accentColor,
-                )
-              : null,
-        ),
-        child: Hero(
-          tag: widget.tagPrefix + file.tag(),
-          child: ThumbnailWidget(file),
-        ),
-      ),
     );
   }
 
-  void _selectFile(File file) {
-    widget.selectedFiles.toggleSelection(file);
-  }
-
-  void _routeToDetailPage(File file, BuildContext context) {
-    final page = DetailPage(
-      _files,
-      _files.indexOf(file),
-      widget.tagPrefix,
-    );
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return page;
-        },
-      ),
-    );
-  }
-
-  void _collateFiles() {
-    final dailyFiles = List<File>();
-    final collatedFiles = List<List<File>>();
-    for (int index = 0; index < _files.length; index++) {
+  List<List<File>> _clubFiles(List<File> files) {
+    final List<File> dailyFiles = [];
+    final List<List<File>> collatedFiles = [];
+    for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
-          !_areFilesFromSameDay(_files[index - 1], _files[index])) {
-        final collatedDailyFiles = List<File>();
+          !_areFromSameDay(
+              files[index - 1].creationTime, files[index].creationTime)) {
+        final List<File> collatedDailyFiles = [];
         collatedDailyFiles.addAll(dailyFiles);
         collatedFiles.add(collatedDailyFiles);
         dailyFiles.clear();
       }
-      dailyFiles.add(_files[index]);
+      dailyFiles.add(files[index]);
     }
     if (dailyFiles.isNotEmpty) {
       collatedFiles.add(dailyFiles);
     }
-    _collatedFiles.clear();
-    _collatedFiles.addAll(collatedFiles);
+    return collatedFiles;
   }
 
-  bool _areFilesFromSameDay(File first, File second) {
-    var firstDate = DateTime.fromMicrosecondsSinceEpoch(first.creationTime);
-    var secondDate = DateTime.fromMicrosecondsSinceEpoch(second.creationTime);
+  List<List<int>> _collateCreationTimes(List<int> creationTimes) {
+    final List<int> dailyTimes = [];
+    final List<List<int>> collatedTimes = [];
+    for (int index = 0; index < creationTimes.length; index++) {
+      if (index > 0 &&
+          !_areFromSameDay(creationTimes[index - 1], creationTimes[index])) {
+        final List<int> collatedDailyTimes = [];
+        collatedDailyTimes.addAll(dailyTimes);
+        collatedTimes.add(collatedDailyTimes);
+        dailyTimes.clear();
+      }
+      dailyTimes.add(creationTimes[index]);
+    }
+    if (dailyTimes.isNotEmpty) {
+      collatedTimes.add(dailyTimes);
+    }
+    return collatedTimes;
+  }
+
+  bool _areFromSameDay(int firstCreationTime, int secondCreationTime) {
+    var firstDate = DateTime.fromMicrosecondsSinceEpoch(firstCreationTime);
+    var secondDate = DateTime.fromMicrosecondsSinceEpoch(secondCreationTime);
     return firstDate.year == secondDate.year &&
         firstDate.month == secondDate.month &&
         firstDate.day == secondDate.day;
-  }
-
-  void _updateScrollbar() {
-    final index = _itemPositionsListener.itemPositions.value.first.index;
-    _lastIndex = index;
-    _scrollKey.currentState?.setPosition(index / _collatedFiles.length);
-  }
-}
-
-class _MaxVelocityPhysics extends AlwaysScrollableScrollPhysics {
-  final double velocityThreshold;
-
-  _MaxVelocityPhysics({@required this.velocityThreshold, ScrollPhysics parent})
-      : super(parent: parent);
-
-  @override
-  bool recommendDeferredLoading(
-      double velocity, ScrollMetrics metrics, BuildContext context) {
-    return velocity.abs() > velocityThreshold;
-  }
-
-  @override
-  _MaxVelocityPhysics applyTo(ScrollPhysics ancestor) {
-    return _MaxVelocityPhysics(
-        velocityThreshold: velocityThreshold, parent: buildParent(ancestor));
   }
 }

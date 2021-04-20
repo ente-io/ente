@@ -215,15 +215,109 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
-  Future<List<File>> getFiles() async {
+  Future<List<File>> getFiles(int startTime, int endTime, {int limit}) async {
+    final db = await instance.database;
+    _logger.info(
+        "Fetching from " + startTime.toString() + " to " + endTime.toString());
+    final results = await db.query(
+      table,
+      where:
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0',
+      whereArgs: [startTime, endTime],
+      orderBy: '$columnCreationTime DESC',
+      limit: limit,
+    );
+    _logger.info("Fetched " + results.length.toString() + " files");
+    return _convertToFiles(results);
+  }
+
+  Future<List<File>> getFilesInCollection(
+      int collectionID, int startTime, int endTime,
+      {int limit}) async {
+    final db = await instance.database;
+    _logger.info(
+        "Fetching from " + startTime.toString() + " to " + endTime.toString());
+    final results = await db.query(
+      table,
+      where:
+          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0',
+      whereArgs: [collectionID, startTime, endTime],
+      orderBy: '$columnCreationTime DESC',
+      limit: limit,
+    );
+    final files = _convertToFiles(results);
+    _logger.info("Fetched " + files.length.toString() + " files");
+    return files;
+  }
+
+  Future<List<File>> getFilesInPath(String path, int startTime, int endTime,
+      {int limit}) async {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where: '$columnIsDeleted = 0',
+      where:
+          '$columnDeviceFolder = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnLocalID IS NOT NULL AND $columnIsDeleted = 0',
+      whereArgs: [path, startTime, endTime],
       orderBy: '$columnCreationTime DESC',
-      limit: 100,
+      groupBy: '$columnLocalID',
+      limit: limit,
     );
     return _convertToFiles(results);
+  }
+
+  Future<List<int>> getAllCreationTimes() async {
+    final db = await instance.database;
+    _logger.info("Fetching creation times");
+    final results = await db.query(
+      table,
+      columns: [columnCreationTime],
+      where: '$columnIsDeleted = 0',
+      orderBy: '$columnCreationTime DESC',
+    );
+    final List<int> times = [];
+    for (final row in results) {
+      times.add(int.parse(row[columnCreationTime]));
+    }
+    _logger.info("Fetched " + times.length.toString() + " creation times");
+    // _logger.info(times.toString());
+    return times;
+  }
+
+  Future<List<int>> getAllCreationTimesInCollection(int collectionID) async {
+    final db = await instance.database;
+    _logger.info("Fetching creation times");
+    final results = await db.query(
+      table,
+      columns: [columnCreationTime],
+      where: '$columnCollectionID = ? AND $columnIsDeleted = 0',
+      whereArgs: [collectionID],
+      orderBy: '$columnCreationTime DESC',
+    );
+    final List<int> times = [];
+    for (final row in results) {
+      times.add(int.parse(row[columnCreationTime]));
+    }
+    _logger.info("Fetched " + times.length.toString() + " creation times");
+    return times;
+  }
+
+  Future<List<int>> getAllCreationTimesInPath(String path) async {
+    final db = await instance.database;
+    _logger.info("Fetching creation times");
+    final results = await db.query(
+      table,
+      columns: [columnCreationTime],
+      where:
+          '$columnLocalID IS NOT NULL AND $columnDeviceFolder = ? AND $columnIsDeleted = 0',
+      whereArgs: [path],
+      orderBy: '$columnCreationTime DESC',
+    );
+    final List<int> times = [];
+    for (final row in results) {
+      times.add(int.parse(row[columnCreationTime]));
+    }
+    _logger.info("Fetched " + times.length.toString() + " creation times");
+    return times;
   }
 
   Future<List<File>> getAllVideos() async {

@@ -24,8 +24,13 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
   @override
   Widget build(Object context) {
     final gallery = Gallery(
-      asyncLoader: (_, __) => FilesDB.instance.getAllInPath(widget.folder.path),
-      shouldLoadAll: true,
+      creationTimesFuture:
+          FilesDB.instance.getAllCreationTimesInPath(widget.folder.path),
+      asyncLoader: (creationStartTime, creationEndTime, {limit}) {
+        return FilesDB.instance.getFilesInPath(
+            widget.folder.path, creationStartTime, creationEndTime,
+            limit: limit);
+      },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       tagPrefix: "device_folder:" + widget.folder.path,
       selectedFiles: _selectedFiles,

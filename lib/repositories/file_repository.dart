@@ -25,23 +25,27 @@ class FileRepository {
   Future<List<File>> _cachedFuture;
 
   Future<List<File>> loadFiles() async {
-    if (_cachedFuture == null) {
-      _cachedFuture = _loadFiles().then((value) {
-        _hasLoadedFiles = true;
-        _cachedFuture = null;
-        return value;
-      });
-    }
-    return _cachedFuture;
+    // if (_cachedFuture == null) {
+    //   _cachedFuture = _loadFiles().then((value) {
+    //     _hasLoadedFiles = true;
+    //     _cachedFuture = null;
+    //     return value;
+    //   });
+    // }
+    // return _cachedFuture;
+    Bus.instance.fire(LocalPhotosUpdatedEvent());
+    return List<File>();
   }
 
   Future<void> reloadFiles() async {
     _logger.info("Reloading...");
-    await loadFiles();
+      Bus.instance.fire(LocalPhotosUpdatedEvent());
+    // await loadFiles();
   }
 
   Future<List<File>> _loadFiles() async {
-    final files = await FilesDB.instance.getFiles();
+    final startTime = DateTime.now();
+    final files = await FilesDB.instance.getFiles(0, DateTime.now().microsecondsSinceEpoch);
     final deduplicatedFiles = List<File>();
     for (int index = 0; index < files.length; index++) {
       if (index != 0) {
@@ -60,6 +64,11 @@ class FileRepository {
       _files.addAll(deduplicatedFiles);
       Bus.instance.fire(LocalPhotosUpdatedEvent());
     }
+    final endTime = DateTime.now();
+    final duration = Duration(
+        microseconds:
+            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
+    _logger.info("Time taken " + duration.inMilliseconds.toString() + "ms");
     return _files;
   }
 }

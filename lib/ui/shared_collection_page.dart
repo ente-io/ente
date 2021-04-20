@@ -22,9 +22,13 @@ class _SharedCollectionPageState extends State<SharedCollectionPage> {
   @override
   Widget build(Object context) {
     var gallery = Gallery(
-      asyncLoader: (_, __) =>
-          FilesDB.instance.getAllInCollection(widget.collection.id),
-      shouldLoadAll: true,
+      creationTimesFuture: FilesDB.instance
+          .getAllCreationTimesInCollection(widget.collection.id),
+      asyncLoader: (creationStartTime, creationEndTime, {limit}) {
+        return FilesDB.instance.getFilesInCollection(
+            widget.collection.id, creationStartTime, creationEndTime,
+            limit: limit);
+      },
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()
           .where((event) => event.collectionID == widget.collection.id),
