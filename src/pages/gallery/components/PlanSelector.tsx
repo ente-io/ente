@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Form, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
-import { Plan, Subscription } from 'services/billingService';
+import billingService, { Plan, Subscription } from 'services/billingService';
 import {
     convertBytesToGBs,
     getPlans,
@@ -58,9 +58,15 @@ function PlanSelector(props: Props) {
         );
     };
 
-    function onPlanSelect(plan: Plan) {
+    async function onPlanSelect(plan: Plan) {
         props.setSelectedPlan(plan);
-        props.setConfirmAction(CONFIRM_ACTION.UPDATE_SUBSCRIPTION);
+        if (hasPaidPlan(subscription)) {
+            props.setConfirmAction(CONFIRM_ACTION.UPDATE_SUBSCRIPTION);
+        } else {
+            props.setLoading(true);
+            await billingService.buyPaidSubscription(plan.stripeID);
+            props.setLoading(false);
+        }
     }
 
     const PlanIcons: JSX.Element[] = plans
@@ -68,9 +74,9 @@ function PlanSelector(props: Props) {
         ?.map((plan) => (
             <PlanIcon
                 key={plan.stripeID}
-                onClick={() =>
+                onClick={async () =>
                     !isUserSubscribedPlan(plan, subscription) &&
-                    onPlanSelect(plan)
+                    (await onPlanSelect(plan))
                 }
                 selected={isUserSubscribedPlan(plan, subscription)}
             >
@@ -98,14 +104,6 @@ function PlanSelector(props: Props) {
                 <div
                     className={`bold-text`}
                 >{`${plan.price} / ${plan.period}`}</div>
-                {isUserSubscribedPlan(plan, subscription) &&
-                    (isSubscriptionCancelled(subscription) ? (
-                        <h5 style={{ color: '#c93f3f' }}>
-                            {constants.CANCELS(subscription.expiryTime)}
-                        </h5>
-                    ) : (
-                        <h5 style={{ color: '#2dc262' }}>{constants.ACTIVE}</h5>
-                    ))}
             </PlanIcon>
         ));
     return (

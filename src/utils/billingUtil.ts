@@ -66,17 +66,10 @@ export async function updateSubscription(
     closePlanSelectorModal
 ) {
     try {
-        const subscription = getUserSubscription();
         setLoading(true);
-        if (hasPaidPlan(subscription)) {
-            await billingService.updateSubscription(plan.stripeID);
-            setLoading(false);
-            await new Promise((resolve) =>
-                setTimeout(() => resolve(null), 400)
-            );
-        } else {
-            await billingService.buyPaidSubscription(plan.stripeID);
-        }
+        await billingService.updateSubscription(plan.stripeID);
+        setLoading(false);
+        await new Promise((resolve) => setTimeout(() => resolve(null), 400));
         setDialogMessage({
             title: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
                 getUserSubscription().expiryTime
@@ -183,7 +176,7 @@ export async function checkSubscriptionPurchase(
                 sessionId
             );
             setDialogMessage({
-                title: 'thank u',
+                title: constants.SUBSCRIPTION_PURCHASE_SUCCESS_TITLE,
                 close: { variant: 'success' },
                 content: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
                     subscription?.expiryTime
