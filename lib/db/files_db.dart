@@ -205,7 +205,6 @@ class FilesDB {
   }
 
   Future<List<File>> getDeduplicatedFiles() async {
-    _logger.info("Getting files for collection");
     final db = await instance.database;
     final results = await db.query(table,
         where: '$columnIsDeleted = 0',
@@ -217,8 +216,6 @@ class FilesDB {
 
   Future<List<File>> getFiles(int startTime, int endTime, {int limit}) async {
     final db = await instance.database;
-    _logger.info(
-        "Fetching from " + startTime.toString() + " to " + endTime.toString());
     final results = await db.query(
       table,
       where:
@@ -235,8 +232,6 @@ class FilesDB {
       int collectionID, int startTime, int endTime,
       {int limit}) async {
     final db = await instance.database;
-    _logger.info(
-        "Fetching from " + startTime.toString() + " to " + endTime.toString());
     final results = await db.query(
       table,
       where:
@@ -267,7 +262,6 @@ class FilesDB {
 
   Future<List<int>> getAllCreationTimes() async {
     final db = await instance.database;
-    _logger.info("Fetching creation times");
     final results = await db.query(
       table,
       columns: [columnCreationTime],
@@ -285,7 +279,6 @@ class FilesDB {
 
   Future<List<int>> getAllCreationTimesInCollection(int collectionID) async {
     final db = await instance.database;
-    _logger.info("Fetching creation times");
     final results = await db.query(
       table,
       columns: [columnCreationTime],
@@ -303,7 +296,6 @@ class FilesDB {
 
   Future<List<int>> getAllCreationTimesInPath(String path) async {
     final db = await instance.database;
-    _logger.info("Fetching creation times");
     final results = await db.query(
       table,
       columns: [columnCreationTime],
