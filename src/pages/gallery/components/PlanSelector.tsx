@@ -1,19 +1,14 @@
 import React, { useState } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
+import { Form, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
-import billingService, {
-    PAYMENT_INTENT_STATUS,
-    Plan,
-    Subscription,
-} from 'services/billingService';
+import { Plan, Subscription } from 'services/billingService';
 import {
     convertBytesToGBs,
     getPlans,
     getUserSubscription,
     hasPaidPlan,
-    isSubscribed,
-    isUserRenewingPlan,
+    isUserSubscribedPlan,
     isSubscriptionCancelled,
     updatePaymentMethod,
 } from 'utils/billingUtil';
@@ -74,10 +69,10 @@ function PlanSelector(props: Props) {
             <PlanIcon
                 key={plan.stripeID}
                 onClick={() =>
-                    !isUserRenewingPlan(plan, subscription) &&
+                    !isUserSubscribedPlan(plan, subscription) &&
                     onPlanSelect(plan)
                 }
-                selected={isUserRenewingPlan(plan, subscription)}
+                selected={isUserSubscribedPlan(plan, subscription)}
             >
                 <div>
                     <span
@@ -103,7 +98,14 @@ function PlanSelector(props: Props) {
                 <div
                     className={`bold-text`}
                 >{`${plan.price} / ${plan.period}`}</div>
-                {isUserRenewingPlan(plan, subscription) && constants.ACTIVE}
+                {isUserSubscribedPlan(plan, subscription) &&
+                    (isSubscriptionCancelled(subscription) ? (
+                        <h5 style={{ color: '#c93f3f' }}>
+                            {constants.CANCELS(subscription.expiryTime)}
+                        </h5>
+                    ) : (
+                        <h5 style={{ color: '#2dc262' }}>{constants.ACTIVE}</h5>
+                    ))}
             </PlanIcon>
         ));
     return (
@@ -123,7 +125,7 @@ function PlanSelector(props: Props) {
                     }}
                 >
                     <span>
-                        {isSubscribed(subscription)
+                        {hasPaidPlan(subscription)
                             ? constants.MANAGE_PLAN
                             : constants.CHOOSE_PLAN}
                     </span>
@@ -134,6 +136,7 @@ function PlanSelector(props: Props) {
                     <div style={{ display: 'flex' }}>
                         <span className={`bold-text`}>{constants.MONTHLY}</span>
                         <Form.Switch
+                            checked={planPeriod == PLAN_PERIOD.YEAR}
                             id={`plan-period-toggler`}
                             style={{ marginLeft: '15px', marginTop: '-4px' }}
                             className={`custom-switch-md`}
@@ -159,7 +162,7 @@ function PlanSelector(props: Props) {
                     )}
                 </div>
                 <DeadCenter style={{ marginBottom: '30px' }}>
-                    {isSubscribed(subscription) ? (
+                    {hasPaidPlan(subscription) ? (
                         <>
                             <LinkButton
                                 variant="secondary"
@@ -173,23 +176,36 @@ function PlanSelector(props: Props) {
                             >
                                 {constants.MANAGEMENT_PORTAL}
                             </LinkButton>
-                            <LinkButton
-                                variant="danger"
-                                onClick={() =>
-                                    props.setConfirmAction(
-                                        CONFIRM_ACTION.CANCEL_SUBSCRIPTION
-                                    )
-                                }
-                            >
-                                {constants.CANCEL_SUBSCRIPTION}
-                            </LinkButton>
+                            {isSubscriptionCancelled(subscription) ? (
+                                <LinkButton
+                                    variant="success"
+                                    onClick={() =>
+                                        props.setConfirmAction(
+                                            CONFIRM_ACTION.ACTIVATE_SUBSCRIPTION
+                                        )
+                                    }
+                                >
+                                    {constants.ACTIVATE_SUBSCRIPTION}
+                                </LinkButton>
+                            ) : (
+                                <LinkButton
+                                    variant="danger"
+                                    onClick={() =>
+                                        props.setConfirmAction(
+                                            CONFIRM_ACTION.CANCEL_SUBSCRIPTION
+                                        )
+                                    }
+                                >
+                                    {constants.CANCEL_SUBSCRIPTION}
+                                </LinkButton>
+                            )}
                         </>
                     ) : (
                         <LinkButton
                             variant="secondary"
                             onClick={props.closeModal}
                         >
-                            skip
+                            {constants.SKIP}
                         </LinkButton>
                     )}
                 </DeadCenter>

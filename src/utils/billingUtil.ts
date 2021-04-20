@@ -52,11 +52,9 @@ export function getUserSubscription(): Subscription {
 export function getPlans(): Plan[] {
     return getData(LS_KEYS.PLANS);
 }
-export function isUserRenewingPlan(plan: Plan, subscription: Subscription) {
+export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
     return (
-        isSubscriptionActive(subscription) &&
-        plan.id === subscription.productID &&
-        !isSubscriptionCancelled(subscription)
+        isSubscriptionActive(subscription) && plan.id === subscription.productID
     );
 }
 
