@@ -76,16 +76,16 @@ class _ArrowCustomPainter extends CustomPainter {
       ..isAntiAlias = true
       ..style = PaintingStyle.fill
       ..color = drawColor;
-    const width = 12.0;
+    const width = 10.0;
     const height = 8.0;
     final baseX = size.width / 2;
     final baseY = size.height / 2;
 
     canvas.drawPath(
-        trianglePath(Offset(baseX - 4.0, baseY - 2.0), width, height, true),
+        trianglePath(Offset(baseX - 2.0, baseY - 2.0), width, height, true),
         paint);
     canvas.drawPath(
-        trianglePath(Offset(baseX - 4.0, baseY + 2.0), width, height, false),
+        trianglePath(Offset(baseX - 2.0, baseY + 2.0), width, height, false),
         paint);
   }
 
