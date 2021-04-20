@@ -199,7 +199,7 @@ export default function Gallery(props: Props) {
             setCollectionAndItsLatestFile(collectionAndItsLatestFile);
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
-            await checkSubscriptionPurchase(setDialogMessage);
+            await checkSubscriptionPurchase(setDialogMessage, router);
             await syncWithRemote();
             setIsFirstLoad(false);
         };

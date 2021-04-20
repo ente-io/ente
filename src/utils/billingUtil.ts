@@ -9,6 +9,7 @@ import billingService, {
 import { SUBSCRIPTION_VERIFICATION_ERROR } from './common/errorUtil';
 import { getData, LS_KEYS } from './storage/localStorage';
 import { MessageAttributes } from 'components/MessageDialog';
+import { NextRouter } from 'next/router';
 
 export function convertBytesToGBs(bytes, precision?): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
@@ -161,32 +162,39 @@ export async function updatePaymentMethod(event, setDialogMessage, setLoading) {
 }
 
 export async function checkSubscriptionPurchase(
-    setDialogMessage: React.Dispatch<React.SetStateAction<MessageAttributes>>
+    setDialogMessage: React.Dispatch<React.SetStateAction<MessageAttributes>>,
+    router: NextRouter
 ) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('session_id');
-    if (sessionId === '-1') {
-        setDialogMessage({
-            title: constants.SUBSCRIPTION_PURCHASE_CANCELLED,
-            close: { variant: 'danger' },
-        });
-    } else if (sessionId) {
-        try {
-            const subscription = await billingService.verifySubscription(
-                sessionId
-            );
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        if (sessionId === '-1') {
             setDialogMessage({
-                title: constants.SUBSCRIPTION_PURCHASE_SUCCESS_TITLE,
-                close: { variant: 'success' },
-                content: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
-                    subscription?.expiryTime
-                ),
+                title: constants.SUBSCRIPTION_PURCHASE_CANCELLED,
+                close: { variant: 'danger' },
             });
-        } catch (e) {
-            setDialogMessage({
-                title: SUBSCRIPTION_VERIFICATION_ERROR,
-                close: {},
-            });
+        } else if (sessionId) {
+            try {
+                const subscription = await billingService.verifySubscription(
+                    sessionId
+                );
+                setDialogMessage({
+                    title: constants.SUBSCRIPTION_PURCHASE_SUCCESS_TITLE,
+                    close: { variant: 'success' },
+                    content: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
+                        subscription?.expiryTime
+                    ),
+                });
+            } catch (e) {
+                setDialogMessage({
+                    title: SUBSCRIPTION_VERIFICATION_ERROR,
+                    close: {},
+                });
+            }
         }
+    } catch (e) {
+        //ignore
+    } finally {
+        router.push('gallery', undefined, { shallow: true });
     }
 }
