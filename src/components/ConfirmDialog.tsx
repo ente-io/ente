@@ -49,7 +49,9 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
                 {...props}
                 attributes={{
                     title: beautifyTitle(
-                        `${constants.CONFIRM} ${CONFIRM_ACTION_VALUES[action].text}`
+                        `${constants.CONFIRM} ${
+                            constants[CONFIRM_ACTION_VALUES[action]?.text]
+                        }`
                     ),
                     proceed: {
                         text: constants[CONFIRM_ACTION_VALUES[action]?.text],
