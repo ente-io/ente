@@ -60,7 +60,7 @@ export function isUserRenewingPlan(plan: Plan, subscription: Subscription) {
     );
 }
 
-export async function buySubscription(
+export async function updateSubscription(
     plan: Plan,
     setDialogMessage,
     setLoading,
@@ -72,19 +72,16 @@ export async function buySubscription(
         setLoading(true);
         if (hasPaidPlan(subscription)) {
             await billingService.updateSubscription(plan.stripeID);
-            if (isSubscriptionCancelled(subscription)) {
-                await billingService.activateSubscription();
-            }
             setLoading(false);
             await new Promise((resolve) =>
                 setTimeout(() => resolve(null), 400)
             );
         } else {
-            await billingService.buySubscription(plan.stripeID);
+            await billingService.buyPaidSubscription(plan.stripeID);
         }
         setDialogMessage({
             title: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
-                getUserSubscription()
+                getUserSubscription().expiryTime
             ),
             close: { variant: 'success' },
         });
@@ -133,6 +130,30 @@ export async function cancelSubscription(
         setLoading(false);
     }
 }
+
+export async function activateSubscription(
+    setDialogMessage,
+    closePlanSelectorModal,
+    setLoading
+) {
+    try {
+        setLoading(true);
+        await billingService.activateSubscription();
+        setDialogMessage({
+            title: constants.SUBSCRIPTION_ACTIVATE_SUCCESS,
+            close: { variant: 'success' },
+        });
+    } catch (e) {
+        setDialogMessage({
+            title: constants.SUBSCRIPTION_ACTIVATE_FAILED,
+            close: { variant: 'danger' },
+        });
+    } finally {
+        closePlanSelectorModal();
+        setLoading(false);
+    }
+}
+
 export async function updatePaymentMethod(event, setDialogMessage, setLoading) {
     try {
         setLoading(true);

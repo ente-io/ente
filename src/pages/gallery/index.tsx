@@ -25,7 +25,8 @@ import { Alert, Button } from 'react-bootstrap';
 import billingService, { Plan } from 'services/billingService';
 import PlanSelector from './components/PlanSelector';
 import {
-    buySubscription,
+    activateSubscription,
+    updateSubscription,
     cancelSubscription,
     checkSubscriptionPurchase,
     updatePaymentMethod,
@@ -425,8 +426,17 @@ export default function Gallery(props: Props) {
             ),
         ],
         [
+            CONFIRM_ACTION.ACTIVATE_SUBSCRIPTION,
+            activateSubscription.bind(
+                null,
+                setDialogMessage,
+                closePlanSelectorModal,
+                setLoading
+            ),
+        ],
+        [
             CONFIRM_ACTION.UPDATE_SUBSCRIPTION,
-            buySubscription.bind(
+            updateSubscription.bind(
                 null,
                 selectedPlan,
                 setDialogMessage,

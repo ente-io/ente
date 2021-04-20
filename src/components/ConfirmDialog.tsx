@@ -8,6 +8,7 @@ export enum CONFIRM_ACTION {
     SESSION_EXPIRED,
     DOWNLOAD_APP,
     CANCEL_SUBSCRIPTION,
+    ACTIVATE_SUBSCRIPTION,
     UPDATE_SUBSCRIPTION,
     UPDATE_PAYMENT_METHOD,
 }
@@ -18,6 +19,7 @@ const CONFIRM_ACTION_VALUES = [
     { text: 'SESSION_EXPIRED', type: 'primary' },
     { text: 'DOWNLOAD_APP', type: 'success' },
     { text: 'CANCEL_SUBSCRIPTION', type: 'danger' },
+    { text: 'ACTIVATE_SUBSCRIPTION', type: 'success' },
     { text: 'UPDATE_SUBSCRIPTION', type: 'success' },
     { text: 'UPDATE_PAYMENT_METHOD', type: 'primary' },
 ];

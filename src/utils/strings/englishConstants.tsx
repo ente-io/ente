@@ -173,6 +173,9 @@ const englishConstants = {
     MONTH: 'month',
     SUBSCRIPTION_CANCEL_FAILED: 'failed to cancel subscription',
     SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
+    SUBSCRIPTION_ACTIVATE_FAILED: 'failed to reactivate subscription renewals',
+    SUBSCRIPTION_ACTIVATE_SUCCESS:
+        'subscription renewals successfully reactivated',
     SUBSCRIPTION_VERIFICATION_FAILED: `we were not able to verify your purchase, verification can take few hours`,
     SUBSCRIPTION_PURCHASE_FAILED:
         'subscription purchase failed , please try again later',
@@ -232,6 +235,11 @@ const englishConstants = {
     UPDATE_SUBSCRIPTION: 'update',
     CONFIRM: 'confirm',
     ACTIVE: 'active',
+    SKIP: 'skip',
+    CANCELS: (expiryDate) => `cancels ${dateString(expiryDate)}`,
+    ACTIVATE_SUBSCRIPTION: 'activate subscription',
+    ACTIVATE_SUBSCRIPTION_MESSAGE:
+        'are you sure you want to activate your subscription, this will cause you to be charged at the period end',
 };
 
 export default englishConstants;

@@ -72,7 +72,7 @@ class billingService {
             console.error(`failed to get user's subscription details`, e);
         }
     }
-    public async buySubscription(productID) {
+    public async buyPaidSubscription(productID) {
         try {
             const response = await this.createCheckoutSession(productID);
             await this.stripe.redirectToCheckout({
