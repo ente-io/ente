@@ -162,8 +162,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
             itemBuilder: (context, index) {
               final page = index ~/ widget.pageSize;
               final pageResult = map[page];
-              final value =
-                  pageResult?.items.elementAt(index % widget.pageSize);
+              final value = pageResult?.items?.elementAt(index % widget.pageSize);
               if (value != null) {
                 return widget.itemBuilder(context, index, value);
               }
