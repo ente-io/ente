@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:photos/ui/huge_listview/draggable_scrollbar_thumbs.dart';
+import 'package:photos/ui/huge_listview/scroll_bar_thumb.dart';
 
 class DraggableScrollbar extends StatefulWidget {
   final Widget child;
@@ -13,7 +15,7 @@ class DraggableScrollbar extends StatefulWidget {
   final int initialScrollIndex;
   final int currentFirstIndex;
   final ValueChanged<double> onChange;
-  final ScrollThumbBuilder scrollThumbBuilder;
+  final String Function(int) labelTextBuilder;
 
   DraggableScrollbar({
     Key key,
@@ -25,7 +27,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.totalCount = 1,
     this.initialScrollIndex = 0,
     this.currentFirstIndex = 0,
-    @required this.scrollThumbBuilder,
+    @required this.labelTextBuilder,
     this.onChange,
   }) : super(key: key);
 
@@ -35,6 +37,7 @@ class DraggableScrollbar extends StatefulWidget {
 
 class DraggableScrollbarState extends State<DraggableScrollbar>
     with TickerProviderStateMixin {
+  static final animationDuration = Duration(milliseconds: 300);
   double thumbOffset = 0.0;
   bool isDragging = false;
   int currentFirstIndex;
@@ -42,6 +45,10 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
   double get thumbMin => 0.0;
 
   double get thumbMax => context.size.height - widget.heightScrollThumb;
+
+  AnimationController _labelAnimationController;
+  Animation<double> _labelAnimation;
+  Timer _fadeoutTimer;
 
   @override
   void initState() {
@@ -55,15 +62,34 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
                 (thumbMax - thumbMin));
       });
     }
+
+    _labelAnimationController = AnimationController(
+      vsync: this,
+      duration: animationDuration,
+    );
+
+    _labelAnimation = CurvedAnimation(
+      parent: _labelAnimationController,
+      curve: Curves.fastOutSlowIn,
+    );
   }
 
   @override
-  Widget build(BuildContext context) => Stack(
-        children: [
-          RepaintBoundary(child: widget.child),
-          RepaintBoundary(child: buildDetector()),
-        ],
-      );
+  void dispose() {
+    _labelAnimationController.dispose();
+    _fadeoutTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        RepaintBoundary(child: widget.child),
+        RepaintBoundary(child: buildDetector()),
+      ],
+    );
+  }
 
   Widget buildKeyboard() {
     if (defaultTargetPlatform == TargetPlatform.windows)
@@ -84,11 +110,12 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
           alignment: Alignment.topRight,
           margin: EdgeInsets.only(top: thumbOffset),
           padding: widget.padding,
-          child: widget.scrollThumbBuilder.call(
+          child: ScrollBarThumb(
             widget.backgroundColor,
             widget.drawColor,
             widget.heightScrollThumb,
-            this.currentFirstIndex,
+            widget.labelTextBuilder.call(this.currentFirstIndex),
+            _labelAnimation,
           ),
         ),
       );
@@ -97,11 +124,20 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
     setState(() {
       this.currentFirstIndex = currentFirstIndex;
       thumbOffset = position * (thumbMax - thumbMin);
+      _fadeoutTimer?.cancel();
+      _fadeoutTimer = Timer(animationDuration, () {
+        _labelAnimationController.reverse();
+        _fadeoutTimer = null;
+      });
     });
   }
 
   void onDragStart(DragStartDetails details) {
-    setState(() => isDragging = true);
+    setState(() {
+      isDragging = true;
+      _labelAnimationController.forward();
+      _fadeoutTimer?.cancel();
+    });
   }
 
   void onDragUpdate(DragUpdateDetails details) {
@@ -116,6 +152,10 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
   }
 
   void onDragEnd(DragEndDetails details) {
+    _fadeoutTimer = Timer(animationDuration, () {
+      _labelAnimationController.reverse();
+      _fadeoutTimer = null;
+    });
     setState(() => isDragging = false);
   }
 

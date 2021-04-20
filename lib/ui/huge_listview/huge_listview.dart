@@ -33,7 +33,7 @@ class HugeListView<T> extends StatefulWidget {
 
   /// Called to build the thumb. One of [DraggableScrollbarThumbs.RoundedRectThumb], [DraggableScrollbarThumbs.ArrowThumb]
   /// or [DraggableScrollbarThumbs.SemicircleThumb], or build your own.
-  final ScrollThumbBuilder thumbBuilder;
+  final String Function(int) labelTextBuilder;
 
   /// Background color of scroll thumb, defaults to white.
   final Color thumbBackgroundColor;
@@ -73,7 +73,7 @@ class HugeListView<T> extends StatefulWidget {
     @required this.startIndex,
     @required this.totalCount,
     @required this.pageFuture,
-    @required this.thumbBuilder,
+    @required this.labelTextBuilder,
     @required this.itemBuilder,
     @required this.placeholderBuilder,
     this.waitBuilder,
@@ -147,7 +147,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
             widget.controller
                 ?.jumpTo(index: (position * widget.totalCount).floor());
           },
-          scrollThumbBuilder: widget.thumbBuilder,
+          labelTextBuilder: widget.labelTextBuilder,
           backgroundColor: widget.thumbBackgroundColor,
           drawColor: widget.thumbDrawColor,
           heightScrollThumb: widget.thumbHeight,

@@ -5,12 +5,14 @@ class ScrollBarThumb extends StatelessWidget {
   final drawColor;
   final height;
   final title;
+  final animation;
 
   const ScrollBarThumb(
     this.backgroundColor,
     this.drawColor,
     this.height,
-    this.title, {
+    this.title,
+    this.animation, {
     Key key,
   }) : super(key: key);
 
@@ -19,18 +21,21 @@ class ScrollBarThumb extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Container(
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white.withOpacity(0.8),
-          ),
-          child: Text(
-            title,
-            style: TextStyle(
-              color: Colors.black,
-              backgroundColor: Colors.transparent,
-              fontSize: 14,
+        FadeTransition(
+          opacity: animation,
+          child: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white.withOpacity(0.8),
+            ),
+            child: Text(
+              title,
+              style: TextStyle(
+                color: Colors.black,
+                backgroundColor: Colors.transparent,
+                fontSize: 14,
+              ),
             ),
           ),
         ),
