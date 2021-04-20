@@ -5,14 +5,16 @@ class ScrollBarThumb extends StatelessWidget {
   final drawColor;
   final height;
   final title;
-  final animation;
+  final labelAnimation;
+  final thumbAnimation;
 
   const ScrollBarThumb(
     this.backgroundColor,
     this.drawColor,
     this.height,
     this.title,
-    this.animation, {
+    this.labelAnimation,
+    this.thumbAnimation, {
     Key key,
   }) : super(key: key);
 
@@ -22,7 +24,7 @@ class ScrollBarThumb extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         FadeTransition(
-          opacity: animation,
+          opacity: labelAnimation,
           child: Container(
             padding: EdgeInsets.fromLTRB(20, 12, 20, 12),
             decoration: BoxDecoration(
@@ -43,18 +45,22 @@ class ScrollBarThumb extends StatelessWidget {
         Padding(
           padding: EdgeInsets.all(12),
         ),
-        CustomPaint(
-          foregroundPainter: _ArrowCustomPainter(drawColor),
-          child: Material(
-            elevation: 4.0,
-            child: Container(
-                constraints: BoxConstraints.tight(Size(height * 0.54, height))),
-            color: backgroundColor,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(height),
-              bottomLeft: Radius.circular(height),
-              topRight: Radius.circular(4.0),
-              bottomRight: Radius.circular(4.0),
+        SlideFadeTransition(
+          animation: thumbAnimation,
+          child: CustomPaint(
+            foregroundPainter: _ArrowCustomPainter(drawColor),
+            child: Material(
+              elevation: 4.0,
+              child: Container(
+                  constraints:
+                      BoxConstraints.tight(Size(height * 0.54, height))),
+              color: backgroundColor,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(height),
+                bottomLeft: Radius.circular(height),
+                topRight: Radius.circular(4.0),
+                bottomRight: Radius.circular(4.0),
+              ),
             ),
           ),
         ),
@@ -98,5 +104,34 @@ class _ArrowCustomPainter extends CustomPainter {
       ..lineTo(offset.dx + (width / 2),
           isUp ? offset.dy - height : offset.dy + height)
       ..close();
+  }
+}
+
+class SlideFadeTransition extends StatelessWidget {
+  final Animation<double> animation;
+  final Widget child;
+
+  const SlideFadeTransition({
+    Key key,
+    @required this.animation,
+    @required this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) => animation.value == 0.0 ? Container() : child,
+      child: SlideTransition(
+        position: Tween(
+          begin: Offset(0.3, 0.0),
+          end: Offset(0.0, 0.0),
+        ).animate(animation),
+        child: FadeTransition(
+          opacity: animation,
+          child: child,
+        ),
+      ),
+    );
   }
 }

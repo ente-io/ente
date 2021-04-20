@@ -39,7 +39,7 @@ class DraggableScrollbar extends StatefulWidget {
 
 class DraggableScrollbarState extends State<DraggableScrollbar>
     with TickerProviderStateMixin {
-  static final animationDuration = Duration(milliseconds: 300);
+  static final animationDuration = Duration(milliseconds: 1000);
   double thumbOffset = 0.0;
   bool isDragging = false;
   int currentFirstIndex;
@@ -48,6 +48,8 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
 
   double get thumbMax => context.size.height - widget.heightScrollThumb;
 
+  AnimationController _thumbAnimationController;
+  Animation<double> _thumbAnimation;
   AnimationController _labelAnimationController;
   Animation<double> _labelAnimation;
   Timer _fadeoutTimer;
@@ -65,6 +67,16 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
       });
     }
 
+    _thumbAnimationController = AnimationController(
+      vsync: this,
+      duration: animationDuration,
+    );
+
+    _thumbAnimation = CurvedAnimation(
+      parent: _thumbAnimationController,
+      curve: Curves.fastOutSlowIn,
+    );
+
     _labelAnimationController = AnimationController(
       vsync: this,
       duration: animationDuration,
@@ -78,6 +90,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
 
   @override
   void dispose() {
+    _thumbAnimationController.dispose();
     _labelAnimationController.dispose();
     _fadeoutTimer?.cancel();
     super.dispose();
@@ -122,6 +135,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
             widget.heightScrollThumb,
             widget.labelTextBuilder.call(this.currentFirstIndex),
             _labelAnimation,
+            _thumbAnimation,
           ),
         ),
       );
@@ -130,8 +144,12 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
     setState(() {
       this.currentFirstIndex = currentFirstIndex;
       thumbOffset = position * (thumbMax - thumbMin);
+      if (_thumbAnimationController.status != AnimationStatus.forward) {
+        _thumbAnimationController.forward();
+      }
       _fadeoutTimer?.cancel();
       _fadeoutTimer = Timer(animationDuration, () {
+        _thumbAnimationController.reverse();
         _labelAnimationController.reverse();
         _fadeoutTimer = null;
       });
@@ -148,6 +166,9 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
 
   void onDragUpdate(DragUpdateDetails details) {
     setState(() {
+      if (_thumbAnimationController.status != AnimationStatus.forward) {
+        _thumbAnimationController.forward();
+      }
       if (isDragging && details.delta.dy != 0) {
         thumbOffset += details.delta.dy;
         thumbOffset = thumbOffset.clamp(thumbMin, thumbMax);
@@ -159,6 +180,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
 
   void onDragEnd(DragEndDetails details) {
     _fadeoutTimer = Timer(animationDuration, () {
+      _thumbAnimationController.reverse();
       _labelAnimationController.reverse();
       _fadeoutTimer = null;
     });
