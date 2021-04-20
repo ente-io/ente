@@ -15,6 +15,8 @@ import {
     isOnFreePlan,
     isSubscriptionCancelled,
     isSubscribed,
+    SetConfirmAction,
+    SetDialogMessage,
 } from 'utils/billingUtil';
 
 import exportService from 'services/exportService';
@@ -30,8 +32,8 @@ import LinkButton from 'pages/gallery/components/LinkButton';
 interface Props {
     files: file[];
     collections: collection[];
-    setConfirmAction: any;
-    somethingWentWrong: any;
+    setConfirmAction: SetConfirmAction;
+    setDialogMessage: SetDialogMessage;
     setPlanModalView;
 }
 export default function Sidebar(props: Props) {
@@ -181,7 +183,12 @@ export default function Sidebar(props: Props) {
                 <RecoveryKeyModal
                     show={recoverModalView}
                     onHide={() => setRecoveryModalView(false)}
-                    somethingWentWrong={props.somethingWentWrong}
+                    somethingWentWrong={() =>
+                        props.setDialogMessage({
+                            title: constants.RECOVER_KEY_GENERATION_FAILED,
+                            close: { variant: 'danger' },
+                        })
+                    }
                 />
                 <LinkButton onClick={() => setRecoveryModalView(true)}>
                     {constants.DOWNLOAD_RECOVERY_KEY}

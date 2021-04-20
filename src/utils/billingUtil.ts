@@ -11,9 +11,13 @@ import { getData, LS_KEYS } from './storage/localStorage';
 import { MessageAttributes } from 'components/MessageDialog';
 import { NextRouter } from 'next/router';
 
-type SetDialogMessage = React.Dispatch<React.SetStateAction<MessageAttributes>>;
-type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
-type SetConfirmAction = React.Dispatch<React.SetStateAction<CONFIRM_ACTION>>;
+export type SetDialogMessage = React.Dispatch<
+    React.SetStateAction<MessageAttributes>
+>;
+export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
+export type SetConfirmAction = React.Dispatch<
+    React.SetStateAction<CONFIRM_ACTION>
+>;
 
 export function convertBytesToGBs(bytes, precision?): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);

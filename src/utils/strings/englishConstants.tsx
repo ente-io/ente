@@ -125,6 +125,8 @@ const englishConstants = {
     SAVE: 'save',
     RECOVERY_KEY_DESCRIPTION:
         'if you forget your password, the only way you can recover your data is with this key',
+    RECOVER_KEY_GENERATION_FAILED:
+        'recovery code could be generated, please try again',
     KEY_NOT_STORED_DISCLAIMER:
         "we don't store this key, so please save this in a safe place",
     RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
@@ -147,6 +149,9 @@ const englishConstants = {
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email ?',
     OK: 'ok',
+    SUCCESS: 'success',
+    ERROR: 'error',
+    MESSAGE: 'message',
     INSTALL_MOBILE_APP: () => (
         <div>
             install our{' '}
@@ -209,13 +214,13 @@ const englishConstants = {
     ),
 
     SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
-        <h4>
+        <>
             <p>we've received your payment</p>
             <p>
                 your subscription is valid till{' '}
                 <strong>{dateString(expiryTime)}</strong>
             </p>
-        </h4>
+        </>
     ),
     SUBSCRIPTION_PURCHASE_CANCELLED:
         'your purchase was canceled, please try again if you want to subscribe',

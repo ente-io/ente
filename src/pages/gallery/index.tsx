@@ -514,12 +514,7 @@ export default function Gallery(props: Props) {
                 files={data}
                 collections={collections}
                 setConfirmAction={setConfirmAction}
-                somethingWentWrong={() =>
-                    setDialogMessage({
-                        title: constants.UNKNOWN_ERROR,
-                        close: { variant: 'danger' },
-                    })
-                }
+                setDialogMessage={setDialogMessage}
                 setPlanModalView={setPlanModalView}
             />
             <UploadButton openFileUploader={props.openFileUploader} />

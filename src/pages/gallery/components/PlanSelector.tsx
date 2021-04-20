@@ -11,6 +11,9 @@ import {
     isUserSubscribedPlan,
     isSubscriptionCancelled,
     updatePaymentMethod,
+    SetConfirmAction,
+    SetDialogMessage,
+    SetLoading,
 } from 'utils/billingUtil';
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import { LoadingOverlay } from './CollectionSelector';
@@ -35,10 +38,10 @@ export const PlanIcon = styled.div<{ selected: boolean }>`
 interface Props {
     modalView: boolean;
     closeModal: any;
-    setDialogMessage;
-    setConfirmAction;
+    setDialogMessage: SetDialogMessage;
+    setConfirmAction: SetConfirmAction;
     setSelectedPlan;
-    setLoading;
+    setLoading: SetLoading;
 }
 enum PLAN_PERIOD {
     MONTH = 'month',
