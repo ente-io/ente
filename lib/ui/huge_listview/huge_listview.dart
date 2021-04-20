@@ -3,7 +3,6 @@ import 'dart:math' show max;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:photos/ui/huge_listview/draggable_scrollbar.dart';
-import 'package:photos/ui/huge_listview/draggable_scrollbar_thumbs.dart';
 import 'package:photos/ui/huge_listview/page_result.dart';
 import 'package:quiver/cache.dart';
 import 'package:quiver/collection.dart';
