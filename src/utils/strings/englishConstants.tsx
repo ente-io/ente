@@ -104,93 +104,7 @@ const englishConstants = {
         'please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
     UPLOAD_FIRST_PHOTO: 'backup your first photo',
-    INSTALL_MOBILE_APP: () => (
-        <div>
-            install our{' '}
-            <a
-                href="https://play.google.com/store/apps/details?id=io.ente.photos"
-                target="_blank"
-            >
-                android
-            </a>{' '}
-            or{' '}
-            <a
-                href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                target="_blank"
-            >
-                ios app{' '}
-            </a>
-            to automatically backup all your photos
-        </div>
-    ),
-    LOGOUT: 'logout',
-    CANCEL_SUBSCRIPTION_MESSAGE:
-        'all of your data will be deleted from our servers at the end of this billing period. are you sure that you want to unsubscribe?',
-    CANCEL_SUBSCRIPTION: 'cancel subscription',
-    CANCEL: 'cancel',
-    SUBSCRIBE: 'subscribe',
-    MANAGEMENT_PORTAL: 'manage payment method',
-    SUBSCRIPTION_CHANGE_DISABLED:
-        'sorry, this operation is currently not supported on the web, please check your mobile app',
-    LOGOUT_MESSAGE: 'sure you want to logout?',
-    DOWNLOAD_APP_MESSAGE:
-        'sorry, this operation is currently not supported on the web, do you want to download the desktop app',
-    DOWNLOAD_APP: 'download',
-    APP_DOWNLOAD_URL: 'https://github.com/ente-io/bhari-frame/releases/',
-    EXPORT: 'export data',
-    SUBSCRIPTION_PLAN: 'subscription plan',
-    USAGE_DETAILS: 'usage',
-    FREE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <>
-            <p>
-                you are on the <strong>free</strong> plan that expires on{' '}
-                {dateString(expiryTime)}
-            </p>
-        </>
-    ),
-    RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <p>your subscription will renew on {dateString(expiryTime)}</p>
-    ),
-
-    RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
-        <>
-            <p>
-                your subscription will be cancelled on {dateString(expiryTime)}
-            </p>
-        </>
-    ),
-    USAGE_INFO: (usage, quota) => (
-        <p>
-            you have used {usage} GB out of your {quota} GB quota
-        </p>
-    ),
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
-    CHANGE: 'change',
-    MANAGE: 'manage',
-    CHANGE_EMAIL: 'change email ?',
-    CHOOSE_PLAN: 'choose your subscription plan',
-    MANAGE_PLAN: 'update your subscription plan',
-    MONTH: 'month',
-    SUBSCRIPTION_CANCEL_FAILED: 'failed to cancel subscription',
-    SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
-    SUBSCRIPTION_ACTIVATE_FAILED: 'failed to reactivate subscription renewals',
-    SUBSCRIPTION_ACTIVATE_SUCCESS:
-        'subscription renewals successfully reactivated',
-    SUBSCRIPTION_VERIFICATION_FAILED: `we were not able to verify your purchase, verification can take few hours`,
-    SUBSCRIPTION_PURCHASE_FAILED:
-        'subscription purchase failed , please try again later',
-    SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
-        <h4>
-            <p>we've received your payment</p>
-            <p>
-                your subscription is valid till{' '}
-                <strong>{dateString(expiryTime)}</strong>
-            </p>
-        </h4>
-    ),
-
-    SUBSCRIPTION_PURCHASE_CANCELLED:
-        'your purchase was canceled, please try again if you want to subscribe',
     DELETE_MESSAGE: 'sure you want to delete selected files?',
     DELETE: 'delete',
     UPLOAD_STRATEGY_CHOICE:
@@ -223,23 +137,113 @@ const englishConstants = {
     SORRY: 'sorry',
     NO_RECOVERY_KEY_MESSAGE:
         'due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
+    REQUEST_FEATURE: 'request feature',
+    SUPPORT: 'support',
+    CONFIRM: 'confirm',
+    SKIP: 'skip',
+    CANCEL: 'cancel',
+    LOGOUT: 'logout',
+    LOGOUT_MESSAGE: 'sure you want to logout?',
+    CHANGE: 'change',
+    CHANGE_EMAIL: 'change email ?',
     OK: 'ok',
+    INSTALL_MOBILE_APP: () => (
+        <div>
+            install our{' '}
+            <a
+                href="https://play.google.com/store/apps/details?id=io.ente.photos"
+                target="_blank"
+            >
+                android
+            </a>{' '}
+            or{' '}
+            <a
+                href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                target="_blank"
+            >
+                ios app{' '}
+            </a>
+            to automatically backup all your photos
+        </div>
+    ),
+    DOWNLOAD_APP_MESSAGE:
+        'sorry, this operation is currently not supported on the web, do you want to download the desktop app',
+    DOWNLOAD_APP: 'download',
+    EXPORT: 'export data',
+
+    // ========================
+    // Subscription
+    // ========================
+    SUBSCRIBE: 'subscribe',
+    SUBSCRIPTION_PLAN: 'subscription plan',
+    USAGE_DETAILS: 'usage',
+    MANAGE: 'manage',
+    MANAGEMENT_PORTAL: 'manage payment method',
+    CHOOSE_PLAN: 'choose your subscription plan',
+    MANAGE_PLAN: 'update your subscription plan',
+
+    FREE_SUBSCRIPTION_INFO: (expiryTime) => (
+        <>
+            <p>
+                you are on the <strong>free</strong> plan that expires on{' '}
+                {dateString(expiryTime)}
+            </p>
+        </>
+    ),
+    RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
+        <p>your subscription will renew on {dateString(expiryTime)}</p>
+    ),
+
+    RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
+        <>
+            <p>
+                your subscription will be cancelled on {dateString(expiryTime)}
+            </p>
+        </>
+    ),
+
+    USAGE_INFO: (usage, quota) => (
+        <p>
+            you have used {usage} GB out of your {quota} GB quota
+        </p>
+    ),
+
+    SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
+        <h4>
+            <p>we've received your payment</p>
+            <p>
+                your subscription is valid till{' '}
+                <strong>{dateString(expiryTime)}</strong>
+            </p>
+        </h4>
+    ),
+    SUBSCRIPTION_PURCHASE_CANCELLED:
+        'your purchase was canceled, please try again if you want to subscribe',
+    SUBSCRIPTION_VERIFICATION_FAILED: `we were not able to verify your purchase, verification can take few hours`,
+    SUBSCRIPTION_PURCHASE_FAILED:
+        'subscription purchase failed , please try again later',
+
     UPDATE_PAYMENT_METHOD_MESSAGE:
         'we are sorry, payment failed when we tried to charge your card, please update your payment method and try again',
     UPDATE_PAYMENT_METHOD: 'update payment method',
     MONTHLY: 'monthly',
     YEARLY: 'yearly',
-    REQUEST_FEATURE: 'request feature',
-    SUPPORT: 'support',
     UPDATE_SUBSCRIPTION_MESSAGE: 'are you sure you want to change your plan?',
     UPDATE_SUBSCRIPTION: 'update',
-    CONFIRM: 'confirm',
-    ACTIVE: 'active',
-    SKIP: 'skip',
-    CANCELS: (expiryDate) => `cancels ${dateString(expiryDate)}`,
+
+    CANCEL_SUBSCRIPTION: 'cancel subscription',
+    CANCEL_SUBSCRIPTION_MESSAGE:
+        'all of your data will be deleted from our servers at the end of this billing period. are you sure that you want to unsubscribe?',
+    SUBSCRIPTION_CANCEL_FAILED: 'failed to cancel subscription',
+    SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
+
     ACTIVATE_SUBSCRIPTION: 'activate subscription',
     ACTIVATE_SUBSCRIPTION_MESSAGE:
         'are you sure you want to activate your subscription, this will cause you to be charged at the period end',
+    SUBSCRIPTION_ACTIVATE_SUCCESS: 'subscription successfully activated',
+    SUBSCRIPTION_ACTIVATE_FAILED: 'failed to reactivate subscription renewals',
+
+    SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
 };
 
 export default englishConstants;
