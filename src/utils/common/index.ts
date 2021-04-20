@@ -1,7 +1,8 @@
-import constants from 'utils/strings/constants';
 import { errorCodes } from './errorUtil';
 
 const TwoSecondInMillSeconds = 2000;
+const DESKTOP_APP_DOWNLOAD_URL =
+    'https://github.com/ente-io/bhari-frame/releases/';
 
 export function checkConnectivity() {
     if (navigator.onLine) {
@@ -21,6 +22,6 @@ export async function WaitFor2Seconds() {
     });
 }
 export function downloadApp() {
-    var win = window.open(constants.APP_DOWNLOAD_URL, '_blank');
+    var win = window.open(DESKTOP_APP_DOWNLOAD_URL, '_blank');
     win.focus();
 }
