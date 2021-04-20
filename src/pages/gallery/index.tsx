@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { file, syncData, localFiles, deleteFiles } from 'services/fileService';
+import { file, syncData, localFiles } from 'services/fileService';
 import PreviewCard from './components/PreviewCard';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
@@ -18,18 +18,16 @@ import {
     getCollectionAndItsLatestFile,
     getFavItemIds,
     getLocalCollections,
-    getCollectionUpdationTime,
     getNonEmptyCollections,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import { Alert, Button, Jumbotron } from 'react-bootstrap';
+import { Alert, Button } from 'react-bootstrap';
 import billingService, { Plan } from 'services/billingService';
 import PlanSelector from './components/PlanSelector';
 import {
     buySubscription,
     cancelSubscription,
     checkSubscriptionPurchase,
-    isSubscribed,
     updatePaymentMethod,
 } from 'utils/billingUtil';
 
@@ -39,7 +37,7 @@ import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
 import { checkConnectivity, downloadApp } from 'utils/common';
-import { isFirstLogin, setIsFirstLogin } from 'utils/storage';
+import { isFirstLogin, justSignedUp, setIsFirstLogin } from 'utils/storage';
 import { logoutUser } from 'services/userService';
 import AlertBanner from './components/AlertBanner';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
@@ -181,6 +179,9 @@ export default function Gallery(props: Props) {
         }
         const main = async () => {
             setIsFirstLoad(isFirstLogin());
+            if (justSignedUp()) {
+                setConfirmAction(CONFIRM_ACTION.UPDATE_SUBSCRIPTION);
+            }
             setIsFirstLogin(false);
             const data = await localFiles();
             const collections = await getLocalCollections();
