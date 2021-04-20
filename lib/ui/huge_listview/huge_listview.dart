@@ -65,6 +65,8 @@ class HugeListView<T> extends StatefulWidget {
   /// Can be used to display the current letter of an alphabetically sorted list, for instance.
   final ValueChanged<int> firstShown;
 
+  final bool isDraggableScrollbarEnabled;
+
   HugeListView({
     Key key,
     this.controller,
@@ -83,6 +85,7 @@ class HugeListView<T> extends StatefulWidget {
     this.thumbBackgroundColor = Colors.white,
     this.thumbDrawColor = Colors.grey,
     this.thumbHeight = 48.0,
+    this.isDraggableScrollbarEnabled = true,
   })  : assert(pageSize > 0),
         assert(velocityThreshold >= 0),
         super(key: key);
@@ -151,6 +154,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
           drawColor: widget.thumbDrawColor,
           heightScrollThumb: widget.thumbHeight,
           currentFirstIndex: _currentFirst(),
+          isEnabled: widget.isDraggableScrollbarEnabled,
           child: ScrollablePositionedList.builder(
             itemScrollController: widget.controller,
             itemPositionsListener: listener,
@@ -161,7 +165,8 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
             itemBuilder: (context, index) {
               final page = index ~/ widget.pageSize;
               final pageResult = map[page];
-              final value = pageResult?.items?.elementAt(index % widget.pageSize);
+              final value =
+                  pageResult?.items?.elementAt(index % widget.pageSize);
               if (value != null) {
                 return widget.itemBuilder(context, index, value);
               }

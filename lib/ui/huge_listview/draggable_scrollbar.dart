@@ -16,6 +16,7 @@ class DraggableScrollbar extends StatefulWidget {
   final int currentFirstIndex;
   final ValueChanged<double> onChange;
   final String Function(int) labelTextBuilder;
+  final bool isEnabled;
 
   DraggableScrollbar({
     Key key,
@@ -29,6 +30,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.currentFirstIndex = 0,
     @required this.labelTextBuilder,
     this.onChange,
+    this.isEnabled = true,
   }) : super(key: key);
 
   @override
@@ -83,12 +85,16 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        RepaintBoundary(child: widget.child),
-        RepaintBoundary(child: buildDetector()),
-      ],
-    );
+    if (widget.isEnabled) {
+      return Stack(
+        children: [
+          RepaintBoundary(child: widget.child),
+          RepaintBoundary(child: buildDetector()),
+        ],
+      );
+    } else {
+      return widget.child;
+    }
   }
 
   Widget buildKeyboard() {
