@@ -43,7 +43,7 @@ export default function Sidebar(props: Props) {
         setSubscription(getUserSubscription());
     }, []);
     const [isOpen, setIsOpen] = useState(false);
-    const [modalView, setModalView] = useState(justSignedUp());
+    const [recoverModalView, setRecoveryModalView] = useState(justSignedUp());
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -179,11 +179,11 @@ export default function Sidebar(props: Props) {
             </LinkButton>
             <>
                 <RecoveryKeyModal
-                    show={modalView}
-                    onHide={() => setModalView(false)}
+                    show={recoverModalView}
+                    onHide={() => setRecoveryModalView(false)}
                     somethingWentWrong={props.somethingWentWrong}
                 />
-                <LinkButton onClick={() => setModalView(true)}>
+                <LinkButton onClick={() => setRecoveryModalView(true)}>
                     {constants.DOWNLOAD_RECOVERY_KEY}
                 </LinkButton>
             </>
