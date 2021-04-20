@@ -29,7 +29,6 @@ class LazyLoadingGallery extends StatelessWidget {
   }
 
   Widget _getGallery(List<File> files) {
-    _logger.info("Building sub gallery of length: " + files.length.toString());
     List<Widget> childGalleries = [];
     for (int index = 0; index < files.length; index += kSubGalleryItemLimit) {
       childGalleries.add(LazyLoadingGridView(
