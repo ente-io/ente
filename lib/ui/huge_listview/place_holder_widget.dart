@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 
 class PlaceHolderWidget extends StatelessWidget {
-  const PlaceHolderWidget({
+  const PlaceHolderWidget(this.count,{
     Key key,
-    @required this.day,
-    @required this.count,
   }) : super(key: key);
 
-  final Widget day;
   final int count;
 
   static final _gridViewCache = Map<int, GridView>();
@@ -17,7 +14,6 @@ class PlaceHolderWidget extends StatelessWidget {
     if (!_gridViewCache.containsKey(count)) {
       _gridViewCache[count] = GridView.builder(
         shrinkWrap: true,
-        padding: EdgeInsets.only(bottom: 12),
         physics: NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
           return Container(
@@ -31,11 +27,6 @@ class PlaceHolderWidget extends StatelessWidget {
         ),
       );
     }
-    return Column(
-      children: <Widget>[
-        day,
-        _gridViewCache[count],
-      ],
-    );
+    return _gridViewCache[count];
   }
 }
