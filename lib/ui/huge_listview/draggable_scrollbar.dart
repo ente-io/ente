@@ -23,7 +23,7 @@ class DraggableScrollbar extends StatefulWidget {
     @required this.child,
     this.backgroundColor = Colors.white,
     this.drawColor = Colors.grey,
-    this.heightScrollThumb = 48.0,
+    this.heightScrollThumb = 80.0,
     this.padding,
     this.totalCount = 1,
     this.initialScrollIndex = 0,

@@ -53,7 +53,7 @@ class ScrollBarThumb extends StatelessWidget {
               elevation: 4.0,
               child: Container(
                   constraints:
-                      BoxConstraints.tight(Size(height * 0.54, height))),
+                      BoxConstraints.tight(Size(height * 0.6, height))),
               color: backgroundColor,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(height),
