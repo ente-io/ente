@@ -37,6 +37,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
     with TickerProviderStateMixin {
   double thumbOffset = 0.0;
   bool isDragging = false;
+  int currentFirstIndex;
 
   double get thumbMin => 0.0;
 
@@ -45,6 +46,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
   @override
   void initState() {
     super.initState();
+    currentFirstIndex = widget.currentFirstIndex;
 
     if (widget.initialScrollIndex > 0 && widget.totalCount > 1) {
       WidgetsBinding.instance?.addPostFrameCallback((_) {
@@ -83,15 +85,17 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
           margin: EdgeInsets.only(top: thumbOffset),
           padding: widget.padding,
           child: widget.scrollThumbBuilder.call(
-              widget.backgroundColor,
-              widget.drawColor,
-              widget.heightScrollThumb,
-              widget.currentFirstIndex),
+            widget.backgroundColor,
+            widget.drawColor,
+            widget.heightScrollThumb,
+            this.currentFirstIndex,
+          ),
         ),
       );
 
-  void setPosition(double position) {
+  void setPosition(double position, int currentFirstIndex) {
     setState(() {
+      this.currentFirstIndex = currentFirstIndex;
       thumbOffset = position * (thumbMax - thumbMin);
     });
   }

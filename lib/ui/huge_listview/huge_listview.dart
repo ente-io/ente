@@ -117,7 +117,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
   void _sendScroll() {
     int current = _currentFirst();
     widget.firstShown?.call(current);
-    scrollKey.currentState?.setPosition(current / widget.totalCount);
+    scrollKey.currentState?.setPosition(current / widget.totalCount, current);
   }
 
   int _currentFirst() {
@@ -222,7 +222,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
   /// Jump to the [position] in the list. [position] is between 0.0 (first item) and 1.0 (last item), practically currentIndex / totalCount.
   /// To jump to a specific item, use [ItemScrollController.jumpTo] or [ItemScrollController.scrollTo].
   void setPosition(double position) {
-    scrollKey.currentState?.setPosition(position);
+    scrollKey.currentState?.setPosition(position, _currentFirst());
   }
 }
 
