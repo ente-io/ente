@@ -130,7 +130,7 @@ class _GalleryState extends State<Gallery> {
             itemBuilder: (context, index, files) {
               var gallery;
               gallery = LazyLoadingGallery(
-                  files, widget.selectedFiles, widget.tagPrefix);
+                  files, widget.asyncLoader, widget.selectedFiles, widget.tagPrefix);
               if (widget.headerWidget != null && index == 0) {
                 gallery = Column(children: [widget.headerWidget, gallery]);
               }

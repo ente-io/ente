@@ -19,10 +19,13 @@ import 'package:photos/utils/toast_util.dart';
 
 class DetailPage extends StatefulWidget {
   final List<File> files;
+  final Future<List<File>> Function(int creationStartTime, int creationEndTime,
+      {int limit}) asyncLoader;
   final int selectedIndex;
   final String tagPrefix;
 
-  DetailPage(this.files, this.selectedIndex, this.tagPrefix, {key})
+  DetailPage(this.files, this.asyncLoader, this.selectedIndex, this.tagPrefix,
+      {key})
       : super(key: key);
 
   @override
@@ -30,17 +33,21 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
+  static const kLoadLimit = 100;
   final _logger = Logger("DetailPageState");
   bool _shouldDisableScroll = false;
   List<File> _files;
   PageController _pageController;
   int _selectedIndex = 0;
   bool _hasPageChanged = false;
+  bool _hasLoadedTillStart = false;
+  bool _hasLoadedTillEnd = false;
 
   @override
   void initState() {
     _files = widget.files;
     _selectedIndex = widget.selectedIndex;
+    _preloadEntries(_selectedIndex);
     super.initState();
   }
 
@@ -49,7 +56,7 @@ class _DetailPageState extends State<DetailPage> {
     _logger.info("Opening " +
         _files[_selectedIndex].toString() +
         ". " +
-        _selectedIndex.toString() +
+        (_selectedIndex + 1).toString() +
         " / " +
         _files.length.toString() +
         " files .");
@@ -66,6 +73,7 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget _buildPageView() {
+    _logger.info("Building with " + _selectedIndex.toString());
     _pageController = PageController(initialPage: _selectedIndex);
     return PageView.builder(
       itemBuilder: (context, index) {
@@ -94,10 +102,12 @@ class _DetailPageState extends State<DetailPage> {
         return content;
       },
       onPageChanged: (index) {
+        _logger.info("onPageChanged to " + index.toString());
         setState(() {
           _selectedIndex = index;
           _hasPageChanged = true;
         });
+        _preloadEntries(index);
         _preloadFiles(index);
       },
       physics: _shouldDisableScroll
@@ -106,6 +116,38 @@ class _DetailPageState extends State<DetailPage> {
       controller: _pageController,
       itemCount: _files.length,
     );
+  }
+
+  void _preloadEntries(int index) {
+    if (index == 0 && !_hasLoadedTillStart) {
+      widget
+          .asyncLoader(_files[index].creationTime + 1,
+              DateTime.now().microsecondsSinceEpoch,
+              limit: kLoadLimit)
+          .then((files) {
+        setState(() {
+          if (files.length < kLoadLimit) {
+            _hasLoadedTillStart = true;
+          }
+          _selectedIndex = files.length;
+          files.addAll(_files);
+          _files = files;
+          _pageController.jumpToPage(_selectedIndex);
+        });
+      });
+    }
+    if (index == _files.length - 1 && !_hasLoadedTillEnd) {
+      widget
+          .asyncLoader(0, _files[index].creationTime - 1, limit: kLoadLimit)
+          .then((files) {
+        setState(() {
+          if (files.length < kLoadLimit) {
+            _hasLoadedTillEnd = true;
+          }
+          _files.addAll(files);
+        });
+      });
+    }
   }
 
   void _preloadFiles(int index) {

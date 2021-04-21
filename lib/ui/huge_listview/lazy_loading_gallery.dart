@@ -14,9 +14,11 @@ class LazyLoadingGallery extends StatelessWidget {
   static const kSubGalleryItemLimit = 80;
   static final _logger = Logger("LazyLoadingDayGallery");
   final files;
+  final asyncLoader;
   final selectedFiles;
   final tag;
-  LazyLoadingGallery(this.files, this.selectedFiles, this.tag, {Key key})
+  LazyLoadingGallery(this.files, this.asyncLoader, this.selectedFiles, this.tag,
+      {Key key})
       : super(key: key);
 
   @override
@@ -35,6 +37,7 @@ class LazyLoadingGallery extends StatelessWidget {
       childGalleries.add(LazyLoadingGridView(
         tag,
         files.sublist(index, min(index + kSubGalleryItemLimit, files.length)),
+        asyncLoader,
         selectedFiles,
       ));
     }
@@ -51,9 +54,12 @@ class LazyLoadingGallery extends StatelessWidget {
 class LazyLoadingGridView extends StatefulWidget {
   final tag;
   final files;
+  final asyncLoader;
   final selectedFiles;
 
-  LazyLoadingGridView(this.tag, this.files, this.selectedFiles, {Key key})
+  LazyLoadingGridView(
+      this.tag, this.files, this.asyncLoader, this.selectedFiles,
+      {Key key})
       : super(key: key);
 
   @override
@@ -131,6 +137,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void _routeToDetailPage(File file, BuildContext context) {
     final page = DetailPage(
       widget.files,
+      widget.asyncLoader,
       widget.files.indexOf(file),
       widget.tag,
     );
