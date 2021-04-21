@@ -49,9 +49,7 @@ enum PLAN_PERIOD {
 function PlanSelector(props: Props) {
     const subscription: Subscription = getUserSubscription();
     const plans = getPlans();
-    const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(
-        PLAN_PERIOD.MONTH
-    );
+    const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
     const togglePeriod = () => {
         setPlanPeriod((prevPeriod) =>
             prevPeriod == PLAN_PERIOD.MONTH
@@ -135,15 +133,16 @@ function PlanSelector(props: Props) {
             <Modal.Body>
                 <DeadCenter>
                     <div style={{ display: 'flex' }}>
-                        <span className={`bold-text`}>{constants.MONTHLY}</span>
+                        <span className={`bold-text`}>{constants.YEARLY}</span>
+
                         <Form.Switch
-                            checked={planPeriod == PLAN_PERIOD.YEAR}
+                            checked={planPeriod == PLAN_PERIOD.MONTH}
                             id={`plan-period-toggler`}
                             style={{ marginLeft: '15px', marginTop: '-4px' }}
                             className={`custom-switch-md`}
                             onChange={togglePeriod}
                         />
-                        <span className={`bold-text`}>{constants.YEARLY}</span>
+                        <span className={`bold-text`}>{constants.MONTHLY}</span>
                     </div>
                 </DeadCenter>
                 <div
