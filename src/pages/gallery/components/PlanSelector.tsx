@@ -164,18 +164,6 @@ function PlanSelector(props: Props) {
                 <DeadCenter style={{ marginBottom: '30px' }}>
                     {hasPaidPlan(subscription) ? (
                         <>
-                            <LinkButton
-                                variant="secondary"
-                                onClick={(event) =>
-                                    updatePaymentMethod(
-                                        event,
-                                        props.setDialogMessage,
-                                        props.setLoading
-                                    )
-                                }
-                            >
-                                {constants.MANAGEMENT_PORTAL}
-                            </LinkButton>
                             {isSubscriptionCancelled(subscription) ? (
                                 <LinkButton
                                     variant="success"
@@ -199,6 +187,18 @@ function PlanSelector(props: Props) {
                                     {constants.CANCEL_SUBSCRIPTION}
                                 </LinkButton>
                             )}
+                            <LinkButton
+                                variant="primary"
+                                onClick={(event) =>
+                                    updatePaymentMethod(
+                                        event,
+                                        props.setDialogMessage,
+                                        props.setLoading
+                                    )
+                                }
+                            >
+                                {constants.MANAGEMENT_PORTAL}
+                            </LinkButton>
                         </>
                     ) : (
                         <LinkButton
