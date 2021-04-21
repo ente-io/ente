@@ -219,12 +219,11 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND ($columnLocalID IS NOT NULL OR $columnUploadedFileID IS NOT NULL)',
       whereArgs: [startTime, endTime],
       orderBy: '$columnCreationTime DESC',
       limit: limit,
     );
-    _logger.info("Fetched " + results.length.toString() + " files");
     return _convertToFiles(results);
   }
 
@@ -261,19 +260,21 @@ class FilesDB {
   }
 
   Future<List<int>> getAllCreationTimes() async {
+    _logger.info("Gallery_home_gallery querying creation times");
     final db = await instance.database;
     final results = await db.query(
       table,
       columns: [columnCreationTime],
-      where: '$columnIsDeleted = 0',
+      where:
+          '$columnIsDeleted = 0 AND ($columnLocalID IS NOT NULL OR $columnUploadedFileID IS NOT NULL)',
       orderBy: '$columnCreationTime DESC',
     );
     final List<int> times = [];
     for (final row in results) {
       times.add(int.parse(row[columnCreationTime]));
     }
-    _logger.info("Fetched " + times.length.toString() + " creation times");
-    // _logger.info(times.toString());
+    _logger
+        .info("Gallery_home_gallery total times: " + times.length.toString());
     return times;
   }
 
@@ -290,7 +291,6 @@ class FilesDB {
     for (final row in results) {
       times.add(int.parse(row[columnCreationTime]));
     }
-    _logger.info("Fetched " + times.length.toString() + " creation times");
     return times;
   }
 
@@ -308,7 +308,6 @@ class FilesDB {
     for (final row in results) {
       times.add(int.parse(row[columnCreationTime]));
     }
-    _logger.info("Fetched " + times.length.toString() + " creation times");
     return times;
   }
 

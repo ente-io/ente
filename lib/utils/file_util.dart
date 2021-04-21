@@ -22,9 +22,9 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -70,7 +70,7 @@ Future<void> deleteFilesFromEverywhere(
     await dialog.hide();
   }
 
-  await FileRepository.instance.reloadFiles();
+  Bus.instance.fire(LocalPhotosUpdatedEvent());
   if (hasUploadedFiles) {
     for (final collectionID in updatedCollectionIDs) {
       Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
@@ -99,7 +99,7 @@ Future<void> deleteFilesOnDeviceOnly(
       FilesDB.instance.update(file);
     }
   }
-  await FileRepository.instance.reloadFiles();
+  Bus.instance.fire(LocalPhotosUpdatedEvent());
   await dialog.hide();
 }
 

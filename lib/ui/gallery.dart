@@ -22,7 +22,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 class Gallery extends StatefulWidget {
   final Future<List<File>> Function(int creationStartTime, int creationEndTime,
       {int limit}) asyncLoader;
-  final Future<List<int>> Function() creationTimesFuture;
+  final Future<List<int>> Function() creationTimesLoader;
   final Stream<Event> reloadEvent;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
@@ -31,7 +31,7 @@ class Gallery extends StatefulWidget {
 
   Gallery({
     @required this.asyncLoader,
-    @required this.creationTimesFuture,
+    @required this.creationTimesLoader,
     @required this.selectedFiles,
     @required this.tagPrefix,
     this.reloadEvent,
@@ -88,71 +88,18 @@ class _GalleryState extends State<Gallery> {
   Widget build(BuildContext context) {
     _logger.info("Building " + widget.tagPrefix);
     return FutureBuilder(
-      future: widget.creationTimesFuture.call(),
+      future: widget.creationTimesLoader().then((times) {
+        _logger.info("Got the data");
+        return times;
+      }),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
+          _logger.info("Snapshot has data!");
           final creationTimes = snapshot.data;
           final collatedTimes = _collateCreationTimes(creationTimes);
           _logger.info(
               "Creation times fetched " + creationTimes.length.toString());
-          var gallery;
-          gallery = HugeListView<List<File>>(
-            key: _hugeListViewKey,
-            controller: ItemScrollController(),
-            pageSize: kPageSize,
-            startIndex: _pageIndex,
-            totalCount: collatedTimes.length,
-            isDraggableScrollbarEnabled: collatedTimes.length > 30,
-            cache: _cache,
-            map: _map,
-            pageFuture: (pageIndex) {
-              _pageIndex = pageIndex;
-              final endTimeIndex =
-                  min(pageIndex * kPageSize, collatedTimes.length - 1);
-              final endTime = collatedTimes[endTimeIndex][0];
-              final startTimeIndex =
-                  min((pageIndex + 1) * kPageSize, collatedTimes.length - 1);
-              final startTime = collatedTimes[startTimeIndex]
-                  [collatedTimes[startTimeIndex].length - 1];
-              return widget
-                  .asyncLoader(startTime, endTime)
-                  .then((files) => _clubFiles(files));
-            },
-            placeholderBuilder: (context, pageIndex) {
-              var day = getDayWidget(collatedTimes[pageIndex][0]);
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Column(
-                  children: [
-                    day,
-                    PlaceHolderWidget(collatedTimes[pageIndex].length),
-                  ],
-                ),
-              );
-            },
-            waitBuilder: (_) {
-              return loadWidget;
-            },
-            emptyResultBuilder: (_) {
-              return nothingToSeeHere;
-            },
-            itemBuilder: (context, index, files) {
-              var gallery;
-              gallery = LazyLoadingGallery(files, widget.asyncLoader,
-                  widget.selectedFiles, widget.tagPrefix);
-              if (widget.headerWidget != null && index == 0) {
-                gallery = Column(children: [widget.headerWidget, gallery]);
-              }
-              return gallery;
-            },
-            labelTextBuilder: (int index) {
-              return getMonthAndYear(
-                  DateTime.fromMicrosecondsSinceEpoch(collatedTimes[index][0]));
-            },
-            thumbBackgroundColor: Color(0xFF151515),
-            thumbDrawColor: Colors.white.withOpacity(0.5),
-            velocityThreshold: 128,
-          );
+          var gallery = _getListView(collatedTimes);
           if (widget.isHomePageGallery) {
             gallery = Container(
               margin: const EdgeInsets.only(bottom: 50),
@@ -177,6 +124,66 @@ class _GalleryState extends State<Gallery> {
           return loadWidget;
         }
       },
+    );
+  }
+
+  Widget _getListView(List<List<int>> collatedTimes) {
+    return HugeListView<List<File>>(
+      key: _hugeListViewKey,
+      controller: ItemScrollController(),
+      pageSize: kPageSize,
+      startIndex: _pageIndex,
+      totalCount: collatedTimes.length,
+      isDraggableScrollbarEnabled: collatedTimes.length > 30,
+      cache: _cache,
+      map: _map,
+      pageFuture: (pageIndex) {
+        _pageIndex = pageIndex;
+        final endTimeIndex =
+            min(pageIndex * kPageSize, collatedTimes.length - 1);
+        final endTime = collatedTimes[endTimeIndex][0];
+        final startTimeIndex =
+            min((pageIndex + 1) * kPageSize, collatedTimes.length - 1);
+        final startTime = collatedTimes[startTimeIndex]
+            [collatedTimes[startTimeIndex].length - 1];
+        return widget
+            .asyncLoader(startTime, endTime)
+            .then((files) => _clubFiles(files));
+      },
+      placeholderBuilder: (context, pageIndex) {
+        var day = getDayWidget(collatedTimes[pageIndex][0]);
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Column(
+            children: [
+              day,
+              PlaceHolderWidget(collatedTimes[pageIndex].length),
+            ],
+          ),
+        );
+      },
+      waitBuilder: (_) {
+        return loadWidget;
+      },
+      emptyResultBuilder: (_) {
+        return nothingToSeeHere;
+      },
+      itemBuilder: (context, index, files) {
+        var gallery;
+        gallery = LazyLoadingGallery(
+            files, widget.asyncLoader, widget.selectedFiles, widget.tagPrefix);
+        if (widget.headerWidget != null && index == 0) {
+          gallery = Column(children: [widget.headerWidget, gallery]);
+        }
+        return gallery;
+      },
+      labelTextBuilder: (int index) {
+        return getMonthAndYear(
+            DateTime.fromMicrosecondsSinceEpoch(collatedTimes[index][0]));
+      },
+      thumbBackgroundColor: Color(0xFF151515),
+      thumbDrawColor: Colors.white.withOpacity(0.5),
+      velocityThreshold: 128,
     );
   }
 

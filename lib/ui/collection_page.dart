@@ -34,7 +34,7 @@ class _CollectionPageState extends State<CollectionPage> {
         collection: widget.collection,
       ),
       body: Gallery(
-        creationTimesFuture: () => FilesDB.instance
+        creationTimesLoader: () => FilesDB.instance
             .getAllCreationTimesInCollection(widget.collection.id),
         asyncLoader: (creationStartTime, creationEndTime, {limit}) {
           return FilesDB.instance.getFilesInCollection(

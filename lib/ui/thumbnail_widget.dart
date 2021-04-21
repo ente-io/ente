@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/file_util.dart';
 
@@ -134,7 +135,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
               _loadNetworkImage();
             } else {
               FilesDB.instance.deleteLocalFile(widget.file.localID);
-              FileRepository.instance.reloadFiles();
+              Bus.instance.fire(LocalPhotosUpdatedEvent());
             }
             return;
           }

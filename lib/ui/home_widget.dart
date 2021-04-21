@@ -16,7 +16,6 @@ import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -53,11 +52,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _settingsButton = SettingsButton();
   static const _headerWidget = HeaderWidget();
   final PageController _pageController = PageController();
-  final _future = FileRepository.instance.loadFiles();
   int _selectedTabIndex = 0;
   Widget _headerWidgetWithSettingsButton;
 
-  StreamSubscription<LocalPhotosUpdatedEvent> _photosUpdatedEvent;
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   StreamSubscription<PermissionGrantedEvent> _permissionGrantedEvent;
   StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
@@ -77,11 +74,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         ],
       ),
     );
-    _photosUpdatedEvent =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _logger.info("Building because local photos updated");
-      setState(() {});
-    });
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source != TabChangedEventSource.tab_bar) {
@@ -231,34 +223,26 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getMainGalleryWidget() {
-    return FutureBuilder(
-      future: _future,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          var header;
-          if (_selectedFiles.files.isEmpty) {
-            header = _headerWidgetWithSettingsButton;
-          } else {
-            header = _headerWidget;
-          }
-          return Gallery(
-            creationTimesFuture: () => FilesDB.instance.getAllCreationTimes(),
-            asyncLoader: (creationStartTime, creationEndTime, {limit}) {
-              return FilesDB.instance
-                  .getFiles(creationStartTime, creationEndTime, limit: limit);
-            },
-            reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-            tagPrefix: "home_gallery",
-            selectedFiles: _selectedFiles,
-            headerWidget: header,
-            isHomePageGallery: true,
-          );
-        } else if (snapshot.hasError) {
-          return Center(child: Text(snapshot.error.toString()));
-        } else {
-          return loadWidget;
-        }
+    var header;
+    if (_selectedFiles.files.isEmpty) {
+      header = _headerWidgetWithSettingsButton;
+    } else {
+      header = _headerWidget;
+    }
+    return Gallery(
+      creationTimesLoader: () {
+        _logger.info("Gallery_home_gallery fetching creation times");
+        return FilesDB.instance.getAllCreationTimes();
       },
+      asyncLoader: (creationStartTime, creationEndTime, {limit}) {
+        return FilesDB.instance
+            .getFiles(creationStartTime, creationEndTime, limit: limit);
+      },
+      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      tagPrefix: "home_gallery",
+      selectedFiles: _selectedFiles,
+      headerWidget: header,
+      isHomePageGallery: true,
     );
   }
 
@@ -346,7 +330,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void dispose() {
     _tabChangedEventSubscription.cancel();
-    _photosUpdatedEvent.cancel();
     _permissionGrantedEvent.cancel();
     _subscriptionPurchaseEvent.cancel();
     _triggerLogoutEvent.cancel();

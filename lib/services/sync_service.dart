@@ -2,10 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/cache/thumbnail_cache_manager.dart';
-import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
@@ -20,7 +17,6 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/utils/file_sync_util.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -263,7 +259,7 @@ class SyncService {
       files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
       await _db.insertMultiple(files);
       _logger.info("Inserted " + files.length.toString() + " files.");
-      await FileRepository.instance.reloadFiles();
+      Bus.instance.fire(LocalPhotosUpdatedEvent());
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
   }
@@ -303,7 +299,7 @@ class SyncService {
           diff.updatedFiles.length.toString() +
           " files in collection " +
           collectionID.toString());
-      FileRepository.instance.reloadFiles();
+      Bus.instance.fire(LocalPhotosUpdatedEvent());
       Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
       if (diff.fetchCount == kDiffLimit) {
         return await _syncCollectionDiff(collectionID);
