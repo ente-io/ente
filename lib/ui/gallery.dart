@@ -11,15 +11,18 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/huge_listview/huge_listview.dart';
 import 'package:photos/ui/huge_listview/lazy_loading_gallery.dart';
+import 'package:photos/ui/huge_listview/page_result.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:quiver/cache.dart';
+import 'package:quiver/collection.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class Gallery extends StatefulWidget {
   final Future<List<File>> Function(int creationStartTime, int creationEndTime,
       {int limit}) asyncLoader;
-  final Future<List<int>> creationTimesFuture;
+  final Future<List<int>> Function() creationTimesFuture;
   final Stream<Event> reloadEvent;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
@@ -45,20 +48,25 @@ class Gallery extends StatefulWidget {
 class _GalleryState extends State<Gallery> {
   static final int kPageSize = 10;
 
-  final Logger _logger = Logger("Gallery");
-  final _cache = Map<int, Future<List<List<File>>>>();
+  Logger _logger;
+  Map<int, HugeListViewPageResult<List<File>>> _map;
+  MapCache<int, HugeListViewPageResult<List<File>>> _cache;
 
   int _pageIndex = 0;
   final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
   @override
   void initState() {
+    _logger = Logger("Gallery_" + widget.tagPrefix);
+    _map = LruMap<int, HugeListViewPageResult<List<File>>>(
+        maximumSize: 256 ~/ kPageSize);
+    _cache = MapCache<int, HugeListViewPageResult<List<File>>>(map: _map);
     if (widget.reloadEvent != null) {
       widget.reloadEvent.listen((event) {
-        _logger.info("Building gallery because reload event fired");
         if (mounted) {
+          _logger.info("Building gallery because reload event fired");
           setState(() {
-            _cache.clear();
+            _map.clear();
           });
         }
       });
@@ -79,12 +87,13 @@ class _GalleryState extends State<Gallery> {
   Widget build(BuildContext context) {
     _logger.info("Building " + widget.tagPrefix);
     return FutureBuilder(
-      future: widget.creationTimesFuture,
+      future: widget.creationTimesFuture.call(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           final creationTimes = snapshot.data;
           final collatedTimes = _collateCreationTimes(creationTimes);
-          _logger.info("Days fetched " + collatedTimes.length.toString());
+          _logger.info(
+              "Creation times fetched " + creationTimes.length.toString());
           var gallery;
           gallery = HugeListView<List<File>>(
             key: _hugeListViewKey,
@@ -93,21 +102,20 @@ class _GalleryState extends State<Gallery> {
             startIndex: _pageIndex,
             totalCount: collatedTimes.length,
             isDraggableScrollbarEnabled: collatedTimes.length > 30,
+            cache: _cache,
+            map: _map,
             pageFuture: (pageIndex) {
               _pageIndex = pageIndex;
-              if (!_cache.containsKey(pageIndex)) {
-                final endTimeIndex =
-                    min(pageIndex * kPageSize, collatedTimes.length - 1);
-                final endTime = collatedTimes[endTimeIndex][0];
-                final startTimeIndex =
-                    min((pageIndex + 1) * kPageSize, collatedTimes.length - 1);
-                final startTime = collatedTimes[startTimeIndex]
-                    [collatedTimes[startTimeIndex].length - 1];
-                _cache[pageIndex] = widget
-                    .asyncLoader(startTime, endTime)
-                    .then((files) => _clubFiles(files));
-              }
-              return _cache[pageIndex];
+              final endTimeIndex =
+                  min(pageIndex * kPageSize, collatedTimes.length - 1);
+              final endTime = collatedTimes[endTimeIndex][0];
+              final startTimeIndex =
+                  min((pageIndex + 1) * kPageSize, collatedTimes.length - 1);
+              final startTime = collatedTimes[startTimeIndex]
+                  [collatedTimes[startTimeIndex].length - 1];
+              return widget
+                  .asyncLoader(startTime, endTime)
+                  .then((files) => _clubFiles(files));
             },
             placeholderBuilder: (context, pageIndex) {
               var day = getDayWidget(collatedTimes[pageIndex][0]);
@@ -129,8 +137,8 @@ class _GalleryState extends State<Gallery> {
             },
             itemBuilder: (context, index, files) {
               var gallery;
-              gallery = LazyLoadingGallery(
-                  files, widget.asyncLoader, widget.selectedFiles, widget.tagPrefix);
+              gallery = LazyLoadingGallery(files, widget.asyncLoader,
+                  widget.selectedFiles, widget.tagPrefix);
               if (widget.headerWidget != null && index == 0) {
                 gallery = Column(children: [widget.headerWidget, gallery]);
               }
@@ -172,6 +180,7 @@ class _GalleryState extends State<Gallery> {
   }
 
   List<List<File>> _clubFiles(List<File> files) {
+    _logger.info("Clubbing file count " + files.length.toString());
     final List<File> dailyFiles = [];
     final List<List<File>> collatedFiles = [];
     for (int index = 0; index < files.length; index++) {

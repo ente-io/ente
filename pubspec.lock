@@ -387,15 +387,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.4"
-  huge_listview:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: d3cfed2da2756a8894402e2ca523693a041c1e31
-      url: "https://github.com/deakjahn/huge_listview.git"
-    source: git
-    version: "1.0.2"
   image:
     dependency: "direct main"
     description:
@@ -649,12 +640,12 @@ packages:
     source: hosted
     version: "1.4.4"
   quiver:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: quiver
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.5"
+    version: "3.0.1"
   rxdart:
     dependency: transitive
     description:

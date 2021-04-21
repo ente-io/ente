@@ -5,7 +5,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:photos/ui/huge_listview/draggable_scrollbar.dart';
 import 'package:photos/ui/huge_listview/page_result.dart';
 import 'package:quiver/cache.dart';
-import 'package:quiver/collection.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 typedef HugeListViewPageFuture<T> = Future<List<T>> Function(int pageIndex);
@@ -67,6 +66,9 @@ class HugeListView<T> extends StatefulWidget {
 
   final bool isDraggableScrollbarEnabled;
 
+  final Map<int, HugeListViewPageResult<T>> map;
+  final MapCache<int, HugeListViewPageResult<T>> cache;
+
   HugeListView({
     Key key,
     this.controller,
@@ -86,6 +88,8 @@ class HugeListView<T> extends StatefulWidget {
     this.thumbDrawColor = Colors.grey,
     this.thumbHeight = 48.0,
     this.isDraggableScrollbarEnabled = true,
+    @required this.map,
+    @required this.cache,
   })  : assert(pageSize > 0),
         assert(velocityThreshold >= 0),
         super(key: key);
@@ -97,8 +101,6 @@ class HugeListView<T> extends StatefulWidget {
 class HugeListViewState<T> extends State<HugeListView<T>> {
   final scrollKey = GlobalKey<DraggableScrollbarState>();
   final listener = ItemPositionsListener.create();
-  Map<int, HugeListViewPageResult<T>> map;
-  MapCache<int, HugeListViewPageResult<T>> cache;
   dynamic error;
   bool _frameCallbackInProgress = false;
 
@@ -106,7 +108,6 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
   void initState() {
     super.initState();
 
-    _initCache();
     listener.itemPositions.addListener(_sendScroll);
   }
 
@@ -164,7 +165,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
             itemCount: max(widget.totalCount, 0),
             itemBuilder: (context, index) {
               final page = index ~/ widget.pageSize;
-              final pageResult = map[page];
+              final pageResult = widget.map[page];
               final value =
                   pageResult?.items?.elementAt(index % widget.pageSize);
               if (value != null) {
@@ -172,7 +173,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
               }
 
               if (!Scrollable.recommendDeferredLoadingForContext(context)) {
-                cache //
+                widget.cache //
                     .get(page, ifAbsent: _loadPage)
                     .then(_reload)
                     .catchError(_error);
@@ -194,12 +195,6 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
 
   Future<HugeListViewPageResult<T>> _loadPage(int index) async {
     return HugeListViewPageResult(index, await widget.pageFuture(index));
-  }
-
-  void _initCache() {
-    map = LruMap<int, HugeListViewPageResult<T>>(
-        maximumSize: 256 ~/ widget.pageSize);
-    cache = MapCache<int, HugeListViewPageResult<T>>(map: map);
   }
 
   void _error(dynamic e, StackTrace stackTrace) {

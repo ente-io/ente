@@ -242,7 +242,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             header = _headerWidget;
           }
           return Gallery(
-            creationTimesFuture: FilesDB.instance.getAllCreationTimes(),
+            creationTimesFuture: () => FilesDB.instance.getAllCreationTimes(),
             asyncLoader: (creationStartTime, creationEndTime, {limit}) {
               return FilesDB.instance
                   .getFiles(creationStartTime, creationEndTime, limit: limit);

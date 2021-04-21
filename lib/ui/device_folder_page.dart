@@ -25,7 +25,7 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
   Widget build(Object context) {
     final gallery = Gallery(
       creationTimesFuture:
-          FilesDB.instance.getAllCreationTimesInPath(widget.folder.path),
+          () => FilesDB.instance.getAllCreationTimesInPath(widget.folder.path),
       asyncLoader: (creationStartTime, creationEndTime, {limit}) {
         return FilesDB.instance.getFilesInPath(
             widget.folder.path, creationStartTime, creationEndTime,
