@@ -49,12 +49,14 @@ class _GalleryState extends State<Gallery> {
   static const int kPageSize = 10;
   static const int kCacheSize = 256;
 
+  final _hugeListViewKey = GlobalKey<HugeListViewState>();
+
   Logger _logger;
   Map<int, HugeListViewPageResult<List<File>>> _map;
   MapCache<int, HugeListViewPageResult<List<File>>> _cache;
-
   int _pageIndex = 0;
-  final _hugeListViewKey = GlobalKey<HugeListViewState>();
+  List<int> _creationTimes;
+  bool _hasLoadedCreationTimes = false;
 
   @override
   void initState() {
@@ -67,7 +69,9 @@ class _GalleryState extends State<Gallery> {
         if (mounted) {
           _logger.info("Building gallery because reload event fired");
           setState(() {
+            _hasLoadedCreationTimes = false;
             _map.clear();
+            _loadCreationTimes();
           });
         }
       });
@@ -76,7 +80,19 @@ class _GalleryState extends State<Gallery> {
       _logger.info("Building gallery because selected files updated");
       setState(() {});
     });
+    _loadCreationTimes();
     super.initState();
+  }
+
+  void _loadCreationTimes() {
+    widget.creationTimesLoader().then((times) async {
+      if (mounted) {
+        setState(() {
+          _creationTimes = times;
+          _hasLoadedCreationTimes = true;
+        });
+      }
+    });
   }
 
   @override
@@ -87,44 +103,32 @@ class _GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building " + widget.tagPrefix);
-    return FutureBuilder(
-      future: widget.creationTimesLoader().then((times) {
-        _logger.info("Got the data");
-        return times;
-      }),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData) {
-          _logger.info("Snapshot has data!");
-          final creationTimes = snapshot.data;
-          final collatedTimes = _collateCreationTimes(creationTimes);
-          _logger.info(
-              "Creation times fetched " + creationTimes.length.toString());
-          var gallery = _getListView(collatedTimes);
-          if (widget.isHomePageGallery) {
-            gallery = Container(
-              margin: const EdgeInsets.only(bottom: 50),
-              child: gallery,
-            );
-            if (widget.selectedFiles.files.isNotEmpty) {
-              gallery = Stack(children: [
-                gallery,
-                Container(
-                  height: 60,
-                  child: GalleryAppBarWidget(
-                    GalleryAppBarType.homepage,
-                    null,
-                    widget.selectedFiles,
-                  ),
-                ),
-              ]);
-            }
-          }
-          return gallery;
-        } else {
-          return loadWidget;
-        }
-      },
-    );
+    if (!_hasLoadedCreationTimes) {
+      return loadWidget;
+    }
+    _logger.info("Creation times fetched " + _creationTimes.length.toString());
+    final collatedTimes = _collateCreationTimes(_creationTimes);
+    var gallery = _getListView(collatedTimes);
+    if (widget.isHomePageGallery) {
+      gallery = Container(
+        margin: const EdgeInsets.only(bottom: 50),
+        child: gallery,
+      );
+      if (widget.selectedFiles.files.isNotEmpty) {
+        gallery = Stack(children: [
+          gallery,
+          Container(
+            height: 60,
+            child: GalleryAppBarWidget(
+              GalleryAppBarType.homepage,
+              null,
+              widget.selectedFiles,
+            ),
+          ),
+        ]);
+      }
+    }
+    return gallery;
   }
 
   Widget _getListView(List<List<int>> collatedTimes) {
