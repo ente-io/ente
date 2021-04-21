@@ -105,14 +105,14 @@ const englishConstants = {
     TITLE: 'ente.io | encrypted photo storage',
     UPLOAD_FIRST_PHOTO: 'backup your first photo',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
-    DELETE_MESSAGE: 'sure you want to delete selected files?',
+    DELETE_MESSAGE: () => 'sure you want to delete selected files?',
     DELETE: 'delete',
     UPLOAD_STRATEGY_CHOICE:
         'you are uploading multiple folders, would you like us to create',
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
     OR: 'or',
     UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
-    SESSION_EXPIRED_MESSAGE:
+    SESSION_EXPIRED_MESSAGE: () =>
         'your session has expired, please login again to continue',
     SESSION_EXPIRED: 'login',
     SYNC_FAILED:
@@ -145,7 +145,7 @@ const englishConstants = {
     SKIP: 'skip',
     CANCEL: 'cancel',
     LOGOUT: 'logout',
-    LOGOUT_MESSAGE: 'sure you want to logout?',
+    LOGOUT_MESSAGE: () => 'sure you want to logout?',
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email ?',
     OK: 'ok',
@@ -171,7 +171,7 @@ const englishConstants = {
             to automatically backup all your photos
         </div>
     ),
-    DOWNLOAD_APP_MESSAGE:
+    DOWNLOAD_APP_MESSAGE: () =>
         'sorry, this operation is currently not supported on the web, do you want to download the desktop app',
     DOWNLOAD_APP: 'download',
     EXPORT: 'export data',
@@ -228,22 +228,30 @@ const englishConstants = {
     SUBSCRIPTION_PURCHASE_FAILED:
         'subscription purchase failed , please try again later',
 
-    UPDATE_PAYMENT_METHOD_MESSAGE:
+    UPDATE_PAYMENT_METHOD_MESSAGE: () =>
         'we are sorry, payment failed when we tried to charge your card, please update your payment method and try again',
     UPDATE_PAYMENT_METHOD: 'update payment method',
     MONTHLY: 'monthly',
     YEARLY: 'yearly',
-    UPDATE_SUBSCRIPTION_MESSAGE: 'are you sure you want to change your plan?',
+    UPDATE_SUBSCRIPTION_MESSAGE: () =>
+        'are you sure you want to change your plan?',
     UPDATE_SUBSCRIPTION: 'update',
 
     CANCEL_SUBSCRIPTION: 'cancel subscription',
-    CANCEL_SUBSCRIPTION_MESSAGE:
-        'all of your data will be deleted from our servers at the end of this billing period. are you sure that you want to unsubscribe?',
+    CANCEL_SUBSCRIPTION_MESSAGE: () => (
+        <>
+            <p>
+                all of your data will be deleted from our servers at the end of
+                this billing period.
+            </p>
+            <p>are you sure that you want to unsubscribe?</p>
+        </>
+    ),
     SUBSCRIPTION_CANCEL_FAILED: 'failed to cancel subscription',
     SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
 
     ACTIVATE_SUBSCRIPTION: 'activate subscription',
-    ACTIVATE_SUBSCRIPTION_MESSAGE:
+    ACTIVATE_SUBSCRIPTION_MESSAGE: () =>
         'are you sure you want to activate your subscription, this will cause you to be charged at the period end',
     SUBSCRIPTION_ACTIVATE_SUCCESS: 'subscription successfully activated',
     SUBSCRIPTION_ACTIVATE_FAILED: 'failed to reactivate subscription renewals',

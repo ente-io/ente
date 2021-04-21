@@ -71,11 +71,9 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
                 }}
             >
                 <h5>
-                    {
-                        constants[
-                            `${CONFIRM_ACTION_VALUES[action]?.text}_MESSAGE`
-                        ]
-                    }
+                    {constants[
+                        `${CONFIRM_ACTION_VALUES[action]?.text}_MESSAGE`
+                    ]()}
                 </h5>
             </MessageDialog>
         </>
