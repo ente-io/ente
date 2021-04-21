@@ -26,13 +26,12 @@ export const PlanIcon = styled.div<{ selected: boolean }>`
     border-radius: 10%;
     height: 192px;
     width: 250px;
-    border: 1px solid #868686;
+    border: 2px solid #868686;
     margin: 10px;
     text-align: center;
     font-size: 20px;
     cursor: ${(props) => (props.selected ? 'not-allowed' : 'pointer')};
     border-color: ${(props) => props.selected && '#56e066'};
-    border-width: 3px;
 `;
 
 interface Props {
