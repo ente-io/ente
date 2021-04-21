@@ -115,6 +115,7 @@ function PlanSelector(props: Props) {
             onHide={props.closeModal}
             dialogClassName="modal-90w"
             style={{ maxWidth: '100%' }}
+            centered
             backdrop={`static`}
         >
             <Modal.Header closeButton>
