@@ -46,7 +46,8 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
-  static final int kPageSize = 10;
+  static const int kPageSize = 10;
+  static const int kCacheSize = 256;
 
   Logger _logger;
   Map<int, HugeListViewPageResult<List<File>>> _map;
@@ -59,7 +60,7 @@ class _GalleryState extends State<Gallery> {
   void initState() {
     _logger = Logger("Gallery_" + widget.tagPrefix);
     _map = LruMap<int, HugeListViewPageResult<List<File>>>(
-        maximumSize: 256 ~/ kPageSize);
+        maximumSize: kCacheSize ~/ kPageSize);
     _cache = MapCache<int, HugeListViewPageResult<List<File>>>(map: _map);
     if (widget.reloadEvent != null) {
       widget.reloadEvent.listen((event) {
