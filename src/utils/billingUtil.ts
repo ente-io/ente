@@ -63,7 +63,8 @@ export function getPlans(): Plan[] {
 }
 export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
     return (
-        isSubscriptionActive(subscription) && plan.id === subscription.productID
+        isSubscriptionActive(subscription) &&
+        plan.stripeID === subscription.productID
     );
 }
 
