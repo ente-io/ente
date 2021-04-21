@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -128,18 +129,17 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   void _routeToDetailPage(File file, BuildContext context) {
-    // TODO
-    // final page = DetailPage(
-    //   _files,
-    //   _files.indexOf(file),
-    //   widget.tagPrefix,
-    // );
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     builder: (BuildContext context) {
-    //       return page;
-    //     },
-    //   ),
-    // );
+    final page = DetailPage(
+      widget.files,
+      widget.files.indexOf(file),
+      widget.tag,
+    );
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return page;
+        },
+      ),
+    );
   }
 }
