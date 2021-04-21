@@ -128,8 +128,9 @@ class billingService {
 
     public async cancelSubscription() {
         try {
-            const response = await HTTPService.get(
+            const response = await HTTPService.post(
                 `${ENDPOINT}/billing/stripe/cancel-subscription`,
+                null,
                 null,
                 {
                     'X-Auth-Token': getToken(),
@@ -145,8 +146,9 @@ class billingService {
 
     public async activateSubscription() {
         try {
-            const response = await HTTPService.get(
+            const response = await HTTPService.post(
                 `${ENDPOINT}/billing/stripe/activate-subscription`,
+                null,
                 null,
                 {
                     'X-Auth-Token': getToken(),
@@ -161,12 +163,11 @@ class billingService {
     }
 
     private async createCheckoutSession(productID) {
-        return HTTPService.post(
+        return HTTPService.get(
             `${ENDPOINT}/billing/stripe/checkout-session`,
             {
                 productID,
             },
-            null,
             {
                 'X-Auth-Token': getToken(),
             }
