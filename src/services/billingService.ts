@@ -21,7 +21,9 @@ export interface Subscription {
     originalTransactionID: string;
     expiryTime: number;
     paymentProvider: string;
-    isCancelled: boolean;
+    attributes: {
+        isCancelled: boolean;
+    };
 }
 export interface Plan {
     id: string;
