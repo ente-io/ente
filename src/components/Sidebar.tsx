@@ -17,6 +17,7 @@ import {
     isSubscribed,
     SetConfirmAction,
     SetDialogMessage,
+    hasStripeSubscription,
 } from 'utils/billingUtil';
 
 import exportService from 'services/exportService';
@@ -81,7 +82,18 @@ export default function Sidebar(props: Props) {
     }
 
     const router = useRouter();
-
+    function onManageClick() {
+        if (hasStripeSubscription(subscription)) {
+            setIsOpen(false);
+            props.setPlanModalView(true);
+        } else {
+            props.setDialogMessage({
+                title: constants.ERROR,
+                content: constants.SUBSCRIPTION_MANAGEMENT_NOT_POSSIBLE,
+                close: { variant: 'danger' },
+            });
+        }
+    }
     return (
         <Menu
             isOpen={isOpen}
@@ -105,10 +117,7 @@ export default function Sidebar(props: Props) {
                                         : 'outline-success'
                                 }
                                 size="sm"
-                                onClick={() => {
-                                    setIsOpen(false);
-                                    props.setPlanModalView(true);
-                                }}
+                                onClick={onManageClick}
                             >
                                 {isSubscribed(subscription)
                                     ? constants.MANAGE
