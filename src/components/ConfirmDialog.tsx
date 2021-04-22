@@ -29,8 +29,10 @@ function inverseButtonType(type) {
         return 'secondary';
     }
 }
-function beautifyTitle(title: string) {
-    return title.replaceAll('_', ' ').toLocaleLowerCase();
+function reverseString(title: string) {
+    return title
+        .split(' ')
+        .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
 }
 
 interface Props {
@@ -48,11 +50,9 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
             <MessageDialog
                 {...props}
                 attributes={{
-                    title: beautifyTitle(
-                        `${constants.CONFIRM} ${
-                            constants[CONFIRM_ACTION_VALUES[action]?.text]
-                        }`
-                    ),
+                    title: `${constants.CONFIRM} ${reverseString(
+                        constants[CONFIRM_ACTION_VALUES[action]?.text]
+                    )}`,
                     proceed: {
                         text: constants[CONFIRM_ACTION_VALUES[action]?.text],
                         action: async () => {
