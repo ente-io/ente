@@ -11,6 +11,8 @@ import { getData, LS_KEYS } from './storage/localStorage';
 import { MessageAttributes } from 'components/MessageDialog';
 import { NextRouter } from 'next/router';
 
+const STRIPE = 'stripe';
+
 export type SetDialogMessage = React.Dispatch<
     React.SetStateAction<MessageAttributes>
 >;
@@ -51,7 +53,7 @@ export function isOnFreePlan(subscription?: Subscription) {
 
 export function isSubscriptionCancelled(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
-    return subscription && subscription.isCancelled;
+    return subscription && subscription.attributes.isCancelled;
 }
 
 export function getUserSubscription(): Subscription {
@@ -66,6 +68,9 @@ export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
         isSubscriptionActive(subscription) &&
         plan.stripeID === subscription.productID
     );
+}
+export function hasStripeSubscription(subscription: Subscription) {
+    return subscription.paymentProvider === STRIPE;
 }
 
 export async function updateSubscription(
