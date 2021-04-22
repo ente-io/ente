@@ -113,7 +113,7 @@ function PlanSelector(props: Props) {
             dialogClassName="modal-90w"
             style={{ maxWidth: '100%' }}
             centered
-            backdrop={`static`}
+            backdrop={hasPaidPlan(subscription) ? 'true' : `static`}
         >
             <Modal.Header closeButton>
                 <Modal.Title
