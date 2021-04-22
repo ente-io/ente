@@ -41,7 +41,12 @@ import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
 import { checkConnectivity, downloadApp } from 'utils/common';
-import { isFirstLogin, justSignedUp, setIsFirstLogin } from 'utils/storage';
+import {
+    isFirstLogin,
+    justSignedUp,
+    setIsFirstLogin,
+    setJustSignedUp,
+} from 'utils/storage';
 import { logoutUser } from 'services/userService';
 import AlertBanner from './components/AlertBanner';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
@@ -207,6 +212,7 @@ export default function Gallery(props: Props) {
             await checkSubscriptionPurchase(setDialogMessage, router);
             await syncWithRemote();
             setIsFirstLoad(false);
+            setJustSignedUp(false);
         };
         main();
     }, []);

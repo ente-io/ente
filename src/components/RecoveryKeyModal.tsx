@@ -34,7 +34,6 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
     }
     function onClose() {
         props.onHide();
-        setJustSignedUp(false);
     }
     return (
         <MessageDialog

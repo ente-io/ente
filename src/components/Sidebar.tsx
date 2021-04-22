@@ -48,7 +48,7 @@ export default function Sidebar(props: Props) {
         setSubscription(getUserSubscription());
     }, []);
     const [isOpen, setIsOpen] = useState(false);
-    const [recoverModalView, setRecoveryModalView] = useState(justSignedUp());
+    const [recoverModalView, setRecoveryModalView] = useState(false);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
