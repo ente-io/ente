@@ -235,9 +235,9 @@ const englishConstants = {
     YEARLY: 'yearly',
     UPDATE_SUBSCRIPTION_MESSAGE: () =>
         'are you sure you want to change your plan?',
-    UPDATE_SUBSCRIPTION: 'update',
+    UPDATE_SUBSCRIPTION: 'change plan',
 
-    CANCEL_SUBSCRIPTION: 'cancel subscription',
+    CANCEL_SUBSCRIPTION: 'unsubscribe',
     CANCEL_SUBSCRIPTION_MESSAGE: () => (
         <>
             <p>
@@ -250,13 +250,14 @@ const englishConstants = {
     SUBSCRIPTION_CANCEL_FAILED: 'failed to cancel subscription',
     SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
 
-    ACTIVATE_SUBSCRIPTION: 'activate subscription',
-    ACTIVATE_SUBSCRIPTION_MESSAGE: () =>
-        'are you sure you want to activate your subscription, this will cause you to be charged at the period end',
+    ACTIVATE_SUBSCRIPTION: 'reactivate subscription',
+    ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
+        `once reactivated, you will be billed on ${expiryTime}`,
     SUBSCRIPTION_ACTIVATE_SUCCESS: 'subscription successfully activated',
     SUBSCRIPTION_ACTIVATE_FAILED: 'failed to reactivate subscription renewals',
 
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
+    SUBSCRIPTION_MANAGEMENT_NOT_POSSIBLE: `please use the mobile app to manage your subscription`,
 };
 
 export default englishConstants;
