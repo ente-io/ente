@@ -14,6 +14,9 @@ import {
     SetConfirmAction,
     SetDialogMessage,
     SetLoading,
+    updateSubscription,
+    activateSubscription,
+    cancelSubscription,
 } from 'utils/billingUtil';
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import { LoadingOverlay } from './CollectionSelector';
@@ -39,7 +42,6 @@ interface Props {
     closeModal: any;
     setDialogMessage: SetDialogMessage;
     setConfirmAction: SetConfirmAction;
-    setSelectedPlan;
     setLoading: SetLoading;
 }
 enum PLAN_PERIOD {
@@ -59,9 +61,18 @@ function PlanSelector(props: Props) {
     };
 
     async function onPlanSelect(plan: Plan) {
-        props.setSelectedPlan(plan);
         if (hasPaidPlan(subscription)) {
-            props.setConfirmAction(CONFIRM_ACTION.UPDATE_SUBSCRIPTION);
+            props.setConfirmAction({
+                action: CONFIRM_ACTION.UPDATE_SUBSCRIPTION,
+                callback: updateSubscription.bind(
+                    null,
+                    plan,
+                    props.setDialogMessage,
+                    props.setLoading,
+                    props.setConfirmAction,
+                    props.closeModal
+                ),
+            });
         } else {
             props.setLoading(true);
             await billingService.buyPaidSubscription(plan.stripeID);
@@ -168,9 +179,21 @@ function PlanSelector(props: Props) {
                                 <LinkButton
                                     variant="success"
                                     onClick={() =>
-                                        props.setConfirmAction(
-                                            CONFIRM_ACTION.ACTIVATE_SUBSCRIPTION
-                                        )
+                                        props.setConfirmAction({
+                                            action:
+                                                CONFIRM_ACTION.ACTIVATE_SUBSCRIPTION,
+                                            callback: activateSubscription.bind(
+                                                null,
+                                                props.setDialogMessage,
+                                                props.closeModal,
+                                                props.setLoading
+                                            ),
+                                            messageAttribute: {
+                                                content: constants.ACTIVATE_SUBSCRIPTION_MESSAGE(
+                                                    subscription.expiryTime
+                                                ),
+                                            },
+                                        })
                                     }
                                 >
                                     {constants.ACTIVATE_SUBSCRIPTION}
@@ -179,9 +202,16 @@ function PlanSelector(props: Props) {
                                 <LinkButton
                                     variant="danger"
                                     onClick={() =>
-                                        props.setConfirmAction(
-                                            CONFIRM_ACTION.CANCEL_SUBSCRIPTION
-                                        )
+                                        props.setConfirmAction({
+                                            action:
+                                                CONFIRM_ACTION.CANCEL_SUBSCRIPTION,
+                                            callback: cancelSubscription.bind(
+                                                null,
+                                                props.setDialogMessage,
+                                                props.closeModal,
+                                                props.setLoading
+                                            ),
+                                        })
                                     }
                                 >
                                     {constants.CANCEL_SUBSCRIPTION}

@@ -17,7 +17,7 @@ import {
     isSubscribed,
     SetConfirmAction,
     SetDialogMessage,
-    hasStripeSubscription,
+    hasNonStripeSubscription,
 } from 'utils/billingUtil';
 
 import exportService from 'services/exportService';
@@ -29,6 +29,8 @@ import RecoveryKeyModal from './RecoveryKeyModal';
 import { justSignedUp } from 'utils/storage';
 import EnteSpinner from './EnteSpinner';
 import LinkButton from 'pages/gallery/components/LinkButton';
+import { downloadApp } from 'utils/common';
+import { logoutUser } from 'services/userService';
 
 interface Props {
     files: file[];
@@ -77,21 +79,24 @@ export default function Sidebar(props: Props) {
         if (isElectron()) {
             exportService.exportFiles(props.files, props.collections);
         } else {
-            props.setConfirmAction(CONFIRM_ACTION.DOWNLOAD_APP);
+            props.setConfirmAction({
+                action: CONFIRM_ACTION.DOWNLOAD_APP,
+                callback: downloadApp,
+            });
         }
     }
 
     const router = useRouter();
     function onManageClick() {
-        if (hasStripeSubscription(subscription)) {
-            setIsOpen(false);
-            props.setPlanModalView(true);
-        } else {
+        if (hasNonStripeSubscription(subscription)) {
             props.setDialogMessage({
                 title: constants.ERROR,
                 content: constants.SUBSCRIPTION_MANAGEMENT_NOT_POSSIBLE,
                 close: { variant: 'danger' },
             });
+        } else {
+            setIsOpen(false);
+            props.setPlanModalView(true);
         }
     }
     return (
@@ -207,7 +212,12 @@ export default function Sidebar(props: Props) {
             ></div>
             <LinkButton
                 variant="danger"
-                onClick={() => props.setConfirmAction(CONFIRM_ACTION.LOGOUT)}
+                onClick={() =>
+                    props.setConfirmAction({
+                        action: CONFIRM_ACTION.LOGOUT,
+                        callback: logoutUser,
+                    })
+                }
             >
                 logout
             </LinkButton>

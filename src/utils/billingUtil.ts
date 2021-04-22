@@ -1,4 +1,7 @@
-import { CONFIRM_ACTION } from 'components/ConfirmDialog';
+import {
+    ConfirmActionAttributes,
+    CONFIRM_ACTION,
+} from 'components/ConfirmDialog';
 import constants from 'utils/strings/constants';
 import billingService, {
     FREE_PLAN,
@@ -18,7 +21,7 @@ export type SetDialogMessage = React.Dispatch<
 >;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
 export type SetConfirmAction = React.Dispatch<
-    React.SetStateAction<CONFIRM_ACTION>
+    React.SetStateAction<ConfirmActionAttributes>
 >;
 
 export function convertBytesToGBs(bytes, precision?): string {
@@ -69,8 +72,11 @@ export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
         plan.stripeID === subscription.productID
     );
 }
-export function hasStripeSubscription(subscription: Subscription) {
-    return subscription.paymentProvider === STRIPE;
+export function hasNonStripeSubscription(subscription: Subscription) {
+    return (
+        subscription.paymentProvider.length > 0 &&
+        subscription.paymentProvider !== STRIPE
+    );
 }
 
 export async function updateSubscription(
@@ -95,7 +101,16 @@ export async function updateSubscription(
     } catch (err) {
         switch (err?.message) {
             case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
-                setConfirmAction(CONFIRM_ACTION.UPDATE_PAYMENT_METHOD);
+                setConfirmAction({
+                    action: CONFIRM_ACTION.UPDATE_PAYMENT_METHOD,
+                    callback: (event) =>
+                        updatePaymentMethod.bind(
+                            null,
+                            event,
+                            setDialogMessage,
+                            setLoading
+                        ),
+                });
                 break;
             case SUBSCRIPTION_VERIFICATION_ERROR:
                 setDialogMessage({

@@ -33,7 +33,10 @@ import {
 } from 'utils/billingUtil';
 
 import Delete from 'components/Delete';
-import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
+import ConfirmDialog, {
+    ConfirmActionAttributes,
+    CONFIRM_ACTION,
+} from 'components/ConfirmDialog';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
@@ -165,10 +168,12 @@ export default function Gallery(props: Props) {
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
-    const [confirmAction, setConfirmAction] = useState<CONFIRM_ACTION>(null);
+    const [
+        confirmAction,
+        setConfirmAction,
+    ] = useState<ConfirmActionAttributes>();
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [planModalView, setPlanModalView] = useState(false);
-    const [selectedPlan, setSelectedPlan] = useState<Plan>(null);
     const [loading, setLoading] = useState(false);
 
     const loadingBar = useRef(null);
@@ -233,7 +238,10 @@ export default function Gallery(props: Props) {
         } catch (e) {
             setBannerMessage(e.message);
             if (e.message === constants.SESSION_EXPIRED_MESSAGE) {
-                setConfirmAction(CONFIRM_ACTION.SESSION_EXPIRED);
+                setConfirmAction({
+                    action: CONFIRM_ACTION.SESSION_EXPIRED,
+                    callback: logoutUser,
+                });
             }
         } finally {
             loadingBar.current?.complete();
@@ -305,6 +313,9 @@ export default function Gallery(props: Props) {
             [id]: checked,
             count: checked ? selected.count + 1 : selected.count - 1,
         });
+    };
+    const clearSelection = function () {
+        setSelected({ count: 0 });
     };
 
     const getThumbnail = (file: file[], index: number) => {
@@ -402,61 +413,6 @@ export default function Gallery(props: Props) {
         );
     };
 
-    const closePlanSelectorModal = function () {
-        setPlanModalView(false);
-    };
-    const clearSelection = function () {
-        setSelected({ count: 0 });
-    };
-    const confirmCallbacks = new Map<CONFIRM_ACTION, Function>([
-        [
-            CONFIRM_ACTION.DELETE,
-            fileDelete.bind(null, selected, clearSelection, syncWithRemote),
-        ],
-        [CONFIRM_ACTION.SESSION_EXPIRED, logoutUser],
-        [CONFIRM_ACTION.LOGOUT, logoutUser],
-        [CONFIRM_ACTION.DOWNLOAD_APP, downloadApp],
-        [
-            CONFIRM_ACTION.CANCEL_SUBSCRIPTION,
-            cancelSubscription.bind(
-                null,
-                setDialogMessage,
-                closePlanSelectorModal,
-                setLoading
-            ),
-        ],
-        [
-            CONFIRM_ACTION.ACTIVATE_SUBSCRIPTION,
-            activateSubscription.bind(
-                null,
-                setDialogMessage,
-                closePlanSelectorModal,
-                setLoading
-            ),
-        ],
-        [
-            CONFIRM_ACTION.UPDATE_SUBSCRIPTION,
-            updateSubscription.bind(
-                null,
-                selectedPlan,
-                setDialogMessage,
-                setLoading,
-                setConfirmAction,
-                closePlanSelectorModal
-            ),
-        ],
-        [
-            CONFIRM_ACTION.UPDATE_PAYMENT_METHOD,
-            (event) =>
-                updatePaymentMethod.bind(
-                    null,
-                    event,
-                    setDialogMessage,
-                    setLoading
-                ),
-        ],
-    ]);
-
     return (
         <FullScreenDropZone
             getRootProps={props.getRootProps}
@@ -481,15 +437,13 @@ export default function Gallery(props: Props) {
                 closeModal={() => setPlanModalView(false)}
                 setDialogMessage={setDialogMessage}
                 setConfirmAction={setConfirmAction}
-                setSelectedPlan={setSelectedPlan}
                 setLoading={setLoading}
             />
             <AlertBanner bannerMessage={bannerMessage} />
             <ConfirmDialog
                 show={confirmAction !== null}
                 onHide={() => setConfirmAction(null)}
-                callback={confirmCallbacks.get(confirmAction)}
-                action={confirmAction}
+                attributes={confirmAction}
             />
             <MessageDialog
                 show={dialogMessage != null}
@@ -709,7 +663,17 @@ export default function Gallery(props: Props) {
             )}
             {selected.count && (
                 <DeleteBtn
-                    onClick={() => setConfirmAction(CONFIRM_ACTION.DELETE)}
+                    onClick={() =>
+                        setConfirmAction({
+                            action: CONFIRM_ACTION.DELETE,
+                            callback: fileDelete.bind(
+                                null,
+                                selected,
+                                clearSelection,
+                                syncWithRemote
+                            ),
+                        })
+                    }
                 >
                     <Delete />
                 </DeleteBtn>

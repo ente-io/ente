@@ -1,7 +1,12 @@
 import React from 'react';
 import constants from 'utils/strings/constants';
-import MessageDialog from './MessageDialog';
+import MessageDialog, { MessageAttributes } from './MessageDialog';
 
+export interface ConfirmActionAttributes {
+    action: CONFIRM_ACTION;
+    callback: Function;
+    messageAttribute?: MessageAttributes;
+}
 export enum CONFIRM_ACTION {
     LOGOUT,
     DELETE,
@@ -31,20 +36,20 @@ function inverseButtonType(type) {
 }
 function reverseString(title: string) {
     return title
-        .split(' ')
+        ?.split(' ')
         .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
 }
-
 interface Props {
-    callback: any;
-    action: CONFIRM_ACTION;
     show: boolean;
     onHide: () => void;
+    attributes: ConfirmActionAttributes;
 }
-function ConfirmDialog({ callback, action, ...props }: Props) {
-    if (action == null) {
+function ConfirmDialog({ attributes, ...props }: Props) {
+    if (attributes == null) {
         return null;
     }
+    let { action, callback, messageAttribute } = attributes;
+    messageAttribute = messageAttribute ?? {};
     return (
         <>
             <MessageDialog
@@ -71,9 +76,10 @@ function ConfirmDialog({ callback, action, ...props }: Props) {
                 }}
             >
                 <h5>
-                    {constants[
-                        `${CONFIRM_ACTION_VALUES[action]?.text}_MESSAGE`
-                    ]()}
+                    {messageAttribute.content ??
+                        constants[
+                            `${CONFIRM_ACTION_VALUES[action]?.text}_MESSAGE`
+                        ]()}
                 </h5>
             </MessageDialog>
         </>
