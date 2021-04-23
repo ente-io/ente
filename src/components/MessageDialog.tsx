@@ -6,7 +6,12 @@ export interface MessageAttributes {
     title?: string;
     staticBackdrop?: boolean;
     close?: { text?: string; variant?: string };
-    proceed?: { text: string; action: any; variant?: string };
+    proceed?: {
+        text: string;
+        action: any;
+        variant?: string;
+        disabled?: boolean;
+    };
     content?: any;
 }
 type Props = React.PropsWithChildren<{
@@ -63,6 +68,7 @@ export default function MessageDialog({
                         }`}
                         onClick={attributes.proceed.action}
                         style={{ padding: '6px 3em', marginRight: '20px' }}
+                        disabled={attributes.proceed.disabled}
                     >
                         {attributes.proceed.text}
                     </Button>

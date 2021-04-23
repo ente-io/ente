@@ -49,6 +49,7 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
                 proceed: {
                     text: constants.SAVE,
                     action: onSaveClick,
+                    disabled: !recoveryKey,
                 },
             }}
         >
