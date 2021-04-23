@@ -52,15 +52,18 @@ export const syncData = async (collections) => {
     };
 };
 
-export const localFiles = async () => {
+export const getLocalFiles = async () => {
     let files: Array<file> = (await localForage.getItem<file[]>(FILES)) || [];
     return files;
 };
 
 export const syncFiles = async (collections: Collection[]) => {
-    let files = await localFiles();
+    const localFiles = await getLocalFiles();
     let isUpdated = false;
-    files = await removeDeletedCollectionFiles(collections, files);
+    let files = await removeDeletedCollectionFiles(collections, localFiles);
+    if (files.length != localFiles.length) {
+        isUpdated = true;
+    }
     for (let collection of collections) {
         if (!getToken()) {
             continue;
