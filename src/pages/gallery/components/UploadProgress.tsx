@@ -66,7 +66,7 @@ export default function UploadProgress(props: Props) {
                     />
                 )}
                 {fileProgressStatuses?.length > 0 && (
-                    <div
+                    <ul
                         style={{
                             marginTop: '10px',
                             overflow: 'auto',
@@ -74,14 +74,16 @@ export default function UploadProgress(props: Props) {
                         }}
                     >
                         {fileProgressStatuses.map(({ fileName, progress }) => (
-                            <div style={{ marginTop: '12px' }}>
-                                {constants.FILE_UPLOAD_PROGRESS(
-                                    fileName,
-                                    progress
-                                )}
-                            </div>
+                            <li style={{ marginTop: '12px' }}>
+                                {props.now === 100
+                                    ? fileName
+                                    : constants.FILE_UPLOAD_PROGRESS(
+                                          fileName,
+                                          progress
+                                      )}
+                            </li>
                         ))}
-                    </div>
+                    </ul>
                 )}
                 {props.now === 100 && (
                     <Modal.Footer style={{ border: 'none' }}>
