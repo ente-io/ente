@@ -21,8 +21,6 @@ import {
     isOnFreePlan,
 } from 'utils/billingUtil';
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
-import { LoadingOverlay } from './CollectionSelector';
-import EnteSpinner from 'components/EnteSpinner';
 import { DeadCenter } from '..';
 import LinkButton from './LinkButton';
 
@@ -120,7 +118,7 @@ function PlanSelector(props: Props) {
                     !isUserSubscribedPlan(plan, subscription) &&
                     (await onPlanSelect(plan))
                 }
-                className='subscription-plan-selector'
+                className="subscription-plan-selector"
                 selected={isUserSubscribedPlan(plan, subscription)}
             >
                 <div>
@@ -145,7 +143,8 @@ function PlanSelector(props: Props) {
                     </span>
                 </div>
                 <div
-                    className={`bold-text`} style={{ color: "#aaa" }}
+                    className={`bold-text`}
+                    style={{ color: '#aaa' }}
                 >{`${plan.price} / ${plan.period}`}</div>
             </PlanIcon>
         ));
@@ -175,7 +174,12 @@ function PlanSelector(props: Props) {
             <Modal.Body style={{ marginTop: '20px' }}>
                 <DeadCenter>
                     <div style={{ display: 'flex' }}>
-                        <span className={`bold-text`} style={{ fontSize: '20px' }}>{constants.YEARLY}</span>
+                        <span
+                            className={`bold-text`}
+                            style={{ fontSize: '20px' }}
+                        >
+                            {constants.YEARLY}
+                        </span>
 
                         <Form.Switch
                             checked={planPeriod == PLAN_PERIOD.MONTH}
@@ -184,7 +188,12 @@ function PlanSelector(props: Props) {
                             className={`custom-switch-md`}
                             onChange={togglePeriod}
                         />
-                        <span className={`bold-text`} style={{ fontSize: '20px' }}>{constants.MONTHLY}</span>
+                        <span
+                            className={`bold-text`}
+                            style={{ fontSize: '20px' }}
+                        >
+                            {constants.MONTHLY}
+                        </span>
                     </div>
                 </DeadCenter>
                 <div
