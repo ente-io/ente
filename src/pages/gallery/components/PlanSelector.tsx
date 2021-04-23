@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
@@ -61,6 +61,16 @@ function PlanSelector(props: Props) {
                 : PLAN_PERIOD.MONTH
         );
     };
+    useEffect(() => {
+        if (!plans) {
+            const main = async () => {
+                props.setLoading(true);
+                await billingService.updatePlans();
+                props.setLoading(false);
+            };
+            main();
+        }
+    });
 
     async function onPlanSelect(plan: Plan) {
         if (
@@ -187,13 +197,7 @@ function PlanSelector(props: Props) {
                         marginBottom: '36px',
                     }}
                 >
-                    {!plans ? (
-                        <LoadingOverlay>
-                            <EnteSpinner />
-                        </LoadingOverlay>
-                    ) : (
-                        PlanIcons
-                    )}
+                    {plans && PlanIcons}
                 </div>
                 <DeadCenter style={{ marginBottom: '30px' }}>
                     {hasStripeSubscription(subscription) ? (
