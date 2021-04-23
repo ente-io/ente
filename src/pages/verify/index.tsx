@@ -150,22 +150,21 @@ export default function Verify() {
                                     buttonText={constants.VERIFY}
                                     loading={loading}
                                 />
-                                <br />
-                                {resend === 0 && (
-                                    <a href="#" onClick={resendEmail}>
-                                        {constants.RESEND_MAIL}
-                                    </a>
-                                )}
-                                {resend === 1 && (
-                                    <span>{constants.SENDING}</span>
-                                )}
-                                {resend === 2 && <span>{constants.SENT}</span>}
-                                <br />
-                                <br />
-                                <div>
-                                    <a href="#" onClick={logoutUser}>
-                                        {constants.CHANGE_EMAIL}
-                                    </a>
+                                <div style={{ marginTop: "24px" }}>
+                                    {resend === 0 && (
+                                        <a href="#" onClick={resendEmail}>
+                                            {constants.RESEND_MAIL}
+                                        </a>
+                                    )}
+                                    {resend === 1 && (
+                                        <span>{constants.SENDING}</span>
+                                    )}
+                                    {resend === 2 && <span>{constants.SENT}</span>}
+                                    <div style={{ marginTop: "8px" }}>
+                                        <a href="#" onClick={logoutUser}>
+                                            {constants.CHANGE_EMAIL}
+                                        </a>
+                                    </div>
                                 </div>
                             </Form>
                         )}
