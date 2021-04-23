@@ -17,7 +17,6 @@ import {
     isSubscribed,
     SetConfirmAction,
     SetDialogMessage,
-    hasNonStripeSubscription,
 } from 'utils/billingUtil';
 
 import exportService from 'services/exportService';
@@ -26,7 +25,6 @@ import isElectron from 'is-electron';
 import { collection } from 'services/collectionService';
 import { useRouter } from 'next/router';
 import RecoveryKeyModal from './RecoveryKeyModal';
-import { justSignedUp } from 'utils/storage';
 import EnteSpinner from './EnteSpinner';
 import LinkButton from 'pages/gallery/components/LinkButton';
 import { downloadApp } from 'utils/common';
@@ -88,16 +86,8 @@ export default function Sidebar(props: Props) {
 
     const router = useRouter();
     function onManageClick() {
-        if (hasNonStripeSubscription(subscription)) {
-            props.setDialogMessage({
-                title: constants.ERROR,
-                content: constants.SUBSCRIPTION_MANAGEMENT_NOT_POSSIBLE,
-                close: { variant: 'danger' },
-            });
-        } else {
-            setIsOpen(false);
-            props.setPlanModalView(true);
-        }
+        setIsOpen(false);
+        props.setPlanModalView(true);
     }
     return (
         <Menu
