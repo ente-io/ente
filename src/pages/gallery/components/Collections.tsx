@@ -1,9 +1,9 @@
 import React from 'react';
-import { collection } from 'services/collectionService';
+import { Collection } from 'services/collectionService';
 import styled from 'styled-components';
 
 interface CollectionProps {
-    collections: collection[];
+    collections: Collection[];
     selected?: number;
     selectCollection: (id?: number) => void;
 }
