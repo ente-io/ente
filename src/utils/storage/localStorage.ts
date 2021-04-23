@@ -3,6 +3,7 @@ export enum LS_KEYS {
     SESSION = 'session',
     KEY_ATTRIBUTES = 'keyAttributes',
     SUBSCRIPTION = 'subscription',
+    PLANS = 'plans',
     IS_FIRST_LOGIN = 'isFirstLogin',
     JUST_SIGNED_UP = 'justSignedUp',
 }
@@ -15,10 +16,19 @@ export const setData = (key: LS_KEYS, value: object) => {
 };
 
 export const getData = (key: LS_KEYS) => {
-    if (typeof localStorage === 'undefined') {
-        return null;
+    try {
+        if (
+            typeof localStorage === 'undefined' ||
+            typeof key === 'undefined' ||
+            typeof localStorage.getItem(key) === 'undefined'
+        ) {
+            return null;
+        }
+        const data = localStorage.getItem(key);
+        return data && JSON.parse(data);
+    } catch (e) {
+        console.error('Failed to Parse JSON');
     }
-    return JSON.parse(localStorage.getItem(key));
 };
 
 export const clearData = () => {

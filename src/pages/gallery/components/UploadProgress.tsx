@@ -86,7 +86,7 @@ export default function UploadProgress(props: Props) {
                 {props.now === 100 && (
                     <Modal.Footer style={{ border: 'none' }}>
                         <Button
-                            variant="dark"
+                            variant="outline-secondary"
                             style={{ width: '100%' }}
                             onClick={props.closeModal}
                         >

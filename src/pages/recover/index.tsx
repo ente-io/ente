@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
 import CryptoWorker, { setSessionKeys } from 'utils/crypto';
 import PassPhraseForm from 'components/PassphraseForm';
-import { MessageDialog } from 'components/MessageDailog';
+import MessageDialog from 'components/MessageDialog';
 
 export default function Recover() {
     const router = useRouter();
@@ -60,7 +60,7 @@ export default function Recover() {
                 onHide={() => SetMessageDialogView(false)}
                 attributes={{
                     title: constants.SORRY,
-                    ok: true,
+                    close: {},
                 }}
             >
                 {constants.NO_RECOVERY_KEY_MESSAGE}

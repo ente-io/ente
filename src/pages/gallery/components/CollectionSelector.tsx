@@ -1,9 +1,10 @@
 import React from 'react';
-import { Card, Modal, Spinner } from 'react-bootstrap';
+import { Card, Modal } from 'react-bootstrap';
 import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
+import EnteSpinner from 'components/EnteSpinner';
 
 export const CollectionIcon = styled.div`
     width: 200px;
@@ -16,7 +17,7 @@ export const CollectionIcon = styled.div`
     outline: none;
 `;
 
-const LoadingOverlay = styled.div`
+export const LoadingOverlay = styled.div`
     left: 0;
     top: 0;
     outline: none;
@@ -28,8 +29,8 @@ const LoadingOverlay = styled.div`
     color: #fff;
     font-weight: 900;
     position: absolute;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 9;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9000;
 `;
 interface Props {
     collectionAndItsLatestFile;
@@ -81,7 +82,7 @@ function CollectionSelector(props: Props) {
                 {CollectionIcons}
                 {props.loading && (
                     <LoadingOverlay>
-                        <Spinner animation="border" />
+                        <EnteSpinner />
                     </LoadingOverlay>
                 )}
             </Modal.Body>

@@ -12,6 +12,8 @@ import CryptoWorker, {
 import PasswordForm from 'components/PasswordForm';
 import { KeyAttributes } from 'types';
 import { setJustSignedUp } from 'utils/storage';
+import RecoveryKeyModal from 'components/RecoveryKeyModal';
+import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 
 export interface KEK {
     key: string;
@@ -22,6 +24,8 @@ export interface KEK {
 export default function Generate() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
+    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>(null);
+    const [recoverModalView, setRecoveryModalView] = useState(false);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -90,9 +94,9 @@ export default function Generate() {
             masterKey
         );
 
-        setSessionKeys(masterKey);
+        await setSessionKeys(masterKey);
         setJustSignedUp(true);
-        router.push('/gallery');
+        setRecoveryModalView(true);
     };
 
     return (
@@ -101,6 +105,14 @@ export default function Generate() {
                 callback={onSubmit}
                 buttonText={constants.SET_PASSPHRASE}
                 back={logoutUser}
+            />
+            <RecoveryKeyModal
+                show={recoverModalView}
+                onHide={() => {
+                    setRecoveryModalView(false);
+                    router.push('/gallery');
+                }}
+                somethingWentWrong={() => null}
             />
         </>
     );

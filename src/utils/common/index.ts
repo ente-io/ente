@@ -1,6 +1,8 @@
 import { errorCodes } from './errorUtil';
 
 const TwoSecondInMillSeconds = 2000;
+const DESKTOP_APP_DOWNLOAD_URL =
+    'https://github.com/ente-io/bhari-frame/releases/';
 
 export function checkConnectivity() {
     if (navigator.onLine) {
@@ -18,4 +20,8 @@ export async function WaitFor2Seconds() {
     await new Promise((resolve) => {
         setTimeout(() => resolve(null), TwoSecondInMillSeconds);
     });
+}
+export function downloadApp() {
+    var win = window.open(DESKTOP_APP_DOWNLOAD_URL, '_blank');
+    win.focus();
 }

@@ -1,8 +1,16 @@
-import { template } from './vernacularStrings';
+import constants from './constants';
 
 /**
  * Global English constants.
  */
+
+const dateString = function (date) {
+    return new Date(date / 1000).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+};
 const englishConstants = {
     COMPANY_NAME: 'ente',
     LOGIN: 'login',
@@ -50,6 +58,7 @@ const englishConstants = {
     SELECT_COLLECTION: `select an album to upload to`,
     CREATE_COLLECTION: `create album`,
     CLOSE: 'close',
+    NO: 'no',
     NOTHING_HERE: `nothing to see here, yet 👀`,
     UPLOAD: {
         0: 'preparing to upload',
@@ -76,8 +85,8 @@ const englishConstants = {
             })()}
         </div>
     ),
-    SUBSCRIPTION_EXPIRED:
-        'your subscription has expired, please renew it form the mobile app',
+    SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew it',
+
     STORAGE_QUOTA_EXCEEDED:
         'you have exceeded your storage quota, please upgrade your plan from the mobile app',
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
@@ -95,6 +104,54 @@ const englishConstants = {
         'please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
     UPLOAD_FIRST_PHOTO: 'backup your first photo',
+    UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
+    DELETE_MESSAGE: () => 'sure you want to delete selected files?',
+    DELETE: 'delete',
+    UPLOAD_STRATEGY_CHOICE:
+        'you are uploading multiple folders, would you like us to create',
+    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
+    OR: 'or',
+    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
+    SESSION_EXPIRED_MESSAGE: () =>
+        'your session has expired, please login again to continue',
+    SESSION_EXPIRED: 'login',
+    SYNC_FAILED:
+        'failed to sync with remote server, please refresh page to try again',
+    PASSWORD_GENERATION_FAILED: `your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser`,
+    CHANGE_PASSWORD: 'change password',
+    GO_BACK: 'go back',
+    DOWNLOAD_RECOVERY_KEY: 'recovery key',
+    SAVE_LATER: 'save later',
+    SAVE: 'save',
+    RECOVERY_KEY_DESCRIPTION:
+        'if you forget your password, the only way you can recover your data is with this key',
+    RECOVER_KEY_GENERATION_FAILED:
+        'recovery code could be generated, please try again',
+    KEY_NOT_STORED_DISCLAIMER:
+        "we don't store this key, so please save this in a safe place",
+    RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
+    FORGOT_PASSWORD: 'forgot password?',
+    RECOVER_ACCOUNT: 'recover account',
+    RETURN_RECOVERY_KEY_HINT: 'recovery key',
+    RECOVER: 'recover',
+    NO_RECOVERY_KEY: 'no recovery key?',
+    INCORRECT_RECOVERY_KEY: 'incorrect recovery key',
+    SORRY: 'sorry',
+    NO_RECOVERY_KEY_MESSAGE:
+        'due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
+    REQUEST_FEATURE: 'request feature',
+    SUPPORT: 'support',
+    CONFIRM: 'confirm',
+    SKIP: 'skip',
+    CANCEL: 'cancel',
+    LOGOUT: 'logout',
+    LOGOUT_MESSAGE: () => 'sure you want to logout?',
+    CHANGE: 'change',
+    CHANGE_EMAIL: 'change email ?',
+    OK: 'ok',
+    SUCCESS: 'success',
+    ERROR: 'error',
+    MESSAGE: 'message',
     INSTALL_MOBILE_APP: () => (
         <div>
             install our{' '}
@@ -114,81 +171,93 @@ const englishConstants = {
             to automatically backup all your photos
         </div>
     ),
-    LOGOUT: 'logout',
-    LOGOUT_MESSAGE: 'sure you want to logout?',
-    CANCEL: 'cancel',
-    DOWNLOAD_APP_MESSAGE:
-        'sorry, this operation is currently not supported on the web, please install the desktop app',
+    DOWNLOAD_APP_MESSAGE: () =>
+        'sorry, this operation is currently not supported on the web, do you want to download the desktop app',
     DOWNLOAD_APP: 'download',
-    APP_DOWNLOAD_URL: 'https://github.com/ente-io/bhari-frame/releases/',
     EXPORT: 'export data',
+
+    // ========================
+    // Subscription
+    // ========================
+    SUBSCRIBE: 'subscribe',
     SUBSCRIPTION_PLAN: 'subscription plan',
     USAGE_DETAILS: 'usage',
+    MANAGE: 'manage',
+    MANAGEMENT_PORTAL: 'manage payment method',
+    CHOOSE_PLAN: 'choose your subscription plan',
+    MANAGE_PLAN: 'manage your subscription',
+
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
                 you are on the <strong>free</strong> plan that expires on{' '}
-                {new Date(expiryTime / 1000).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                })}
+                {dateString(expiryTime)}
             </p>
         </>
     ),
-    PAID_SUBSCRIPTION_INFO: (expiryTime) => (
+    RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
+        <p>your subscription will renew on {dateString(expiryTime)}</p>
+    ),
+
+    RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
-                your subscription will renew on{' '}
-                {new Date(expiryTime / 1000).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                })}
+                your subscription will be cancelled on {dateString(expiryTime)}
             </p>
         </>
     ),
+
     USAGE_INFO: (usage, quota) => (
         <p>
             you have used {usage} GB out of your {quota} GB quota
         </p>
     ),
-    UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
-    CHANGE: 'change',
-    CHANGE_EMAIL: 'change email?',
-    DELETE_MESSAGE: 'sure you want to delete selected files?',
-    DELETE: 'delete',
-    UPLOAD_STRATEGY_CHOICE:
-        'you are uploading multiple folders, would you like us to create',
-    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
-    OR: 'or',
-    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
-    SESSION_EXPIRED_MESSAGE:
-        'your session has expired, please login again to continue',
-    SESSION_EXPIRED: 'login',
-    SYNC_FAILED:
-        'failed to sync with remote server, please refresh page to try again',
-    PASSWORD_GENERATION_FAILED: `your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser`,
-    CHANGE_PASSWORD: 'change password',
-    GO_BACK: 'go back',
-    DOWNLOAD_RECOVERY_KEY: 'recovery key',
-    SAVE_LATER: 'save later',
-    SAVE: 'save',
-    RECOVERY_KEY_DESCRIPTION:
-        'if you forget your password, the only way you can recover your data is with this key',
-    KEY_NOT_STORED_DISCLAIMER:
-        "we don't store this key, so please save this in a safe place",
-    RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
-    FORGOT_PASSWORD: 'forgot password?',
-    RECOVER_ACCOUNT: 'recover account',
-    RETURN_RECOVERY_KEY_HINT: 'recovery key',
-    RECOVER: 'recover',
-    NO_RECOVERY_KEY: 'no recovery key?',
-    INCORRECT_RECOVERY_KEY: 'incorrect recovery key',
-    SORRY: 'sorry',
-    NO_RECOVERY_KEY_MESSAGE:
-        'due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
-    OK: 'ok',
+
+    SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
+        <>
+            <p>we've received your payment</p>
+            <p>
+                your subscription is valid till{' '}
+                <strong>{dateString(expiryTime)}</strong>
+            </p>
+        </>
+    ),
+    SUBSCRIPTION_PURCHASE_CANCELLED:
+        'your purchase was canceled, please try again if you want to subscribe',
+    SUBSCRIPTION_VERIFICATION_FAILED: `we were not able to verify your purchase, verification can take few hours`,
+    SUBSCRIPTION_PURCHASE_FAILED:
+        'subscription purchase failed , please try again later',
+
+    UPDATE_PAYMENT_METHOD_MESSAGE: () =>
+        'we are sorry, payment failed when we tried to charge your card, please update your payment method and try again',
+    UPDATE_PAYMENT_METHOD: 'update payment method',
+    MONTHLY: 'monthly',
+    YEARLY: 'yearly',
+    UPDATE_SUBSCRIPTION_MESSAGE: () =>
+        'are you sure you want to change your plan?',
+    UPDATE_SUBSCRIPTION: 'change plan',
+
+    CANCEL_SUBSCRIPTION: 'unsubscribe',
+    CANCEL_SUBSCRIPTION_MESSAGE: () => (
+        <>
+            <p>
+                all of your data will be deleted from our servers at the end of
+                this billing period.
+            </p>
+            <p>are you sure that you want to unsubscribe?</p>
+        </>
+    ),
+    SUBSCRIPTION_CANCEL_FAILED: 'failed to cancel subscription',
+    SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
+
+    ACTIVATE_SUBSCRIPTION: 'reactivate subscription',
+    ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
+        `once reactivated, you will be billed on ${dateString(expiryTime)}`,
+    SUBSCRIPTION_ACTIVATE_SUCCESS: 'subscription successfully activated',
+    SUBSCRIPTION_ACTIVATE_FAILED: 'failed to reactivate subscription renewals',
+
+    SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
+    CANCEL_SUBSCRIPTION_ON_MOBILE: `please cancel your subscription from the mobile app to activate a subscription here`,
 };
 
 export default englishConstants;

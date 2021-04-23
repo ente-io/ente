@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { file, syncData, localFiles, deleteFiles } from 'services/fileService';
+import { file, syncData, localFiles } from 'services/fileService';
 import PreviewCard from './components/PreviewCard';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
@@ -18,21 +18,41 @@ import {
     getCollectionAndItsLatestFile,
     getFavItemIds,
     getLocalCollections,
-    getCollectionUpdationTime,
     getNonEmptyCollections,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import AlertBanner from './components/AlertBanner';
-import { Alert, Button, Jumbotron } from 'react-bootstrap';
+import { Alert, Button } from 'react-bootstrap';
+import billingService, { Plan } from 'services/billingService';
+import PlanSelector from './components/PlanSelector';
+import {
+    activateSubscription,
+    updateSubscription,
+    cancelSubscription,
+    checkSubscriptionPurchase,
+    updatePaymentMethod,
+} from 'utils/billingUtil';
+
 import Delete from 'components/Delete';
-import ConfirmDialog, { CONFIRM_ACTION } from 'components/ConfirmDialog';
+import ConfirmDialog, {
+    ConfirmActionAttributes,
+    CONFIRM_ACTION,
+} from 'components/ConfirmDialog';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
-import { checkConnectivity } from 'utils/common';
-import { isFirstLogin, setIsFirstLogin } from 'utils/storage';
+import { checkConnectivity, downloadApp } from 'utils/common';
+import {
+    isFirstLogin,
+    justSignedUp,
+    setIsFirstLogin,
+    setJustSignedUp,
+} from 'utils/storage';
 import { logoutUser } from 'services/userService';
-import { MessageDialog } from 'components/MessageDailog';
+import AlertBanner from './components/AlertBanner';
+import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
+import { LoadingOverlay } from './components/CollectionSelector';
+import EnteSpinner from 'components/EnteSpinner';
+import { fileDelete } from 'utils/file';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
@@ -73,7 +93,7 @@ const ListItem = styled.div`
     justify-content: center;
 `;
 
-const DeadCenter = styled.div`
+export const DeadCenter = styled.div`
     flex: 1;
     display: flex;
     justify-content: center;
@@ -116,7 +136,6 @@ interface Props {
     collectionSelectorView;
     closeCollectionSelector;
     showCollectionSelector;
-    setNavbarIconView;
     err;
 }
 
@@ -154,8 +173,14 @@ export default function Gallery(props: Props) {
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
-    const [confirmAction, setConfirmAction] = useState<CONFIRM_ACTION>(null);
-    const [requestFailed, setRequestFailed] = useState(false);
+    const [
+        confirmAction,
+        setConfirmAction,
+    ] = useState<ConfirmActionAttributes>();
+    const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
+    const [planModalView, setPlanModalView] = useState(false);
+    const [loading, setLoading] = useState(false);
+
     const loadingBar = useRef(null);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -165,6 +190,9 @@ export default function Gallery(props: Props) {
         }
         const main = async () => {
             setIsFirstLoad(isFirstLogin());
+            if (justSignedUp()) {
+                setPlanModalView(true);
+            }
             setIsFirstLogin(false);
             const data = await localFiles();
             const collections = await getLocalCollections();
@@ -181,12 +209,12 @@ export default function Gallery(props: Props) {
             setCollectionAndItsLatestFile(collectionAndItsLatestFile);
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
-
+            await checkSubscriptionPurchase(setDialogMessage, router);
             await syncWithRemote();
             setIsFirstLoad(false);
+            setJustSignedUp(false);
         };
         main();
-        props.setNavbarIconView(true);
     }, []);
 
     const syncWithRemote = async () => {
@@ -195,6 +223,8 @@ export default function Gallery(props: Props) {
             loadingBar.current?.continuousStart();
             const collections = await syncCollections();
             const { data, isUpdated } = await syncData(collections);
+            await billingService.updatePlans();
+            await billingService.syncSubscription();
             const nonEmptyCollections = getNonEmptyCollections(
                 collections,
                 data
@@ -213,8 +243,11 @@ export default function Gallery(props: Props) {
             setSinceTime(new Date().getTime());
         } catch (e) {
             setBannerMessage(e.message);
-            if (e.message === constants.SESSION_EXPIRED_MESSAGE) {
-                setConfirmAction(CONFIRM_ACTION.SESSION_EXPIRED);
+            if (e.message === constants.SESSION_EXPIRED_MESSAGE()) {
+                setConfirmAction({
+                    action: CONFIRM_ACTION.SESSION_EXPIRED,
+                    callback: logoutUser,
+                });
             }
         } finally {
             loadingBar.current?.complete();
@@ -286,6 +319,9 @@ export default function Gallery(props: Props) {
             [id]: checked,
             count: checked ? selected.count + 1 : selected.count - 1,
         });
+    };
+    const clearSelection = function () {
+        setSelected({ count: 0 });
     };
 
     const getThumbnail = (file: file[], index: number) => {
@@ -382,27 +418,6 @@ export default function Gallery(props: Props) {
             first.getDate() === second.getDate()
         );
     };
-    const confirmCallbacks = new Map<CONFIRM_ACTION, Function>([
-        [
-            CONFIRM_ACTION.DELETE,
-            async function () {
-                await deleteFiles(selected);
-                syncWithRemote();
-                setConfirmAction(null);
-                setSelected({ count: 0 });
-            },
-        ],
-        [CONFIRM_ACTION.SESSION_EXPIRED, logoutUser],
-        [CONFIRM_ACTION.LOGOUT, logoutUser],
-        [
-            CONFIRM_ACTION.DOWNLOAD_APP,
-            function () {
-                var win = window.open(constants.APP_DOWNLOAD_URL, '_blank');
-                win.focus();
-                setConfirmAction(null);
-            },
-        ],
-    ]);
 
     return (
         <FullScreenDropZone
@@ -410,6 +425,11 @@ export default function Gallery(props: Props) {
             getInputProps={props.getInputProps}
             showCollectionSelector={props.showCollectionSelector}
         >
+            {loading && (
+                <LoadingOverlay>
+                    <EnteSpinner />
+                </LoadingOverlay>
+            )}
             <LoadingBar color="#2dc262" ref={loadingBar} />
             {isFirstLoad && (
                 <div className="text-center">
@@ -418,23 +438,23 @@ export default function Gallery(props: Props) {
                     </Alert>
                 </div>
             )}
-            <AlertBanner
-                bannerMessage={bannerMessage}
-                setBannerMessage={setBannerMessage}
+            <PlanSelector
+                modalView={planModalView}
+                closeModal={() => setPlanModalView(false)}
+                setDialogMessage={setDialogMessage}
+                setConfirmAction={setConfirmAction}
+                setLoading={setLoading}
             />
+            <AlertBanner bannerMessage={bannerMessage} />
             <ConfirmDialog
                 show={confirmAction !== null}
                 onHide={() => setConfirmAction(null)}
-                callback={confirmCallbacks.get(confirmAction)}
-                action={confirmAction}
+                attributes={confirmAction}
             />
             <MessageDialog
-                show={requestFailed}
-                onHide={() => setRequestFailed(false)}
-                attributes={{
-                    title: constants.UNKNOWN_ERROR,
-                    ok: true,
-                }}
+                show={dialogMessage != null}
+                onHide={() => setDialogMessage(null)}
+                attributes={dialogMessage}
             />
             <Collections
                 collections={collections}
@@ -454,7 +474,8 @@ export default function Gallery(props: Props) {
                 files={data}
                 collections={collections}
                 setConfirmAction={setConfirmAction}
-                somethingWentWrong={() => setRequestFailed(true)}
+                setDialogMessage={setDialogMessage}
+                setPlanModalView={setPlanModalView}
             />
             <UploadButton openFileUploader={props.openFileUploader} />
             {!isFirstLoad && data.length == 0 ? (
@@ -648,7 +669,17 @@ export default function Gallery(props: Props) {
             )}
             {selected.count > 0 && (
                 <DeleteBtn
-                    onClick={() => setConfirmAction(CONFIRM_ACTION.DELETE)}
+                    onClick={() =>
+                        setConfirmAction({
+                            action: CONFIRM_ACTION.DELETE,
+                            callback: fileDelete.bind(
+                                null,
+                                selected,
+                                clearSelection,
+                                syncWithRemote
+                            ),
+                        })
+                    }
                 >
                     <Delete />
                 </DeleteBtn>

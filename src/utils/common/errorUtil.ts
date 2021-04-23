@@ -9,10 +9,13 @@ export const errorCodes = {
 
 const AXIOS_NETWORK_ERROR = 'Network Error';
 
+export const SUBSCRIPTION_VERIFICATION_ERROR =
+    'Subscription verification failed';
+
 export function ErrorHandler(error) {
-    try {
+    let errorMessage = null;
+    if (error?.status) {
         const errorCode = error.status.toString();
-        let errorMessage = null;
         switch (errorCode) {
             case errorCodes.ERR_NO_ACTIVE_SUBSCRIPTION:
                 errorMessage = constants.SUBSCRIPTION_EXPIRED;
@@ -24,16 +27,15 @@ export function ErrorHandler(error) {
                 errorMessage = constants.NO_INTERNET_CONNECTION;
                 break;
             case errorCodes.ERR_SESSION_EXPIRED:
-                errorMessage = constants.SESSION_EXPIRED_MESSAGE;
+                errorMessage = constants.SESSION_EXPIRED_MESSAGE();
                 break;
         }
+    } else {
         if (error.message === AXIOS_NETWORK_ERROR) {
             errorMessage = constants.SYNC_FAILED;
         }
-        if (errorMessage) {
-            throw new Error(errorMessage);
-        }
-    } catch (e) {
-        //ignore;
+    }
+    if (errorMessage) {
+        throw new Error(errorMessage);
     }
 }

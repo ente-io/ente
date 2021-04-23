@@ -1,4 +1,4 @@
-import { file } from 'services/fileService';
+import { deleteFiles, file } from 'services/fileService';
 import { runningInBrowser } from 'utils/common';
 
 const TYPE_HEIC = 'heic';
@@ -41,4 +41,10 @@ export function sortFilesIntoCollections(files: file[]) {
         collectionWiseFiles.get(file.collectionID).push(file);
     }
     return collectionWiseFiles;
+}
+
+export async function fileDelete(selected, clearSelection, syncWithRemote) {
+    await deleteFiles(selected);
+    syncWithRemote();
+    clearSelection;
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import Alert from 'react-bootstrap/Alert';
 
-export default function AlertBanner({ bannerMessage, setBannerMessage }) {
+export default function AlertBanner({ bannerMessage }) {
     return (
         <Alert
             variant={'danger'}

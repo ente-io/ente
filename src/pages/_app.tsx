@@ -2,18 +2,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
-import Spinner from 'react-bootstrap/Spinner';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import Container from 'components/Container';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 
-import UploadButton from 'pages/gallery/components/UploadButton';
 import { sentryInit } from '../utils/sentry';
 import { useDropzone } from 'react-dropzone';
-import Sidebar from 'components/Sidebar';
+import EnteSpinner from 'components/EnteSpinner';
 
 const GlobalStyles = createGlobalStyle`
     html, body {
@@ -25,6 +22,7 @@ const GlobalStyles = createGlobalStyle`
         display: flex;
         flex-direction: column;
         background-color: #191919;
+        color: #aaa;
     }
 
     #__next {
@@ -79,6 +77,11 @@ const GlobalStyles = createGlobalStyle`
     .modal {
         z-index: 2000;
     }
+    .modal-dialog-centered {
+        min-height: -webkit-calc(90% - 3.5rem);
+        min-height: -moz-calc(90% - 3.5rem);
+        min-height: calc(90% - 3.5rem);
+    }
     .modal .modal-header, .modal .modal-footer {
         border-color: #444 !important;
     }
@@ -86,10 +89,12 @@ const GlobalStyles = createGlobalStyle`
         color: #aaa;
         text-shadow: none;
     }
+    .modal-backdrop {
+        z-index:2000;
+    }
     .modal .card {
         background-color: #202020;
         border: none;
-        color: #aaa;
     }
     .modal .card > div {
         border-radius: 30px;
@@ -97,6 +102,7 @@ const GlobalStyles = createGlobalStyle`
         margin: 0 0 5px 0;
     }
     .modal-content {
+        border-radius:15px;
         background-color:#202020 !important;
         color:#aaa;
     }
@@ -134,12 +140,12 @@ const GlobalStyles = createGlobalStyle`
     }
     .card {
         background-color: #242424;
-        color: #fff;
+        color: #d1d1d1;
         border-radius: 12px;
     }
     .jumbotron{
         background-color: #191919;
-        color: #fff;
+        color: #d1d1d1;
         text-align: center;
         margin-top: 50px;
     }
@@ -171,13 +177,46 @@ const GlobalStyles = createGlobalStyle`
         background: #131313;
         padding: 2.5em 1.5em 0;
         font-size: 1.15em;
-        color:#fff
+        color:#d1d1d1
     }
     .bm-cross {
-        background: #fff;
+        background: #d1d1d1;
     }
     .bg-upload-progress-bar {
         background-color: #2dc262;
+    }
+    .custom-switch.custom-switch-md .custom-control-label {
+        padding-left: 2rem;
+        padding-bottom: 1.5rem;
+    }
+    
+    .custom-switch.custom-switch-md .custom-control-label::before {
+        height: 1.5rem;
+        background-color: #303030;
+        border: none;
+        width: calc(2.5rem + 0.75rem);
+        border-radius: 3rem;
+    }
+    .custom-switch.custom-switch-md:active .custom-control-label::before {
+        background-color: #303030;
+    }
+    
+    .custom-switch.custom-switch-md .custom-control-label::after {
+        top:2px;
+        background:#c4c4c4;
+        width: calc(2.0rem - 4px);
+        height: calc(2.0rem - 4px);
+        border-radius: calc(2rem - (2.0rem / 2));
+    }
+    
+    .custom-switch.custom-switch-md .custom-control-input:checked ~ .custom-control-label::after {
+        transform: translateX(calc(2.0rem - 0.25rem));
+        background:#c4c4c4;
+    }
+    .bold-text{
+        color: #ECECEC;
+        line-height: 24px;
+        font-size: 24px;
     }
 `;
 
@@ -191,12 +230,15 @@ const FlexContainer = styled.div`
     text-align: center;
 `;
 
+export interface BannerMessage {
+    message: string;
+    variant: string;
+}
+
 sentryInit();
 export default function App({ Component, pageProps, err }) {
     const router = useRouter();
-    const [user, setUser] = useState();
     const [loading, setLoading] = useState(false);
-    const [navbarIconView, setNavbarIconView] = useState(false);
     const [collectionSelectorView, setCollectionSelectorView] = useState(false);
 
     function closeCollectionSelector() {
@@ -207,8 +249,6 @@ export default function App({ Component, pageProps, err }) {
     }
 
     useEffect(() => {
-        const user = getData(LS_KEYS.USER);
-        setUser(user);
         console.log(
             `%c${constants.CONSOLE_WARNING_STOP}`,
             'color: red; font-size: 52px;'
@@ -222,8 +262,6 @@ export default function App({ Component, pageProps, err }) {
         });
 
         router.events.on('routeChangeComplete', () => {
-            const user = getData(LS_KEYS.USER);
-            setUser(user);
             setLoading(false);
         });
     }, []);
@@ -251,7 +289,6 @@ export default function App({ Component, pageProps, err }) {
                 {/* End Cloudflare Web Analytics  */}
             </Head>
             <GlobalStyles />
-
             <Navbar>
                 <FlexContainer>
                     <Image
@@ -263,9 +300,9 @@ export default function App({ Component, pageProps, err }) {
             </Navbar>
             {loading ? (
                 <Container>
-                    <Spinner animation="border" role="status" variant="success">
+                    <EnteSpinner>
                         <span className="sr-only">Loading...</span>
-                    </Spinner>
+                    </EnteSpinner>
                 </Container>
             ) : (
                 <Component
@@ -276,7 +313,6 @@ export default function App({ Component, pageProps, err }) {
                     collectionSelectorView={collectionSelectorView}
                     showCollectionSelector={showCollectionSelector}
                     closeCollectionSelector={closeCollectionSelector}
-                    setNavbarIconView={setNavbarIconView}
                     err={err}
                 />
             )}
