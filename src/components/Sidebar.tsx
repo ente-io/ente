@@ -22,7 +22,7 @@ import {
 import exportService from 'services/exportService';
 import { file } from 'services/fileService';
 import isElectron from 'is-electron';
-import { collection } from 'services/collectionService';
+import { Collection } from 'services/collectionService';
 import { useRouter } from 'next/router';
 import RecoveryKeyModal from './RecoveryKeyModal';
 import EnteSpinner from './EnteSpinner';
@@ -32,7 +32,7 @@ import { logoutUser } from 'services/userService';
 
 interface Props {
     files: file[];
-    collections: collection[];
+    collections: Collection[];
     setConfirmAction: SetConfirmAction;
     setDialogMessage: SetDialogMessage;
     setPlanModalView;
@@ -202,6 +202,7 @@ export default function Sidebar(props: Props) {
             ></div>
             <LinkButton
                 variant="danger"
+                style={{ marginBottom: '50px' }}
                 onClick={() =>
                     props.setConfirmAction({
                         action: CONFIRM_ACTION.LOGOUT,

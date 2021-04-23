@@ -12,7 +12,7 @@ import Collections from './components/Collections';
 import Upload from './components/Upload';
 import DownloadManager from 'services/downloadManager';
 import {
-    collection,
+    Collection,
     syncCollections,
     CollectionAndItsLatestFile,
     getCollectionAndItsLatestFile,
@@ -153,7 +153,7 @@ export type selectedState = {
 
 export default function Gallery(props: Props) {
     const router = useRouter();
-    const [collections, setCollections] = useState<collection[]>([]);
+    const [collections, setCollections] = useState<Collection[]>([]);
     const [
         collectionAndItsLatestFile,
         setCollectionAndItsLatestFile,

@@ -2,7 +2,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 import EXIF from 'exif-js';
 import { file, fileAttribute } from './fileService';
-import { collection } from './collectionService';
+import { Collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity, WaitFor2Seconds } from 'utils/common';
 import { ErrorHandler } from 'utils/common/errorUtil';
@@ -47,7 +47,7 @@ interface ParsedEXIFData {
 }
 export interface FileWithCollection {
     file: File;
-    collection: collection;
+    collection: Collection;
 }
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -327,7 +327,7 @@ class UploadService {
 
     private fileAlreadyInCollection(
         newFile: FileInMemory,
-        collection: collection
+        collection: Collection
     ): boolean {
         const collectionFiles =
             this.existingFilesCollectionWise.get(collection.id) ?? [];
@@ -544,7 +544,7 @@ class UploadService {
     }
 
     private getUploadFile(
-        collection: collection,
+        collection: Collection,
         backupedFile: BackupedFile,
         fileKey: B64EncryptionResult
     ): uploadFile {

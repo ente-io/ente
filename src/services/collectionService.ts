@@ -22,7 +22,7 @@ const COLLECTION_UPDATION_TIME = 'collection-updation-time';
 const FAV_COLLECTION = 'fav-collection';
 const COLLECTIONS = 'collections';
 
-export interface collection {
+export interface Collection {
     id: number;
     owner: user;
     key?: string;
@@ -44,12 +44,12 @@ interface collectionAttributes {
 }
 
 export interface CollectionAndItsLatestFile {
-    collection: collection;
+    collection: Collection;
     file: file;
 }
 
 const getCollectionSecrets = async (
-    collection: collection,
+    collection: Collection,
     masterKey: string
 ) => {
     const worker = await new CryptoWorker();
@@ -91,7 +91,7 @@ const getCollections = async (
     token: string,
     sinceTime: number,
     key: string
-): Promise<collection[]> => {
+): Promise<Collection[]> => {
     try {
         const resp = await HTTPService.get(
             `${ENDPOINT}/collections`,
@@ -100,8 +100,8 @@ const getCollections = async (
             },
             { 'X-Auth-Token': token }
         );
-        const promises: Promise<collection>[] = resp.data.collections.map(
-            (collection: collection) => getCollectionSecrets(collection, key)
+        const promises: Promise<Collection>[] = resp.data.collections.map(
+            (collection: Collection) => getCollectionSecrets(collection, key)
         );
         return await Promise.all(promises);
     } catch (e) {
@@ -110,8 +110,8 @@ const getCollections = async (
     }
 };
 
-export const getLocalCollections = async (): Promise<collection[]> => {
-    const collections: collection[] =
+export const getLocalCollections = async (): Promise<Collection[]> => {
+    const collections: Collection[] =
         (await localForage.getItem(COLLECTIONS)) ?? [];
     return collections;
 };
@@ -135,7 +135,7 @@ export const syncCollections = async () => {
         ...localCollections,
         ...updatedCollections,
     ];
-    var latestCollectionsInstances = new Map<number, collection>();
+    var latestCollectionsInstances = new Map<number, Collection>();
     allCollectionsInstances.forEach((collection) => {
         if (
             !latestCollectionsInstances.has(collection.id) ||
@@ -164,7 +164,7 @@ export const syncCollections = async () => {
 };
 
 export const getCollectionAndItsLatestFile = (
-    collections: collection[],
+    collections: Collection[],
     files: file[]
 ): CollectionAndItsLatestFile[] => {
     const latestFile = new Map<number, file>();
@@ -193,7 +193,7 @@ export const getCollectionAndItsLatestFile = (
 };
 
 export const getFavItemIds = async (files: file[]): Promise<Set<number>> => {
-    let favCollection = await localForage.getItem<collection>(FAV_COLLECTION);
+    let favCollection = await localForage.getItem<Collection>(FAV_COLLECTION);
     if (!favCollection) return new Set();
 
     return new Set(
@@ -210,7 +210,7 @@ export const createAlbum = async (albumName: string) => {
 export const createCollection = async (
     collectionName: string,
     type: CollectionType
-): Promise<collection> => {
+): Promise<Collection> => {
     try {
         const existingCollections = await getLocalCollections();
         for (let collection of existingCollections) {
@@ -236,7 +236,7 @@ export const createCollection = async (
             collectionName,
             collectionKey
         );
-        const newCollection: collection = {
+        const newCollection: Collection = {
             id: null,
             owner: null,
             encryptedKey,
@@ -249,7 +249,7 @@ export const createCollection = async (
             updationTime: null,
             isDeleted: false,
         };
-        let createdCollection: collection = await postCollection(
+        let createdCollection: Collection = await postCollection(
             newCollection,
             token
         );
@@ -264,9 +264,9 @@ export const createCollection = async (
 };
 
 const postCollection = async (
-    collectionData: collection,
+    collectionData: Collection,
     token: string
-): Promise<collection> => {
+): Promise<Collection> => {
     try {
         const response = await HTTPService.post(
             `${ENDPOINT}/collections`,
@@ -281,7 +281,7 @@ const postCollection = async (
 };
 
 export const addToFavorites = async (file: file) => {
-    let favCollection: collection = await localForage.getItem<collection>(
+    let favCollection: Collection = await localForage.getItem<Collection>(
         FAV_COLLECTION
     );
     if (!favCollection) {
@@ -295,13 +295,13 @@ export const addToFavorites = async (file: file) => {
 };
 
 export const removeFromFavorites = async (file: file) => {
-    let favCollection: collection = await localForage.getItem<collection>(
+    let favCollection: Collection = await localForage.getItem<Collection>(
         FAV_COLLECTION
     );
     await removeFromCollection(favCollection, [file]);
 };
 
-const addToCollection = async (collection: collection, files: file[]) => {
+const addToCollection = async (collection: Collection, files: file[]) => {
     try {
         const params = new Object();
         const worker = await new CryptoWorker();
@@ -337,7 +337,7 @@ const addToCollection = async (collection: collection, files: file[]) => {
         console.error('Add to collection Failed ', e);
     }
 };
-const removeFromCollection = async (collection: collection, files: file[]) => {
+const removeFromCollection = async (collection: Collection, files: file[]) => {
     try {
         const params = new Object();
         const token = getToken();
@@ -361,7 +361,7 @@ const removeFromCollection = async (collection: collection, files: file[]) => {
     }
 };
 
-const setLocalFavoriteCollection = async (collections: collection[]) => {
+const setLocalFavoriteCollection = async (collections: Collection[]) => {
     const localFavCollection = await localForage.getItem(FAV_COLLECTION);
     if (localFavCollection) {
         return;
@@ -375,7 +375,7 @@ const setLocalFavoriteCollection = async (collections: collection[]) => {
 };
 
 export const getNonEmptyCollections = (
-    collections: collection[],
+    collections: Collection[],
     files: file[]
 ) => {
     const nonEmptyCollectionsIds = new Set<number>();
