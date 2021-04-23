@@ -147,16 +147,20 @@ export default function Sidebar(props: Props) {
                     {constants.USAGE_DETAILS}
                 </h5>
                 <div style={{ color: '#959595' }}>
-                    {usage ? (
-                        constants.USAGE_INFO(
-                            usage,
-                            Math.ceil(
-                                Number(convertBytesToGBs(subscription?.storage))
+                    {
+                        usage ? (
+                            constants.USAGE_INFO(
+                                usage,
+                                Math.ceil(
+                                    Number(convertBytesToGBs(subscription?.storage))
+                                )
                             )
-                        )
-                    ) : (
-                        <EnteSpinner />
-                    )}
+                        ) :
+                            (
+                                <div style={{ textAlign: 'center' }}>
+                                    <EnteSpinner style={{ borderWidth: '2px', width: '20px', height: '20px' }} />
+                                </div>
+                            )}
                 </div>
             </div>
             <div
