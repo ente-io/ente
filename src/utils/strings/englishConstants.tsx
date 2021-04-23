@@ -57,6 +57,7 @@ const englishConstants = {
     CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. Please don't copy-paste unverified code here.`,
     SELECT_COLLECTION: `select an album to upload to`,
     CREATE_COLLECTION: `create album`,
+    ENTER_ALBUM_NAME: 'album name',
     CLOSE: 'close',
     NO: 'no',
     NOTHING_HERE: `nothing to see here, yet 👀`,

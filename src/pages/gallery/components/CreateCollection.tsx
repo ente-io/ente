@@ -1,29 +1,28 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Modal, Form, Button } from 'react-bootstrap';
+import React, { useEffect, useRef } from 'react';
+import { Modal, Form } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import { UPLOAD_STRATEGY } from './Upload';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import SubmitButton from 'components/SubmitButton';
 
 interface Props {
     createCollectionView;
     setCreateCollectionView;
     autoFilledName;
-    uploadFiles: (strategy: UPLOAD_STRATEGY, collectionName) => void;
+    uploadFiles: (strategy: UPLOAD_STRATEGY, collectionName) => Promise<void>;
     triggerFocus;
 }
+interface formValues {
+    albumName: string;
+}
 export default function CreateCollection(props: Props) {
-    const [albumName, setAlbumName] = useState('');
-    const handleChange = (event) => {
-        setAlbumName(event.target.value);
-    };
     const collectionNameInputRef = useRef(null);
-    const handleSubmit = async (event) => {
-        event.preventDefault();
+
+    const onSubmit = async ({ albumName }: formValues) => {
         props.setCreateCollectionView(false);
         await props.uploadFiles(UPLOAD_STRATEGY.SINGLE_COLLECTION, albumName);
     };
-    useEffect(() => {
-        setAlbumName(props.autoFilledName);
-    }, [props.autoFilledName]);
 
     useEffect(() => {
         setTimeout(() => {
@@ -43,24 +42,50 @@ export default function CreateCollection(props: Props) {
                 <Modal.Title>{constants.CREATE_COLLECTION}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form onSubmit={handleSubmit}>
-                    <Form.Group controlId="formBasicEmail">
-                        <Form.Control
-                            type="text"
-                            placeholder={constants.ALBUM_NAME}
-                            value={albumName}
-                            onChange={handleChange}
-                            ref={collectionNameInputRef}
-                        />
-                    </Form.Group>
-                    <Button
-                        variant="outline-success"
-                        type="submit"
-                        style={{ width: '100%' }}
-                    >
-                        {constants.CREATE}
-                    </Button>
-                </Form>
+                <Formik<formValues>
+                    initialValues={{ albumName: props.autoFilledName }}
+                    validationSchema={Yup.object().shape({
+                        albumName: Yup.string().required(constants.REQUIRED),
+                    })}
+                    onSubmit={onSubmit}
+                >
+                    {({
+                        values,
+                        touched,
+                        errors,
+                        handleChange,
+                        handleBlur,
+                        handleSubmit,
+                    }) => (
+                        <Form noValidate onSubmit={handleSubmit}>
+                            <Form.Group>
+                                <Form.Control
+                                    className="text-center"
+                                    type="text"
+                                    value={values.albumName}
+                                    onChange={handleChange('albumName')}
+                                    onBlur={handleBlur('albumName')}
+                                    isInvalid={Boolean(
+                                        touched.albumName && errors.albumName
+                                    )}
+                                    placeholder={constants.ENTER_ALBUM_NAME}
+                                    ref={collectionNameInputRef}
+                                />
+
+                                <Form.Control.Feedback
+                                    type="invalid"
+                                    className="text-center"
+                                >
+                                    {errors.albumName}
+                                </Form.Control.Feedback>
+                            </Form.Group>
+                            <SubmitButton
+                                buttonText={constants.CREATE}
+                                loading={false}
+                            />
+                        </Form>
+                    )}
+                </Formik>
             </Modal.Body>
         </Modal>
     );
