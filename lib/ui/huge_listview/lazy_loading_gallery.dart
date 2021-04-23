@@ -3,42 +3,88 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/events/event.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class LazyLoadingGallery extends StatelessWidget {
-  static const kSubGalleryItemLimit = 80;
-  static final _logger = Logger("LazyLoadingDayGallery");
-  final files;
-  final asyncLoader;
-  final selectedFiles;
-  final tag;
-  LazyLoadingGallery(this.files, this.asyncLoader, this.selectedFiles, this.tag,
+class LazyLoadingGallery extends StatefulWidget {
+  final List<File> files;
+  final Stream<Event> reloadEvent;
+  final Future<List<File>> Function(int creationStartTime, int creationEndTime,
+      {int limit}) asyncLoader;
+  final SelectedFiles selectedFiles;
+  final String tag;
+
+  LazyLoadingGallery(this.files, this.reloadEvent, this.asyncLoader,
+      this.selectedFiles, this.tag,
       {Key key})
       : super(key: key);
+
+  @override
+  _LazyLoadingGalleryState createState() => _LazyLoadingGalleryState();
+}
+
+class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
+  static const kSubGalleryItemLimit = 80;
+  static const kMicroSecondsInADay = 86400000000;
+
+  static final Logger _logger = Logger("LazyLoadingGallery");
+
+  List<File> _files;
+
+  @override
+  void initState() {
+    super.initState();
+    _files = widget.files;
+    final galleryDate =
+        DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
+    widget.reloadEvent.listen((event) async {
+      if (event is LocalPhotosUpdatedEvent) {
+        bool isOnSameDay = event.updatedFiles.where((file) {
+          final fileDate =
+              DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
+          return fileDate.year == galleryDate.year &&
+              fileDate.month == galleryDate.month &&
+              fileDate.day == galleryDate.day;
+        }).isNotEmpty;
+        if (isOnSameDay) {
+          final dayStartTime =
+              DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
+          final files = await widget.asyncLoader(
+              dayStartTime.microsecondsSinceEpoch,
+              dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
+          setState(() {
+            _files = files;
+          });
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        getDayWidget(files[0].creationTime),
-        _getGallery(files),
+        getDayWidget(_files[0].creationTime),
+        _getGallery(),
       ],
     );
   }
 
-  Widget _getGallery(List<File> files) {
+  Widget _getGallery() {
     List<Widget> childGalleries = [];
-    for (int index = 0; index < files.length; index += kSubGalleryItemLimit) {
+    for (int index = 0; index < _files.length; index += kSubGalleryItemLimit) {
       childGalleries.add(LazyLoadingGridView(
-        tag,
-        files.sublist(index, min(index + kSubGalleryItemLimit, files.length)),
-        asyncLoader,
-        selectedFiles,
+        widget.tag,
+        _files.sublist(index, min(index + kSubGalleryItemLimit, _files.length)),
+        widget.asyncLoader,
+        widget.selectedFiles,
       ));
     }
 

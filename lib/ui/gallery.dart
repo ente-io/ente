@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/events/event.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common_elements.dart';
@@ -69,9 +70,14 @@ class _GalleryState extends State<Gallery> {
         if (mounted) {
           _logger.info("Building gallery because reload event fired");
           setState(() {
-            _hasLoadedCreationTimes = false;
-            _map.clear();
-            _loadCreationTimes();
+            if (event is LocalPhotosUpdatedEvent) {
+              // TODO: Attach new days
+            } else {
+              _logger.info("Clearing all cache");
+              _map.clear();
+              _hasLoadedCreationTimes = false;
+              _loadCreationTimes();
+            }
           });
         }
       });
@@ -175,7 +181,12 @@ class _GalleryState extends State<Gallery> {
       itemBuilder: (context, index, files) {
         var gallery;
         gallery = LazyLoadingGallery(
-            files, widget.asyncLoader, widget.selectedFiles, widget.tagPrefix);
+          files,
+          widget.reloadEvent,
+          widget.asyncLoader,
+          widget.selectedFiles,
+          widget.tagPrefix,
+        );
         if (widget.headerWidget != null && index == 0) {
           gallery = Column(children: [widget.headerWidget, gallery]);
         }
