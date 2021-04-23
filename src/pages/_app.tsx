@@ -13,6 +13,25 @@ import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 
 const GlobalStyles = createGlobalStyle`
+/* ubuntu-regular - latin */
+@font-face {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400;
+  src: local(''),
+       url('/fonts/ubuntu-v15-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/ubuntu-v15-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* ubuntu-700 - latin */
+@font-face {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 700;
+  src: local(''),
+       url('/fonts/ubuntu-v15-latin-700.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/ubuntu-v15-latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
     html, body {
         padding: 0;
         margin: 0;
@@ -23,6 +42,7 @@ const GlobalStyles = createGlobalStyle`
         flex-direction: column;
         background-color: #191919;
         color: #aaa;
+        font-family:Ubuntu, Arial, sans-serif;
     }
 
     #__next {
