@@ -2,7 +2,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 import localForage from 'utils/storage/localForage';
 
-import { collection } from './collectionService';
+import { Collection } from './collectionService';
 import { DataStream, MetadataObject } from './uploadService';
 import CryptoWorker from 'utils/crypto';
 import { getToken } from 'utils/common/key';
@@ -57,7 +57,7 @@ export const localFiles = async () => {
     return files;
 };
 
-export const syncFiles = async (collections: collection[]) => {
+export const syncFiles = async (collections: Collection[]) => {
     let files = await localFiles();
     let isUpdated = false;
     files = await removeDeletedCollectionFiles(collections, files);
@@ -104,13 +104,13 @@ export const syncFiles = async (collections: collection[]) => {
 };
 
 export const getFiles = async (
-    collection: collection,
+    collection: Collection,
     sinceTime: number,
     limit: number
 ): Promise<file[]> => {
     try {
         const worker = await new CryptoWorker();
-        let promises: Promise<file>[] = [];
+        const decryptedFiles: file[] = [];
         let time =
             sinceTime ||
             (await localForage.getItem<number>(`${collection.id}-time`)) ||
@@ -132,25 +132,28 @@ export const getFiles = async (
                     'X-Auth-Token': token,
                 }
             );
-            promises.push(
-                ...resp.data.diff.map(async (file: file) => {
-                    if (!file.isDeleted) {
-                        file.key = await worker.decryptB64(
-                            file.encryptedKey,
-                            file.keyDecryptionNonce,
-                            collection.key
-                        );
-                        file.metadata = await worker.decryptMetadata(file);
-                    }
-                    return file;
-                })
+
+            decryptedFiles.push(
+                ...(await Promise.all(
+                    resp.data.diff.map(async (file: file) => {
+                        if (!file.isDeleted) {
+                            file.key = await worker.decryptB64(
+                                file.encryptedKey,
+                                file.keyDecryptionNonce,
+                                collection.key
+                            );
+                            file.metadata = await worker.decryptMetadata(file);
+                        }
+                        return file;
+                    }) as Promise<file>[]
+                ))
             );
 
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime;
             }
         } while (resp.data.diff.length === limit);
-        return await Promise.all(promises);
+        return decryptedFiles;
     } catch (e) {
         console.error('Get files failed', e);
         ErrorHandler(e);
@@ -158,7 +161,7 @@ export const getFiles = async (
 };
 
 const removeDeletedCollectionFiles = async (
-    collections: collection[],
+    collections: Collection[],
     files: file[]
 ) => {
     const syncedCollectionIds = new Set<number>();
