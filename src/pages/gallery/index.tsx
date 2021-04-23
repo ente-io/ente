@@ -243,7 +243,7 @@ export default function Gallery(props: Props) {
             setSinceTime(new Date().getTime());
         } catch (e) {
             setBannerMessage(e.message);
-            if (e.message === constants.SESSION_EXPIRED_MESSAGE) {
+            if (e.message === constants.SESSION_EXPIRED_MESSAGE()) {
                 setConfirmAction({
                     action: CONFIRM_ACTION.SESSION_EXPIRED,
                     callback: logoutUser,
