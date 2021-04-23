@@ -45,6 +45,7 @@ export function sortFilesIntoCollections(files: file[]) {
 
 export async function fileDelete(selected, clearSelection, syncWithRemote) {
     await deleteFiles(selected);
+    clearSelection();
     syncWithRemote();
     clearSelection;
 }
