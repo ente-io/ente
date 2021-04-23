@@ -667,7 +667,7 @@ export default function Gallery(props: Props) {
                     {constants.INSTALL_MOBILE_APP()}
                 </Alert>
             )}
-            {selected.count && (
+            {selected.count > 0 && (
                 <DeleteBtn
                     onClick={() =>
                         setConfirmAction({
