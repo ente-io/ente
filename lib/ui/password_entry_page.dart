@@ -198,7 +198,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   void _updatePassword() async {
-    final dialog = createProgressDialog(context, "generating encryption keys...");
+    final dialog =
+        createProgressDialog(context, "generating encryption keys...");
     await dialog.show();
     try {
       final keyAttributes = await Configuration.instance
@@ -266,8 +267,14 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         barrierDismissible: false,
       );
     } catch (e) {
+      _logger.severe(e);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      if (e is UnsupportedError) {
+        showErrorDialog(context, "insecure device",
+            "sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.");
+      } else {
+        showGenericErrorDialog(context);
+      }
     }
   }
 }
