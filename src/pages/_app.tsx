@@ -218,6 +218,9 @@ const GlobalStyles = createGlobalStyle`
         line-height: 24px;
         font-size: 24px;
     }
+    .subscription-plan-selector {
+        background: #222;
+    }
     .subscription-plan-selector:hover {
         background: #1b1b1b;
     }
