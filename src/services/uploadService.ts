@@ -280,13 +280,13 @@ class UploadService {
             this.fileProgress.delete(rawFile.name);
         } catch (e) {
             console.error('file upload failed with error', e);
-            ErrorHandler(e);
             const error = new Error(
                 `Uploading Failed for File - ${rawFile.name}`
             );
             this.uploadErrors.push(error);
             // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
             this.fileProgress.set(rawFile.name, FILE_UPLOAD_FAILED);
+            ErrorHandler(e);
         } finally {
             this.filesCompleted++;
             this.updateProgressBarUI();
