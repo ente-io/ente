@@ -142,7 +142,6 @@ function PlanSelector(props: Props) {
             show={props.modalView}
             onHide={props.closeModal}
             dialogClassName="modal-90w"
-            style={{ maxWidth: '100%' }}
             centered
             backdrop={hasPaidSubscription(subscription) ? 'true' : `static`}
         >
@@ -181,6 +180,7 @@ function PlanSelector(props: Props) {
                         display: 'flex',
                         justifyContent: 'space-around',
                         flexWrap: 'wrap',
+                        minHeight: '212px',
                         margin: '4% 0',
                     }}
                 >
