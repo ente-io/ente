@@ -95,7 +95,7 @@ export default function Sidebar(props: Props) {
             onStateChange={(state) => setIsOpen(state.isOpen)}
             itemListElement="div"
         >
-            <div style={{ marginBottom: '12px', outline: 'none' }}>
+            <div style={{ marginBottom: '28px', outline: 'none', color: 'rgb(45, 194, 98)', fontSize: '16px', }}>
                 {user?.email}
             </div>
             <div style={{ outline: 'none' }}>
