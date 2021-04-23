@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { file, syncData, localFiles } from 'services/fileService';
+import { file, syncData, getLocalFiles } from 'services/fileService';
 import PreviewCard from './components/PreviewCard';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
@@ -188,7 +188,7 @@ export default function Gallery(props: Props) {
                 setPlanModalView(true);
             }
             setIsFirstLogin(false);
-            const data = await localFiles();
+            const data = await getLocalFiles();
             const collections = await getLocalCollections();
             const nonEmptyCollections = getNonEmptyCollections(
                 collections,
