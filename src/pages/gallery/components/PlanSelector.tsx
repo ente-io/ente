@@ -7,7 +7,6 @@ import {
     convertBytesToGBs,
     getPlans,
     getUserSubscription,
-    hasPaidPlan,
     isUserSubscribedPlan,
     isSubscriptionCancelled,
     updatePaymentMethod,
@@ -17,6 +16,9 @@ import {
     updateSubscription,
     activateSubscription,
     cancelSubscription,
+    hasStripeSubscription,
+    hasPaidSubscription,
+    isOnFreePlan,
 } from 'utils/billingUtil';
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import { LoadingOverlay } from './CollectionSelector';
@@ -61,7 +63,16 @@ function PlanSelector(props: Props) {
     };
 
     async function onPlanSelect(plan: Plan) {
-        if (hasPaidPlan(subscription)) {
+        if (
+            !hasStripeSubscription(subscription) &&
+            !isSubscriptionCancelled(subscription)
+        ) {
+            props.setDialogMessage({
+                title: constants.ERROR,
+                content: constants.CANCEL_SUBSCRIPTION_ON_MOBILE,
+                close: { variant: 'danger' },
+            });
+        } else if (hasStripeSubscription(subscription)) {
             props.setConfirmAction({
                 action: CONFIRM_ACTION.UPDATE_SUBSCRIPTION,
                 callback: updateSubscription.bind(
@@ -133,7 +144,7 @@ function PlanSelector(props: Props) {
             dialogClassName="modal-90w"
             style={{ maxWidth: '100%' }}
             centered
-            backdrop={hasPaidPlan(subscription) ? 'true' : `static`}
+            backdrop={hasPaidSubscription(subscription) ? 'true' : `static`}
         >
             <Modal.Header closeButton>
                 <Modal.Title
@@ -144,7 +155,7 @@ function PlanSelector(props: Props) {
                     }}
                 >
                     <span>
-                        {hasPaidPlan(subscription)
+                        {hasPaidSubscription(subscription)
                             ? constants.MANAGE_PLAN
                             : constants.CHOOSE_PLAN}
                     </span>
@@ -182,7 +193,7 @@ function PlanSelector(props: Props) {
                     )}
                 </div>
                 <DeadCenter style={{ marginBottom: '30px' }}>
-                    {hasPaidPlan(subscription) ? (
+                    {hasStripeSubscription(subscription) ? (
                         <>
                             {isSubscriptionCancelled(subscription) ? (
                                 <LinkButton
@@ -241,10 +252,12 @@ function PlanSelector(props: Props) {
                         </>
                     ) : (
                         <LinkButton
-                            variant="secondary"
+                            variant="primary"
                             onClick={props.closeModal}
                         >
-                            {constants.SKIP}
+                            {isOnFreePlan(subscription)
+                                ? constants.SKIP
+                                : constants.CLOSE}
                         </LinkButton>
                     )}
                 </DeadCenter>

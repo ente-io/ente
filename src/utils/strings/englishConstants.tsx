@@ -185,7 +185,7 @@ const englishConstants = {
     MANAGE: 'manage',
     MANAGEMENT_PORTAL: 'manage payment method',
     CHOOSE_PLAN: 'choose your subscription plan',
-    MANAGE_PLAN: 'update your subscription plan',
+    MANAGE_PLAN: 'manage your subscription',
 
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
@@ -257,7 +257,7 @@ const englishConstants = {
     SUBSCRIPTION_ACTIVATE_FAILED: 'failed to reactivate subscription renewals',
 
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
-    SUBSCRIPTION_MANAGEMENT_NOT_POSSIBLE: `please use the mobile app to manage your subscription`,
+    CANCEL_SUBSCRIPTION_ON_MOBILE: `please cancel your subscription from the mobile app to activate a subscription here`,
 };
 
 export default englishConstants;
