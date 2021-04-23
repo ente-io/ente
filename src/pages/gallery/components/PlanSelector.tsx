@@ -64,6 +64,7 @@ function PlanSelector(props: Props) {
 
     async function onPlanSelect(plan: Plan) {
         if (
+            hasPaidSubscription(subscription) &&
             !hasStripeSubscription(subscription) &&
             !isSubscriptionCancelled(subscription)
         ) {
