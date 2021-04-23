@@ -22,15 +22,9 @@ import {
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import { Alert, Button } from 'react-bootstrap';
-import billingService, { Plan } from 'services/billingService';
+import billingService from 'services/billingService';
 import PlanSelector from './components/PlanSelector';
-import {
-    activateSubscription,
-    updateSubscription,
-    cancelSubscription,
-    checkSubscriptionPurchase,
-    updatePaymentMethod,
-} from 'utils/billingUtil';
+import { checkSubscriptionPurchase } from 'utils/billingUtil';
 
 import Delete from 'components/Delete';
 import ConfirmDialog, {
@@ -40,7 +34,7 @@ import ConfirmDialog, {
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
-import { checkConnectivity, downloadApp } from 'utils/common';
+import { checkConnectivity } from 'utils/common';
 import {
     isFirstLogin,
     justSignedUp,
@@ -221,10 +215,10 @@ export default function Gallery(props: Props) {
         try {
             checkConnectivity();
             loadingBar.current?.continuousStart();
-            const collections = await syncCollections();
-            const { data, isUpdated } = await syncData(collections);
             await billingService.updatePlans();
             await billingService.syncSubscription();
+            const collections = await syncCollections();
+            const { data, isUpdated } = await syncData(collections);
             const nonEmptyCollections = getNonEmptyCollections(
                 collections,
                 data
