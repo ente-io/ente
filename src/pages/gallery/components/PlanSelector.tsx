@@ -74,9 +74,18 @@ function PlanSelector(props: Props) {
                 ),
             });
         } else {
-            props.setLoading(true);
-            await billingService.buyPaidSubscription(plan.stripeID);
-            props.setLoading(false);
+            try {
+                props.setLoading(true);
+                await billingService.buyPaidSubscription(plan.stripeID);
+            } catch (e) {
+                props.setDialogMessage({
+                    title: constants.ERROR,
+                    content: constants.SUBSCRIPTION_PURCHASE_FAILED,
+                    close: { variant: 'danger' },
+                });
+            } finally {
+                props.setLoading(false);
+            }
         }
     }
 
