@@ -27,7 +27,7 @@ export type SetConfirmAction = React.Dispatch<
 export function convertBytesToGBs(bytes, precision?): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
 }
-export function hasPaidPlan(subscription?: Subscription) {
+export function hasPaidSubscription(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
     return (
         subscription &&
@@ -38,7 +38,10 @@ export function hasPaidPlan(subscription?: Subscription) {
 
 export function isSubscribed(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
-    return hasPaidPlan(subscription) && !isSubscriptionCancelled(subscription);
+    return (
+        hasPaidSubscription(subscription) &&
+        !isSubscriptionCancelled(subscription)
+    );
 }
 export function isSubscriptionActive(subscription?: Subscription): boolean {
     subscription = subscription ?? getUserSubscription();
@@ -69,13 +72,16 @@ export function getPlans(): Plan[] {
 export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
     return (
         isSubscriptionActive(subscription) &&
-        plan.stripeID === subscription.productID
+        (plan.stripeID === subscription.productID ||
+            plan.iosID === subscription.productID ||
+            plan.androidID === subscription.productID)
     );
 }
-export function hasNonStripeSubscription(subscription: Subscription) {
+export function hasStripeSubscription(subscription: Subscription) {
     return (
+        hasPaidSubscription(subscription) &&
         subscription.paymentProvider.length > 0 &&
-        subscription.paymentProvider !== STRIPE
+        subscription.paymentProvider == STRIPE
     );
 }
 
