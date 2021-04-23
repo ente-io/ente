@@ -110,6 +110,7 @@ function PlanSelector(props: Props) {
                     !isUserSubscribedPlan(plan, subscription) &&
                     (await onPlanSelect(plan))
                 }
+                className='subscription-plan-selector'
                 selected={isUserSubscribedPlan(plan, subscription)}
             >
                 <div>
@@ -134,7 +135,7 @@ function PlanSelector(props: Props) {
                     </span>
                 </div>
                 <div
-                    className={`bold-text`}
+                    className={`bold-text`} style={{ color: "#aaa" }}
                 >{`${plan.price} / ${plan.period}`}</div>
             </PlanIcon>
         ));
@@ -161,10 +162,10 @@ function PlanSelector(props: Props) {
                     </span>
                 </Modal.Title>
             </Modal.Header>
-            <Modal.Body>
+            <Modal.Body style={{ marginTop: '20px' }}>
                 <DeadCenter>
                     <div style={{ display: 'flex' }}>
-                        <span className={`bold-text`}>{constants.YEARLY}</span>
+                        <span className={`bold-text`} style={{ fontSize: '20px' }}>{constants.YEARLY}</span>
 
                         <Form.Switch
                             checked={planPeriod == PLAN_PERIOD.MONTH}
@@ -173,7 +174,7 @@ function PlanSelector(props: Props) {
                             className={`custom-switch-md`}
                             onChange={togglePeriod}
                         />
-                        <span className={`bold-text`}>{constants.MONTHLY}</span>
+                        <span className={`bold-text`} style={{ fontSize: '20px' }}>{constants.MONTHLY}</span>
                     </div>
                 </DeadCenter>
                 <div
@@ -182,7 +183,8 @@ function PlanSelector(props: Props) {
                         justifyContent: 'space-around',
                         flexWrap: 'wrap',
                         minHeight: '212px',
-                        margin: '4% 0',
+                        marginTop: '24px',
+                        marginBottom: '36px',
                     }}
                 >
                     {!plans ? (
@@ -247,6 +249,7 @@ function PlanSelector(props: Props) {
                                         props.setLoading
                                     )
                                 }
+                                style={{ marginTop: '20px' }}
                             >
                                 {constants.MANAGEMENT_PORTAL}
                             </LinkButton>
@@ -255,6 +258,7 @@ function PlanSelector(props: Props) {
                         <LinkButton
                             variant="primary"
                             onClick={props.closeModal}
+                            style={{ color: 'rgb(121, 121, 121)' }}
                         >
                             {isOnFreePlan(subscription)
                                 ? constants.SKIP
