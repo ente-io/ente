@@ -49,7 +49,7 @@ class DiffFetcher {
                   await FilesDB.instance.deleteFromCollection(
                       file.uploadedFileID, file.collectionID);
                   Bus.instance.fire(
-                      CollectionUpdatedEvent(collectionID: file.collectionID));
+                      CollectionUpdatedEvent(file.collectionID, [file]));
                   Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
                 }
                 continue;

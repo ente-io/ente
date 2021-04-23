@@ -1,12 +1,6 @@
 import 'package:photos/events/event.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/events/files_updated_event.dart';
 
-class LocalPhotosUpdatedEvent extends Event {
-  final List<File> updatedFiles;
-
-  LocalPhotosUpdatedEvent(this.updatedFiles) {
-    updatedFiles.sort((a, b) {
-      return a.creationTime.compareTo(b.creationTime);
-    });
-  }
+class LocalPhotosUpdatedEvent extends FilesUpdatedEvent {
+  LocalPhotosUpdatedEvent(updatedFiles) : super(updatedFiles);
 }

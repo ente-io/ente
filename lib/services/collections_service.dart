@@ -88,7 +88,7 @@ class CollectionsService {
     }
     if (fetchedCollections.isNotEmpty) {
       _logger.info("Collections updated");
-      Bus.instance.fire(CollectionUpdatedEvent());
+      Bus.instance.fire(CollectionUpdatedEvent(null, List<File>.empty()));
     }
     return collections;
   }
@@ -324,7 +324,7 @@ class CollectionsService {
     )
         .then((value) async {
       await _filesDB.insertMultiple(files);
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
       SyncService.instance.syncWithRemote(silently: true);
     });
   }
@@ -345,7 +345,7 @@ class CollectionsService {
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     );
     await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
-    Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
+    Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
     SyncService.instance.syncWithRemote(silently: true);
   }
 

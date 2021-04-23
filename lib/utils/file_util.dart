@@ -76,7 +76,8 @@ Future<void> deleteFilesFromEverywhere(
   }
   if (hasUploadedFiles) {
     for (final collectionID in updatedCollectionIDs) {
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID,
+          deletedFiles.where((file) => file.collectionID == collectionID)));
     }
     // TODO: Blocking call?
     SyncService.instance.deleteFilesOnServer();

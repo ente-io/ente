@@ -1,10 +1,10 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/events/event.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/detail_page.dart';
@@ -15,7 +15,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 class LazyLoadingGallery extends StatefulWidget {
   final List<File> files;
-  final Stream<Event> reloadEvent;
+  final Stream<FilesUpdatedEvent> reloadEvent;
   final Future<List<File>> Function(int creationStartTime, int creationEndTime,
       {int limit}) asyncLoader;
   final SelectedFiles selectedFiles;
@@ -37,6 +37,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   static final Logger _logger = Logger("LazyLoadingGallery");
 
   List<File> _files;
+  StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
 
   @override
   void initState() {
@@ -44,29 +45,32 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     _files = widget.files;
     final galleryDate =
         DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
-    widget.reloadEvent.listen((event) async {
-      if (event is LocalPhotosUpdatedEvent) {
-        bool isOnSameDay = event.updatedFiles.where((file) {
-          final fileDate =
-              DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
-          return fileDate.year == galleryDate.year &&
-              fileDate.month == galleryDate.month &&
-              fileDate.day == galleryDate.day;
-        }).isNotEmpty;
-        if (isOnSameDay) {
-          final dayStartTime =
-              DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
-          final files = await widget.asyncLoader(
-              dayStartTime.microsecondsSinceEpoch,
-              dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
-          if (mounted) {
-            setState(() {
-              _files = files;
-            });
-          }
+    _reloadEventSubscription = widget.reloadEvent.listen((event) async {
+      bool isOnSameDay = event.updatedFiles.where((file) {
+        final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
+        return fileDate.year == galleryDate.year &&
+            fileDate.month == galleryDate.month &&
+            fileDate.day == galleryDate.day;
+      }).isNotEmpty;
+      if (isOnSameDay) {
+        final dayStartTime =
+            DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
+        final files = await widget.asyncLoader(
+            dayStartTime.microsecondsSinceEpoch,
+            dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
+        if (mounted) {
+          setState(() {
+            _files = files;
+          });
         }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _reloadEventSubscription.cancel();
+    super.dispose();
   }
 
   @override

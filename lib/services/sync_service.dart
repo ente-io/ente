@@ -302,7 +302,7 @@ class SyncService {
           " files in collection " +
           collectionID.toString());
       Bus.instance.fire(LocalPhotosUpdatedEvent(diff.updatedFiles));
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
       if (diff.fetchCount == kDiffLimit) {
         return await _syncCollectionDiff(collectionID);
       }
@@ -376,7 +376,7 @@ class SyncService {
 
   Future<void> _onFileUploaded(
       File file, int alreadyUploaded, int toBeUploadedInThisSession) async {
-    Bus.instance.fire(CollectionUpdatedEvent(collectionID: file.collectionID));
+    Bus.instance.fire(CollectionUpdatedEvent(file.collectionID, [file]));
     _completedUploads++;
     final completed =
         await FilesDB.instance.getNumberOfUploadedFiles() - alreadyUploaded;

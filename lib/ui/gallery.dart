@@ -4,8 +4,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/events/event.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common_elements.dart';
@@ -24,7 +23,7 @@ class Gallery extends StatefulWidget {
   final Future<List<File>> Function(int creationStartTime, int creationEndTime,
       {int limit}) asyncLoader;
   final Future<List<int>> Function() creationTimesLoader;
-  final Stream<Event> reloadEvent;
+  final Stream<FilesUpdatedEvent> reloadEvent;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
   final Widget headerWidget;
@@ -58,6 +57,7 @@ class _GalleryState extends State<Gallery> {
   int _pageIndex = 0;
   List<List<int>> _collatedCreationTimes = [];
   bool _hasLoadedCreationTimes = false;
+  StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
 
   @override
   void initState() {
@@ -66,20 +66,9 @@ class _GalleryState extends State<Gallery> {
         maximumSize: kCacheSize ~/ kPageSize);
     _cache = MapCache<int, HugeListViewPageResult<List<File>>>(map: _map);
     if (widget.reloadEvent != null) {
-      widget.reloadEvent.listen((event) {
-        if (mounted) {
-          _logger.info("Building gallery because reload event fired");
-          setState(() {
-            if (event is LocalPhotosUpdatedEvent) {
-              _loadCreationTimes();
-            } else {
-              _logger.info("Clearing all cache");
-              _map.clear();
-              _hasLoadedCreationTimes = false;
-              _loadCreationTimes();
-            }
-          });
-        }
+      _reloadEventSubscription = widget.reloadEvent.listen((event) {
+        _logger.info("Building gallery because reload event fired");
+        _loadCreationTimes();
       });
     }
     widget.selectedFiles.addListener(() {
@@ -107,6 +96,7 @@ class _GalleryState extends State<Gallery> {
 
   @override
   void dispose() {
+    _reloadEventSubscription.cancel();
     super.dispose();
   }
 
