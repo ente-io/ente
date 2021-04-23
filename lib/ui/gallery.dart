@@ -56,7 +56,7 @@ class _GalleryState extends State<Gallery> {
   Map<int, HugeListViewPageResult<List<File>>> _map;
   MapCache<int, HugeListViewPageResult<List<File>>> _cache;
   int _pageIndex = 0;
-  List<int> _creationTimes;
+  List<List<int>> _collatedCreationTimes = [];
   bool _hasLoadedCreationTimes = false;
 
   @override
@@ -71,7 +71,7 @@ class _GalleryState extends State<Gallery> {
           _logger.info("Building gallery because reload event fired");
           setState(() {
             if (event is LocalPhotosUpdatedEvent) {
-              // TODO: Attach new days
+              _loadCreationTimes();
             } else {
               _logger.info("Clearing all cache");
               _map.clear();
@@ -93,10 +93,14 @@ class _GalleryState extends State<Gallery> {
   void _loadCreationTimes() {
     widget.creationTimesLoader().then((times) async {
       if (mounted) {
-        setState(() {
-          _creationTimes = times;
-          _hasLoadedCreationTimes = true;
-        });
+        final collatedCreationTimes = _collateCreationTimes(times);
+        if (collatedCreationTimes.length != _collatedCreationTimes.length) {
+          _logger.info("New day discovered");
+          setState(() {
+            _hasLoadedCreationTimes = true;
+            _collatedCreationTimes = collatedCreationTimes;
+          });
+        }
       }
     });
   }
@@ -112,9 +116,7 @@ class _GalleryState extends State<Gallery> {
     if (!_hasLoadedCreationTimes) {
       return loadWidget;
     }
-    _logger.info("Creation times fetched " + _creationTimes.length.toString());
-    final collatedTimes = _collateCreationTimes(_creationTimes);
-    var gallery = _getListView(collatedTimes);
+    var gallery = _getListView(_collatedCreationTimes);
     if (widget.isHomePageGallery) {
       gallery = Container(
         margin: const EdgeInsets.only(bottom: 50),
@@ -147,6 +149,12 @@ class _GalleryState extends State<Gallery> {
       isDraggableScrollbarEnabled: collatedTimes.length > 30,
       cache: _cache,
       map: _map,
+      keyDeriver: (int pageIndex) {
+        final date =
+            DateTime.fromMicrosecondsSinceEpoch(collatedTimes[pageIndex][0]);
+        final roundedDate = DateTime(date.year, date.month, date.day);
+        return roundedDate.microsecondsSinceEpoch;
+      },
       pageFuture: (pageIndex) {
         _pageIndex = pageIndex;
         final endTimeIndex =

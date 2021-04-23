@@ -59,9 +59,11 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           final files = await widget.asyncLoader(
               dayStartTime.microsecondsSinceEpoch,
               dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
-          setState(() {
-            _files = files;
-          });
+          if (mounted) {
+            setState(() {
+              _files = files;
+            });
+          }
         }
       }
     });
@@ -69,6 +71,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
   @override
   Widget build(BuildContext context) {
+    if (_files.length == 0) {
+      return Container();
+    }
     return Column(
       children: <Widget>[
         getDayWidget(_files[0].creationTime),

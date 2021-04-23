@@ -68,6 +68,7 @@ class HugeListView<T> extends StatefulWidget {
 
   final Map<int, HugeListViewPageResult<T>> map;
   final MapCache<int, HugeListViewPageResult<T>> cache;
+  final int Function(int) keyDeriver;
 
   HugeListView({
     Key key,
@@ -90,6 +91,7 @@ class HugeListView<T> extends StatefulWidget {
     this.isDraggableScrollbarEnabled = true,
     @required this.map,
     @required this.cache,
+    @required this.keyDeriver,
   })  : assert(pageSize > 0),
         assert(velocityThreshold >= 0),
         super(key: key);
@@ -165,7 +167,8 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
             itemCount: max(widget.totalCount, 0),
             itemBuilder: (context, index) {
               final page = index ~/ widget.pageSize;
-              final pageResult = widget.map[page];
+              final key = widget.keyDeriver(index);
+              final pageResult = widget.map[key];
               final value =
                   pageResult?.items?.elementAt(index % widget.pageSize);
               if (value != null) {
@@ -174,7 +177,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
 
               if (!Scrollable.recommendDeferredLoadingForContext(context)) {
                 widget.cache //
-                    .get(page, ifAbsent: _loadPage)
+                    .get(key, ifAbsent: (_) => _loadPage(page))
                     .then(_reload)
                     .catchError(_error);
               } else if (!_frameCallbackInProgress) {
