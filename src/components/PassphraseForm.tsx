@@ -67,7 +67,7 @@ export default function PassPhraseForm(props: Props) {
                                         onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                                errors.passphrase
+                                            errors.passphrase
                                         )}
                                         disabled={loading}
                                         autoFocus={true}
@@ -86,6 +86,7 @@ export default function PassPhraseForm(props: Props) {
                                     style={{
                                         display: 'flex',
                                         flexDirection: 'column',
+                                        marginTop: '12px',
                                     }}
                                 >
                                     <Button
