@@ -216,10 +216,8 @@ const englishConstants = {
     SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
         <>
             <p>we've received your payment</p>
-            <p>
-                your subscription is valid till{' '}
-                <strong>{dateString(expiryTime)}</strong>
-            </p>
+            your subscription is valid till{' '}
+            <strong>{dateString(expiryTime)}</strong>
         </>
     ),
     SUBSCRIPTION_PURCHASE_CANCELLED:
