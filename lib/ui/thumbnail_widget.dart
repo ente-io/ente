@@ -135,7 +135,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
               _loadNetworkImage();
             } else {
               FilesDB.instance.deleteLocalFile(widget.file.localID);
-              Bus.instance.fire(LocalPhotosUpdatedEvent());
+              Bus.instance.fire(LocalPhotosUpdatedEvent([widget.file]));
             }
             return;
           }

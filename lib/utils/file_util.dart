@@ -51,10 +51,12 @@ Future<void> deleteFilesFromEverywhere(
   }
   bool hasUploadedFiles = false;
   final updatedCollectionIDs = Set<int>();
+  final List<File> deletedFiles = [];
   for (final file in files) {
     if (file.localID != null) {
       // Remove only those files that have been removed from disk
       if (deletedIDs.contains(file.localID)) {
+        deletedFiles.add(file);
         if (file.uploadedFileID != null) {
           hasUploadedFiles = true;
           await FilesDB.instance.markForDeletion(file.uploadedFileID);
@@ -69,8 +71,9 @@ Future<void> deleteFilesFromEverywhere(
     }
     await dialog.hide();
   }
-
-  Bus.instance.fire(LocalPhotosUpdatedEvent());
+  if (deletedFiles.isNotEmpty) {
+    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
+  }
   if (hasUploadedFiles) {
     for (final collectionID in updatedCollectionIDs) {
       Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
@@ -92,14 +95,18 @@ Future<void> deleteFilesOnDeviceOnly(
   }
   final deletedIDs =
       (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
+  final List<File> deletedFiles = [];
   for (final file in files) {
     // Remove only those files that have been removed from disk
     if (deletedIDs.contains(file.localID)) {
+      deletedFiles.add(file);
       file.localID = null;
       FilesDB.instance.update(file);
     }
   }
-  Bus.instance.fire(LocalPhotosUpdatedEvent());
+  if (deletedFiles.isNotEmpty) {
+    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
+  }
   await dialog.hide();
 }
 

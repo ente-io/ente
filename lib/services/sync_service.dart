@@ -207,7 +207,7 @@ class SyncService {
       if (!result) {
         _logger.severe("Did not get permission");
         await _prefs.setInt(kDbUpdationTimeKey, syncStartTime);
-        Bus.instance.fire(LocalPhotosUpdatedEvent());
+        Bus.instance.fire(LocalPhotosUpdatedEvent(List<File>.empty()));
         return await syncWithRemote();
       }
     }
@@ -256,10 +256,12 @@ class SyncService {
           null,
         );
       }
+      final List<File> allFiles = [];
+      allFiles.addAll(files);
       files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
       await _db.insertMultiple(files);
       _logger.info("Inserted " + files.length.toString() + " files.");
-      Bus.instance.fire(LocalPhotosUpdatedEvent());
+      Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
   }
@@ -299,7 +301,7 @@ class SyncService {
           diff.updatedFiles.length.toString() +
           " files in collection " +
           collectionID.toString());
-      Bus.instance.fire(LocalPhotosUpdatedEvent());
+      Bus.instance.fire(LocalPhotosUpdatedEvent(diff.updatedFiles));
       Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
       if (diff.fetchCount == kDiffLimit) {
         return await _syncCollectionDiff(collectionID);

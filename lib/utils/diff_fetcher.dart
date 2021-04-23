@@ -50,7 +50,7 @@ class DiffFetcher {
                       file.uploadedFileID, file.collectionID);
                   Bus.instance.fire(
                       CollectionUpdatedEvent(collectionID: file.collectionID));
-                  Bus.instance.fire(LocalPhotosUpdatedEvent());
+                  Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
                 }
                 continue;
               }

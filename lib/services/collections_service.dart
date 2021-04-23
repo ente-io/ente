@@ -71,7 +71,8 @@ class CollectionsService {
         await _filesDB.deleteCollection(collection.id);
         await _db.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
-        Bus.instance.fire(LocalPhotosUpdatedEvent());
+        Bus.instance.fire(
+            LocalPhotosUpdatedEvent(List<File>.empty()));
       } else {
         updatedCollections.add(collection);
       }

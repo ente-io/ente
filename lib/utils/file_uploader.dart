@@ -365,7 +365,7 @@ class FileUploader {
         await FilesDB.instance.update(remoteFile);
       }
       if (!_isBackground) {
-        Bus.instance.fire(LocalPhotosUpdatedEvent());
+        Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
       }
       _logger.info("File upload complete for " + remoteFile.toString());
       return remoteFile;
