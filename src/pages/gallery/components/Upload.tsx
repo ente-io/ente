@@ -4,9 +4,10 @@ import CollectionSelector from './CollectionSelector';
 import UploadProgress from './UploadProgress';
 import UploadService from 'services/uploadService';
 import { createAlbum } from 'services/collectionService';
-import CreateCollection from './CreateCollection';
+import NameCollection from './NameCollection';
 import ChoiceModal from './ChoiceModal';
 import { file } from 'services/fileService';
+import constants from 'utils/strings/constants';
 
 interface Props {
     collectionSelectorView: any;
@@ -42,7 +43,6 @@ export default function Upload(props: Props) {
         fileAnalysisResult,
         setFileAnalysisResult,
     ] = useState<AnalysisResult>(null);
-    const [triggerFocus, setTriggerFocus] = useState(false);
     useEffect(() => {
         if (!props.collectionSelectorView) {
             return;
@@ -174,7 +174,6 @@ export default function Upload(props: Props) {
         if (!fileAnalysisResult) {
             return;
         }
-        setTriggerFocus((prev) => !prev);
         fileAnalysisResult.multipleFolders
             ? setChoiceModalView(true)
             : setCreateCollectionView(true);
@@ -190,19 +189,24 @@ export default function Upload(props: Props) {
                 closeCollectionSelector={props.closeCollectionSelector}
                 loading={props.acceptedFiles.length === 0}
             />
-            <CreateCollection
-                createCollectionView={createCollectionView}
-                setCreateCollectionView={setCreateCollectionView}
+            <NameCollection
+                show={createCollectionView}
+                onHide={() => setCreateCollectionView(false)}
                 autoFilledName={fileAnalysisResult?.suggestedCollectionName}
-                uploadFiles={uploadFilesToNewCollections}
-                triggerFocus={triggerFocus}
+                callback={uploadFilesToNewCollections.bind(
+                    null,
+                    UPLOAD_STRATEGY.SINGLE_COLLECTION
+                )}
+                purpose={{
+                    title: constants.CREATE_COLLECTION,
+                    buttonText: constants.CREATE,
+                }}
             />
             <ChoiceModal
                 show={choiceModalView}
                 onHide={() => setChoiceModalView(false)}
                 uploadFiles={uploadFilesToNewCollections}
                 showCollectionCreateModal={() => setCreateCollectionView(true)}
-                setTriggerFocus={setTriggerFocus}
             />
             <UploadProgress
                 now={percentComplete}
