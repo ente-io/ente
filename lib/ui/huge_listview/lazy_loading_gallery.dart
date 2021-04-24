@@ -94,6 +94,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         _files.sublist(index, min(index + kSubGalleryItemLimit, _files.length)),
         widget.asyncLoader,
         widget.selectedFiles,
+        index == 0,
       ));
     }
 
@@ -111,9 +112,10 @@ class LazyLoadingGridView extends StatefulWidget {
   final files;
   final asyncLoader;
   final selectedFiles;
+  final isVisible;
 
-  LazyLoadingGridView(
-      this.tag, this.files, this.asyncLoader, this.selectedFiles,
+  LazyLoadingGridView(this.tag, this.files, this.asyncLoader,
+      this.selectedFiles, this.isVisible,
       {Key key})
       : super(key: key);
 
@@ -122,7 +124,13 @@ class LazyLoadingGridView extends StatefulWidget {
 }
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
-  bool _isVisible = false;
+  bool _isVisible;
+  
+  @override
+  void initState() {
+    super.initState();
+    _isVisible = widget.isVisible;
+  }
 
   @override
   Widget build(BuildContext context) {
