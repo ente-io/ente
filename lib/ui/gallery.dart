@@ -4,7 +4,9 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common_elements.dart';
@@ -201,7 +203,6 @@ class _GalleryState extends State<Gallery> {
   }
 
   List<List<File>> _clubFiles(List<File> files) {
-    _logger.info("Clubbing file count " + files.length.toString());
     final List<File> dailyFiles = [];
     final List<List<File>> collatedFiles = [];
     for (int index = 0; index < files.length; index++) {
