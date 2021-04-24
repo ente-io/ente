@@ -5,6 +5,7 @@ import {
     Collection,
     CollectionType,
     deleteCollection,
+    renameCollection,
 } from 'services/collectionService';
 import styled from 'styled-components';
 import { SetConfirmAction } from 'utils/billingUtil';
@@ -95,7 +96,8 @@ export default function Collections(props: CollectionProps) {
             </Option>
         )
     );
-    const renameCollection = async () => {
+    const collectionRename = async (selectedCollection, albumName) => {
+        await renameCollection(selectedCollection, albumName);
         props.syncWithRemote();
     };
     return (
@@ -104,7 +106,7 @@ export default function Collections(props: CollectionProps) {
                 show={renameCollectionModalView}
                 onHide={() => setRenameCollectionModalView(false)}
                 autoFilledName={selectedCollection?.name}
-                callback={renameCollection}
+                callback={collectionRename.bind(null, selectedCollection)}
                 purpose={{
                     title: constants.RENAME_COLLECTION,
                     buttonText: constants.RENAME,

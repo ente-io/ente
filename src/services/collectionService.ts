@@ -375,6 +375,34 @@ export const deleteCollection = async (
     }
 };
 
+export const renameCollection = async (
+    collection: Collection,
+    newCollectionName: string
+) => {
+    const token = getToken();
+    const worker = await new CryptoWorker();
+    const {
+        encryptedData: encryptedName,
+        nonce: nameDecryptionNonce,
+    }: B64EncryptionResult = await worker.encryptUTF8(
+        newCollectionName,
+        collection.key
+    );
+    const collectionRenameRequest = {
+        collectionID: collection.id,
+        encryptedName,
+        nameDecryptionNonce,
+    };
+    await HTTPService.post(
+        `${ENDPOINT}/collections/rename`,
+        collectionRenameRequest,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+};
+
 export const getFavCollection = async () => {
     const collections = await getLocalCollections();
     for (let collection of collections) {
