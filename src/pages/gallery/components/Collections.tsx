@@ -1,17 +1,26 @@
-import React from 'react';
-import { Collection } from 'services/collectionService';
+import { CONFIRM_ACTION } from 'components/ConfirmDialog';
+import React, { useEffect, useState } from 'react';
+import { Dropdown } from 'react-bootstrap';
+import {
+    Collection,
+    CollectionType,
+    deleteCollection,
+    getFavCollection,
+} from 'services/collectionService';
 import styled from 'styled-components';
+import { SetConfirmAction } from 'utils/billingUtil';
+import constants from 'utils/strings/constants';
 
 interface CollectionProps {
     collections: Collection[];
     selected?: number;
     selectCollection: (id?: number) => void;
+    setConfirmAction: SetConfirmAction;
+    syncWithRemote: Function;
 }
 
 const Container = styled.div`
     margin: 0 auto;
-    overflow-y: hidden;
-    height: 50px;
     display: flex;
     max-width: 100%;
 
@@ -29,12 +38,15 @@ const Container = styled.div`
 `;
 
 const Wrapper = styled.div`
-    height: 70px;
     margin-top: 10px;
-    flex: 1;
     white-space: nowrap;
-    overflow: auto;
     max-width: 100%;
+`;
+const Option = styled.div`
+    display: inline-block;
+    opacity: 0;
+    font-weight: bold;
+    padding-left: 5px;
 `;
 const Chip = styled.button<{ active: boolean }>`
     border-radius: 8px;
@@ -49,6 +61,10 @@ const Chip = styled.button<{ active: boolean }>`
         box-shadow: 0 0 0 2px #2666cc;
         background-color: #eee;
     }
+    &:hover ${Option} {
+        opacity: 1;
+        color: ${(props) => (props.active ? 'black' : 'white')};
+    }
 `;
 
 export default function Collections(props: CollectionProps) {
@@ -57,19 +73,60 @@ export default function Collections(props: CollectionProps) {
     if (!collections || collections.length === 0) {
         return <Container />;
     }
+    const CustomToggle = React.forwardRef<any, { onClick }>(
+        ({ children, onClick }, ref) => (
+            <Option
+                ref={ref}
+                onClick={(e) => {
+                    e.preventDefault();
+                    onClick(e);
+                }}
+            >
+                {children}
+                &#8942;
+            </Option>
+        )
+    );
     return (
         <Container>
             <Wrapper>
                 <Chip active={!selected} onClick={clickHandler()}>
                     All
                 </Chip>
-                {collections?.map((item) => (
+                {collections?.map((item, index) => (
                     <Chip
                         key={item.id}
                         active={selected === item.id}
                         onClick={clickHandler(item.id)}
                     >
-                        {item.name}
+                        <Dropdown>
+                            {item.name}
+                            {item.type != CollectionType.favorites && (
+                                <>
+                                    <Dropdown.Toggle as={CustomToggle} split />
+                                    <Dropdown.Menu>
+                                        <Dropdown.Item>
+                                            {constants.RENAME}
+                                        </Dropdown.Item>
+                                        <Dropdown.Item
+                                            onClick={() => {
+                                                props.setConfirmAction({
+                                                    action:
+                                                        CONFIRM_ACTION.DELETE_COLLECTION,
+                                                    callback: deleteCollection.bind(
+                                                        null,
+                                                        item.id,
+                                                        props.syncWithRemote
+                                                    ),
+                                                });
+                                            }}
+                                        >
+                                            {constants.DELETE}
+                                        </Dropdown.Item>
+                                    </Dropdown.Menu>
+                                </>
+                            )}
+                        </Dropdown>
                     </Chip>
                 ))}
             </Wrapper>
