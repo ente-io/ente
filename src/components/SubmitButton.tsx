@@ -7,7 +7,7 @@ interface Props {
 }
 const SubmitButton = ({ loading, buttonText }: Props) => (
     <Button
-        variant="success"
+        variant="outline-success"
         type="submit"
         block
         disabled={loading}
