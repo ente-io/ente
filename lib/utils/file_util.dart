@@ -181,7 +181,7 @@ final Map<int, Future<io.File>> fileDownloadsInProgress =
 
 final _thumbnailQueue = LinkedHashMap<int, FileDownloadItem>();
 int _currentlyDownloading = 0;
-int kMaximumConcurrentDownloads = 100;
+const int kMaximumConcurrentDownloads = 500;
 
 class FileDownloadItem {
   final File file;
