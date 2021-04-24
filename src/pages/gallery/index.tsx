@@ -454,6 +454,8 @@ export default function Gallery(props: Props) {
                 collections={collections}
                 selected={Number(router.query.collection)}
                 selectCollection={selectCollection}
+                setConfirmAction={setConfirmAction}
+                syncWithRemote={syncWithRemote}
             />
             <Upload
                 collectionSelectorView={props.collectionSelectorView}

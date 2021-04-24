@@ -257,6 +257,10 @@ const englishConstants = {
 
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
     CANCEL_SUBSCRIPTION_ON_MOBILE: `please cancel your subscription from the mobile app to activate a subscription here`,
+    RENAME: 'rename',
+    DELETE_COLLECTION: 'delete collection',
+    DELETE_COLLECTION_MESSAGE: () =>
+        'are you sure you want to delete this collection, all files in this will also be deleted if they are not in any other collection',
 };
 
 export default englishConstants;

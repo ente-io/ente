@@ -12,7 +12,7 @@ import { ErrorHandler } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();
 
-enum CollectionType {
+export enum CollectionType {
     folder = 'folder',
     favorites = 'favorites',
     album = 'album',
@@ -130,7 +130,6 @@ export const syncCollections = async () => {
     if (updatedCollections.length == 0) {
         return localCollections;
     }
-    setLocalFavoriteCollection(updatedCollections);
     const allCollectionsInstances = [
         ...localCollections,
         ...updatedCollections,
@@ -193,7 +192,7 @@ export const getCollectionAndItsLatestFile = (
 };
 
 export const getFavItemIds = async (files: file[]): Promise<Set<number>> => {
-    let favCollection = await localForage.getItem<Collection>(FAV_COLLECTION);
+    let favCollection = await getFavCollection();
     if (!favCollection) return new Set();
 
     return new Set(
@@ -281,9 +280,7 @@ const postCollection = async (
 };
 
 export const addToFavorites = async (file: file) => {
-    let favCollection: Collection = await localForage.getItem<Collection>(
-        FAV_COLLECTION
-    );
+    let favCollection = await getFavCollection();
     if (!favCollection) {
         favCollection = await createCollection(
             'Favorites',
@@ -295,9 +292,7 @@ export const addToFavorites = async (file: file) => {
 };
 
 export const removeFromFavorites = async (file: file) => {
-    let favCollection: Collection = await localForage.getItem<Collection>(
-        FAV_COLLECTION
-    );
+    let favCollection = await getFavCollection();
     await removeFromCollection(favCollection, [file]);
 };
 
@@ -361,17 +356,33 @@ const removeFromCollection = async (collection: Collection, files: file[]) => {
     }
 };
 
-const setLocalFavoriteCollection = async (collections: Collection[]) => {
-    const localFavCollection = await localForage.getItem(FAV_COLLECTION);
-    if (localFavCollection) {
-        return;
+export const deleteCollection = async (
+    collectionID: number,
+    syncWithRemote: Function
+) => {
+    try {
+        const token = getToken();
+
+        await HTTPService.delete(
+            `${ENDPOINT}/collections/${collectionID}`,
+            null,
+            null,
+            { 'X-Auth-Token': token }
+        );
+        syncWithRemote();
+    } catch (e) {
+        console.error('delete collection failed ', e);
     }
-    const favCollection = collections.filter(
-        (collection) => collection.type == CollectionType.favorites
-    );
-    if (favCollection.length > 0) {
-        await localForage.setItem(FAV_COLLECTION, favCollection[0]);
+};
+
+export const getFavCollection = async () => {
+    const collections = await getLocalCollections();
+    for (let collection of collections) {
+        if (collection.type == CollectionType.favorites) {
+            return collection;
+        }
     }
+    return null;
 };
 
 export const getNonEmptyCollections = (

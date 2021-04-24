@@ -16,6 +16,7 @@ export enum CONFIRM_ACTION {
     ACTIVATE_SUBSCRIPTION,
     UPDATE_SUBSCRIPTION,
     UPDATE_PAYMENT_METHOD,
+    DELETE_COLLECTION,
 }
 
 const CONFIRM_ACTION_VALUES = [
@@ -27,6 +28,7 @@ const CONFIRM_ACTION_VALUES = [
     { text: 'ACTIVATE_SUBSCRIPTION', type: 'success' },
     { text: 'UPDATE_SUBSCRIPTION', type: 'success' },
     { text: 'UPDATE_PAYMENT_METHOD', type: 'primary' },
+    { text: 'DELETE_COLLECTION', type: 'danger' },
 ];
 function inverseButtonType(type) {
     if (type === 'success') return 'danger';
