@@ -1,15 +1,15 @@
 import { CONFIRM_ACTION } from 'components/ConfirmDialog';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import {
     Collection,
     CollectionType,
     deleteCollection,
-    getFavCollection,
 } from 'services/collectionService';
 import styled from 'styled-components';
 import { SetConfirmAction } from 'utils/billingUtil';
 import constants from 'utils/strings/constants';
+import NameCollection from './NameCollection';
 
 interface CollectionProps {
     collections: Collection[];
@@ -69,7 +69,15 @@ const Chip = styled.button<{ active: boolean }>`
 
 export default function Collections(props: CollectionProps) {
     const { selected, collections, selectCollection } = props;
-    const clickHandler = (id?: number) => () => selectCollection(id);
+    const [selectedCollection, setSelectedCollection] = useState(null);
+    const [renameCollectionModalView, setRenameCollectionModalView] = useState(
+        false
+    );
+    const clickHandler = (collection?: Collection) => () => {
+        setSelectedCollection(collection);
+        selectCollection(collection.id);
+    };
+
     if (!collections || collections.length === 0) {
         return <Container />;
     }
@@ -87,49 +95,73 @@ export default function Collections(props: CollectionProps) {
             </Option>
         )
     );
+    const renameCollection = async () => {
+        props.syncWithRemote();
+    };
     return (
-        <Container>
-            <Wrapper>
-                <Chip active={!selected} onClick={clickHandler()}>
-                    All
-                </Chip>
-                {collections?.map((item, index) => (
-                    <Chip
-                        key={item.id}
-                        active={selected === item.id}
-                        onClick={clickHandler(item.id)}
-                    >
-                        <Dropdown>
-                            {item.name}
-                            {item.type != CollectionType.favorites && (
-                                <>
-                                    <Dropdown.Toggle as={CustomToggle} split />
-                                    <Dropdown.Menu>
-                                        <Dropdown.Item>
-                                            {constants.RENAME}
-                                        </Dropdown.Item>
-                                        <Dropdown.Item
-                                            onClick={() => {
-                                                props.setConfirmAction({
-                                                    action:
-                                                        CONFIRM_ACTION.DELETE_COLLECTION,
-                                                    callback: deleteCollection.bind(
-                                                        null,
-                                                        item.id,
-                                                        props.syncWithRemote
-                                                    ),
-                                                });
-                                            }}
-                                        >
-                                            {constants.DELETE}
-                                        </Dropdown.Item>
-                                    </Dropdown.Menu>
-                                </>
-                            )}
-                        </Dropdown>
+        <>
+            <NameCollection
+                show={renameCollectionModalView}
+                onHide={() => setRenameCollectionModalView(false)}
+                autoFilledName={selectedCollection?.name}
+                callback={renameCollection}
+                purpose={{
+                    title: constants.RENAME_COLLECTION,
+                    buttonText: constants.RENAME,
+                }}
+            />
+            <Container>
+                <Wrapper>
+                    <Chip active={!selected} onClick={clickHandler()}>
+                        All
                     </Chip>
-                ))}
-            </Wrapper>
-        </Container>
+                    {collections?.map((item, index) => (
+                        <Chip
+                            key={item.id}
+                            active={selected === item.id}
+                            onClick={clickHandler(item)}
+                        >
+                            <Dropdown>
+                                {item.name}
+                                {item.type != CollectionType.favorites && (
+                                    <>
+                                        <Dropdown.Toggle
+                                            as={CustomToggle}
+                                            split
+                                        />
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item
+                                                onClick={() => {
+                                                    setRenameCollectionModalView(
+                                                        true
+                                                    );
+                                                }}
+                                            >
+                                                {constants.RENAME}
+                                            </Dropdown.Item>
+                                            <Dropdown.Item
+                                                onClick={() => {
+                                                    props.setConfirmAction({
+                                                        action:
+                                                            CONFIRM_ACTION.DELETE_COLLECTION,
+                                                        callback: deleteCollection.bind(
+                                                            null,
+                                                            item.id,
+                                                            props.syncWithRemote
+                                                        ),
+                                                    });
+                                                }}
+                                            >
+                                                {constants.DELETE}
+                                            </Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </>
+                                )}
+                            </Dropdown>
+                        </Chip>
+                    ))}
+                </Wrapper>
+            </Container>
+        </>
     );
 }
