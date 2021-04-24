@@ -244,6 +244,11 @@ const GlobalStyles = createGlobalStyle`
     .subscription-plan-selector:hover {
         background: #1b1b1b;
     }
+    .dropdown-item:active{
+        color: #16181b;
+        text-decoration: none;
+        background-color: #e9ecef;
+    }
 `;
 
 const Image = styled.img`

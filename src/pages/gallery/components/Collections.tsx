@@ -47,7 +47,8 @@ const Option = styled.div`
     display: inline-block;
     opacity: 0;
     font-weight: bold;
-    padding-left: 5px;
+    width: 0px;
+    margin: 0 9px;
 `;
 const Chip = styled.button<{ active: boolean }>`
     border-radius: 8px;
@@ -58,10 +59,6 @@ const Chip = styled.button<{ active: boolean }>`
         props.active ? '#fff' : 'rgba(255, 255, 255, 0.3)'};
     outline: none !important;
 
-    &:focus {
-        box-shadow: 0 0 0 2px #2666cc;
-        background-color: #eee;
-    }
     &:hover ${Option} {
         opacity: 1;
         color: ${(props) => (props.active ? 'black' : 'white')};
@@ -88,6 +85,7 @@ export default function Collections(props: CollectionProps) {
                 ref={ref}
                 onClick={(e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     onClick(e);
                 }}
             >
@@ -131,7 +129,15 @@ export default function Collections(props: CollectionProps) {
                                             as={CustomToggle}
                                             split
                                         />
-                                        <Dropdown.Menu>
+                                        <Dropdown.Menu
+                                            style={{
+                                                minWidth: '2em',
+                                                borderRadius: '8px',
+                                                fontSize: '12px',
+                                                boxShadow:
+                                                    'rgba(252, 0, 0, 0.6) 0px 1px 2px 0px, rgba(255, 0, 0, 0.3) 0px 2px 6px 2px',
+                                            }}
+                                        >
                                             <Dropdown.Item
                                                 onClick={() => {
                                                     setRenameCollectionModalView(
@@ -141,7 +147,11 @@ export default function Collections(props: CollectionProps) {
                                             >
                                                 {constants.RENAME}
                                             </Dropdown.Item>
+                                            <Dropdown.Divider
+                                                style={{ margin: '2px' }}
+                                            />
                                             <Dropdown.Item
+                                                style={{ color: '#c93f3f' }}
                                                 onClick={() => {
                                                     props.setConfirmAction({
                                                         action:
