@@ -7,39 +7,39 @@ import * as Yup from 'yup';
 import SubmitButton from 'components/SubmitButton';
 
 interface Props {
-    createCollectionView;
-    setCreateCollectionView;
-    autoFilledName;
-    uploadFiles: (strategy: UPLOAD_STRATEGY, collectionName) => Promise<void>;
-    triggerFocus;
+    show: boolean;
+    onHide: () => void;
+    autoFilledName: string;
+    callback: any;
+    purpose: { title: string; buttonText: string };
 }
 interface formValues {
     albumName: string;
 }
-export default function CreateCollection(props: Props) {
+export default function NameCollection(props: Props) {
     const collectionNameInputRef = useRef(null);
 
-    const onSubmit = async ({ albumName }: formValues) => {
-        props.setCreateCollectionView(false);
-        await props.uploadFiles(UPLOAD_STRATEGY.SINGLE_COLLECTION, albumName);
+    const onSubmit = ({ albumName }: formValues) => {
+        props.callback(albumName);
+        props.onHide();
     };
 
     useEffect(() => {
         setTimeout(() => {
             collectionNameInputRef.current?.focus();
         }, 200);
-    }, [props.triggerFocus]);
+    }, [props.show]);
     return (
         <Modal
-            show={props.createCollectionView}
-            onHide={() => props.setCreateCollectionView(false)}
+            show={props.show}
+            onHide={props.onHide}
             centered
             backdrop="static"
             style={{ background: 'rgba(0, 0, 0, 0.8)' }}
             dialogClassName="ente-modal"
         >
             <Modal.Header closeButton>
-                <Modal.Title>{constants.CREATE_COLLECTION}</Modal.Title>
+                <Modal.Title>{props.purpose.title}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Formik<formValues>
@@ -70,6 +70,7 @@ export default function CreateCollection(props: Props) {
                                     )}
                                     placeholder={constants.ENTER_ALBUM_NAME}
                                     ref={collectionNameInputRef}
+                                    autoFocus={true}
                                 />
 
                                 <Form.Control.Feedback
@@ -80,7 +81,7 @@ export default function CreateCollection(props: Props) {
                                 </Form.Control.Feedback>
                             </Form.Group>
                             <SubmitButton
-                                buttonText={constants.CREATE}
+                                buttonText={props.purpose.buttonText}
                                 loading={false}
                             />
                         </Form>
