@@ -108,11 +108,12 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 }
 
 class LazyLoadingGridView extends StatefulWidget {
-  final tag;
-  final files;
-  final asyncLoader;
-  final selectedFiles;
-  final isVisible;
+  final String tag;
+  final List<File> files;
+  final Future<List<File>> Function(int creationStartTime, int creationEndTime,
+      {int limit}) asyncLoader;
+  final SelectedFiles selectedFiles;
+  final bool isVisible;
 
   LazyLoadingGridView(this.tag, this.files, this.asyncLoader,
       this.selectedFiles, this.isVisible,
@@ -125,7 +126,7 @@ class LazyLoadingGridView extends StatefulWidget {
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   bool _isVisible;
-  
+
   @override
   void initState() {
     super.initState();
