@@ -95,6 +95,7 @@ function PlanSelector(props: Props) {
                         props.setLoading,
                         props.closeModal
                     ),
+                    variant: 'success',
                 },
                 close: { text: constants.CANCEL },
             });
@@ -236,6 +237,7 @@ function PlanSelector(props: Props) {
                                                     props.closeModal,
                                                     props.setLoading
                                                 ),
+                                                variant: 'success',
                                             },
                                             close: {
                                                 text: constants.CANCEL,
@@ -263,6 +265,7 @@ function PlanSelector(props: Props) {
                                                     props.closeModal,
                                                     props.setLoading
                                                 ),
+                                                variant: 'danger',
                                             },
                                             close: {
                                                 text: constants.CANCEL,

@@ -9,7 +9,7 @@ export interface MessageAttributes {
     proceed?: {
         text: string;
         action: any;
-        variant?: string;
+        variant: string;
         disabled?: boolean;
     };
     content?: any;
