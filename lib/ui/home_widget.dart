@@ -15,8 +15,6 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
-import 'package:photos/models/filters/important_items_filter.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -236,8 +234,15 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     return Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit}) {
-        return FilesDB.instance
-            .getFiles(creationStartTime, creationEndTime, limit: limit);
+        final importantPaths = Configuration.instance.getPathsToBackUp();
+        if (importantPaths.isNotEmpty) {
+          return FilesDB.instance.getFilesInPaths(
+              creationStartTime, creationEndTime, importantPaths.toList(),
+              limit: limit);
+        } else {
+          return FilesDB.instance
+              .getAllFiles(creationStartTime, creationEndTime, limit: limit);
+        }
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       tagPrefix: "home_gallery",
@@ -293,19 +298,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
       ),
     );
-  }
-
-  List<File> _getFilteredPhotos(List<File> unfilteredFiles) {
-    _logger.info("Filtering " + unfilteredFiles.length.toString());
-    final List<File> filteredPhotos = List<File>();
-    final filter = ImportantItemsFilter();
-    for (File file in unfilteredFiles) {
-      if (filter.shouldInclude(file)) {
-        filteredPhotos.add(file);
-      }
-    }
-    _logger.info("Filtered down to " + filteredPhotos.length.toString());
-    return filteredPhotos;
   }
 
   void _showBackupFolderSelectionDialog() {
