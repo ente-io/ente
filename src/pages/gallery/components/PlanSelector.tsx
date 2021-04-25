@@ -10,7 +10,6 @@ import {
     isUserSubscribedPlan,
     isSubscriptionCancelled,
     updatePaymentMethod,
-    SetConfirmAction,
     SetDialogMessage,
     SetLoading,
     updateSubscription,

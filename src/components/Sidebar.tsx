@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
-import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import billingService, { Subscription } from 'services/billingService';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -15,7 +14,6 @@ import {
     isOnFreePlan,
     isSubscriptionCancelled,
     isSubscribed,
-    SetConfirmAction,
     SetDialogMessage,
 } from 'utils/billingUtil';
 

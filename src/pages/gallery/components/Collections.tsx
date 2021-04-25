@@ -1,4 +1,3 @@
-import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import React, { useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import {
