@@ -106,16 +106,18 @@ const englishConstants = {
     TITLE: 'ente.io | encrypted photo storage',
     UPLOAD_FIRST_PHOTO: 'backup your first photo',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
-    DELETE_MESSAGE: () => 'sure you want to delete selected files?',
+    CONFIRM_DELETE_FILE: 'confirm file deletion',
+    DELETE_FILE_MESSAGE: 'sure you want to delete selected files?',
+    DELETE_FILE: 'delete files',
     DELETE: 'delete',
     UPLOAD_STRATEGY_CHOICE:
         'you are uploading multiple folders, would you like us to create',
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
     OR: 'or',
     UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
-    SESSION_EXPIRED_MESSAGE: () =>
+    SESSION_EXPIRED_MESSAGE:
         'your session has expired, please login again to continue',
-    SESSION_EXPIRED: 'login',
+    SESSION_EXPIRED: 'session expired',
     SYNC_FAILED:
         'failed to sync with remote server, please refresh page to try again',
     PASSWORD_GENERATION_FAILED: `your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser`,
@@ -146,7 +148,7 @@ const englishConstants = {
     SKIP: 'skip',
     CANCEL: 'cancel',
     LOGOUT: 'logout',
-    LOGOUT_MESSAGE: () => 'sure you want to logout?',
+    LOGOUT_MESSAGE: 'sure you want to logout?',
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email ?',
     OK: 'ok',
@@ -172,9 +174,13 @@ const englishConstants = {
             to automatically backup all your photos
         </div>
     ),
-    DOWNLOAD_APP_MESSAGE: () =>
-        'sorry, this operation is currently not supported on the web, do you want to download the desktop app',
-    DOWNLOAD_APP: 'download',
+    DOWNLOAD_APP_MESSAGE: () => (
+        <>
+            <p>sorry, this operation is currently not supported on the web,</p>
+            <p> do you want to download the desktop app</p>
+        </>
+    ),
+    DOWNLOAD_APP: 'download desktop app',
     EXPORT: 'export data',
 
     // ========================
@@ -232,10 +238,10 @@ const englishConstants = {
     UPDATE_PAYMENT_METHOD: 'update payment method',
     MONTHLY: 'monthly',
     YEARLY: 'yearly',
-    UPDATE_SUBSCRIPTION_MESSAGE: () =>
-        'are you sure you want to change your plan?',
+    UPDATE_SUBSCRIPTION_MESSAGE: 'are you sure you want to change your plan?',
     UPDATE_SUBSCRIPTION: 'change plan',
 
+    CONFIRM_CANCEL_SUBSCRIPTION: 'confirm unsubscription',
     CANCEL_SUBSCRIPTION: 'unsubscribe',
     CANCEL_SUBSCRIPTION_MESSAGE: () => (
         <>
@@ -250,6 +256,7 @@ const englishConstants = {
     SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
 
     ACTIVATE_SUBSCRIPTION: 'reactivate subscription',
+    CONFIRM_ACTIVATE_SUBSCRIPTION: 'confirm subscription activation',
     ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
         `once reactivated, you will be billed on ${dateString(expiryTime)}`,
     SUBSCRIPTION_ACTIVATE_SUCCESS: 'subscription successfully activated',
@@ -259,9 +266,18 @@ const englishConstants = {
     CANCEL_SUBSCRIPTION_ON_MOBILE: `please cancel your subscription from the mobile app to activate a subscription here`,
     RENAME: 'rename',
     RENAME_COLLECTION: 'rename album',
+    CONFIRM_DELETE_COLLECTION: 'confirm collection deletion',
     DELETE_COLLECTION: 'delete collection',
-    DELETE_COLLECTION_MESSAGE: () =>
-        'are you sure you want to delete this collection, all files in this will also be deleted if they are not in any other collection',
+    DELETE_COLLECTION_MESSAGE: () => (
+        <>
+            <p>are you sure you want to delete this collection,</p>
+            <p>
+                {' '}
+                all files in this will also be deleted if they are not in any
+                other collection
+            </p>
+        </>
+    ),
 };
 
 export default englishConstants;

@@ -8,7 +8,8 @@ import {
     renameCollection,
 } from 'services/collectionService';
 import styled from 'styled-components';
-import { SetConfirmAction } from 'utils/billingUtil';
+import { SetDialogMessage } from 'utils/billingUtil';
+import { reverseString } from 'utils/common';
 import constants from 'utils/strings/constants';
 import NameCollection from './NameCollection';
 
@@ -16,7 +17,7 @@ interface CollectionProps {
     collections: Collection[];
     selected?: number;
     selectCollection: (id?: number) => void;
-    setConfirmAction: SetConfirmAction;
+    setDialogMessage: SetDialogMessage;
     syncWithRemote: Function;
 }
 
@@ -153,14 +154,25 @@ export default function Collections(props: CollectionProps) {
                                             <Dropdown.Item
                                                 style={{ color: '#c93f3f' }}
                                                 onClick={() => {
-                                                    props.setConfirmAction({
-                                                        action:
-                                                            CONFIRM_ACTION.DELETE_COLLECTION,
-                                                        callback: deleteCollection.bind(
-                                                            null,
-                                                            item.id,
-                                                            props.syncWithRemote
-                                                        ),
+                                                    props.setDialogMessage({
+                                                        title:
+                                                            constants.CONFIRM_DELETE_COLLECTION,
+                                                        content: constants.DELETE_COLLECTION_MESSAGE(),
+                                                        staticBackdrop: true,
+                                                        proceed: {
+                                                            text:
+                                                                constants.DELETE_COLLECTION,
+                                                            action: deleteCollection.bind(
+                                                                null,
+                                                                item.id,
+                                                                props.syncWithRemote
+                                                            ),
+                                                            variant: 'danger',
+                                                        },
+                                                        close: {
+                                                            text:
+                                                                constants.CANCEL,
+                                                        },
                                                     });
                                                 }}
                                             >
