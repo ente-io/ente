@@ -233,7 +233,7 @@ const englishConstants = {
     SUBSCRIPTION_PURCHASE_FAILED:
         'subscription purchase failed , please try again later',
 
-    UPDATE_PAYMENT_METHOD_MESSAGE: () =>
+    UPDATE_PAYMENT_METHOD_MESSAGE:
         'we are sorry, payment failed when we tried to charge your card, please update your payment method and try again',
     UPDATE_PAYMENT_METHOD: 'update payment method',
     MONTHLY: 'monthly',

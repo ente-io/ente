@@ -1,7 +1,3 @@
-import {
-    ConfirmActionAttributes,
-    CONFIRM_ACTION,
-} from 'components/ConfirmDialog';
 import constants from 'utils/strings/constants';
 import billingService, {
     FREE_PLAN,
@@ -20,9 +16,6 @@ export type SetDialogMessage = React.Dispatch<
     React.SetStateAction<MessageAttributes>
 >;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
-export type SetConfirmAction = React.Dispatch<
-    React.SetStateAction<ConfirmActionAttributes>
->;
 
 export function convertBytesToGBs(bytes, precision?): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
@@ -89,7 +82,6 @@ export async function updateSubscription(
     plan: Plan,
     setDialogMessage: SetDialogMessage,
     setLoading: SetLoading,
-    setConfirmAction: SetConfirmAction,
     closePlanSelectorModal: () => null
 ) {
     try {
@@ -107,15 +99,22 @@ export async function updateSubscription(
     } catch (err) {
         switch (err?.message) {
             case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
-                setConfirmAction({
-                    action: CONFIRM_ACTION.UPDATE_PAYMENT_METHOD,
-                    callback: (event) =>
-                        updatePaymentMethod.bind(
-                            null,
-                            event,
-                            setDialogMessage,
-                            setLoading
-                        ),
+                setDialogMessage({
+                    title: constants.UPDATE_PAYMENT_METHOD,
+                    content: constants.UPDATE_PAYMENT_METHOD_MESSAGE,
+                    staticBackdrop: true,
+                    proceed: {
+                        text: constants.UPDATE_PAYMENT_METHOD,
+                        variant: 'success',
+                        action: (event) =>
+                            updatePaymentMethod.bind(
+                                null,
+                                event,
+                                setDialogMessage,
+                                setLoading
+                            ),
+                    },
+                    close: { text: constants.CANCEL },
                 });
                 break;
             case SUBSCRIPTION_VERIFICATION_ERROR:
