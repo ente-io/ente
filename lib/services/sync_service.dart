@@ -8,6 +8,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/first_import_succeeded_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
@@ -263,7 +264,11 @@ class SyncService {
       _logger.info("Inserted " + files.length.toString() + " files.");
       Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
     }
+    bool isFirstImport = !_prefs.containsKey(kDbUpdationTimeKey);
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
+    if (isFirstImport) {
+      Bus.instance.fire(FirstImportSucceededEvent());
+    }
   }
 
   Future<void> syncWithRemote({bool silently = false}) async {
@@ -302,7 +307,8 @@ class SyncService {
           " files in collection " +
           collectionID.toString());
       Bus.instance.fire(LocalPhotosUpdatedEvent(diff.updatedFiles));
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
+      Bus.instance
+          .fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
       if (diff.fetchCount == kDiffLimit) {
         return await _syncCollectionDiff(collectionID);
       }
