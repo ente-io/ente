@@ -73,7 +73,7 @@ export default function Collections(props: CollectionProps) {
     );
     const clickHandler = (collection?: Collection) => () => {
         setSelectedCollection(collection);
-        selectCollection(collection.id);
+        selectCollection(collection?.id);
     };
 
     if (!collections || collections.length === 0) {
