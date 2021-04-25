@@ -39,7 +39,7 @@ export default function NameCollection(props: Props) {
             dialogClassName="ente-modal"
         >
             <Modal.Header closeButton>
-                <Modal.Title>{props.purpose.title}</Modal.Title>
+                <Modal.Title>{props.purpose?.title}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Formik<formValues>
