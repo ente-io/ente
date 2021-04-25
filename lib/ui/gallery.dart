@@ -42,6 +42,7 @@ class Gallery extends StatefulWidget {
 
 class _GalleryState extends State<Gallery> {
   static const int kPageSize = 10;
+  static const int kInitialLoadLimit = 100;
 
   final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
@@ -64,7 +65,7 @@ class _GalleryState extends State<Gallery> {
       _logger.info("Building gallery because selected files updated");
       setState(() {});
     });
-    _loadFiles();
+    _loadFiles(limit: kInitialLoadLimit).then((value) => _loadFiles());
     super.initState();
   }
 
