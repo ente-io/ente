@@ -4,27 +4,21 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/huge_listview/huge_listview.dart';
 import 'package:photos/ui/huge_listview/lazy_loading_gallery.dart';
-import 'package:photos/ui/huge_listview/page_result.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
-import 'package:quiver/cache.dart';
-import 'package:quiver/collection.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class Gallery extends StatefulWidget {
   final Future<List<File>> Function(int creationStartTime, int creationEndTime,
       {int limit}) asyncLoader;
-  final Future<List<int>> Function() creationTimesLoader;
   final Stream<FilesUpdatedEvent> reloadEvent;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
@@ -33,7 +27,6 @@ class Gallery extends StatefulWidget {
 
   Gallery({
     @required this.asyncLoader,
-    @required this.creationTimesLoader,
     @required this.selectedFiles,
     @required this.tagPrefix,
     this.reloadEvent,
@@ -49,51 +42,53 @@ class Gallery extends StatefulWidget {
 
 class _GalleryState extends State<Gallery> {
   static const int kPageSize = 10;
-  static const int kCacheSize = 256;
 
   final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
   Logger _logger;
-  Map<int, HugeListViewPageResult<List<File>>> _map;
-  MapCache<int, HugeListViewPageResult<List<File>>> _cache;
   int _pageIndex = 0;
-  List<List<int>> _collatedCreationTimes = [];
-  bool _hasLoadedCreationTimes = false;
+  List<List<File>> _collatedFiles = [];
+  bool _hasLoadedFiles = false;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
 
   @override
   void initState() {
     _logger = Logger("Gallery_" + widget.tagPrefix);
-    _map = LruMap<int, HugeListViewPageResult<List<File>>>(
-        maximumSize: kCacheSize ~/ kPageSize);
-    _cache = MapCache<int, HugeListViewPageResult<List<File>>>(map: _map);
     if (widget.reloadEvent != null) {
       _reloadEventSubscription = widget.reloadEvent.listen((event) {
         _logger.info("Building gallery because reload event fired");
-        _loadCreationTimes();
+        _loadFiles();
       });
     }
     widget.selectedFiles.addListener(() {
       _logger.info("Building gallery because selected files updated");
       setState(() {});
     });
-    _loadCreationTimes();
+    _loadFiles();
     super.initState();
   }
 
-  void _loadCreationTimes() {
-    widget.creationTimesLoader().then((times) async {
+  Future<bool> _loadFiles({int limit}) async {
+    _logger.info("Loading files");
+    final startTime = DateTime.now();
+    final files = await widget
+        .asyncLoader(0, DateTime.now().microsecondsSinceEpoch, limit: limit);
+    final endTime = DateTime.now();
+    final duration = Duration(
+        microseconds:
+            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
+    _logger.info("Time taken: " + duration.inMilliseconds.toString() + "ms");
+    final collatedFiles = _collateFiles(files);
+    if (_collatedFiles.length != collatedFiles.length) {
       if (mounted) {
-        final collatedCreationTimes = _collateCreationTimes(times);
-        if (collatedCreationTimes.length != _collatedCreationTimes.length) {
-          _logger.info("New day discovered");
-          setState(() {
-            _hasLoadedCreationTimes = true;
-            _collatedCreationTimes = collatedCreationTimes;
-          });
-        }
+        _logger.info("New day discovered");
+        setState(() {
+          _hasLoadedFiles = true;
+          _collatedFiles = collatedFiles;
+        });
       }
-    });
+    }
+    return true;
   }
 
   @override
@@ -105,10 +100,10 @@ class _GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building " + widget.tagPrefix);
-    if (!_hasLoadedCreationTimes) {
+    if (!_hasLoadedFiles) {
       return loadWidget;
     }
-    var gallery = _getListView(_collatedCreationTimes);
+    var gallery = _getListView();
     if (widget.isHomePageGallery) {
       gallery = Container(
         margin: const EdgeInsets.only(bottom: 50),
@@ -131,43 +126,34 @@ class _GalleryState extends State<Gallery> {
     return gallery;
   }
 
-  Widget _getListView(List<List<int>> collatedTimes) {
+  Widget _getListView() {
     return HugeListView<List<File>>(
       key: _hugeListViewKey,
       controller: ItemScrollController(),
       pageSize: kPageSize,
       startIndex: _pageIndex,
-      totalCount: collatedTimes.length,
-      isDraggableScrollbarEnabled: collatedTimes.length > 30,
-      cache: _cache,
-      map: _map,
-      keyDeriver: (int pageIndex) {
-        final date =
-            DateTime.fromMicrosecondsSinceEpoch(collatedTimes[pageIndex][0]);
-        final roundedDate = DateTime(date.year, date.month, date.day);
-        return roundedDate.microsecondsSinceEpoch;
-      },
-      pageFuture: (pageIndex) {
+      totalCount: _collatedFiles.length,
+      isDraggableScrollbarEnabled: _collatedFiles.length > 30,
+      page: (pageIndex) {
         _pageIndex = pageIndex;
         final endTimeIndex =
-            min(pageIndex * kPageSize, collatedTimes.length - 1);
-        final endTime = collatedTimes[endTimeIndex][0];
+            min(pageIndex * kPageSize, _collatedFiles.length - 1);
         final startTimeIndex =
-            min((pageIndex + 1) * kPageSize, collatedTimes.length - 1);
-        final startTime = collatedTimes[startTimeIndex]
-            [collatedTimes[startTimeIndex].length - 1];
-        return widget
-            .asyncLoader(startTime, endTime)
-            .then((files) => _clubFiles(files));
+            min((pageIndex + 1) * kPageSize, _collatedFiles.length - 1);
+        List<List<File>> result = [];
+        for (int index = endTimeIndex; index <= startTimeIndex; index++) {
+          result.add(_collatedFiles[index]);
+        }
+        return result;
       },
       placeholderBuilder: (context, pageIndex) {
-        var day = getDayWidget(collatedTimes[pageIndex][0]);
+        var day = getDayWidget(_collatedFiles[pageIndex][0].creationTime);
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Column(
             children: [
               day,
-              PlaceHolderWidget(collatedTimes[pageIndex].length),
+              PlaceHolderWidget(_collatedFiles[pageIndex].length),
             ],
           ),
         );
@@ -193,8 +179,8 @@ class _GalleryState extends State<Gallery> {
         return gallery;
       },
       labelTextBuilder: (int index) {
-        return getMonthAndYear(
-            DateTime.fromMicrosecondsSinceEpoch(collatedTimes[index][0]));
+        return getMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
+            _collatedFiles[index][0].creationTime));
       },
       thumbBackgroundColor: Color(0xFF151515),
       thumbDrawColor: Colors.white.withOpacity(0.5),
@@ -202,7 +188,7 @@ class _GalleryState extends State<Gallery> {
     );
   }
 
-  List<List<File>> _clubFiles(List<File> files) {
+  List<List<File>> _collateFiles(List<File> files) {
     final List<File> dailyFiles = [];
     final List<List<File>> collatedFiles = [];
     for (int index = 0; index < files.length; index++) {
@@ -220,25 +206,6 @@ class _GalleryState extends State<Gallery> {
       collatedFiles.add(dailyFiles);
     }
     return collatedFiles;
-  }
-
-  List<List<int>> _collateCreationTimes(List<int> creationTimes) {
-    final List<int> dailyTimes = [];
-    final List<List<int>> collatedTimes = [];
-    for (int index = 0; index < creationTimes.length; index++) {
-      if (index > 0 &&
-          !_areFromSameDay(creationTimes[index - 1], creationTimes[index])) {
-        final List<int> collatedDailyTimes = [];
-        collatedDailyTimes.addAll(dailyTimes);
-        collatedTimes.add(collatedDailyTimes);
-        dailyTimes.clear();
-      }
-      dailyTimes.add(creationTimes[index]);
-    }
-    if (dailyTimes.isNotEmpty) {
-      collatedTimes.add(dailyTimes);
-    }
-    return collatedTimes;
   }
 
   bool _areFromSameDay(int firstCreationTime, int secondCreationTime) {

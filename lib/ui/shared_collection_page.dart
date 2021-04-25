@@ -22,8 +22,6 @@ class _SharedCollectionPageState extends State<SharedCollectionPage> {
   @override
   Widget build(Object context) {
     var gallery = Gallery(
-      creationTimesLoader: () => FilesDB.instance
-          .getAllCreationTimesInCollection(widget.collection.id),
       asyncLoader: (creationStartTime, creationEndTime, {limit}) {
         return FilesDB.instance.getFilesInCollection(
             widget.collection.id, creationStartTime, creationEndTime,

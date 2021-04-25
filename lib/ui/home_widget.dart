@@ -8,6 +8,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
+import 'package:photos/events/first_import_succeeded_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
@@ -25,7 +26,6 @@ import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/grant_permissions_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
-import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/nav_bar.dart';
@@ -58,6 +58,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   StreamSubscription<PermissionGrantedEvent> _permissionGrantedEvent;
   StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
+  StreamSubscription<FirstImportSucceededEvent> _firstImportEvent;
   StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
@@ -99,6 +100,10 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (Configuration.instance.getPathsToBackUp().isEmpty) {
         _showBackupFolderSelectionDialog();
       }
+    });
+    _firstImportEvent =
+        Bus.instance.on<FirstImportSucceededEvent>().listen((event) {
+      setState(() {});
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
@@ -230,10 +235,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       header = _headerWidget;
     }
     return Gallery(
-      creationTimesLoader: () {
-        _logger.info("Gallery_home_gallery fetching creation times");
-        return FilesDB.instance.getAllCreationTimes();
-      },
       asyncLoader: (creationStartTime, creationEndTime, {limit}) {
         return FilesDB.instance
             .getFiles(creationStartTime, creationEndTime, limit: limit);
@@ -332,6 +333,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _tabChangedEventSubscription.cancel();
     _permissionGrantedEvent.cancel();
     _subscriptionPurchaseEvent.cancel();
+    _firstImportEvent.cancel();
     _triggerLogoutEvent.cancel();
     _loggedOutEvent.cancel();
     _backupFoldersUpdatedEvent.cancel();
