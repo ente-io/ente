@@ -64,9 +64,12 @@ export default function MessageDialog({
                 {attributes.proceed && (
                     <Button
                         variant={`outline-${
-                            attributes.proceed?.variant ?? 'success'
+                            attributes.proceed?.variant ?? 'primary'
                         }`}
-                        onClick={attributes.proceed.action}
+                        onClick={() => {
+                            attributes.proceed.action();
+                            props.onHide();
+                        }}
                         style={{ padding: '6px 3em', marginRight: '20px' }}
                         disabled={attributes.proceed.disabled}
                     >
