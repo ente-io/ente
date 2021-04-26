@@ -35,7 +35,7 @@ export default function NameCollection(props: Props) {
         <MessageDialog
             show={props.show}
             onHide={props.onHide}
-            size={null}
+            size={'sm'}
             attributes={{
                 title: props.purpose?.title,
             }}
