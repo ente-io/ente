@@ -18,6 +18,7 @@ type Props = React.PropsWithChildren<{
     show: boolean;
     onHide: () => void;
     attributes: MessageAttributes;
+    size?: 'sm' | 'lg' | 'xl';
 }>;
 export default function MessageDialog({
     attributes,
@@ -29,8 +30,8 @@ export default function MessageDialog({
     }
     return (
         <Modal
-            {...props}
             size="lg"
+            {...props}
             centered
             backdrop={attributes.staticBackdrop ? 'static' : 'true'}
         >
