@@ -4,15 +4,16 @@ import { Button, Spinner } from 'react-bootstrap';
 interface Props {
     loading: boolean;
     buttonText: string;
+    inline?: any;
 }
-const SubmitButton = ({ loading, buttonText }: Props) => (
+const SubmitButton = ({ loading, buttonText, inline }: Props) => (
     <Button
         className="submitButton"
         variant="outline-success"
         type="submit"
-        block
+        block={!inline}
         disabled={loading}
-        style={{ padding: '0', height: '40px' }}
+        style={{ padding: '6px 1em' }}
     >
         {loading ? (
             <Spinner
