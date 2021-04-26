@@ -15,14 +15,16 @@ class ThumbnailWidget extends StatefulWidget {
   final File file;
   final BoxFit fit;
   final bool shouldShowSyncStatus;
-  final Duration loadDeferDuration;
+  final Duration diskLoadDeferDuration;
+  final Duration serverLoadDeferDuration;
 
   ThumbnailWidget(
     this.file, {
     Key key,
     this.fit = BoxFit.cover,
     this.shouldShowSyncStatus = true,
-    this.loadDeferDuration,
+    this.diskLoadDeferDuration,
+    this.serverLoadDeferDuration,
   }) : super(key: key ?? Key(file.generatedID.toString()));
   @override
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
@@ -129,8 +131,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
       } else {
-        if (widget.loadDeferDuration != null) {
-          Future.delayed(widget.loadDeferDuration, () {
+        if (widget.diskLoadDeferDuration != null) {
+          Future.delayed(widget.diskLoadDeferDuration, () {
             if (mounted) {
               _getThumbnailFromDisk();
             }
@@ -192,8 +194,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _hasLoadedThumbnail = true;
         return;
       }
-      if (widget.loadDeferDuration != null) {
-        Future.delayed(widget.loadDeferDuration, () {
+      if (widget.serverLoadDeferDuration != null) {
+        Future.delayed(widget.serverLoadDeferDuration, () {
           if (mounted) {
             _getThumbnailFromServer();
           }
