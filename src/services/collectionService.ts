@@ -402,6 +402,54 @@ export const renameCollection = async (
         }
     );
 };
+export const shareCollection = async (
+    collection: Collection,
+    withUserEmail: string
+) => {
+    try {
+        const token = getToken();
+        const shareCollectionRequest = {
+            collectionID: collection.id,
+            email: withUserEmail,
+            encryptedKey: collection.encryptedKey,
+        };
+        await HTTPService.post(
+            `${ENDPOINT}/collections/share`,
+            shareCollectionRequest,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        console.error('share collection failed ', e);
+        throw e;
+    }
+};
+
+export const unshareCollection = async (
+    collection: Collection,
+    withUserEmail: string
+) => {
+    try {
+        const token = getToken();
+        const shareCollectionRequest = {
+            collectionID: collection.id,
+            email: withUserEmail,
+        };
+        await HTTPService.post(
+            `${ENDPOINT}/collections/unshare`,
+            shareCollectionRequest,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        console.error('unshare collection failed ', e);
+        throw e;
+    }
+};
 
 export const getFavCollection = async () => {
     const collections = await getLocalCollections();
