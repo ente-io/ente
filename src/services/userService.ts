@@ -23,7 +23,7 @@ export interface RecoveryKey {
 }
 const ENDPOINT = getEndpoint();
 
-export interface user {
+export interface User {
     id: number;
     name: string;
     email: string;

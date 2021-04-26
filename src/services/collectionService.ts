@@ -6,7 +6,7 @@ import localForage from 'utils/storage/localForage';
 import HTTPService from './HTTPService';
 import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
-import { user } from './userService';
+import { User } from './userService';
 import CryptoWorker from 'utils/crypto';
 import { ErrorHandler } from 'utils/common/errorUtil';
 
@@ -24,14 +24,14 @@ const COLLECTIONS = 'collections';
 
 export interface Collection {
     id: number;
-    owner: user;
+    owner: User;
     key?: string;
     name?: string;
     encryptedName?: string;
     nameDecryptionNonce?: string;
     type: CollectionType;
     attributes: collectionAttributes;
-    sharees: user[];
+    sharees: User[];
     updationTime: number;
     encryptedKey: string;
     keyDecryptionNonce: string;
