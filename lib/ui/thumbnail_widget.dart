@@ -15,12 +15,14 @@ class ThumbnailWidget extends StatefulWidget {
   final File file;
   final BoxFit fit;
   final bool shouldShowSyncStatus;
+  final Duration loadDeferDuration;
 
   ThumbnailWidget(
     this.file, {
     Key key,
     this.fit = BoxFit.cover,
     this.shouldShowSyncStatus = true,
+    this.loadDeferDuration,
   }) : super(key: key ?? Key(file.generatedID.toString()));
   @override
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
@@ -127,44 +129,56 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
       } else {
-        widget.file.getAsset().then((asset) async {
-          if (asset == null || !(await asset.exists)) {
-            if (widget.file.uploadedFileID != null) {
-              widget.file.localID = null;
-              FilesDB.instance.update(widget.file);
-              _loadNetworkImage();
-            } else {
-              FilesDB.instance.deleteLocalFile(widget.file.localID);
-              Bus.instance.fire(LocalPhotosUpdatedEvent([widget.file]));
+        if (widget.loadDeferDuration != null) {
+          Future.delayed(widget.loadDeferDuration, () {
+            if (mounted) {
+              _getThumbnailFromDisk();
             }
-            return;
-          }
-          asset
-              .thumbDataWithSize(
-            THUMBNAIL_SMALL_SIZE,
-            THUMBNAIL_SMALL_SIZE,
-            quality: THUMBNAIL_QUALITY,
-          )
-              .then((data) {
-            if (data != null && mounted) {
-              final imageProvider = Image.memory(data).image;
-              precacheImage(imageProvider, context).then((value) {
-                if (mounted) {
-                  setState(() {
-                    _imageProvider = imageProvider;
-                    _hasLoadedThumbnail = true;
-                  });
-                }
-              });
-            }
-            ThumbnailLruCache.put(widget.file, THUMBNAIL_SMALL_SIZE, data);
           });
-        }).catchError((e) {
-          _logger.warning("Could not load image: ", e);
-          _encounteredErrorLoadingThumbnail = true;
-        });
+        } else {
+          _getThumbnailFromDisk();
+        }
       }
     }
+  }
+
+  Future _getThumbnailFromDisk() async {
+    widget.file.getAsset().then((asset) async {
+      if (asset == null || !(await asset.exists)) {
+        if (widget.file.uploadedFileID != null) {
+          widget.file.localID = null;
+          FilesDB.instance.update(widget.file);
+          _loadNetworkImage();
+        } else {
+          FilesDB.instance.deleteLocalFile(widget.file.localID);
+          Bus.instance.fire(LocalPhotosUpdatedEvent([widget.file]));
+        }
+        return;
+      }
+      asset
+          .thumbDataWithSize(
+        THUMBNAIL_SMALL_SIZE,
+        THUMBNAIL_SMALL_SIZE,
+        quality: THUMBNAIL_QUALITY,
+      )
+          .then((data) {
+        if (data != null && mounted) {
+          final imageProvider = Image.memory(data).image;
+          precacheImage(imageProvider, context).then((value) {
+            if (mounted) {
+              setState(() {
+                _imageProvider = imageProvider;
+                _hasLoadedThumbnail = true;
+              });
+            }
+          });
+        }
+        ThumbnailLruCache.put(widget.file, THUMBNAIL_SMALL_SIZE, data);
+      });
+    }).catchError((e) {
+      _logger.warning("Could not load image: ", e);
+      _encounteredErrorLoadingThumbnail = true;
+    });
   }
 
   void _loadNetworkImage() {
@@ -178,7 +192,15 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _hasLoadedThumbnail = true;
         return;
       }
-      _getThumbnailFromServer();
+      if (widget.loadDeferDuration != null) {
+        Future.delayed(widget.loadDeferDuration, () {
+          if (mounted) {
+            _getThumbnailFromServer();
+          }
+        });
+      } else {
+        _getThumbnailFromServer();
+      }
     }
   }
 
