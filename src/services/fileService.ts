@@ -176,7 +176,11 @@ const removeDeletedCollectionFiles = async (
     return files;
 };
 
-export const deleteFiles = async (clickedFiles: selectedState) => {
+export const deleteFiles = async (
+    clickedFiles: selectedState,
+    clearSelection: Function,
+    syncWithRemote: Function
+) => {
     try {
         let filesToDelete = [];
         for (let [key, val] of Object.entries(clickedFiles)) {
@@ -196,6 +200,8 @@ export const deleteFiles = async (clickedFiles: selectedState) => {
                 'X-Auth-Token': token,
             }
         );
+        clearSelection();
+        syncWithRemote();
     } catch (e) {
         console.error('delete failed');
     }

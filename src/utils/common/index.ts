@@ -25,3 +25,8 @@ export function downloadApp() {
     var win = window.open(DESKTOP_APP_DOWNLOAD_URL, '_blank');
     win.focus();
 }
+export function reverseString(title: string) {
+    return title
+        ?.split(' ')
+        .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
+}

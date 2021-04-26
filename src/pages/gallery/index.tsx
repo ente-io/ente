@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { file, syncData, getLocalFiles } from 'services/fileService';
+import {
+    file,
+    syncData,
+    getLocalFiles,
+    deleteFiles,
+} from 'services/fileService';
 import PreviewCard from './components/PreviewCard';
 import styled from 'styled-components';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
@@ -27,10 +32,6 @@ import PlanSelector from './components/PlanSelector';
 import { checkSubscriptionPurchase } from 'utils/billingUtil';
 
 import Delete from 'components/Delete';
-import ConfirmDialog, {
-    ConfirmActionAttributes,
-    CONFIRM_ACTION,
-} from 'components/ConfirmDialog';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
@@ -46,7 +47,6 @@ import AlertBanner from './components/AlertBanner';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import { LoadingOverlay } from './components/CollectionSelector';
 import EnteSpinner from 'components/EnteSpinner';
-import { fileDelete } from 'utils/file';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
@@ -167,11 +167,8 @@ export default function Gallery(props: Props) {
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
-    const [
-        confirmAction,
-        setConfirmAction,
-    ] = useState<ConfirmActionAttributes>();
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
+    const [dialogView, setDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -211,6 +208,8 @@ export default function Gallery(props: Props) {
         main();
     }, []);
 
+    useEffect(() => setDialogView(true), [dialogMessage]);
+
     const syncWithRemote = async () => {
         try {
             checkConnectivity();
@@ -237,10 +236,16 @@ export default function Gallery(props: Props) {
             setSinceTime(new Date().getTime());
         } catch (e) {
             setBannerMessage(e.message);
-            if (e.message === constants.SESSION_EXPIRED_MESSAGE()) {
-                setConfirmAction({
-                    action: CONFIRM_ACTION.SESSION_EXPIRED,
-                    callback: logoutUser,
+            if (e.message === constants.SESSION_EXPIRED_MESSAGE) {
+                setDialogMessage({
+                    title: constants.SESSION_EXPIRED,
+                    content: constants.SESSION_EXPIRED_MESSAGE,
+                    staticBackdrop: true,
+                    proceed: {
+                        text: constants.LOGIN,
+                        action: logoutUser,
+                        variant: 'primary',
+                    },
                 });
             }
         } finally {
@@ -436,26 +441,20 @@ export default function Gallery(props: Props) {
                 modalView={planModalView}
                 closeModal={() => setPlanModalView(false)}
                 setDialogMessage={setDialogMessage}
-                setConfirmAction={setConfirmAction}
                 setLoading={setLoading}
             />
             <AlertBanner bannerMessage={bannerMessage} />
-            <ConfirmDialog
-                show={confirmAction !== null}
-                onHide={() => setConfirmAction(null)}
-                attributes={confirmAction}
-            />
             <MessageDialog
-                show={dialogMessage != null}
-                onHide={() => setDialogMessage(null)}
+                show={dialogView}
+                onHide={() => setDialogView(false)}
                 attributes={dialogMessage}
             />
             <Collections
                 collections={collections}
                 selected={Number(router.query.collection)}
                 selectCollection={selectCollection}
-                setConfirmAction={setConfirmAction}
                 syncWithRemote={syncWithRemote}
+                setDialogMessage={setDialogMessage}
             />
             <Upload
                 collectionSelectorView={props.collectionSelectorView}
@@ -469,7 +468,6 @@ export default function Gallery(props: Props) {
             <Sidebar
                 files={data}
                 collections={collections}
-                setConfirmAction={setConfirmAction}
                 setDialogMessage={setDialogMessage}
                 setPlanModalView={setPlanModalView}
             />
@@ -666,14 +664,21 @@ export default function Gallery(props: Props) {
             {selected.count > 0 && (
                 <DeleteBtn
                     onClick={() =>
-                        setConfirmAction({
-                            action: CONFIRM_ACTION.DELETE,
-                            callback: fileDelete.bind(
-                                null,
-                                selected,
-                                clearSelection,
-                                syncWithRemote
-                            ),
+                        setDialogMessage({
+                            title: constants.CONFIRM_DELETE_FILE,
+                            content: constants.DELETE_FILE_MESSAGE,
+                            staticBackdrop: true,
+                            proceed: {
+                                action: deleteFiles.bind(
+                                    null,
+                                    selected,
+                                    clearSelection,
+                                    syncWithRemote
+                                ),
+                                text: constants.DELETE,
+                                variant: 'danger',
+                            },
+                            close: { text: constants.CANCEL },
                         })
                     }
                 >

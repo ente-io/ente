@@ -10,7 +10,6 @@ import {
     isUserSubscribedPlan,
     isSubscriptionCancelled,
     updatePaymentMethod,
-    SetConfirmAction,
     SetDialogMessage,
     SetLoading,
     updateSubscription,
@@ -20,9 +19,9 @@ import {
     hasPaidSubscription,
     isOnFreePlan,
 } from 'utils/billingUtil';
-import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import { DeadCenter } from '..';
 import LinkButton from './LinkButton';
+import { reverseString } from 'utils/common';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     padding-top: 20px;
@@ -41,7 +40,6 @@ interface Props {
     modalView: boolean;
     closeModal: any;
     setDialogMessage: SetDialogMessage;
-    setConfirmAction: SetConfirmAction;
     setLoading: SetLoading;
 }
 enum PLAN_PERIOD {
@@ -82,16 +80,24 @@ function PlanSelector(props: Props) {
                 close: { variant: 'danger' },
             });
         } else if (hasStripeSubscription(subscription)) {
-            props.setConfirmAction({
-                action: CONFIRM_ACTION.UPDATE_SUBSCRIPTION,
-                callback: updateSubscription.bind(
-                    null,
-                    plan,
-                    props.setDialogMessage,
-                    props.setLoading,
-                    props.setConfirmAction,
-                    props.closeModal
-                ),
+            props.setDialogMessage({
+                title: `${constants.CONFIRM} ${reverseString(
+                    constants.UPDATE_SUBSCRIPTION
+                )}`,
+                content: constants.UPDATE_SUBSCRIPTION_MESSAGE,
+                staticBackdrop: true,
+                proceed: {
+                    text: constants.UPDATE_SUBSCRIPTION,
+                    action: updateSubscription.bind(
+                        null,
+                        plan,
+                        props.setDialogMessage,
+                        props.setLoading,
+                        props.closeModal
+                    ),
+                    variant: 'success',
+                },
+                close: { text: constants.CANCEL },
             });
         } else {
             try {
@@ -215,19 +221,26 @@ function PlanSelector(props: Props) {
                                 <LinkButton
                                     variant="success"
                                     onClick={() =>
-                                        props.setConfirmAction({
-                                            action:
-                                                CONFIRM_ACTION.ACTIVATE_SUBSCRIPTION,
-                                            callback: activateSubscription.bind(
-                                                null,
-                                                props.setDialogMessage,
-                                                props.closeModal,
-                                                props.setLoading
+                                        props.setDialogMessage({
+                                            title:
+                                                constants.CONFIRM_ACTIVATE_SUBSCRIPTION,
+                                            content: constants.ACTIVATE_SUBSCRIPTION_MESSAGE(
+                                                subscription.expiryTime
                                             ),
-                                            messageAttribute: {
-                                                content: constants.ACTIVATE_SUBSCRIPTION_MESSAGE(
-                                                    subscription.expiryTime
+                                            staticBackdrop: true,
+                                            proceed: {
+                                                text:
+                                                    constants.ACTIVATE_SUBSCRIPTION,
+                                                action: activateSubscription.bind(
+                                                    null,
+                                                    props.setDialogMessage,
+                                                    props.closeModal,
+                                                    props.setLoading
                                                 ),
+                                                variant: 'success',
+                                            },
+                                            close: {
+                                                text: constants.CANCEL,
                                             },
                                         })
                                     }
@@ -238,15 +251,25 @@ function PlanSelector(props: Props) {
                                 <LinkButton
                                     variant="danger"
                                     onClick={() =>
-                                        props.setConfirmAction({
-                                            action:
-                                                CONFIRM_ACTION.CANCEL_SUBSCRIPTION,
-                                            callback: cancelSubscription.bind(
-                                                null,
-                                                props.setDialogMessage,
-                                                props.closeModal,
-                                                props.setLoading
-                                            ),
+                                        props.setDialogMessage({
+                                            title:
+                                                constants.CONFIRM_CANCEL_SUBSCRIPTION,
+                                            content: constants.CANCEL_SUBSCRIPTION_MESSAGE(),
+                                            staticBackdrop: true,
+                                            proceed: {
+                                                text:
+                                                    constants.CANCEL_SUBSCRIPTION,
+                                                action: cancelSubscription.bind(
+                                                    null,
+                                                    props.setDialogMessage,
+                                                    props.closeModal,
+                                                    props.setLoading
+                                                ),
+                                                variant: 'danger',
+                                            },
+                                            close: {
+                                                text: constants.CANCEL,
+                                            },
                                         })
                                     }
                                 >

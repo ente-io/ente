@@ -249,6 +249,9 @@ const GlobalStyles = createGlobalStyle`
         text-decoration: none;
         background-color: #e9ecef;
     }
+    .submitButton:hover > .spinner-border{
+        color:white;
+    }
 `;
 
 const Image = styled.img`

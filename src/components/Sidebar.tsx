@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
-import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import billingService, { Subscription } from 'services/billingService';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -15,7 +14,6 @@ import {
     isOnFreePlan,
     isSubscriptionCancelled,
     isSubscribed,
-    SetConfirmAction,
     SetDialogMessage,
 } from 'utils/billingUtil';
 
@@ -33,7 +31,6 @@ import { logoutUser } from 'services/userService';
 interface Props {
     files: file[];
     collections: Collection[];
-    setConfirmAction: SetConfirmAction;
     setDialogMessage: SetDialogMessage;
     setPlanModalView;
 }
@@ -77,9 +74,18 @@ export default function Sidebar(props: Props) {
         if (isElectron()) {
             exportService.exportFiles(props.files, props.collections);
         } else {
-            props.setConfirmAction({
-                action: CONFIRM_ACTION.DOWNLOAD_APP,
-                callback: downloadApp,
+            props.setDialogMessage({
+                title: constants.DOWNLOAD_APP,
+                content: constants.DOWNLOAD_APP_MESSAGE(),
+                staticBackdrop: true,
+                proceed: {
+                    text: constants.DOWNLOAD,
+                    action: downloadApp,
+                    variant: 'success',
+                },
+                close: {
+                    text: constants.CLOSE,
+                },
             });
         }
     }
@@ -95,7 +101,14 @@ export default function Sidebar(props: Props) {
             onStateChange={(state) => setIsOpen(state.isOpen)}
             itemListElement="div"
         >
-            <div style={{ marginBottom: '28px', outline: 'none', color: 'rgb(45, 194, 98)', fontSize: '16px', }}>
+            <div
+                style={{
+                    marginBottom: '28px',
+                    outline: 'none',
+                    color: 'rgb(45, 194, 98)',
+                    fontSize: '16px',
+                }}
+            >
                 {user?.email}
             </div>
             <div style={{ outline: 'none' }}>
@@ -147,20 +160,24 @@ export default function Sidebar(props: Props) {
                     {constants.USAGE_DETAILS}
                 </h5>
                 <div style={{ color: '#959595' }}>
-                    {
-                        usage ? (
-                            constants.USAGE_INFO(
-                                usage,
-                                Math.ceil(
-                                    Number(convertBytesToGBs(subscription?.storage))
-                                )
+                    {usage ? (
+                        constants.USAGE_INFO(
+                            usage,
+                            Math.ceil(
+                                Number(convertBytesToGBs(subscription?.storage))
                             )
-                        ) :
-                            (
-                                <div style={{ textAlign: 'center' }}>
-                                    <EnteSpinner style={{ borderWidth: '2px', width: '20px', height: '20px' }} />
-                                </div>
-                            )}
+                        )
+                    ) : (
+                        <div style={{ textAlign: 'center' }}>
+                            <EnteSpinner
+                                style={{
+                                    borderWidth: '2px',
+                                    width: '20px',
+                                    height: '20px',
+                                }}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
             <div
@@ -208,9 +225,16 @@ export default function Sidebar(props: Props) {
                 variant="danger"
                 style={{ marginBottom: '50px' }}
                 onClick={() =>
-                    props.setConfirmAction({
-                        action: CONFIRM_ACTION.LOGOUT,
-                        callback: logoutUser,
+                    props.setDialogMessage({
+                        title: `${constants.CONFIRM} ${constants.LOGOUT}`,
+                        content: constants.LOGOUT_MESSAGE,
+                        staticBackdrop: true,
+                        proceed: {
+                            text: constants.LOGOUT,
+                            action: logoutUser,
+                            variant: 'danger',
+                        },
+                        close: { text: constants.CANCEL },
                     })
                 }
             >

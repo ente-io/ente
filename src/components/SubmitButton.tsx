@@ -7,6 +7,7 @@ interface Props {
 }
 const SubmitButton = ({ loading, buttonText }: Props) => (
     <Button
+        className="submitButton"
         variant="outline-success"
         type="submit"
         block
