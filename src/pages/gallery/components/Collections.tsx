@@ -17,7 +17,7 @@ interface CollectionProps {
     selected?: number;
     selectCollection: (id?: number) => void;
     setDialogMessage: SetDialogMessage;
-    syncWithRemote: Function;
+    syncWithRemote: () => Promise<void>;
 }
 
 const Container = styled.div`
@@ -67,7 +67,7 @@ const Chip = styled.button<{ active: boolean }>`
 
 export default function Collections(props: CollectionProps) {
     const { selected, collections, selectCollection } = props;
-    const [selectedCollection, setSelectedCollection] = useState<Collection>(
+    const [selectedCollectionID, setSelectedCollectionID] = useState<number>(
         null
     );
     const [renameCollectionModalView, setRenameCollectionModalView] = useState(
@@ -77,10 +77,13 @@ export default function Collections(props: CollectionProps) {
         false
     );
     const clickHandler = (collection?: Collection) => () => {
-        setSelectedCollection(collection);
+        setSelectedCollectionID(collection.id);
         selectCollection(collection?.id);
     };
 
+    const getSelectedCollection = (collectionID: number) => {
+        return collections.find((collection) => collection.id == collectionID);
+    };
     if (!collections || collections.length === 0) {
         return <Container />;
     }
@@ -103,13 +106,19 @@ export default function Collections(props: CollectionProps) {
         await renameCollection(selectedCollection, albumName);
         props.syncWithRemote();
     };
+    collections.map((collection) => console.log(collection.sharees));
     return (
         <>
             <NameCollection
                 show={renameCollectionModalView}
                 onHide={() => setRenameCollectionModalView(false)}
-                autoFilledName={selectedCollection?.name}
-                callback={collectionRename.bind(null, selectedCollection)}
+                autoFilledName={
+                    getSelectedCollection(selectedCollectionID)?.name
+                }
+                callback={collectionRename.bind(
+                    null,
+                    getSelectedCollection(selectedCollectionID)
+                )}
                 purpose={{
                     title: constants.RENAME_COLLECTION,
                     buttonText: constants.RENAME,
@@ -118,7 +127,8 @@ export default function Collections(props: CollectionProps) {
             <CollectionShare
                 show={collectionShareModalView}
                 onHide={() => setCollectionShareModalView(false)}
-                sharees={selectedCollection?.sharees}
+                collection={getSelectedCollection(selectedCollectionID)}
+                syncWithRemote={props.syncWithRemote}
             />
             <Container>
                 <Wrapper>

@@ -279,18 +279,20 @@ const englishConstants = {
         </>
     ),
     SHARE: 'share',
-    COLLECTION_SHARE: 'collection share',
+    SHARE_COLLECTION: 'share collection',
     SHARE_WITH_PEOPLE: 'share with people',
     SHAREES: 'shared with',
     ZERO_SHAREES: () => (
         <>
             <p>shared with no one</p>
-            <p>
-                `Memories are better when shared, add your loved ones`
-                <p>- ente 😜</p>
-            </p>
+            <p>`Memories are better when shared, add your loved ones` - ente</p>
         </>
     ),
+    SHARE_WITH_SELF:
+        'you entered your own email,enter the email of person you want to share with!!',
+    ALREADY_SHARED: 'you have already shared with this person',
+    SHARING_BAD_REQUEST_ERROR: 'sharing collection not allowed',
+    SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing disabled for free accounts',
 };
 
 export default englishConstants;

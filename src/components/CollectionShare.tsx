@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import MessageDialog from './MessageDialog';
 import { Formik, FormikHelpers } from 'formik';
@@ -9,53 +9,88 @@ import { Button, Col, Table } from 'react-bootstrap';
 import { DeadCenter } from 'pages/gallery';
 import SubmitButton from './SubmitButton';
 import { User } from 'services/userService';
+import {
+    Collection,
+    shareCollection,
+    unshareCollection,
+} from 'services/collectionService';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 interface Props {
     show: boolean;
     onHide: () => void;
-    sharees: User[];
+    collection: Collection;
+    syncWithRemote: () => Promise<void>;
 }
 interface formValues {
     email: string;
 }
 interface ShareeProps {
     sharee: User;
+    collectionUnshare: (sharee: User) => void;
 }
 
-function CollectionShare({ ...props }: Props) {
+function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
-    const loginUser = async (
+    console.log(props.collection?.sharees);
+    const collectionShare = async (
         { email }: formValues,
-        { setFieldError }: FormikHelpers<formValues>
+        { resetForm, setFieldError }: FormikHelpers<formValues>
     ) => {
         try {
             setLoading(true);
-            // await getOtt(email);
+            const user: User = getData(LS_KEYS.USER);
+            if (email === user.email) {
+                setFieldError('email', constants.SHARE_WITH_SELF);
+            } else if (
+                props.collection.sharees.find((value) => value.email === email)
+            ) {
+                setFieldError('email', constants.ALREADY_SHARED);
+            } else {
+                await shareCollection(props.collection, email);
+                await props.syncWithRemote();
+                resetForm();
+            }
         } catch (e) {
-            setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
+            let errorMessage = null;
+            switch (e?.status) {
+                case 400:
+                    errorMessage = constants.SHARING_BAD_REQUEST_ERROR;
+                    break;
+                case 402:
+                    errorMessage = constants.SHARING_DISABLED_FOR_FREE_ACCOUNTS;
+                    break;
+                case 404:
+                    errorMessage = constants.USER_DOES_NOT_EXIST;
+                    break;
+                default:
+                    errorMessage = `${constants.UNKNOWN_ERROR} ${e.message}`;
+            }
+            setFieldError('email', errorMessage);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
+    };
+    const collectionUnshare = async (sharee) => {
+        await unshareCollection(props.collection, sharee.email);
+        await props.syncWithRemote();
     };
 
-    const ShareeRow = ({ sharee }: ShareeProps) => (
+    const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
         <tr>
-            <td>
-                <span style={{ marginRight: '10px' }}>{sharee.email}</span>
-            </td>
+            <td>{sharee.email}</td>
             <td>
                 <Button
                     variant="outline-danger"
                     style={{
-                        height: '22px',
-                        lineHeight: '11px',
+                        height: '25px',
+                        lineHeight: 0,
                         padding: 0,
-                        width: '22px',
-                        fontSize: '30px',
+                        width: '25px',
+                        fontSize: '1.2em',
+                        fontWeight: 900,
                     }}
-                    onClick={() => {
-                        /* unshare(user)*/
-                        return null;
-                    }}
+                    onClick={() => collectionUnshare(sharee)}
                 >
                     -
                 </Button>
@@ -67,9 +102,9 @@ function CollectionShare({ ...props }: Props) {
             size={null}
             show={props.show}
             onHide={props.onHide}
-            attributes={{ title: constants.COLLECTION_SHARE }}
+            attributes={{ title: constants.SHARE_COLLECTION }}
         >
-            <DeadCenter>
+            <DeadCenter style={{ width: '85%', margin: 'auto' }}>
                 <p>{constants.SHARE_WITH_PEOPLE}</p>
                 <Formik<formValues>
                     initialValues={{ email: '' }}
@@ -78,7 +113,7 @@ function CollectionShare({ ...props }: Props) {
                             .email(constants.EMAIL_ERROR)
                             .required(constants.REQUIRED),
                     })}
-                    onSubmit={loginUser}
+                    onSubmit={collectionShare}
                 >
                     {({
                         values,
@@ -133,14 +168,18 @@ function CollectionShare({ ...props }: Props) {
                         width: '100%',
                     }}
                 ></div>
-                {props.sharees?.length > 0 ? (
+                {props.collection?.sharees.length > 0 ? (
                     <>
                         <p>{constants.SHAREES}</p>
 
                         <Table striped bordered hover variant="dark" size="sm">
                             <tbody>
-                                {props.sharees?.map((sharee) => (
-                                    <ShareeRow sharee={sharee} />
+                                {props.collection?.sharees.map((sharee) => (
+                                    <ShareeRow
+                                        key={sharee.email}
+                                        sharee={sharee}
+                                        collectionUnshare={collectionUnshare}
+                                    />
                                 ))}
                             </tbody>
                         </Table>
