@@ -109,7 +109,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
 class LazyLoadingGridView extends StatefulWidget {
   static const kThumbnailDiskLoadDeferDuration = Duration(milliseconds: 40);
-  static const kThumbnailServerLoadDeferDuration = Duration(milliseconds: 100);
+  static const kThumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
   final String tag;
   final List<File> files;
   final Future<List<File>> Function(int creationStartTime, int creationEndTime,
