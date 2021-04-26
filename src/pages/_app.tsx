@@ -112,7 +112,7 @@ const GlobalStyles = createGlobalStyle`
     .modal-backdrop {
         z-index:2000;
     }
-    .modal .card {
+    .modal .card , .table {
         background-color: #202020;
         border: none;
     }
@@ -251,6 +251,9 @@ const GlobalStyles = createGlobalStyle`
     }
     .submitButton:hover > .spinner-border{
         color:white;
+    }
+    hr{
+        border-top: 1rem solid #444 !important;
     }
 `;
 

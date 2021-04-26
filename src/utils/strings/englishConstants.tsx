@@ -278,6 +278,19 @@ const englishConstants = {
             </p>
         </>
     ),
+    SHARE: 'share',
+    COLLECTION_SHARE: 'collection share',
+    SHARE_WITH_PEOPLE: 'share with people',
+    SHAREES: 'shared with',
+    ZERO_SHAREES: () => (
+        <>
+            <p>shared with no one</p>
+            <p>
+                `Memories are better when shared, add your loved ones`
+                <p>- ente 😜</p>
+            </p>
+        </>
+    ),
 };
 
 export default englishConstants;

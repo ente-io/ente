@@ -1,3 +1,4 @@
+import CollectionShare from 'components/CollectionShare';
 import React, { useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import {
@@ -8,7 +9,6 @@ import {
 } from 'services/collectionService';
 import styled from 'styled-components';
 import { SetDialogMessage } from 'utils/billingUtil';
-import { reverseString } from 'utils/common';
 import constants from 'utils/strings/constants';
 import NameCollection from './NameCollection';
 
@@ -67,8 +67,13 @@ const Chip = styled.button<{ active: boolean }>`
 
 export default function Collections(props: CollectionProps) {
     const { selected, collections, selectCollection } = props;
-    const [selectedCollection, setSelectedCollection] = useState(null);
+    const [selectedCollection, setSelectedCollection] = useState<Collection>(
+        null
+    );
     const [renameCollectionModalView, setRenameCollectionModalView] = useState(
+        false
+    );
+    const [collectionShareModalView, setCollectionShareModalView] = useState(
         false
     );
     const clickHandler = (collection?: Collection) => () => {
@@ -110,6 +115,11 @@ export default function Collections(props: CollectionProps) {
                     buttonText: constants.RENAME,
                 }}
             />
+            <CollectionShare
+                show={collectionShareModalView}
+                onHide={() => setCollectionShareModalView(false)}
+                sharees={selectedCollection?.sharees}
+            />
             <Container>
                 <Wrapper>
                     <Chip active={!selected} onClick={clickHandler()}>
@@ -146,6 +156,18 @@ export default function Collections(props: CollectionProps) {
                                                 }}
                                             >
                                                 {constants.RENAME}
+                                            </Dropdown.Item>
+                                            <Dropdown.Divider
+                                                style={{ margin: '2px' }}
+                                            />
+                                            <Dropdown.Item
+                                                onClick={() => {
+                                                    setCollectionShareModalView(
+                                                        true
+                                                    );
+                                                }}
+                                            >
+                                                {constants.SHARE}
                                             </Dropdown.Item>
                                             <Dropdown.Divider
                                                 style={{ margin: '2px' }}
