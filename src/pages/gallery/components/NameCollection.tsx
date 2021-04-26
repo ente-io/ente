@@ -5,6 +5,7 @@ import { UPLOAD_STRATEGY } from './Upload';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from 'components/SubmitButton';
+import MessageDialog from 'components/MessageDialog';
 
 interface Props {
     show: boolean;
@@ -29,65 +30,61 @@ export default function NameCollection(props: Props) {
             collectionNameInputRef.current?.focus();
         }, 200);
     }, [props.show]);
+
     return (
-        <Modal
+        <MessageDialog
             show={props.show}
             onHide={props.onHide}
-            centered
-            backdrop="static"
-            style={{ background: 'rgba(0, 0, 0, 0.8)' }}
-            dialogClassName="ente-modal"
+            size={null}
+            attributes={{
+                title: props.purpose?.title,
+            }}
         >
-            <Modal.Header closeButton>
-                <Modal.Title>{props.purpose?.title}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Formik<formValues>
-                    initialValues={{ albumName: props.autoFilledName }}
-                    validationSchema={Yup.object().shape({
-                        albumName: Yup.string().required(constants.REQUIRED),
-                    })}
-                    onSubmit={onSubmit}
-                >
-                    {({
-                        values,
-                        touched,
-                        errors,
-                        handleChange,
-                        handleBlur,
-                        handleSubmit,
-                    }) => (
-                        <Form noValidate onSubmit={handleSubmit}>
-                            <Form.Group>
-                                <Form.Control
-                                    className="text-center"
-                                    type="text"
-                                    value={values.albumName}
-                                    onChange={handleChange('albumName')}
-                                    onBlur={handleBlur('albumName')}
-                                    isInvalid={Boolean(
-                                        touched.albumName && errors.albumName
-                                    )}
-                                    placeholder={constants.ENTER_ALBUM_NAME}
-                                    ref={collectionNameInputRef}
-                                    autoFocus={true}
-                                />
-
-                                <Form.Control.Feedback
-                                    type="invalid"
-                                    className="text-center"
-                                >
-                                    {errors.albumName}
-                                </Form.Control.Feedback>
-                            </Form.Group>
-                            <SubmitButton
-                                buttonText={props.purpose.buttonText}
-                                loading={false}
+            <Formik<formValues>
+                initialValues={{ albumName: props.autoFilledName }}
+                validationSchema={Yup.object().shape({
+                    albumName: Yup.string().required(constants.REQUIRED),
+                })}
+                onSubmit={onSubmit}
+            >
+                {({
+                    values,
+                    touched,
+                    errors,
+                    handleChange,
+                    handleBlur,
+                    handleSubmit,
+                }) => (
+                    <Form noValidate onSubmit={handleSubmit}>
+                        <Form.Group>
+                            <Form.Control
+                                className="text-center"
+                                type="text"
+                                value={values.albumName}
+                                onChange={handleChange('albumName')}
+                                onBlur={handleBlur('albumName')}
+                                isInvalid={Boolean(
+                                    touched.albumName && errors.albumName
+                                )}
+                                placeholder={constants.ENTER_ALBUM_NAME}
+                                ref={collectionNameInputRef}
+                                autoFocus={true}
                             />
-                        </Form>
-                    )}
-                </Formik>
-            </Modal.Body>
-        </Modal>
+
+                            <Form.Control.Feedback
+                                type="invalid"
+                                className="text-center"
+                            >
+                                {errors.albumName}
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        <SubmitButton
+                            buttonText={props.purpose.buttonText}
+                            loading={false}
+                        />
+                    </Form>
+                )}
+            </Formik>
+        </MessageDialog>
     );
 }
