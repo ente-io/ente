@@ -39,19 +39,6 @@ export interface file {
     updationTime: number;
 }
 
-export const syncData = async (collections) => {
-    const { files: resp, isUpdated } = await syncFiles(collections);
-
-    return {
-        data: resp.map((item) => ({
-            ...item,
-            w: window.innerWidth,
-            h: window.innerHeight,
-        })),
-        isUpdated,
-    };
-};
-
 export const getLocalFiles = async () => {
     let files: Array<file> = (await localForage.getItem<file[]>(FILES)) || [];
     return files;
@@ -104,7 +91,14 @@ export const syncFiles = async (collections: Collection[]) => {
             collection.updationTime
         );
     }
-    return { files, isUpdated };
+    return {
+        files: files.map((item) => ({
+            ...item,
+            w: window.innerWidth,
+            h: window.innerHeight,
+        })),
+        isUpdated,
+    };
 };
 
 export const getFiles = async (
