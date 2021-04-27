@@ -71,14 +71,12 @@ export default function Collections(props: CollectionProps) {
     const [selectedCollectionID, setSelectedCollectionID] = useState<number>(
         null
     );
-    const [renameCollectionModalView, setRenameCollectionModalView] = useState(
-        false
-    );
+
     const [collectionShareModalView, setCollectionShareModalView] = useState(
         false
     );
     const clickHandler = (collection?: Collection) => () => {
-        setSelectedCollectionID(collection.id);
+        setSelectedCollectionID(collection?.id);
         selectCollection(collection?.id);
     };
 
@@ -132,7 +130,7 @@ export default function Collections(props: CollectionProps) {
                     <Chip active={!selected} onClick={clickHandler()}>
                         All
                     </Chip>
-                    {collections?.map((item, index) => (
+                    {collections?.map((item) => (
                         <Chip
                             key={item.id}
                             active={selected === item.id}
