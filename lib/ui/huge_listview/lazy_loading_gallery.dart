@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/detail_page.dart';
@@ -51,23 +52,34 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     final galleryDate =
         DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
     _reloadEventSubscription = widget.reloadEvent.listen((event) async {
-      bool isOnSameDay = event.updatedFiles.where((file) {
+      final updatedFiles = event.updatedFiles
+          .where((file) =>
+              file.creationTime !=
+              null) // Filtering out noise of deleted files diff from server
+          .where((file) {
         final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
         return fileDate.year == galleryDate.year &&
             fileDate.month == galleryDate.month &&
             fileDate.day == galleryDate.day;
-      }).isNotEmpty;
+      });
+      bool isOnSameDay = updatedFiles.isNotEmpty;
       if (isOnSameDay) {
-        final dayStartTime =
-            DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
-        final files = await widget.asyncLoader(
-            dayStartTime.microsecondsSinceEpoch,
-            dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
-        if (mounted) {
-          setState(() {
-            _files = files;
-          });
-        }
+        Future.delayed(Duration(milliseconds: 100), () async {
+          final dayStartTime =
+              DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
+          final files = await widget.asyncLoader(
+              dayStartTime.microsecondsSinceEpoch,
+              dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
+          if (files.isEmpty) {
+            // All files on this day were deleted, let gallery trigger the reload
+          } else {
+            if (mounted) {
+              setState(() {
+                _files = files;
+              });
+            }
+          }
+        });
       }
     });
   }
@@ -83,6 +95,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     super.didUpdateWidget(oldWidget);
     if (!listEquals(_files, widget.files)) {
       setState(() {
+        _reloadEventSubscription.cancel();
         _init();
       });
     }
