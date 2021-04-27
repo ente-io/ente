@@ -501,10 +501,9 @@ class FilesDB {
 
   Future<int> deleteMultipleUploadedFiles(List<int> uploadedFileIDs) async {
     final db = await instance.database;
-    return db.delete(
+    return await db.delete(
       table,
-      where: '$columnUploadedFileID IN (?)',
-      whereArgs: [uploadedFileIDs.join(", ")],
+      where: '$columnUploadedFileID IN (${uploadedFileIDs.join(', ')})',
     );
   }
 
