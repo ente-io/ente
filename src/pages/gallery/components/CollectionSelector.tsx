@@ -30,11 +30,7 @@ interface Props {
     onHide: () => void;
     directlyShowNextModal: boolean;
     collectionsAndTheirLatestFile: CollectionAndItsLatestFile[];
-    attributes: {
-        showNextModal: () => void;
-        title: string;
-        callback: (collection) => Promise<void>;
-    };
+    attributes: CollectionSelectorAttributes;
 }
 function CollectionSelector({
     attributes,
