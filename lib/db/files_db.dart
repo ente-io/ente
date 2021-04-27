@@ -289,14 +289,23 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
-  Future<List<File>> getFilesCreatedWithinDuration(
-      int startCreationTime, int endCreationTime) async {
+  Future<List<File>> getFilesCreatedWithinDurations(
+      List<List<int>> durations) async {
     final db = await instance.database;
+    String whereClause = "";
+    for (int index = 0; index < durations.length; index++) {
+      whereClause += "($columnCreationTime > " +
+          durations[index][0].toString() +
+          " AND $columnCreationTime < " +
+          durations[index][1].toString() +
+          ")";
+      if (index != durations.length - 1) {
+        whereClause += " OR ";
+      }
+    }
     final results = await db.query(
       table,
-      where:
-          '$columnCreationTime > ? AND $columnCreationTime < ? AND $columnIsDeleted = 0',
-      whereArgs: [startCreationTime, endCreationTime],
+      where: whereClause + " AND $columnIsDeleted = 0",
       orderBy: '$columnCreationTime ASC',
     );
     return _convertToFiles(results);
