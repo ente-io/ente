@@ -1,5 +1,5 @@
 import React, { SyntheticEvent, useEffect, useState } from 'react';
-import { file } from 'services/fileService';
+import { File } from 'services/fileService';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
@@ -7,7 +7,7 @@ import { getToken } from 'utils/common/key';
 import useLongPress from 'utils/common/useLongPress';
 
 interface IProps {
-    data: file;
+    file: File;
     updateUrl: (url: string) => void;
     onClick?: () => void;
     forcedEnable?: boolean;
@@ -105,7 +105,7 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
 export default function PreviewCard(props: IProps) {
     const [imgSrc, setImgSrc] = useState<string>();
     const {
-        data,
+        file,
         onClick,
         updateUrl,
         forcedEnable,
@@ -116,21 +116,21 @@ export default function PreviewCard(props: IProps) {
     } = props;
 
     useEffect(() => {
-        if (data && !data.msrc) {
+        if (file && !file.msrc) {
             const main = async () => {
-                const url = await DownloadManager.getPreview(data);
+                const url = await DownloadManager.getPreview(file);
                 setImgSrc(url);
-                data.msrc = url;
+                file.msrc = url;
                 updateUrl(url);
             };
             main();
         }
-    }, [data]);
+    }, [file]);
 
     const handleClick = () => {
         if (selectOnClick) {
             onSelect?.(!selected);
-        } else if (data?.msrc || imgSrc) {
+        } else if (file?.msrc || imgSrc) {
             onClick?.();
         }
     };
@@ -146,7 +146,7 @@ export default function PreviewCard(props: IProps) {
     return (
         <Cont
             onClick={handleClick}
-            disabled={!forcedEnable && !data?.msrc && !imgSrc}
+            disabled={!forcedEnable && !file?.msrc && !imgSrc}
             selected={selected}
             {...(selectable ? useLongPress(longPressCallback, 500) : {})}
         >
@@ -158,8 +158,8 @@ export default function PreviewCard(props: IProps) {
                     onClick={(e) => e.stopPropagation()}
                 />
             )}
-            {(data?.msrc || imgSrc) && <img src={data?.msrc || imgSrc} />}
-            {data?.metadata.fileType === 1 && <PlayCircleOutline />}
+            {(file?.msrc || imgSrc) && <img src={file?.msrc || imgSrc} />}
+            {file?.metadata.fileType === 1 && <PlayCircleOutline />}
         </Cont>
     );
 }
