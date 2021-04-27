@@ -130,7 +130,6 @@ class UploadService {
     private filesToBeUploaded: FileWithCollection[];
     private progressBarProps;
     private uploadErrors: Error[];
-    private setUploadErrors;
     private existingFilesCollectionWise: Map<number, file[]>;
     constructor() {
         const main = async () => {
@@ -320,7 +319,6 @@ class UploadService {
             }
         }
         setPercentComplete(percentComplete);
-        this.setUploadErrors(this.uploadErrors);
         setFileProgress(this.fileProgress);
     }
 

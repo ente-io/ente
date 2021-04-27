@@ -32,7 +32,6 @@ interface ShareeProps {
 
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
-    console.log(props.collection?.sharees);
     const collectionShare = async (
         { email }: formValues,
         { resetForm, setFieldError }: FormikHelpers<formValues>
