@@ -5,9 +5,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:photos/ui/huge_listview/draggable_scrollbar.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-typedef HugeListViewPageFuture<T> = List<T> Function(int pageIndex);
 typedef HugeListViewItemBuilder<T> = Widget Function(
-    BuildContext context, int index, T entry);
+    BuildContext context, int index);
 typedef HugeListViewErrorBuilder = Widget Function(
     BuildContext context, dynamic error);
 
@@ -15,17 +14,11 @@ class HugeListView<T> extends StatefulWidget {
   /// A [ScrollablePositionedList] controller for jumping or scrolling to an item.
   final ItemScrollController controller;
 
-  /// Size of the page. [HugeListView] only keeps a few pages of items in memory any time.
-  final int pageSize;
-
   /// Index of an item to initially align within the viewport.
   final int startIndex;
 
   /// Total number of items in the list.
   final int totalCount;
-
-  /// Called to build items for the list with the specified [pageIndex].
-  final HugeListViewPageFuture<T> page;
 
   /// Called to build the thumb. One of [DraggableScrollbarThumbs.RoundedRectThumb], [DraggableScrollbarThumbs.ArrowThumb]
   /// or [DraggableScrollbarThumbs.SemicircleThumb], or build your own.
@@ -67,10 +60,8 @@ class HugeListView<T> extends StatefulWidget {
   HugeListView({
     Key key,
     this.controller,
-    @required this.pageSize,
     @required this.startIndex,
     @required this.totalCount,
-    @required this.page,
     @required this.labelTextBuilder,
     @required this.itemBuilder,
     @required this.placeholderBuilder,
@@ -83,8 +74,7 @@ class HugeListView<T> extends StatefulWidget {
     this.thumbDrawColor = Colors.grey,
     this.thumbHeight = 48.0,
     this.isDraggableScrollbarEnabled = true,
-  })  : assert(pageSize > 0),
-        assert(velocityThreshold >= 0),
+  })  : assert(velocityThreshold >= 0),
         super(key: key);
 
   @override
@@ -158,10 +148,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
             itemCount: max(widget.totalCount, 0),
             itemBuilder: (context, index) {
               if (!Scrollable.recommendDeferredLoadingForContext(context)) {
-                final page = index ~/ widget.pageSize;
-                final pageResult = widget.page(page);
-                final value = pageResult?.elementAt(index % widget.pageSize);
-                return widget.itemBuilder(context, index, value);
+                return widget.itemBuilder(context, index);
               } else if (!_frameCallbackInProgress) {
                 _frameCallbackInProgress = true;
                 SchedulerBinding.instance

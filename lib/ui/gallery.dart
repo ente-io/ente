@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -42,13 +41,12 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
-  static const int kPageSize = 10;
   static const int kInitialLoadLimit = 100;
 
   final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
   Logger _logger;
-  int _pageIndex = 0;
+  int _index = 0;
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
@@ -126,26 +124,17 @@ class _GalleryState extends State<Gallery> {
     return HugeListView<List<File>>(
       key: _hugeListViewKey,
       controller: ItemScrollController(),
-      pageSize: kPageSize,
-      startIndex: _pageIndex,
+      startIndex: _index,
       totalCount: _collatedFiles.length,
       isDraggableScrollbarEnabled: _collatedFiles.length > 30,
-      page: (pageIndex) {
-        _pageIndex = pageIndex;
-        final endTimeIndex =
-            min(pageIndex * kPageSize, _collatedFiles.length - 1);
-        final startTimeIndex =
-            min((pageIndex + 1) * kPageSize, _collatedFiles.length - 1);
-        return _collatedFiles.sublist(endTimeIndex, startTimeIndex);
-      },
-      placeholderBuilder: (context, pageIndex) {
-        var day = getDayWidget(_collatedFiles[pageIndex][0].creationTime);
+      placeholderBuilder: (context, index) {
+        var day = getDayWidget(_collatedFiles[index][0].creationTime);
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Column(
             children: [
               day,
-              PlaceHolderWidget(_collatedFiles[pageIndex].length),
+              PlaceHolderWidget(_collatedFiles[index].length),
             ],
           ),
         );
@@ -156,10 +145,10 @@ class _GalleryState extends State<Gallery> {
       emptyResultBuilder: (_) {
         return nothingToSeeHere;
       },
-      itemBuilder: (context, index, files) {
+      itemBuilder: (context, index) {
         var gallery;
         gallery = LazyLoadingGallery(
-          files,
+          _collatedFiles[index],
           widget.reloadEvent,
           widget.asyncLoader,
           widget.selectedFiles,
