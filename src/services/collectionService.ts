@@ -296,7 +296,10 @@ export const removeFromFavorites = async (file: File) => {
     await removeFromCollection(favCollection, [file]);
 };
 
-const addToCollection = async (collection: Collection, files: File[]) => {
+export const addToCollection = async (
+    collection: Collection,
+    files: File[]
+) => {
     try {
         const params = new Object();
         const worker = await new CryptoWorker();
