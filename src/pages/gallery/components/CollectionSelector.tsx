@@ -55,7 +55,10 @@ function CollectionSelector({
         (item) => (
             <CollectionIcon
                 key={item.collection.id}
-                onClick={attributes.callback.bind(null, item.collection)}
+                onClick={() => {
+                    attributes.callback(item.collection);
+                    props.onHide();
+                }}
             >
                 <Card>
                     <PreviewCard

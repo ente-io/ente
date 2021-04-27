@@ -484,7 +484,10 @@ export default function Gallery() {
             />
             <CollectionNamer
                 show={collectionNamerView}
-                onHide={setCollectionNamerView.bind(null, false)}
+                onHide={() => {
+                    setCollectionNamerView(false);
+                    setCollectionSelectorView(false);
+                }}
                 attributes={collectionNamerAttributes}
             />
             <CollectionSelector
