@@ -553,13 +553,24 @@ class FilesDB {
         (
           SELECT $columnDeviceFolder, MAX($columnCreationTime) AS max_creation_time
           FROM $table
+          WHERE $table.$columnLocalID IS NOT NULL
           GROUP BY $columnDeviceFolder
         ) latest_files
         ON $table.$columnDeviceFolder = latest_files.$columnDeviceFolder
-        AND $table.$columnCreationTime = latest_files.max_creation_time
-        AND $table.$columnLocalID IS NOT NULL;
+        AND $table.$columnCreationTime = latest_files.max_creation_time;
     ''');
-    return _convertToFiles(rows);
+    final files = _convertToFiles(rows);
+    // TODO: Do this de-duplication within the SQL Query
+    final folderMap = Map<String, File>();
+    for (final file in files) {
+      if (folderMap.containsKey(file.deviceFolder)) {
+        if (folderMap[file.deviceFolder].updationTime < file.updationTime) {
+          continue;
+        }
+      }
+      folderMap[file.deviceFolder] = file;
+    }
+    return folderMap.values.toList();
   }
 
   Future<List<File>> getLatestCollectionFiles() async {
