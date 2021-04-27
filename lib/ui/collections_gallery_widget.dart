@@ -177,7 +177,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       List<CollectionWithThumbnail> collections, int index) {
     if (index < collections.length) {
       final c = collections[index];
-      return CollectionIcon(c);
+      return CollectionItem(c);
     } else {
       return Container(
         padding: EdgeInsets.fromLTRB(28, 0, 28, 58),
@@ -296,8 +296,8 @@ class DeviceFolderIcon extends StatelessWidget {
   }
 }
 
-class CollectionIcon extends StatelessWidget {
-  CollectionIcon(this.c, {
+class CollectionItem extends StatelessWidget {
+  CollectionItem(this.c, {
     Key key,
   }) : super(key: Key(c.collection.id.toString()));
 
