@@ -24,7 +24,7 @@ class LazyLoadingGallery extends StatefulWidget {
   LazyLoadingGallery(this.files, this.reloadEvent, this.asyncLoader,
       this.selectedFiles, this.tag,
       {Key key})
-      : super(key: key ?? GlobalKey<_LazyLoadingGalleryState>());
+      : super(key: key);
 
   @override
   _LazyLoadingGalleryState createState() => _LazyLoadingGalleryState();
