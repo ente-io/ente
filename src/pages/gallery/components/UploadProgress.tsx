@@ -24,7 +24,11 @@ export default function UploadProgress(props: Props) {
     return (
         <Modal
             show={props.show}
-            onHide={props.closeModal}
+            onHide={
+                props.uploadStage !== UPLOAD_STAGES.FINISH
+                    ? () => null
+                    : props.closeModal
+            }
             size="lg"
             aria-labelledby="contained-modal-title-vcenter"
             centered
