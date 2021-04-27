@@ -12,7 +12,8 @@
       "target": [
         "AppImage",
         "deb",
-        "rpm"
+        "rpm",
+        "tar.gz"
       ],
       "icon": "./build/icon.icns",
       "category": "Photography"
