@@ -43,6 +43,10 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   @override
   void initState() {
     super.initState();
+    _init();
+  }
+
+  void _init() {
     _files = widget.files;
     final galleryDate =
         DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
@@ -79,7 +83,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     super.didUpdateWidget(oldWidget);
     if (!listEquals(_files, widget.files)) {
       setState(() {
-        _files = widget.files;
+        _init();
       });
     }
   }
