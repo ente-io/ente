@@ -58,7 +58,7 @@ function CollectionSelector({
             >
                 <Card>
                     <PreviewCard
-                        data={item.file}
+                        file={item.file}
                         updateUrl={() => {}}
                         forcedEnable
                     />

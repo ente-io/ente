@@ -1,5 +1,5 @@
 import { getToken } from 'utils/common/key';
-import { file } from './fileService';
+import { File } from './fileService';
 import HTTPService from './HTTPService';
 import { getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
 import CryptoWorker from 'utils/crypto';
@@ -9,7 +9,7 @@ class DownloadManager {
     private fileDownloads = new Map<number, Promise<string>>();
     private thumbnailDownloads = new Map<number, Promise<string>>();
 
-    public async getPreview(file: file) {
+    public async getPreview(file: File) {
         try {
             const token = getToken();
             if (!token) {
@@ -53,7 +53,7 @@ class DownloadManager {
         }
     }
 
-    getFile = async (file: file) => {
+    getFile = async (file: File) => {
         try {
             if (!this.fileDownloads.get(file.id)) {
                 const download = (async () => {
@@ -70,7 +70,7 @@ class DownloadManager {
         }
     };
 
-    async downloadFile(file: file) {
+    async downloadFile(file: File) {
         const worker = await new CryptoWorker();
         const token = getToken();
         if (!token) {

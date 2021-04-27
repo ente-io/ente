@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
-    file,
+    File,
     getLocalFiles,
     deleteFiles,
     syncFiles,
@@ -92,7 +92,7 @@ export default function Gallery() {
         collectionsAndTheirLatestFile,
         setCollectionsAndTheirLatestFile,
     ] = useState<CollectionAndItsLatestFile[]>([]);
-    const [files, setFiles] = useState<file[]>(null);
+    const [files, setFiles] = useState<File[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [bannerMessage, setBannerMessage] = useState<string>(null);
     const [sinceTime, setSinceTime] = useState(0);

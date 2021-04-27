@@ -3,7 +3,7 @@ import { DeadCenter, FILE_TYPE } from 'pages/gallery';
 import PreviewCard from 'pages/gallery/components/PreviewCard';
 import React, { useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { file } from 'services/fileService';
+import { File } from 'services/fileService';
 import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
@@ -16,11 +16,11 @@ const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
 
-type SetFiles = React.Dispatch<React.SetStateAction<file[]>>;
+type SetFiles = React.Dispatch<React.SetStateAction<File[]>>;
 
 interface TimeStampListItem {
     itemType: ITEM_TYPE;
-    items?: file[];
+    items?: File[];
     itemStartIndex?: number;
     date?: string;
 }
@@ -75,7 +75,7 @@ enum ITEM_TYPE {
 }
 
 interface Props {
-    files: file[];
+    files: File[];
     setFiles: SetFiles;
     syncWithRemote: () => Promise<void>;
     favItemIds: Set<number>;
@@ -169,7 +169,7 @@ const PhotoFrame = ({
             count: checked ? selected.count + 1 : selected.count - 1,
         }));
     };
-    const getThumbnail = (file: file[], index: number) => {
+    const getThumbnail = (file: File[], index: number) => {
         return (
             <PreviewCard
                 key={`tile-${file[index].id}`}
@@ -184,7 +184,7 @@ const PhotoFrame = ({
         );
     };
 
-    const getSlideData = async (instance: any, index: number, item: file) => {
+    const getSlideData = async (instance: any, index: number, item: File) => {
         if (!item.msrc) {
             const url = await DownloadManager.getPreview(item);
             updateUrl(item.dataIndex)(url);

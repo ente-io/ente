@@ -20,7 +20,7 @@ export interface fileAttribute {
     decryptionHeader: string;
 }
 
-export interface file {
+export interface File {
     id: number;
     collectionID: number;
     file: fileAttribute;
@@ -40,7 +40,7 @@ export interface file {
 }
 
 export const getLocalFiles = async () => {
-    let files: Array<file> = (await localForage.getItem<file[]>(FILES)) || [];
+    let files: Array<File> = (await localForage.getItem<File[]>(FILES)) || [];
     return files;
 };
 
@@ -65,7 +65,7 @@ export const syncFiles = async (collections: Collection[]) => {
         let fetchedFiles =
             (await getFiles(collection, lastSyncTime, DIFF_LIMIT)) ?? [];
         files.push(...fetchedFiles);
-        var latestVersionFiles = new Map<string, file>();
+        var latestVersionFiles = new Map<string, File>();
         files.forEach((file) => {
             const uid = `${file.collectionID}-${file.id}`;
             if (
@@ -105,10 +105,10 @@ export const getFiles = async (
     collection: Collection,
     sinceTime: number,
     limit: number
-): Promise<file[]> => {
+): Promise<File[]> => {
     try {
         const worker = await new CryptoWorker();
-        const decryptedFiles: file[] = [];
+        const decryptedFiles: File[] = [];
         let time =
             sinceTime ||
             (await localForage.getItem<number>(`${collection.id}-time`)) ||
@@ -133,7 +133,7 @@ export const getFiles = async (
 
             decryptedFiles.push(
                 ...(await Promise.all(
-                    resp.data.diff.map(async (file: file) => {
+                    resp.data.diff.map(async (file: File) => {
                         if (!file.isDeleted) {
                             file.key = await worker.decryptB64(
                                 file.encryptedKey,
@@ -143,7 +143,7 @@ export const getFiles = async (
                             file.metadata = await worker.decryptMetadata(file);
                         }
                         return file;
-                    }) as Promise<file>[]
+                    }) as Promise<File>[]
                 ))
             );
 
@@ -160,7 +160,7 @@ export const getFiles = async (
 
 const removeDeletedCollectionFiles = async (
     collections: Collection[],
-    files: file[]
+    files: File[]
 ) => {
     const syncedCollectionIds = new Set<number>();
     for (let collection of collections) {

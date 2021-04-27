@@ -1,5 +1,5 @@
 import React, { SyntheticEvent, useEffect, useState } from 'react';
-import { file } from 'services/fileService';
+import { File } from 'services/fileService';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
@@ -7,7 +7,7 @@ import { getToken } from 'utils/common/key';
 import useLongPress from 'utils/common/useLongPress';
 
 interface IProps {
-    file: file;
+    file: File;
     updateUrl: (url: string) => void;
     onClick?: () => void;
     forcedEnable?: boolean;

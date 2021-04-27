@@ -18,7 +18,7 @@ import {
 } from 'utils/billingUtil';
 
 import exportService from 'services/exportService';
-import { file } from 'services/fileService';
+import { File } from 'services/fileService';
 import isElectron from 'is-electron';
 import { Collection } from 'services/collectionService';
 import { useRouter } from 'next/router';
@@ -29,7 +29,7 @@ import { downloadApp } from 'utils/common';
 import { logoutUser } from 'services/userService';
 
 interface Props {
-    files: file[];
+    files: File[];
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
     setPlanModalView;
