@@ -274,21 +274,21 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         child: Text("this device"),
         isDestructiveAction: true,
         onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
           await deleteFilesOnDeviceOnly(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
           showToast("files deleted from device");
-          Navigator.of(context, rootNavigator: true).pop();
         },
       ));
       actions.add(CupertinoActionSheetAction(
         child: Text("everywhere"),
         isDestructiveAction: true,
         onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
           await deleteFilesFromEverywhere(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          Navigator.of(context, rootNavigator: true).pop();
         },
       ));
     } else {
@@ -296,10 +296,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         child: Text("delete forever"),
         isDestructiveAction: true,
         onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
           await deleteFilesFromEverywhere(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          Navigator.of(context, rootNavigator: true).pop();
         },
       ));
     }

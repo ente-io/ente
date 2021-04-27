@@ -75,7 +75,6 @@ Future<void> deleteFilesFromEverywhere(
           .deleteFilesOnServer(uploadedFileIDsToBeDeleted);
       await FilesDB.instance
           .deleteMultipleUploadedFiles(uploadedFileIDsToBeDeleted);
-      await dialog.hide();
     } catch (e) {
       await dialog.hide();
       showGenericErrorDialog(context);
@@ -92,6 +91,7 @@ Future<void> deleteFilesFromEverywhere(
   if (deletedFiles.isNotEmpty) {
     Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
   }
+  await dialog.hide();
   showToast("deleted from everywhere");
   if (uploadedFileIDsToBeDeleted.isNotEmpty) {
     SyncService.instance.syncWithRemote(silently: true);
