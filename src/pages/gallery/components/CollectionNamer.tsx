@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { Modal, Form } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
-import { UPLOAD_STRATEGY } from './Upload';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from 'components/SubmitButton';
@@ -33,12 +32,13 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
         attributes.callback(albumName);
         props.onHide();
     };
-
     useEffect(() => {
-        setTimeout(() => {
-            collectionNameInputRef.current?.focus();
-        }, 200);
-    }, [props.show]);
+        if (attributes) {
+            setTimeout(() => {
+                collectionNameInputRef.current?.focus();
+            }, 200);
+        }
+    }, [attributes]);
     if (!attributes) {
         return (
             <MessageDialog show={false} onHide={() => null} attributes={{}} />
