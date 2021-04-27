@@ -319,7 +319,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       itemBuilder: (BuildContext context, int index) {
         if (index < widget.memories.length - 1) {
           final nextFile = widget.memories[index + 1].file;
-          preloadLocalFileThumbnail(nextFile);
+          preloadThumbnail(nextFile);
         }
         final file = widget.memories[index].file;
         return MemoryItem(file);

@@ -128,22 +128,25 @@ void preloadFile(File file) {
   }
 }
 
-void preloadLocalFileThumbnail(File file) {
-  if (file.localID == null ||
-      ThumbnailLruCache.get(file, THUMBNAIL_SMALL_SIZE) != null) {
-    return;
-  }
-  file.getAsset().then((asset) {
-    asset
-        .thumbDataWithSize(
-      THUMBNAIL_SMALL_SIZE,
-      THUMBNAIL_SMALL_SIZE,
-      quality: THUMBNAIL_QUALITY,
-    )
-        .then((data) {
-      ThumbnailLruCache.put(file, THUMBNAIL_SMALL_SIZE, data);
+void preloadThumbnail(File file) {
+  if (file.localID == null) {
+    getThumbnailFromServer(file);
+  } else {
+    if (ThumbnailLruCache.get(file, THUMBNAIL_SMALL_SIZE) != null) {
+      return;
+    }
+    file.getAsset().then((asset) {
+      asset
+          .thumbDataWithSize(
+        THUMBNAIL_SMALL_SIZE,
+        THUMBNAIL_SMALL_SIZE,
+        quality: THUMBNAIL_QUALITY,
+      )
+          .then((data) {
+        ThumbnailLruCache.put(file, THUMBNAIL_SMALL_SIZE, data);
+      });
     });
-  });
+  }
 }
 
 Future<io.File> getNativeFile(File file) async {
