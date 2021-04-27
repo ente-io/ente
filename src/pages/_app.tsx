@@ -276,14 +276,6 @@ sentryInit();
 export default function App({ Component, pageProps, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [collectionSelectorView, setCollectionSelectorView] = useState(false);
-
-    function closeCollectionSelector() {
-        setCollectionSelectorView(false);
-    }
-    function showCollectionSelector() {
-        setCollectionSelectorView(true);
-    }
 
     useEffect(() => {
         console.log(
@@ -302,17 +294,6 @@ export default function App({ Component, pageProps, err }) {
             setLoading(false);
         });
     }, []);
-    const onDropAccepted = useCallback(() => {
-        if (acceptedFiles != null && !collectionSelectorView) {
-            showCollectionSelector();
-        }
-    }, []);
-    const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
-        noClick: true,
-        noKeyboard: true,
-        accept: 'image/*, video/*, application/json, ',
-        onDropAccepted,
-    });
     return (
         <>
             <Head>
@@ -342,16 +323,7 @@ export default function App({ Component, pageProps, err }) {
                     </EnteSpinner>
                 </Container>
             ) : (
-                <Component
-                    getRootProps={getRootProps}
-                    getInputProps={getInputProps}
-                    openFileUploader={open}
-                    acceptedFiles={acceptedFiles}
-                    collectionSelectorView={collectionSelectorView}
-                    showCollectionSelector={showCollectionSelector}
-                    closeCollectionSelector={closeCollectionSelector}
-                    err={err}
-                />
+                <Component err={err} />
             )}
         </>
     );

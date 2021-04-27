@@ -10,7 +10,7 @@ import {
 import styled from 'styled-components';
 import { SetDialogMessage } from 'utils/billingUtil';
 import constants from 'utils/strings/constants';
-import NameCollection from './NameCollection';
+import { SetCollectionNamerAttributes } from './CollectionNamer';
 
 interface CollectionProps {
     collections: Collection[];
@@ -18,6 +18,7 @@ interface CollectionProps {
     selectCollection: (id?: number) => void;
     setDialogMessage: SetDialogMessage;
     syncWithRemote: () => Promise<void>;
+    setCollectionNamerAttributes: SetCollectionNamerAttributes;
 }
 
 const Container = styled.div`
@@ -70,14 +71,12 @@ export default function Collections(props: CollectionProps) {
     const [selectedCollectionID, setSelectedCollectionID] = useState<number>(
         null
     );
-    const [renameCollectionModalView, setRenameCollectionModalView] = useState(
-        false
-    );
+
     const [collectionShareModalView, setCollectionShareModalView] = useState(
         false
     );
     const clickHandler = (collection?: Collection) => () => {
-        setSelectedCollectionID(collection.id);
+        setSelectedCollectionID(collection?.id);
         selectCollection(collection?.id);
     };
 
@@ -106,24 +105,20 @@ export default function Collections(props: CollectionProps) {
         await renameCollection(selectedCollection, albumName);
         props.syncWithRemote();
     };
-    collections.map((collection) => console.log(collection.sharees));
+    const showRenameCollectionModal = () => {
+        props.setCollectionNamerAttributes({
+            title: constants.RENAME_COLLECTION,
+            buttonText: constants.RENAME,
+            autoFilledName: getSelectedCollection(selectedCollectionID)?.name,
+            callback: collectionRename.bind(
+                null,
+                getSelectedCollection(selectedCollectionID)
+            ),
+        });
+    };
+
     return (
         <>
-            <NameCollection
-                show={renameCollectionModalView}
-                onHide={() => setRenameCollectionModalView(false)}
-                autoFilledName={
-                    getSelectedCollection(selectedCollectionID)?.name
-                }
-                callback={collectionRename.bind(
-                    null,
-                    getSelectedCollection(selectedCollectionID)
-                )}
-                purpose={{
-                    title: constants.RENAME_COLLECTION,
-                    buttonText: constants.RENAME,
-                }}
-            />
             <CollectionShare
                 show={collectionShareModalView}
                 onHide={() => setCollectionShareModalView(false)}
@@ -135,7 +130,7 @@ export default function Collections(props: CollectionProps) {
                     <Chip active={!selected} onClick={clickHandler()}>
                         All
                     </Chip>
-                    {collections?.map((item, index) => (
+                    {collections?.map((item) => (
                         <Chip
                             key={item.id}
                             active={selected === item.id}
@@ -159,11 +154,9 @@ export default function Collections(props: CollectionProps) {
                                             }}
                                         >
                                             <Dropdown.Item
-                                                onClick={() => {
-                                                    setRenameCollectionModalView(
-                                                        true
-                                                    );
-                                                }}
+                                                onClick={
+                                                    showRenameCollectionModal
+                                                }
                                             >
                                                 {constants.RENAME}
                                             </Dropdown.Item>

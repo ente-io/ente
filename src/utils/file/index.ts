@@ -1,4 +1,4 @@
-import { deleteFiles, file } from 'services/fileService';
+import { deleteFiles, File } from 'services/fileService';
 import { runningInBrowser } from 'utils/common';
 
 const TYPE_HEIC = 'heic';
@@ -32,11 +32,11 @@ export function fileIsHEIC(name: string) {
     return name.endsWith(TYPE_HEIC);
 }
 
-export function sortFilesIntoCollections(files: file[]) {
-    const collectionWiseFiles = new Map<number, file[]>();
+export function sortFilesIntoCollections(files: File[]) {
+    const collectionWiseFiles = new Map<number, File[]>();
     for (let file of files) {
         if (!collectionWiseFiles.has(file.collectionID)) {
-            collectionWiseFiles.set(file.collectionID, new Array<file>());
+            collectionWiseFiles.set(file.collectionID, new Array<File>());
         }
         collectionWiseFiles.get(file.collectionID).push(file);
     }

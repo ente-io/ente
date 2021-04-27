@@ -1,7 +1,7 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 import EXIF from 'exif-js';
-import { file, fileAttribute } from './fileService';
+import { File, fileAttribute } from './fileService';
 import { Collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity, WaitFor2Seconds } from 'utils/common';
@@ -46,7 +46,7 @@ interface ParsedEXIFData {
     creationTime: number;
 }
 export interface FileWithCollection {
-    file: File;
+    file: globalThis.File;
     collection: Collection;
 }
 export interface DataStream {
@@ -130,8 +130,7 @@ class UploadService {
     private filesToBeUploaded: FileWithCollection[];
     private progressBarProps;
     private uploadErrors: Error[];
-    private setUploadErrors;
-    private existingFilesCollectionWise: Map<number, file[]>;
+    private existingFilesCollectionWise: Map<number, File[]>;
     constructor() {
         const main = async () => {
             try {
@@ -148,9 +147,8 @@ class UploadService {
     }
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
-        existingFiles: file[],
-        progressBarProps,
-        setUploadErrors
+        existingFiles: File[],
+        progressBarProps
     ) {
         try {
             checkConnectivity();
@@ -159,14 +157,14 @@ class UploadService {
             this.filesCompleted = 0;
             this.fileProgress = new Map<string, number>();
             this.uploadErrors = [];
-            this.setUploadErrors = setUploadErrors;
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
             this.existingFilesCollectionWise = sortFilesIntoCollections(
                 existingFiles
             );
+            this.updateProgressBarUI();
 
-            let metadataFiles: File[] = [];
+            let metadataFiles: globalThis.File[] = [];
             let actualFiles: FileWithCollection[] = [];
             filesWithCollectionToUpload.forEach((fileWithCollection) => {
                 let file = fileWithCollection.file;
@@ -321,7 +319,6 @@ class UploadService {
             }
         }
         setPercentComplete(percentComplete);
-        this.setUploadErrors(this.uploadErrors);
         setFileProgress(this.fileProgress);
     }
 
@@ -354,7 +351,7 @@ class UploadService {
         }
     }
 
-    private async readFile(reader: FileReader, receivedFile: File) {
+    private async readFile(reader: FileReader, receivedFile: globalThis.File) {
         try {
             const thumbnail = await this.generateThumbnail(
                 reader,
@@ -578,7 +575,7 @@ class UploadService {
         }
     }
 
-    private async seedMetadataMap(receivedFile: File) {
+    private async seedMetadataMap(receivedFile: globalThis.File) {
         try {
             const metadataJSON: object = await new Promise(
                 (resolve, reject) => {
@@ -640,7 +637,7 @@ class UploadService {
     }
     private async generateThumbnail(
         reader: FileReader,
-        file: File
+        file: globalThis.File
     ): Promise<Uint8Array> {
         try {
             let canvas = document.createElement('canvas');
@@ -648,7 +645,11 @@ class UploadService {
             let imageURL = null;
             if (file.type.match(TYPE_IMAGE) || fileIsHEIC(file.name)) {
                 if (fileIsHEIC(file.name)) {
-                    file = new File([await convertHEIC2JPEG(file)], null, null);
+                    file = new globalThis.File(
+                        [await convertHEIC2JPEG(file)],
+                        null,
+                        null
+                    );
                 }
                 let image = new Image();
                 imageURL = URL.createObjectURL(file);
@@ -736,7 +737,7 @@ class UploadService {
         }
     }
 
-    private getFileStream(reader: FileReader, file: File) {
+    private getFileStream(reader: FileReader, file: globalThis.File) {
         let self = this;
         let fileChunkReader = (async function* fileChunkReaderMaker(
             fileSize,
@@ -942,7 +943,7 @@ class UploadService {
     }
     private async getExifData(
         reader: FileReader,
-        receivedFile: File,
+        receivedFile: globalThis.File,
         fileType: FILE_TYPE
     ): Promise<ParsedEXIFData> {
         try {

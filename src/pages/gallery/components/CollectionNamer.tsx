@@ -1,47 +1,60 @@
 import React, { useEffect, useRef } from 'react';
-import { Modal, Form } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
-import { UPLOAD_STRATEGY } from './Upload';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from 'components/SubmitButton';
 import MessageDialog from 'components/MessageDialog';
 
+export interface CollectionNamerAttributes {
+    callback: (name) => Promise<void>;
+    title: string;
+    autoFilledName: string;
+    buttonText: string;
+}
+
+export type SetCollectionNamerAttributes = React.Dispatch<
+    React.SetStateAction<CollectionNamerAttributes>
+>;
+
 interface Props {
     show: boolean;
     onHide: () => void;
-    autoFilledName: string;
-    callback: any;
-    purpose: { title: string; buttonText: string };
+    attributes: CollectionNamerAttributes;
 }
 interface formValues {
     albumName: string;
 }
-export default function NameCollection(props: Props) {
-    const collectionNameInputRef = useRef(null);
 
+export default function CollectionNamer({ attributes, ...props }: Props) {
+    const collectionNameInputRef = useRef(null);
+    useEffect(() => {
+        if (attributes) {
+            setTimeout(() => {
+                collectionNameInputRef.current?.focus();
+            }, 200);
+        }
+    }, [attributes]);
+    if (!attributes) {
+        return (
+            <MessageDialog show={false} onHide={() => null} attributes={{}} />
+        );
+    }
     const onSubmit = ({ albumName }: formValues) => {
-        props.callback(albumName);
+        attributes.callback(albumName);
         props.onHide();
     };
-
-    useEffect(() => {
-        setTimeout(() => {
-            collectionNameInputRef.current?.focus();
-        }, 200);
-    }, [props.show]);
-
     return (
         <MessageDialog
             show={props.show}
             onHide={props.onHide}
             size={'sm'}
             attributes={{
-                title: props.purpose?.title,
+                title: attributes?.title,
             }}
         >
             <Formik<formValues>
-                initialValues={{ albumName: props.autoFilledName }}
+                initialValues={{ albumName: attributes.autoFilledName }}
                 validationSchema={Yup.object().shape({
                     albumName: Yup.string().required(constants.REQUIRED),
                 })}
@@ -79,7 +92,7 @@ export default function NameCollection(props: Props) {
                             </Form.Control.Feedback>
                         </Form.Group>
                         <SubmitButton
-                            buttonText={props.purpose.buttonText}
+                            buttonText={attributes.buttonText}
                             loading={false}
                         />
                     </Form>

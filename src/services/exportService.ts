@@ -1,7 +1,7 @@
 import { runningInBrowser } from 'utils/common';
 import { Collection } from './collectionService';
 import downloadManager from './downloadManager';
-import { file } from './fileService';
+import { File } from './fileService';
 
 enum ExportNotification {
     START = 'export started',
@@ -14,7 +14,7 @@ class ExportService {
     exportInProgress: Promise<void> = null;
     abortExport: boolean = false;
 
-    async exportFiles(files: file[], collections: Collection[]) {
+    async exportFiles(files: File[], collections: Collection[]) {
         if (this.exportInProgress) {
             this.ElectronAPIs.sendNotification(ExportNotification.IN_PROGRESS);
             return this.exportInProgress;
@@ -22,7 +22,7 @@ class ExportService {
         this.exportInProgress = this.fileExporter(files, collections);
         return this.exportInProgress;
     }
-    async fileExporter(files: file[], collections: Collection[]) {
+    async fileExporter(files: File[], collections: Collection[]) {
         try {
             const dir = await this.ElectronAPIs.selectRootDirectory();
             if (!dir) {
@@ -38,8 +38,9 @@ class ExportService {
             );
             const collectionIDMap = new Map<number, string>();
             for (let collection of collections) {
-                let collectionFolderPath = `${dir}/${collection.id
-                    }_${this.sanitizeName(collection.name)}`;
+                let collectionFolderPath = `${dir}/${
+                    collection.id
+                }_${this.sanitizeName(collection.name)}`;
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
                     collectionFolderPath
                 );
@@ -77,7 +78,7 @@ class ExportService {
         }
     }
 
-    async downloadAndSave(file: file, path) {
+    async downloadAndSave(file: File, path) {
         const fileStream = await downloadManager.downloadFile(file);
         this.ElectronAPIs.saveStreamToDisk(path, fileStream);
         this.ElectronAPIs.saveFileToDisk(

@@ -8,7 +8,7 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from 'services/collectionService';
-import { file } from 'services/fileService';
+import { File } from 'services/fileService';
 import constants from 'utils/strings/constants';
 import DownloadManger from 'services/downloadManager';
 
@@ -17,7 +17,7 @@ interface Iprops {
     items: any[];
     currentIndex?: number;
     onClose?: (needUpdate: boolean) => void;
-    gettingData: (instance: any, index: number, item: file) => void;
+    gettingData: (instance: any, index: number, item: File) => void;
     id?: string;
     className?: string;
     favItemIds: Set<number>;

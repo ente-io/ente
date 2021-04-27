@@ -1,6 +1,6 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { file } from './fileService';
+import { File } from './fileService';
 import localForage from 'utils/storage/localForage';
 
 import HTTPService from './HTTPService';
@@ -45,7 +45,7 @@ interface collectionAttributes {
 
 export interface CollectionAndItsLatestFile {
     collection: Collection;
-    file: file;
+    file: File;
 }
 
 const getCollectionSecrets = async (
@@ -162,18 +162,18 @@ export const syncCollections = async () => {
     return collections;
 };
 
-export const getCollectionAndItsLatestFile = (
+export const getCollectionsAndTheirLatestFile = (
     collections: Collection[],
-    files: file[]
+    files: File[]
 ): CollectionAndItsLatestFile[] => {
-    const latestFile = new Map<number, file>();
+    const latestFile = new Map<number, File>();
 
     files.forEach((file) => {
         if (!latestFile.has(file.collectionID)) {
             latestFile.set(file.collectionID, file);
         }
     });
-    let allCollectionAndItsLatestFile: CollectionAndItsLatestFile[] = [];
+    let collectionsAndTheirLatestFile: CollectionAndItsLatestFile[] = [];
     const userID = getData(LS_KEYS.USER)?.id;
 
     for (const collection of collections) {
@@ -183,15 +183,15 @@ export const getCollectionAndItsLatestFile = (
         ) {
             continue;
         }
-        allCollectionAndItsLatestFile.push({
+        collectionsAndTheirLatestFile.push({
             collection,
             file: latestFile.get(collection.id),
         });
     }
-    return allCollectionAndItsLatestFile;
+    return collectionsAndTheirLatestFile;
 };
 
-export const getFavItemIds = async (files: file[]): Promise<Set<number>> => {
+export const getFavItemIds = async (files: File[]): Promise<Set<number>> => {
     let favCollection = await getFavCollection();
     if (!favCollection) return new Set();
 
@@ -279,7 +279,7 @@ const postCollection = async (
     }
 };
 
-export const addToFavorites = async (file: file) => {
+export const addToFavorites = async (file: File) => {
     let favCollection = await getFavCollection();
     if (!favCollection) {
         favCollection = await createCollection(
@@ -291,12 +291,12 @@ export const addToFavorites = async (file: file) => {
     await addToCollection(favCollection, [file]);
 };
 
-export const removeFromFavorites = async (file: file) => {
+export const removeFromFavorites = async (file: File) => {
     let favCollection = await getFavCollection();
     await removeFromCollection(favCollection, [file]);
 };
 
-const addToCollection = async (collection: Collection, files: file[]) => {
+const addToCollection = async (collection: Collection, files: File[]) => {
     try {
         const params = new Object();
         const worker = await new CryptoWorker();
@@ -332,7 +332,7 @@ const addToCollection = async (collection: Collection, files: file[]) => {
         console.error('Add to collection Failed ', e);
     }
 };
-const removeFromCollection = async (collection: Collection, files: file[]) => {
+const removeFromCollection = async (collection: Collection, files: File[]) => {
     try {
         const params = new Object();
         const token = getToken();
@@ -463,7 +463,7 @@ export const getFavCollection = async () => {
 
 export const getNonEmptyCollections = (
     collections: Collection[],
-    files: file[]
+    files: File[]
 ) => {
     const nonEmptyCollectionsIds = new Set<number>();
     for (let file of files) {
