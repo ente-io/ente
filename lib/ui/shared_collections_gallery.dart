@@ -51,7 +51,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
     return FutureBuilder<SharedCollections>(
       future: Future.value(FilesDB.instance.getLatestCollectionFiles())
           .then((files) async {
-        var startTime = DateTime.now();
         final List<CollectionWithThumbnail> outgoing = [];
         final List<CollectionWithThumbnail> incoming = [];
         for (final file in files) {
@@ -85,12 +84,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           return second.lastUpdatedFile.updationTime
               .compareTo(first.lastUpdatedFile.updationTime);
         });
-
-        var endTime = DateTime.now();
-        var duration = Duration(
-            microseconds: endTime.microsecondsSinceEpoch -
-                startTime.microsecondsSinceEpoch);
-        _logger.info("Total time taken: " + duration.inMilliseconds.toString());
         return SharedCollections(outgoing, incoming);
       }),
       builder: (context, snapshot) {
