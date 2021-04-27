@@ -15,6 +15,7 @@ interface Props {
     setBannerMessage;
     acceptedFiles: File[];
     existingFiles: file[];
+    closeCollectionSelector: () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setLoading: SetLoading;
@@ -44,11 +45,17 @@ export default function Upload(props: Props) {
     ] = useState<AnalysisResult>(null);
     useEffect(() => {
         if (props.acceptedFiles?.length > 0) {
+            props.setLoading(true);
+            let fileAnalysisResult = analyseUploadFiles();
+            if (!fileAnalysisResult) {
+                setFileAnalysisResult(fileAnalysisResult);
+            }
             props.setCollectionSelectorAttributes({
                 callback: uploadFilesToExistingCollection,
-                showNextModal: nextModal,
+                showNextModal: nextModal.bind(null, fileAnalysisResult),
                 title: 'upload to collection',
             });
+            props.setLoading(false);
         }
     }, [props.acceptedFiles]);
     const setupCreateCollection = () => {
@@ -56,24 +63,22 @@ export default function Upload(props: Props) {
             title: constants.CREATE_COLLECTION,
             buttonText: constants.CREATE,
             autoFilledName: fileAnalysisResult?.suggestedCollectionName,
-            callback: uploadFilesToNewCollections.bind(
-                null,
-                UPLOAD_STRATEGY.SINGLE_COLLECTION
-            ),
+            callback: async (collectionName) => {
+                props.closeCollectionSelector();
+                await uploadFilesToNewCollections(
+                    UPLOAD_STRATEGY.SINGLE_COLLECTION,
+                    collectionName
+                );
+            },
         });
     };
 
-    const nextModal = () => {
-        props.setLoading(true);
-        let fileAnalysisResult = analyseUploadFiles();
-        if (!fileAnalysisResult) {
-            return;
-        }
-        fileAnalysisResult.multipleFolders
+    const nextModal = (fileAnalysisResult) => {
+        console.log(fileAnalysisResult);
+        fileAnalysisResult?.multipleFolders
             ? setChoiceModalView(true)
             : setupCreateCollection();
         setFileAnalysisResult(fileAnalysisResult);
-        props.setLoading(false);
     };
 
     function analyseUploadFiles() {
