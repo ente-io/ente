@@ -189,16 +189,15 @@ class MemoryWidget extends StatelessWidget {
   }
 
   int _getNextMemoryIndex() {
-    for (var index = 0; index < memories.length; index++) {
+    int lastSeenIndex = 0;
+    for (var index = memories.length - 1; index >=0; index--) {
       if (!memories[index].isSeen()) {
-        return index;
-      }
-      if (index > 0 &&
-          memories[index - 1].seenTime() > memories[index].seenTime()) {
-        return index;
+        lastSeenIndex = index;
+      } else {
+        break;
       }
     }
-    return 0;
+    return lastSeenIndex;
   }
 
   String _getTitle(Memory memory) {
