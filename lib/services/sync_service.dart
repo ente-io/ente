@@ -287,7 +287,6 @@ class SyncService {
       await _syncCollectionDiff(c.id);
       _collectionsService.setCollectionSyncTime(c.id, c.updationTime);
     }
-    await deleteFilesOnServer();
     bool hasUploadedFiles = await _uploadDiff();
     if (hasUploadedFiles) {
       syncWithRemote(silently: true);
@@ -443,24 +442,21 @@ class SyncService {
     }
   }
 
-  Future<void> deleteFilesOnServer() async {
-    return _db.getDeletedFileIDs().then((ids) async {
-      for (int id in ids) {
-        await _deleteFileOnServer(id);
-        await _db.delete(id);
-      }
-    });
-  }
-
-  Future<void> _deleteFileOnServer(int fileID) async {
+  Future<void> deleteFilesOnServer(List<int> fileIDs) async {
     return _dio
-        .delete(
-          Configuration.instance.getHttpEndpoint() +
-              "/files/" +
-              fileID.toString(),
+        .post(
+          Configuration.instance.getHttpEndpoint() + "/files/delete",
           options: Options(
-              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+            headers: {
+              "X-Auth-Token": Configuration.instance.getToken(),
+            },
+          ),
+          data: {
+            "fileIDs": fileIDs,
+          }
         )
-        .catchError((e) => _logger.severe(e));
+        .catchError((e) {
+          _logger.severe(e);
+        });
   }
 }

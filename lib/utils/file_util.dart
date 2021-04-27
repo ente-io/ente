@@ -28,6 +28,7 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 import 'crypto_util.dart';
 
@@ -49,8 +50,8 @@ Future<void> deleteFilesFromEverywhere(
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
-  bool hasUploadedFiles = false;
   final updatedCollectionIDs = Set<int>();
+  final List<int> uploadedFileIDsToBeDeleted = [];
   final List<File> deletedFiles = [];
   for (final file in files) {
     if (file.localID != null) {
@@ -58,23 +59,28 @@ Future<void> deleteFilesFromEverywhere(
       if (deletedIDs.contains(file.localID)) {
         deletedFiles.add(file);
         if (file.uploadedFileID != null) {
-          hasUploadedFiles = true;
-          await FilesDB.instance.markForDeletion(file.uploadedFileID);
+          uploadedFileIDsToBeDeleted.add(file.uploadedFileID);
           updatedCollectionIDs.add(file.collectionID);
         } else {
           await FilesDB.instance.deleteLocalFile(file.localID);
         }
       }
     } else {
-      hasUploadedFiles = true;
-      await FilesDB.instance.markForDeletion(file.uploadedFileID);
+      uploadedFileIDsToBeDeleted.add(file.uploadedFileID);
     }
-    await dialog.hide();
   }
-  if (deletedFiles.isNotEmpty) {
-    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
-  }
-  if (hasUploadedFiles) {
+  if (uploadedFileIDsToBeDeleted.isNotEmpty) {
+    try {
+      await SyncService.instance
+          .deleteFilesOnServer(uploadedFileIDsToBeDeleted);
+      await FilesDB.instance
+          .deleteMultipleUploadedFiles(uploadedFileIDsToBeDeleted);
+      await dialog.hide();
+    } catch (e) {
+      await dialog.hide();
+      showGenericErrorDialog(context);
+      throw e;
+    }
     for (final collectionID in updatedCollectionIDs) {
       Bus.instance.fire(CollectionUpdatedEvent(
           collectionID,
@@ -82,9 +88,11 @@ Future<void> deleteFilesFromEverywhere(
               .where((file) => file.collectionID == collectionID)
               .toList()));
     }
-    // TODO: Blocking call?
-    SyncService.instance.deleteFilesOnServer();
   }
+  if (deletedFiles.isNotEmpty) {
+    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
+  }
+  showToast("deleted from everywhere");
 }
 
 Future<void> deleteFilesOnDeviceOnly(

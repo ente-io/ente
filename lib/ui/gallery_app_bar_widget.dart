@@ -288,7 +288,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           await deleteFilesFromEverywhere(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("files deleted from everywhere");
           Navigator.of(context, rootNavigator: true).pop();
         },
       ));
@@ -300,7 +299,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           await deleteFilesFromEverywhere(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("files deleted from everywhere");
           Navigator.of(context, rootNavigator: true).pop();
         },
       ));

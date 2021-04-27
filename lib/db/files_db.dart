@@ -490,24 +490,21 @@ class FilesDB {
     );
   }
 
-  Future<int> markForDeletion(int uploadedFileID) async {
-    final db = await instance.database;
-    final values = new Map<String, dynamic>();
-    values[columnIsDeleted] = 1;
-    return db.update(
-      table,
-      values,
-      where: '$columnUploadedFileID =?',
-      whereArgs: [uploadedFileID],
-    );
-  }
-
   Future<int> delete(int uploadedFileID) async {
     final db = await instance.database;
     return db.delete(
       table,
       where: '$columnUploadedFileID =?',
       whereArgs: [uploadedFileID],
+    );
+  }
+
+  Future<int> deleteMultipleUploadedFiles(List<int> uploadedFileIDs) async {
+    final db = await instance.database;
+    return db.delete(
+      table,
+      where: '$columnUploadedFileID IN (?)',
+      whereArgs: [uploadedFileIDs.join(", ")],
     );
   }
 
