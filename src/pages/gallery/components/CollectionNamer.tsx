@@ -6,14 +6,6 @@ import * as Yup from 'yup';
 import SubmitButton from 'components/SubmitButton';
 import MessageDialog from 'components/MessageDialog';
 
-interface Props {
-    show: boolean;
-    onHide: () => void;
-    attributes: CollectionNamerAttributes;
-}
-interface formValues {
-    albumName: string;
-}
 export interface CollectionNamerAttributes {
     callback: (name) => Promise<void>;
     title: string;
@@ -25,13 +17,17 @@ export type SetCollectionNamerAttributes = React.Dispatch<
     React.SetStateAction<CollectionNamerAttributes>
 >;
 
+interface Props {
+    show: boolean;
+    onHide: () => void;
+    attributes: CollectionNamerAttributes;
+}
+interface formValues {
+    albumName: string;
+}
+
 export default function CollectionNamer({ attributes, ...props }: Props) {
     const collectionNameInputRef = useRef(null);
-
-    const onSubmit = ({ albumName }: formValues) => {
-        attributes.callback(albumName);
-        props.onHide();
-    };
     useEffect(() => {
         if (attributes) {
             setTimeout(() => {
@@ -44,6 +40,10 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
             <MessageDialog show={false} onHide={() => null} attributes={{}} />
         );
     }
+    const onSubmit = ({ albumName }: formValues) => {
+        attributes.callback(albumName);
+        props.onHide();
+    };
     return (
         <MessageDialog
             show={props.show}
