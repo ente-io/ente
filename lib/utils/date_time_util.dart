@@ -159,7 +159,7 @@ Widget getDayWidget(int timestamp) {
     padding: const EdgeInsets.fromLTRB(10, 8, 0, 10),
     alignment: Alignment.centerLeft,
     child: Text(
-      _getDayTitle(timestamp),
+      getDayTitle(timestamp),
       style: TextStyle(
         fontSize: 14,
         color: Colors.white.withOpacity(0.85),
@@ -168,7 +168,7 @@ Widget getDayWidget(int timestamp) {
   );
 }
 
-String _getDayTitle(int timestamp) {
+String getDayTitle(int timestamp) {
   final date = DateTime.fromMicrosecondsSinceEpoch(timestamp);
   final now = DateTime.now();
   var title = getDayAndMonth(date);
