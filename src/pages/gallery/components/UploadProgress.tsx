@@ -7,11 +7,9 @@ interface Props {
     fileCounter;
     uploadStage;
     now;
-    uploadErrors;
     closeModal;
     fileProgress: Map<string, number>;
     show;
-    onHide;
 }
 export default function UploadProgress(props: Props) {
     let fileProgressStatuses = [];
