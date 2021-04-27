@@ -6,22 +6,21 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from 'components/SubmitButton';
 import MessageDialog from 'components/MessageDialog';
+import { CollectionNamerAttributes } from '..';
 
 interface Props {
     show: boolean;
     onHide: () => void;
-    autoFilledName: string;
-    callback: any;
-    purpose: { title: string; buttonText: string };
+    attributes: CollectionNamerAttributes;
 }
 interface formValues {
     albumName: string;
 }
-export default function NameCollection(props: Props) {
+export default function CollectionNamer({ attributes, ...props }: Props) {
     const collectionNameInputRef = useRef(null);
 
     const onSubmit = ({ albumName }: formValues) => {
-        props.callback(albumName);
+        attributes.callback(albumName);
         props.onHide();
     };
 
@@ -37,11 +36,11 @@ export default function NameCollection(props: Props) {
             onHide={props.onHide}
             size={'sm'}
             attributes={{
-                title: props.purpose?.title,
+                title: attributes?.title,
             }}
         >
             <Formik<formValues>
-                initialValues={{ albumName: props.autoFilledName }}
+                initialValues={{ albumName: attributes.autoFilledName }}
                 validationSchema={Yup.object().shape({
                     albumName: Yup.string().required(constants.REQUIRED),
                 })}
@@ -79,7 +78,7 @@ export default function NameCollection(props: Props) {
                             </Form.Control.Feedback>
                         </Form.Group>
                         <SubmitButton
-                            buttonText={props.purpose.buttonText}
+                            buttonText={attributes.buttonText}
                             loading={false}
                         />
                     </Form>
