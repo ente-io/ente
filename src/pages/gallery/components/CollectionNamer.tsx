@@ -6,7 +6,6 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from 'components/SubmitButton';
 import MessageDialog from 'components/MessageDialog';
-import { CollectionNamerAttributes } from '..';
 
 interface Props {
     show: boolean;
@@ -16,6 +15,17 @@ interface Props {
 interface formValues {
     albumName: string;
 }
+export interface CollectionNamerAttributes {
+    callback: (name) => Promise<void>;
+    title: string;
+    autoFilledName: string;
+    buttonText: string;
+}
+
+export type SetCollectionNamerAttributes = React.Dispatch<
+    React.SetStateAction<CollectionNamerAttributes>
+>;
+
 export default function CollectionNamer({ attributes, ...props }: Props) {
     const collectionNameInputRef = useRef(null);
 

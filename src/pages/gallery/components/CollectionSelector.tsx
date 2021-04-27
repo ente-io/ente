@@ -16,6 +16,15 @@ export const CollectionIcon = styled.div`
     outline: none;
 `;
 
+export interface CollectionSelectorAttributes {
+    callback: (collection) => Promise<void>;
+    showNextModal: () => void;
+    title: string;
+}
+export type SetCollectionSelectorAttributes = React.Dispatch<
+    React.SetStateAction<CollectionSelectorAttributes>
+>;
+
 interface Props {
     show: boolean;
     onHide: () => void;

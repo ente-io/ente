@@ -10,11 +10,7 @@ import {
 import styled from 'styled-components';
 import { SetDialogMessage } from 'utils/billingUtil';
 import constants from 'utils/strings/constants';
-import { CollectionNamerAttributes } from '..';
-
-type SetCollectionNamerAttributes = React.Dispatch<
-    React.SetStateAction<CollectionNamerAttributes>
->;
+import { SetCollectionNamerAttributes } from './CollectionNamer';
 
 interface CollectionProps {
     collections: Collection[];

@@ -47,8 +47,12 @@ import AlertBanner from './components/AlertBanner';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
-import CollectionNamer from './components/CollectionNamer';
-import CollectionSelector from './components/CollectionSelector';
+import CollectionNamer, {
+    CollectionNamerAttributes,
+} from './components/CollectionNamer';
+import CollectionSelector, {
+    CollectionSelectorAttributes,
+} from './components/CollectionSelector';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -147,20 +151,7 @@ export type selectedState = {
     count: number;
 };
 
-export interface CollectionSelectorAttributes {
-    callback: (collection) => Promise<void>;
-    showNextModal: () => void;
-    title: string;
-}
-
-export interface CollectionNamerAttributes {
-    callback: (name) => Promise<void>;
-    title: string;
-    autoFilledName: string;
-    buttonText: string;
-}
-
-export default function Gallery(props: Props) {
+export default function Gallery() {
     const router = useRouter();
     const [collections, setCollections] = useState<Collection[]>([]);
     const [
