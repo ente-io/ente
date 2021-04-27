@@ -40,7 +40,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
 
   @override
   Widget build(BuildContext context) {
-    if (_event == null) {
+    if (!SyncService.instance.isSyncInProgress() || _event == null) {
       return Container();
     }
     if (_event.status == SyncStatus.error) {
