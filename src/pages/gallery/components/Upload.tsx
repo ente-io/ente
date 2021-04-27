@@ -58,7 +58,7 @@ export default function Upload(props: Props) {
             props.setLoading(false);
         }
     }, [props.acceptedFiles]);
-    const showCreateCollectionModal = (fileAnalysisResult) => {
+    const showCreateCollectionModal = (fileAnalysisResult?: AnalysisResult) => {
         props.setCollectionNamerAttributes({
             title: constants.CREATE_COLLECTION,
             buttonText: constants.CREATE,
@@ -73,7 +73,7 @@ export default function Upload(props: Props) {
         });
     };
 
-    const nextModal = (fileAnalysisResult) => {
+    const nextModal = (fileAnalysisResult: AnalysisResult) => {
         fileAnalysisResult?.multipleFolders
             ? setChoiceModalView(true)
             : showCreateCollectionModal(fileAnalysisResult);
