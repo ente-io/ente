@@ -320,6 +320,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         if (index < widget.memories.length - 1) {
           final nextFile = widget.memories[index + 1].file;
           preloadThumbnail(nextFile);
+          preloadFile(nextFile);
         }
         final file = widget.memories[index].file;
         return MemoryItem(file);
