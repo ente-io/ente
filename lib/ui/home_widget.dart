@@ -43,12 +43,13 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
+  static const _deviceFolderGalleryWidget = const CollectionsGalleryWidget();
+  static const _sharedCollectionGallery = const SharedCollectionGallery();
+  static const _headerWidget = HeaderWidget();
+  
   final _logger = Logger("HomeWidgetState");
-  final _deviceFolderGalleryWidget = CollectionsGalleryWidget();
-  final _sharedCollectionGallery = SharedCollectionGallery();
   final _selectedFiles = SelectedFiles();
   final _settingsButton = SettingsButton();
-  static const _headerWidget = HeaderWidget();
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
   Widget _headerWidgetWithSettingsButton;
