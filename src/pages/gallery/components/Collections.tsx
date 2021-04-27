@@ -23,9 +23,10 @@ interface CollectionProps {
 
 const Container = styled.div`
     margin: 0 auto;
+    overflow-y: hidden;
+    height: 50px;
     display: flex;
     max-width: 100%;
-
     @media (min-width: 1000px) {
         width: 1000px;
     }
@@ -40,8 +41,11 @@ const Container = styled.div`
 `;
 
 const Wrapper = styled.div`
+    height: 70px;
     margin-top: 10px;
+    flex: 1;
     white-space: nowrap;
+    overflow: auto;
     max-width: 100%;
 `;
 const Option = styled.div`
