@@ -26,7 +26,6 @@ import billingService from 'services/billingService';
 import PlanSelector from './components/PlanSelector';
 import { checkSubscriptionPurchase } from 'utils/billingUtil';
 
-import Delete from 'components/Delete';
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
 import UploadButton from './components/UploadButton';
@@ -50,6 +49,9 @@ import CollectionSelector, {
 } from './components/CollectionSelector';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
+import { getSelectedFileIds } from 'utils/file';
+import { addFilesToCollection } from 'utils/collection';
+import SelectedFileOptions from './components/SelectedFileOptions';
 
 export enum FILE_TYPE {
     IMAGE,
@@ -65,19 +67,6 @@ export const DeadCenter = styled.div`
     color: #fff;
     text-align: center;
     flex-direction: column;
-`;
-
-const DeleteBtn = styled.button`
-    border: none;
-    background-color: #ff6666;
-    position: fixed;
-    z-index: 1;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    color: #fff;
 `;
 
 export type selectedState = {
@@ -221,6 +210,31 @@ export default function Gallery() {
     if (!files) {
         return <div />;
     }
+    const addToCollectionHelper = addFilesToCollection.bind(
+        null,
+        setCollectionSelectorView,
+        selected,
+        files,
+        clearSelection,
+        syncWithRemote,
+        selectCollection
+    );
+
+    const showCreateCollectionModal = () =>
+        setCollectionNamerAttributes({
+            title: constants.CREATE_COLLECTION,
+            buttonText: constants.CREATE,
+            autoFilledName: '',
+            callback: (collectionName) =>
+                addToCollectionHelper(collectionName, null),
+        });
+
+    const deleteFileHelper = () =>
+        deleteFiles(
+            getSelectedFileIds(selected),
+            clearSelection,
+            syncWithRemote
+        );
     return (
         <FullScreenDropZone
             getRootProps={getRootProps}
@@ -323,28 +337,15 @@ export default function Gallery() {
                 </Alert>
             )}
             {selected.count > 0 && (
-                <DeleteBtn
-                    onClick={() =>
-                        setDialogMessage({
-                            title: constants.CONFIRM_DELETE_FILE,
-                            content: constants.DELETE_FILE_MESSAGE,
-                            staticBackdrop: true,
-                            proceed: {
-                                action: deleteFiles.bind(
-                                    null,
-                                    selected,
-                                    clearSelection,
-                                    syncWithRemote
-                                ),
-                                text: constants.DELETE,
-                                variant: 'danger',
-                            },
-                            close: { text: constants.CANCEL },
-                        })
+                <SelectedFileOptions
+                    addToCollectionHelper={addToCollectionHelper}
+                    showCreateCollectionModal={showCreateCollectionModal}
+                    setDialogMessage={setDialogMessage}
+                    setCollectionSelectorAttributes={
+                        setCollectionSelectorAttributes
                     }
-                >
-                    <Delete />
-                </DeleteBtn>
+                    deleteFileHelper={deleteFileHelper}
+                />
             )}
         </FullScreenDropZone>
     );
