@@ -45,8 +45,11 @@ import {
 import { logoutUser } from 'services/userService';
 import AlertBanner from './components/AlertBanner';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
-import { LoadingOverlay } from './components/CollectionSelector';
+import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
+import CollectionNamer from './components/CollectionNamer';
+import CollectionSelector from './components/CollectionSelector';
+import { LoadingOverlay } from 'components/LoadingOverlay';
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
@@ -123,13 +126,6 @@ const DateContainer = styled.div`
 `;
 
 interface Props {
-    getRootProps;
-    getInputProps;
-    openFileUploader;
-    acceptedFiles;
-    collectionSelectorView;
-    closeCollectionSelector;
-    showCollectionSelector;
     err;
 }
 
@@ -151,6 +147,19 @@ export type selectedState = {
     count: number;
 };
 
+export interface CollectionSelectorAttributes {
+    callback: (collection) => Promise<void>;
+    showNextModal: () => void;
+    title: string;
+}
+
+export interface CollectionNamerAttributes {
+    callback: (name) => Promise<void>;
+    title: string;
+    autoFilledName: string;
+    buttonText: string;
+}
+
 export default function Gallery(props: Props) {
     const router = useRouter();
     const [collections, setCollections] = useState<Collection[]>([]);
@@ -171,6 +180,27 @@ export default function Gallery(props: Props) {
     const [dialogView, setDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [
+        collectionSelectorAttributes,
+        setCollectionSelectorAttributes,
+    ] = useState<CollectionSelectorAttributes>(null);
+    const [collectionSelectorView, setCollectionSelectorView] = useState(false);
+
+    const [
+        collectionNamerAttributes,
+        setCollectionNamerAttributes,
+    ] = useState<CollectionNamerAttributes>(null);
+    const [collectionNamerView, setCollectionNamerView] = useState(false);
+    const {
+        getRootProps,
+        getInputProps,
+        open: openFileUploader,
+        acceptedFiles,
+    } = useDropzone({
+        noClick: true,
+        noKeyboard: true,
+        accept: 'image/*, video/*, application/json, ',
+    });
 
     const loadingBar = useRef(null);
     useEffect(() => {
@@ -209,6 +239,12 @@ export default function Gallery(props: Props) {
     }, []);
 
     useEffect(() => setDialogView(true), [dialogMessage]);
+    useEffect(() => setCollectionSelectorView(true), [
+        collectionSelectorAttributes,
+    ]);
+    useEffect(() => setCollectionNamerView(true), [
+        collectionSelectorAttributes,
+    ]);
 
     const syncWithRemote = async () => {
         try {
@@ -420,9 +456,9 @@ export default function Gallery(props: Props) {
 
     return (
         <FullScreenDropZone
-            getRootProps={props.getRootProps}
-            getInputProps={props.getInputProps}
-            showCollectionSelector={props.showCollectionSelector}
+            getRootProps={getRootProps}
+            getInputProps={getInputProps}
+            showCollectionSelector={setCollectionSelectorView.bind(null, true)}
         >
             {loading && (
                 <LoadingOverlay>
@@ -455,15 +491,30 @@ export default function Gallery(props: Props) {
                 selectCollection={selectCollection}
                 syncWithRemote={syncWithRemote}
                 setDialogMessage={setDialogMessage}
+                setCollectionNamerAttributes={setCollectionNamerAttributes}
+            />
+            <CollectionNamer
+                show={collectionNamerView}
+                onHide={setCollectionNamerView.bind(null, false)}
+                attributes={collectionNamerAttributes}
+            />
+            <CollectionSelector
+                show={collectionSelectorView}
+                onHide={setCollectionSelectorView.bind(null, false)}
+                collectionsAndTheirLatestFile={collectionAndItsLatestFile}
+                directlyShowNextModal={collectionAndItsLatestFile?.length === 0}
+                attributes={collectionSelectorAttributes}
             />
             <Upload
-                collectionSelectorView={props.collectionSelectorView}
-                closeCollectionSelector={props.closeCollectionSelector}
-                collectionAndItsLatestFile={collectionAndItsLatestFile}
-                refetchData={syncWithRemote}
+                syncWithRemote={syncWithRemote}
                 setBannerMessage={setBannerMessage}
-                acceptedFiles={props.acceptedFiles}
+                acceptedFiles={acceptedFiles}
                 existingFiles={data}
+                setCollectionSelectorAttributes={
+                    setCollectionSelectorAttributes
+                }
+                setLoading={setLoading}
+                setCollectionNamerAttributes={setCollectionNamerAttributes}
             />
             <Sidebar
                 files={data}
@@ -471,7 +522,7 @@ export default function Gallery(props: Props) {
                 setDialogMessage={setDialogMessage}
                 setPlanModalView={setPlanModalView}
             />
-            <UploadButton openFileUploader={props.openFileUploader} />
+            <UploadButton openFileUploader={openFileUploader} />
             {!isFirstLoad && data.length == 0 ? (
                 <div
                     style={{
@@ -482,7 +533,7 @@ export default function Gallery(props: Props) {
                 >
                     <Button
                         variant="outline-success"
-                        onClick={props.openFileUploader}
+                        onClick={openFileUploader}
                         style={{
                             paddingLeft: '32px',
                             paddingRight: '32px',
