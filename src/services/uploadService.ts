@@ -149,8 +149,7 @@ class UploadService {
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
         existingFiles: file[],
-        progressBarProps,
-        setUploadErrors
+        progressBarProps
     ) {
         try {
             checkConnectivity();
@@ -159,12 +158,12 @@ class UploadService {
             this.filesCompleted = 0;
             this.fileProgress = new Map<string, number>();
             this.uploadErrors = [];
-            this.setUploadErrors = setUploadErrors;
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
             this.existingFilesCollectionWise = sortFilesIntoCollections(
                 existingFiles
             );
+            this.updateProgressBarUI();
 
             let metadataFiles: File[] = [];
             let actualFiles: FileWithCollection[] = [];
