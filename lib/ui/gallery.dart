@@ -75,7 +75,7 @@ class _GalleryState extends State<Gallery> {
     final collatedFiles = _collateFiles(files);
     if (_collatedFiles.length != collatedFiles.length) {
       if (mounted) {
-        _logger.info("New day discovered");
+        _logger.info("Days updated");
         setState(() {
           _hasLoadedFiles = true;
           _collatedFiles = collatedFiles;
