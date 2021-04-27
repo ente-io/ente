@@ -116,7 +116,7 @@ void preloadFile(File file) {
     return;
   }
   if (file.localID == null) {
-    // getFileFromServer(file);
+    getFileFromServer(file);
   } else {
     if (FileLruCache.get(file) == null) {
       file.getAsset().then((asset) {
