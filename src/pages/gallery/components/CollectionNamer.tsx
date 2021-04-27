@@ -39,7 +39,11 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
             collectionNameInputRef.current?.focus();
         }, 200);
     }, [props.show]);
-
+    if (!attributes) {
+        return (
+            <MessageDialog show={false} onHide={() => null} attributes={{}} />
+        );
+    }
     return (
         <MessageDialog
             show={props.show}
