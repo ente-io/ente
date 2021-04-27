@@ -79,7 +79,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   }
 
   Future<CollectionItems> _getCollections() async {
-    var startTime = DateTime.now();
     final filesDB = FilesDB.instance;
     final collectionsService = CollectionsService.instance;
     final userID = Configuration.instance.getUserID();
@@ -103,12 +102,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       return second.thumbnail.updationTime
           .compareTo(first.thumbnail.updationTime);
     });
-
-    var endTime = DateTime.now();
-    var duration = Duration(
-        microseconds:
-            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
-    _logger.info("Total time taken: " + duration.inMilliseconds.toString());
     return CollectionItems(folders, collectionsWithThumbnail);
   }
 
