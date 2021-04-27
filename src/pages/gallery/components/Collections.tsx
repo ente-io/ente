@@ -105,7 +105,7 @@ export default function Collections(props: CollectionProps) {
         await renameCollection(selectedCollection, albumName);
         props.syncWithRemote();
     };
-    const setupRenameCollectionModal = () => {
+    const showRenameCollectionModal = () => {
         props.setCollectionNamerAttributes({
             title: constants.RENAME_COLLECTION,
             buttonText: constants.RENAME,
@@ -155,7 +155,7 @@ export default function Collections(props: CollectionProps) {
                                         >
                                             <Dropdown.Item
                                                 onClick={
-                                                    setupRenameCollectionModal
+                                                    showRenameCollectionModal
                                                 }
                                             >
                                                 {constants.RENAME}

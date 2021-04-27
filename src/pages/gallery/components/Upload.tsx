@@ -58,7 +58,7 @@ export default function Upload(props: Props) {
             props.setLoading(false);
         }
     }, [props.acceptedFiles]);
-    const setupCreateCollection = (fileAnalysisResult) => {
+    const showCreateCollectionModal = (fileAnalysisResult) => {
         props.setCollectionNamerAttributes({
             title: constants.CREATE_COLLECTION,
             buttonText: constants.CREATE,
@@ -76,7 +76,7 @@ export default function Upload(props: Props) {
     const nextModal = (fileAnalysisResult) => {
         fileAnalysisResult?.multipleFolders
             ? setChoiceModalView(true)
-            : setupCreateCollection(fileAnalysisResult);
+            : showCreateCollectionModal(fileAnalysisResult);
         setFileAnalysisResult(fileAnalysisResult);
     };
 
@@ -191,7 +191,7 @@ export default function Upload(props: Props) {
                 onHide={() => setChoiceModalView(false)}
                 uploadFiles={uploadFilesToNewCollections}
                 showCollectionCreateModal={() =>
-                    setupCreateCollection(fileAnalysisResult)
+                    showCreateCollectionModal(fileAnalysisResult)
                 }
             />
             <UploadProgress
