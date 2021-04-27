@@ -120,8 +120,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
-                      return _buildIncomingCollection(
-                          context, collections.incoming[index]);
+                      return IncomingCollectionItem(
+                          collections.incoming[index]);
                     },
                     itemCount: collections.incoming.length,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -142,8 +142,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                       padding: EdgeInsets.only(bottom: 12),
                       physics: NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
-                        return _buildOutgoingCollection(
-                            context, collections.outgoing[index]);
+                        return OutgoingCollectionItem(
+                            collections.outgoing[index]);
                       },
                       itemCount: collections.outgoing.length,
                     ),
@@ -152,152 +152,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildOutgoingCollection(
-      BuildContext context, CollectionWithThumbnail c) {
-    final sharees = List<String>();
-    for (int index = 0; index < c.collection.sharees.length; index++) {
-      if (index < 2) {
-        sharees.add(c.collection.sharees[index].name);
-      } else {
-        final remaining = c.collection.sharees.length - index;
-        if (remaining == 1) {
-          // If it's the last sharee
-          sharees.add(c.collection.sharees[index].name);
-        } else {
-          sharees.add("and " +
-              remaining.toString() +
-              " other" +
-              (remaining > 1 ? "s" : ""));
-        }
-        break;
-      }
-    }
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        margin: EdgeInsets.fromLTRB(16, 12, 8, 12),
-        child: Row(
-          children: <Widget>[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Container(
-                child: Hero(
-                    tag: "outgoing_collection" + c.thumbnail.tag(),
-                    child: ThumbnailWidget(
-                      c.thumbnail,
-                    )),
-                height: 60,
-                width: 60,
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  c.collection.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
-                  child: Text(
-                    "Shared with " + sharees.join(", "),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).primaryColorLight,
-                    ),
-                    textAlign: TextAlign.left,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      onTap: () {
-        final page = CollectionPage(
-          c.collection,
-          tagPrefix: "outgoing_collection",
-        );
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return page;
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildIncomingCollection(
-      BuildContext context, CollectionWithThumbnail c) {
-    return GestureDetector(
-      child: Column(
-        children: <Widget>[
-          ClipRRect(
-            borderRadius: BorderRadius.circular(18.0),
-            child: Container(
-              child: Stack(
-                children: [
-                  Hero(
-                      tag: "shared_collection" + c.thumbnail.tag(),
-                      child: ThumbnailWidget(c.thumbnail)),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Container(
-                      child: Text(
-                        c.collection.owner.name == null ||
-                                c.collection.owner.name.isEmpty
-                            ? c.collection.owner.email.substring(0, 1)
-                            : c.collection.owner.name.substring(0, 1),
-                        textAlign: TextAlign.center,
-                      ),
-                      padding: EdgeInsets.all(8),
-                      margin: EdgeInsets.fromLTRB(0, 0, 4, 0),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context).accentColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              height: 160,
-              width: 160,
-            ),
-          ),
-          Padding(padding: EdgeInsets.all(2)),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-              child: Text(
-                c.collection.name,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-        ],
-      ),
-      onTap: () {
-        final page = SharedCollectionPage(c.collection);
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return page;
-            },
-          ),
-        );
-      },
     );
   }
 
@@ -413,4 +267,168 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class OutgoingCollectionItem extends StatelessWidget {
+  final CollectionWithThumbnail c;
+
+  const OutgoingCollectionItem(
+    this.c, {
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final sharees = List<String>();
+    for (int index = 0; index < c.collection.sharees.length; index++) {
+      if (index < 2) {
+        sharees.add(c.collection.sharees[index].name);
+      } else {
+        final remaining = c.collection.sharees.length - index;
+        if (remaining == 1) {
+          // If it's the last sharee
+          sharees.add(c.collection.sharees[index].name);
+        } else {
+          sharees.add("and " +
+              remaining.toString() +
+              " other" +
+              (remaining > 1 ? "s" : ""));
+        }
+        break;
+      }
+    }
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        margin: EdgeInsets.fromLTRB(16, 12, 8, 12),
+        child: Row(
+          children: <Widget>[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: Container(
+                child: Hero(
+                    tag: "outgoing_collection" + c.thumbnail.tag(),
+                    child: ThumbnailWidget(
+                      c.thumbnail,
+                    )),
+                height: 60,
+                width: 60,
+              ),
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  c.collection.name,
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Text(
+                    "Shared with " + sharees.join(", "),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).primaryColorLight,
+                    ),
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      onTap: () {
+        final page = CollectionPage(
+          c.collection,
+          tagPrefix: "outgoing_collection",
+        );
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page;
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class IncomingCollectionItem extends StatelessWidget {
+  final CollectionWithThumbnail c;
+
+  const IncomingCollectionItem(
+    this.c, {
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      child: Column(
+        children: <Widget>[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(18.0),
+            child: Container(
+              child: Stack(
+                children: [
+                  Hero(
+                      tag: "shared_collection" + c.thumbnail.tag(),
+                      child: ThumbnailWidget(c.thumbnail)),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      child: Text(
+                        c.collection.owner.name == null ||
+                                c.collection.owner.name.isEmpty
+                            ? c.collection.owner.email.substring(0, 1)
+                            : c.collection.owner.name.substring(0, 1),
+                        textAlign: TextAlign.center,
+                      ),
+                      padding: EdgeInsets.all(8),
+                      margin: EdgeInsets.fromLTRB(0, 0, 4, 0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).accentColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              height: 160,
+              width: 160,
+            ),
+          ),
+          Padding(padding: EdgeInsets.all(2)),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+              child: Text(
+                c.collection.name,
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
+      ),
+      onTap: () {
+        final page = SharedCollectionPage(c.collection);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page;
+            },
+          ),
+        );
+      },
+    );
+  }
 }
