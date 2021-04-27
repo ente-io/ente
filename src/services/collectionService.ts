@@ -162,7 +162,7 @@ export const syncCollections = async () => {
     return collections;
 };
 
-export const getCollectionAndItsLatestFile = (
+export const getCollectionsAndTheirLatestFile = (
     collections: Collection[],
     files: file[]
 ): CollectionAndItsLatestFile[] => {
@@ -173,7 +173,7 @@ export const getCollectionAndItsLatestFile = (
             latestFile.set(file.collectionID, file);
         }
     });
-    let allCollectionAndItsLatestFile: CollectionAndItsLatestFile[] = [];
+    let collectionsAndTheirLatestFile: CollectionAndItsLatestFile[] = [];
     const userID = getData(LS_KEYS.USER)?.id;
 
     for (const collection of collections) {
@@ -183,12 +183,12 @@ export const getCollectionAndItsLatestFile = (
         ) {
             continue;
         }
-        allCollectionAndItsLatestFile.push({
+        collectionsAndTheirLatestFile.push({
             collection,
             file: latestFile.get(collection.id),
         });
     }
-    return allCollectionAndItsLatestFile;
+    return collectionsAndTheirLatestFile;
 };
 
 export const getFavItemIds = async (files: file[]): Promise<Set<number>> => {

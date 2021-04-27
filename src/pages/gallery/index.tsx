@@ -20,7 +20,7 @@ import {
     Collection,
     syncCollections,
     CollectionAndItsLatestFile,
-    getCollectionAndItsLatestFile,
+    getCollectionsAndTheirLatestFile,
     getFavItemIds,
     getLocalCollections,
     getNonEmptyCollections,
@@ -155,8 +155,8 @@ export default function Gallery() {
     const router = useRouter();
     const [collections, setCollections] = useState<Collection[]>([]);
     const [
-        collectionAndItsLatestFile,
-        setCollectionAndItsLatestFile,
+        collectionsAndTheirLatestFile,
+        setCollectionsAndTheirLatestFile,
     ] = useState<CollectionAndItsLatestFile[]>([]);
     const [data, setData] = useState<file[]>();
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
@@ -212,13 +212,13 @@ export default function Gallery() {
                 collections,
                 data
             );
-            const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
+            const collectionsAndTheirLatestFile = await getCollectionsAndTheirLatestFile(
                 nonEmptyCollections,
                 data
             );
             setData(data);
             setCollections(nonEmptyCollections);
-            setCollectionAndItsLatestFile(collectionAndItsLatestFile);
+            setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
             const favItemIds = await getFavItemIds(data);
             setFavItemIds(favItemIds);
             await checkSubscriptionPurchase(setDialogMessage, router);
@@ -247,7 +247,7 @@ export default function Gallery() {
                 collections,
                 data
             );
-            const collectionAndItsLatestFile = await getCollectionAndItsLatestFile(
+            const collectionAndItsLatestFile = await getCollectionsAndTheirLatestFile(
                 nonEmptyCollections,
                 data
             );
@@ -256,7 +256,7 @@ export default function Gallery() {
             if (isUpdated) {
                 setData(data);
             }
-            setCollectionAndItsLatestFile(collectionAndItsLatestFile);
+            setCollectionsAndTheirLatestFile(collectionAndItsLatestFile);
             setFavItemIds(favItemIds);
             setSinceTime(new Date().getTime());
         } catch (e) {
@@ -490,8 +490,10 @@ export default function Gallery() {
             <CollectionSelector
                 show={collectionSelectorView}
                 onHide={setCollectionSelectorView.bind(null, false)}
-                collectionsAndTheirLatestFile={collectionAndItsLatestFile}
-                directlyShowNextModal={collectionAndItsLatestFile?.length === 0}
+                collectionsAndTheirLatestFile={collectionsAndTheirLatestFile}
+                directlyShowNextModal={
+                    collectionsAndTheirLatestFile?.length === 0
+                }
                 attributes={collectionSelectorAttributes}
             />
             <Upload
