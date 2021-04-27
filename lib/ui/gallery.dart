@@ -81,6 +81,8 @@ class _GalleryState extends State<Gallery> {
           _collatedFiles = collatedFiles;
         });
       }
+    } else {
+      _collatedFiles = collatedFiles;
     }
     return true;
   }
