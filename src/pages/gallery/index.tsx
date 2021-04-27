@@ -233,9 +233,7 @@ export default function Gallery() {
     useEffect(() => setCollectionSelectorView(true), [
         collectionSelectorAttributes,
     ]);
-    useEffect(() => setCollectionNamerView(true), [
-        collectionSelectorAttributes,
-    ]);
+    useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
 
     const syncWithRemote = async () => {
         try {
