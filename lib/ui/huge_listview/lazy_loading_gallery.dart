@@ -74,6 +74,17 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   }
 
   @override
+  void didUpdateWidget(LazyLoadingGallery oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.files.isEmpty ||
+        widget.files[0].creationTime != _files[0].creationTime) {
+      setState(() {
+        _files = widget.files;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_files.length == 0) {
       return Container();
