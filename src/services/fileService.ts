@@ -171,17 +171,11 @@ const removeDeletedCollectionFiles = async (
 };
 
 export const deleteFiles = async (
-    clickedFiles: selectedState,
+    filesToDelete: number[],
     clearSelection: Function,
     syncWithRemote: Function
 ) => {
     try {
-        let filesToDelete = [];
-        for (let [key, val] of Object.entries(clickedFiles)) {
-            if (typeof val === 'boolean' && val) {
-                filesToDelete.push(Number(key));
-            }
-        }
         const token = getToken();
         if (!token) {
             return;

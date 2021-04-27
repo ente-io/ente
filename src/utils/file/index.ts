@@ -42,3 +42,23 @@ export function sortFilesIntoCollections(files: File[]) {
     }
     return collectionWiseFiles;
 }
+
+export function getSelectedFileIds(selectedFiles) {
+    let filesIDs: number[] = [];
+    for (let [key, val] of Object.entries(selectedFiles)) {
+        if (typeof val === 'boolean' && val) {
+            filesIDs.push(Number(key));
+        }
+    }
+    return filesIDs;
+}
+export function getSelectedFiles(selectedFiles, files: File[]): File[] {
+    let filesIDs = new Set(getSelectedFileIds(selectedFiles));
+    let filesToDelete: File[] = [];
+    for (let file of files) {
+        if (filesIDs.has(file.id)) {
+            filesToDelete.push(file);
+        }
+    }
+    return filesToDelete;
+}
