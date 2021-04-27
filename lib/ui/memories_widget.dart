@@ -23,6 +23,7 @@ class MemoriesWidget extends StatefulWidget {
 class _MemoriesWidgetState extends State<MemoriesWidget>
     with AutomaticKeepAliveClientMixin {
   final _logger = Logger("MemoriesWidget");
+
   Function _listener;
 
   @override
@@ -96,7 +97,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget>
     if (yearlyMemories.isNotEmpty) {
       collatedMemories.add(yearlyMemories);
     }
-    return collatedMemories;
+    return collatedMemories.reversed.toList();
   }
 
   bool _areMemoriesFromSameYear(Memory first, Memory second) {

@@ -2,10 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/memory.dart';
-import 'package:photos/utils/date_time_util.dart';
 
 class MemoriesService extends ChangeNotifier {
   final _logger = Logger("MemoryService");
@@ -39,34 +37,24 @@ class MemoriesService extends ChangeNotifier {
     if (_cachedMemories != null) {
       return _cachedMemories;
     }
-    final filter = ImportantItemsFilter();
-    final files = List<File>();
     final presentTime = DateTime.now();
     final present = presentTime.subtract(Duration(
         hours: presentTime.hour,
         minutes: presentTime.minute,
         seconds: presentTime.second));
+    final List<List<int>> durations = [];
     for (var yearAgo = 1; yearAgo <= yearsBefore; yearAgo++) {
       final date = _getDate(present, yearAgo);
       final startCreationTime =
           date.subtract(Duration(days: daysBefore)).microsecondsSinceEpoch;
       final endCreationTime =
           date.add(Duration(days: daysAfter)).microsecondsSinceEpoch;
-      final filesInYear = await _filesDB.getFilesCreatedWithinDuration(
-          startCreationTime, endCreationTime);
-      if (filesInYear.length > 0)
-        _logger.info("Got " +
-            filesInYear.length.toString() +
-            " memories between " +
-            getFormattedTime(
-                DateTime.fromMicrosecondsSinceEpoch(startCreationTime)) +
-            " to " +
-            getFormattedTime(
-                DateTime.fromMicrosecondsSinceEpoch(endCreationTime)));
-      files.addAll(filesInYear);
+      durations.add([startCreationTime, endCreationTime]);
     }
+    final files = await _filesDB.getFilesCreatedWithinDurations(durations);
     final seenTimes = await _memoriesDB.getSeenTimes();
-    final memories = List<Memory>();
+    final List<Memory> memories = [];
+    final filter = ImportantItemsFilter();
     for (final file in files) {
       if (filter.shouldInclude(file)) {
         final seenTime = seenTimes[file.generatedID] ?? -1;
@@ -74,6 +62,11 @@ class MemoriesService extends ChangeNotifier {
       }
     }
     _logger.info("Number of memories: " + memories.length.toString());
+    final endTime = DateTime.now();
+    final duration = Duration(
+        microseconds: endTime.microsecondsSinceEpoch -
+            presentTime.microsecondsSinceEpoch);
+    _logger.info("Time taken: " + duration.inMilliseconds.toString() + "ms");
     _cachedMemories = memories;
     return _cachedMemories;
   }
