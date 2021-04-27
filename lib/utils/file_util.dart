@@ -93,6 +93,9 @@ Future<void> deleteFilesFromEverywhere(
     Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
   }
   showToast("deleted from everywhere");
+  if (uploadedFileIDsToBeDeleted.isNotEmpty) {
+    SyncService.instance.syncWithRemote(silently: true);
+  }
 }
 
 Future<void> deleteFilesOnDeviceOnly(
