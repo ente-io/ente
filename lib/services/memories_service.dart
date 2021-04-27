@@ -16,6 +16,7 @@ class MemoriesService extends ChangeNotifier {
   static final daysAfter = 1;
 
   List<Memory> _cachedMemories;
+  Future<List<Memory>> _future;
 
   MemoriesService._privateConstructor();
 
@@ -31,12 +32,22 @@ class MemoriesService extends ChangeNotifier {
 
   void clearCache() {
     _cachedMemories = null;
+    _future = null;
   }
 
   Future<List<Memory>> getMemories() async {
     if (_cachedMemories != null) {
       return _cachedMemories;
     }
+    if (_future != null) {
+      return _future;
+    }
+    _future = _fetchMemories();
+    return _future;
+  }
+
+  Future<List<Memory>> _fetchMemories() async {
+    _logger.info("Fetching memories");
     final presentTime = DateTime.now();
     final present = presentTime.subtract(Duration(
         hours: presentTime.hour,
@@ -61,12 +72,6 @@ class MemoriesService extends ChangeNotifier {
         memories.add(Memory(file, seenTime));
       }
     }
-    _logger.info("Number of memories: " + memories.length.toString());
-    final endTime = DateTime.now();
-    final duration = Duration(
-        microseconds: endTime.microsecondsSinceEpoch -
-            presentTime.microsecondsSinceEpoch);
-    _logger.info("Time taken: " + duration.inMilliseconds.toString() + "ms");
     _cachedMemories = memories;
     return _cachedMemories;
   }
