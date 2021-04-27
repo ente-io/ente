@@ -16,6 +16,7 @@ class SyncIndicator extends StatefulWidget {
 }
 
 class _SyncIndicatorState extends State<SyncIndicator> {
+  static const kSleepDuration = Duration(milliseconds: 3000);
   SyncStatusUpdate _event;
   double _containerHeight = 48;
   StreamSubscription<SyncStatusUpdate> _subscription;
@@ -40,7 +41,12 @@ class _SyncIndicatorState extends State<SyncIndicator> {
 
   @override
   Widget build(BuildContext context) {
-    if (!SyncService.instance.isSyncInProgress() || _event == null) {
+    bool isNotOutdatedEvent = _event != null &&
+        (_event.status == SyncStatus.completed_backup ||
+            _event.status == SyncStatus.completed_first_gallery_import) &&
+        (DateTime.now().microsecondsSinceEpoch - _event.timestamp >
+            kSleepDuration.inMicroseconds);
+    if (_event == null || isNotOutdatedEvent) {
       return Container();
     }
     if (_event.status == SyncStatus.error) {
@@ -48,7 +54,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     }
     if (_event.status == SyncStatus.completed_first_gallery_import ||
         _event.status == SyncStatus.completed_backup) {
-      Future.delayed(Duration(milliseconds: 3000), () {
+      Future.delayed(kSleepDuration, () {
         if (mounted) {
           setState(() {
             _containerHeight = 0;
