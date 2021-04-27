@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -76,8 +77,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   @override
   void didUpdateWidget(LazyLoadingGallery oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.files.isEmpty ||
-        widget.files[0].creationTime != _files[0].creationTime) {
+    if (!listEquals(_files, widget.files)) {
       setState(() {
         _files = widget.files;
       });
@@ -145,6 +145,16 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void initState() {
     super.initState();
     _isVisible = widget.isVisible;
+  }
+
+  @override
+  void didUpdateWidget(LazyLoadingGridView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!listEquals(widget.files, oldWidget.files)) {
+      setState(() {
+        _isVisible = widget.isVisible;
+      });
+    }
   }
 
   @override
