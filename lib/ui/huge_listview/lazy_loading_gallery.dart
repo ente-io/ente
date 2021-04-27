@@ -24,14 +24,14 @@ class LazyLoadingGallery extends StatefulWidget {
   LazyLoadingGallery(this.files, this.reloadEvent, this.asyncLoader,
       this.selectedFiles, this.tag,
       {Key key})
-      : super(key: key);
+      : super(key: key ?? GlobalKey<_LazyLoadingGalleryState>());
 
   @override
   _LazyLoadingGalleryState createState() => _LazyLoadingGalleryState();
 }
 
 class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
-  static const kSubGalleryItemLimit = 80;
+  static const kSubGalleryItemLimit = 24;
   static const kMicroSecondsInADay = 86400000000;
 
   static final Logger _logger = Logger("LazyLoadingGallery");
@@ -110,6 +110,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 class LazyLoadingGridView extends StatefulWidget {
   static const kThumbnailDiskLoadDeferDuration = Duration(milliseconds: 40);
   static const kThumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
+
   final String tag;
   final List<File> files;
   final Future<List<File>> Function(int creationStartTime, int creationEndTime,
@@ -120,7 +121,7 @@ class LazyLoadingGridView extends StatefulWidget {
   LazyLoadingGridView(this.tag, this.files, this.asyncLoader,
       this.selectedFiles, this.isVisible,
       {Key key})
-      : super(key: key);
+      : super(key: key ?? GlobalKey<_LazyLoadingGridViewState>());
 
   @override
   _LazyLoadingGridViewState createState() => _LazyLoadingGridViewState();
@@ -192,8 +193,10 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
           tag: widget.tag + file.tag(),
           child: ThumbnailWidget(
             file,
-            diskLoadDeferDuration: LazyLoadingGridView.kThumbnailDiskLoadDeferDuration,
-            serverLoadDeferDuration: LazyLoadingGridView.kThumbnailServerLoadDeferDuration,
+            diskLoadDeferDuration:
+                LazyLoadingGridView.kThumbnailDiskLoadDeferDuration,
+            serverLoadDeferDuration:
+                LazyLoadingGridView.kThumbnailServerLoadDeferDuration,
           ),
         ),
       ),
