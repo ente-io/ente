@@ -142,11 +142,7 @@ class _GalleryState extends State<Gallery> {
             min(pageIndex * kPageSize, _collatedFiles.length - 1);
         final startTimeIndex =
             min((pageIndex + 1) * kPageSize, _collatedFiles.length - 1);
-        List<List<File>> result = [];
-        for (int index = endTimeIndex; index <= startTimeIndex; index++) {
-          result.add(_collatedFiles[index]);
-        }
-        return result;
+        return _collatedFiles.sublist(endTimeIndex, startTimeIndex);
       },
       placeholderBuilder: (context, pageIndex) {
         var day = getDayWidget(_collatedFiles[pageIndex][0].creationTime);
@@ -207,6 +203,8 @@ class _GalleryState extends State<Gallery> {
     if (dailyFiles.isNotEmpty) {
       collatedFiles.add(dailyFiles);
     }
+    collatedFiles
+        .sort((a, b) => b[0].creationTime.compareTo(a[0].creationTime));
     return collatedFiles;
   }
 
