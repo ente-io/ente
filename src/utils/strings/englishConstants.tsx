@@ -283,7 +283,7 @@ const englishConstants = {
     SHAREES: 'shared with',
     ZERO_SHAREES: () => (
         <>
-            <p>shared with no one 😔</p>
+            <p>currently shared with no one 😔</p>
             <em style={{ color: "#777" }}>"memories are fonder when shared"</em>
         </>
     ),
