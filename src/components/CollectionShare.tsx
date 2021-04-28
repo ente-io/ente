@@ -126,6 +126,7 @@ function CollectionShare(props: Props) {
                             <Form.Row>
                                 <Form.Group
                                     as={Col}
+                                    xs={10}
                                     controlId="formHorizontalEmail"
                                 >
                                     <Form.Control
@@ -146,7 +147,7 @@ function CollectionShare(props: Props) {
                                 </Form.Group>
                                 <Form.Group
                                     as={Col}
-                                    sm={1}
+                                    xs={2}
                                     controlId="formHorizontalEmail"
                                 >
                                     <SubmitButton
@@ -184,7 +185,9 @@ function CollectionShare(props: Props) {
                         </Table>
                     </>
                 ) : (
-                    <div style={{ marginTop: "12px" }}>{constants.ZERO_SHAREES()}</div>
+                    <div style={{ marginTop: '12px' }}>
+                        {constants.ZERO_SHAREES()}
+                    </div>
                 )}
             </DeadCenter>
         </MessageDialog>
