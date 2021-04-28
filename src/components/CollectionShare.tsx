@@ -184,7 +184,7 @@ function CollectionShare(props: Props) {
                         </Table>
                     </>
                 ) : (
-                    <p>{constants.ZERO_SHAREES()}</p>
+                    <div style={{ marginTop: "12px" }}>{constants.ZERO_SHAREES()}</div>
                 )}
             </DeadCenter>
         </MessageDialog>
