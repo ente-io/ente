@@ -182,8 +182,8 @@ const GlobalStyles = createGlobalStyle`
     } 
     .bm-burger-button {
         position: fixed;
-        width: 28px;
-        height: 20px;
+        width: 24px;
+        height: 16px;
         top:25px;
         left: 32px;
     }
@@ -316,7 +316,7 @@ export default function App({ Component, pageProps, err }) {
             <Navbar>
                 <FlexContainer>
                     <Image
-                        style={{ height: '24px' }}
+                        style={{ height: '24px', padding: '3px' }}
                         alt="logo"
                         src="/icon.svg"
                     />
