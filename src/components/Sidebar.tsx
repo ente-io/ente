@@ -188,10 +188,10 @@ export default function Sidebar(props: Props) {
                     width: '100%',
                 }}
             ></div>
-            <LinkButton onClick={openFeedbackURL}>
+            <LinkButton style={{ marginTop: '30px' }} onClick={openFeedbackURL}>
                 {constants.REQUEST_FEATURE}
             </LinkButton>
-            <LinkButton onClick={openSupportMail}>
+            <LinkButton style={{ marginTop: '30px' }} onClick={openSupportMail}>
                 {constants.SUPPORT}
             </LinkButton>
             <>
@@ -205,14 +205,22 @@ export default function Sidebar(props: Props) {
                         })
                     }
                 />
-                <LinkButton onClick={() => setRecoveryModalView(true)}>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => setRecoveryModalView(true)}
+                >
                     {constants.DOWNLOAD_RECOVERY_KEY}
                 </LinkButton>
             </>
-            <LinkButton onClick={() => router.push('changePassword')}>
+            <LinkButton
+                style={{ marginTop: '30px' }}
+                onClick={() => router.push('changePassword')}
+            >
                 {constants.CHANGE_PASSWORD}
             </LinkButton>
-            <LinkButton onClick={exportFiles}>{constants.EXPORT}</LinkButton>
+            <LinkButton style={{ marginTop: '30px' }} onClick={exportFiles}>
+                {constants.EXPORT}
+            </LinkButton>
             <div
                 style={{
                     height: '1px',
@@ -223,7 +231,7 @@ export default function Sidebar(props: Props) {
             ></div>
             <LinkButton
                 variant="danger"
-                style={{ marginBottom: '50px' }}
+                style={{ marginTop: '30px', marginBottom: '50px' }}
                 onClick={() =>
                     props.setDialogMessage({
                         title: `${constants.CONFIRM} ${constants.LOGOUT}`,

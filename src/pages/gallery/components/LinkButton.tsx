@@ -6,7 +6,7 @@ enum ButtonVariant {
     secondary = 'secondary',
 }
 type Props = React.PropsWithChildren<{
-    onClick?: any;
+    onClick: any;
     variant?: string;
     style?: any;
 }>;
@@ -29,7 +29,7 @@ export default function LinkButton(props: Props) {
             style={{
                 color: getButtonColor(props.variant),
                 cursor: 'pointer',
-                marginTop: '30px',
+                marginBottom: 0,
                 ...props.style,
             }}
             onClick={props?.onClick ?? (() => null)}
