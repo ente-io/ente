@@ -432,14 +432,14 @@ export const shareCollection = async (
 
         const token = getToken();
         const publicKey: string = await getPublicKey(withUserEmail);
-        const encryptedKey: B64EncryptionResult = await worker.boxSeal(
+        const encryptedKey: string = await worker.boxSeal(
             collection.key,
             publicKey
         );
         const shareCollectionRequest = {
             collectionID: collection.id,
             email: withUserEmail,
-            encryptedKey: encryptedKey.encryptedData,
+            encryptedKey: encryptedKey,
         };
         await HTTPService.post(
             `${ENDPOINT}/collections/share`,
