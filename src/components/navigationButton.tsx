@@ -26,22 +26,35 @@ const Wrapper = styled.div<{ direction: SCROLL_DIRECTION }>`
 
 const NavigationButton = (props: Props) => {
     const [scrollTimeOut, setScrollTimeOut] = useState<NodeJS.Timeout>(null);
+    if (!props.collectionRef?.current) {
+        return <div />;
+    }
+    let {
+        clientWidth,
+        clientHeight,
+        scrollWidth,
+        scrollHeight,
+    } = props.collectionRef.current;
+    if (scrollHeight <= clientHeight && scrollWidth <= clientWidth) {
+        return <div />;
+    }
+    const scrollStart = () =>
+        setScrollTimeOut(
+            setInterval(function () {
+                props.collectionRef.current.scrollLeft +=
+                    props.scrollDirection * SCROLL_SPEED;
+            }, 0)
+        );
+
+    const scrollEnd = () => clearTimeout(scrollTimeOut);
+
     return (
         <Wrapper
             direction={props.scrollDirection}
-            onMouseDown={() => {
-                setScrollTimeOut(
-                    setInterval(function () {
-                        props.collectionRef.current.scrollLeft +=
-                            props.scrollDirection * SCROLL_SPEED;
-                    }, 0)
-                );
-
-                return false;
-            }}
-            onMouseUp={() => {
-                clearTimeout(scrollTimeOut);
-            }}
+            onMouseDown={scrollStart}
+            onMouseUp={scrollEnd}
+            onTouchStart={scrollStart}
+            onTouchEnd={scrollEnd}
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
