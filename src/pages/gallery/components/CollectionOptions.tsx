@@ -17,6 +17,7 @@ interface Props {
     selectedCollectionID: number;
     setDialogMessage: SetDialogMessage;
     showCollectionShareModal: () => void;
+    redirectToAll: () => void;
 }
 const CollectionOptions = (props: Props) => {
     const collectionRename = async (
@@ -93,7 +94,8 @@ const CollectionOptions = (props: Props) => {
 
                                             props.selectedCollectionID,
 
-                                            props.syncWithRemote
+                                            props.syncWithRemote,
+                                            props.redirectToAll
                                         ),
                                         variant: 'danger',
                                     },

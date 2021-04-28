@@ -3,8 +3,10 @@ import { SetDialogMessage } from 'components/MessageDialog';
 import React, { useState } from 'react';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Collection, CollectionType } from 'services/collectionService';
+import { User } from 'services/userService';
 import styled from 'styled-components';
 import { getSelectedCollection } from 'utils/collection';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
 
@@ -81,6 +83,7 @@ export default function Collections(props: CollectionProps) {
         setSelectedCollectionID(collection?.id);
         selectCollection(collection?.id);
     };
+    const user: User = getData(LS_KEYS.USER);
 
     if (!collections || collections.length === 0) {
         return <Container />;
@@ -112,7 +115,8 @@ export default function Collections(props: CollectionProps) {
                             onClick={clickHandler(item)}
                         >
                             {item.name}
-                            {item.type != CollectionType.favorites && (
+                            {item.type != CollectionType.favorites &&
+                            item.owner.id === user.id ? (
                                 <OverlayTrigger
                                     rootClose
                                     trigger="click"
@@ -129,6 +133,10 @@ export default function Collections(props: CollectionProps) {
                                             null,
                                             true
                                         ),
+                                        redirectToAll: selectCollection.bind(
+                                            null,
+                                            null
+                                        ),
                                     })}
                                 >
                                     <Option
@@ -141,6 +149,13 @@ export default function Collections(props: CollectionProps) {
                                         &#8942;
                                     </Option>
                                 </OverlayTrigger>
+                            ) : (
+                                <div
+                                    style={{
+                                        display: 'inline-block',
+                                        width: '24px',
+                                    }}
+                                />
                             )}
                         </Chip>
                     ))}

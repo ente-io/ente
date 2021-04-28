@@ -379,7 +379,8 @@ const removeFromCollection = async (collection: Collection, files: File[]) => {
 
 export const deleteCollection = async (
     collectionID: number,
-    syncWithRemote: Function
+    syncWithRemote: () => Promise<void>,
+    redirectToAll: () => void
 ) => {
     try {
         const token = getToken();
@@ -390,7 +391,8 @@ export const deleteCollection = async (
             null,
             { 'X-Auth-Token': token }
         );
-        syncWithRemote();
+        await syncWithRemote();
+        redirectToAll();
     } catch (e) {
         console.error('delete collection failed ', e);
     }
