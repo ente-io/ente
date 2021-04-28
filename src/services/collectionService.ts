@@ -48,7 +48,7 @@ export interface CollectionAndItsLatestFile {
     file: File;
 }
 
-const getCollectionSecrets = async (
+const getCollectionWithSecrets = async (
     collection: Collection,
     masterKey: string
 ) => {
@@ -101,9 +101,27 @@ const getCollections = async (
             { 'X-Auth-Token': token }
         );
         const promises: Promise<Collection>[] = resp.data.collections.map(
-            (collection: Collection) => getCollectionSecrets(collection, key)
+            async (collection: Collection) => {
+                let collectionWithSecrets = { ...collection, key: null };
+                try {
+                    collectionWithSecrets = await getCollectionWithSecrets(
+                        collection,
+                        key
+                    );
+                } catch (e) {
+                    console.error(
+                        `decryption failed for collection with id=${collection.id}`,
+                        e
+                    );
+                } finally {
+                    return collectionWithSecrets;
+                }
+            }
         );
-        return await Promise.all(promises);
+        const collections = (await Promise.all(promises)).filter(
+            (collection) => collection.key !== null
+        );
+        return collections;
     } catch (e) {
         console.error('getCollections failed- ', e);
         ErrorHandler(e);
@@ -252,7 +270,7 @@ export const createCollection = async (
             newCollection,
             token
         );
-        createdCollection = await getCollectionSecrets(
+        createdCollection = await getCollectionWithSecrets(
             createdCollection,
             encryptionKey
         );
