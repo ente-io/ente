@@ -1,6 +1,9 @@
 import CollectionShare from 'components/CollectionShare';
 import { SetDialogMessage } from 'components/MessageDialog';
-import React, { useState } from 'react';
+import NavigationButton, {
+    SCROLL_DIRECTION,
+} from 'components/navigationButton';
+import React, { useRef, useState } from 'react';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Collection, CollectionType } from 'services/collectionService';
 import { User } from 'services/userService';
@@ -9,6 +12,7 @@ import { getSelectedCollection } from 'utils/collection';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
+import OptionIcon, { OptionIconWrapper } from './OptionIcon';
 
 interface CollectionProps {
     collections: Collection[];
@@ -46,17 +50,12 @@ const Wrapper = styled.div`
     overflow: auto;
     max-width: 100%;
 `;
-const Option = styled.div`
-    display: inline-block;
-    opacity: 0;
-    font-weight: bold;
-    width: 0px;
-    margin: 0 9px;
-`;
+
 const Chip = styled.button<{ active: boolean }>`
     border-radius: 8px;
-    padding: 4px 14px 4px 34px;
-    margin: 2px 8px 2px 2px;
+    padding: 4px;
+    padding-left: 24px;
+    margin: 2px;
     border: none;
     background-color: ${(props) =>
         props.active ? '#fff' : 'rgba(255, 255, 255, 0.3)'};
@@ -64,9 +63,9 @@ const Chip = styled.button<{ active: boolean }>`
     &:hover {
         background-color: ${(props) => !props.active && '#bbbbbb'};
     }
-    &:hover ${Option} {
+    &:hover ${OptionIconWrapper} {
         opacity: 1;
-        color: #6c6c6c;
+        color: #000000;
     }
 `;
 
@@ -75,7 +74,7 @@ export default function Collections(props: CollectionProps) {
     const [selectedCollectionID, setSelectedCollectionID] = useState<number>(
         null
     );
-
+    const collectionRef = useRef<HTMLDivElement>(null);
     const [collectionShareModalView, setCollectionShareModalView] = useState(
         false
     );
@@ -88,7 +87,15 @@ export default function Collections(props: CollectionProps) {
     if (!collections || collections.length === 0) {
         return <Container />;
     }
-
+    const collectionOptions = CollectionOptions({
+        syncWithRemote: props.syncWithRemote,
+        setCollectionNamerAttributes: props.setCollectionNamerAttributes,
+        collections: props.collections,
+        selectedCollectionID,
+        setDialogMessage: props.setDialogMessage,
+        showCollectionShareModal: setCollectionShareModalView.bind(null, true),
+        redirectToAll: selectCollection.bind(null, null),
+    });
     return (
         <>
             <CollectionShare
@@ -101,7 +108,11 @@ export default function Collections(props: CollectionProps) {
                 syncWithRemote={props.syncWithRemote}
             />
             <Container>
-                <Wrapper>
+                <NavigationButton
+                    collectionRef={collectionRef}
+                    scrollDirection={SCROLL_DIRECTION.LEFT}
+                />
+                <Wrapper ref={collectionRef}>
                     <Chip active={!selected} onClick={clickHandler()}>
                         All
                         <div
@@ -121,33 +132,13 @@ export default function Collections(props: CollectionProps) {
                                     rootClose
                                     trigger="click"
                                     placement="bottom"
-                                    overlay={CollectionOptions({
-                                        syncWithRemote: props.syncWithRemote,
-                                        setCollectionNamerAttributes:
-                                            props.setCollectionNamerAttributes,
-                                        collections: props.collections,
-                                        selectedCollectionID,
-                                        setDialogMessage:
-                                            props.setDialogMessage,
-                                        showCollectionShareModal: setCollectionShareModalView.bind(
-                                            null,
-                                            true
-                                        ),
-                                        redirectToAll: selectCollection.bind(
-                                            null,
-                                            null
-                                        ),
-                                    })}
+                                    overlay={collectionOptions}
                                 >
-                                    <Option
-                                        onClick={(e) => {
-                                            setSelectedCollectionID(item.id);
-
-                                            e.stopPropagation();
-                                        }}
-                                    >
-                                        &#8942;
-                                    </Option>
+                                    <OptionIcon
+                                        onClick={() =>
+                                            setSelectedCollectionID(item.id)
+                                        }
+                                    />
                                 </OverlayTrigger>
                             ) : (
                                 <div
@@ -160,6 +151,10 @@ export default function Collections(props: CollectionProps) {
                         </Chip>
                     ))}
                 </Wrapper>
+                <NavigationButton
+                    collectionRef={collectionRef}
+                    scrollDirection={SCROLL_DIRECTION.RIGHT}
+                />
             </Container>
         </>
     );
