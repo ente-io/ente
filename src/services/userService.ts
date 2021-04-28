@@ -35,6 +35,18 @@ export const getOtt = (email: string) => {
         client: 'web',
     });
 };
+export const getPublicKey = async (email: string) => {
+    const token = getToken();
+
+    const resp = await HTTPService.get(
+        `${ENDPOINT}/users/public-key`,
+        { email },
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    return resp.data['publicKey'];
+};
 
 export const verifyOtt = (email: string, ott: string) => {
     return HTTPService.get(`${ENDPOINT}/users/credentials`, { email, ott });

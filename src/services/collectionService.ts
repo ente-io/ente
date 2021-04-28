@@ -6,7 +6,7 @@ import localForage from 'utils/storage/localForage';
 import HTTPService from './HTTPService';
 import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
-import { User } from './userService';
+import { getPublicKey, User } from './userService';
 import CryptoWorker from 'utils/crypto';
 import { ErrorHandler } from 'utils/common/errorUtil';
 
@@ -428,11 +428,18 @@ export const shareCollection = async (
     withUserEmail: string
 ) => {
     try {
+        const worker = await new CryptoWorker();
+
         const token = getToken();
+        const publicKey: string = await getPublicKey(withUserEmail);
+        const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
+            collection.key,
+            publicKey
+        );
         const shareCollectionRequest = {
             collectionID: collection.id,
             email: withUserEmail,
-            encryptedKey: collection.encryptedKey,
+            encryptedKey: encryptedKey.encryptedData,
         };
         await HTTPService.post(
             `${ENDPOINT}/collections/share`,
