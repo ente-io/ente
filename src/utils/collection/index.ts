@@ -33,3 +33,7 @@ export async function addFilesToCollection(
     await syncWithRemote();
     selectCollection(collection.id);
 }
+
+export function getSelectedCollection(collectionID: number, collections) {
+    return collections.find((collection) => collection.id == collectionID);
+}

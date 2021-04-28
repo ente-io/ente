@@ -1,16 +1,12 @@
 import CollectionShare from 'components/CollectionShare';
+import { SetDialogMessage } from 'components/MessageDialog';
 import React, { useState } from 'react';
-import { Dropdown } from 'react-bootstrap';
-import {
-    Collection,
-    CollectionType,
-    deleteCollection,
-    renameCollection,
-} from 'services/collectionService';
+import { OverlayTrigger } from 'react-bootstrap';
+import { Collection, CollectionType } from 'services/collectionService';
 import styled from 'styled-components';
-import { SetDialogMessage } from 'utils/billingUtil';
-import constants from 'utils/strings/constants';
+import { getSelectedCollection } from 'utils/collection';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
+import CollectionOptions from './CollectionOptions';
 
 interface CollectionProps {
     collections: Collection[];
@@ -19,6 +15,15 @@ interface CollectionProps {
     setDialogMessage: SetDialogMessage;
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
+}
+
+interface Props {
+    syncWithRemote: () => Promise<void>;
+    setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    collections: Collection[];
+    selectedCollectionID: number;
+    setDialogMessage: SetDialogMessage;
+    showCollectionShareModal: () => void;
 }
 
 const Container = styled.div`
@@ -84,49 +89,19 @@ export default function Collections(props: CollectionProps) {
         selectCollection(collection?.id);
     };
 
-    const getSelectedCollection = (collectionID: number) => {
-        return collections.find((collection) => collection.id == collectionID);
-    };
     if (!collections || collections.length === 0) {
         return <Container />;
     }
-    const CustomToggle = React.forwardRef<any, { onClick }>(
-        ({ children, onClick }, ref) => (
-            <Option
-                ref={ref}
-                onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onClick(e);
-                }}
-            >
-                {children}
-                &#8942;
-            </Option>
-        )
-    );
-    const collectionRename = async (selectedCollection, albumName) => {
-        await renameCollection(selectedCollection, albumName);
-        props.syncWithRemote();
-    };
-    const showRenameCollectionModal = () => {
-        props.setCollectionNamerAttributes({
-            title: constants.RENAME_COLLECTION,
-            buttonText: constants.RENAME,
-            autoFilledName: getSelectedCollection(selectedCollectionID)?.name,
-            callback: collectionRename.bind(
-                null,
-                getSelectedCollection(selectedCollectionID)
-            ),
-        });
-    };
 
     return (
         <>
             <CollectionShare
                 show={collectionShareModalView}
                 onHide={() => setCollectionShareModalView(false)}
-                collection={getSelectedCollection(selectedCollectionID)}
+                collection={getSelectedCollection(
+                    selectedCollectionID,
+                    props.collections
+                )}
                 syncWithRemote={props.syncWithRemote}
             />
             <Container>
@@ -140,76 +115,37 @@ export default function Collections(props: CollectionProps) {
                             active={selected === item.id}
                             onClick={clickHandler(item)}
                         >
-                            <Dropdown>
-                                {item.name}
-                                {item.type != CollectionType.favorites && (
-                                    <>
-                                        <Dropdown.Toggle
-                                            as={CustomToggle}
-                                            split
-                                        />
-                                        <Dropdown.Menu
-                                            style={{
-                                                minWidth: '2em',
-                                                borderRadius: '8px',
-                                                fontSize: '12px',
-                                                boxShadow:
-                                                    'rgba(252, 0, 0, 0.6) 0px 1px 2px 0px, rgba(255, 0, 0, 0.3) 0px 2px 6px 2px',
-                                            }}
-                                        >
-                                            <Dropdown.Item
-                                                onClick={
-                                                    showRenameCollectionModal
-                                                }
-                                            >
-                                                {constants.RENAME}
-                                            </Dropdown.Item>
-                                            <Dropdown.Divider
-                                                style={{ margin: '2px' }}
-                                            />
-                                            <Dropdown.Item
-                                                onClick={() => {
-                                                    setCollectionShareModalView(
-                                                        true
-                                                    );
-                                                }}
-                                            >
-                                                {constants.SHARE}
-                                            </Dropdown.Item>
-                                            <Dropdown.Divider
-                                                style={{ margin: '2px' }}
-                                            />
-                                            <Dropdown.Item
-                                                style={{ color: '#c93f3f' }}
-                                                onClick={() => {
-                                                    props.setDialogMessage({
-                                                        title:
-                                                            constants.CONFIRM_DELETE_COLLECTION,
-                                                        content: constants.DELETE_COLLECTION_MESSAGE(),
-                                                        staticBackdrop: true,
-                                                        proceed: {
-                                                            text:
-                                                                constants.DELETE_COLLECTION,
-                                                            action: deleteCollection.bind(
-                                                                null,
-                                                                item.id,
-                                                                props.syncWithRemote
-                                                            ),
-                                                            variant: 'danger',
-                                                        },
-                                                        close: {
-                                                            text:
-                                                                constants.CANCEL,
-                                                        },
-                                                    });
-                                                }}
-                                            >
-                                                {constants.DELETE}
-                                            </Dropdown.Item>
-                                        </Dropdown.Menu>
-                                    </>
-                                )}
-                            </Dropdown>
+                            {item.name}
+                            {item.type != CollectionType.favorites && (
+                                <OverlayTrigger
+                                    rootClose
+                                    trigger="click"
+                                    placement="bottom"
+                                    overlay={CollectionOptions({
+                                        syncWithRemote: props.syncWithRemote,
+                                        setCollectionNamerAttributes:
+                                            props.setCollectionNamerAttributes,
+                                        collections: props.collections,
+                                        selectedCollectionID,
+                                        setDialogMessage:
+                                            props.setDialogMessage,
+                                        showCollectionShareModal: setCollectionShareModalView.bind(
+                                            null,
+                                            true
+                                        ),
+                                    })}
+                                >
+                                    <Option
+                                        onClick={(e) => {
+                                            setSelectedCollectionID(item.id);
+
+                                            e.stopPropagation();
+                                        }}
+                                    >
+                                        &#8942;
+                                    </Option>
+                                </OverlayTrigger>
+                            )}
                         </Chip>
                     ))}
                 </Wrapper>
