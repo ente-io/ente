@@ -127,7 +127,7 @@ export default function Collections(props: CollectionProps) {
                         >
                             {item.name}
                             {item.type != CollectionType.favorites &&
-                            item.owner.id === user.id ? (
+                            item.owner.id === user?.id ? (
                                 <OverlayTrigger
                                     rootClose
                                     trigger="click"
