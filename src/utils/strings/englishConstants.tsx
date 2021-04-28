@@ -279,7 +279,7 @@ const englishConstants = {
         </>
     ),
     SHARE: 'share',
-    SHARE_COLLECTION: 'share collection',
+    SHARE_COLLECTION: 'share album',
     SHARE_WITH_PEOPLE: 'share with your loved ones',
     SHAREES: 'shared with',
     ZERO_SHAREES: () => (
