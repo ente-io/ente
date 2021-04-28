@@ -1,18 +1,18 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { file } from './fileService';
+import { File } from './fileService';
 import localForage from 'utils/storage/localForage';
 
 import HTTPService from './HTTPService';
 import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
-import { user } from './userService';
+import { getPublicKey, User } from './userService';
 import CryptoWorker from 'utils/crypto';
 import { ErrorHandler } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();
 
-enum CollectionType {
+export enum CollectionType {
     folder = 'folder',
     favorites = 'favorites',
     album = 'album',
@@ -24,14 +24,14 @@ const COLLECTIONS = 'collections';
 
 export interface Collection {
     id: number;
-    owner: user;
+    owner: User;
     key?: string;
     name?: string;
     encryptedName?: string;
     nameDecryptionNonce?: string;
     type: CollectionType;
     attributes: collectionAttributes;
-    sharees: user[];
+    sharees: User[];
     updationTime: number;
     encryptedKey: string;
     keyDecryptionNonce: string;
@@ -45,10 +45,10 @@ interface collectionAttributes {
 
 export interface CollectionAndItsLatestFile {
     collection: Collection;
-    file: file;
+    file: File;
 }
 
-const getCollectionSecrets = async (
+const getCollectionWithSecrets = async (
     collection: Collection,
     masterKey: string
 ) => {
@@ -101,7 +101,25 @@ const getCollections = async (
             { 'X-Auth-Token': token }
         );
         const promises: Promise<Collection>[] = resp.data.collections.map(
-            (collection: Collection) => getCollectionSecrets(collection, key)
+            async (collection: Collection) => {
+                if (collection.isDeleted) {
+                    return collection;
+                }
+                let collectionWithSecrets = collection;
+                try {
+                    collectionWithSecrets = await getCollectionWithSecrets(
+                        collection,
+                        key
+                    );
+                } catch (e) {
+                    console.error(
+                        `decryption failed for collection with id=${collection.id}`,
+                        e
+                    );
+                } finally {
+                    return collectionWithSecrets;
+                }
+            }
         );
         return await Promise.all(promises);
     } catch (e) {
@@ -130,7 +148,6 @@ export const syncCollections = async () => {
     if (updatedCollections.length == 0) {
         return localCollections;
     }
-    setLocalFavoriteCollection(updatedCollections);
     const allCollectionsInstances = [
         ...localCollections,
         ...updatedCollections,
@@ -163,18 +180,18 @@ export const syncCollections = async () => {
     return collections;
 };
 
-export const getCollectionAndItsLatestFile = (
+export const getCollectionsAndTheirLatestFile = (
     collections: Collection[],
-    files: file[]
+    files: File[]
 ): CollectionAndItsLatestFile[] => {
-    const latestFile = new Map<number, file>();
+    const latestFile = new Map<number, File>();
 
     files.forEach((file) => {
         if (!latestFile.has(file.collectionID)) {
             latestFile.set(file.collectionID, file);
         }
     });
-    let allCollectionAndItsLatestFile: CollectionAndItsLatestFile[] = [];
+    let collectionsAndTheirLatestFile: CollectionAndItsLatestFile[] = [];
     const userID = getData(LS_KEYS.USER)?.id;
 
     for (const collection of collections) {
@@ -184,16 +201,16 @@ export const getCollectionAndItsLatestFile = (
         ) {
             continue;
         }
-        allCollectionAndItsLatestFile.push({
+        collectionsAndTheirLatestFile.push({
             collection,
             file: latestFile.get(collection.id),
         });
     }
-    return allCollectionAndItsLatestFile;
+    return collectionsAndTheirLatestFile;
 };
 
-export const getFavItemIds = async (files: file[]): Promise<Set<number>> => {
-    let favCollection = await localForage.getItem<Collection>(FAV_COLLECTION);
+export const getFavItemIds = async (files: File[]): Promise<Set<number>> => {
+    let favCollection = await getFavCollection();
     if (!favCollection) return new Set();
 
     return new Set(
@@ -253,7 +270,7 @@ export const createCollection = async (
             newCollection,
             token
         );
-        createdCollection = await getCollectionSecrets(
+        createdCollection = await getCollectionWithSecrets(
             createdCollection,
             encryptionKey
         );
@@ -280,10 +297,8 @@ const postCollection = async (
     }
 };
 
-export const addToFavorites = async (file: file) => {
-    let favCollection: Collection = await localForage.getItem<Collection>(
-        FAV_COLLECTION
-    );
+export const addToFavorites = async (file: File) => {
+    let favCollection = await getFavCollection();
     if (!favCollection) {
         favCollection = await createCollection(
             'Favorites',
@@ -294,14 +309,15 @@ export const addToFavorites = async (file: file) => {
     await addToCollection(favCollection, [file]);
 };
 
-export const removeFromFavorites = async (file: file) => {
-    let favCollection: Collection = await localForage.getItem<Collection>(
-        FAV_COLLECTION
-    );
+export const removeFromFavorites = async (file: File) => {
+    let favCollection = await getFavCollection();
     await removeFromCollection(favCollection, [file]);
 };
 
-const addToCollection = async (collection: Collection, files: file[]) => {
+export const addToCollection = async (
+    collection: Collection,
+    files: File[]
+) => {
     try {
         const params = new Object();
         const worker = await new CryptoWorker();
@@ -337,7 +353,7 @@ const addToCollection = async (collection: Collection, files: file[]) => {
         console.error('Add to collection Failed ', e);
     }
 };
-const removeFromCollection = async (collection: Collection, files: file[]) => {
+const removeFromCollection = async (collection: Collection, files: File[]) => {
     try {
         const params = new Object();
         const token = getToken();
@@ -361,22 +377,123 @@ const removeFromCollection = async (collection: Collection, files: file[]) => {
     }
 };
 
-const setLocalFavoriteCollection = async (collections: Collection[]) => {
-    const localFavCollection = await localForage.getItem(FAV_COLLECTION);
-    if (localFavCollection) {
-        return;
+export const deleteCollection = async (
+    collectionID: number,
+    syncWithRemote: () => Promise<void>,
+    redirectToAll: () => void
+) => {
+    try {
+        const token = getToken();
+
+        await HTTPService.delete(
+            `${ENDPOINT}/collections/${collectionID}`,
+            null,
+            null,
+            { 'X-Auth-Token': token }
+        );
+        await syncWithRemote();
+        redirectToAll();
+    } catch (e) {
+        console.error('delete collection failed ', e);
     }
-    const favCollection = collections.filter(
-        (collection) => collection.type == CollectionType.favorites
+};
+
+export const renameCollection = async (
+    collection: Collection,
+    newCollectionName: string
+) => {
+    const token = getToken();
+    const worker = await new CryptoWorker();
+    const {
+        encryptedData: encryptedName,
+        nonce: nameDecryptionNonce,
+    }: B64EncryptionResult = await worker.encryptUTF8(
+        newCollectionName,
+        collection.key
     );
-    if (favCollection.length > 0) {
-        await localForage.setItem(FAV_COLLECTION, favCollection[0]);
+    const collectionRenameRequest = {
+        collectionID: collection.id,
+        encryptedName,
+        nameDecryptionNonce,
+    };
+    await HTTPService.post(
+        `${ENDPOINT}/collections/rename`,
+        collectionRenameRequest,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+};
+export const shareCollection = async (
+    collection: Collection,
+    withUserEmail: string
+) => {
+    try {
+        const worker = await new CryptoWorker();
+
+        const token = getToken();
+        const publicKey: string = await getPublicKey(withUserEmail);
+        const encryptedKey: string = await worker.boxSeal(
+            collection.key,
+            publicKey
+        );
+        const shareCollectionRequest = {
+            collectionID: collection.id,
+            email: withUserEmail,
+            encryptedKey: encryptedKey,
+        };
+        await HTTPService.post(
+            `${ENDPOINT}/collections/share`,
+            shareCollectionRequest,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        console.error('share collection failed ', e);
+        throw e;
     }
+};
+
+export const unshareCollection = async (
+    collection: Collection,
+    withUserEmail: string
+) => {
+    try {
+        const token = getToken();
+        const shareCollectionRequest = {
+            collectionID: collection.id,
+            email: withUserEmail,
+        };
+        await HTTPService.post(
+            `${ENDPOINT}/collections/unshare`,
+            shareCollectionRequest,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        console.error('unshare collection failed ', e);
+        throw e;
+    }
+};
+
+export const getFavCollection = async () => {
+    const collections = await getLocalCollections();
+    for (let collection of collections) {
+        if (collection.type == CollectionType.favorites) {
+            return collection;
+        }
+    }
+    return null;
 };
 
 export const getNonEmptyCollections = (
     collections: Collection[],
-    files: file[]
+    files: File[]
 ) => {
     const nonEmptyCollectionsIds = new Set<number>();
     for (let file of files) {

@@ -347,6 +347,13 @@ export async function boxSealOpen(
     );
 }
 
+export async function boxSeal(input: string, publicKey: string) {
+    await sodium.ready;
+    return await toB64(
+        sodium.crypto_box_seal(await fromB64(input), await fromB64(publicKey))
+    );
+}
+
 export async function fromB64(input: string) {
     await sodium.ready;
     return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);

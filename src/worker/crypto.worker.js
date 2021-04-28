@@ -120,6 +120,10 @@ export class Crypto {
         return libsodium.boxSealOpen(input, publicKey, secretKey);
     }
 
+    async boxSeal(input, publicKey) {
+        return libsodium.boxSeal(input, publicKey);
+    }
+
     async fromString(string) {
         return libsodium.fromString(string);
     }

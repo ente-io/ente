@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
-import { CONFIRM_ACTION } from 'components/ConfirmDialog';
 import billingService, { Subscription } from 'services/billingService';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -15,12 +14,10 @@ import {
     isOnFreePlan,
     isSubscriptionCancelled,
     isSubscribed,
-    SetConfirmAction,
-    SetDialogMessage,
 } from 'utils/billingUtil';
 
 import exportService from 'services/exportService';
-import { file } from 'services/fileService';
+import { File } from 'services/fileService';
 import isElectron from 'is-electron';
 import { Collection } from 'services/collectionService';
 import { useRouter } from 'next/router';
@@ -29,11 +26,11 @@ import EnteSpinner from './EnteSpinner';
 import LinkButton from 'pages/gallery/components/LinkButton';
 import { downloadApp } from 'utils/common';
 import { logoutUser } from 'services/userService';
+import { SetDialogMessage } from './MessageDialog';
 
 interface Props {
-    files: file[];
+    files: File[];
     collections: Collection[];
-    setConfirmAction: SetConfirmAction;
     setDialogMessage: SetDialogMessage;
     setPlanModalView;
 }
@@ -77,9 +74,18 @@ export default function Sidebar(props: Props) {
         if (isElectron()) {
             exportService.exportFiles(props.files, props.collections);
         } else {
-            props.setConfirmAction({
-                action: CONFIRM_ACTION.DOWNLOAD_APP,
-                callback: downloadApp,
+            props.setDialogMessage({
+                title: constants.DOWNLOAD_APP,
+                content: constants.DOWNLOAD_APP_MESSAGE(),
+                staticBackdrop: true,
+                proceed: {
+                    text: constants.DOWNLOAD,
+                    action: downloadApp,
+                    variant: 'success',
+                },
+                close: {
+                    text: constants.CLOSE,
+                },
             });
         }
     }
@@ -95,7 +101,14 @@ export default function Sidebar(props: Props) {
             onStateChange={(state) => setIsOpen(state.isOpen)}
             itemListElement="div"
         >
-            <div style={{ marginBottom: '28px', outline: 'none', color: 'rgb(45, 194, 98)', fontSize: '16px', }}>
+            <div
+                style={{
+                    marginBottom: '28px',
+                    outline: 'none',
+                    color: 'rgb(45, 194, 98)',
+                    fontSize: '16px',
+                }}
+            >
                 {user?.email}
             </div>
             <div style={{ outline: 'none' }}>
@@ -147,20 +160,24 @@ export default function Sidebar(props: Props) {
                     {constants.USAGE_DETAILS}
                 </h5>
                 <div style={{ color: '#959595' }}>
-                    {
-                        usage ? (
-                            constants.USAGE_INFO(
-                                usage,
-                                Math.ceil(
-                                    Number(convertBytesToGBs(subscription?.storage))
-                                )
+                    {usage ? (
+                        constants.USAGE_INFO(
+                            usage,
+                            Math.ceil(
+                                Number(convertBytesToGBs(subscription?.storage))
                             )
-                        ) :
-                            (
-                                <div style={{ textAlign: 'center' }}>
-                                    <EnteSpinner style={{ borderWidth: '2px', width: '20px', height: '20px' }} />
-                                </div>
-                            )}
+                        )
+                    ) : (
+                        <div style={{ textAlign: 'center' }}>
+                            <EnteSpinner
+                                style={{
+                                    borderWidth: '2px',
+                                    width: '20px',
+                                    height: '20px',
+                                }}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
             <div
@@ -171,10 +188,10 @@ export default function Sidebar(props: Props) {
                     width: '100%',
                 }}
             ></div>
-            <LinkButton onClick={openFeedbackURL}>
+            <LinkButton style={{ marginTop: '30px' }} onClick={openFeedbackURL}>
                 {constants.REQUEST_FEATURE}
             </LinkButton>
-            <LinkButton onClick={openSupportMail}>
+            <LinkButton style={{ marginTop: '30px' }} onClick={openSupportMail}>
                 {constants.SUPPORT}
             </LinkButton>
             <>
@@ -188,14 +205,22 @@ export default function Sidebar(props: Props) {
                         })
                     }
                 />
-                <LinkButton onClick={() => setRecoveryModalView(true)}>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => setRecoveryModalView(true)}
+                >
                     {constants.DOWNLOAD_RECOVERY_KEY}
                 </LinkButton>
             </>
-            <LinkButton onClick={() => router.push('changePassword')}>
+            <LinkButton
+                style={{ marginTop: '30px' }}
+                onClick={() => router.push('changePassword')}
+            >
                 {constants.CHANGE_PASSWORD}
             </LinkButton>
-            <LinkButton onClick={exportFiles}>{constants.EXPORT}</LinkButton>
+            <LinkButton style={{ marginTop: '30px' }} onClick={exportFiles}>
+                {constants.EXPORT}
+            </LinkButton>
             <div
                 style={{
                     height: '1px',
@@ -206,11 +231,18 @@ export default function Sidebar(props: Props) {
             ></div>
             <LinkButton
                 variant="danger"
-                style={{ marginBottom: '50px' }}
+                style={{ marginTop: '30px', marginBottom: '50px' }}
                 onClick={() =>
-                    props.setConfirmAction({
-                        action: CONFIRM_ACTION.LOGOUT,
-                        callback: logoutUser,
+                    props.setDialogMessage({
+                        title: `${constants.CONFIRM} ${constants.LOGOUT}`,
+                        content: constants.LOGOUT_MESSAGE,
+                        staticBackdrop: true,
+                        proceed: {
+                            text: constants.LOGOUT,
+                            action: logoutUser,
+                            variant: 'danger',
+                        },
+                        close: { text: constants.CANCEL },
                     })
                 }
             >

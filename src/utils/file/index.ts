@@ -1,4 +1,4 @@
-import { deleteFiles, file } from 'services/fileService';
+import { deleteFiles, File } from 'services/fileService';
 import { runningInBrowser } from 'utils/common';
 
 const TYPE_HEIC = 'heic';
@@ -32,20 +32,33 @@ export function fileIsHEIC(name: string) {
     return name.endsWith(TYPE_HEIC);
 }
 
-export function sortFilesIntoCollections(files: file[]) {
-    const collectionWiseFiles = new Map<number, file[]>();
+export function sortFilesIntoCollections(files: File[]) {
+    const collectionWiseFiles = new Map<number, File[]>();
     for (let file of files) {
         if (!collectionWiseFiles.has(file.collectionID)) {
-            collectionWiseFiles.set(file.collectionID, new Array<file>());
+            collectionWiseFiles.set(file.collectionID, new Array<File>());
         }
         collectionWiseFiles.get(file.collectionID).push(file);
     }
     return collectionWiseFiles;
 }
 
-export async function fileDelete(selected, clearSelection, syncWithRemote) {
-    await deleteFiles(selected);
-    clearSelection();
-    syncWithRemote();
-    clearSelection;
+export function getSelectedFileIds(selectedFiles) {
+    let filesIDs: number[] = [];
+    for (let [key, val] of Object.entries(selectedFiles)) {
+        if (typeof val === 'boolean' && val) {
+            filesIDs.push(Number(key));
+        }
+    }
+    return filesIDs;
+}
+export function getSelectedFiles(selectedFiles, files: File[]): File[] {
+    let filesIDs = new Set(getSelectedFileIds(selectedFiles));
+    let filesToDelete: File[] = [];
+    for (let file of files) {
+        if (filesIDs.has(file.id)) {
+            filesToDelete.push(file);
+        }
+    }
+    return filesToDelete;
 }

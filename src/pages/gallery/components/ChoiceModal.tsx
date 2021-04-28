@@ -8,12 +8,10 @@ interface Props {
     show;
     onHide;
     showCollectionCreateModal;
-    setTriggerFocus;
 }
 function ChoiceModal({
     uploadFiles,
     showCollectionCreateModal,
-    setTriggerFocus,
     ...props
 }: Props) {
     return (
@@ -48,20 +46,17 @@ function ChoiceModal({
                         variant="outline-success"
                         onClick={() => {
                             props.onHide();
-                            setTriggerFocus((prev) => !prev);
                             showCollectionCreateModal();
                         }}
                         style={{
                             padding: '12px',
                             paddingLeft: '24px',
-                            paddingRight: '24px'
+                            paddingRight: '24px',
                         }}
                     >
                         {constants.UPLOAD_STRATEGY_SINGLE_COLLECTION}
                     </Button>
-                    <strong>
-                        {constants.OR}
-                    </strong>
+                    <strong>{constants.OR}</strong>
                     <Button
                         variant="outline-success"
                         onClick={() =>
@@ -70,7 +65,7 @@ function ChoiceModal({
                         style={{
                             padding: '12px',
                             paddingLeft: '24px',
-                            paddingRight: '24px'
+                            paddingRight: '24px',
                         }}
                     >
                         {constants.UPLOAD_STRATEGY_COLLECTION_PER_FOLDER}

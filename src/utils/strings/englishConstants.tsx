@@ -57,6 +57,7 @@ const englishConstants = {
     CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. Please don't copy-paste unverified code here.`,
     SELECT_COLLECTION: `select an album to upload to`,
     CREATE_COLLECTION: `create album`,
+    ENTER_ALBUM_NAME: 'album name',
     CLOSE: 'close',
     NO: 'no',
     NOTHING_HERE: `nothing to see here, yet 👀`,
@@ -105,16 +106,18 @@ const englishConstants = {
     TITLE: 'ente.io | encrypted photo storage',
     UPLOAD_FIRST_PHOTO: 'backup your first photo',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
-    DELETE_MESSAGE: () => 'sure you want to delete selected files?',
+    CONFIRM_DELETE_FILE: 'confirm file deletion',
+    DELETE_FILE_MESSAGE: 'sure you want to delete selected files?',
+    DELETE_FILE: 'delete files',
     DELETE: 'delete',
     UPLOAD_STRATEGY_CHOICE:
         'you are uploading multiple folders, would you like us to create',
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
     OR: 'or',
     UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
-    SESSION_EXPIRED_MESSAGE: () =>
+    SESSION_EXPIRED_MESSAGE:
         'your session has expired, please login again to continue',
-    SESSION_EXPIRED: 'login',
+    SESSION_EXPIRED: 'session expired',
     SYNC_FAILED:
         'failed to sync with remote server, please refresh page to try again',
     PASSWORD_GENERATION_FAILED: `your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser`,
@@ -145,7 +148,7 @@ const englishConstants = {
     SKIP: 'skip',
     CANCEL: 'cancel',
     LOGOUT: 'logout',
-    LOGOUT_MESSAGE: () => 'sure you want to logout?',
+    LOGOUT_MESSAGE: 'sure you want to logout?',
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email ?',
     OK: 'ok',
@@ -171,9 +174,13 @@ const englishConstants = {
             to automatically backup all your photos
         </div>
     ),
-    DOWNLOAD_APP_MESSAGE: () =>
-        'sorry, this operation is currently not supported on the web, do you want to download the desktop app',
-    DOWNLOAD_APP: 'download',
+    DOWNLOAD_APP_MESSAGE: () => (
+        <>
+            <p>sorry, this operation is currently not supported on the web,</p>
+            <p> do you want to download the desktop app</p>
+        </>
+    ),
+    DOWNLOAD_APP: 'download desktop app',
     EXPORT: 'export data',
 
     // ========================
@@ -226,15 +233,15 @@ const englishConstants = {
     SUBSCRIPTION_PURCHASE_FAILED:
         'subscription purchase failed , please try again later',
 
-    UPDATE_PAYMENT_METHOD_MESSAGE: () =>
+    UPDATE_PAYMENT_METHOD_MESSAGE:
         'we are sorry, payment failed when we tried to charge your card, please update your payment method and try again',
     UPDATE_PAYMENT_METHOD: 'update payment method',
     MONTHLY: 'monthly',
     YEARLY: 'yearly',
-    UPDATE_SUBSCRIPTION_MESSAGE: () =>
-        'are you sure you want to change your plan?',
+    UPDATE_SUBSCRIPTION_MESSAGE: 'are you sure you want to change your plan?',
     UPDATE_SUBSCRIPTION: 'change plan',
 
+    CONFIRM_CANCEL_SUBSCRIPTION: 'confirm unsubscription',
     CANCEL_SUBSCRIPTION: 'unsubscribe',
     CANCEL_SUBSCRIPTION_MESSAGE: () => (
         <>
@@ -249,6 +256,7 @@ const englishConstants = {
     SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
 
     ACTIVATE_SUBSCRIPTION: 'reactivate subscription',
+    CONFIRM_ACTIVATE_SUBSCRIPTION: 'confirm subscription activation',
     ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
         `once reactivated, you will be billed on ${dateString(expiryTime)}`,
     SUBSCRIPTION_ACTIVATE_SUCCESS: 'subscription successfully activated',
@@ -256,6 +264,34 @@ const englishConstants = {
 
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
     CANCEL_SUBSCRIPTION_ON_MOBILE: `please cancel your subscription from the mobile app to activate a subscription here`,
+    RENAME: 'rename',
+    RENAME_COLLECTION: 'rename album',
+    CONFIRM_DELETE_COLLECTION: 'confirm album deletion',
+    DELETE_COLLECTION: 'delete album',
+    DELETE_COLLECTION_MESSAGE: () => (
+        <>
+            <p>are you sure you want to delete this album?</p>
+            <p>
+                {' '}
+                all files that are present only in this album will be permanently deleted
+            </p>
+        </>
+    ),
+    SHARE: 'share',
+    SHARE_COLLECTION: 'share album',
+    SHARE_WITH_PEOPLE: 'share with your loved ones',
+    SHAREES: 'shared with',
+    ZERO_SHAREES: () => (
+        <>
+            <p>currently shared with no one 😔</p>
+            <em style={{ color: "#777" }}>"memories are fonder when shared"</em>
+        </>
+    ),
+    SHARE_WITH_SELF: 'oops, you cannot share with yourself',
+    ALREADY_SHARED: (email) =>
+        `oops, you're already sharing this with ${email}`,
+    SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
+    SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
 };
 
 export default englishConstants;

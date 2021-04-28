@@ -23,7 +23,7 @@ export interface RecoveryKey {
 }
 const ENDPOINT = getEndpoint();
 
-export interface user {
+export interface User {
     id: number;
     name: string;
     email: string;
@@ -34,6 +34,18 @@ export const getOtt = (email: string) => {
         email: email,
         client: 'web',
     });
+};
+export const getPublicKey = async (email: string) => {
+    const token = getToken();
+
+    const resp = await HTTPService.get(
+        `${ENDPOINT}/users/public-key`,
+        { email },
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    return resp.data['publicKey'];
 };
 
 export const verifyOtt = (email: string, ott: string) => {

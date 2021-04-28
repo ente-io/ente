@@ -42,7 +42,7 @@ const GlobalStyles = createGlobalStyle`
         flex-direction: column;
         background-color: #191919;
         color: #aaa;
-        font-family:Ubuntu, Arial, sans-serif;
+        font-family:Ubuntu, Arial, sans-serif !important;
     }
 
     #__next {
@@ -112,7 +112,7 @@ const GlobalStyles = createGlobalStyle`
     .modal-backdrop {
         z-index:2000;
     }
-    .modal .card {
+    .modal .card , .table {
         background-color: #202020;
         border: none;
     }
@@ -170,7 +170,7 @@ const GlobalStyles = createGlobalStyle`
         margin-top: 50px;
     }
     .alert-success {
-        background-color: #a9f7ff;
+        background-color: #8ffbb9;
         color: #000000;
     }
     .alert-primary {
@@ -182,8 +182,8 @@ const GlobalStyles = createGlobalStyle`
     } 
     .bm-burger-button {
         position: fixed;
-        width: 28px;
-        height: 20px;
+        width: 24px;
+        height: 16px;
         top:25px;
         left: 32px;
     }
@@ -244,6 +244,26 @@ const GlobalStyles = createGlobalStyle`
     .subscription-plan-selector:hover {
         background: #1b1b1b;
     }
+    .dropdown-item:active{
+        color: #16181b;
+        text-decoration: none;
+        background-color: #e9ecef;
+    }
+    .submitButton:hover > .spinner-border{
+        color:white;
+    }
+    hr{
+        border-top: 1rem solid #444 !important;
+    }
+    .list-group-item:hover{
+        background-color:#343434 !important;
+    }
+    .list-group-item:active , list-group-item:focus{
+        background-color:#000 !important;
+    }
+    .arrow::after{
+        border-bottom-color:#282828 !important;
+    }
 `;
 
 const Image = styled.img`
@@ -265,14 +285,6 @@ sentryInit();
 export default function App({ Component, pageProps, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [collectionSelectorView, setCollectionSelectorView] = useState(false);
-
-    function closeCollectionSelector() {
-        setCollectionSelectorView(false);
-    }
-    function showCollectionSelector() {
-        setCollectionSelectorView(true);
-    }
 
     useEffect(() => {
         console.log(
@@ -291,17 +303,6 @@ export default function App({ Component, pageProps, err }) {
             setLoading(false);
         });
     }, []);
-    const onDropAccepted = useCallback(() => {
-        if (acceptedFiles != null && !collectionSelectorView) {
-            showCollectionSelector();
-        }
-    }, []);
-    const { getRootProps, getInputProps, open, acceptedFiles } = useDropzone({
-        noClick: true,
-        noKeyboard: true,
-        accept: 'image/*, video/*, application/json, ',
-        onDropAccepted,
-    });
     return (
         <>
             <Head>
@@ -318,7 +319,7 @@ export default function App({ Component, pageProps, err }) {
             <Navbar>
                 <FlexContainer>
                     <Image
-                        style={{ height: '24px' }}
+                        style={{ height: '24px', padding: '3px' }}
                         alt="logo"
                         src="/icon.svg"
                     />
@@ -331,16 +332,7 @@ export default function App({ Component, pageProps, err }) {
                     </EnteSpinner>
                 </Container>
             ) : (
-                <Component
-                    getRootProps={getRootProps}
-                    getInputProps={getInputProps}
-                    openFileUploader={open}
-                    acceptedFiles={acceptedFiles}
-                    collectionSelectorView={collectionSelectorView}
-                    showCollectionSelector={showCollectionSelector}
-                    closeCollectionSelector={closeCollectionSelector}
-                    err={err}
-                />
+                <Component err={err} />
             )}
         </>
     );

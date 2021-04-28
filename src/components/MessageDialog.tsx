@@ -9,15 +9,20 @@ export interface MessageAttributes {
     proceed?: {
         text: string;
         action: any;
-        variant?: string;
+        variant: string;
         disabled?: boolean;
     };
     content?: any;
 }
+
+export type SetDialogMessage = React.Dispatch<
+    React.SetStateAction<MessageAttributes>
+>;
 type Props = React.PropsWithChildren<{
     show: boolean;
     onHide: () => void;
     attributes: MessageAttributes;
+    size?: 'sm' | 'lg' | 'xl';
 }>;
 export default function MessageDialog({
     attributes,
@@ -29,12 +34,12 @@ export default function MessageDialog({
     }
     return (
         <Modal
-            {...props}
             size="lg"
+            {...props}
             centered
             backdrop={attributes.staticBackdrop ? 'static' : 'true'}
         >
-            <Modal.Header style={{ borderBottom: 'none' }}>
+            <Modal.Header style={{ borderBottom: 'none' }} closeButton>
                 {attributes.title && (
                     <Modal.Title>
                         <strong>{attributes.title}</strong>
@@ -64,9 +69,12 @@ export default function MessageDialog({
                 {attributes.proceed && (
                     <Button
                         variant={`outline-${
-                            attributes.proceed?.variant ?? 'success'
+                            attributes.proceed?.variant ?? 'primary'
                         }`}
-                        onClick={attributes.proceed.action}
+                        onClick={() => {
+                            attributes.proceed.action();
+                            props.onHide();
+                        }}
                         style={{ padding: '6px 3em', marginRight: '20px' }}
                         disabled={attributes.proceed.disabled}
                     >
