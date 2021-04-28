@@ -102,7 +102,10 @@ const getCollections = async (
         );
         const promises: Promise<Collection>[] = resp.data.collections.map(
             async (collection: Collection) => {
-                let collectionWithSecrets = { ...collection, key: null };
+                if (collection.isDeleted) {
+                    return collection;
+                }
+                let collectionWithSecrets = collection;
                 try {
                     collectionWithSecrets = await getCollectionWithSecrets(
                         collection,
@@ -118,10 +121,7 @@ const getCollections = async (
                 }
             }
         );
-        const collections = (await Promise.all(promises)).filter(
-            (collection) => collection.key !== null
-        );
-        return collections;
+        return await Promise.all(promises);
     } catch (e) {
         console.error('getCollections failed- ', e);
         ErrorHandler(e);
@@ -432,7 +432,7 @@ export const shareCollection = async (
 
         const token = getToken();
         const publicKey: string = await getPublicKey(withUserEmail);
-        const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
+        const encryptedKey: B64EncryptionResult = await worker.boxSeal(
             collection.key,
             publicKey
         );
