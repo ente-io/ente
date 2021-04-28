@@ -279,13 +279,13 @@ const englishConstants = {
         </>
     ),
     SHARE: 'share',
-    SHARE_COLLECTION: 'share collection',
-    SHARE_WITH_PEOPLE: 'share with people',
+    SHARE_COLLECTION: 'share album',
+    SHARE_WITH_PEOPLE: 'share with your loved ones',
     SHAREES: 'shared with',
     ZERO_SHAREES: () => (
         <>
-            <p>shared with no one</p>
-            <p>`Memories are better when shared, add your loved ones` - ente</p>
+            <p>shared with no one 😔</p>
+            <em style={{ color: "#777" }}>"memories are fonder when shared"</em>
         </>
     ),
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
