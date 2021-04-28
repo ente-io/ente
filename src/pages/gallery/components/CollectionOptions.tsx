@@ -41,7 +41,7 @@ const CollectionOptions = (props: Props) => {
         });
     };
     const MenuLink = (props) => (
-        <LinkButton style={{ fontSize: '12px' }} {...props}>
+        <LinkButton style={{ fontSize: '14px', fontWeight: 700 }} {...props}>
             {props.children}
         </LinkButton>
     );

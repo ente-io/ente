@@ -42,7 +42,7 @@ const GlobalStyles = createGlobalStyle`
         flex-direction: column;
         background-color: #191919;
         color: #aaa;
-        font-family:Ubuntu, Arial, sans-serif;
+        font-family:Ubuntu, Arial, sans-serif !important;
     }
 
     #__next {
@@ -254,6 +254,12 @@ const GlobalStyles = createGlobalStyle`
     }
     hr{
         border-top: 1rem solid #444 !important;
+    }
+    .list-group-item:hover{
+        background-color:#343434 !important;
+    }
+    .list-group-item:active , list-group-item:focus{
+        background-color:#000 !important;
     }
 `;
 
