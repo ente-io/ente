@@ -266,15 +266,14 @@ const englishConstants = {
     CANCEL_SUBSCRIPTION_ON_MOBILE: `please cancel your subscription from the mobile app to activate a subscription here`,
     RENAME: 'rename',
     RENAME_COLLECTION: 'rename album',
-    CONFIRM_DELETE_COLLECTION: 'confirm collection deletion',
-    DELETE_COLLECTION: 'delete collection',
+    CONFIRM_DELETE_COLLECTION: 'confirm album deletion',
+    DELETE_COLLECTION: 'delete album',
     DELETE_COLLECTION_MESSAGE: () => (
         <>
-            <p>are you sure you want to delete this collection,</p>
+            <p>are you sure you want to delete this album?</p>
             <p>
                 {' '}
-                all files in this will also be deleted if they are not in any
-                other collection
+                all files that are present only in this album will be permanently deleted
             </p>
         </>
     ),
@@ -291,8 +290,8 @@ const englishConstants = {
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
     ALREADY_SHARED: (email) =>
         `oops, you're already sharing this with ${email}`,
-    SHARING_BAD_REQUEST_ERROR: 'sharing collection not allowed',
-    SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing disabled for free accounts',
+    SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
+    SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
 };
 
 export default englishConstants;
