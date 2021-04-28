@@ -19,9 +19,14 @@ interface Props {
     showCollectionShareModal: () => void;
 }
 const CollectionOptions = (props: Props) => {
-    const collectionRename = async (selectedCollection, albumName) => {
-        await renameCollection(selectedCollection, albumName);
-        props.syncWithRemote();
+    const collectionRename = async (
+        selectedCollection: Collection,
+        newName: string
+    ) => {
+        if (selectedCollection.name !== newName) {
+            await renameCollection(selectedCollection, newName);
+            props.syncWithRemote();
+        }
     };
     const showRenameCollectionModal = () => {
         props.setCollectionNamerAttributes({
@@ -41,7 +46,10 @@ const CollectionOptions = (props: Props) => {
         });
     };
     const MenuLink = (props) => (
-        <LinkButton style={{ fontSize: '14px', fontWeight: 700 }} {...props}>
+        <LinkButton
+            style={{ fontSize: '14px', fontWeight: 700, padding: '8px 1em' }}
+            {...props}
+        >
             {props.children}
         </LinkButton>
     );
@@ -49,8 +57,8 @@ const CollectionOptions = (props: Props) => {
     const MenuItem = (props) => (
         <ListGroup.Item
             style={{
-                padding: '8px 1em',
                 background: '#282828',
+                padding: 0,
             }}
         >
             {props.children}
