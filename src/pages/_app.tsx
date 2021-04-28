@@ -170,7 +170,7 @@ const GlobalStyles = createGlobalStyle`
         margin-top: 50px;
     }
     .alert-success {
-        background-color: #a9f7ff;
+        background-color: #8ffbb9;
         color: #000000;
     }
     .alert-primary {
