@@ -261,6 +261,9 @@ const GlobalStyles = createGlobalStyle`
     .list-group-item:active , list-group-item:focus{
         background-color:#000 !important;
     }
+    .arrow::after{
+        border-bottom-color:#282828 !important;
+    }
 `;
 
 const Image = styled.img`

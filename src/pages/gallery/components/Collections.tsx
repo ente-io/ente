@@ -17,15 +17,6 @@ interface CollectionProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
 }
 
-interface Props {
-    syncWithRemote: () => Promise<void>;
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    collections: Collection[];
-    selectedCollectionID: number;
-    setDialogMessage: SetDialogMessage;
-    showCollectionShareModal: () => void;
-}
-
 const Container = styled.div`
     margin: 0 auto;
     overflow-y: hidden;
@@ -62,16 +53,18 @@ const Option = styled.div`
 `;
 const Chip = styled.button<{ active: boolean }>`
     border-radius: 8px;
-    padding: 4px 14px;
+    padding: 4px 14px 4px 34px;
     margin: 2px 8px 2px 2px;
     border: none;
     background-color: ${(props) =>
         props.active ? '#fff' : 'rgba(255, 255, 255, 0.3)'};
     outline: none !important;
-
+    &:hover {
+        background-color: ${(props) => !props.active && '#bbbbbb'};
+    }
     &:hover ${Option} {
         opacity: 1;
-        color: ${(props) => (props.active ? 'black' : 'white')};
+        color: #6c6c6c;
     }
 `;
 
@@ -108,6 +101,9 @@ export default function Collections(props: CollectionProps) {
                 <Wrapper>
                     <Chip active={!selected} onClick={clickHandler()}>
                         All
+                        <div
+                            style={{ display: 'inline-block', width: '24px' }}
+                        />
                     </Chip>
                     {collections?.map((item) => (
                         <Chip
