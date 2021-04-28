@@ -288,9 +288,9 @@ const englishConstants = {
             <p>`Memories are better when shared, add your loved ones` - ente</p>
         </>
     ),
-    SHARE_WITH_SELF:
-        'you entered your own email,enter the email of person you want to share with!!',
-    ALREADY_SHARED: 'you have already shared with this person',
+    SHARE_WITH_SELF: 'oops, you cannot share with yourself',
+    ALREADY_SHARED: (email) =>
+        `oops, you're already sharing this with ${email}`,
     SHARING_BAD_REQUEST_ERROR: 'sharing collection not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing disabled for free accounts',
 };

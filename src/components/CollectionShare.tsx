@@ -44,7 +44,7 @@ function CollectionShare(props: Props) {
             } else if (
                 props.collection.sharees.find((value) => value.email === email)
             ) {
-                setFieldError('email', constants.ALREADY_SHARED);
+                setFieldError('email', constants.ALREADY_SHARED(email));
             } else {
                 await shareCollection(props.collection, email);
                 await props.syncWithRemote();
