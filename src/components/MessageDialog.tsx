@@ -14,6 +14,10 @@ export interface MessageAttributes {
     };
     content?: any;
 }
+
+export type SetDialogMessage = React.Dispatch<
+    React.SetStateAction<MessageAttributes>
+>;
 type Props = React.PropsWithChildren<{
     show: boolean;
     onHide: () => void;

@@ -1,7 +1,7 @@
 import AddToCollectionBtn from 'components/AddToCollectionBtn';
 import DeleteBtn from 'components/DeleteBtn';
+import { SetDialogMessage } from 'components/MessageDialog';
 import React from 'react';
-import { SetDialogMessage } from 'utils/billingUtil';
 import constants from 'utils/strings/constants';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
 

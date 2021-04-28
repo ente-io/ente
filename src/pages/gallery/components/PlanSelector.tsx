@@ -10,8 +10,6 @@ import {
     isUserSubscribedPlan,
     isSubscriptionCancelled,
     updatePaymentMethod,
-    SetDialogMessage,
-    SetLoading,
     updateSubscription,
     activateSubscription,
     cancelSubscription,
@@ -19,9 +17,10 @@ import {
     hasPaidSubscription,
     isOnFreePlan,
 } from 'utils/billingUtil';
-import { DeadCenter } from '..';
+import { DeadCenter, SetLoading } from '..';
 import LinkButton from './LinkButton';
 import { reverseString } from 'utils/common';
+import { SetDialogMessage } from 'components/MessageDialog';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     padding-top: 20px;

@@ -6,9 +6,9 @@ import { createAlbum } from 'services/collectionService';
 import ChoiceModal from './ChoiceModal';
 import { File } from 'services/fileService';
 import constants from 'utils/strings/constants';
-import { SetLoading } from 'utils/billingUtil';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
+import { SetLoading } from '..';
 
 interface Props {
     syncWithRemote: () => Promise<void>;

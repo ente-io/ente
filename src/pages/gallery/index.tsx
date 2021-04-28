@@ -73,6 +73,7 @@ export type selectedState = {
     [k: number]: boolean;
     count: number;
 };
+export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
 
 export default function Gallery() {
     const router = useRouter();

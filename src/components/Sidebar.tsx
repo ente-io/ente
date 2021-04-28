@@ -14,7 +14,6 @@ import {
     isOnFreePlan,
     isSubscriptionCancelled,
     isSubscribed,
-    SetDialogMessage,
 } from 'utils/billingUtil';
 
 import exportService from 'services/exportService';
@@ -27,6 +26,7 @@ import EnteSpinner from './EnteSpinner';
 import LinkButton from 'pages/gallery/components/LinkButton';
 import { downloadApp } from 'utils/common';
 import { logoutUser } from 'services/userService';
+import { SetDialogMessage } from './MessageDialog';
 
 interface Props {
     files: File[];

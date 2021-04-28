@@ -7,15 +7,11 @@ import billingService, {
 } from 'services/billingService';
 import { SUBSCRIPTION_VERIFICATION_ERROR } from './common/errorUtil';
 import { getData, LS_KEYS } from './storage/localStorage';
-import { MessageAttributes } from 'components/MessageDialog';
 import { NextRouter } from 'next/router';
+import { SetDialogMessage } from 'components/MessageDialog';
+import { SetLoading } from 'pages/gallery';
 
 const STRIPE = 'stripe';
-
-export type SetDialogMessage = React.Dispatch<
-    React.SetStateAction<MessageAttributes>
->;
-export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
 
 export function convertBytesToGBs(bytes, precision?): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
