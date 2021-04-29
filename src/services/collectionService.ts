@@ -8,7 +8,7 @@ import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
 import { getPublicKey, User } from './userService';
 import CryptoWorker from 'utils/crypto';
-import { ErrorHandler } from 'utils/common/errorUtil';
+import { errorCodes, ErrorHandler } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();
 
@@ -124,7 +124,7 @@ const getCollections = async (
         return await Promise.all(promises);
     } catch (e) {
         console.error('getCollections failed- ', e);
-        ErrorHandler(e);
+        throw e?.status?.toString();
     }
 };
 
@@ -141,8 +141,13 @@ export const getCollectionUpdationTime = async (): Promise<number> => {
 export const syncCollections = async () => {
     const localCollections = await getLocalCollections();
     const lastCollectionUpdationTime = await getCollectionUpdationTime();
-    const key = await getActualKey(),
-        token = getToken();
+    const token = getToken();
+    let key;
+    try {
+        key = await getActualKey();
+    } catch (e) {
+        throw new Error(errorCodes.ERR_MULTIPLE_TABS);
+    }
     const updatedCollections =
         (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
     if (updatedCollections.length == 0) {

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
-import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     File,
     getLocalFiles,
@@ -52,6 +52,7 @@ import PhotoFrame from 'components/PhotoFrame';
 import { getSelectedFileIds } from 'utils/file';
 import { addFilesToCollection } from 'utils/collection';
 import SelectedFileOptions from './components/SelectedFileOptions';
+import { errorCodes } from 'utils/common/errorUtil';
 
 export enum FILE_TYPE {
     IMAGE,
@@ -181,18 +182,24 @@ export default function Gallery() {
             setFavItemIds(favItemIds);
             setSinceTime(new Date().getTime());
         } catch (e) {
-            setBannerMessage(e.message);
-            if (e.message === constants.SESSION_EXPIRED_MESSAGE) {
-                setDialogMessage({
-                    title: constants.SESSION_EXPIRED,
-                    content: constants.SESSION_EXPIRED_MESSAGE,
-                    staticBackdrop: true,
-                    proceed: {
-                        text: constants.LOGIN,
-                        action: logoutUser,
-                        variant: 'primary',
-                    },
-                });
+            switch (e.message) {
+                case errorCodes.ERR_SESSION_EXPIRED:
+                    setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
+                    setDialogMessage({
+                        title: constants.SESSION_EXPIRED,
+                        content: constants.SESSION_EXPIRED_MESSAGE,
+                        staticBackdrop: true,
+                        proceed: {
+                            text: constants.LOGIN,
+                            action: logoutUser,
+                            variant: 'primary',
+                        },
+                    });
+                    break;
+                case errorCodes.ERR_MULTIPLE_TABS:
+                    clearKeys();
+                    router.push('/credentials');
+                    break;
             }
         } finally {
             loadingBar.current?.complete();
