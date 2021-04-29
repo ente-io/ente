@@ -112,6 +112,8 @@ function CollectionShare(props: Props) {
                             .email(constants.EMAIL_ERROR)
                             .required(constants.REQUIRED),
                     })}
+                    validateOnChange={false}
+                    validateOnBlur={false}
                     onSubmit={collectionShare}
                 >
                     {({
@@ -119,7 +121,6 @@ function CollectionShare(props: Props) {
                         errors,
                         touched,
                         handleChange,
-                        handleBlur,
                         handleSubmit,
                     }) => (
                         <Form noValidate onSubmit={handleSubmit}>
@@ -134,7 +135,6 @@ function CollectionShare(props: Props) {
                                         placeholder={constants.ENTER_EMAIL}
                                         value={values.email}
                                         onChange={handleChange('email')}
-                                        onBlur={handleBlur('email')}
                                         isInvalid={Boolean(
                                             touched.email && errors.email
                                         )}

@@ -60,6 +60,8 @@ export default function Home() {
                                 .email(constants.EMAIL_ERROR)
                                 .required(constants.REQUIRED),
                         })}
+                        validateOnChange={false}
+                        validateOnBlur={false}
                         onSubmit={registerUser}
                     >
                         {({
@@ -67,7 +69,6 @@ export default function Home() {
                             errors,
                             touched,
                             handleChange,
-                            handleBlur,
                             handleSubmit,
                         }): JSX.Element => (
                             <Form noValidate onSubmit={handleSubmit}>
@@ -77,7 +78,6 @@ export default function Home() {
                                         placeholder={constants.ENTER_NAME}
                                         value={values.name}
                                         onChange={handleChange('name')}
-                                        onBlur={handleBlur('name')}
                                         isInvalid={Boolean(
                                             touched.name && errors.name
                                         )}
@@ -93,7 +93,6 @@ export default function Home() {
                                         placeholder={constants.ENTER_EMAIL}
                                         value={values.email}
                                         onChange={handleChange('email')}
-                                        onBlur={handleBlur('email')}
                                         isInvalid={Boolean(
                                             touched.email && errors.email
                                         )}

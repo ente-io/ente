@@ -48,13 +48,14 @@ export default function PassPhraseForm(props: Props) {
                                 constants.REQUIRED
                             ),
                         })}
+                        validateOnChange={false}
+                        validateOnBlur={false}
                     >
                         {({
                             values,
                             touched,
                             errors,
                             handleChange,
-                            handleBlur,
                             handleSubmit,
                         }) => (
                             <Form noValidate onSubmit={handleSubmit}>
@@ -64,10 +65,9 @@ export default function PassPhraseForm(props: Props) {
                                         placeholder={props.placeholder}
                                         value={values.passphrase}
                                         onChange={handleChange('passphrase')}
-                                        onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                            errors.passphrase
+                                                errors.passphrase
                                         )}
                                         disabled={loading}
                                         autoFocus={true}

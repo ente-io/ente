@@ -61,6 +61,8 @@ function SetPassword(props: Props) {
                             ),
                             confirm: Yup.string().required(constants.REQUIRED),
                         })}
+                        validateOnChange={false}
+                        validateOnBlur={false}
                         onSubmit={onSubmit}
                     >
                         {({
@@ -68,7 +70,6 @@ function SetPassword(props: Props) {
                             touched,
                             errors,
                             handleChange,
-                            handleBlur,
                             handleSubmit,
                         }) => (
                             <Form noValidate onSubmit={handleSubmit}>
@@ -78,7 +79,6 @@ function SetPassword(props: Props) {
                                         placeholder={constants.PASSPHRASE_HINT}
                                         value={values.passphrase}
                                         onChange={handleChange('passphrase')}
-                                        onBlur={handleBlur('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
                                                 errors.passphrase
@@ -98,7 +98,6 @@ function SetPassword(props: Props) {
                                         }
                                         value={values.confirm}
                                         onChange={handleChange('confirm')}
-                                        onBlur={handleBlur('confirm')}
                                         isInvalid={Boolean(
                                             touched.confirm && errors.confirm
                                         )}

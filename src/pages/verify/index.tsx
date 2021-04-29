@@ -117,6 +117,8 @@ export default function Verify() {
                         validationSchema={Yup.object().shape({
                             ott: Yup.string().required(constants.REQUIRED),
                         })}
+                        validateOnChange={false}
+                        validateOnBlur={false}
                         onSubmit={onSubmit}
                     >
                         {({
@@ -124,7 +126,6 @@ export default function Verify() {
                             touched,
                             errors,
                             handleChange,
-                            handleBlur,
                             handleSubmit,
                         }) => (
                             <Form noValidate onSubmit={handleSubmit}>
@@ -134,7 +135,6 @@ export default function Verify() {
                                         type="text"
                                         value={values.ott}
                                         onChange={handleChange('ott')}
-                                        onBlur={handleBlur('ott')}
                                         isInvalid={Boolean(
                                             touched.ott && errors.ott
                                         )}
@@ -150,7 +150,7 @@ export default function Verify() {
                                     buttonText={constants.VERIFY}
                                     loading={loading}
                                 />
-                                <div style={{ marginTop: "24px" }}>
+                                <div style={{ marginTop: '24px' }}>
                                     {resend === 0 && (
                                         <a href="#" onClick={resendEmail}>
                                             {constants.RESEND_MAIL}
@@ -159,8 +159,10 @@ export default function Verify() {
                                     {resend === 1 && (
                                         <span>{constants.SENDING}</span>
                                     )}
-                                    {resend === 2 && <span>{constants.SENT}</span>}
-                                    <div style={{ marginTop: "8px" }}>
+                                    {resend === 2 && (
+                                        <span>{constants.SENT}</span>
+                                    )}
+                                    <div style={{ marginTop: '8px' }}>
                                         <a href="#" onClick={logoutUser}>
                                             {constants.CHANGE_EMAIL}
                                         </a>

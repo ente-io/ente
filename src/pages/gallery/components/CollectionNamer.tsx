@@ -58,16 +58,11 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                 validationSchema={Yup.object().shape({
                     albumName: Yup.string().required(constants.REQUIRED),
                 })}
+                validateOnChange={false}
+                validateOnBlur={false}
                 onSubmit={onSubmit}
             >
-                {({
-                    values,
-                    touched,
-                    errors,
-                    handleChange,
-                    handleBlur,
-                    handleSubmit,
-                }) => (
+                {({ values, touched, errors, handleChange, handleSubmit }) => (
                     <Form noValidate onSubmit={handleSubmit}>
                         <Form.Group>
                             <Form.Control
@@ -75,7 +70,6 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                                 type="text"
                                 value={values.albumName}
                                 onChange={handleChange('albumName')}
-                                onBlur={handleBlur('albumName')}
                                 isInvalid={Boolean(
                                     touched.albumName && errors.albumName
                                 )}
