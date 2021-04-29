@@ -55,7 +55,7 @@ const Chip = styled.button<{ active: boolean }>`
     border-radius: 8px;
     padding: 4px;
     padding-left: 24px;
-    margin: 2px;
+    margin: 3px;
     border: none;
     background-color: ${(props) =>
         props.active ? '#fff' : 'rgba(255, 255, 255, 0.3)'};
@@ -127,7 +127,7 @@ export default function Collections(props: CollectionProps) {
                         >
                             {item.name}
                             {item.type != CollectionType.favorites &&
-                            item.owner.id === user?.id ? (
+                                item.owner.id === user?.id ? (
                                 <OverlayTrigger
                                     rootClose
                                     trigger="click"
