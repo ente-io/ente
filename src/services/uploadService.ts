@@ -36,6 +36,7 @@ const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
 const FILE_UPLOAD_FAILED = -1;
 const FILE_UPLOAD_SKIPPED = -2;
 const FILE_UPLOAD_COMPLETED = 100;
+const EDITED_FILE_SUFFIX = '-edited';
 
 interface Location {
     latitude: number;
@@ -382,6 +383,13 @@ class UploadService {
                 receivedFile,
                 fileType
             );
+            let receivedFileOriginalName = receivedFile.name;
+            if (receivedFile.name.endsWith(EDITED_FILE_SUFFIX)) {
+                receivedFileOriginalName = receivedFile.name.slice(
+                    0,
+                    -1 * EDITED_FILE_SUFFIX.length
+                );
+            }
             const metadata = Object.assign(
                 {
                     title: receivedFile.name,
@@ -392,7 +400,7 @@ class UploadService {
                     longitude: location?.latitude,
                     fileType,
                 },
-                this.metadataMap.get(receivedFile.name)
+                this.metadataMap.get(receivedFileOriginalName)
             );
             const filedata =
                 receivedFile.size > MIN_STREAM_FILE_SIZE
