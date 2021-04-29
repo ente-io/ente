@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
-import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     File,
     getLocalFiles,
@@ -182,7 +182,7 @@ export default function Gallery() {
             setFavItemIds(favItemIds);
             setSinceTime(new Date().getTime());
         } catch (e) {
-            switch (e?.status.toString()) {
+            switch (e.message) {
                 case errorCodes.ERR_SESSION_EXPIRED:
                     setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
                     setDialogMessage({
@@ -195,6 +195,10 @@ export default function Gallery() {
                             variant: 'primary',
                         },
                     });
+                    break;
+                case errorCodes.ERR_MULTIPLE_TABS:
+                    clearKeys();
+                    router.push('/credentials');
                     break;
             }
         } finally {
