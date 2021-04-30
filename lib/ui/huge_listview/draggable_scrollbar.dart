@@ -39,7 +39,8 @@ class DraggableScrollbar extends StatefulWidget {
 
 class DraggableScrollbarState extends State<DraggableScrollbar>
     with TickerProviderStateMixin {
-  static final animationDuration = Duration(milliseconds: 1000);
+  static final thumbAnimationDuration = Duration(milliseconds: 1000);
+  static final labelAnimationDuration = Duration(milliseconds: 300);
   double thumbOffset = 0.0;
   bool isDragging = false;
   int currentFirstIndex;
@@ -69,7 +70,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
 
     _thumbAnimationController = AnimationController(
       vsync: this,
-      duration: animationDuration,
+      duration: thumbAnimationDuration,
     );
 
     _thumbAnimation = CurvedAnimation(
@@ -79,7 +80,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
 
     _labelAnimationController = AnimationController(
       vsync: this,
-      duration: animationDuration,
+      duration: labelAnimationDuration,
     );
 
     _labelAnimation = CurvedAnimation(
@@ -148,7 +149,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
         _thumbAnimationController.forward();
       }
       _fadeoutTimer?.cancel();
-      _fadeoutTimer = Timer(animationDuration, () {
+      _fadeoutTimer = Timer(thumbAnimationDuration, () {
         _thumbAnimationController.reverse();
         _labelAnimationController.reverse();
         _fadeoutTimer = null;
@@ -179,7 +180,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
   }
 
   void onDragEnd(DragEndDetails details) {
-    _fadeoutTimer = Timer(animationDuration, () {
+    _fadeoutTimer = Timer(thumbAnimationDuration, () {
       _thumbAnimationController.reverse();
       _labelAnimationController.reverse();
       _fadeoutTimer = null;
