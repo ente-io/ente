@@ -49,6 +49,7 @@ class _GalleryState extends State<Gallery> {
   int _index = 0;
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
+  bool _shouldShowAppBar = false;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
 
   @override
@@ -60,10 +61,23 @@ class _GalleryState extends State<Gallery> {
         _loadFiles();
       });
     }
-    widget.selectedFiles.addListener(() {
-      _logger.info("Building gallery because selected files updated");
-      setState(() {});
-    });
+    if (widget.isHomePageGallery) {
+      widget.selectedFiles.addListener(() {
+        if (widget.selectedFiles.files.isEmpty) {
+          if (_shouldShowAppBar && mounted) {
+            setState(() {
+              _shouldShowAppBar = false;
+            });
+          }
+        } else {
+          if (!_shouldShowAppBar && mounted) {
+            setState(() {
+              _shouldShowAppBar = true;
+            });
+          }
+        }
+      });
+    }
     _loadFiles(limit: kInitialLoadLimit).then((value) => _loadFiles());
     super.initState();
   }
@@ -105,7 +119,7 @@ class _GalleryState extends State<Gallery> {
         margin: const EdgeInsets.only(bottom: 50),
         child: gallery,
       );
-      if (widget.selectedFiles.files.isNotEmpty) {
+      if (_shouldShowAppBar) {
         gallery = Stack(children: [
           gallery,
           Container(

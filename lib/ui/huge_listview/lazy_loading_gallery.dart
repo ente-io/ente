@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/detail_page.dart';
@@ -162,6 +161,17 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void initState() {
     super.initState();
     _isVisible = widget.isVisible;
+    widget.selectedFiles.addListener(() {
+      bool shouldRefresh = false;
+      for (final file in widget.files) {
+        if (widget.selectedFiles.latestSelection == file) {
+          shouldRefresh = true;
+        }
+      }
+      if (shouldRefresh && mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
