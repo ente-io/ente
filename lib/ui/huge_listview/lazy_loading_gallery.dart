@@ -51,7 +51,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     final galleryDate =
         DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
     _reloadEventSubscription = widget.reloadEvent.listen((event) async {
-      final updatedFiles = event.updatedFiles
+      final filesUpdatedThisDay = event.updatedFiles
           .where((file) =>
               file.creationTime !=
               null) // Filtering out noise of deleted files diff from server
@@ -61,8 +61,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             fileDate.month == galleryDate.month &&
             fileDate.day == galleryDate.day;
       });
-      bool isOnSameDay = updatedFiles.isNotEmpty;
-      if (isOnSameDay) {
+      if (filesUpdatedThisDay.isNotEmpty) {
         final dayStartTime =
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
         final files = await widget.asyncLoader(
