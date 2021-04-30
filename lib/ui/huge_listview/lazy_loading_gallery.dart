@@ -63,22 +63,20 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       });
       bool isOnSameDay = updatedFiles.isNotEmpty;
       if (isOnSameDay) {
-        Future.delayed(Duration(milliseconds: 100), () async {
-          final dayStartTime =
-              DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
-          final files = await widget.asyncLoader(
-              dayStartTime.microsecondsSinceEpoch,
-              dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
-          if (files.isEmpty) {
-            // All files on this day were deleted, let gallery trigger the reload
-          } else {
-            if (mounted) {
-              setState(() {
-                _files = files;
-              });
-            }
+        final dayStartTime =
+            DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
+        final files = await widget.asyncLoader(
+            dayStartTime.microsecondsSinceEpoch,
+            dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
+        if (files.isEmpty) {
+          // All files on this day were deleted, let gallery trigger the reload
+        } else {
+          if (mounted) {
+            setState(() {
+              _files = files;
+            });
           }
-        });
+        }
       }
     });
   }
