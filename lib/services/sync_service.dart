@@ -443,20 +443,15 @@ class SyncService {
   }
 
   Future<void> deleteFilesOnServer(List<int> fileIDs) async {
-    return _dio
-        .post(
-          Configuration.instance.getHttpEndpoint() + "/files/delete",
-          options: Options(
-            headers: {
-              "X-Auth-Token": Configuration.instance.getToken(),
-            },
-          ),
-          data: {
-            "fileIDs": fileIDs,
-          }
-        )
-        .catchError((e) {
-          _logger.severe(e);
+    return await _dio
+        .post(Configuration.instance.getHttpEndpoint() + "/files/delete",
+            options: Options(
+              headers: {
+                "X-Auth-Token": Configuration.instance.getToken(),
+              },
+            ),
+            data: {
+          "fileIDs": fileIDs,
         });
   }
 }

@@ -76,6 +76,7 @@ Future<void> deleteFilesFromEverywhere(
       await FilesDB.instance
           .deleteMultipleUploadedFiles(uploadedFileIDsToBeDeleted);
     } catch (e) {
+      _logger.severe(e);
       await dialog.hide();
       showGenericErrorDialog(context);
       throw e;
