@@ -10,6 +10,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
   final File file;

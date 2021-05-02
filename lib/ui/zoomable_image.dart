@@ -12,6 +12,7 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/thumbnail_util.dart';
 
 class ZoomableImage extends StatefulWidget {
   final File photo;
