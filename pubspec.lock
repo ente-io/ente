@@ -140,7 +140,7 @@ packages:
       name: crisp
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.4"
+    version: "0.1.3"
   crypto:
     dependency: transitive
     description:
@@ -278,7 +278,7 @@ packages:
       name: flutter_plugin_android_lifecycle
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   flutter_secure_storage:
     dependency: "direct main"
     description:
@@ -407,7 +407,7 @@ packages:
       name: local_auth
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.5"
   logging:
     dependency: "direct main"
     description:
