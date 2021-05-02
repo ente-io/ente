@@ -7,7 +7,6 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/huge_listview/huge_listview.dart';
 import 'package:photos/ui/huge_listview/lazy_loading_gallery.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
@@ -49,7 +48,6 @@ class _GalleryState extends State<Gallery> {
   int _index = 0;
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
-  bool _shouldShowAppBar = false;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
 
   @override
@@ -60,23 +58,6 @@ class _GalleryState extends State<Gallery> {
       _reloadEventSubscription = widget.reloadEvent.listen((event) {
         _logger.info("Building gallery because reload event fired");
         _loadFiles();
-      });
-    }
-    if (widget.isHomePageGallery) {
-      widget.selectedFiles.addListener(() {
-        if (widget.selectedFiles.files.isEmpty) {
-          if (_shouldShowAppBar && mounted) {
-            setState(() {
-              _shouldShowAppBar = false;
-            });
-          }
-        } else {
-          if (!_shouldShowAppBar && mounted) {
-            setState(() {
-              _shouldShowAppBar = true;
-            });
-          }
-        }
       });
     }
     _loadFiles(limit: kInitialLoadLimit).then((value) => _loadFiles());
@@ -120,19 +101,6 @@ class _GalleryState extends State<Gallery> {
         margin: const EdgeInsets.only(bottom: 50),
         child: gallery,
       );
-      if (_shouldShowAppBar) {
-        gallery = Stack(children: [
-          gallery,
-          Container(
-            height: 60,
-            child: GalleryAppBarWidget(
-              GalleryAppBarType.homepage,
-              null,
-              widget.selectedFiles,
-            ),
-          ),
-        ]);
-      }
     }
     return gallery;
   }

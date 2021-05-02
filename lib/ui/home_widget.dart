@@ -22,6 +22,7 @@ import 'package:photos/ui/backup_folder_selection_widget.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
+import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/grant_permissions_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
@@ -46,7 +47,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   static const _deviceFolderGalleryWidget = const CollectionsGalleryWidget();
   static const _sharedCollectionGallery = const SharedCollectionGallery();
   static const _headerWidget = HeaderWidget();
-  
+
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
   final _settingsButton = SettingsButton();
@@ -233,7 +234,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     } else {
       header = _headerWidget;
     }
-    return Gallery(
+    final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit}) {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         if (importantPaths.isNotEmpty) {
@@ -251,6 +252,17 @@ class _HomeWidgetState extends State<HomeWidget> {
       headerWidget: header,
       isHomePageGallery: true,
     );
+    return Stack(children: [
+      gallery,
+      Container(
+        height: 60,
+        child: GalleryAppBarWidget(
+          GalleryAppBarType.homepage,
+          null,
+          _selectedFiles,
+        ),
+      ),
+    ]);
   }
 
   Widget _buildBottomNavigationBar() {

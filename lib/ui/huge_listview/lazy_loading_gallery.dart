@@ -90,7 +90,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           files.addAll(_files);
           files.removeWhere((file) => updateFileIDs.contains(file.generatedID));
           if (files.isNotEmpty && mounted) {
-            // All files on this day were deleted, let gallery trigger the reload
+            // If all files on this day were deleted, ignore and let the gallery reload itself
             setState(() {
               _files = files;
             });
@@ -185,7 +185,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     widget.selectedFiles.addListener(() {
       bool shouldRefresh = false;
       for (final file in widget.files) {
-        if (widget.selectedFiles.latestSelection == file) {
+        if (widget.selectedFiles.lastSelections.contains(file)) {
           shouldRefresh = true;
         }
       }
@@ -231,6 +231,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
         ),
+        padding: EdgeInsets.all(0),
       );
     }
   }

@@ -26,8 +26,7 @@ enum GalleryAppBarType {
   search_results,
 }
 
-class GalleryAppBarWidget extends StatefulWidget
-    implements PreferredSizeWidget {
+class GalleryAppBarWidget extends StatefulWidget {
   final GalleryAppBarType type;
   final String title;
   final SelectedFiles selectedFiles;
@@ -44,9 +43,6 @@ class GalleryAppBarWidget extends StatefulWidget
 
   @override
   _GalleryAppBarWidgetState createState() => _GalleryAppBarWidgetState();
-
-  @override
-  Size get preferredSize => Size.fromHeight(60.0);
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -78,7 +74,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   Widget build(BuildContext context) {
     if (widget.selectedFiles.files.isEmpty) {
       return AppBar(
-        backgroundColor: Color(0x00000000),
+        backgroundColor: widget.type == GalleryAppBarType.homepage
+            ? Color(0x00000000)
+            : null,
         elevation: 0,
         title: widget.type == GalleryAppBarType.homepage
             ? Container()
