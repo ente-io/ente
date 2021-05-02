@@ -119,10 +119,6 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building " +
-        getDayTitle(_files[0].creationTime) +
-        " with " +
-        _files.length.toString());
     if (_files.length == 0) {
       return Container();
     }
