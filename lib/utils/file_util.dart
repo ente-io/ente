@@ -22,6 +22,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -90,7 +91,8 @@ Future<void> deleteFilesFromEverywhere(
     }
   }
   if (deletedFiles.isNotEmpty) {
-    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
+    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles,
+        type: EventType.deleted));
   }
   await dialog.hide();
   showToast("deleted from everywhere");
@@ -121,7 +123,8 @@ Future<void> deleteFilesOnDeviceOnly(
     }
   }
   if (deletedFiles.isNotEmpty) {
-    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
+    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles,
+        type: EventType.deleted));
   }
   await dialog.hide();
 }

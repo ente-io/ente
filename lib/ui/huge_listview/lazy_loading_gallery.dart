@@ -62,15 +62,35 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             fileDate.day == galleryDate.day;
       });
       if (filesUpdatedThisDay.isNotEmpty) {
-        final dayStartTime =
-            DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
-        final files = await widget.asyncLoader(
-            dayStartTime.microsecondsSinceEpoch,
-            dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
-        if (files.isEmpty) {
-          // All files on this day were deleted, let gallery trigger the reload
+        _logger.info(filesUpdatedThisDay.length.toString() +
+            " files were updated on " +
+            getDayTitle(galleryDate.microsecondsSinceEpoch));
+        if (event.type == EventType.added_or_updated) {
+          final dayStartTime =
+              DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
+          final files = await widget.asyncLoader(
+              dayStartTime.microsecondsSinceEpoch,
+              dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
+          if (files.isEmpty) {
+            // All files on this day were deleted, let gallery trigger the reload
+          } else {
+            if (mounted) {
+              setState(() {
+                _files = files;
+              });
+            }
+          }
         } else {
-          if (mounted) {
+          // Files were deleted
+          final updateFileIDs = Set<int>();
+          for (final file in filesUpdatedThisDay) {
+            updateFileIDs.add(file.generatedID);
+          }
+          final List<File> files = [];
+          files.addAll(_files);
+          files.removeWhere((file) => updateFileIDs.contains(file.generatedID));
+          if (files.isNotEmpty && mounted) {
+            // All files on this day were deleted, let gallery trigger the reload
             setState(() {
               _files = files;
             });
@@ -99,6 +119,10 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
   @override
   Widget build(BuildContext context) {
+    _logger.info("Building " +
+        getDayTitle(_files[0].creationTime) +
+        " with " +
+        _files.length.toString());
     if (_files.length == 0) {
       return Container();
     }

@@ -55,6 +55,7 @@ class _GalleryState extends State<Gallery> {
   @override
   void initState() {
     _logger = Logger("Gallery_" + widget.tagPrefix);
+    _logger.info("initState");
     if (widget.reloadEvent != null) {
       _reloadEventSubscription = widget.reloadEvent.listen((event) {
         _logger.info("Building gallery because reload event fired");
