@@ -109,14 +109,15 @@ class CrispChatPage extends StatefulWidget {
 
 class _CrispChatPageState extends State<CrispChatPage> {
   static const websiteID = "86d56ea2-68a2-43f9-8acb-95e06dee42e8";
+  CrispMain _crisp;
 
   @override
   void initState() {
-    crisp.initialize(
+    _crisp = CrispMain(
       websiteId: websiteID,
     );
-    crisp.register(
-      CrispUser(
+    _crisp.register(
+      user: CrispUser(
         email: Configuration.instance.getEmail(),
       ),
     );
@@ -130,6 +131,7 @@ class _CrispChatPageState extends State<CrispChatPage> {
         title: Text("support chat"),
       ),
       body: CrispView(
+        crispMain: _crisp,
         loadingWidget: loadWidget,
       ),
     );

@@ -23,7 +23,7 @@ class _WebPageState extends State<WebPage> {
         actions: [_hasLoadedPage ? Container() : loadWidget],
       ),
       body: InAppWebView(
-        initialUrl: widget.url,
+        initialUrlRequest: URLRequest(url: Uri.parse(widget.url)),
         onLoadStop: (c, url) {
           setState(() {
             _hasLoadedPage = true;

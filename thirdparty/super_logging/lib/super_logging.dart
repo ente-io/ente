@@ -12,8 +12,6 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sentry/sentry.dart';
 
-export 'package:sentry/sentry.dart' show User;
-
 typedef FutureOr<void> FutureOrVoidCallback();
 
 extension SuperString on String {
@@ -51,17 +49,6 @@ extension SuperLogRecord on LogRecord {
     }
 
     return msg;
-  }
-
-  Event toEvent({String appVersion}) {
-    return Event(
-      release: appVersion,
-      level: SeverityLevel.error,
-      culprit: message,
-      loggerName: loggerName,
-      exception: error,
-      stackTrace: stackTrace,
-    );
   }
 }
 
@@ -205,7 +192,7 @@ class SuperLogging {
   static void _sendErrorToSentry(Object error, StackTrace stack) {
     try {
       sentryClient.captureException(
-        exception: error,
+        error,
         stackTrace: stack,
       );
       $.info('Error sent to sentry.io: $error');
@@ -240,8 +227,7 @@ class SuperLogging {
 
     // add error to sentry queue
     if (sentryIsEnabled && rec.error != null) {
-      var event = rec.toEvent(appVersion: appVersion);
-      sentryQueueControl.add(event);
+      _sendErrorToSentry(rec.error, null);
     }
   }
 
@@ -254,33 +240,30 @@ class SuperLogging {
   }
 
   /// A queue to be consumed by [setupSentry].
-  static final sentryQueueControl = StreamController<Event>();
+  static final sentryQueueControl = StreamController<Error>();
 
   /// Whether sentry logging is currently enabled or not.
   static bool sentryIsEnabled;
 
   static Future<void> setupSentry() async {
-    sentryClient = SentryClient(dsn: config.sentryDsn);
-    await for (final event in sentryQueueControl.stream) {
-      dynamic error;
+    sentryClient = SentryClient(SentryOptions(dsn: config.sentryDsn));
+    await for (final error in sentryQueueControl.stream) {
       try {
-        var response = await sentryClient.capture(event: event);
-        error = response.error;
+        sentryClient.captureException(
+          error,
+        );
       } catch (e) {
-        error = e;
+        $.fine(
+          "sentry upload failed; will retry after ${config.sentryRetryDelay}",
+        );
+        doSentryRetry(error);
       }
-
-      if (error == null) continue;
-      $.fine(
-        "sentry upload failed; will retry after ${config.sentryRetryDelay} ($error)",
-      );
-      doSentryRetry(event);
     }
   }
 
-  static void doSentryRetry(Event event) async {
+  static void doSentryRetry(Error error) async {
     await Future.delayed(config.sentryRetryDelay);
-    sentryQueueControl.add(event);
+    sentryQueueControl.add(error);
   }
 
   /// The log file currently in use.

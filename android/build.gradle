@@ -8,9 +8,8 @@ buildscript {
     ext.appCompatVersion = '1.1.0' // for background_fetch
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:3.3.1' // for background_fetch
+        classpath 'com.android.tools.build:gradle:4.0.1' // for background_fetch
     }
 }
 

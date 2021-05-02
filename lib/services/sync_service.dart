@@ -120,11 +120,12 @@ class SyncService {
       _logger.info("Logging user out");
       Bus.instance.fire(TriggerLogoutEvent());
     } catch (e, s) {
-      if (e is DioError &&
-          e.type == DioErrorType.DEFAULT &&
-          e.error.osError != null) {
-        final errorCode = e.error.osError?.errorCode;
-        if (errorCode == 111 || errorCode == 101 || errorCode == 7) {
+      if (e is DioError) {
+        if (e.type == DioErrorType.connectTimeout ||
+            e.type == DioErrorType.sendTimeout ||
+            e.type == DioErrorType.receiveTimeout ||
+            e.type == DioErrorType.cancel ||
+            e.type == DioErrorType.other) {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
               reason: "waiting for network..."));
           return false;

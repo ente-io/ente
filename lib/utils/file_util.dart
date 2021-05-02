@@ -91,8 +91,8 @@ Future<void> deleteFilesFromEverywhere(
     }
   }
   if (deletedFiles.isNotEmpty) {
-    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles,
-        type: EventType.deleted));
+    Bus.instance
+        .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
   }
   await dialog.hide();
   showToast("deleted from everywhere");
@@ -123,8 +123,8 @@ Future<void> deleteFilesOnDeviceOnly(
     }
   }
   if (deletedFiles.isNotEmpty) {
-    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles,
-        type: EventType.deleted));
+    Bus.instance
+        .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
   }
   await dialog.hide();
 }
@@ -224,7 +224,7 @@ enum DownloadStatus {
 Future<io.File> getFileFromServer(File file,
     {ProgressCallback progressCallback}) async {
   final cacheManager = file.fileType == FileType.video
-      ? VideoCacheManager()
+      ? VideoCacheManager.instance
       : DefaultCacheManager();
   return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
     if (info == null) {
@@ -243,7 +243,7 @@ Future<io.File> getFileFromServer(File file,
 }
 
 Future<io.File> getThumbnailFromServer(File file) async {
-  return ThumbnailCacheManager()
+  return ThumbnailCacheManager.instance
       .getFileFromCache(file.getThumbnailUrl())
       .then((info) {
     if (info == null) {
@@ -390,7 +390,7 @@ Future<io.File> _downloadAndDecryptThumbnail(File file) async {
         data.length.toString());
   }
   encryptedFile.deleteSync();
-  final cachedThumbnail = ThumbnailCacheManager().putFile(
+  final cachedThumbnail = ThumbnailCacheManager.instance.putFile(
     file.getThumbnailUrl(),
     data,
     eTag: file.getThumbnailUrl(),
@@ -418,9 +418,9 @@ Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
 
 void clearCache(File file) {
   if (file.fileType == FileType.video) {
-    VideoCacheManager().removeFile(file.getDownloadUrl());
+    VideoCacheManager.instance.removeFile(file.getDownloadUrl());
   } else {
     DefaultCacheManager().removeFile(file.getDownloadUrl());
   }
-  ThumbnailCacheManager().removeFile(file.getThumbnailUrl());
+  ThumbnailCacheManager.instance.removeFile(file.getThumbnailUrl());
 }
