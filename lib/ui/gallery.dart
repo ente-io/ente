@@ -22,7 +22,6 @@ class Gallery extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final String tagPrefix;
   final Widget headerWidget;
-  final bool isHomePageGallery;
 
   Gallery({
     @required this.asyncLoader,
@@ -30,7 +29,6 @@ class Gallery extends StatefulWidget {
     @required this.tagPrefix,
     this.reloadEvent,
     this.headerWidget,
-    this.isHomePageGallery = false,
   });
 
   @override
@@ -95,14 +93,7 @@ class _GalleryState extends State<Gallery> {
     if (!_hasLoadedFiles) {
       return const LoadingPhotosWidget();
     }
-    var gallery = _getListView();
-    if (widget.isHomePageGallery) {
-      gallery = Container(
-        margin: const EdgeInsets.only(bottom: 50),
-        child: gallery,
-      );
-    }
-    return gallery;
+    return _getListView();
   }
 
   Widget _getListView() {

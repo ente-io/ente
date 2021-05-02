@@ -250,19 +250,16 @@ class _HomeWidgetState extends State<HomeWidget> {
       tagPrefix: "home_gallery",
       selectedFiles: _selectedFiles,
       headerWidget: header,
-      isHomePageGallery: true,
     );
-    return Stack(children: [
-      gallery,
-      Container(
-        height: 60,
-        child: GalleryAppBarWidget(
-          GalleryAppBarType.homepage,
-          null,
-          _selectedFiles,
+    return Stack(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 50),
+          child: gallery,
         ),
-      ),
-    ]);
+        HomePageAppBar(_selectedFiles),
+      ],
+    );
   }
 
   Widget _buildBottomNavigationBar() {
@@ -343,6 +340,45 @@ class _HomeWidgetState extends State<HomeWidget> {
     _loggedOutEvent.cancel();
     _backupFoldersUpdatedEvent.cancel();
     super.dispose();
+  }
+}
+
+class HomePageAppBar extends StatefulWidget {
+  const HomePageAppBar(
+    this.selectedFiles, {
+    Key key,
+  }) : super(key: key);
+
+  final SelectedFiles selectedFiles;
+
+  @override
+  _HomePageAppBarState createState() => _HomePageAppBarState();
+}
+
+class _HomePageAppBarState extends State<HomePageAppBar> {
+  @override
+  void initState() {
+    super.initState();
+    widget.selectedFiles.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appBar = Container(
+      height: 60,
+      child: GalleryAppBarWidget(
+        GalleryAppBarType.homepage,
+        null,
+        widget.selectedFiles,
+      ),
+    );
+    if (widget.selectedFiles.files.isEmpty) {
+      return IgnorePointer(child: appBar);
+    } else {
+      return appBar;
+    }
   }
 }
 
