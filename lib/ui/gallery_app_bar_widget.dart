@@ -233,7 +233,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             final dialog = createProgressDialog(context, "removing files...");
             await dialog.show();
             try {
-              CollectionsService.instance.removeFromCollection(
+              await CollectionsService.instance.removeFromCollection(
                   widget.collection.id, widget.selectedFiles.files.toList());
               await dialog.hide();
               widget.selectedFiles.clearAll();
