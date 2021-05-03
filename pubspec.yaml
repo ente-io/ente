@@ -58,7 +58,7 @@ dependencies:
   flutter_sodium: ^0.2.0
   pedantic: ^1.9.2
   page_transition: "^1.1.7+2"
-  scrollable_positioned_list: ^0.1.8
+  scrollable_positioned_list: ^0.1.10
   connectivity: ^3.0.3
   url_launcher: ^6.0.3
   fluttercontactpicker: ^4.4.0
