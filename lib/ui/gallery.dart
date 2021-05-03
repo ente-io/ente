@@ -10,7 +10,6 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/huge_listview/huge_listview.dart';
 import 'package:photos/ui/huge_listview/lazy_loading_gallery.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
-import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -91,7 +90,7 @@ class _GalleryState extends State<Gallery> {
   Widget build(BuildContext context) {
     _logger.info("Building " + widget.tagPrefix);
     if (!_hasLoadedFiles) {
-      return const LoadingPhotosWidget();
+      return loadWidget;
     }
     return _getListView();
   }
