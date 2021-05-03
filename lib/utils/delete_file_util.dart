@@ -48,6 +48,8 @@ Future<void> deleteFilesFromEverywhere(
         }
       }
     } else {
+      updatedCollectionIDs.add(file.collectionID);
+      deletedFiles.add(file);
       uploadedFileIDsToBeDeleted.add(file.uploadedFileID);
     }
   }
@@ -65,10 +67,12 @@ Future<void> deleteFilesFromEverywhere(
     }
     for (final collectionID in updatedCollectionIDs) {
       Bus.instance.fire(CollectionUpdatedEvent(
-          collectionID,
-          deletedFiles
-              .where((file) => file.collectionID == collectionID)
-              .toList()));
+        collectionID,
+        deletedFiles
+            .where((file) => file.collectionID == collectionID)
+            .toList(),
+        type: EventType.deleted,
+      ));
     }
   }
   if (deletedFiles.isNotEmpty) {
