@@ -10,6 +10,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
 class FilesDB {
+  /*
+  Note: columnUploadedFileID and columnCollectionID have to be compared against
+  both NULL and -1 because older clients might have entries where the DEFAULT
+  was unset, and a migration script to set the DEFAULT would break in case of
+  duplicate entries for un-uploaded files that were created due to a collision
+  in background and foreground syncs.
+  */
   static final _databaseName = "ente.files.db";
 
   static final Logger _logger = Logger("FilesDB");
@@ -69,9 +76,9 @@ class FilesDB {
         CREATE TABLE $tableName (
           $columnGeneratedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           $columnLocalID TEXT,
-          $columnUploadedFileID INTEGER,
+          $columnUploadedFileID INTEGER DEFAULT -1,
           $columnOwnerID INTEGER,
-          $columnCollectionID INTEGER,
+          $columnCollectionID INTEGER DEFAULT -1,
           $columnTitle TEXT NOT NULL,
           $columnDeviceFolder TEXT,
           $columnLatitude REAL,
@@ -210,7 +217,7 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND ($columnLocalID IS NOT NULL OR $columnUploadedFileID IS NOT NULL)',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND ($columnLocalID IS NOT NULL OR ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1))',
       whereArgs: [startTime, endTime],
       orderBy: '$columnCreationTime DESC',
       limit: limit,
@@ -225,7 +232,7 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN (?)) OR $columnUploadedFileID IS NOT NULL)',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN (?)) OR ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1))',
       whereArgs: [startTime, endTime, paths.join(", ")],
       orderBy: '$columnCreationTime DESC',
       limit: limit,
@@ -341,7 +348,7 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnUploadedFileID IS NULL AND $columnDeviceFolder IN ($inParam)',
+          '($columnUploadedFileID IS NULL OR $columnUploadedFileID IS -1) AND $columnDeviceFolder IN ($inParam)',
       orderBy: '$columnCreationTime DESC',
       groupBy: '$columnLocalID',
     );
@@ -354,7 +361,7 @@ class FilesDB {
       table,
       columns: [columnUploadedFileID],
       where:
-          '($columnLocalID IS NOT NULL AND $columnUploadedFileID IS NOT NULL AND $columnUpdationTime IS NULL AND $columnIsDeleted = 0)',
+          '($columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) AND $columnUpdationTime IS NULL AND $columnIsDeleted = 0)',
       orderBy: '$columnCreationTime DESC',
       distinct: true,
     );
@@ -402,7 +409,7 @@ class FilesDB {
       table,
       columns: [columnUploadedFileID],
       where:
-          '($columnLocalID IS NOT NULL AND $columnUploadedFileID IS NOT NULL AND $columnUpdationTime IS NOT NULL AND $columnIsDeleted = 0)',
+          '($columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) AND $columnUpdationTime IS NOT NULL AND $columnIsDeleted = 0)',
       orderBy: '$columnCreationTime DESC',
       distinct: true,
     );
@@ -583,6 +590,7 @@ class FilesDB {
           SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
           FROM $table
           GROUP BY $columnCollectionID
+          WHERE $columnCollectionID IS NOT -1
         ) latest_files
         ON $table.$columnCollectionID = latest_files.$columnCollectionID
         AND $table.$columnCreationTime = latest_files.max_creation_time;
@@ -643,9 +651,9 @@ class FilesDB {
       row[columnGeneratedID] = file.generatedID;
     }
     row[columnLocalID] = file.localID;
-    row[columnUploadedFileID] = file.uploadedFileID;
+    row[columnUploadedFileID] = file.uploadedFileID ?? -1;
     row[columnOwnerID] = file.ownerID;
-    row[columnCollectionID] = file.collectionID;
+    row[columnCollectionID] = file.collectionID ?? -1;
     row[columnTitle] = file.title;
     row[columnDeviceFolder] = file.deviceFolder;
     if (file.location != null) {
@@ -676,7 +684,7 @@ class FilesDB {
   Map<String, dynamic> _getRowForFileWithoutCollection(File file) {
     final row = new Map<String, dynamic>();
     row[columnLocalID] = file.localID;
-    row[columnUploadedFileID] = file.uploadedFileID;
+    row[columnUploadedFileID] = file.uploadedFileID ?? -1;
     row[columnOwnerID] = file.ownerID;
     row[columnTitle] = file.title;
     row[columnDeviceFolder] = file.deviceFolder;
@@ -707,9 +715,11 @@ class FilesDB {
     final file = File();
     file.generatedID = row[columnGeneratedID];
     file.localID = row[columnLocalID];
-    file.uploadedFileID = row[columnUploadedFileID];
+    file.uploadedFileID =
+        row[columnUploadedFileID] == -1 ? null : row[columnUploadedFileID];
     file.ownerID = row[columnOwnerID];
-    file.collectionID = row[columnCollectionID];
+    file.collectionID =
+        row[columnCollectionID] == -1 ? null : row[columnCollectionID];
     file.title = row[columnTitle];
     file.deviceFolder = row[columnDeviceFolder];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {
