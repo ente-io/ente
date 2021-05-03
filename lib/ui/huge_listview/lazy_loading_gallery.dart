@@ -32,7 +32,7 @@ class LazyLoadingGallery extends StatefulWidget {
 }
 
 class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
-  static const kSubGalleryItemLimit = 24;
+  static const kSubGalleryItemLimit = 80;
   static const kMicroSecondsInADay = 86400000000;
 
   static final Logger _logger = Logger("LazyLoadingGallery");
