@@ -40,7 +40,7 @@ class DraggableScrollbar extends StatefulWidget {
 class DraggableScrollbarState extends State<DraggableScrollbar>
     with TickerProviderStateMixin {
   static final thumbAnimationDuration = Duration(milliseconds: 1000);
-  static final labelAnimationDuration = Duration(milliseconds: 300);
+  static final labelAnimationDuration = Duration(milliseconds: 1000);
   double thumbOffset = 0.0;
   bool isDragging = false;
   int currentFirstIndex;
@@ -103,7 +103,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
       return Stack(
         children: [
           RepaintBoundary(child: widget.child),
-          RepaintBoundary(child: buildDetector()),
+          RepaintBoundary(child: buildThumb()),
         ],
       );
     } else {
@@ -116,28 +116,26 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
       return RawKeyboardListener(
         focusNode: FocusNode(),
         onKey: keyHandler,
-        child: buildDetector(),
+        child: buildThumb(),
       );
     else
-      return buildDetector();
+      return buildThumb();
   }
 
-  Widget buildDetector() => GestureDetector(
-        onVerticalDragStart: onDragStart,
-        onVerticalDragUpdate: onDragUpdate,
-        onVerticalDragEnd: onDragEnd,
-        child: Container(
-          alignment: Alignment.topRight,
-          margin: EdgeInsets.only(top: thumbOffset),
-          padding: widget.padding,
-          child: ScrollBarThumb(
-            widget.backgroundColor,
-            widget.drawColor,
-            widget.heightScrollThumb,
-            widget.labelTextBuilder.call(this.currentFirstIndex),
-            _labelAnimation,
-            _thumbAnimation,
-          ),
+  Widget buildThumb() => Container(
+        alignment: Alignment.topRight,
+        margin: EdgeInsets.only(top: thumbOffset),
+        padding: widget.padding,
+        child: ScrollBarThumb(
+          widget.backgroundColor,
+          widget.drawColor,
+          widget.heightScrollThumb,
+          widget.labelTextBuilder.call(this.currentFirstIndex),
+          _labelAnimation,
+          _thumbAnimation,
+          onDragStart,
+          onDragUpdate,
+          onDragEnd,
         ),
       );
 

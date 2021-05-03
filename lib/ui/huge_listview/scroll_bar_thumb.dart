@@ -7,6 +7,9 @@ class ScrollBarThumb extends StatelessWidget {
   final title;
   final labelAnimation;
   final thumbAnimation;
+  final Function(DragStartDetails details) onDragStart;
+  final Function(DragUpdateDetails details) onDragUpdate;
+  final Function(DragEndDetails details) onDragEnd;
 
   const ScrollBarThumb(
     this.backgroundColor,
@@ -14,7 +17,10 @@ class ScrollBarThumb extends StatelessWidget {
     this.height,
     this.title,
     this.labelAnimation,
-    this.thumbAnimation, {
+    this.thumbAnimation,
+    this.onDragStart,
+    this.onDragUpdate,
+    this.onDragEnd, {
     Key key,
   }) : super(key: key);
 
@@ -45,21 +51,26 @@ class ScrollBarThumb extends StatelessWidget {
         Padding(
           padding: EdgeInsets.all(12),
         ),
-        SlideFadeTransition(
-          animation: thumbAnimation,
-          child: CustomPaint(
-            foregroundPainter: _ArrowCustomPainter(drawColor),
-            child: Material(
-              elevation: 4.0,
-              child: Container(
-                  constraints:
-                      BoxConstraints.tight(Size(height * 0.6, height))),
-              color: backgroundColor,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(height),
-                bottomLeft: Radius.circular(height),
-                topRight: Radius.circular(4.0),
-                bottomRight: Radius.circular(4.0),
+        GestureDetector(
+          onVerticalDragStart: onDragStart,
+          onVerticalDragUpdate: onDragUpdate,
+          onVerticalDragEnd: onDragEnd,
+          child: SlideFadeTransition(
+            animation: thumbAnimation,
+            child: CustomPaint(
+              foregroundPainter: _ArrowCustomPainter(drawColor),
+              child: Material(
+                elevation: 4.0,
+                child: Container(
+                    constraints:
+                        BoxConstraints.tight(Size(height * 0.6, height))),
+                color: backgroundColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(height),
+                  bottomLeft: Radius.circular(height),
+                  topRight: Radius.circular(4.0),
+                  bottomRight: Radius.circular(4.0),
+                ),
               ),
             ),
           ),
