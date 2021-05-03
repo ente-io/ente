@@ -11,13 +11,13 @@ dependencies:
   flutter:
     sdk: flutter
 
-  package_info_plus: ^0.6.4
+  package_info_plus: ^1.0.1
   device_info: ^0.4.1+4
   logging: ^0.11.4
-  sentry: ^3.0.1
+  sentry: ^5.0.0
   intl: ^0.17.0
   path: ^1.6.4
-  path_provider: ^1.6.0
+  path_provider: ^2.0.1
 
 dev_dependencies:
   flutter_test:

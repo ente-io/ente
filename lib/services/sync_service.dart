@@ -2,15 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/cache/thumbnail_cache_manager.dart';
-import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/first_import_succeeded_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
@@ -20,7 +18,6 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/utils/file_sync_util.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -123,11 +120,12 @@ class SyncService {
       _logger.info("Logging user out");
       Bus.instance.fire(TriggerLogoutEvent());
     } catch (e, s) {
-      if (e is DioError &&
-          e.type == DioErrorType.DEFAULT &&
-          e.error.osError != null) {
-        final errorCode = e.error.osError?.errorCode;
-        if (errorCode == 111 || errorCode == 101 || errorCode == 7) {
+      if (e is DioError) {
+        if (e.type == DioErrorType.connectTimeout ||
+            e.type == DioErrorType.sendTimeout ||
+            e.type == DioErrorType.receiveTimeout ||
+            e.type == DioErrorType.cancel ||
+            e.type == DioErrorType.other) {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
               reason: "waiting for network..."));
           return false;
@@ -211,7 +209,7 @@ class SyncService {
       if (!result) {
         _logger.severe("Did not get permission");
         await _prefs.setInt(kDbUpdationTimeKey, syncStartTime);
-        Bus.instance.fire(LocalPhotosUpdatedEvent());
+        Bus.instance.fire(LocalPhotosUpdatedEvent(List<File>.empty()));
         return await syncWithRemote();
       }
     }
@@ -260,12 +258,18 @@ class SyncService {
           null,
         );
       }
+      final List<File> allFiles = [];
+      allFiles.addAll(files);
       files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
       await _db.insertMultiple(files);
       _logger.info("Inserted " + files.length.toString() + " files.");
-      await FileRepository.instance.reloadFiles();
+      Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
     }
+    bool isFirstImport = !_prefs.containsKey(kDbUpdationTimeKey);
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
+    if (isFirstImport) {
+      Bus.instance.fire(FirstImportSucceededEvent());
+    }
   }
 
   Future<void> syncWithRemote({bool silently = false}) async {
@@ -284,7 +288,6 @@ class SyncService {
       await _syncCollectionDiff(c.id);
       _collectionsService.setCollectionSyncTime(c.id, c.updationTime);
     }
-    await deleteFilesOnServer();
     bool hasUploadedFiles = await _uploadDiff();
     if (hasUploadedFiles) {
       syncWithRemote(silently: true);
@@ -303,8 +306,9 @@ class SyncService {
           diff.updatedFiles.length.toString() +
           " files in collection " +
           collectionID.toString());
-      FileRepository.instance.reloadFiles();
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
+      Bus.instance.fire(LocalPhotosUpdatedEvent(diff.updatedFiles));
+      Bus.instance
+          .fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
       if (diff.fetchCount == kDiffLimit) {
         return await _syncCollectionDiff(collectionID);
       }
@@ -378,7 +382,7 @@ class SyncService {
 
   Future<void> _onFileUploaded(
       File file, int alreadyUploaded, int toBeUploadedInThisSession) async {
-    Bus.instance.fire(CollectionUpdatedEvent(collectionID: file.collectionID));
+    Bus.instance.fire(CollectionUpdatedEvent(file.collectionID, [file]));
     _completedUploads++;
     final completed =
         await FilesDB.instance.getNumberOfUploadedFiles() - alreadyUploaded;
@@ -439,24 +443,16 @@ class SyncService {
     }
   }
 
-  Future<void> deleteFilesOnServer() async {
-    return _db.getDeletedFileIDs().then((ids) async {
-      for (int id in ids) {
-        await _deleteFileOnServer(id);
-        await _db.delete(id);
-      }
-    });
-  }
-
-  Future<void> _deleteFileOnServer(int fileID) async {
-    return _dio
-        .delete(
-          Configuration.instance.getHttpEndpoint() +
-              "/files/" +
-              fileID.toString(),
-          options: Options(
-              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-        )
-        .catchError((e) => _logger.severe(e));
+  Future<void> deleteFilesOnServer(List<int> fileIDs) async {
+    return await _dio
+        .post(Configuration.instance.getHttpEndpoint() + "/files/delete",
+            options: Options(
+              headers: {
+                "X-Auth-Token": Configuration.instance.getToken(),
+              },
+            ),
+            data: {
+          "fileIDs": fileIDs,
+        });
   }
 }

@@ -9,43 +9,50 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 
-class DeviceFolderPage extends StatefulWidget {
+class DeviceFolderPage extends StatelessWidget {
   final DeviceFolder folder;
-
-  const DeviceFolderPage(this.folder, {Key key}) : super(key: key);
-
-  @override
-  _DeviceFolderPageState createState() => _DeviceFolderPageState();
-}
-
-class _DeviceFolderPageState extends State<DeviceFolderPage> {
   final _selectedFiles = SelectedFiles();
+
+  DeviceFolderPage(this.folder, {Key key}) : super(key: key);
 
   @override
   Widget build(Object context) {
     final gallery = Gallery(
-      asyncLoader: (_, __) => FilesDB.instance.getAllInPath(widget.folder.path),
-      shouldLoadAll: true,
+      asyncLoader: (creationStartTime, creationEndTime, {limit}) {
+        return FilesDB.instance.getFilesInPath(
+            folder.path, creationStartTime, creationEndTime,
+            limit: limit);
+      },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      tagPrefix: "device_folder:" + widget.folder.path,
+      tagPrefix: "device_folder:" + folder.path,
       selectedFiles: _selectedFiles,
       headerWidget: Configuration.instance.hasConfiguredAccount()
           ? _getHeaderWidget()
           : Container(),
     );
     return Scaffold(
-      appBar: GalleryAppBarWidget(
-        GalleryAppBarType.local_folder,
-        widget.folder.name,
-        _selectedFiles,
-        path: widget.folder.thumbnail.deviceFolder,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 80),
+            child: gallery,
+          ),
+          Container(
+            height: 80,
+            child: GalleryAppBarWidget(
+              GalleryAppBarType.local_folder,
+              folder.name,
+              _selectedFiles,
+              path: folder.thumbnail.deviceFolder,
+            ),
+          )
+        ],
       ),
-      body: gallery,
     );
   }
 
   Widget _getHeaderWidget() {
-    return BackupConfigurationHeaderWidget(widget.folder.path);
+    return BackupConfigurationHeaderWidget(folder.path);
   }
 }
 
@@ -68,7 +75,7 @@ class _BackupConfigurationHeaderWidgetState
     return Container(
       padding: EdgeInsets.only(left: 12, right: 12),
       margin: EdgeInsets.only(bottom: 12),
-      color: Colors.grey.withOpacity(0.15),
+      color: Color.fromRGBO(10, 40, 40, 0.3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

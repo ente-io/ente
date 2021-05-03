@@ -79,7 +79,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   }
 
   Future<CollectionItems> _getCollections() async {
-    var startTime = DateTime.now();
     final filesDB = FilesDB.instance;
     final collectionsService = CollectionsService.instance;
     final userID = Configuration.instance.getUserID();
@@ -103,12 +102,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       return second.thumbnail.updationTime
           .compareTo(first.thumbnail.updationTime);
     });
-
-    var endTime = DateTime.now();
-    var duration = Duration(
-        microseconds:
-            endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch);
-    _logger.info("Total time taken: " + duration.inMilliseconds.toString());
     return CollectionItems(folders, collectionsWithThumbnail);
   }
 
@@ -139,8 +132,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                               physics:
                                   ScrollPhysics(), // to disable GridView's scrolling
                               itemBuilder: (context, index) {
-                                return _buildFolder(
-                                    context, items.folders[index]);
+                                return DeviceFolderIcon(items.folders[index]);
                               },
                               itemCount: items.folders.length,
                             ),
@@ -174,7 +166,63 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     );
   }
 
-  Widget _buildFolder(BuildContext context, DeviceFolder folder) {
+  Widget _buildCollection(BuildContext context,
+      List<CollectionWithThumbnail> collections, int index) {
+    if (index < collections.length) {
+      final c = collections[index];
+      return CollectionItem(c);
+    } else {
+      return Container(
+        padding: EdgeInsets.fromLTRB(28, 0, 28, 58),
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18.0),
+            ),
+            side: BorderSide(
+              width: 1,
+              color: Theme.of(context).accentColor.withOpacity(0.4),
+            ),
+          ),
+          child: Icon(
+            Icons.add,
+            color: Theme.of(context).accentColor.withOpacity(0.7),
+          ),
+          onPressed: () async {
+            await showToast(
+                "long press to select photos and click + to create an album",
+                toastLength: Toast.LENGTH_LONG);
+            Bus.instance.fire(
+                TabChangedEvent(0, TabChangedEventSource.collections_page));
+          },
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _localFilesSubscription.cancel();
+    _collectionUpdatesSubscription.cancel();
+    _loggedOutEvent.cancel();
+    _backupFoldersUpdatedEvent.cancel();
+    super.dispose();
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+class DeviceFolderIcon extends StatelessWidget {
+  const DeviceFolderIcon(
+    this.folder, {
+    Key key,
+  }) : super(key: key);
+
+  final DeviceFolder folder;
+
+  @override
+  Widget build(BuildContext context) {
     final isBackedUp =
         Configuration.instance.getPathsToBackUp().contains(folder.path);
     return GestureDetector(
@@ -239,87 +287,56 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       },
     );
   }
+}
 
-  Widget _buildCollection(BuildContext context,
-      List<CollectionWithThumbnail> collections, int index) {
-    if (index < collections.length) {
-      final c = collections[index];
-      return GestureDetector(
-        child: Column(
-          children: <Widget>[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(18.0),
-              child: Container(
-                child: Hero(
-                    tag: "collection" + c.thumbnail.tag(),
-                    child: ThumbnailWidget(c.thumbnail)),
-                height: 140,
-                width: 140,
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(4)),
-            Expanded(
-              child: Text(
-                c.collection.name,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        onTap: () {
-          final page = CollectionPage(c.collection);
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return page;
-              },
-            ),
-          );
-        },
-      );
-    } else {
-      return Container(
-        padding: EdgeInsets.fromLTRB(28, 0, 28, 58),
-        child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18.0),
-            ),
-            side: BorderSide(
-              width: 1,
-              color: Theme.of(context).accentColor.withOpacity(0.4),
-            ),
-          ),
-          child: Icon(
-            Icons.add,
-            color: Theme.of(context).accentColor.withOpacity(0.7),
-          ),
-          onPressed: () async {
-            await showToast(
-                "long press to select photos and click + to create an album",
-                toastLength: Toast.LENGTH_LONG);
-            Bus.instance.fire(
-                TabChangedEvent(0, TabChangedEventSource.collections_page));
-          },
-        ),
-      );
-    }
-  }
+class CollectionItem extends StatelessWidget {
+  CollectionItem(this.c, {
+    Key key,
+  }) : super(key: Key(c.collection.id.toString()));
+
+  final CollectionWithThumbnail c;
 
   @override
-  void dispose() {
-    _localFilesSubscription.cancel();
-    _collectionUpdatesSubscription.cancel();
-    _loggedOutEvent.cancel();
-    _backupFoldersUpdatedEvent.cancel();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      child: Column(
+        children: <Widget>[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(18.0),
+            child: Container(
+              child: Hero(
+                  tag: "collection" + c.thumbnail.tag(),
+                  child: ThumbnailWidget(
+                    c.thumbnail,
+                  )),
+              height: 140,
+              width: 140,
+            ),
+          ),
+          Padding(padding: EdgeInsets.all(4)),
+          Expanded(
+            child: Text(
+              c.collection.name,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      onTap: () {
+        final page = CollectionPage(c.collection);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page;
+            },
+          ),
+        );
+      },
+    );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class SectionTitle extends StatelessWidget {

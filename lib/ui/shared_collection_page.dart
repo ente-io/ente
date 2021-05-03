@@ -7,38 +7,44 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 
-class SharedCollectionPage extends StatefulWidget {
+class SharedCollectionPage extends StatelessWidget {
   final Collection collection;
-
-  const SharedCollectionPage(this.collection, {Key key}) : super(key: key);
-
-  @override
-  _SharedCollectionPageState createState() => _SharedCollectionPageState();
-}
-
-class _SharedCollectionPageState extends State<SharedCollectionPage> {
   final _selectedFiles = SelectedFiles();
+
+  SharedCollectionPage(this.collection, {Key key}) : super(key: key);
 
   @override
   Widget build(Object context) {
     var gallery = Gallery(
-      asyncLoader: (_, __) =>
-          FilesDB.instance.getAllInCollection(widget.collection.id),
-      shouldLoadAll: true,
+      asyncLoader: (creationStartTime, creationEndTime, {limit}) {
+        return FilesDB.instance.getFilesInCollection(
+            collection.id, creationStartTime, creationEndTime,
+            limit: limit);
+      },
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == widget.collection.id),
+          .where((event) => event.collectionID == collection.id),
       tagPrefix: "shared_collection",
       selectedFiles: _selectedFiles,
     );
     return Scaffold(
-      appBar: GalleryAppBarWidget(
-        GalleryAppBarType.shared_collection,
-        widget.collection.name,
-        _selectedFiles,
-        collection: widget.collection,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 80),
+            child: gallery,
+          ),
+          Container(
+            height: 80,
+            child: GalleryAppBarWidget(
+              GalleryAppBarType.shared_collection,
+              collection.name,
+              _selectedFiles,
+              collection: collection,
+            ),
+          )
+        ],
       ),
-      body: gallery,
     );
   }
 }

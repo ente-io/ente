@@ -6,16 +6,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
+import 'package:photos/events/first_import_succeeded_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
-import 'package:photos/models/filters/important_items_filter.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -23,9 +22,9 @@ import 'package:photos/ui/backup_folder_selection_widget.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
+import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/grant_permissions_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
-import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/nav_bar.dart';
@@ -45,21 +44,21 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
+  static const _deviceFolderGalleryWidget = const CollectionsGalleryWidget();
+  static const _sharedCollectionGallery = const SharedCollectionGallery();
+  static const _headerWidget = HeaderWidget();
+
   final _logger = Logger("HomeWidgetState");
-  final _deviceFolderGalleryWidget = CollectionsGalleryWidget();
-  final _sharedCollectionGallery = SharedCollectionGallery();
   final _selectedFiles = SelectedFiles();
   final _settingsButton = SettingsButton();
-  static const _headerWidget = HeaderWidget();
   final PageController _pageController = PageController();
-  final _future = FileRepository.instance.loadFiles();
   int _selectedTabIndex = 0;
   Widget _headerWidgetWithSettingsButton;
 
-  StreamSubscription<LocalPhotosUpdatedEvent> _photosUpdatedEvent;
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   StreamSubscription<PermissionGrantedEvent> _permissionGrantedEvent;
   StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
+  StreamSubscription<FirstImportSucceededEvent> _firstImportEvent;
   StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
@@ -76,11 +75,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         ],
       ),
     );
-    _photosUpdatedEvent =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _logger.info("Building because local photos updated");
-      setState(() {});
-    });
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source != TabChangedEventSource.tab_bar) {
@@ -106,6 +100,10 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (Configuration.instance.getPathsToBackUp().isEmpty) {
         _showBackupFolderSelectionDialog();
       }
+    });
+    _firstImportEvent =
+        Bus.instance.on<FirstImportSucceededEvent>().listen((event) {
+      setState(() {});
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
@@ -230,32 +228,37 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getMainGalleryWidget() {
-    return FutureBuilder(
-      future: _future,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          var header;
-          if (_selectedFiles.files.isEmpty) {
-            header = _headerWidgetWithSettingsButton;
-          } else {
-            header = _headerWidget;
-          }
-          return Gallery(
-            syncLoader: () {
-              return _getFilteredPhotos(FileRepository.instance.files);
-            },
-            reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-            tagPrefix: "home_gallery",
-            selectedFiles: _selectedFiles,
-            headerWidget: header,
-            isHomePageGallery: true,
-          );
-        } else if (snapshot.hasError) {
-          return Center(child: Text(snapshot.error.toString()));
+    var header;
+    if (_selectedFiles.files.isEmpty) {
+      header = _headerWidgetWithSettingsButton;
+    } else {
+      header = _headerWidget;
+    }
+    final gallery = Gallery(
+      asyncLoader: (creationStartTime, creationEndTime, {limit}) {
+        final importantPaths = Configuration.instance.getPathsToBackUp();
+        if (importantPaths.isNotEmpty) {
+          return FilesDB.instance.getFilesInPaths(
+              creationStartTime, creationEndTime, importantPaths.toList(),
+              limit: limit);
         } else {
-          return loadWidget;
+          return FilesDB.instance
+              .getAllFiles(creationStartTime, creationEndTime, limit: limit);
         }
       },
+      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      tagPrefix: "home_gallery",
+      selectedFiles: _selectedFiles,
+      headerWidget: header,
+    );
+    return Stack(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 50),
+          child: gallery,
+        ),
+        HomePageAppBar(_selectedFiles),
+      ],
     );
   }
 
@@ -307,19 +310,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  List<File> _getFilteredPhotos(List<File> unfilteredFiles) {
-    _logger.info("Filtering " + unfilteredFiles.length.toString());
-    final List<File> filteredPhotos = List<File>();
-    final filter = ImportantItemsFilter();
-    for (File file in unfilteredFiles) {
-      if (filter.shouldInclude(file)) {
-        filteredPhotos.add(file);
-      }
-    }
-    _logger.info("Filtered down to " + filteredPhotos.length.toString());
-    return filteredPhotos;
-  }
-
   void _showBackupFolderSelectionDialog() {
     Future.delayed(
       Duration.zero,
@@ -343,13 +333,52 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void dispose() {
     _tabChangedEventSubscription.cancel();
-    _photosUpdatedEvent.cancel();
     _permissionGrantedEvent.cancel();
     _subscriptionPurchaseEvent.cancel();
+    _firstImportEvent.cancel();
     _triggerLogoutEvent.cancel();
     _loggedOutEvent.cancel();
     _backupFoldersUpdatedEvent.cancel();
     super.dispose();
+  }
+}
+
+class HomePageAppBar extends StatefulWidget {
+  const HomePageAppBar(
+    this.selectedFiles, {
+    Key key,
+  }) : super(key: key);
+
+  final SelectedFiles selectedFiles;
+
+  @override
+  _HomePageAppBarState createState() => _HomePageAppBarState();
+}
+
+class _HomePageAppBarState extends State<HomePageAppBar> {
+  @override
+  void initState() {
+    super.initState();
+    widget.selectedFiles.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appBar = Container(
+      height: 60,
+      child: GalleryAppBarWidget(
+        GalleryAppBarType.homepage,
+        null,
+        widget.selectedFiles,
+      ),
+    );
+    if (widget.selectedFiles.files.isEmpty) {
+      return IgnorePointer(child: appBar);
+    } else {
+      return appBar;
+    }
   }
 }
 

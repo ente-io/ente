@@ -13,8 +13,8 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/share_collection_widget.dart';
+import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -26,8 +26,7 @@ enum GalleryAppBarType {
   search_results,
 }
 
-class GalleryAppBarWidget extends StatefulWidget
-    implements PreferredSizeWidget {
+class GalleryAppBarWidget extends StatefulWidget {
   final GalleryAppBarType type;
   final String title;
   final SelectedFiles selectedFiles;
@@ -44,9 +43,6 @@ class GalleryAppBarWidget extends StatefulWidget
 
   @override
   _GalleryAppBarWidgetState createState() => _GalleryAppBarWidgetState();
-
-  @override
-  Size get preferredSize => Size.fromHeight(60.0);
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -78,7 +74,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   Widget build(BuildContext context) {
     if (widget.selectedFiles.files.isEmpty) {
       return AppBar(
-        backgroundColor: Color(0x00000000),
+        backgroundColor: widget.type == GalleryAppBarType.homepage
+            ? Color(0x00000000)
+            : null,
         elevation: 0,
         title: widget.type == GalleryAppBarType.homepage
             ? Container()
@@ -235,7 +233,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             final dialog = createProgressDialog(context, "removing files...");
             await dialog.show();
             try {
-              CollectionsService.instance.removeFromCollection(
+              await CollectionsService.instance.removeFromCollection(
                   widget.collection.id, widget.selectedFiles.files.toList());
               await dialog.hide();
               widget.selectedFiles.clearAll();
@@ -274,22 +272,21 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         child: Text("this device"),
         isDestructiveAction: true,
         onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
           await deleteFilesOnDeviceOnly(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
           showToast("files deleted from device");
-          Navigator.of(context, rootNavigator: true).pop();
         },
       ));
       actions.add(CupertinoActionSheetAction(
         child: Text("everywhere"),
         isDestructiveAction: true,
         onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
           await deleteFilesFromEverywhere(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("files deleted from everywhere");
-          Navigator.of(context, rootNavigator: true).pop();
         },
       ));
     } else {
@@ -297,11 +294,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         child: Text("delete forever"),
         isDestructiveAction: true,
         onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
           await deleteFilesFromEverywhere(
               context, widget.selectedFiles.files.toList());
           _clearSelectedFiles();
-          showToast("files deleted from everywhere");
-          Navigator.of(context, rootNavigator: true).pop();
         },
       ));
     }

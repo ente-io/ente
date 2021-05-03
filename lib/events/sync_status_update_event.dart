@@ -7,6 +7,7 @@ class SyncStatusUpdate extends Event {
   final SyncStatus status;
   final String reason;
   final Error error;
+  int timestamp;
 
   SyncStatusUpdate(
     this.status, {
@@ -15,7 +16,9 @@ class SyncStatusUpdate extends Event {
     this.wasStopped = false,
     this.reason = "",
     this.error,
-  });
+  }) {
+    this.timestamp = DateTime.now().microsecondsSinceEpoch;
+  }
 
   @override
   String toString() {

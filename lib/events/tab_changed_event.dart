@@ -1,4 +1,4 @@
-import 'package:sentry/sentry.dart';
+import 'package:photos/events/event.dart';
 
 class TabChangedEvent extends Event {
   final int selectedIndex;

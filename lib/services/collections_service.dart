@@ -13,10 +13,10 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -71,7 +71,8 @@ class CollectionsService {
         await _filesDB.deleteCollection(collection.id);
         await _db.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
-        FileRepository.instance.reloadFiles();
+        Bus.instance.fire(
+            LocalPhotosUpdatedEvent(List<File>.empty()));
       } else {
         updatedCollections.add(collection);
       }
@@ -87,7 +88,7 @@ class CollectionsService {
     }
     if (fetchedCollections.isNotEmpty) {
       _logger.info("Collections updated");
-      Bus.instance.fire(CollectionUpdatedEvent());
+      Bus.instance.fire(CollectionUpdatedEvent(null, List<File>.empty()));
     }
     return collections;
   }
@@ -323,7 +324,7 @@ class CollectionsService {
     )
         .then((value) async {
       await _filesDB.insertMultiple(files);
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
       SyncService.instance.syncWithRemote(silently: true);
     });
   }
@@ -344,7 +345,7 @@ class CollectionsService {
           Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     );
     await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
-    Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
+    Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
     SyncService.instance.syncWithRemote(silently: true);
   }
 

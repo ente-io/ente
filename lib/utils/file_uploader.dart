@@ -14,12 +14,12 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/upload_url.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -365,7 +365,7 @@ class FileUploader {
         await FilesDB.instance.update(remoteFile);
       }
       if (!_isBackground) {
-        FileRepository.instance.reloadFiles();
+        Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
       }
       _logger.info("File upload complete for " + remoteFile.toString());
       return remoteFile;

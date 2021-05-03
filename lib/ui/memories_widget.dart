@@ -23,6 +23,7 @@ class MemoriesWidget extends StatefulWidget {
 class _MemoriesWidgetState extends State<MemoriesWidget>
     with AutomaticKeepAliveClientMixin {
   final _logger = Logger("MemoriesWidget");
+
   Function _listener;
 
   @override
@@ -96,7 +97,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget>
     if (yearlyMemories.isNotEmpty) {
       collatedMemories.add(yearlyMemories);
     }
-    return collatedMemories;
+    return collatedMemories.reversed.toList();
   }
 
   bool _areMemoriesFromSameYear(Memory first, Memory second) {
@@ -188,16 +189,15 @@ class MemoryWidget extends StatelessWidget {
   }
 
   int _getNextMemoryIndex() {
-    for (var index = 0; index < memories.length; index++) {
+    int lastSeenIndex = 0;
+    for (var index = memories.length - 1; index >=0; index--) {
       if (!memories[index].isSeen()) {
-        return index;
-      }
-      if (index > 0 &&
-          memories[index - 1].seenTime() > memories[index].seenTime()) {
-        return index;
+        lastSeenIndex = index;
+      } else {
+        break;
       }
     }
-    return 0;
+    return lastSeenIndex;
   }
 
   String _getTitle(Memory memory) {
@@ -319,7 +319,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       itemBuilder: (BuildContext context, int index) {
         if (index < widget.memories.length - 1) {
           final nextFile = widget.memories[index + 1].file;
-          preloadLocalFileThumbnail(nextFile);
+          preloadThumbnail(nextFile);
+          preloadFile(nextFile);
         }
         final file = widget.memories[index].file;
         return MemoryItem(file);

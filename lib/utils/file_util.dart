@@ -1,114 +1,36 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io' as io;
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache_manager.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
-import 'package:photos/db/files_db.dart';
-import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/sync_service.dart';
-import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/thumbnail_util.dart';
 
 import 'crypto_util.dart';
 
 final _logger = Logger("FileUtil");
-
-Future<void> deleteFilesFromEverywhere(
-    BuildContext context, List<File> files) async {
-  final dialog = createProgressDialog(context, "deleting...");
-  await dialog.show();
-  final localIDs = List<String>();
-  for (final file in files) {
-    if (file.localID != null) {
-      localIDs.add(file.localID);
-    }
-  }
-  var deletedIDs;
-  try {
-    deletedIDs = (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
-  } catch (e, s) {
-    _logger.severe("Could not delete file", e, s);
-  }
-  bool hasUploadedFiles = false;
-  final updatedCollectionIDs = Set<int>();
-  for (final file in files) {
-    if (file.localID != null) {
-      // Remove only those files that have been removed from disk
-      if (deletedIDs.contains(file.localID)) {
-        if (file.uploadedFileID != null) {
-          hasUploadedFiles = true;
-          await FilesDB.instance.markForDeletion(file.uploadedFileID);
-          updatedCollectionIDs.add(file.collectionID);
-        } else {
-          await FilesDB.instance.deleteLocalFile(file.localID);
-        }
-      }
-    } else {
-      hasUploadedFiles = true;
-      await FilesDB.instance.markForDeletion(file.uploadedFileID);
-    }
-    await dialog.hide();
-  }
-
-  await FileRepository.instance.reloadFiles();
-  if (hasUploadedFiles) {
-    for (final collectionID in updatedCollectionIDs) {
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID: collectionID));
-    }
-    // TODO: Blocking call?
-    SyncService.instance.deleteFilesOnServer();
-  }
-}
-
-Future<void> deleteFilesOnDeviceOnly(
-    BuildContext context, List<File> files) async {
-  final dialog = createProgressDialog(context, "deleting...");
-  await dialog.show();
-  final localIDs = List<String>();
-  for (final file in files) {
-    if (file.localID != null) {
-      localIDs.add(file.localID);
-    }
-  }
-  final deletedIDs =
-      (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
-  for (final file in files) {
-    // Remove only those files that have been removed from disk
-    if (deletedIDs.contains(file.localID)) {
-      file.localID = null;
-      FilesDB.instance.update(file);
-    }
-  }
-  await FileRepository.instance.reloadFiles();
-  await dialog.hide();
-}
 
 void preloadFile(File file) {
   if (file.fileType == FileType.video) {
     return;
   }
   if (file.localID == null) {
-    // getFileFromServer(file);
+    getFileFromServer(file);
   } else {
     if (FileLruCache.get(file) == null) {
       file.getAsset().then((asset) {
@@ -120,22 +42,25 @@ void preloadFile(File file) {
   }
 }
 
-void preloadLocalFileThumbnail(File file) {
-  if (file.localID == null ||
-      ThumbnailLruCache.get(file, THUMBNAIL_SMALL_SIZE) != null) {
-    return;
-  }
-  file.getAsset().then((asset) {
-    asset
-        .thumbDataWithSize(
-      THUMBNAIL_SMALL_SIZE,
-      THUMBNAIL_SMALL_SIZE,
-      quality: THUMBNAIL_QUALITY,
-    )
-        .then((data) {
-      ThumbnailLruCache.put(file, THUMBNAIL_SMALL_SIZE, data);
+void preloadThumbnail(File file) {
+  if (file.localID == null) {
+    getThumbnailFromServer(file);
+  } else {
+    if (ThumbnailLruCache.get(file, THUMBNAIL_SMALL_SIZE) != null) {
+      return;
+    }
+    file.getAsset().then((asset) {
+      asset
+          .thumbDataWithSize(
+        THUMBNAIL_SMALL_SIZE,
+        THUMBNAIL_SMALL_SIZE,
+        quality: THUMBNAIL_QUALITY,
+      )
+          .then((data) {
+        ThumbnailLruCache.put(file, THUMBNAIL_SMALL_SIZE, data);
+      });
     });
-  });
+  }
 }
 
 Future<io.File> getNativeFile(File file) async {
@@ -171,31 +96,10 @@ Future<Uint8List> getBytesFromDisk(File file, {int quality = 100}) async {
 final Map<int, Future<io.File>> fileDownloadsInProgress =
     Map<int, Future<io.File>>();
 
-final _thumbnailQueue = LinkedHashMap<int, FileDownloadItem>();
-int _currentlyDownloading = 0;
-int kMaximumConcurrentDownloads = 100;
-
-class FileDownloadItem {
-  final File file;
-  final Completer<io.File> completer;
-  DownloadStatus status;
-
-  FileDownloadItem(
-    this.file,
-    this.completer, {
-    this.status = DownloadStatus.not_started,
-  });
-}
-
-enum DownloadStatus {
-  not_started,
-  in_progress,
-}
-
 Future<io.File> getFileFromServer(File file,
     {ProgressCallback progressCallback}) async {
   final cacheManager = file.fileType == FileType.video
-      ? VideoCacheManager()
+      ? VideoCacheManager.instance
       : DefaultCacheManager();
   return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
     if (info == null) {
@@ -211,61 +115,6 @@ Future<io.File> getFileFromServer(File file,
       return info.file;
     }
   });
-}
-
-Future<io.File> getThumbnailFromServer(File file) async {
-  return ThumbnailCacheManager()
-      .getFileFromCache(file.getThumbnailUrl())
-      .then((info) {
-    if (info == null) {
-      if (!_thumbnailQueue.containsKey(file.uploadedFileID)) {
-        final completer = Completer<io.File>();
-        _thumbnailQueue[file.uploadedFileID] =
-            FileDownloadItem(file, completer);
-        _pollQueue();
-        return completer.future;
-      } else {
-        return _thumbnailQueue[file.uploadedFileID].completer.future;
-      }
-    } else {
-      ThumbnailFileLruCache.put(file, info.file);
-      return info.file;
-    }
-  });
-}
-
-void removePendingGetThumbnailRequestIfAny(File file) {
-  if (_thumbnailQueue[file.uploadedFileID] != null &&
-      _thumbnailQueue[file.uploadedFileID].status ==
-          DownloadStatus.not_started) {
-    _thumbnailQueue.remove(file.uploadedFileID);
-  }
-}
-
-void _pollQueue() async {
-  if (_thumbnailQueue.length > 0 &&
-      _currentlyDownloading < kMaximumConcurrentDownloads) {
-    final firstPendingEntry = _thumbnailQueue.entries.firstWhere(
-        (entry) => entry.value.status == DownloadStatus.not_started,
-        orElse: () => null);
-    if (firstPendingEntry != null) {
-      final item = firstPendingEntry.value;
-      _currentlyDownloading++;
-      item.status = DownloadStatus.in_progress;
-      try {
-        final data = await _downloadAndDecryptThumbnail(item.file);
-        ThumbnailFileLruCache.put(item.file, data);
-        item.completer.complete(data);
-      } catch (e, s) {
-        _logger.severe(
-            "Failed to download thumbnail " + item.file.toString(), e, s);
-        item.completer.completeError(e);
-      }
-      _currentlyDownloading--;
-      _thumbnailQueue.remove(firstPendingEntry.key);
-      _pollQueue();
-    }
-  }
 }
 
 Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
@@ -334,41 +183,6 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
   });
 }
 
-Future<io.File> _downloadAndDecryptThumbnail(File file) async {
-  final temporaryPath = Configuration.instance.getTempDirectory() +
-      file.generatedID.toString() +
-      "_thumbnail.decrypted";
-  await Network.instance.getDio().download(
-        file.getThumbnailUrl(),
-        temporaryPath,
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
-      );
-  final encryptedFile = io.File(temporaryPath);
-  final thumbnailDecryptionKey = decryptFileKey(file);
-  var data = CryptoUtil.decryptChaCha(
-    encryptedFile.readAsBytesSync(),
-    thumbnailDecryptionKey,
-    Sodium.base642bin(file.thumbnailDecryptionHeader),
-  );
-  final thumbnailSize = data.length;
-  if (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
-    data = await compressThumbnail(data);
-    _logger.info("Compressed thumbnail from " +
-        thumbnailSize.toString() +
-        " to " +
-        data.length.toString());
-  }
-  encryptedFile.deleteSync();
-  final cachedThumbnail = ThumbnailCacheManager().putFile(
-    file.getThumbnailUrl(),
-    data,
-    eTag: file.getThumbnailUrl(),
-    maxAge: Duration(days: 365),
-  );
-  return cachedThumbnail;
-}
 
 Uint8List decryptFileKey(File file) {
   final encryptedKey = Sodium.base642bin(file.encryptedKey);
@@ -389,9 +203,9 @@ Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
 
 void clearCache(File file) {
   if (file.fileType == FileType.video) {
-    VideoCacheManager().removeFile(file.getDownloadUrl());
+    VideoCacheManager.instance.removeFile(file.getDownloadUrl());
   } else {
     DefaultCacheManager().removeFile(file.getDownloadUrl());
   }
-  ThumbnailCacheManager().removeFile(file.getThumbnailUrl());
+  ThumbnailCacheManager.instance.removeFile(file.getThumbnailUrl());
 }

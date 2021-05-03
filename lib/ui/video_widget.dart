@@ -66,7 +66,9 @@ class _VideoWidgetState extends State<VideoWidget> {
         });
       },
     ).then((file) {
-      _setVideoPlayerController(file: file);
+      if (file != null) {
+        _setVideoPlayerController(file: file);
+      }
     });
   }
 

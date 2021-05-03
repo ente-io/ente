@@ -4,13 +4,15 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/repositories/file_repository.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/thumbnail_util.dart';
 
 class ZoomableImage extends StatefulWidget {
   final File photo;
@@ -167,7 +169,7 @@ class _ZoomableImageState extends State<ZoomableImage>
               _loadNetworkImage();
             } else {
               FilesDB.instance.deleteLocalFile(_photo.localID);
-              FileRepository.instance.reloadFiles();
+              Bus.instance.fire(LocalPhotosUpdatedEvent([_photo]));
             }
             return;
           }
