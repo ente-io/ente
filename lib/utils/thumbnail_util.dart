@@ -30,7 +30,9 @@ class FileDownloadItem {
 }
 
 Future<io.File> getThumbnailFromServer(File file) async {
-  return ThumbnailCacheManager.instance.getFileFromCache("asd").then((info) {
+  return ThumbnailCacheManager.instance
+      .getFileFromCache(file.getThumbnailUrl())
+      .then((info) {
     if (info == null) {
       if (!_map.containsKey(file.uploadedFileID)) {
         if (_queue.length == kMaximumConcurrentDownloads) {
@@ -80,13 +82,14 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   var encryptedThumbnail;
   try {
     encryptedThumbnail = (await Network.instance.getDio().get(
-          file.getThumbnailUrl(),
-          options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()},
-            responseType: ResponseType.bytes,
-          ),
-          cancelToken: item.cancelToken,
-        )).data;
+              file.getThumbnailUrl(),
+              options: Options(
+                headers: {"X-Auth-Token": Configuration.instance.getToken()},
+                responseType: ResponseType.bytes,
+              ),
+              cancelToken: item.cancelToken,
+            ))
+        .data;
   } catch (e) {
     if (e is DioError && CancelToken.isCancel(e)) {
       return;
