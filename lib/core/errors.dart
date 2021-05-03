@@ -15,3 +15,5 @@ class UserCancelledUploadError extends Error {}
 class LockAlreadyAcquiredError extends Error {}
 
 class UnauthorizedError extends Error {}
+
+class RequestCancelledError extends Error{}

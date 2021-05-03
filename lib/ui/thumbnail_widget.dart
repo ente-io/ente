@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -9,7 +10,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -207,10 +207,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
   }
 
-  void _getThumbnailFromServer() {
-    getThumbnailFromServer(widget.file).then((file) async {
+  void _getThumbnailFromServer() async {
+    try {
+      final thumbnail = await getThumbnailFromServer(widget.file);
       if (mounted) {
-        final imageProvider = Image.file(file).image;
+        final imageProvider = Image.file(thumbnail).image;
         precacheImage(imageProvider, context).then((value) {
           if (mounted) {
             setState(() {
@@ -218,24 +219,35 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
               _hasLoadedThumbnail = true;
             });
           }
-        }).catchError((e) {
-          _logger.severe("Could not load image " + widget.file.toString());
-          _encounteredErrorLoadingThumbnail = true;
         });
       }
-    });
+    } catch (e) {
+      if (e is RequestCancelledError) {
+        if (mounted) {
+          _logger.info("Thumbnail request was aborted although it is in view, will retry");
+          _reset();
+        }
+      } else {
+        _logger.severe("Could not load image " + widget.file.toString(), e);
+        _encounteredErrorLoadingThumbnail = true;
+      }
+    }
   }
 
   @override
   void didUpdateWidget(ThumbnailWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.file.generatedID != oldWidget.file.generatedID) {
-      setState(() {
-        _hasLoadedThumbnail = false;
-        _isLoadingThumbnail = false;
-        _encounteredErrorLoadingThumbnail = false;
-        _imageProvider = null;
-      });
+      _reset();
     }
+  }
+
+  void _reset() {
+    setState(() {
+      _hasLoadedThumbnail = false;
+      _isLoadingThumbnail = false;
+      _encounteredErrorLoadingThumbnail = false;
+      _imageProvider = null;
+    });
   }
 }
