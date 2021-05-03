@@ -11,6 +11,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/ui/video_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/share_util.dart';
