@@ -110,7 +110,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         loadingWidget,
         AnimatedOpacity(
           opacity: content == null ? 0 : 1.0,
-          duration: Duration(milliseconds: 400),
+          duration: Duration(milliseconds: 100),
           child: content,
         ),
         widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
@@ -167,14 +167,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           .then((data) {
         if (data != null && mounted) {
           final imageProvider = Image.memory(data).image;
-          precacheImage(imageProvider, context).then((value) {
-            if (mounted) {
-              setState(() {
-                _imageProvider = imageProvider;
-                _hasLoadedThumbnail = true;
-              });
-            }
-          });
+          _cacheAndRender(imageProvider);
         }
         ThumbnailLruCache.put(widget.file, THUMBNAIL_SMALL_SIZE, data);
       });
@@ -212,19 +205,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       final thumbnail = await getThumbnailFromServer(widget.file);
       if (mounted) {
         final imageProvider = Image.file(thumbnail).image;
-        precacheImage(imageProvider, context).then((value) {
-          if (mounted) {
-            setState(() {
-              _imageProvider = imageProvider;
-              _hasLoadedThumbnail = true;
-            });
-          }
-        });
+        _cacheAndRender(imageProvider);
       }
     } catch (e) {
       if (e is RequestCancelledError) {
         if (mounted) {
-          _logger.info("Thumbnail request was aborted although it is in view, will retry");
+          _logger.info(
+              "Thumbnail request was aborted although it is in view, will retry");
           _reset();
         }
       } else {
@@ -232,6 +219,22 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _encounteredErrorLoadingThumbnail = true;
       }
     }
+  }
+
+  void _cacheAndRender(ImageProvider<Object> imageProvider) {
+    if (imageCache.currentSizeBytes > 256 * 1024 * 1024) {
+      _logger.info("Clearing image cache");
+      imageCache.clear();
+      imageCache.clearLiveImages();
+    }
+    precacheImage(imageProvider, context).then((value) {
+      if (mounted) {
+        setState(() {
+          _imageProvider = imageProvider;
+          _hasLoadedThumbnail = true;
+        });
+      }
+    });
   }
 
   @override
