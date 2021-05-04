@@ -30,6 +30,18 @@ Uint8List cryptoPwHash(Map<String, dynamic> args) {
   );
 }
 
+EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
+  final initPushResult =
+      Sodium.cryptoSecretstreamXchacha20poly1305InitPush(args["key"]);
+  final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
+      initPushResult.state,
+      args["source"],
+      null,
+      Sodium.cryptoSecretstreamXchacha20poly1305TagFinal);
+  return EncryptionResult(
+      encryptedData: encryptedData, header: initPushResult.header);
+}
+
 EncryptionResult chachaEncryptFile(Map<String, dynamic> args) {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final logger = Logger("ChaChaEncrypt");
@@ -140,16 +152,11 @@ class CryptoUtil {
     return cryptoSecretboxOpenEasy(args);
   }
 
-  static EncryptionResult encryptChaCha(Uint8List source, Uint8List key) {
-    final initPushResult =
-        Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
-    final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
-        initPushResult.state,
-        source,
-        null,
-        Sodium.cryptoSecretstreamXchacha20poly1305TagFinal);
-    return EncryptionResult(
-        encryptedData: encryptedData, header: initPushResult.header);
+  static Future<EncryptionResult> encryptChaCha(Uint8List source, Uint8List key) async {
+    final args = Map<String, dynamic>();
+    args["source"] = source;
+    args["key"] = key;
+    return _computer.compute(chachaEncryptData, param: args);
   }
 
   static Uint8List decryptChaCha(

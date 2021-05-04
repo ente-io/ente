@@ -303,7 +303,7 @@ class FileUploader {
       }
 
       final encryptedThumbnailData =
-          CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key);
+          await CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key);
       if (io.File(encryptedThumbnailPath).existsSync()) {
         io.File(encryptedThumbnailPath).deleteSync();
       }
@@ -325,7 +325,7 @@ class FileUploader {
         file.location = Location(latLong.latitude, latLong.longitude);
       }
 
-      final encryptedMetadataData = CryptoUtil.encryptChaCha(
+      final encryptedMetadataData = await CryptoUtil.encryptChaCha(
           utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);
       final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
