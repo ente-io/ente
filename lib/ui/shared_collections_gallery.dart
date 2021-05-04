@@ -6,8 +6,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
@@ -31,12 +31,19 @@ class SharedCollectionGallery extends StatefulWidget {
 class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
     with AutomaticKeepAliveClientMixin {
   Logger _logger = Logger("SharedCollectionGallery");
-  StreamSubscription<CollectionUpdatedEvent> _subscription;
+  StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
+  StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
 
   @override
   void initState() {
-    _subscription = Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+    _localFilesSubscription =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      _logger.info("Files updated");
+      setState(() {});
+    });
+    _collectionUpdatesSubscription =
+        Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       setState(() {});
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
@@ -49,7 +56,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder<SharedCollections>(
-      future: Future.value(FilesDB.instance.getLatestCollectionFiles())
+      future: Future.value(CollectionsService.instance.getLatestCollectionFiles())
           .then((files) async {
         final List<CollectionWithThumbnail> outgoing = [];
         final List<CollectionWithThumbnail> incoming = [];
@@ -62,7 +69,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 CollectionWithThumbnail(
                   c,
                   file,
-                  await FilesDB.instance.getLastModifiedFileInCollection(c.id),
                 ),
               );
             }
@@ -71,18 +77,17 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
               CollectionWithThumbnail(
                 c,
                 file,
-                await FilesDB.instance.getLastModifiedFileInCollection(c.id),
               ),
             );
           }
         }
         outgoing.sort((first, second) {
-          return second.lastUpdatedFile.updationTime
-              .compareTo(first.lastUpdatedFile.updationTime);
+          return second.collection.updationTime
+              .compareTo(first.collection.updationTime);
         });
         incoming.sort((first, second) {
-          return second.lastUpdatedFile.updationTime
-              .compareTo(first.lastUpdatedFile.updationTime);
+          return second.collection.updationTime
+              .compareTo(first.collection.updationTime);
         });
         return SharedCollections(outgoing, incoming);
       }),
@@ -253,7 +258,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _localFilesSubscription.cancel();
+    _collectionUpdatesSubscription.cancel();
     _loggedOutEvent.cancel();
     super.dispose();
   }

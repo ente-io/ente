@@ -91,11 +91,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime));
 
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
-    final latestCollectionFiles = await filesDB.getLatestCollectionFiles();
+    final latestCollectionFiles =
+        await collectionsService.getLatestCollectionFiles();
     for (final file in latestCollectionFiles) {
       final c = collectionsService.getCollectionByID(file.collectionID);
       if (c.owner.id == userID) {
-        collectionsWithThumbnail.add(CollectionWithThumbnail(c, file, null));
+        collectionsWithThumbnail.add(CollectionWithThumbnail(c, file));
       }
     }
     collectionsWithThumbnail.sort((first, second) {
@@ -290,7 +291,8 @@ class DeviceFolderIcon extends StatelessWidget {
 }
 
 class CollectionItem extends StatelessWidget {
-  CollectionItem(this.c, {
+  CollectionItem(
+    this.c, {
     Key key,
   }) : super(key: Key(c.collection.id.toString()));
 

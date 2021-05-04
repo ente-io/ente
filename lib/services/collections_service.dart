@@ -34,6 +34,7 @@ class CollectionsService {
   FilesDB _filesDB;
   Configuration _config;
   SharedPreferences _prefs;
+  Future<List<File>> _cachedLatestFiles;
   final _dio = Network.instance.getDio();
   final _localCollections = Map<String, Collection>();
   final _collectionIDToCollections = Map<int, Collection>();
@@ -54,6 +55,14 @@ class CollectionsService {
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
     }
+    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      _cachedLatestFiles = null;
+      getLatestCollectionFiles();
+    });
+    Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+      _cachedLatestFiles = null;
+      getLatestCollectionFiles();
+    });
   }
 
   Future<List<Collection>> sync() async {
@@ -71,8 +80,7 @@ class CollectionsService {
         await _filesDB.deleteCollection(collection.id);
         await _db.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
-        Bus.instance.fire(
-            LocalPhotosUpdatedEvent(List<File>.empty()));
+        Bus.instance.fire(LocalPhotosUpdatedEvent(List<File>.empty()));
       } else {
         updatedCollections.add(collection);
       }
@@ -117,6 +125,13 @@ class CollectionsService {
       syncTime = 0;
     }
     return syncTime;
+  }
+
+  Future<List<File>> getLatestCollectionFiles() {
+    if (_cachedLatestFiles == null) {
+      _cachedLatestFiles = _filesDB.getLatestCollectionFiles();
+    }
+    return _cachedLatestFiles;
   }
 
   Future<void> setCollectionSyncTime(int collectionID, int time) async {

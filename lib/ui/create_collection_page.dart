@@ -146,18 +146,17 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   Future<List<CollectionWithThumbnail>> _getCollectionsWithThumbnail() async {
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
     final latestCollectionFiles =
-        await FilesDB.instance.getLatestCollectionFiles();
+        await CollectionsService.instance.getLatestCollectionFiles();
     for (final file in latestCollectionFiles) {
       final c =
           CollectionsService.instance.getCollectionByID(file.collectionID);
       if (c.owner.id == Configuration.instance.getUserID()) {
-        collectionsWithThumbnail.add(CollectionWithThumbnail(c, file,
-            await FilesDB.instance.getLastModifiedFileInCollection(c.id)));
+        collectionsWithThumbnail.add(CollectionWithThumbnail(c, file));
       }
     }
     collectionsWithThumbnail.sort((first, second) {
-      return second.lastUpdatedFile.updationTime
-          .compareTo(first.lastUpdatedFile.updationTime);
+      return second.collection.updationTime
+          .compareTo(first.collection.updationTime);
     });
     return collectionsWithThumbnail;
   }
