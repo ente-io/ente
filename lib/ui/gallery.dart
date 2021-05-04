@@ -43,6 +43,7 @@ class _GalleryState extends State<Gallery> {
 
   Logger _logger;
   int _index = 0;
+  List<File> _files = [];
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
@@ -71,10 +72,12 @@ class _GalleryState extends State<Gallery> {
         _logger.info("Days updated");
         setState(() {
           _hasLoadedFiles = true;
+          _files = files;
           _collatedFiles = collatedFiles;
         });
       }
     } else {
+      _files = files;
       _collatedFiles = collatedFiles;
     }
     return true;
@@ -123,6 +126,7 @@ class _GalleryState extends State<Gallery> {
       itemBuilder: (context, index) {
         var gallery;
         gallery = LazyLoadingGallery(
+          _files,
           _collatedFiles[index],
           widget.reloadEvent,
           widget.asyncLoader,

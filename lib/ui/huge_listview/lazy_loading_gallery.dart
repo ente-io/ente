@@ -15,6 +15,7 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class LazyLoadingGallery extends StatefulWidget {
+  final List<File> allFiles;
   final List<File> files;
   final Stream<FilesUpdatedEvent> reloadEvent;
   final Future<List<File>> Function(int creationStartTime, int creationEndTime,
@@ -22,8 +23,8 @@ class LazyLoadingGallery extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final String tag;
 
-  LazyLoadingGallery(this.files, this.reloadEvent, this.asyncLoader,
-      this.selectedFiles, this.tag,
+  LazyLoadingGallery(this.allFiles, this.files, this.reloadEvent,
+      this.asyncLoader, this.selectedFiles, this.tag,
       {Key key})
       : super(key: key);
 
@@ -135,8 +136,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     for (int index = 0; index < _files.length; index += kSubGalleryItemLimit) {
       childGalleries.add(LazyLoadingGridView(
         widget.tag,
+        widget.allFiles,
         _files.sublist(index, min(index + kSubGalleryItemLimit, _files.length)),
-        widget.asyncLoader,
         widget.selectedFiles,
         index == 0,
       ));
@@ -156,14 +157,13 @@ class LazyLoadingGridView extends StatefulWidget {
   static const kThumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
 
   final String tag;
+  final List<File> allFiles;
   final List<File> files;
-  final Future<List<File>> Function(int creationStartTime, int creationEndTime,
-      {int limit}) asyncLoader;
   final SelectedFiles selectedFiles;
   final bool isVisible;
 
-  LazyLoadingGridView(this.tag, this.files, this.asyncLoader,
-      this.selectedFiles, this.isVisible,
+  LazyLoadingGridView(
+      this.tag, this.allFiles, this.files, this.selectedFiles, this.isVisible,
       {Key key})
       : super(key: key ?? GlobalKey<_LazyLoadingGridViewState>());
 
@@ -275,9 +275,8 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   void _routeToDetailPage(File file, BuildContext context) {
     final page = DetailPage(
-      widget.files,
-      widget.asyncLoader,
-      widget.files.indexOf(file),
+      widget.allFiles,
+      widget.allFiles.indexOf(file),
       widget.tag,
     );
     Navigator.of(context).push(
