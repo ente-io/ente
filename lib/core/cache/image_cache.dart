@@ -16,7 +16,7 @@ class FileLruCache {
 }
 
 class ThumbnailFileLruCache {
-  static LRUMap<String, io.File> _map = LRUMap(500);
+  static LRUMap<String, io.File> _map = LRUMap(100);
 
   static io.File get(File file) {
     return _map.get(file.tag());
