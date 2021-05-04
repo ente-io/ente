@@ -76,7 +76,7 @@ EncryptionResult chachaEncryptFile(Map<String, dynamic> args) {
   return EncryptionResult(key: key, header: initPushResult.header);
 }
 
-void chachaDecrypt(Map<String, dynamic> args) {
+void chachaDecryptFile(Map<String, dynamic> args) {
   final logger = Logger("ChaChaDecrypt");
   final decryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final sourceFile = io.File(args["sourceFilePath"]);
@@ -106,6 +106,14 @@ void chachaDecrypt(Map<String, dynamic> args) {
 
   logger.info("ChaCha20 Decryption time: " +
       (DateTime.now().millisecondsSinceEpoch - decryptionStartTime).toString());
+}
+
+Uint8List chachaDecryptData(Map<String, dynamic> args) {
+  final pullState =
+      Sodium.cryptoSecretstreamXchacha20poly1305InitPull(args["header"], args["key"]);
+  final pullResult =
+      Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, args["source"], null);
+  return pullResult.m;
 }
 
 class CryptoUtil {
@@ -152,20 +160,21 @@ class CryptoUtil {
     return cryptoSecretboxOpenEasy(args);
   }
 
-  static Future<EncryptionResult> encryptChaCha(Uint8List source, Uint8List key) async {
+  static Future<EncryptionResult> encryptChaCha(
+      Uint8List source, Uint8List key) async {
     final args = Map<String, dynamic>();
     args["source"] = source;
     args["key"] = key;
     return _computer.compute(chachaEncryptData, param: args);
   }
 
-  static Uint8List decryptChaCha(
-      Uint8List source, Uint8List key, Uint8List header) {
-    final pullState =
-        Sodium.cryptoSecretstreamXchacha20poly1305InitPull(header, key);
-    final pullResult =
-        Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, source, null);
-    return pullResult.m;
+  static Future<Uint8List> decryptChaCha(
+      Uint8List source, Uint8List key, Uint8List header) async {
+    final args = Map<String, dynamic>();
+    args["source"] = source;
+    args["key"] = key;
+    args["header"] = header;
+    return _computer.compute(chachaDecryptData, param: args);
   }
 
   static Future<EncryptionResult> encryptFile(
@@ -191,7 +200,7 @@ class CryptoUtil {
     args["destinationFilePath"] = destinationFilePath;
     args["header"] = header;
     args["key"] = key;
-    return _computer.compute(chachaDecrypt, param: args);
+    return _computer.compute(chachaDecryptFile, param: args);
   }
 
   static Uint8List generateKey() {

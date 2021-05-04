@@ -100,7 +100,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     return;
   }
   final thumbnailDecryptionKey = decryptFileKey(file);
-  var data = CryptoUtil.decryptChaCha(
+  var data = await CryptoUtil.decryptChaCha(
     encryptedThumbnail,
     thumbnailDecryptionKey,
     Sodium.base642bin(file.thumbnailDecryptionHeader),
