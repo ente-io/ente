@@ -124,7 +124,7 @@ const getCollections = async (
         return await Promise.all(promises);
     } catch (e) {
         console.error('getCollections failed- ', e);
-        throw e?.status?.toString();
+        throw new Error(e?.status?.toString());
     }
 };
 
