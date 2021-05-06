@@ -25,10 +25,17 @@ class LazyLoadingGallery extends StatefulWidget {
   final String tag;
   final Stream<int> currentIndexStream;
 
-  LazyLoadingGallery(this.allFiles, this.files, this.index, this.reloadEvent,
-      this.asyncLoader, this.selectedFiles, this.tag, this.currentIndexStream,
-      {Key key})
-      : super(key: key);
+  LazyLoadingGallery(
+    this.allFiles,
+    this.files,
+    this.index,
+    this.reloadEvent,
+    this.asyncLoader,
+    this.selectedFiles,
+    this.tag,
+    this.currentIndexStream, {
+    Key key,
+  }) : super(key: key);
 
   @override
   _LazyLoadingGalleryState createState() => _LazyLoadingGalleryState();
@@ -55,66 +62,70 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   void _init() {
     _shouldRender = true;
     _files = widget.files;
-    final galleryDate =
-        DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
-    _reloadEventSubscription = widget.reloadEvent.listen((event) async {
-      final filesUpdatedThisDay = event.updatedFiles
-          .where((file) =>
-              file.creationTime !=
-              null) // Filtering out noise of deleted files diff from server
-          .where((file) {
-        final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
-        return fileDate.year == galleryDate.year &&
-            fileDate.month == galleryDate.month &&
-            fileDate.day == galleryDate.day;
-      });
-      if (filesUpdatedThisDay.isNotEmpty) {
-        _logger.info(filesUpdatedThisDay.length.toString() +
-            " files were updated on " +
-            getDayTitle(galleryDate.microsecondsSinceEpoch));
-        if (event.type == EventType.added_or_updated) {
-          final dayStartTime =
-              DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
-          final files = await widget.asyncLoader(
-              dayStartTime.microsecondsSinceEpoch,
-              dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
-          if (files.isEmpty) {
-            // All files on this day were deleted, let gallery trigger the reload
-          } else {
-            if (mounted) {
-              setState(() {
-                _files = files;
-              });
-            }
-          }
-        } else {
-          // Files were deleted
-          final updateFileIDs = Set<int>();
-          for (final file in filesUpdatedThisDay) {
-            updateFileIDs.add(file.generatedID);
-          }
-          final List<File> files = [];
-          files.addAll(_files);
-          files.removeWhere((file) => updateFileIDs.contains(file.generatedID));
-          if (files.isNotEmpty && mounted) {
-            // If all files on this day were deleted, ignore and let the gallery reload itself
-            setState(() {
-              _files = files;
-            });
-          }
-        }
-      }
-    });
+
+    _reloadEventSubscription = widget.reloadEvent.listen((e) => _onReload(e));
 
     _currentIndexSubscription =
         widget.currentIndexStream.listen((currentIndex) {
-      bool shouldRender = (currentIndex - widget.index).abs() < kNumberOfDaysToRenderBeforeAndAfter;
+      bool shouldRender = (currentIndex - widget.index).abs() <
+          kNumberOfDaysToRenderBeforeAndAfter;
       if (mounted && shouldRender != _shouldRender) {
         setState(() {
           _shouldRender = shouldRender;
         });
       }
     });
+  }
+
+  Future _onReload(FilesUpdatedEvent event) async {
+    final galleryDate =
+        DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
+    final filesUpdatedThisDay = event.updatedFiles
+        .where((file) =>
+            file.creationTime !=
+            null) // Filtering out noise of deleted files diff from server
+        .where((file) {
+      final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
+      return fileDate.year == galleryDate.year &&
+          fileDate.month == galleryDate.month &&
+          fileDate.day == galleryDate.day;
+    });
+    if (filesUpdatedThisDay.isNotEmpty) {
+      _logger.info(filesUpdatedThisDay.length.toString() +
+          " files were updated on " +
+          getDayTitle(galleryDate.microsecondsSinceEpoch));
+      if (event.type == EventType.added_or_updated) {
+        final dayStartTime =
+            DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
+        final files = await widget.asyncLoader(
+            dayStartTime.microsecondsSinceEpoch,
+            dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
+        if (files.isEmpty) {
+          // All files on this day were deleted, let gallery trigger the reload
+        } else {
+          if (mounted) {
+            setState(() {
+              _files = files;
+            });
+          }
+        }
+      } else {
+        // Files were deleted
+        final updateFileIDs = Set<int>();
+        for (final file in filesUpdatedThisDay) {
+          updateFileIDs.add(file.generatedID);
+        }
+        final List<File> files = [];
+        files.addAll(_files);
+        files.removeWhere((file) => updateFileIDs.contains(file.generatedID));
+        if (files.isNotEmpty && mounted) {
+          // If all files on this day were deleted, ignore and let the gallery reload itself
+          setState(() {
+            _files = files;
+          });
+        }
+      }
+    }
   }
 
   @override
@@ -180,9 +191,13 @@ class LazyLoadingGridView extends StatefulWidget {
   final bool isVisible;
 
   LazyLoadingGridView(
-      this.tag, this.allFiles, this.files, this.selectedFiles, this.isVisible,
-      {Key key})
-      : super(key: key ?? GlobalKey<_LazyLoadingGridViewState>());
+    this.tag,
+    this.allFiles,
+    this.files,
+    this.selectedFiles,
+    this.isVisible, {
+    Key key,
+  }) : super(key: key ?? GlobalKey<_LazyLoadingGridViewState>());
 
   @override
   _LazyLoadingGridViewState createState() => _LazyLoadingGridViewState();
