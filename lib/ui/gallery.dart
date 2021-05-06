@@ -64,8 +64,13 @@ class _GalleryState extends State<Gallery> {
 
   Future<bool> _loadFiles({int limit}) async {
     _logger.info("Loading files");
+    final startTime = DateTime.now().microsecondsSinceEpoch;
     final files = await widget
         .asyncLoader(0, DateTime.now().microsecondsSinceEpoch, limit: limit);
+    final endTime = DateTime.now().microsecondsSinceEpoch;
+    final duration = Duration(microseconds: endTime - startTime);
+    _logger.info(
+        "Time taken to load: " + duration.inMilliseconds.toString() + "ms");
     final collatedFiles = _collateFiles(files);
     if (_collatedFiles.length != collatedFiles.length) {
       if (mounted) {
