@@ -410,7 +410,6 @@ class FilesDB {
       columns: [columnUploadedFileID],
       where:
           '($columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) AND $columnUpdationTime IS NOT NULL AND $columnIsDeleted = 0)',
-      orderBy: '$columnCreationTime DESC',
       distinct: true,
     );
     return rows.length;
