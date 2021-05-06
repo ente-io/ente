@@ -144,7 +144,7 @@ class FilesDB {
     int batchCounter = 0;
     for (File file in files) {
       if (batchCounter == 400) {
-        await batch.commit();
+        await batch.commit(noResult: true);
         batch = db.batch();
         batchCounter = 0;
       }
