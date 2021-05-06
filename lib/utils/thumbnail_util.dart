@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/cache/image_cache.dart';
+import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -23,13 +23,13 @@ const int kMaximumConcurrentDownloads = 2500;
 
 class FileDownloadItem {
   final File file;
-  final Completer<io.File> completer;
+  final Completer<Uint8List> completer;
   final CancelToken cancelToken;
 
   FileDownloadItem(this.file, this.completer, this.cancelToken);
 }
 
-Future<io.File> getThumbnailFromServer(File file) async {
+Future<Uint8List> getThumbnailFromServer(File file) async {
   return ThumbnailCacheManager.instance
       .getFileFromCache(file.getThumbnailUrl())
       .then((info) {
@@ -42,7 +42,7 @@ Future<io.File> getThumbnailFromServer(File file) async {
           item.completer.completeError(RequestCancelledError());
         }
         final item =
-            FileDownloadItem(file, Completer<io.File>(), CancelToken());
+            FileDownloadItem(file, Completer<Uint8List>(), CancelToken());
         _map[file.uploadedFileID] = item;
         _queue.add(file.uploadedFileID);
         _downloadItem(item);
@@ -51,8 +51,8 @@ Future<io.File> getThumbnailFromServer(File file) async {
         return _map[file.uploadedFileID].completer.future;
       }
     } else {
-      ThumbnailFileLruCache.put(file, info.file);
-      return info.file;
+      ThumbnailLruCache.put(file, info.file.readAsBytesSync());
+      return info.file.readAsBytes();
     }
   });
 }
@@ -109,16 +109,16 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   if (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
     data = await compressThumbnail(data);
   }
-  final cachedThumbnail = await ThumbnailCacheManager.instance.putFile(
+  ThumbnailLruCache.put(item.file, data);
+  ThumbnailCacheManager.instance.putFile(
     file.getThumbnailUrl(),
     data,
     eTag: file.getThumbnailUrl(),
     maxAge: Duration(days: 365),
   );
-  ThumbnailFileLruCache.put(item.file, cachedThumbnail);
   if (_map.containsKey(file.uploadedFileID)) {
     try {
-      item.completer.complete(cachedThumbnail);
+      item.completer.complete(data);
     } catch (e) {
       _logger.severe("Error while completing request for " +
           file.uploadedFileID.toString());

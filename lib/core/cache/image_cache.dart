@@ -14,15 +14,3 @@ class FileLruCache {
     _map.put(file.tag(), imageData);
   }
 }
-
-class ThumbnailFileLruCache {
-  static LRUMap<String, io.File> _map = LRUMap(100);
-
-  static io.File get(File file) {
-    return _map.get(file.tag());
-  }
-
-  static void put(File file, io.File imageData) {
-    _map.put(file.tag(), imageData);
-  }
-}

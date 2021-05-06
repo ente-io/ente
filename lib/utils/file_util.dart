@@ -57,7 +57,7 @@ void preloadThumbnail(File file) {
         quality: THUMBNAIL_QUALITY,
       )
           .then((data) {
-        ThumbnailLruCache.put(file, THUMBNAIL_SMALL_SIZE, data);
+        ThumbnailLruCache.put(file, data, THUMBNAIL_SMALL_SIZE);
       });
     });
   }
@@ -182,7 +182,6 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     fileDownloadsInProgress.remove(file.uploadedFileID);
   });
 }
-
 
 Uint8List decryptFileKey(File file) {
   final encryptedKey = Sodium.base642bin(file.encryptedKey);

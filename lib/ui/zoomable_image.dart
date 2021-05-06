@@ -81,13 +81,13 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _loadNetworkImage() {
     if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      final cachedThumbnail = ThumbnailFileLruCache.get(_photo);
+      final cachedThumbnail = ThumbnailLruCache.get(_photo);
       if (cachedThumbnail != null) {
-        _imageProvider = Image.file(cachedThumbnail).image;
+        _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
       } else {
         getThumbnailFromServer(_photo).then((file) {
-          final imageProvider = Image.file(file).image;
+          final imageProvider = Image.memory(file).image;
           if (mounted) {
             precacheImage(imageProvider, context).then((value) {
               if (mounted) {
@@ -148,7 +148,7 @@ class _ZoomableImageState extends State<ZoomableImage>
               return;
             }
             _onLargeThumbnailLoaded(Image.memory(data).image, context);
-            ThumbnailLruCache.put(_photo, THUMBNAIL_LARGE_SIZE, data);
+            ThumbnailLruCache.put(_photo, data, THUMBNAIL_LARGE_SIZE);
           });
         });
       }

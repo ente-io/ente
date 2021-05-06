@@ -169,7 +169,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           final imageProvider = Image.memory(data).image;
           _cacheAndRender(imageProvider);
         }
-        ThumbnailLruCache.put(widget.file, THUMBNAIL_SMALL_SIZE, data);
+        ThumbnailLruCache.put(widget.file, data, THUMBNAIL_SMALL_SIZE);
       });
     }).catchError((e) {
       _logger.warning("Could not load image: ", e);
@@ -182,9 +182,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_encounteredErrorLoadingThumbnail &&
         !_isLoadingThumbnail) {
       _isLoadingThumbnail = true;
-      final cachedThumbnail = ThumbnailFileLruCache.get(widget.file);
+      final cachedThumbnail = ThumbnailLruCache.get(widget.file);
       if (cachedThumbnail != null) {
-        _imageProvider = Image.file(cachedThumbnail).image;
+        _imageProvider = Image.memory(cachedThumbnail).image;
         _hasLoadedThumbnail = true;
         return;
       }
@@ -204,7 +204,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     try {
       final thumbnail = await getThumbnailFromServer(widget.file);
       if (mounted) {
-        final imageProvider = Image.file(thumbnail).image;
+        final imageProvider = Image.memory(thumbnail).image;
         _cacheAndRender(imageProvider);
       }
     } catch (e) {
