@@ -188,14 +188,14 @@ class LazyLoadingGridView extends StatefulWidget {
   final List<File> allFiles;
   final List<File> files;
   final SelectedFiles selectedFiles;
-  final bool isVisible;
+  final bool shouldRender;
 
   LazyLoadingGridView(
     this.tag,
     this.allFiles,
     this.files,
     this.selectedFiles,
-    this.isVisible, {
+    this.shouldRender, {
     Key key,
   }) : super(key: key ?? GlobalKey<_LazyLoadingGridViewState>());
 
@@ -204,12 +204,12 @@ class LazyLoadingGridView extends StatefulWidget {
 }
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
-  bool _isVisible;
+  bool _shouldRender;
 
   @override
   void initState() {
     super.initState();
-    _isVisible = widget.isVisible;
+    _shouldRender = widget.shouldRender;
     widget.selectedFiles.addListener(() {
       bool shouldRefresh = false;
       for (final file in widget.files) {
@@ -228,20 +228,20 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     super.didUpdateWidget(oldWidget);
     if (!listEquals(widget.files, oldWidget.files)) {
       setState(() {
-        _isVisible = widget.isVisible;
+        _shouldRender = widget.shouldRender;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isVisible) {
+    if (!_shouldRender) {
       return VisibilityDetector(
         key: Key(widget.tag + widget.files[0].creationTime.toString()),
         onVisibilityChanged: (visibility) {
-          if (visibility.visibleFraction > 0 && !_isVisible) {
+          if (visibility.visibleFraction > 0 && !_shouldRender) {
             setState(() {
-              _isVisible = true;
+              _shouldRender = true;
             });
           }
         },
