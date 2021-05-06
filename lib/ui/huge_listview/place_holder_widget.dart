@@ -14,6 +14,7 @@ class PlaceHolderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!_gridViewCache.containsKey(count)) {
       _gridViewCache[count] = GridView.builder(
+        padding: EdgeInsets.all(0),
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
