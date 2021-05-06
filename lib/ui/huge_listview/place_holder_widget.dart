@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class PlaceHolderWidget extends StatelessWidget {
-  const PlaceHolderWidget(this.count,{
+  const PlaceHolderWidget(
+    this.count, {
     Key key,
   }) : super(key: key);
 
