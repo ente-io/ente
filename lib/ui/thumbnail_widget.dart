@@ -110,7 +110,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         loadingWidget,
         AnimatedOpacity(
           opacity: content == null ? 0 : 1.0,
-          duration: Duration(milliseconds: 100),
+          duration: Duration(milliseconds: 200),
           child: content,
         ),
         widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
