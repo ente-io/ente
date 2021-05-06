@@ -99,14 +99,14 @@ class File {
   }
 
   String getDownloadUrl() {
-    // if (kDebugMode) {
-    return Configuration.instance.getHttpEndpoint() +
-        "/files/download/" +
-        uploadedFileID.toString();
-    // } else {
-    //   return "https://files.ente.workers.dev/?fileID=" +
-    //       uploadedFileID.toString();
-    // }
+    if (kDebugMode) {
+      return Configuration.instance.getHttpEndpoint() +
+          "/files/download/" +
+          uploadedFileID.toString();
+    } else {
+      return "https://files.ente.workers.dev/?fileID=" +
+          uploadedFileID.toString();
+    }
   }
 
   // Passing token within the URL due to https://github.com/flutter/flutter/issues/16466
@@ -120,14 +120,14 @@ class File {
   }
 
   String getThumbnailUrl() {
-    // if (!kDebugMode) {
-    return Configuration.instance.getHttpEndpoint() +
-        "/files/preview/" +
-        uploadedFileID.toString();
-    // } else {
-    //   return "https://thumbnails.ente.workers.dev/?fileID=" +
-    //       uploadedFileID.toString();
-    // }
+    if (!kDebugMode) {
+      return Configuration.instance.getHttpEndpoint() +
+          "/files/preview/" +
+          uploadedFileID.toString();
+    } else {
+      return "https://thumbnails.ente.workers.dev/?fileID=" +
+          uploadedFileID.toString();
+    }
   }
 
   @override
