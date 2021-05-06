@@ -17,14 +17,16 @@ import 'package:visibility_detector/visibility_detector.dart';
 class LazyLoadingGallery extends StatefulWidget {
   final List<File> allFiles;
   final List<File> files;
+  final int index;
   final Stream<FilesUpdatedEvent> reloadEvent;
   final Future<List<File>> Function(int creationStartTime, int creationEndTime,
       {int limit}) asyncLoader;
   final SelectedFiles selectedFiles;
   final String tag;
+  final Stream<int> currentIndexStream;
 
-  LazyLoadingGallery(this.allFiles, this.files, this.reloadEvent,
-      this.asyncLoader, this.selectedFiles, this.tag,
+  LazyLoadingGallery(this.allFiles, this.files, this.index, this.reloadEvent,
+      this.asyncLoader, this.selectedFiles, this.tag, this.currentIndexStream,
       {Key key})
       : super(key: key);
 
@@ -35,11 +37,14 @@ class LazyLoadingGallery extends StatefulWidget {
 class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   static const kSubGalleryItemLimit = 80;
   static const kMicroSecondsInADay = 86400000000;
+  static const kNumberOfDaysToRenderBeforeAndAfter = 8;
 
   static final Logger _logger = Logger("LazyLoadingGallery");
 
   List<File> _files;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
+  StreamSubscription<int> _currentIndexSubscription;
+  bool _shouldRender;
 
   @override
   void initState() {
@@ -48,6 +53,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   }
 
   void _init() {
+    _shouldRender = true;
     _files = widget.files;
     final galleryDate =
         DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
@@ -99,11 +105,22 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         }
       }
     });
+
+    _currentIndexSubscription =
+        widget.currentIndexStream.listen((currentIndex) {
+      bool shouldRender = (currentIndex - widget.index).abs() < kNumberOfDaysToRenderBeforeAndAfter;
+      if (mounted && shouldRender != _shouldRender) {
+        setState(() {
+          _shouldRender = shouldRender;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     _reloadEventSubscription.cancel();
+    _currentIndexSubscription.cancel();
     super.dispose();
   }
 
@@ -123,11 +140,14 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     if (_files.length == 0) {
       return Container();
     }
-    return Column(
-      children: <Widget>[
-        getDayWidget(_files[0].creationTime),
-        _getGallery(),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        children: [
+          getDayWidget(_files[0].creationTime),
+          _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
+        ],
+      ),
     );
   }
 
@@ -143,11 +163,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       ));
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        children: childGalleries,
-      ),
+    return Column(
+      children: childGalleries,
     );
   }
 }

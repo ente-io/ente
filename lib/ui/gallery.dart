@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/huge_listview/huge_listview.dart';
 import 'package:photos/ui/huge_listview/lazy_loading_gallery.dart';
-import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -105,18 +105,6 @@ class _GalleryState extends State<Gallery> {
       startIndex: _index,
       totalCount: _collatedFiles.length,
       isDraggableScrollbarEnabled: _collatedFiles.length > 30,
-      placeholderBuilder: (context, index) {
-        var day = getDayWidget(_collatedFiles[index][0].creationTime);
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Column(
-            children: [
-              day,
-              PlaceHolderWidget(_collatedFiles[index].length),
-            ],
-          ),
-        );
-      },
       waitBuilder: (_) {
         return loadWidget;
       },
@@ -128,10 +116,15 @@ class _GalleryState extends State<Gallery> {
         gallery = LazyLoadingGallery(
           _files,
           _collatedFiles[index],
+          index,
           widget.reloadEvent,
           widget.asyncLoader,
           widget.selectedFiles,
           widget.tagPrefix,
+          Bus.instance
+              .on<GalleryIndexUpdatedEvent>()
+              .where((event) => event.tag == widget.tagPrefix)
+              .map((event) => event.index),
         );
         if (widget.headerWidget != null && index == 0) {
           gallery = Column(children: [widget.headerWidget, gallery]);
@@ -144,7 +137,10 @@ class _GalleryState extends State<Gallery> {
       },
       thumbBackgroundColor: Color(0xFF151515),
       thumbDrawColor: Colors.white.withOpacity(0.5),
-      velocityThreshold: 128,
+      firstShown: (int firstIndex) {
+        Bus.instance
+            .fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));
+      },
     );
   }
 
@@ -177,4 +173,11 @@ class _GalleryState extends State<Gallery> {
         firstDate.month == secondDate.month &&
         firstDate.day == secondDate.day;
   }
+}
+
+class GalleryIndexUpdatedEvent {
+  final String tag;
+  final int index;
+
+  GalleryIndexUpdatedEvent(this.tag, this.index);
 }
