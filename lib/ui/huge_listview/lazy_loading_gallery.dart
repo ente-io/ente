@@ -43,6 +43,7 @@ class LazyLoadingGallery extends StatefulWidget {
 
 class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   static const kSubGalleryItemLimit = 80;
+  static const kRecycleLimit = 400;
   static const kMicroSecondsInADay = 86400000000;
   static const kNumberOfDaysToRenderBeforeAndAfter = 8;
 
@@ -171,6 +172,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         _files.sublist(index, min(index + kSubGalleryItemLimit, _files.length)),
         widget.selectedFiles,
         index == 0,
+        _files.length > kRecycleLimit,
       ));
     }
 
@@ -189,13 +191,15 @@ class LazyLoadingGridView extends StatefulWidget {
   final List<File> files;
   final SelectedFiles selectedFiles;
   final bool shouldRender;
+  final bool shouldRecycle;
 
   LazyLoadingGridView(
     this.tag,
     this.allFiles,
     this.files,
     this.selectedFiles,
-    this.shouldRender, {
+    this.shouldRender,
+    this.shouldRecycle, {
     Key key,
   }) : super(key: key ?? GlobalKey<_LazyLoadingGridViewState>());
 
@@ -235,11 +239,36 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.shouldRecycle) {
+      return _getRecyclableView();
+    } else {
+      return _getNonRecyclableView();
+    }
+  }
+
+  Widget _getRecyclableView() {
+    return VisibilityDetector(
+      key: Key(widget.tag + widget.files[0].creationTime.toString()),
+      onVisibilityChanged: (visibility) {
+        final shouldRender = visibility.visibleFraction > 0;
+        if (mounted && shouldRender != _shouldRender) {
+          setState(() {
+            _shouldRender = shouldRender;
+          });
+        }
+      },
+      child: _shouldRender
+          ? _getGridView()
+          : PlaceHolderWidget(widget.files.length),
+    );
+  }
+
+  Widget _getNonRecyclableView() {
     if (!_shouldRender) {
       return VisibilityDetector(
         key: Key(widget.tag + widget.files[0].creationTime.toString()),
         onVisibilityChanged: (visibility) {
-          if (visibility.visibleFraction > 0 && !_shouldRender) {
+          if (mounted && visibility.visibleFraction > 0 && !_shouldRender) {
             setState(() {
               _shouldRender = true;
             });
@@ -248,20 +277,24 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         child: PlaceHolderWidget(widget.files.length),
       );
     } else {
-      return GridView.builder(
-        shrinkWrap: true,
-        physics:
-            NeverScrollableScrollPhysics(), // to disable GridView's scrolling
-        itemBuilder: (context, index) {
-          return _buildFile(context, widget.files[index]);
-        },
-        itemCount: widget.files.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-        ),
-        padding: EdgeInsets.all(0),
-      );
+      return _getGridView();
     }
+  }
+
+  Widget _getGridView() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics:
+          NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+      itemBuilder: (context, index) {
+        return _buildFile(context, widget.files[index]);
+      },
+      itemCount: widget.files.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+      ),
+      padding: EdgeInsets.all(0),
+    );
   }
 
   Widget _buildFile(BuildContext context, File file) {
