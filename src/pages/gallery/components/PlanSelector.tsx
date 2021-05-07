@@ -277,13 +277,10 @@ function PlanSelector(props: Props) {
                             )}
                             <LinkButton
                                 variant="primary"
-                                onClick={(event) =>
-                                    updatePaymentMethod(
-                                        event,
-                                        props.setDialogMessage,
-                                        props.setLoading
-                                    )
-                                }
+                                onClick={updatePaymentMethod(
+                                    props.setDialogMessage,
+                                    props.setLoading
+                                )}
                                 style={{ marginTop: '20px' }}
                             >
                                 {constants.MANAGEMENT_PORTAL}
