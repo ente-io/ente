@@ -102,13 +102,12 @@ export async function updateSubscription(
                     proceed: {
                         text: constants.UPDATE_PAYMENT_METHOD,
                         variant: 'success',
-                        action: (event) =>
-                            updatePaymentMethod.bind(
-                                null,
-                                event,
-                                setDialogMessage,
-                                setLoading
-                            ),
+                        action: updatePaymentMethod.bind(
+                            null,
+
+                            setDialogMessage,
+                            setLoading
+                        ),
                     },
                     close: { text: constants.CANCEL },
                 });
@@ -184,13 +183,11 @@ export async function activateSubscription(
 }
 
 export async function updatePaymentMethod(
-    event,
     setDialogMessage: SetDialogMessage,
     setLoading: SetLoading
 ) {
     try {
         setLoading(true);
-        event.preventDefault();
         await billingService.redirectToCustomerPortal();
     } catch (error) {
         setDialogMessage({
