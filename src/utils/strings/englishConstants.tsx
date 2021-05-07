@@ -272,7 +272,6 @@ const englishConstants = {
         <>
             <p>are you sure you want to delete this album?</p>
             <p>
-                {' '}
                 all files that are present only in this album will be
                 permanently deleted
             </p>
