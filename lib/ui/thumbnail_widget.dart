@@ -76,6 +76,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   @override
+  void didUpdateWidget(ThumbnailWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.file.generatedID != oldWidget.file.generatedID) {
+      _reset();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.file.localID == null) {
       _loadNetworkImage();
@@ -212,6 +220,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           _logger.info(
               "Thumbnail request was aborted although it is in view, will retry");
           _reset();
+          setState(() {});
         }
       } else {
         _logger.severe("Could not load image " + widget.file.toString(), e);
@@ -236,20 +245,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     });
   }
 
-  @override
-  void didUpdateWidget(ThumbnailWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.file.generatedID != oldWidget.file.generatedID) {
-      _reset();
-    }
-  }
-
   void _reset() {
-    setState(() {
-      _hasLoadedThumbnail = false;
-      _isLoadingThumbnail = false;
-      _encounteredErrorLoadingThumbnail = false;
-      _imageProvider = null;
-    });
+    _hasLoadedThumbnail = false;
+    _isLoadingThumbnail = false;
+    _encounteredErrorLoadingThumbnail = false;
+    _imageProvider = null;
   }
 }
