@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
+import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/memories_service.dart';
@@ -17,12 +18,17 @@ import 'package:photos/ui/home_widget.dart';
 import 'package:photos/ui/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_logging/super_logging.dart';
 import 'package:logging/logging.dart';
 
 final _logger = Logger("main");
 
 Completer<void> _initializationStatus;
+const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
+const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
+const kHeartBeatFrequency = Duration(seconds: 1);
+const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 
 final themeData = ThemeData(
   fontFamily: 'Ubuntu',
@@ -68,17 +74,27 @@ Future<void> _runInForeground() async {
 Future _runInBackground(String taskId) async {
   if (_initializationStatus == null) {
     _runWithLogs(() async {
-      _logger.info("[BackgroundFetch] Event received: $taskId");
-      await _init(true);
-      await _sync(isAppInBackground: true);
-      BackgroundFetch.finish(taskId);
+      _backgroundTask(taskId);
     }, prefix: "[bg]");
   } else {
-    _logger.info("[BackgroundFetch] Event received: $taskId");
-    await _init(true);
-    await _sync(isAppInBackground: true);
-    BackgroundFetch.finish(taskId);
+    _backgroundTask(taskId);
   }
+}
+
+void _backgroundTask(String taskId) async {
+  await Future.delayed(Duration(seconds: 3));
+  if (await _isRunningInForeground()) {
+    _logger.info("FG task running, skipping BG task");
+    BackgroundFetch.finish(taskId);
+    return;
+  } else {
+    _logger.info("FG task is not running");
+  }
+  _logger.info("[BackgroundFetch] Event received: $taskId");
+  _scheduleBGTaskKill(taskId);
+  await _init(true);
+  await _sync(isAppInBackground: true);
+  BackgroundFetch.finish(taskId);
 }
 
 void _headlessTaskHandler(HeadlessTask task) {
@@ -94,6 +110,7 @@ Future<void> _init(bool isBackground) async {
     return _initializationStatus.future;
   }
   _initializationStatus = Completer<void>();
+  _scheduleHeartBeat(isBackground);
   _logger.info("Initializing...");
   InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
@@ -134,6 +151,40 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
   ));
 }
 
+Future<void> _scheduleHeartBeat(bool isBackground) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setInt(
+      isBackground ? kLastBGTaskHeartBeatTime : kLastFGTaskHeartBeatTime,
+      DateTime.now().microsecondsSinceEpoch);
+  Future.delayed(kHeartBeatFrequency, () async {
+    await _scheduleHeartBeat(isBackground);
+  });
+}
+
+Future<bool> _isRunningInForeground() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.reload();
+  final currentTime = DateTime.now().microsecondsSinceEpoch;
+  return (prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0) >
+      (currentTime - kFGTaskDeathTimeoutInMicroseconds);
+}
+
+void _scheduleBGTaskKill(String taskId) async {
+  if (await _isRunningInForeground()) {
+    _logger.info("Found app in FG, committing seppuku.");
+    await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
+        ProcessType.background.toString(),
+        DateTime.now().microsecondsSinceEpoch);
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(kLastBGTaskHeartBeatTime);
+    BackgroundFetch.finish(taskId);
+    return;
+  }
+  Future.delayed(kHeartBeatFrequency, () async {
+    _scheduleBGTaskKill(taskId);
+  });
+}
+
 class EnteApp extends StatelessWidget with WidgetsBindingObserver {
   static const _homeWidget = const HomeWidget();
 
@@ -172,6 +223,8 @@ class EnteApp extends StatelessWidget with WidgetsBindingObserver {
           requiredNetworkType: NetworkType.NONE,
         ), (String taskId) async {
       await _runInBackground(taskId);
+    }, (taskId) {
+      BackgroundFetch.finish(taskId);
     }).then((int status) {
       _logger.info('[BackgroundFetch] configure success: $status');
     }).catchError((e) {
