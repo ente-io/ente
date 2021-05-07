@@ -2,13 +2,14 @@ import { B64EncryptionResult } from 'services/uploadService';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { errorCodes } from './errorUtil';
 
 export const getActualKey = async () => {
     const encryptionKeyAttributes: B64EncryptionResult = getKey(
         SESSION_KEYS.ENCRYPTION_KEY
     );
-    if (!encryptionKeyAttributes) {
-        return;
+    if (!encryptionKeyAttributes?.encryptedData) {
+        throw new Error(errorCodes.ERR_KEY_MISSING);
     }
     const cryptoWorker = await new CryptoWorker();
     const key: string = await cryptoWorker.decryptB64(
