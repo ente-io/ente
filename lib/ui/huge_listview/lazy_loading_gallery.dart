@@ -140,10 +140,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   void didUpdateWidget(LazyLoadingGallery oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!listEquals(_files, widget.files)) {
-      setState(() {
-        _reloadEventSubscription.cancel();
-        _init();
-      });
+      _reloadEventSubscription.cancel();
+      _init();
     }
   }
 
@@ -231,9 +229,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void didUpdateWidget(LazyLoadingGridView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!listEquals(widget.files, oldWidget.files)) {
-      setState(() {
-        _shouldRender = widget.shouldRender;
-      });
+      _shouldRender = widget.shouldRender;
     }
   }
 
