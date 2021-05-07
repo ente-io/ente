@@ -16,6 +16,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import 'package:photos/main.dart';
 import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
@@ -30,8 +31,6 @@ class FileUploader {
   static const kMaximumConcurrentUploads = 4;
   static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
-  static const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
-  static const kBGHeartBeatFrequency = Duration(seconds: 1);
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
 
   final _logger = Logger("FileUploader");
@@ -64,9 +63,7 @@ class FileUploader {
         _processType.toString(), currentTime);
     await _uploadLocks
         .releaseAllLocksAcquiredBefore(currentTime - kSafeBufferForLockExpiry);
-    if (isBackground) {
-      _scheduleBGHeartBeat();
-    } else {
+    if (!isBackground) {
       await _prefs.reload();
       final isBGTaskDead = (_prefs.getInt(kLastBGTaskHeartBeatTime) ?? 0) <
           (currentTime - kBGTaskDeathTimeout);
@@ -592,14 +589,6 @@ class FileUploader {
         throw e;
       }
     }
-  }
-
-  Future<void> _scheduleBGHeartBeat() async {
-    await _prefs.setInt(
-        kLastBGTaskHeartBeatTime, DateTime.now().microsecondsSinceEpoch);
-    Future.delayed(kBGHeartBeatFrequency, () async {
-      await _scheduleBGHeartBeat();
-    });
   }
 
   Future<void> _pollBackgroundUploadStatus() async {
