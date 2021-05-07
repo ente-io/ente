@@ -324,6 +324,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (isActive) {
                 return;
               }
+              if (_currentSubscription.paymentProvider == kStripe) {
+                showErrorDialog(context, "sorry",
+                    "please visit photos.ente.io to manage your subscription");
+                return;
+              }
               await _dialog.show();
               if (_usageFuture != null) {
                 final usage = await _usageFuture;

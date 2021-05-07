@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 const kFreeProductID = "free";
+const kStripe = "stripe";
 
 class Subscription {
   final int id;
@@ -25,10 +26,10 @@ class Subscription {
 
   Subscription copyWith({
     int id,
-    int productID,
+    String productID,
     int storage,
-    int originalTransactionID,
-    int paymentProvider,
+    String originalTransactionID,
+    String paymentProvider,
     int expiryTime,
   }) {
     return Subscription(
