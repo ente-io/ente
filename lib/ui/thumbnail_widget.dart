@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
