@@ -290,6 +290,7 @@ export default function Gallery() {
                 syncWithRemote={syncWithRemote}
                 setDialogMessage={setDialogMessage}
                 setCollectionNamerAttributes={setCollectionNamerAttributes}
+                startLoadingBar={loadingBar.current?.continuousStart}
             />
             <CollectionNamer
                 show={collectionNamerView}

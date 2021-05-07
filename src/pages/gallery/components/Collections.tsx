@@ -21,6 +21,7 @@ interface CollectionProps {
     setDialogMessage: SetDialogMessage;
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    startLoadingBar: () => void;
 }
 
 const Container = styled.div`
@@ -93,6 +94,7 @@ export default function Collections(props: CollectionProps) {
         collections: props.collections,
         selectedCollectionID,
         setDialogMessage: props.setDialogMessage,
+        startLoadingBar: props.startLoadingBar,
         showCollectionShareModal: setCollectionShareModalView.bind(null, true),
         redirectToAll: selectCollection.bind(null, null),
     });
@@ -127,7 +129,7 @@ export default function Collections(props: CollectionProps) {
                         >
                             {item.name}
                             {item.type != CollectionType.favorites &&
-                                item.owner.id === user?.id ? (
+                            item.owner.id === user?.id ? (
                                 <OverlayTrigger
                                     rootClose
                                     trigger="click"
