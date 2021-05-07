@@ -146,7 +146,7 @@ export const syncCollections = async () => {
     try {
         key = await getActualKey();
     } catch (e) {
-        throw new Error(errorCodes.ERR_MULTIPLE_TABS);
+        throw e;
     }
     const updatedCollections =
         (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
