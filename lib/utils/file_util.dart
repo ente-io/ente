@@ -206,5 +206,11 @@ void clearCache(File file) {
   } else {
     DefaultCacheManager().removeFile(file.getDownloadUrl());
   }
-  ThumbnailCacheManager.instance.removeFile(file.getThumbnailUrl());
+  final cachedThumbnail = io.File(
+      Configuration.instance.getThumbnailCacheDirectory() +
+          "/" +
+          file.uploadedFileID.toString());
+  if (cachedThumbnail.existsSync()) {
+    cachedThumbnail.deleteSync();
+  }
 }

@@ -7,7 +7,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
-import 'package:photos/core/cache/thumbnail_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
@@ -15,6 +14,8 @@ import 'package:photos/core/network.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
+
+import 'dart:io' as io;
 
 final _logger = Logger("ThumbnailUtil");
 final _map = LinkedHashMap<int, FileDownloadItem>();
@@ -30,31 +31,27 @@ class FileDownloadItem {
 }
 
 Future<Uint8List> getThumbnailFromServer(File file) async {
-  return ThumbnailCacheManager.instance
-      .getFileFromCache(file.getThumbnailUrl())
-      .then((info) {
-    if (info == null) {
-      if (!_map.containsKey(file.uploadedFileID)) {
-        if (_queue.length == kMaximumConcurrentDownloads) {
-          final id = _queue.removeFirst();
-          final item = _map.remove(id);
-          item.cancelToken.cancel();
-          item.completer.completeError(RequestCancelledError());
-        }
-        final item =
-            FileDownloadItem(file, Completer<Uint8List>(), CancelToken());
-        _map[file.uploadedFileID] = item;
-        _queue.add(file.uploadedFileID);
-        _downloadItem(item);
-        return item.completer.future;
-      } else {
-        return _map[file.uploadedFileID].completer.future;
-      }
-    } else {
-      ThumbnailLruCache.put(file, info.file.readAsBytesSync());
-      return info.file.readAsBytes();
+  final cachedThumbnail = getCachedThumbnail(file);
+  if (cachedThumbnail.existsSync()) {
+    final data = cachedThumbnail.readAsBytesSync();
+    ThumbnailLruCache.put(file, data);
+    return data;
+  }
+  if (!_map.containsKey(file.uploadedFileID)) {
+    if (_queue.length == kMaximumConcurrentDownloads) {
+      final id = _queue.removeFirst();
+      final item = _map.remove(id);
+      item.cancelToken.cancel();
+      item.completer.completeError(RequestCancelledError());
     }
-  });
+    final item = FileDownloadItem(file, Completer<Uint8List>(), CancelToken());
+    _map[file.uploadedFileID] = item;
+    _queue.add(file.uploadedFileID);
+    _downloadItem(item);
+    return item.completer.future;
+  } else {
+    return _map[file.uploadedFileID].completer.future;
+  }
 }
 
 void removePendingGetThumbnailRequestIfAny(File file) {
@@ -110,12 +107,11 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     data = await compressThumbnail(data);
   }
   ThumbnailLruCache.put(item.file, data);
-  ThumbnailCacheManager.instance.putFile(
-    file.getThumbnailUrl(),
-    data,
-    eTag: file.getThumbnailUrl(),
-    maxAge: Duration(days: 365),
-  );
+  final cachedThumbnail = getCachedThumbnail(item.file);
+  if (cachedThumbnail.existsSync()) {
+    cachedThumbnail.deleteSync();
+  }
+  cachedThumbnail.writeAsBytes(data);
   if (_map.containsKey(file.uploadedFileID)) {
     try {
       item.completer.complete(data);
@@ -124,4 +120,10 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
           file.uploadedFileID.toString());
     }
   }
+}
+
+io.File getCachedThumbnail(File file) {
+  final thumbnailCacheDirectory =
+      Configuration.instance.getThumbnailCacheDirectory();
+  return io.File(thumbnailCacheDirectory + "/" + file.uploadedFileID.toString());
 }

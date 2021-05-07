@@ -54,6 +54,7 @@ class Configuration {
   String _secretKey;
   FlutterSecureStorage _secureStorage;
   String _tempDirectory;
+  String _thumbnailCacheDirectory;
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
@@ -76,6 +77,8 @@ class Configuration {
       _logger.warning(e);
     }
     tempDirectory.createSync(recursive: true);
+    _thumbnailCacheDirectory = (await getTemporaryDirectory()).path + "/thumbnail-cache";
+    io.Directory(_thumbnailCacheDirectory).createSync(recursive: true);
     if (!_preferences.containsKey(tokenKey)) {
       await _secureStorage.deleteAll();
     } else {
@@ -365,6 +368,10 @@ class Configuration {
   // Caution: This directory is cleared on app start
   String getTempDirectory() {
     return _tempDirectory;
+  }
+
+  String getThumbnailCacheDirectory() {
+    return _thumbnailCacheDirectory;
   }
 
   bool hasConfiguredAccount() {
