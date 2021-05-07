@@ -222,6 +222,7 @@ export default function Gallery() {
         collectionName: string,
         collection: Collection
     ) => {
+        loadingBar.current?.continuousStart();
         addFilesToCollection(
             setCollectionSelectorView,
             selected,
@@ -232,7 +233,6 @@ export default function Gallery() {
             collectionName,
             collection
         );
-        loadingBar.current?.continuousStart();
     };
 
     const showCreateCollectionModal = () =>
@@ -245,12 +245,12 @@ export default function Gallery() {
         });
 
     const deleteFileHelper = () => {
+        loadingBar.current?.continuousStart();
         deleteFiles(
             getSelectedFileIds(selected),
             clearSelection,
             syncWithRemote
         );
-        loadingBar.current?.continuousStart();
     };
     return (
         <FullScreenDropZone
