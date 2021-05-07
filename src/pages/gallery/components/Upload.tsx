@@ -9,6 +9,7 @@ import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import { SetLoading } from '..';
+import { SetDialogMessage } from 'components/MessageDialog';
 
 interface Props {
     syncWithRemote: () => Promise<void>;
@@ -19,6 +20,7 @@ interface Props {
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setLoading: SetLoading;
+    setDialogMessage: SetDialogMessage;
 }
 
 export enum UPLOAD_STRATEGY {
@@ -142,24 +144,35 @@ export default function Upload(props: Props) {
         collectionName
     ) => {
         try {
-            setProgressView(true);
-
-            if (strategy == UPLOAD_STRATEGY.SINGLE_COLLECTION) {
-                let collection = await createAlbum(collectionName);
-
-                return await uploadFilesToExistingCollection(collection);
-            }
-            const collectionWiseFiles = getCollectionWiseFiles();
             let filesWithCollectionToUpload = new Array<FileWithCollection>();
-            for (let [collectionName, files] of collectionWiseFiles) {
-                let collection = await createAlbum(collectionName);
-                for (let file of files) {
-                    filesWithCollectionToUpload.push({ collection, file });
+            try {
+                if (strategy == UPLOAD_STRATEGY.SINGLE_COLLECTION) {
+                    let collection = await createAlbum(collectionName);
+
+                    return await uploadFilesToExistingCollection(collection);
                 }
+                const collectionWiseFiles = getCollectionWiseFiles();
+                for (let [collectionName, files] of collectionWiseFiles) {
+                    let collection = await createAlbum(collectionName);
+                    for (let file of files) {
+                        filesWithCollectionToUpload.push({ collection, file });
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to create album', e);
+                props.setDialogMessage({
+                    title: constants.ERROR,
+                    staticBackdrop: true,
+                    close: { variant: 'danger' },
+                    content: constants.CREATE_ALBUM_FAILED,
+                });
+                throw e;
             }
+            setProgressView(true);
             await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
             console.error('Failed to upload files to new collections', e);
+            setProgressView(false);
         }
     };
 
@@ -179,6 +192,7 @@ export default function Upload(props: Props) {
             );
         } catch (err) {
             props.setBannerMessage(err.message);
+            throw err;
         } finally {
             props.syncWithRemote();
         }

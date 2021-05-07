@@ -310,6 +310,7 @@ export default function Gallery() {
                 )}
                 setLoading={setLoading}
                 setCollectionNamerAttributes={setCollectionNamerAttributes}
+                setDialogMessage={setDialogMessage}
             />
             <Sidebar
                 files={files}
