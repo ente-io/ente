@@ -196,7 +196,7 @@ export default function Gallery() {
                         },
                     });
                     break;
-                case errorCodes.ERR_MULTIPLE_TABS:
+                case errorCodes.ERR_KEY_MISSING:
                     clearKeys();
                     router.push('/credentials');
                     break;

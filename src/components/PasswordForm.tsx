@@ -114,11 +114,16 @@ function SetPassword(props: Props) {
                             </Form>
                         )}
                     </Formik>
-                    <div className="text-center" style={{ marginTop: '20px' }}>
-                        <Button variant="link" onClick={props.back}>
-                            {constants.GO_BACK}
-                        </Button>
-                    </div>
+                    {props.back && (
+                        <div
+                            className="text-center"
+                            style={{ marginTop: '20px' }}
+                        >
+                            <Button variant="link" onClick={props.back}>
+                                {constants.GO_BACK}
+                            </Button>
+                        </div>
+                    )}
                 </Card.Body>
             </Card>
         </Container>
