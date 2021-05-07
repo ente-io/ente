@@ -126,11 +126,11 @@ function PhotoSwipe(props: Iprops) {
         const { favItemIds } = props;
         if (!isInFav(file)) {
             favItemIds.add(file.id);
-            await addToFavorites(file);
+            addToFavorites(file);
             setIsFav(true);
         } else {
             favItemIds.delete(file.id);
-            await removeFromFavorites(file);
+            removeFromFavorites(file);
             setIsFav(false);
         }
         needUpdate.current = true;
