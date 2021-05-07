@@ -179,6 +179,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 TabChangedEventSource.page_view,
               ));
             },
+            physics: NeverScrollableScrollPhysics(),
             controller: _pageController,
           ),
           Align(
