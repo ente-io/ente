@@ -218,15 +218,22 @@ export default function Gallery() {
     if (!files) {
         return <div />;
     }
-    const addToCollectionHelper = addFilesToCollection.bind(
-        null,
-        setCollectionSelectorView,
-        selected,
-        files,
-        clearSelection,
-        syncWithRemote,
-        selectCollection
-    );
+    const addToCollectionHelper = (
+        collectionName: string,
+        collection: Collection
+    ) => {
+        addFilesToCollection(
+            setCollectionSelectorView,
+            selected,
+            files,
+            clearSelection,
+            syncWithRemote,
+            selectCollection,
+            collectionName,
+            collection
+        );
+        loadingBar.current?.continuousStart();
+    };
 
     const showCreateCollectionModal = () =>
         setCollectionNamerAttributes({
@@ -237,12 +244,14 @@ export default function Gallery() {
                 addToCollectionHelper(collectionName, null),
         });
 
-    const deleteFileHelper = () =>
+    const deleteFileHelper = () => {
         deleteFiles(
             getSelectedFileIds(selected),
             clearSelection,
             syncWithRemote
         );
+        loadingBar.current?.continuousStart();
+    };
     return (
         <FullScreenDropZone
             getRootProps={getRootProps}
