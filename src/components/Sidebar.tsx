@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { slide as Menu } from 'react-burger-menu';
 import billingService, { Subscription } from 'services/billingService';
 import constants from 'utils/strings/constants';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getToken } from 'utils/common/key';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { Button } from 'react-bootstrap';
@@ -214,7 +214,10 @@ export default function Sidebar(props: Props) {
             </>
             <LinkButton
                 style={{ marginTop: '30px' }}
-                onClick={() => router.push('changePassword')}
+                onClick={() => {
+                    setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
+                    router.push('changePassword');
+                }}
             >
                 {constants.CHANGE_PASSWORD}
             </LinkButton>

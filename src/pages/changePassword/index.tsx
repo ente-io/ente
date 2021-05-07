@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import constants from 'utils/strings/constants';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { B64EncryptionResult } from 'services/uploadService';
@@ -66,14 +66,21 @@ export default function Generate() {
         );
 
         setSessionKeys(key);
+        redirectToGallery();
+    };
+    const redirectToGallery = () => {
+        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
         router.push('/gallery');
     };
-
     return (
         <PasswordForm
             callback={onSubmit}
             buttonText={constants.CHANGE_PASSWORD}
-            back={() => router.push('/gallery')}
+            back={
+                getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
+                    ? redirectToGallery
+                    : null
+            }
         />
     );
 }
