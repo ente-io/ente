@@ -35,7 +35,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.tag,
     this.currentIndexStream, {
     Key key,
-  }) : super(key: key);
+  }) : super(key: key ?? UniqueKey());
 
   @override
   _LazyLoadingGalleryState createState() => _LazyLoadingGalleryState();
@@ -201,7 +201,7 @@ class LazyLoadingGridView extends StatefulWidget {
     this.shouldRender,
     this.shouldRecycle, {
     Key key,
-  }) : super(key: key ?? GlobalKey<_LazyLoadingGridViewState>());
+  }) : super(key: key ?? UniqueKey());
 
   @override
   _LazyLoadingGridViewState createState() => _LazyLoadingGridViewState();
@@ -248,7 +248,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   Widget _getRecyclableView() {
     return VisibilityDetector(
-      key: Key(widget.tag + widget.files[0].creationTime.toString()),
+      key: UniqueKey(),
       onVisibilityChanged: (visibility) {
         final shouldRender = visibility.visibleFraction > 0;
         if (mounted && shouldRender != _shouldRender) {
@@ -266,7 +266,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   Widget _getNonRecyclableView() {
     if (!_shouldRender) {
       return VisibilityDetector(
-        key: Key(widget.tag + widget.files[0].creationTime.toString()),
+        key: UniqueKey(),
         onVisibilityChanged: (visibility) {
           if (mounted && visibility.visibleFraction > 0 && !_shouldRender) {
             setState(() {
