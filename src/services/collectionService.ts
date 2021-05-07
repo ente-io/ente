@@ -8,7 +8,8 @@ import { B64EncryptionResult } from './uploadService';
 import { getActualKey, getToken } from 'utils/common/key';
 import { getPublicKey, User } from './userService';
 import CryptoWorker from 'utils/crypto';
-import { errorCodes, ErrorHandler } from 'utils/common/errorUtil';
+import { SetDialogMessage } from 'components/MessageDialog';
+import constants from 'utils/strings/constants';
 
 const ENDPOINT = getEndpoint();
 
@@ -386,7 +387,8 @@ const removeFromCollection = async (collection: Collection, files: File[]) => {
 export const deleteCollection = async (
     collectionID: number,
     syncWithRemote: () => Promise<void>,
-    redirectToAll: () => void
+    redirectToAll: () => void,
+    setDialogMessage: SetDialogMessage
 ) => {
     try {
         const token = getToken();
@@ -401,6 +403,11 @@ export const deleteCollection = async (
         redirectToAll();
     } catch (e) {
         console.error('delete collection failed ', e);
+        setDialogMessage({
+            title: constants.ERROR,
+            content: constants.DELETE_COLLECTION_FAILED,
+            close: { variant: 'danger' },
+        });
     }
 };
 

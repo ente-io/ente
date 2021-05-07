@@ -95,7 +95,8 @@ const CollectionOptions = (props: Props) => {
                                             props.selectedCollectionID,
 
                                             props.syncWithRemote,
-                                            props.redirectToAll
+                                            props.redirectToAll,
+                                            props.setDialogMessage
                                         ),
                                         variant: 'danger',
                                     },
