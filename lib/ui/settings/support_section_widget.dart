@@ -56,7 +56,26 @@ class SupportSectionWidget extends StatelessWidget {
               showGenericErrorDialog(context);
             }
           },
-          onLongPress: () async {
+          child: SettingsTextItem(text: "email", icon: Icons.navigate_next),
+        ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return CrispChatPage();
+                },
+              ),
+            );
+          },
+          child: SettingsTextItem(text: "chat", icon: Icons.navigate_next),
+        ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
             final dialog = createProgressDialog(context, "preparing logs...");
             await dialog.show();
             final tempPath = (await getTemporaryDirectory()).path;
@@ -75,25 +94,12 @@ class SupportSectionWidget extends StatelessWidget {
             try {
               await FlutterEmailSender.send(email);
             } catch (e) {
-              return Share.shareFiles([zipFilePath]);
+              await Share.shareFiles([zipFilePath]);
             }
             showToast("thanks for reporting a bug!");
           },
-          child: SettingsTextItem(text: "email", icon: Icons.navigate_next),
-        ),
-        Divider(height: 4),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return CrispChatPage();
-                },
-              ),
-            );
-          },
-          child: SettingsTextItem(text: "chat", icon: Icons.navigate_next),
+          child: SettingsTextItem(
+              text: "report bug 🐞", icon: Icons.navigate_next),
         ),
       ]),
     );
