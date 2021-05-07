@@ -5,7 +5,7 @@ export const errorCodes = {
     ERR_NO_ACTIVE_SUBSCRIPTION: '402',
     ERR_NO_INTERNET_CONNECTION: '1',
     ERR_SESSION_EXPIRED: '401',
-    ERR_MULTIPLE_TABS: '2',
+    ERR_KEY_MISSING: '2',
 };
 
 const AXIOS_NETWORK_ERROR = 'Network Error';

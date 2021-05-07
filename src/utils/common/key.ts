@@ -1,18 +1,21 @@
+import { B64EncryptionResult } from 'services/uploadService';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { errorCodes } from './errorUtil';
 
 export const getActualKey = async () => {
-    const session = getData(LS_KEYS.SESSION);
-    if (session == null) {
-        return;
+    const encryptionKeyAttributes: B64EncryptionResult = getKey(
+        SESSION_KEYS.ENCRYPTION_KEY
+    );
+    if (!encryptionKeyAttributes?.encryptedData) {
+        throw new Error(errorCodes.ERR_KEY_MISSING);
     }
     const cryptoWorker = await new CryptoWorker();
-    const encryptedKey = getKey(SESSION_KEYS.ENCRYPTION_KEY)?.encryptionKey;
     const key: string = await cryptoWorker.decryptB64(
-        encryptedKey,
-        session.sessionNonce,
-        session.sessionKey
+        encryptionKeyAttributes.encryptedData,
+        encryptionKeyAttributes.nonce,
+        encryptionKeyAttributes.key
     );
     return key;
 };

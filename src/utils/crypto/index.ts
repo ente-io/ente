@@ -45,11 +45,7 @@ export async function generateAndSaveIntermediateKeyAttributes(
 export const setSessionKeys = async (key: string) => {
     const cryptoWorker = await new CryptoWorker();
     const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
-    const sessionKey = sessionKeyAttributes.key;
-    const sessionNonce = sessionKeyAttributes.nonce;
-    const encryptionKey = sessionKeyAttributes.encryptedData;
-    setKey(SESSION_KEYS.ENCRYPTION_KEY, { encryptionKey });
-    setData(LS_KEYS.SESSION, { sessionKey, sessionNonce });
+    setKey(SESSION_KEYS.ENCRYPTION_KEY, sessionKeyAttributes);
 };
 
 export const getRecoveryKey = async () => {
