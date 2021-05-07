@@ -6,6 +6,7 @@ export enum LS_KEYS {
     PLANS = 'plans',
     IS_FIRST_LOGIN = 'isFirstLogin',
     JUST_SIGNED_UP = 'justSignedUp',
+    SHOW_BACK_BUTTON = 'showBackButton',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {
