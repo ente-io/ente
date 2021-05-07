@@ -172,17 +172,21 @@ Future<bool> _isRunningInForeground() async {
 void _scheduleBGTaskKill(String taskId) async {
   if (await _isRunningInForeground()) {
     _logger.info("Found app in FG, committing seppuku.");
-    await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
-        ProcessType.background.toString(),
-        DateTime.now().microsecondsSinceEpoch);
-    final prefs = await SharedPreferences.getInstance();
-    prefs.remove(kLastBGTaskHeartBeatTime);
-    BackgroundFetch.finish(taskId);
+    await _killBGTask(taskId);
     return;
   }
   Future.delayed(kHeartBeatFrequency, () async {
     _scheduleBGTaskKill(taskId);
   });
+}
+
+Future<void> _killBGTask(String taskId) async {
+  await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
+      ProcessType.background.toString(),
+      DateTime.now().microsecondsSinceEpoch);
+  final prefs = await SharedPreferences.getInstance();
+  prefs.remove(kLastBGTaskHeartBeatTime);
+  BackgroundFetch.finish(taskId);
 }
 
 class EnteApp extends StatelessWidget with WidgetsBindingObserver {
@@ -224,7 +228,8 @@ class EnteApp extends StatelessWidget with WidgetsBindingObserver {
         ), (String taskId) async {
       await _runInBackground(taskId);
     }, (taskId) {
-      BackgroundFetch.finish(taskId);
+      _logger.info("BG task timeout");
+      _killBGTask(taskId);
     }).then((int status) {
       _logger.info('[BackgroundFetch] configure success: $status');
     }).catchError((e) {
