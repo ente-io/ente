@@ -17,7 +17,7 @@ export const CollectionIcon = styled.div`
 `;
 
 export interface CollectionSelectorAttributes {
-    callback: (collection) => Promise<void>;
+    callback: (collection) => void;
     showNextModal: () => void;
     title: string;
 }
