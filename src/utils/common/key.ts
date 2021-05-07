@@ -7,7 +7,7 @@ export const getActualKey = async () => {
     const encryptionKeyAttributes: B64EncryptionResult = getKey(
         SESSION_KEYS.ENCRYPTION_KEY
     );
-    if (encryptionKeyAttributes) {
+    if (!encryptionKeyAttributes) {
         return;
     }
     const cryptoWorker = await new CryptoWorker();
