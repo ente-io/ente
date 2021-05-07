@@ -168,7 +168,7 @@ export const syncCollections = async () => {
         }
     });
 
-    let collections = [],
+    let collections: Collection[] = [],
         updationTime = await localForage.getItem<number>(
             COLLECTION_UPDATION_TIME
         );
@@ -281,7 +281,8 @@ export const createCollection = async (
         );
         return createdCollection;
     } catch (e) {
-        console.error('Add collection failed', e);
+        console.error('create collection failed', e);
+        throw e;
     }
 };
 
@@ -298,7 +299,7 @@ const postCollection = async (
         );
         return response.data.collection;
     } catch (e) {
-        console.error('create Collection failed ', e);
+        console.error('post Collection failed ', e);
     }
 };
 

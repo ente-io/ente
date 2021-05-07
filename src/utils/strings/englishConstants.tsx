@@ -272,8 +272,8 @@ const englishConstants = {
         <>
             <p>are you sure you want to delete this album?</p>
             <p>
-                {' '}
-                all files that are present only in this album will be permanently deleted
+                all files that are present only in this album will be
+                permanently deleted
             </p>
         </>
     ),
@@ -284,7 +284,7 @@ const englishConstants = {
     ZERO_SHAREES: () => (
         <>
             <p>currently shared with no one 😔</p>
-            <em style={{ color: "#777" }}>"memories are fonder when shared"</em>
+            <em style={{ color: '#777' }}>"memories are fonder when shared"</em>
         </>
     ),
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
@@ -292,6 +292,7 @@ const englishConstants = {
         `oops, you're already sharing this with ${email}`,
     SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
+    CREATE_ALBUM_FAILED: 'failed to create album , please try again',
 };
 
 export default englishConstants;

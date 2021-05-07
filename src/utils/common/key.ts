@@ -5,19 +5,21 @@ import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { errorCodes } from './errorUtil';
 
 export const getActualKey = async () => {
-    const encryptionKeyAttributes: B64EncryptionResult = getKey(
-        SESSION_KEYS.ENCRYPTION_KEY
-    );
-    if (!encryptionKeyAttributes?.encryptedData) {
+    try {
+        const encryptionKeyAttributes: B64EncryptionResult = getKey(
+            SESSION_KEYS.ENCRYPTION_KEY
+        );
+
+        const cryptoWorker = await new CryptoWorker();
+        const key: string = await cryptoWorker.decryptB64(
+            encryptionKeyAttributes.encryptedData,
+            encryptionKeyAttributes.nonce,
+            encryptionKeyAttributes.key
+        );
+        return key;
+    } catch (e) {
         throw new Error(errorCodes.ERR_KEY_MISSING);
     }
-    const cryptoWorker = await new CryptoWorker();
-    const key: string = await cryptoWorker.decryptB64(
-        encryptionKeyAttributes.encryptedData,
-        encryptionKeyAttributes.nonce,
-        encryptionKeyAttributes.key
-    );
-    return key;
 };
 
 export const getStripePublishableKey = () =>

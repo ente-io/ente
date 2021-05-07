@@ -5,6 +5,7 @@ import constants from 'utils/strings/constants';
 export interface MessageAttributes {
     title?: string;
     staticBackdrop?: boolean;
+    content?: any;
     close?: { text?: string; variant?: string };
     proceed?: {
         text: string;
@@ -12,7 +13,6 @@ export interface MessageAttributes {
         variant: string;
         disabled?: boolean;
     };
-    content?: any;
 }
 
 export type SetDialogMessage = React.Dispatch<
