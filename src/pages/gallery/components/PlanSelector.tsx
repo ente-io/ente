@@ -277,7 +277,8 @@ function PlanSelector(props: Props) {
                             )}
                             <LinkButton
                                 variant="primary"
-                                onClick={updatePaymentMethod(
+                                onClick={updatePaymentMethod.bind(
+                                    null,
                                     props.setDialogMessage,
                                     props.setLoading
                                 )}
