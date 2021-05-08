@@ -207,8 +207,7 @@ function PlanSelector(props: Props) {
                         justifyContent: 'space-around',
                         flexWrap: 'wrap',
                         minHeight: '212px',
-                        marginTop: '24px',
-                        marginBottom: '36px',
+                        margin: '24px 0',
                     }}
                 >
                     {plans && PlanIcons}
