@@ -39,10 +39,7 @@ export default function MessageDialog({
             centered
             backdrop={attributes.staticBackdrop ? 'static' : 'true'}
         >
-            <Modal.Header
-                style={{ borderBottom: 'none' }}
-                closeButton={attributes.close != null}
-            >
+            <Modal.Header style={{ borderBottom: 'none' }} closeButton>
                 {attributes.title && (
                     <Modal.Title>
                         <strong>{attributes.title}</strong>
