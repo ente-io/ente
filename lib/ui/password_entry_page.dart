@@ -40,6 +40,16 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   final _passwordController1 = TextEditingController(),
       _passwordController2 = TextEditingController();
   double _passwordStrength = 0;
+  String _password;
+
+  @override
+  void initState() {
+    super.initState();
+    _password = Configuration.instance.getVolatilePassword();
+    if (_password != null) {
+      Future.delayed(Duration.zero, () => _showRecoveryCodeDialog(_password));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +58,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       title = "change password";
     } else if (widget.mode == PasswordEntryMode.reset) {
       title = "reset password";
+    } else if (_password != null) {
+      title = "encryption keys";
     }
     return Scaffold(
       appBar: AppBar(
@@ -61,6 +73,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   Widget _getBody(String buttonText) {
+    if (_password != null) {
+      return Container();
+    }
     return Column(
       children: [
         FlutterPasswordStrength(
@@ -190,7 +205,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           "the password you have chosen is too simple, please choose another one");
     } else {
       if (widget.mode == PasswordEntryMode.set) {
-        _showRecoveryCodeDialog();
+        _showRecoveryCodeDialog(_passwordController1.text);
       } else {
         _updatePassword();
       }
@@ -229,13 +244,12 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     }
   }
 
-  Future<void> _showRecoveryCodeDialog() async {
+  Future<void> _showRecoveryCodeDialog(String password) async {
     final dialog =
         createProgressDialog(context, "generating encryption keys...");
     await dialog.show();
     try {
-      final result =
-          await Configuration.instance.generateKey(_passwordController1.text);
+      final result = await Configuration.instance.generateKey(password);
       await dialog.hide();
       final onDone = () async {
         final dialog = createProgressDialog(context, "please wait...");
@@ -252,7 +266,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             (route) => route.isFirst,
           );
         } catch (e, s) {
-          Logger("PEP").severe(e, s);
+          _logger.severe(e, s);
           await dialog.hide();
           showGenericErrorDialog(context);
         }
@@ -261,7 +275,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         context: context,
         builder: (BuildContext context) {
           return RecoveryKeyDialog(
-              result.privateKeyAttributes.recoveryKey, "continue", onDone);
+            result.privateKeyAttributes.recoveryKey,
+            "continue",
+            onDone,
+            isDismissible: false,
+          );
         },
         barrierColor: Colors.black.withOpacity(0.85),
         barrierDismissible: false,

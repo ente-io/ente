@@ -55,6 +55,7 @@ class Configuration {
   FlutterSecureStorage _secureStorage;
   String _tempDirectory;
   String _thumbnailCacheDirectory;
+  String _volatilePassword;
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
@@ -77,7 +78,8 @@ class Configuration {
       _logger.warning(e);
     }
     tempDirectory.createSync(recursive: true);
-    _thumbnailCacheDirectory = (await getTemporaryDirectory()).path + "/thumbnail-cache";
+    _thumbnailCacheDirectory =
+        (await getTemporaryDirectory()).path + "/thumbnail-cache";
     io.Directory(_thumbnailCacheDirectory).createSync(recursive: true);
     if (!_preferences.containsKey(tokenKey)) {
       await _secureStorage.deleteAll();
@@ -243,9 +245,9 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
-    // if (kDebugMode) {
-    //   return "http://192.168.1.111:8080";
-    // }
+    if (kDebugMode) {
+      return "http://192.168.1.111:8080";
+    }
     return "https://api.ente.io";
   }
 
@@ -415,5 +417,13 @@ class Configuration {
 
   Future<void> setShouldHideFromRecents(bool value) {
     return _preferences.setBool(keyShouldHideFromRecents, value);
+  }
+
+  void setVolatilePassword(String volatilePassword) {
+    _volatilePassword = volatilePassword;
+  }
+
+  String getVolatilePassword() {
+    return _volatilePassword;
   }
 }

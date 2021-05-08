@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_password_strength/flutter_password_strength.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
@@ -21,14 +25,22 @@ class EmailEntryPage extends StatefulWidget {
 }
 
 class _EmailEntryPageState extends State<EmailEntryPage> {
+  static const kPasswordStrengthThreshold = 0.4;
+
+  static final _logger = Logger("EmailEntry");
+
   final _config = Configuration.instance;
+  final _passwordController1 = TextEditingController(),
+      _passwordController2 = TextEditingController();
+
   String _email;
-  String _name;
+  double _passwordStrength = 0;
+  bool _hasAgreedToTOS = true;
+  bool _hasAgreedToE2E = false;
 
   @override
   void initState() {
     _email = _config.getEmail();
-    _name = _config.getName();
     super.initState();
   }
 
@@ -44,181 +56,290 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     );
     return Scaffold(
       appBar: appBar,
-      body: _getBody(appBar.preferredSize.height),
+      body: _getBody(),
+      resizeToAvoidBottomInset: false,
     );
   }
 
-  Widget _getBody(final appBarSize) {
-    final pageSize = MediaQuery.of(context).size.height;
-    final notifySize = MediaQuery.of(context).padding.top;
-    return SingleChildScrollView(
-      child: Container(
-        height: pageSize - (appBarSize + notifySize),
-        padding: EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Padding(
-              padding: EdgeInsets.all(60),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-              child: TextFormField(
-                decoration: InputDecoration(
-                  hintText: 'name',
-                  hintStyle: TextStyle(
-                    color: Colors.white30,
-                  ),
-                  contentPadding: EdgeInsets.all(12),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _name = value;
-                  });
-                },
-                autocorrect: false,
-                keyboardType: TextInputType.text,
-                textCapitalization: TextCapitalization.words,
-                initialValue: _name,
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-              child: TextFormField(
-                decoration: InputDecoration(
-                  hintText: 'email',
-                  hintStyle: TextStyle(
-                    color: Colors.white30,
-                  ),
-                  contentPadding: EdgeInsets.all(12),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _email = value;
-                  });
-                },
-                autocorrect: false,
-                keyboardType: TextInputType.emailAddress,
-                initialValue: _email,
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "by clicking sign up, I agree to the ",
-                    ),
-                    TextSpan(
-                      text: "terms of service",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontFamily: 'Ubuntu',
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (BuildContext context) {
-                                return WebPage(
-                                    "terms", "https://ente.io/terms");
-                              },
-                            ),
-                          );
-                        },
-                    ),
-                    TextSpan(text: " and "),
-                    TextSpan(
-                      text: "privacy policy",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontFamily: 'Ubuntu',
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (BuildContext context) {
-                                return WebPage(
-                                    "privacy", "https://ente.io/privacy");
-                              },
-                            ),
-                          );
-                        },
-                    ),
-                  ],
-                  style: TextStyle(
-                    height: 1.25,
-                    fontSize: 12,
-                    fontFamily: 'Ubuntu',
-                    color: Colors.white70,
-                  ),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(4)),
-            Container(
-              width: double.infinity,
-              height: 64,
-              padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-              child: button(
-                "sign up",
-                onPressed: _email != null &&
-                        _email.isNotEmpty &&
-                        _name != null &&
-                        _name.isNotEmpty
-                    ? () {
-                        if (!isValidEmail(_email)) {
-                          showErrorDialog(context, "invalid email address",
-                              "please enter a valid email address.");
-                          return;
-                        }
-                        _config.setEmail(_email);
-                        _config.setName(_name);
-                        UserService.instance.getOtt(context, _email);
-                      }
-                    : null,
-                fontSize: 18,
-              ),
-            ),
-            Expanded(child: Container()),
-            Align(
-              alignment: Alignment.center,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  showModalBottomSheet<void>(
-                      context: context,
-                      backgroundColor: Theme.of(context).cardColor,
-                      builder: (BuildContext context) {
-                        return PricingWidget();
-                      });
-                },
-                child: Container(
-                  padding: EdgeInsets.all(32),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        "pricing",
-                      ),
-                      Icon(Icons.arrow_drop_up),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
+  Widget _getBody() {
+    return Column(
+      children: [
+        FlutterPasswordStrength(
+          password: _passwordController1.text,
+          backgroundColor: Colors.white.withOpacity(0.1),
+          strengthCallback: (strength) {
+            _passwordStrength = strength;
+          },
         ),
+        Expanded(child: Container()),
+        SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      hintText: 'email',
+                      hintStyle: TextStyle(
+                        color: Colors.white30,
+                      ),
+                      contentPadding: EdgeInsets.all(12),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _email = value;
+                      });
+                    },
+                    autocorrect: false,
+                    keyboardType: TextInputType.emailAddress,
+                    initialValue: _email,
+                  ),
+                ),
+                Padding(padding: EdgeInsets.all(8)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      hintText: "password",
+                      hintStyle: TextStyle(
+                        color: Colors.white30,
+                      ),
+                      contentPadding: EdgeInsets.all(12),
+                    ),
+                    controller: _passwordController1,
+                    autofocus: false,
+                    autocorrect: false,
+                    keyboardType: TextInputType.visiblePassword,
+                    onChanged: (_) {
+                      setState(() {});
+                    },
+                  ),
+                ),
+                Padding(padding: EdgeInsets.all(8)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      hintText: "confirm password",
+                      hintStyle: TextStyle(
+                        color: Colors.white30,
+                      ),
+                      contentPadding: EdgeInsets.all(12),
+                    ),
+                    controller: _passwordController2,
+                    autofocus: false,
+                    autocorrect: false,
+                    obscureText: true,
+                    keyboardType: TextInputType.visiblePassword,
+                    onChanged: (_) {
+                      setState(() {});
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(20),
+                ),
+                _getAgreement(),
+                Padding(padding: EdgeInsets.all(16)),
+                Container(
+                  width: double.infinity,
+                  height: 64,
+                  padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+                  child: button(
+                    "sign up",
+                    onPressed: _isFormValid()
+                        ? () {
+                            if (!isValidEmail(_email)) {
+                              showErrorDialog(context, "invalid email address",
+                                  "please enter a valid email address.");
+                            } else if (_passwordController1.text !=
+                                _passwordController2.text) {
+                              showErrorDialog(context, "uhm...",
+                                  "the passwords you entered don't match");
+                            } else if (_passwordStrength <
+                                kPasswordStrengthThreshold) {
+                              showErrorDialog(context, "weak password",
+                                  "the password you have chosen is too simple, please choose another one");
+                            } else {
+                              _config.setVolatilePassword(
+                                  _passwordController1.text);
+                              _config.setEmail(_email);
+                              UserService.instance.getOtt(context, _email);
+                            }
+                          }
+                        : null,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(child: Container()),
+      ],
+    );
+  }
+
+  Container _getAgreement() {
+    return Container(
+      padding: const EdgeInsets.only(left: 20, right: 20),
+      child: Column(
+        children: [
+          _getTOSAgreement(),
+          _getPasswordAgreement(),
+        ],
       ),
     );
+  }
+
+  Widget _getTOSAgreement() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _hasAgreedToTOS = !_hasAgreedToTOS;
+        });
+      },
+      behavior: HitTestBehavior.translucent,
+      child: Row(
+        children: [
+          Checkbox(
+              value: _hasAgreedToTOS,
+              onChanged: (value) {
+                setState(() {
+                  _hasAgreedToTOS = value;
+                });
+              }),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "I agree to the ",
+                  ),
+                  TextSpan(
+                    text: "terms of service",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontFamily: 'Ubuntu',
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return WebPage("terms", "https://ente.io/terms");
+                            },
+                          ),
+                        );
+                      },
+                  ),
+                  TextSpan(text: " and "),
+                  TextSpan(
+                    text: "privacy policy",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontFamily: 'Ubuntu',
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return WebPage(
+                                  "privacy", "https://ente.io/privacy");
+                            },
+                          ),
+                        );
+                      },
+                  ),
+                ],
+                style: TextStyle(
+                  height: 1.25,
+                  fontSize: 12,
+                  fontFamily: 'Ubuntu',
+                  color: Colors.white70,
+                ),
+              ),
+              textAlign: TextAlign.left,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _getPasswordAgreement() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _hasAgreedToE2E = !_hasAgreedToE2E;
+        });
+      },
+      behavior: HitTestBehavior.translucent,
+      child: Row(
+        children: [
+          Checkbox(
+              value: _hasAgreedToE2E,
+              onChanged: (value) {
+                setState(() {
+                  _hasAgreedToE2E = value;
+                });
+              }),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text:
+                        "I understand that if I lose my password, I may lose my data since my data is ",
+                  ),
+                  TextSpan(
+                    text: "end-to-end encrypted",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontFamily: 'Ubuntu',
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return WebPage(
+                                  "encryption", "https://ente.io/encryption");
+                            },
+                          ),
+                        );
+                      },
+                  ),
+                  TextSpan(text: " with ente"),
+                ],
+                style: TextStyle(
+                  height: 1.5,
+                  fontSize: 12,
+                  fontFamily: 'Ubuntu',
+                  color: Colors.white70,
+                ),
+              ),
+              textAlign: TextAlign.left,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _isFormValid() {
+    return _email != null &&
+        _email.isNotEmpty &&
+        _passwordController1.text.isNotEmpty &&
+        _passwordController2.text.isNotEmpty &&
+        _hasAgreedToTOS &&
+        _hasAgreedToE2E;
   }
 }
 
@@ -245,7 +366,10 @@ class PricingWidget extends StatelessWidget {
   Container _buildPlans(BuildContext context, BillingPlans plans) {
     final planWidgets = List<BillingPlanWidget>();
     for (final plan in plans.plans) {
-      planWidgets.add(BillingPlanWidget(plan));
+      final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
+      if (productID != null && productID.isNotEmpty) {
+        planWidgets.add(BillingPlanWidget(plan));
+      }
     }
     final freePlan = plans.freePlan;
     return Container(
@@ -261,11 +385,14 @@ class PricingWidget extends StatelessWidget {
               fontSize: 18,
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: planWidgets,
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: planWidgets,
+            ),
           ),
-          Text("there is also a free trial of " +
+          Text("we offer a free trial of " +
               convertBytesToReadableFormat(freePlan.storage) +
               " for " +
               freePlan.duration.toString() +
