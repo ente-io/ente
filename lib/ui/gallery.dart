@@ -14,9 +14,11 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
+typedef GalleryLoader = Future<List<File>>
+    Function(int creationStartTime, int creationEndTime, {int limit, bool asc});
+
 class Gallery extends StatefulWidget {
-  final Future<List<File>> Function(int creationStartTime, int creationEndTime,
-      {int limit}) asyncLoader;
+  final GalleryLoader asyncLoader;
   final Stream<FilesUpdatedEvent> reloadEvent;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
@@ -43,7 +45,6 @@ class _GalleryState extends State<Gallery> {
 
   Logger _logger;
   int _index = 0;
-  List<File> _files = [];
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
@@ -77,12 +78,10 @@ class _GalleryState extends State<Gallery> {
         _logger.info("Days updated");
         setState(() {
           _hasLoadedFiles = true;
-          _files = files;
           _collatedFiles = collatedFiles;
         });
       }
     } else {
-      _files = files;
       _collatedFiles = collatedFiles;
     }
     return true;
@@ -119,7 +118,6 @@ class _GalleryState extends State<Gallery> {
       itemBuilder: (context, index) {
         var gallery;
         gallery = LazyLoadingGallery(
-          _files,
           _collatedFiles[index],
           index,
           widget.reloadEvent,

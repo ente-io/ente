@@ -18,10 +18,10 @@ class DeviceFolderPage extends StatelessWidget {
   @override
   Widget build(Object context) {
     final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit}) {
+      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInPath(
             folder.path, creationStartTime, creationEndTime,
-            limit: limit);
+            limit: limit, asc: asc);
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       tagPrefix: "device_folder:" + folder.path,

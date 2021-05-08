@@ -248,15 +248,15 @@ class _HomeWidgetState extends State<HomeWidget> {
       header = _headerWidget;
     }
     final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit}) {
+      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         if (importantPaths.isNotEmpty) {
           return FilesDB.instance.getFilesInPaths(
               creationStartTime, creationEndTime, importantPaths.toList(),
-              limit: limit);
+              limit: limit, asc: asc);
         } else {
           return FilesDB.instance
-              .getAllFiles(creationStartTime, creationEndTime, limit: limit);
+              .getAllFiles(creationStartTime, creationEndTime, limit: limit, asc: asc);
         }
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),

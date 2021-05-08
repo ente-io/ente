@@ -20,10 +20,10 @@ class CollectionPage extends StatelessWidget {
   @override
   Widget build(Object context) {
     final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit}) {
+      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInCollection(
             collection.id, creationStartTime, creationEndTime,
-            limit: limit);
+            limit: limit, asc: asc);
       },
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()

@@ -9,24 +9,22 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/detail_page.dart';
+import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class LazyLoadingGallery extends StatefulWidget {
-  final List<File> allFiles;
   final List<File> files;
   final int index;
   final Stream<FilesUpdatedEvent> reloadEvent;
-  final Future<List<File>> Function(int creationStartTime, int creationEndTime,
-      {int limit}) asyncLoader;
+  final GalleryLoader asyncLoader;
   final SelectedFiles selectedFiles;
   final String tag;
   final Stream<int> currentIndexStream;
 
   LazyLoadingGallery(
-    this.allFiles,
     this.files,
     this.index,
     this.reloadEvent,
@@ -166,8 +164,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     for (int index = 0; index < _files.length; index += kSubGalleryItemLimit) {
       childGalleries.add(LazyLoadingGridView(
         widget.tag,
-        widget.allFiles,
         _files.sublist(index, min(index + kSubGalleryItemLimit, _files.length)),
+        widget.asyncLoader,
         widget.selectedFiles,
         index == 0,
         _files.length > kRecycleLimit,
@@ -185,16 +183,16 @@ class LazyLoadingGridView extends StatefulWidget {
   static const kThumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
 
   final String tag;
-  final List<File> allFiles;
   final List<File> files;
+  final GalleryLoader asyncLoader;
   final SelectedFiles selectedFiles;
   final bool shouldRender;
   final bool shouldRecycle;
 
   LazyLoadingGridView(
     this.tag,
-    this.allFiles,
     this.files,
+    this.asyncLoader,
     this.selectedFiles,
     this.shouldRender,
     this.shouldRecycle, {
@@ -336,8 +334,9 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   void _routeToDetailPage(File file, BuildContext context) {
     final page = DetailPage(
-      widget.allFiles,
-      widget.allFiles.indexOf(file),
+      widget.files,
+      widget.asyncLoader,
+      widget.files.indexOf(file),
       widget.tag,
     );
     Navigator.of(context).push(
