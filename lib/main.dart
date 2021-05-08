@@ -28,6 +28,7 @@ Completer<void> _initializationStatus;
 const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
 const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
+const kFGSyncFrequency = Duration(minutes: 5);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 
 final themeData = ThemeData(
@@ -61,7 +62,7 @@ Future<void> _runInForeground() async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false);
-    _sync();
+    _scheduleFGSync();
     runApp(AppLock(
       builder: (args) => EnteApp(),
       lockScreen: LockScreen(),
@@ -157,16 +158,15 @@ Future<void> _scheduleHeartBeat(bool isBackground) async {
       isBackground ? kLastBGTaskHeartBeatTime : kLastFGTaskHeartBeatTime,
       DateTime.now().microsecondsSinceEpoch);
   Future.delayed(kHeartBeatFrequency, () async {
-    await _scheduleHeartBeat(isBackground);
+    _scheduleHeartBeat(isBackground);
   });
 }
 
-Future<bool> _isRunningInForeground() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.reload();
-  final currentTime = DateTime.now().microsecondsSinceEpoch;
-  return (prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0) >
-      (currentTime - kFGTaskDeathTimeoutInMicroseconds);
+Future<void> _scheduleFGSync() async {
+  await _sync();
+  Future.delayed(kFGSyncFrequency, () async {
+    _scheduleFGSync();
+  });
 }
 
 void _scheduleBGTaskKill(String taskId) async {
@@ -178,6 +178,14 @@ void _scheduleBGTaskKill(String taskId) async {
   Future.delayed(kHeartBeatFrequency, () async {
     _scheduleBGTaskKill(taskId);
   });
+}
+
+Future<bool> _isRunningInForeground() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.reload();
+  final currentTime = DateTime.now().microsecondsSinceEpoch;
+  return (prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0) >
+      (currentTime - kFGTaskDeathTimeoutInMicroseconds);
 }
 
 Future<void> _killBGTask(String taskId) async {
