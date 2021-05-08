@@ -82,7 +82,7 @@ function CollectionSelector({
             <Modal.Body
                 style={{
                     display: 'flex',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'space-around',
                     flexWrap: 'wrap',
                 }}
             >
