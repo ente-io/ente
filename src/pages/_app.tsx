@@ -93,6 +93,7 @@ const GlobalStyles = createGlobalStyle`
     .modal-90w{
         width:90vw;
         max-width:960px!important;
+        margin:auto;
     }
     .modal {
         z-index: 2000;
