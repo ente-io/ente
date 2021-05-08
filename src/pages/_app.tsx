@@ -90,11 +90,7 @@ const GlobalStyles = createGlobalStyle`
     .pswp__img {
         object-fit: contain;
     }
-    .modal-90w{
-        width:90vw;
-        max-width:960px!important;
-        margin:auto;
-    }
+
     .modal {
         z-index: 2000;
     }
@@ -177,10 +173,6 @@ const GlobalStyles = createGlobalStyle`
     .alert-primary {
         background-color: #c4ffd6;
     }
-    .ente-modal{
-        width: 500px;
-        max-width:100%;
-    } 
     .bm-burger-button {
         position: fixed;
         width: 24px;
