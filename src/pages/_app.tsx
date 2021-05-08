@@ -124,7 +124,8 @@ const GlobalStyles = createGlobalStyle`
         color:#aaa;
     }
     .modal-dialog{
-        max-width:90%;
+        max-width:960px!important;
+        width:90%;
         margin:5% auto;
     }
     .download-btn{
