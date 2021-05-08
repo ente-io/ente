@@ -212,14 +212,14 @@ class FilesDB {
   }
 
   Future<List<File>> getAllFiles(int startTime, int endTime,
-      {int limit}) async {
+      {int limit, bool asc}) async {
     final db = await instance.database;
     final results = await db.query(
       table,
       where:
           '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND ($columnLocalID IS NOT NULL OR ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1))',
       whereArgs: [startTime, endTime],
-      orderBy: '$columnCreationTime DESC',
+      orderBy: '$columnCreationTime ' + (asc ?? false ? 'ASC' : 'DESC'),
       limit: limit,
     );
     return _convertToFiles(results);
@@ -227,14 +227,14 @@ class FilesDB {
 
   Future<List<File>> getFilesInPaths(
       int startTime, int endTime, List<String> paths,
-      {int limit}) async {
+      {int limit, bool asc}) async {
     final db = await instance.database;
     final results = await db.query(
       table,
       where:
           '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN (?)) OR ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1))',
       whereArgs: [startTime, endTime, paths.join(", ")],
-      orderBy: '$columnCreationTime DESC',
+      orderBy: '$columnCreationTime ' + (asc ?? false ? 'ASC' : 'DESC'),
       limit: limit,
     );
     return _convertToFiles(results);
@@ -242,14 +242,14 @@ class FilesDB {
 
   Future<List<File>> getFilesInCollection(
       int collectionID, int startTime, int endTime,
-      {int limit}) async {
+      {int limit, bool asc}) async {
     final db = await instance.database;
     final results = await db.query(
       table,
       where:
           '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0',
       whereArgs: [collectionID, startTime, endTime],
-      orderBy: '$columnCreationTime DESC',
+      orderBy: '$columnCreationTime ' + (asc ?? false ? 'ASC' : 'DESC'),
       limit: limit,
     );
     final files = _convertToFiles(results);
@@ -258,14 +258,14 @@ class FilesDB {
   }
 
   Future<List<File>> getFilesInPath(String path, int startTime, int endTime,
-      {int limit}) async {
+      {int limit, bool asc}) async {
     final db = await instance.database;
     final results = await db.query(
       table,
       where:
           '$columnDeviceFolder = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnLocalID IS NOT NULL AND $columnIsDeleted = 0',
       whereArgs: [path, startTime, endTime],
-      orderBy: '$columnCreationTime DESC',
+      orderBy: '$columnCreationTime ' + (asc ?? false ? 'ASC' : 'DESC'),
       groupBy: '$columnLocalID',
       limit: limit,
     );
