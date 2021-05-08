@@ -90,17 +90,14 @@ const GlobalStyles = createGlobalStyle`
     .pswp__img {
         object-fit: contain;
     }
-    .modal-90w{
-        width:90vw;
-        max-width:960px!important;
-    }
+
     .modal {
         z-index: 2000;
     }
     .modal-dialog-centered {
-        min-height: -webkit-calc(90% - 3.5rem);
-        min-height: -moz-calc(90% - 3.5rem);
-        min-height: calc(90% - 3.5rem);
+        min-height: -webkit-calc(80% - 3.5rem);
+        min-height: -moz-calc(80% - 3.5rem);
+        min-height: calc(80% - 3.5rem);
     }
     .modal .modal-header, .modal .modal-footer {
         border-color: #444 !important;
@@ -125,6 +122,11 @@ const GlobalStyles = createGlobalStyle`
         border-radius:15px;
         background-color:#202020 !important;
         color:#aaa;
+    }
+    .modal-dialog{
+        max-width:960px!important;
+        width:90%;
+        margin:5% auto;
     }
     .download-btn{
         margin-top:10px;
@@ -176,10 +178,6 @@ const GlobalStyles = createGlobalStyle`
     .alert-primary {
         background-color: #c4ffd6;
     }
-    .ente-modal{
-        width: 500px;
-        max-width:100%;
-    } 
     .bm-burger-button {
         position: fixed;
         width: 24px;
