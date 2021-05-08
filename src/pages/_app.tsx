@@ -95,9 +95,9 @@ const GlobalStyles = createGlobalStyle`
         z-index: 2000;
     }
     .modal-dialog-centered {
-        min-height: -webkit-calc(90% - 3.5rem);
-        min-height: -moz-calc(90% - 3.5rem);
-        min-height: calc(90% - 3.5rem);
+        min-height: -webkit-calc(80% - 3.5rem);
+        min-height: -moz-calc(80% - 3.5rem);
+        min-height: calc(80% - 3.5rem);
     }
     .modal .modal-header, .modal .modal-footer {
         border-color: #444 !important;

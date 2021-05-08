@@ -71,11 +71,7 @@ function CollectionSelector({
     );
 
     return (
-        <Modal
-            {...props}
-            dialogClassName="modal-90w"
-            style={{ maxWidth: '100%' }}
-        >
+        <Modal {...props} size="xl" centered>
             <Modal.Header closeButton>
                 <Modal.Title>{attributes.title}</Modal.Title>
             </Modal.Header>
