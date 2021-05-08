@@ -25,7 +25,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.shouldShowSyncStatus = true,
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
-  }) : super(key: key ?? Key(file.generatedID.toString()));
+  }) : super(key: key ?? Key(file.tag()));
   @override
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
 }

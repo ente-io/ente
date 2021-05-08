@@ -19,6 +19,7 @@ class BlurredFileBackdrop extends StatelessWidget {
         ThumbnailWidget(
           file,
           fit: BoxFit.cover,
+          key: Key("memory_backdrop" + file.tag()),
         ),
         BackdropFilter(
           filter: new ImageFilter.blur(sigmaX: 64.0, sigmaY: 64.0),

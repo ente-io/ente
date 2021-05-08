@@ -56,8 +56,9 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder<SharedCollections>(
-      future: Future.value(CollectionsService.instance.getLatestCollectionFiles())
-          .then((files) async {
+      future:
+          Future.value(CollectionsService.instance.getLatestCollectionFiles())
+              .then((files) async {
         final List<CollectionWithThumbnail> outgoing = [];
         final List<CollectionWithThumbnail> incoming = [];
         for (final file in files) {
@@ -309,6 +310,7 @@ class OutgoingCollectionItem extends StatelessWidget {
                     tag: "outgoing_collection" + c.thumbnail.tag(),
                     child: ThumbnailWidget(
                       c.thumbnail,
+                      key: Key("outgoing_collection" + c.thumbnail.tag()),
                     )),
                 height: 60,
                 width: 60,
@@ -378,7 +380,10 @@ class IncomingCollectionItem extends StatelessWidget {
                 children: [
                   Hero(
                       tag: "shared_collection" + c.thumbnail.tag(),
-                      child: ThumbnailWidget(c.thumbnail)),
+                      child: ThumbnailWidget(
+                        c.thumbnail,
+                        key: Key("shared_collection" + c.thumbnail.tag()),
+                      )),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Container(

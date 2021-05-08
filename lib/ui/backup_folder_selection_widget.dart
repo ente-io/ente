@@ -162,6 +162,7 @@ class _BackupFolderSelectionWidgetState
         child: ThumbnailWidget(
           file,
           shouldShowSyncStatus: false,
+          key: Key("backup_selection_widget" + file.tag()),
         ),
         height: 50,
         width: 50,

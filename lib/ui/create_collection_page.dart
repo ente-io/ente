@@ -120,6 +120,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                 child: ThumbnailWidget(item.thumbnail),
                 height: 64,
                 width: 64,
+                key: Key("collection_item:" + item.thumbnail.tag()),
               ),
             ),
             Padding(padding: EdgeInsets.all(8)),

@@ -181,6 +181,7 @@ class MemoryWidget extends StatelessWidget {
             child: ThumbnailWidget(
               memories[index].file,
               shouldShowSyncStatus: false,
+              key: Key("memories" + memories[index].file.tag()),
             ),
           ),
         ),
@@ -190,7 +191,7 @@ class MemoryWidget extends StatelessWidget {
 
   int _getNextMemoryIndex() {
     int lastSeenIndex = 0;
-    for (var index = memories.length - 1; index >=0; index--) {
+    for (var index = memories.length - 1; index >= 0; index--) {
       if (!memories[index].isSeen()) {
         lastSeenIndex = index;
       } else {

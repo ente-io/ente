@@ -243,6 +243,9 @@ class DeviceFolderIcon extends StatelessWidget {
                       ThumbnailWidget(
                         folder.thumbnail,
                         shouldShowSyncStatus: false,
+                        key: Key("device_folder:" +
+                            folder.path +
+                            folder.thumbnail.tag()),
                       ),
                       isBackedUp
                           ? Container()
@@ -310,6 +313,7 @@ class CollectionItem extends StatelessWidget {
                   tag: "collection" + c.thumbnail.tag(),
                   child: ThumbnailWidget(
                     c.thumbnail,
+                    key: Key("collection" + c.thumbnail.tag()),
                   )),
               height: 140,
               width: 140,
