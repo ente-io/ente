@@ -12,9 +12,15 @@ class RecoveryKeyDialog extends StatefulWidget {
   final String recoveryKey;
   final String doneText;
   final Function() onDone;
+  final bool isDismissible;
 
-  RecoveryKeyDialog(this.recoveryKey, this.doneText, this.onDone, {Key key})
-      : super(key: key);
+  RecoveryKeyDialog(
+    this.recoveryKey,
+    this.doneText,
+    this.onDone, {
+    Key key,
+    this.isDismissible = true,
+  }) : super(key: key);
 
   @override
   _RecoveryKeyDialogState createState() => _RecoveryKeyDialogState();
@@ -70,53 +76,56 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
         ),
       );
     }
-    return AlertDialog(
-      title: Text("recovery key"),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "if you forget your password, the only way you can recover your data is with this key",
-              style: TextStyle(height: 1.2),
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-            GestureDetector(
-              onTap: () async {
-                await Clipboard.setData(new ClipboardData(text: recoveryKey));
-                showToast("recovery key copied to clipboard");
-                setState(() {
-                  _hasTriedToSave = true;
-                });
-              },
-              child: Container(
-                padding: EdgeInsets.all(16),
-                child: Center(
-                  child: Text(
-                    recoveryKey,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFeatures: [FontFeature.tabularFigures()],
-                      color: Colors.white.withOpacity(0.7),
+    return WillPopScope(
+      onWillPop: () async => widget.isDismissible,
+      child: AlertDialog(
+        title: Text("recovery key"),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "if you forget your password, the only way you can recover your data is with this key",
+                style: TextStyle(height: 1.2),
+              ),
+              Padding(padding: EdgeInsets.all(8)),
+              GestureDetector(
+                onTap: () async {
+                  await Clipboard.setData(new ClipboardData(text: recoveryKey));
+                  showToast("recovery key copied to clipboard");
+                  setState(() {
+                    _hasTriedToSave = true;
+                  });
+                },
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  child: Center(
+                    child: Text(
+                      recoveryKey,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                        color: Colors.white.withOpacity(0.7),
+                      ),
                     ),
                   ),
+                  color: Colors.white.withOpacity(0.1),
                 ),
-                color: Colors.white.withOpacity(0.1),
               ),
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-            Text(
-              "we don't store this key",
-            ),
-            Padding(padding: EdgeInsets.all(8)),
-            Text(
-              "please save this in a safe place",
-            ),
-          ],
+              Padding(padding: EdgeInsets.all(8)),
+              Text(
+                "we don't store this key",
+              ),
+              Padding(padding: EdgeInsets.all(8)),
+              Text(
+                "please save this in a safe place",
+              ),
+            ],
+          ),
         ),
+        actions: actions,
       ),
-      actions: actions,
     );
   }
 
