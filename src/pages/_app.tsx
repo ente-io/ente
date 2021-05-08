@@ -123,6 +123,10 @@ const GlobalStyles = createGlobalStyle`
         background-color:#202020 !important;
         color:#aaa;
     }
+    .modal-dialog{
+        max-width:90%;
+        margin:5% auto;
+    }
     .download-btn{
         margin-top:10px;
         width: 25px;
