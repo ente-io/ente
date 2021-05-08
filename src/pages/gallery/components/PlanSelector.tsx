@@ -57,7 +57,7 @@ function PlanSelector(props: Props) {
         );
     };
     useEffect(() => {
-        if (!plans) {
+        if (!plans && props.modalView) {
             const main = async () => {
                 props.setLoading(true);
                 await billingService.updatePlans();
@@ -65,7 +65,7 @@ function PlanSelector(props: Props) {
             };
             main();
         }
-    });
+    }, [props.modalView]);
 
     async function onPlanSelect(plan: Plan) {
         if (
