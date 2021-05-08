@@ -29,13 +29,11 @@ export default function UploadProgress(props: Props) {
                     ? () => null
                     : props.closeModal
             }
-            size="lg"
             aria-labelledby="contained-modal-title-vcenter"
             centered
             backdrop={
                 props.uploadStage !== UPLOAD_STAGES.FINISH ? 'static' : 'true'
             }
-            dialogClassName="ente-modal"
         >
             <Modal.Body>
                 <div

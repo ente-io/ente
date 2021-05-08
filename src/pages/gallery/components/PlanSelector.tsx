@@ -157,7 +157,7 @@ function PlanSelector(props: Props) {
         <Modal
             show={props.modalView}
             onHide={props.closeModal}
-            dialogClassName="modal-90w"
+            size="xl"
             centered
             backdrop={hasPaidSubscription(subscription) ? 'true' : `static`}
         >
