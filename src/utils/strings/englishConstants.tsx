@@ -110,6 +110,7 @@ const englishConstants = {
     DELETE_FILE_MESSAGE: 'sure you want to delete selected files?',
     DELETE_FILE: 'delete files',
     DELETE: 'delete',
+    MULTI_FOLDER_UPLOAD: 'choose upload strategy',
     UPLOAD_STRATEGY_CHOICE:
         'you are uploading multiple folders, would you like us to create',
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
