@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:move_to_background/move_to_background.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
@@ -182,8 +184,7 @@ void _scheduleBGTaskKill(String taskId) async {
 
 Future<void> _killBGTask(String taskId) async {
   await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
-      ProcessType.background.toString(),
-      DateTime.now().microsecondsSinceEpoch);
+      ProcessType.background.toString(), DateTime.now().microsecondsSinceEpoch);
   final prefs = await SharedPreferences.getInstance();
   prefs.remove(kLastBGTaskHeartBeatTime);
   BackgroundFetch.finish(taskId);
@@ -196,11 +197,21 @@ class EnteApp extends StatelessWidget with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addObserver(this);
     _configureBackgroundFetch();
-    return MaterialApp(
-      title: "ente",
-      theme: themeData,
-      home: _homeWidget,
-      debugShowCheckedModeBanner: false,
+    return WillPopScope(
+      child: MaterialApp(
+        title: "ente",
+        theme: themeData,
+        home: _homeWidget,
+        debugShowCheckedModeBanner: false,
+      ),
+      onWillPop: () async {
+        if (Platform.isAndroid) {
+          MoveToBackground.moveTaskToBack();
+          return false;
+        } else {
+          return true;
+        }
+      },
     );
   }
 
