@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:move_to_background/move_to_background.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -156,38 +158,48 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget");
 
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(0),
-        child: Container(),
+    return WillPopScope(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(0),
+          child: Container(),
+        ),
+        body: Stack(
+          children: [
+            ExtentsPageView(
+              children: [
+                SyncService.instance.hasGrantedPermissions()
+                    ? (SyncService.instance.hasScannedDisk()
+                        ? _getMainGalleryWidget()
+                        : const LoadingPhotosWidget())
+                    : GrantPermissionsWidget(),
+                _deviceFolderGalleryWidget,
+                _sharedCollectionGallery,
+              ],
+              onPageChanged: (page) {
+                Bus.instance.fire(TabChangedEvent(
+                  page,
+                  TabChangedEventSource.page_view,
+                ));
+              },
+              physics: NeverScrollableScrollPhysics(),
+              controller: _pageController,
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: _buildBottomNavigationBar(),
+            ),
+          ],
+        ),
       ),
-      body: Stack(
-        children: [
-          ExtentsPageView(
-            children: [
-              SyncService.instance.hasGrantedPermissions()
-                  ? (SyncService.instance.hasScannedDisk()
-                      ? _getMainGalleryWidget()
-                      : const LoadingPhotosWidget())
-                  : GrantPermissionsWidget(),
-              _deviceFolderGalleryWidget,
-              _sharedCollectionGallery,
-            ],
-            onPageChanged: (page) {
-              Bus.instance.fire(TabChangedEvent(
-                page,
-                TabChangedEventSource.page_view,
-              ));
-            },
-            physics: NeverScrollableScrollPhysics(),
-            controller: _pageController,
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: _buildBottomNavigationBar(),
-          ),
-        ],
-      ),
+      onWillPop: () async {
+        if (Platform.isAndroid) {
+          MoveToBackground.moveTaskToBack();
+          return false;
+        } else {
+          return true;
+        }
+      },
     );
   }
 

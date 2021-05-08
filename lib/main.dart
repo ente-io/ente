@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:move_to_background/move_to_background.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
@@ -197,21 +195,11 @@ class EnteApp extends StatelessWidget with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addObserver(this);
     _configureBackgroundFetch();
-    return WillPopScope(
-      child: MaterialApp(
-        title: "ente",
-        theme: themeData,
-        home: _homeWidget,
-        debugShowCheckedModeBanner: false,
-      ),
-      onWillPop: () async {
-        if (Platform.isAndroid) {
-          MoveToBackground.moveTaskToBack();
-          return false;
-        } else {
-          return true;
-        }
-      },
+    return MaterialApp(
+      title: "ente",
+      theme: themeData,
+      home: _homeWidget,
+      debugShowCheckedModeBanner: false,
     );
   }
 
