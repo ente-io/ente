@@ -12,6 +12,7 @@ import 'package:photos/ui/video_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 class MemoriesWidget extends StatefulWidget {
@@ -123,13 +124,7 @@ class MemoryWidget extends StatelessWidget {
     final title = _getTitle(memories[index]);
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return FullScreenMemory(title, memories, index);
-            },
-          ),
-        );
+        routeToPage(context, FullScreenMemory(title, memories, index));
       },
       child: Container(
         width: 100,

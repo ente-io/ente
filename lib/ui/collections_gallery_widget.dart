@@ -21,6 +21,7 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/device_folder_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
@@ -281,13 +282,7 @@ class DeviceFolderIcon extends StatelessWidget {
         ),
       ),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return DeviceFolderPage(folder);
-            },
-          ),
-        );
+        routeToPage(context, DeviceFolderPage(folder));
       },
     );
   }
@@ -332,14 +327,7 @@ class CollectionItem extends StatelessWidget {
         ],
       ),
       onTap: () {
-        final page = CollectionPage(c.collection);
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return page;
-            },
-          ),
-        );
+        routeToPage(context, CollectionPage(c.collection));
       },
     );
   }

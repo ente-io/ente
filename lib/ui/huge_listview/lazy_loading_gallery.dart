@@ -13,6 +13,7 @@ import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class LazyLoadingGallery extends StatefulWidget {
@@ -340,24 +341,6 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       widget.files.indexOf(file),
       widget.tag,
     );
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (BuildContext context, Animation<double> animation,
-            Animation<double> secondaryAnimation) {
-          return page;
-        },
-        transitionsBuilder: (BuildContext context, Animation<double> animation,
-            Animation<double> secondaryAnimation, Widget child) {
-          return Align(
-            child: FadeTransition(
-              opacity: animation,
-              child: child,
-            ),
-          );
-        },
-        transitionDuration: Duration(milliseconds: 200),
-        opaque: false,
-      ),
-    );
+    routeToPage(context, page);
   }
 }

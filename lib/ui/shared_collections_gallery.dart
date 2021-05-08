@@ -17,6 +17,7 @@ import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/shared_collection_page.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -348,13 +349,7 @@ class OutgoingCollectionItem extends StatelessWidget {
           c.collection,
           tagPrefix: "outgoing_collection",
         );
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return page;
-            },
-          ),
-        );
+        routeToPage(context, page);
       },
     );
   }
@@ -424,14 +419,7 @@ class IncomingCollectionItem extends StatelessWidget {
         ],
       ),
       onTap: () {
-        final page = SharedCollectionPage(c.collection);
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return page;
-            },
-          ),
-        );
+        routeToPage(context, SharedCollectionPage(c.collection));
       },
     );
   }
