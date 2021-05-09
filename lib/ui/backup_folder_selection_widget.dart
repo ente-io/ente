@@ -69,7 +69,7 @@ class _BackupFolderSelectionWidgetState
             padding: EdgeInsets.all(4),
           ),
           Text(
-            "select folders to backup",
+            "select photos to preserve",
             style: TextStyle(fontSize: 20),
           ),
           Padding(
