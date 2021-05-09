@@ -8,9 +8,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
-import 'package:photos/events/first_import_succeeded_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
@@ -43,6 +41,7 @@ class SyncService {
   int _completedUploads = 0;
 
   static const kDbUpdationTimeKey = "db_updation_time";
+  static const kHasCompletedFirstImportKey = "has_completed_firstImport";
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kLastBackgroundUploadDetectedTime =
       "last_background_upload_detected_time";
@@ -154,8 +153,8 @@ class SyncService {
     return _syncStopRequested;
   }
 
-  bool hasScannedDisk() {
-    return _prefs.containsKey(kDbUpdationTimeKey);
+  bool hasCompletedFirstImport() {
+    return _prefs.getBool(kHasCompletedFirstImportKey) ?? false;
   }
 
   bool isSyncInProgress() {
@@ -167,13 +166,11 @@ class SyncService {
   }
 
   bool hasGrantedPermissions() {
-    return _prefs.containsKey(kHasGrantedPermissionsKey) &&
-        _prefs.getBool(kHasGrantedPermissionsKey);
+    return _prefs.getBool(kHasGrantedPermissionsKey) ?? false;
   }
 
   Future<void> onPermissionGranted() async {
     await _prefs.setBool(kHasGrantedPermissionsKey, true);
-    Bus.instance.fire(PermissionGrantedEvent());
     _doSync();
   }
 
@@ -231,6 +228,7 @@ class SyncService {
         toTime = DateTime(toYear).microsecondsSinceEpoch;
       }
       await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
+      _prefs.setBool(kHasCompletedFirstImportKey, true);
       Bus.instance
           .fire(SyncStatusUpdate(SyncStatus.completed_first_gallery_import));
     }
@@ -265,11 +263,7 @@ class SyncService {
       _logger.info("Inserted " + files.length.toString() + " files.");
       Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
     }
-    bool isFirstImport = !_prefs.containsKey(kDbUpdationTimeKey);
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
-    if (isFirstImport) {
-      Bus.instance.fire(FirstImportSucceededEvent());
-    }
   }
 
   Future<void> syncWithRemote({bool silently = false}) async {

@@ -10,9 +10,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
-import 'package:photos/events/first_import_succeeded_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
@@ -26,7 +24,6 @@ import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/grant_permissions_widget.dart';
-import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/nav_bar.dart';
@@ -58,9 +55,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget _headerWidgetWithSettingsButton;
 
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
-  StreamSubscription<PermissionGrantedEvent> _permissionGrantedEvent;
   StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
-  StreamSubscription<FirstImportSucceededEvent> _firstImportEvent;
   StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
@@ -92,19 +87,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
       }
     });
-    _permissionGrantedEvent =
-        Bus.instance.on<PermissionGrantedEvent>().listen((event) {
-      setState(() {});
-    });
     _subscriptionPurchaseEvent =
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
-      setState(() {});
-      if (Configuration.instance.getPathsToBackUp().isEmpty) {
-        _showBackupFolderSelectionDialog();
-      }
-    });
-    _firstImportEvent =
-        Bus.instance.on<FirstImportSucceededEvent>().listen((event) {
       setState(() {});
     });
     _triggerLogoutEvent =
@@ -149,7 +133,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (Configuration.instance.getPathsToBackUp().isEmpty &&
         Configuration.instance.hasConfiguredAccount() &&
         BillingService.instance.hasActiveSubscription()) {
-      _showBackupFolderSelectionDialog();
+      showBackupFolderSelectionDialog(context);
     }
     super.initState();
   }
@@ -164,33 +148,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           preferredSize: Size.fromHeight(0),
           child: Container(),
         ),
-        body: Stack(
-          children: [
-            ExtentsPageView(
-              children: [
-                SyncService.instance.hasGrantedPermissions()
-                    ? (SyncService.instance.hasScannedDisk()
-                        ? _getMainGalleryWidget()
-                        : const LoadingPhotosWidget())
-                    : GrantPermissionsWidget(),
-                _deviceFolderGalleryWidget,
-                _sharedCollectionGallery,
-              ],
-              onPageChanged: (page) {
-                Bus.instance.fire(TabChangedEvent(
-                  page,
-                  TabChangedEventSource.page_view,
-                ));
-              },
-              physics: NeverScrollableScrollPhysics(),
-              controller: _pageController,
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: _buildBottomNavigationBar(),
-            ),
-          ],
-        ),
+        body: _getBody(),
       ),
       onWillPop: () async {
         if (Platform.isAndroid) {
@@ -200,6 +158,39 @@ class _HomeWidgetState extends State<HomeWidget> {
           return true;
         }
       },
+    );
+  }
+
+  Widget _getBody() {
+    if (!Configuration.instance.hasConfiguredAccount()) {
+      return SignInHeader();
+    }
+    if (!SyncService.instance.hasGrantedPermissions()) {
+      return GrantPermissionsWidget();
+    }
+
+    return Stack(
+      children: [
+        ExtentsPageView(
+          children: [
+            _getMainGalleryWidget(),
+            _deviceFolderGalleryWidget,
+            _sharedCollectionGallery,
+          ],
+          onPageChanged: (page) {
+            Bus.instance.fire(TabChangedEvent(
+              page,
+              TabChangedEventSource.page_view,
+            ));
+          },
+          physics: NeverScrollableScrollPhysics(),
+          controller: _pageController,
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: _buildBottomNavigationBar(),
+        ),
+      ],
     );
   }
 
@@ -255,8 +246,9 @@ class _HomeWidgetState extends State<HomeWidget> {
               creationStartTime, creationEndTime, importantPaths.toList(),
               limit: limit, asc: asc);
         } else {
-          return FilesDB.instance
-              .getAllFiles(creationStartTime, creationEndTime, limit: limit, asc: asc);
+          return FilesDB.instance.getAllFiles(
+              creationStartTime, creationEndTime,
+              limit: limit, asc: asc);
         }
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
@@ -323,32 +315,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  void _showBackupFolderSelectionDialog() {
-    Future.delayed(
-      Duration.zero,
-      () => showDialog(
-        context: context,
-        builder: (context) {
-          return WillPopScope(
-            onWillPop: () async => false,
-            child: AlertDialog(
-              content: const BackupFolderSelectionWidget("start backup"),
-              backgroundColor: Colors.black.withOpacity(0.8),
-            ),
-          );
-        },
-        barrierDismissible: false,
-        barrierColor: Colors.black.withOpacity(0.85),
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _tabChangedEventSubscription.cancel();
-    _permissionGrantedEvent.cancel();
     _subscriptionPurchaseEvent.cancel();
-    _firstImportEvent.cancel();
     _triggerLogoutEvent.cancel();
     _loggedOutEvent.cancel();
     _backupFoldersUpdatedEvent.cancel();
@@ -397,7 +367,6 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
 
 class HeaderWidget extends StatelessWidget {
   static const _memoriesWidget = const MemoriesWidget();
-  static const _signInHeader = const SignInHeader();
   static const _syncIndicator = const SyncIndicator();
 
   const HeaderWidget({
@@ -408,7 +377,6 @@ class HeaderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Logger("Header").info("Building header widget");
     const list = [
-      _signInHeader,
       _syncIndicator,
       _memoriesWidget,
     ];

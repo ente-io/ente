@@ -72,7 +72,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             );
             await InAppPurchaseConnection.instance.completePurchase(purchase);
             Bus.instance.fire(SubscriptionPurchasedEvent());
-            String text = "your photos and videos will now be backed up";
+            String text = "thank you for subscribing!";
             if (!widget.isOnboarding) {
               final isUpgrade = _hasActiveSubscription &&
                   newSubscription.storage > _currentSubscription.storage;
@@ -458,6 +458,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     ),
                     onPressed: () {
                       if (widget.isOnboarding) {
+                        showToast("thank you for signing up!");
                         Bus.instance.fire(SubscriptionPurchasedEvent());
                       }
                       Navigator.of(context, rootNavigator: true).pop('dialog');

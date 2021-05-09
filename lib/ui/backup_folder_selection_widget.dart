@@ -10,6 +10,26 @@ import 'package:photos/models/file.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
+void showBackupFolderSelectionDialog(BuildContext context) {
+  Future.delayed(
+    Duration.zero,
+    () => showDialog(
+      context: context,
+      builder: (context) {
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: AlertDialog(
+            content: const BackupFolderSelectionWidget("start backup"),
+            backgroundColor: Colors.black.withOpacity(0.8),
+          ),
+        );
+      },
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.85),
+    ),
+  );
+}
+
 class BackupFolderSelectionWidget extends StatefulWidget {
   final String buttonText;
 
