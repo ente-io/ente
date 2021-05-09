@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -37,10 +38,52 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   double _passwordStrength = 0;
   bool _hasAgreedToTOS = true;
   bool _hasAgreedToE2E = false;
+  bool _password1Visible = false;
+  bool _password2Visible = false;
+  FocusNode _password1FocusNode = FocusNode();
+  FocusNode _password2FocusNode = FocusNode();
+  bool _password1InFocus = false;
+  bool _password2InFocus = false;
+
+  Animatable<Color> _passwordStrengthColors = TweenSequence<Color>(
+    [
+      TweenSequenceItem(
+        weight: 1.0,
+        tween: ColorTween(
+          begin: Colors.red,
+          end: Colors.yellow,
+        ),
+      ),
+      TweenSequenceItem(
+        weight: 1.0,
+        tween: ColorTween(
+          begin: Colors.yellow,
+          end: Colors.lightGreen,
+        ),
+      ),
+      TweenSequenceItem(
+        weight: 1.0,
+        tween: ColorTween(
+          begin: Colors.lightGreen,
+          end: Color.fromRGBO(45, 194, 98, 1.0),
+        ),
+      ),
+    ],
+  );
 
   @override
   void initState() {
     _email = _config.getEmail();
+    _password1FocusNode.addListener(() {
+      setState(() {
+        _password1InFocus = _password1FocusNode.hasFocus;
+      });
+    });
+    _password2FocusNode.addListener(() {
+      setState(() {
+        _password2InFocus = _password2FocusNode.hasFocus;
+      });
+    });
     super.initState();
   }
 
@@ -70,6 +113,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           strengthCallback: (strength) {
             _passwordStrength = strength;
           },
+          strengthColors: _passwordStrengthColors,
         ),
         Expanded(child: Container()),
         SingleChildScrollView(
@@ -104,17 +148,33 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
                   child: TextFormField(
+                    keyboardType: TextInputType.text,
+                    controller: _passwordController1,
+                    obscureText: !_password1Visible,
                     decoration: InputDecoration(
                       hintText: "password",
                       hintStyle: TextStyle(
                         color: Colors.white30,
                       ),
                       contentPadding: EdgeInsets.all(12),
+                      suffixIcon: _password1InFocus
+                          ? IconButton(
+                              icon: Icon(
+                                _password1Visible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.white.withOpacity(0.5),
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _password1Visible = !_password1Visible;
+                                });
+                              },
+                            )
+                          : null,
                     ),
-                    controller: _passwordController1,
-                    autofocus: false,
-                    autocorrect: false,
-                    keyboardType: TextInputType.visiblePassword,
+                    focusNode: _password1FocusNode,
                     onChanged: (_) {
                       setState(() {});
                     },
@@ -124,21 +184,33 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
                   child: TextFormField(
+                    keyboardType: TextInputType.text,
+                    controller: _passwordController2,
+                    obscureText: !_password2Visible,
                     decoration: InputDecoration(
                       hintText: "confirm password",
                       hintStyle: TextStyle(
                         color: Colors.white30,
                       ),
                       contentPadding: EdgeInsets.all(12),
+                      suffixIcon: _password2InFocus
+                          ? IconButton(
+                              icon: Icon(
+                                _password2Visible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.white.withOpacity(0.5),
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _password2Visible = !_password2Visible;
+                                });
+                              },
+                            )
+                          : null,
                     ),
-                    controller: _passwordController2,
-                    autofocus: false,
-                    autocorrect: false,
-                    obscureText: true,
-                    keyboardType: TextInputType.visiblePassword,
-                    onChanged: (_) {
-                      setState(() {});
-                    },
+                    focusNode: _password2FocusNode,
                   ),
                 ),
                 Padding(
