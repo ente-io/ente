@@ -34,7 +34,6 @@ export default function MessageDialog({
     }
     return (
         <Modal
-            size="lg"
             {...props}
             centered
             backdrop={attributes.staticBackdrop ? 'static' : 'true'}

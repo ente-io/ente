@@ -98,7 +98,6 @@ function CollectionShare(props: Props) {
     );
     return (
         <MessageDialog
-            size={null}
             show={props.show}
             onHide={props.onHide}
             attributes={{ title: constants.SHARE_COLLECTION }}

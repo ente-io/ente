@@ -270,6 +270,7 @@ export default function Gallery() {
             />
             <AlertBanner bannerMessage={bannerMessage} />
             <MessageDialog
+                size={'xl'}
                 show={dialogView}
                 onHide={() => setDialogView(false)}
                 attributes={dialogMessage}

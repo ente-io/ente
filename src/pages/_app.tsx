@@ -124,9 +124,11 @@ const GlobalStyles = createGlobalStyle`
         color:#aaa;
     }
     .modal-dialog{
-        max-width:960px!important;
-        width:90%;
         margin:5% auto;
+        width:90%;
+    }
+    .modal-xl{
+        max-width:960px!important;
     }
     .download-btn{
         margin-top:10px;
