@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:computer/computer.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -33,6 +34,7 @@ class SyncService {
   final _uploader = FileUploader.instance;
   final _collectionsService = CollectionsService.instance;
   final _diffFetcher = DiffFetcher();
+  final Computer _computer = Computer();
   bool _syncStopRequested = false;
   bool _isBackground = false;
   Completer<bool> _existingSync;
@@ -78,6 +80,7 @@ class SyncService {
       await PhotoManager.clearFileCache();
       _logger.info("Cleared file cache");
     }
+    await _computer.turnOn(workersCount: 1);
   }
 
   Future<bool> existingSync() async {
@@ -211,6 +214,7 @@ class SyncService {
       }
     }
     final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
+    final startTime = DateTime.now().microsecondsSinceEpoch;
     if (lastDBUpdationTime != 0) {
       await _loadAndStorePhotos(
           lastDBUpdationTime, syncStartTime, existingLocalFileIDs);
@@ -232,6 +236,9 @@ class SyncService {
       Bus.instance
           .fire(SyncStatusUpdate(SyncStatus.completed_first_gallery_import));
     }
+    final endTime = DateTime.now().microsecondsSinceEpoch;
+    final duration = Duration(microseconds: endTime - startTime);
+    _logger.info("Load took " + duration.inMilliseconds.toString() + "ms");
   }
 
   Future<void> _loadAndStorePhotos(
@@ -240,7 +247,7 @@ class SyncService {
         DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
         " to " +
         DateTime.fromMicrosecondsSinceEpoch(toTime).toString());
-    final files = await getDeviceFiles(fromTime, toTime);
+    final files = await getDeviceFiles(fromTime, toTime, _computer);
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
       final updatedFiles =
