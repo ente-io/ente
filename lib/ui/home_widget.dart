@@ -23,7 +23,7 @@ import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
-import 'package:photos/ui/grant_permissions_widget.dart';
+import 'package:photos/ui/grant_permissions_page.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/nav_bar.dart';
@@ -162,11 +162,11 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody() {
+    if (!SyncService.instance.hasGrantedPermissions()) {
+      return GrantPermissionsPage();
+    }
     if (!Configuration.instance.hasConfiguredAccount()) {
       return SignInHeader();
-    }
-    if (!SyncService.instance.hasGrantedPermissions()) {
-      return GrantPermissionsWidget();
     }
 
     return Stack(
