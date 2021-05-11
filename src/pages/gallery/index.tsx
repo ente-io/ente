@@ -191,6 +191,7 @@ export default function Gallery() {
                             action: logoutUser,
                             variant: 'primary',
                         },
+                        nonClosable: true,
                     });
                     break;
                 case errorCodes.ERR_KEY_MISSING:
