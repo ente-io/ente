@@ -5,6 +5,7 @@ import constants from 'utils/strings/constants';
 export interface MessageAttributes {
     title?: string;
     staticBackdrop?: boolean;
+    nonClosable?: boolean;
     content?: any;
     close?: { text?: string; variant?: string };
     proceed?: {
@@ -35,10 +36,14 @@ export default function MessageDialog({
     return (
         <Modal
             {...props}
+            onHide={attributes.nonClosable ? () => null : props.onHide}
             centered
             backdrop={attributes.staticBackdrop ? 'static' : 'true'}
         >
-            <Modal.Header style={{ borderBottom: 'none' }} closeButton>
+            <Modal.Header
+                style={{ borderBottom: 'none' }}
+                closeButton={!attributes.nonClosable}
+            >
                 {attributes.title && (
                     <Modal.Title>
                         <strong>{attributes.title}</strong>
