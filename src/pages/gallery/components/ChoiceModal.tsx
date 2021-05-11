@@ -1,3 +1,4 @@
+import MessageDialog from 'components/MessageDialog';
 import React from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
@@ -15,64 +16,56 @@ function ChoiceModal({
     ...props
 }: Props) {
     return (
-        <Modal
+        <MessageDialog
             {...props}
-            size="lg"
-            aria-labelledby="contained-modal-title-vcenter"
-            centered
+            attributes={{ title: constants.MULTI_FOLDER_UPLOAD }}
         >
-            <Modal.Body style={{ padding: '24px' }}>
-                <Modal.Header
-                    style={{
-                        borderColor: 'rgb(16, 176, 2)',
-                        fontSize: '20px',
-                        marginBottom: '20px',
-                        border: 'none',
+            <p>{constants.UPLOAD_STRATEGY_CHOICE}</p>
+            <div
+                style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                }}
+            >
+                <Button
+                    variant="outline-success"
+                    onClick={() => {
+                        props.onHide();
+                        showCollectionCreateModal();
                     }}
-                    id="contained-modal-title-vcenter"
-                    closeButton
+                    style={{
+                        padding: '12px 24px',
+                        flex: 2,
+                        whiteSpace: 'nowrap',
+                    }}
                 >
-                    {constants.UPLOAD_STRATEGY_CHOICE}
-                </Modal.Header>
+                    {constants.UPLOAD_STRATEGY_SINGLE_COLLECTION}
+                </Button>
                 <div
                     style={{
-                        display: 'flex',
-                        justifyContent: 'space-around',
-                        paddingBottom: '20px',
-                        alignItems: 'center',
+                        flex: 1,
+                        textAlign: 'center',
+                        minWidth: '100px',
+                        margin: '2% auto',
                     }}
                 >
-                    <Button
-                        variant="outline-success"
-                        onClick={() => {
-                            props.onHide();
-                            showCollectionCreateModal();
-                        }}
-                        style={{
-                            padding: '12px',
-                            paddingLeft: '24px',
-                            paddingRight: '24px',
-                        }}
-                    >
-                        {constants.UPLOAD_STRATEGY_SINGLE_COLLECTION}
-                    </Button>
                     <strong>{constants.OR}</strong>
-                    <Button
-                        variant="outline-success"
-                        onClick={() =>
-                            uploadFiles(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER)
-                        }
-                        style={{
-                            padding: '12px',
-                            paddingLeft: '24px',
-                            paddingRight: '24px',
-                        }}
-                    >
-                        {constants.UPLOAD_STRATEGY_COLLECTION_PER_FOLDER}
-                    </Button>
                 </div>
-            </Modal.Body>
-        </Modal>
+                <Button
+                    variant="outline-success"
+                    onClick={() =>
+                        uploadFiles(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER)
+                    }
+                    style={{
+                        padding: '12px 24px',
+                        flex: 2,
+                        whiteSpace: 'nowrap',
+                    }}
+                >
+                    {constants.UPLOAD_STRATEGY_COLLECTION_PER_FOLDER}
+                </Button>
+            </div>
+        </MessageDialog>
     );
 }
 export default ChoiceModal;

@@ -57,7 +57,7 @@ function PlanSelector(props: Props) {
         );
     };
     useEffect(() => {
-        if (!plans) {
+        if (!plans && props.modalView) {
             const main = async () => {
                 props.setLoading(true);
                 await billingService.updatePlans();
@@ -65,7 +65,7 @@ function PlanSelector(props: Props) {
             };
             main();
         }
-    });
+    }, [props.modalView]);
 
     async function onPlanSelect(plan: Plan) {
         if (
@@ -157,7 +157,7 @@ function PlanSelector(props: Props) {
         <Modal
             show={props.modalView}
             onHide={props.closeModal}
-            dialogClassName="modal-90w"
+            size="xl"
             centered
             backdrop={hasPaidSubscription(subscription) ? 'true' : `static`}
         >
@@ -207,8 +207,7 @@ function PlanSelector(props: Props) {
                         justifyContent: 'space-around',
                         flexWrap: 'wrap',
                         minHeight: '212px',
-                        marginTop: '24px',
-                        marginBottom: '36px',
+                        margin: '24px 0',
                     }}
                 >
                     {plans && PlanIcons}
