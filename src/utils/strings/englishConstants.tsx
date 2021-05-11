@@ -51,7 +51,8 @@ const englishConstants = {
         </p>
     ),
     PASSPHRASE_HINT: 'password',
-    PASSPHRASE_CONFIRM: 'password again',
+    RE_ENTER_PASSPHRASE: 'password again',
+    CONFIRM_PASSPHRASE: 'confirm your password',
     PASSPHRASE_MATCH_ERROR: `passwords don't match`,
     CONSOLE_WARNING_STOP: 'STOP!',
     CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. Please don't copy-paste unverified code here.`,

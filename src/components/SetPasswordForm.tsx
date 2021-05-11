@@ -19,7 +19,7 @@ interface formValues {
     passphrase: string;
     confirm: string;
 }
-function SetPassword(props: Props) {
+function SetPasswordForm(props: Props) {
     const [loading, setLoading] = useState(false);
     const onSubmit = async (
         values: formValues,
@@ -94,7 +94,7 @@ function SetPassword(props: Props) {
                                     <Form.Control
                                         type="password"
                                         placeholder={
-                                            constants.PASSPHRASE_CONFIRM
+                                            constants.RE_ENTER_PASSPHRASE
                                         }
                                         value={values.confirm}
                                         onChange={handleChange('confirm')}
@@ -129,4 +129,4 @@ function SetPassword(props: Props) {
         </Container>
     );
 }
-export default SetPassword;
+export default SetPasswordForm;

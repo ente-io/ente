@@ -10,7 +10,7 @@ import CryptoWorker, {
 } from 'utils/crypto';
 import { getActualKey } from 'utils/common/key';
 import { logoutUser, setKeys, UpdatedKey } from 'services/userService';
-import PasswordForm from 'components/PasswordForm';
+import SetPasswordForm from 'components/SetPasswordForm';
 
 export interface KEK {
     key: string;
@@ -44,10 +44,8 @@ export default function Generate() {
             setFieldError('confirm', constants.PASSWORD_GENERATION_FAILED);
             return;
         }
-        const encryptedKeyAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(
-            key,
-            kek.key
-        );
+        const encryptedKeyAttributes: B64EncryptionResult =
+            await cryptoWorker.encryptToB64(key, kek.key);
         const updatedKey: UpdatedKey = {
             kekSalt,
             encryptedKey: encryptedKeyAttributes.encryptedData,
@@ -73,7 +71,7 @@ export default function Generate() {
         router.push('/gallery');
     };
     return (
-        <PasswordForm
+        <SetPasswordForm
             callback={onSubmit}
             buttonText={constants.CHANGE_PASSWORD}
             back={
