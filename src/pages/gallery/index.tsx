@@ -79,10 +79,8 @@ export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
 export default function Gallery() {
     const router = useRouter();
     const [collections, setCollections] = useState<Collection[]>([]);
-    const [
-        collectionsAndTheirLatestFile,
-        setCollectionsAndTheirLatestFile,
-    ] = useState<CollectionAndItsLatestFile[]>([]);
+    const [collectionsAndTheirLatestFile, setCollectionsAndTheirLatestFile] =
+        useState<CollectionAndItsLatestFile[]>([]);
     const [files, setFiles] = useState<File[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [bannerMessage, setBannerMessage] = useState<string>(null);
@@ -93,16 +91,12 @@ export default function Gallery() {
     const [dialogView, setDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [
-        collectionSelectorAttributes,
-        setCollectionSelectorAttributes,
-    ] = useState<CollectionSelectorAttributes>(null);
+    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
+        useState<CollectionSelectorAttributes>(null);
     const [collectionSelectorView, setCollectionSelectorView] = useState(false);
 
-    const [
-        collectionNamerAttributes,
-        setCollectionNamerAttributes,
-    ] = useState<CollectionNamerAttributes>(null);
+    const [collectionNamerAttributes, setCollectionNamerAttributes] =
+        useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const {
         getRootProps,
@@ -134,10 +128,11 @@ export default function Gallery() {
                 collections,
                 files
             );
-            const collectionsAndTheirLatestFile = await getCollectionsAndTheirLatestFile(
-                nonEmptyCollections,
-                files
-            );
+            const collectionsAndTheirLatestFile =
+                await getCollectionsAndTheirLatestFile(
+                    nonEmptyCollections,
+                    files
+                );
             setFiles(files);
             setCollections(nonEmptyCollections);
             setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
@@ -152,9 +147,10 @@ export default function Gallery() {
     }, []);
 
     useEffect(() => setDialogView(true), [dialogMessage]);
-    useEffect(() => setCollectionSelectorView(true), [
-        collectionSelectorAttributes,
-    ]);
+    useEffect(
+        () => setCollectionSelectorView(true),
+        [collectionSelectorAttributes]
+    );
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
 
     const syncWithRemote = async () => {
@@ -169,10 +165,11 @@ export default function Gallery() {
                 collections,
                 files
             );
-            const collectionAndItsLatestFile = await getCollectionsAndTheirLatestFile(
-                nonEmptyCollections,
-                files
-            );
+            const collectionAndItsLatestFile =
+                await getCollectionsAndTheirLatestFile(
+                    nonEmptyCollections,
+                    files
+                );
             const favItemIds = await getFavItemIds(files);
             setCollections(nonEmptyCollections);
             if (isUpdated) {
@@ -279,7 +276,7 @@ export default function Gallery() {
             />
             <AlertBanner bannerMessage={bannerMessage} />
             <MessageDialog
-                size={'xl'}
+                size={'lg'}
                 show={dialogView}
                 onHide={() => setDialogView(false)}
                 attributes={dialogMessage}
