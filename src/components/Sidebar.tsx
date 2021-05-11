@@ -27,7 +27,6 @@ import LinkButton from 'pages/gallery/components/LinkButton';
 import { downloadApp } from 'utils/common';
 import { logoutUser } from 'services/userService';
 import { SetDialogMessage } from './MessageDialog';
-import AccountDeleteModal from './AccountDeleteModal';
 
 interface Props {
     files: File[];
@@ -236,7 +235,7 @@ export default function Sidebar(props: Props) {
             ></div>
             <LinkButton
                 variant="danger"
-                style={{ marginTop: '30px', marginBottom: '50px' }}
+                style={{ marginTop: '30px' }}
                 onClick={() =>
                     props.setDialogMessage({
                         title: `${constants.CONFIRM} ${constants.LOGOUT}`,
@@ -253,6 +252,7 @@ export default function Sidebar(props: Props) {
             >
                 logout
             </LinkButton>
+            <div style={{ marginBottom: '50px' }} />
         </Menu>
     );
 }
