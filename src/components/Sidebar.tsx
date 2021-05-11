@@ -27,12 +27,13 @@ import LinkButton from 'pages/gallery/components/LinkButton';
 import { downloadApp } from 'utils/common';
 import { logoutUser } from 'services/userService';
 import { SetDialogMessage } from './MessageDialog';
+import AccountDeleteModal from './AccountDeleteModal';
 
 interface Props {
     files: File[];
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
-    setPlanModalView;
+    showPlanSelectorModal: () => void;
 }
 export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
@@ -44,6 +45,7 @@ export default function Sidebar(props: Props) {
     }, []);
     const [isOpen, setIsOpen] = useState(false);
     const [recoverModalView, setRecoveryModalView] = useState(false);
+    const [accountDeleteModalView, setAccountDeleteModalView] = useState(false);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -93,7 +95,7 @@ export default function Sidebar(props: Props) {
     const router = useRouter();
     function onManageClick() {
         setIsOpen(false);
-        props.setPlanModalView(true);
+        props.showPlanSelectorModal();
     }
     return (
         <Menu
