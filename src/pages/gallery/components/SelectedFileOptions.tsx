@@ -6,11 +6,11 @@ import constants from 'utils/strings/constants';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
 
 interface Props {
-    addToCollectionHelper: (collectionName, collection) => Promise<void>;
+    addToCollectionHelper: (collectionName, collection) => void;
     showCreateCollectionModal: () => void;
     setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
-    deleteFileHelper: () => Promise<void>;
+    deleteFileHelper: () => void;
 }
 const SelectedFileOptions = ({
     addToCollectionHelper,

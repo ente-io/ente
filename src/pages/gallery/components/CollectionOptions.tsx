@@ -16,6 +16,7 @@ interface Props {
     collections: Collection[];
     selectedCollectionID: number;
     setDialogMessage: SetDialogMessage;
+    startLoadingBar: () => void;
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
 }
@@ -37,15 +38,42 @@ const CollectionOptions = (props: Props) => {
                 props.selectedCollectionID,
                 props.collections
             )?.name,
-            callback: collectionRename.bind(
-                null,
-                getSelectedCollection(
-                    props.selectedCollectionID,
-                    props.collections
-                )
-            ),
+            callback: (newName) => {
+                props.startLoadingBar();
+                collectionRename(
+                    getSelectedCollection(
+                        props.selectedCollectionID,
+                        props.collections
+                    ),
+                    newName
+                );
+            },
         });
     };
+    const confirmDeleteCollection = () => {
+        props.setDialogMessage({
+            title: constants.CONFIRM_DELETE_COLLECTION,
+            content: constants.DELETE_COLLECTION_MESSAGE(),
+            staticBackdrop: true,
+            proceed: {
+                text: constants.DELETE_COLLECTION,
+                action: () => {
+                    props.startLoadingBar();
+                    deleteCollection(
+                        props.selectedCollectionID,
+                        props.syncWithRemote,
+                        props.redirectToAll,
+                        props.setDialogMessage
+                    );
+                },
+                variant: 'danger',
+            },
+            close: {
+                text: constants.CANCEL,
+            },
+        });
+    };
+
     const MenuLink = (props) => (
         <LinkButton
             style={{ fontSize: '14px', fontWeight: 700, padding: '8px 1em' }}
@@ -82,28 +110,7 @@ const CollectionOptions = (props: Props) => {
                     <MenuItem>
                         <MenuLink
                             variant="danger"
-                            onClick={() => {
-                                props.setDialogMessage({
-                                    title: constants.CONFIRM_DELETE_COLLECTION,
-                                    content: constants.DELETE_COLLECTION_MESSAGE(),
-                                    staticBackdrop: true,
-                                    proceed: {
-                                        text: constants.DELETE_COLLECTION,
-                                        action: deleteCollection.bind(
-                                            null,
-
-                                            props.selectedCollectionID,
-
-                                            props.syncWithRemote,
-                                            props.redirectToAll
-                                        ),
-                                        variant: 'danger',
-                                    },
-                                    close: {
-                                        text: constants.CANCEL,
-                                    },
-                                });
-                            }}
+                            onClick={confirmDeleteCollection}
                         >
                             {constants.DELETE}
                         </MenuLink>

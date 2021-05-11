@@ -218,15 +218,22 @@ export default function Gallery() {
     if (!files) {
         return <div />;
     }
-    const addToCollectionHelper = addFilesToCollection.bind(
-        null,
-        setCollectionSelectorView,
-        selected,
-        files,
-        clearSelection,
-        syncWithRemote,
-        selectCollection
-    );
+    const addToCollectionHelper = (
+        collectionName: string,
+        collection: Collection
+    ) => {
+        loadingBar.current?.continuousStart();
+        addFilesToCollection(
+            setCollectionSelectorView,
+            selected,
+            files,
+            clearSelection,
+            syncWithRemote,
+            selectCollection,
+            collectionName,
+            collection
+        );
+    };
 
     const showCreateCollectionModal = () =>
         setCollectionNamerAttributes({
@@ -237,12 +244,14 @@ export default function Gallery() {
                 addToCollectionHelper(collectionName, null),
         });
 
-    const deleteFileHelper = () =>
+    const deleteFileHelper = () => {
+        loadingBar.current?.continuousStart();
         deleteFiles(
             getSelectedFileIds(selected),
             clearSelection,
             syncWithRemote
         );
+    };
     return (
         <FullScreenDropZone
             getRootProps={getRootProps}
@@ -282,6 +291,7 @@ export default function Gallery() {
                 syncWithRemote={syncWithRemote}
                 setDialogMessage={setDialogMessage}
                 setCollectionNamerAttributes={setCollectionNamerAttributes}
+                startLoadingBar={loadingBar.current?.continuousStart}
             />
             <CollectionNamer
                 show={collectionNamerView}

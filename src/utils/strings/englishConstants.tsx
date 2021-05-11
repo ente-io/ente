@@ -269,6 +269,7 @@ const englishConstants = {
     RENAME_COLLECTION: 'rename album',
     CONFIRM_DELETE_COLLECTION: 'confirm album deletion',
     DELETE_COLLECTION: 'delete album',
+    DELETE_COLLECTION_FAILED: 'album deletion failed , please try again',
     DELETE_COLLECTION_MESSAGE: () => (
         <>
             <p>are you sure you want to delete this album?</p>

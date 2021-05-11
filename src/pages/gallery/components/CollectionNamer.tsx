@@ -7,7 +7,7 @@ import SubmitButton from 'components/SubmitButton';
 import MessageDialog from 'components/MessageDialog';
 
 export interface CollectionNamerAttributes {
-    callback: (name) => Promise<void>;
+    callback: (name) => void;
     title: string;
     autoFilledName: string;
     buttonText: string;
