@@ -41,10 +41,8 @@ export default function Upload(props: Props) {
     const [fileProgress, setFileProgress] = useState(new Map<string, number>());
     const [percentComplete, setPercentComplete] = useState(0);
     const [choiceModalView, setChoiceModalView] = useState(false);
-    const [
-        fileAnalysisResult,
-        setFileAnalysisResult,
-    ] = useState<AnalysisResult>(null);
+    const [fileAnalysisResult, setFileAnalysisResult] =
+        useState<AnalysisResult>(null);
     useEffect(() => {
         if (props.acceptedFiles?.length > 0) {
             props.setLoading(true);
@@ -127,12 +125,11 @@ export default function Upload(props: Props) {
         try {
             setProgressView(true);
 
-            let filesWithCollectionToUpload: FileWithCollection[] = props.acceptedFiles.map(
-                (file) => ({
+            let filesWithCollectionToUpload: FileWithCollection[] =
+                props.acceptedFiles.map((file) => ({
                     file,
                     collection,
-                })
-            );
+                }));
             await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
             console.error('Failed to upload files to existing collections', e);
@@ -180,6 +177,7 @@ export default function Upload(props: Props) {
         filesWithCollectionToUpload: FileWithCollection[]
     ) => {
         try {
+            props.closeCollectionSelector();
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
                 props.existingFiles,

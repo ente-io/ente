@@ -54,9 +54,10 @@ function ChoiceModal({
                 </div>
                 <Button
                     variant="outline-success"
-                    onClick={() =>
-                        uploadFiles(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER)
-                    }
+                    onClick={() => {
+                        props.onHide();
+                        uploadFiles(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
+                    }}
                     style={{
                         padding: '12px 24px',
                         flex: 2,
