@@ -89,7 +89,7 @@ export default function Recover() {
                     close: {},
                     content: constants.NO_RECOVERY_KEY_MESSAGE,
                 }}
-            ></MessageDialog>
+            />
         </>
     );
 }
