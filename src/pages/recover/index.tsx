@@ -5,8 +5,10 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
 import CryptoWorker, { setSessionKeys } from 'utils/crypto';
-import PassPhraseForm from 'components/PassphraseForm';
+import SingleInputForm from 'components/SingleInputForm';
 import MessageDialog from 'components/MessageDialog';
+import Container from 'components/Container';
+import { Card, Button } from 'react-bootstrap';
 
 export default function Recover() {
     const router = useRouter();
@@ -43,28 +45,51 @@ export default function Recover() {
 
     return (
         <>
-            <PassPhraseForm
-                callback={recover}
-                fieldType="text"
-                title={constants.RECOVER_ACCOUNT}
-                placeholder={constants.RETURN_RECOVERY_KEY_HINT}
-                buttonText={constants.RECOVER}
-                alternateOption={{
-                    text: constants.NO_RECOVERY_KEY,
-                    click: () => SetMessageDialogView(true),
-                }}
-                back={router.back}
-            />
+            <Container>
+                <Card
+                    style={{ minWidth: '320px', padding: '40px 30px' }}
+                    className="text-center"
+                >
+                    <Card.Body>
+                        <Card.Title style={{ marginBottom: '24px' }}>
+                            {constants.RECOVER_ACCOUNT}
+                        </Card.Title>
+                        <SingleInputForm
+                            callback={recover}
+                            fieldType="text"
+                            placeholder={constants.RETURN_RECOVERY_KEY_HINT}
+                            buttonText={constants.RECOVER}
+                        />
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                marginTop: '12px',
+                            }}
+                        >
+                            <Button
+                                variant="link"
+                                onClick={() => SetMessageDialogView(true)}
+                            >
+                                {constants.NO_RECOVERY_KEY}
+                            </Button>
+                            <Button variant="link" onClick={router.back}>
+                                {constants.GO_BACK}
+                            </Button>
+                        </div>
+                    </Card.Body>
+                </Card>
+            </Container>
             <MessageDialog
+                size={'lg'}
                 show={messageDialogView}
                 onHide={() => SetMessageDialogView(false)}
                 attributes={{
                     title: constants.SORRY,
                     close: {},
+                    content: constants.NO_RECOVERY_KEY_MESSAGE,
                 }}
-            >
-                {constants.NO_RECOVERY_KEY_MESSAGE}
-            </MessageDialog>
+            ></MessageDialog>
         </>
     );
 }
