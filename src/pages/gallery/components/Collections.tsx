@@ -3,7 +3,7 @@ import { SetDialogMessage } from 'components/MessageDialog';
 import NavigationButton, {
     SCROLL_DIRECTION,
 } from 'components/navigationButton';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Collection, CollectionType } from 'services/collectionService';
 import { User } from 'services/userService';
@@ -72,13 +72,19 @@ const Chip = styled.button<{ active: boolean }>`
 
 export default function Collections(props: CollectionProps) {
     const { selected, collections, selectCollection } = props;
-    const [selectedCollectionID, setSelectedCollectionID] = useState<number>(
-        null
-    );
+    const [selectedCollectionID, setSelectedCollectionID] =
+        useState<number>(null);
     const collectionRef = useRef<HTMLDivElement>(null);
-    const [collectionShareModalView, setCollectionShareModalView] = useState(
-        false
-    );
+    const [collectionShareModalView, setCollectionShareModalView] =
+        useState(false);
+
+    useEffect(() => {
+        if (!collectionRef?.current) {
+            return;
+        }
+        collectionRef.current.scrollLeft = 0;
+    }, [collections]);
+
     const clickHandler = (collection?: Collection) => () => {
         setSelectedCollectionID(collection?.id);
         selectCollection(collection?.id);
