@@ -335,7 +335,12 @@ class CollectionItem extends StatelessWidget {
 
 class SectionTitle extends StatelessWidget {
   final String title;
-  const SectionTitle(this.title, {Key key}) : super(key: key);
+  final Alignment alignment;
+  const SectionTitle(
+    this.title, {
+    Key key,
+    this.alignment = Alignment.centerLeft,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -343,7 +348,7 @@ class SectionTitle extends StatelessWidget {
         margin: EdgeInsets.fromLTRB(24, 12, 0, 0),
         child: Column(children: [
           Align(
-            alignment: Alignment.centerLeft,
+            alignment: alignment,
             child: Text(
               title,
               style: TextStyle(
