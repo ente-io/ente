@@ -17,6 +17,7 @@ function ChoiceModal({
 }: Props) {
     return (
         <MessageDialog
+            size={'lg'}
             {...props}
             attributes={{ title: constants.MULTI_FOLDER_UPLOAD }}
         >
