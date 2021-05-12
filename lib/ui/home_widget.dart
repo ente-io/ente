@@ -16,9 +16,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/ui/backup_folder_selection_widget.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
@@ -130,11 +128,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       setState(() {});
     });
     _initDeepLinks();
-    if (Configuration.instance.getPathsToBackUp().isEmpty &&
-        Configuration.instance.hasConfiguredAccount() &&
-        BillingService.instance.hasActiveSubscription()) {
-      showBackupFolderSelectionDialog(context);
-    }
     super.initState();
   }
 
