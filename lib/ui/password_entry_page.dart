@@ -303,6 +303,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     await dialog.show();
     try {
       final result = await Configuration.instance.generateKey(password);
+      Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
       final onDone = () async {
         final dialog = createProgressDialog(context, "please wait...");
