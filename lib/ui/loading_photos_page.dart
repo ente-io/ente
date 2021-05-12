@@ -112,6 +112,7 @@ class _LoadingPhotosPageState extends State<LoadingPhotosPage> {
                   return _getMessage(_messages[index]);
                 },
                 itemCount: _messages.length,
+                physics: NeverScrollableScrollPhysics(),
               ),
             ),
           ],
