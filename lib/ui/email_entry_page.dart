@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -489,7 +488,7 @@ class BillingPlanWidget extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
-        color: Colors.grey[850],
+        color: Colors.black.withOpacity(0.2),
         child: Container(
           padding: EdgeInsets.fromLTRB(12, 20, 12, 20),
           child: Column(
