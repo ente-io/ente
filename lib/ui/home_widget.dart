@@ -17,6 +17,7 @@ import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
@@ -160,6 +161,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     if (!SyncService.instance.hasGrantedPermissions()) {
       return GrantPermissionsPage();
+    }
+    if (Configuration.instance.getPathsToBackUp().length == 0) {
+      return BackupFolderSelectionPage();
     }
 
     return Stack(
