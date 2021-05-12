@@ -23,6 +23,7 @@ class Gallery extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final String tagPrefix;
   final Widget header;
+  final Widget footer;
 
   Gallery({
     @required this.asyncLoader,
@@ -30,6 +31,7 @@ class Gallery extends StatefulWidget {
     @required this.tagPrefix,
     this.reloadEvent,
     this.header,
+    this.footer,
   });
 
   @override
@@ -131,6 +133,9 @@ class _GalleryState extends State<Gallery> {
         );
         if (widget.header != null && index == 0) {
           gallery = Column(children: [widget.header, gallery]);
+        }
+        if (widget.footer != null && index == _collatedFiles.length - 1) {
+          gallery = Column(children: [gallery, widget.footer]);
         }
         return gallery;
       },
