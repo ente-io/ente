@@ -229,7 +229,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   onPressed: _isFormValid()
                       ? () {
                           if (!isValidEmail(_email)) {
-                            showErrorDialog(context, "invalid email address",
+                            showErrorDialog(context, "invalid email",
                                 "please enter a valid email address.");
                           } else if (_passwordController1.text !=
                               _passwordController2.text) {
