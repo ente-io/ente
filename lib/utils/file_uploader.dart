@@ -257,6 +257,7 @@ class FileUploader {
           file.toString() +
           ", isForced: " +
           forcedUpload.toString());
+      // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
       final asset = await file
           .getAsset()
           .timeout(Duration(seconds: 3))
