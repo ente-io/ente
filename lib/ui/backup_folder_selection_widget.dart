@@ -68,8 +68,8 @@ class _BackupFolderSelectionWidgetState
               fontSize: 18,
               onPressed: _backedupFolders.length == 0
                   ? null
-                  : () {
-                      Configuration.instance.setPathsToBackUp(_backedupFolders);
+                  : () async {
+                      await Configuration.instance.setPathsToBackUp(_backedupFolders);
                       Bus.instance.fire(BackupFoldersUpdatedEvent());
                       Navigator.pop(context);
                     },
