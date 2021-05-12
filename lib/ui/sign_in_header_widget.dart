@@ -52,7 +52,7 @@ class _SignInHeaderState extends State<SignInHeader> {
 
   Widget _getBody(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(8, 24, 8, 8),
+      padding: EdgeInsets.fromLTRB(8, 40, 8, 8),
       child: Column(
         children: [
           Text.rich(
@@ -106,7 +106,7 @@ class _SignInHeaderState extends State<SignInHeader> {
             textAlign: TextAlign.center,
           ),
           Padding(
-            padding: EdgeInsets.all(18),
+            padding: EdgeInsets.all(24),
           ),
           _getFeatureSlider(),
           new DotsIndicator(
@@ -118,9 +118,12 @@ class _SignInHeaderState extends State<SignInHeader> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(28),
           ),
           _getSignUpButton(context),
+          Padding(
+            padding: EdgeInsets.all(4),
+          ),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             child: Container(
@@ -140,8 +143,11 @@ class _SignInHeaderState extends State<SignInHeader> {
             ),
             onTap: _navigateToSignInPage,
           ),
+          Padding(
+            padding: EdgeInsets.all(4),
+          ),
           Divider(
-            height: 4,
+            height: 1,
             color: Theme.of(context).buttonColor.withOpacity(0.5),
           ),
         ],
@@ -174,7 +180,7 @@ class _SignInHeaderState extends State<SignInHeader> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
-                letterSpacing: 1.0,
+                letterSpacing: 0.6,
               ),
             ),
           ),
@@ -184,11 +190,8 @@ class _SignInHeaderState extends State<SignInHeader> {
     );
   }
 
-  ConstrainedBox _getFeatureSlider() {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: 290,
-      ),
+  Widget _getFeatureSlider() {
+    return Expanded(
       child: PageView(
         children: [
           _getProtectedFeature(),
@@ -213,7 +216,7 @@ class _SignInHeaderState extends State<SignInHeader> {
             "assets/protected.png",
             height: 170,
           ),
-          Padding(padding: EdgeInsets.all(10)),
+          Padding(padding: EdgeInsets.all(16)),
           Container(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -222,27 +225,28 @@ class _SignInHeaderState extends State<SignInHeader> {
                 Text(
                   "protected",
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Theme.of(context).buttonColor,
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(6)),
+                Padding(padding: EdgeInsets.all(12)),
                 Container(
                   child: Text(
-                    "encrypted by your master key,",
+                    "end-to-end encrypted with your password,",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: Colors.white.withOpacity(0.9),
                     ),
                   ),
                 ),
                 Padding(padding: EdgeInsets.all(2)),
                 Container(
                   child: Text(
-                    "only visible to you",
+                    "visible only to you",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: Colors.white.withOpacity(0.9),
                     ),
                   ),
                 ),
