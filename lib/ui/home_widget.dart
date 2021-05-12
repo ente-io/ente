@@ -30,7 +30,7 @@ import 'package:photos/ui/nav_bar.dart';
 import 'package:photos/ui/settings_button.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/ui/sign_in_header_widget.dart';
+import 'package:photos/ui/landing_page.dart';
 import 'package:photos/ui/sync_indicator.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:uni_links/uni_links.dart';
@@ -163,7 +163,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _getBody() {
     if (!Configuration.instance.hasConfiguredAccount()) {
-      return SignInHeader();
+      return LandingPage();
     }
     if (!SyncService.instance.hasGrantedPermissions()) {
       return GrantPermissionsPage();

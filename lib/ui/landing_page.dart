@@ -13,14 +13,14 @@ import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
 import 'package:photos/ui/subscription_page.dart';
 
-class SignInHeader extends StatefulWidget {
-  const SignInHeader({Key key}) : super(key: key);
+class LandingPage extends StatefulWidget {
+  const LandingPage({Key key}) : super(key: key);
 
   @override
-  _SignInHeaderState createState() => _SignInHeaderState();
+  _LandingPageState createState() => _LandingPageState();
 }
 
-class _SignInHeaderState extends State<SignInHeader> {
+class _LandingPageState extends State<LandingPage> {
   StreamSubscription _userAuthEventSubscription;
   double _featureIndex = 0;
 
