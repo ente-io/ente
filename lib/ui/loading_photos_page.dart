@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animations/loading_animations.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/ui/backup_folder_selection_widget.dart';
+import 'package:photos/ui/backup_folder_selection_page.dart';
 
 class LoadingPhotosPage extends StatefulWidget {
   const LoadingPhotosPage({Key key}) : super(key: key);
@@ -38,7 +38,13 @@ class _LoadingPhotosPageState extends State<LoadingPhotosPage> {
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (mounted &&
           event.status == SyncStatus.completed_first_gallery_import) {
-        showBackupFolderSelectionDialog(context);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return BackupFolderSelectionPage();
+            },
+          ),
+        );
       }
     });
 
