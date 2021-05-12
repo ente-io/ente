@@ -26,7 +26,7 @@ class DeviceFolderPage extends StatelessWidget {
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       tagPrefix: "device_folder:" + folder.path,
       selectedFiles: _selectedFiles,
-      headerWidget: Configuration.instance.hasConfiguredAccount()
+      header: Configuration.instance.hasConfiguredAccount()
           ? _getHeaderWidget()
           : Container(),
     );

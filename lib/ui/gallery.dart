@@ -22,14 +22,14 @@ class Gallery extends StatefulWidget {
   final Stream<FilesUpdatedEvent> reloadEvent;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
-  final Widget headerWidget;
+  final Widget header;
 
   Gallery({
     @required this.asyncLoader,
     @required this.selectedFiles,
     @required this.tagPrefix,
     this.reloadEvent,
-    this.headerWidget,
+    this.header,
   });
 
   @override
@@ -129,8 +129,8 @@ class _GalleryState extends State<Gallery> {
               .where((event) => event.tag == widget.tagPrefix)
               .map((event) => event.index),
         );
-        if (widget.headerWidget != null && index == 0) {
-          gallery = Column(children: [widget.headerWidget, gallery]);
+        if (widget.header != null && index == 0) {
+          gallery = Column(children: [widget.header, gallery]);
         }
         return gallery;
       },

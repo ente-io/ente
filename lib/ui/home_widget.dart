@@ -255,7 +255,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       tagPrefix: "home_gallery",
       selectedFiles: _selectedFiles,
-      headerWidget: header,
+      header: header,
     );
     return Stack(
       children: [
