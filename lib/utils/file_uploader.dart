@@ -269,7 +269,6 @@ class FileUploader {
               throw e;
             }
           });
-      _logger.info("Got asset for " + file.toString());
       if (asset == null) {
         await _onInvalidFileError(file);
       }
@@ -283,7 +282,6 @@ class FileUploader {
           throw e;
         }
       });
-      _logger.info("Got origin file for " + file.toString());
       var key;
       var isAlreadyUploadedFile = file.uploadedFileID != null;
       if (isAlreadyUploadedFile) {
