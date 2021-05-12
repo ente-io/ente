@@ -37,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Text(
               "sign in",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 letterSpacing: 0.6,
               ),
             ),
