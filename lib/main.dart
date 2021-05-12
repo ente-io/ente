@@ -48,7 +48,7 @@ final themeData = ThemeData(
   ),
   cardColor: Color.fromRGBO(25, 25, 25, 1.0),
   dialogTheme: DialogTheme().copyWith(
-    backgroundColor: Color.fromRGBO(20, 20, 20, 1.0),
+    backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
   ),
 );
 
