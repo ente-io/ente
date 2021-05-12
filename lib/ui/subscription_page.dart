@@ -159,7 +159,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       widgets.add(Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
         child: Text(
-          "ente encrypts and backs up your memories, so they're always available, even if you lose your device",
+          "ente preserves your memories, so they're always available to you, even if you lose your device",
           style: TextStyle(
             color: Colors.white54,
             height: 1.2,

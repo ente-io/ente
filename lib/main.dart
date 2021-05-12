@@ -46,7 +46,7 @@ final themeData = ThemeData(
   appBarTheme: AppBarTheme().copyWith(
     color: Color.fromRGBO(10, 20, 20, 1.0),
   ),
-  cardColor: Color.fromRGBO(25, 25, 25, 1.0),
+  cardColor: Color.fromRGBO(10, 15, 15, 1.0),
   dialogTheme: DialogTheme().copyWith(
     backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
   ),
