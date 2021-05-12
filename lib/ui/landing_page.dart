@@ -130,13 +130,18 @@ class _LandingPageState extends State<LandingPage> {
               width: double.infinity,
               padding: EdgeInsets.all(28),
               child: Center(
-                child: Text(
-                  "sign in",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Theme.of(context).buttonColor,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.6,
+                child: Hero(
+                  tag: "sign_in",
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: Text(
+                      "sign in",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
                   ),
                 ),
               ),

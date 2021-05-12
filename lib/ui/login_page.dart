@@ -30,10 +30,17 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "sign in",
-          style: TextStyle(
-            fontSize: 18,
+        title: Hero(
+          tag: "sign_in",
+          child: Material(
+            type: MaterialType.transparency,
+            child: Text(
+              "sign in",
+              style: TextStyle(
+                fontSize: 18,
+                letterSpacing: 0.6,
+              ),
+            ),
           ),
         ),
       ),
