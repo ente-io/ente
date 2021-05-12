@@ -173,8 +173,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 ),
                 padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
                 side: BorderSide(
-                  width: 1,
-                  color: Theme.of(context).buttonColor.withOpacity(0.4),
+                  width: 2,
+                  color: Theme.of(context).buttonColor.withOpacity(0.5),
                 ),
               ),
               child: Row(
@@ -186,7 +186,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                     Icons.outgoing_mail,
                     color: Colors.white.withOpacity(0.7),
                   ),
-                  Padding(padding: EdgeInsets.all(4)),
+                  Padding(padding: EdgeInsets.all(6)),
                   Text(
                     "invite",
                     style: TextStyle(
@@ -223,8 +223,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 ),
                 padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
                 side: BorderSide(
-                  width: 1,
-                  color: Theme.of(context).buttonColor.withOpacity(0.4),
+                  width: 2,
+                  color: Theme.of(context).buttonColor.withOpacity(0.5),
                 ),
               ),
               child: Row(
@@ -236,7 +236,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                     Icons.person_add,
                     color: Colors.white.withOpacity(0.7),
                   ),
-                  Padding(padding: EdgeInsets.all(4)),
+                  Padding(padding: EdgeInsets.all(6)),
                   Text(
                     "share",
                     style: TextStyle(
