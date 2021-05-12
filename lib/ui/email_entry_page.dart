@@ -90,10 +90,16 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
-      title: Text(
-        "sign up",
-        style: TextStyle(
-          fontSize: 18,
+      title: Hero(
+        tag: "sign_up",
+        child: Material(
+          type: MaterialType.transparency,
+          child: Text(
+            "sign up",
+            style: TextStyle(
+              fontSize: 18,
+            ),
+          ),
         ),
       ),
     );
