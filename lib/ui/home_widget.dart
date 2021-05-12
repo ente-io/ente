@@ -162,11 +162,11 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody() {
-    if (!SyncService.instance.hasGrantedPermissions()) {
-      return GrantPermissionsPage();
-    }
     if (!Configuration.instance.hasConfiguredAccount()) {
       return SignInHeader();
+    }
+    if (!SyncService.instance.hasGrantedPermissions()) {
+      return GrantPermissionsPage();
     }
 
     return Stack(
