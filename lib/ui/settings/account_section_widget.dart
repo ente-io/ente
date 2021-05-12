@@ -64,7 +64,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    content: const BackupFolderSelectionWidget("set folders"),
+                    content: const BackupFolderSelectionWidget("preserve"),
                     backgroundColor: Colors.black.withOpacity(0.8),
                   );
                 },
