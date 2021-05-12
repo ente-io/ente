@@ -37,9 +37,7 @@ Widget button(
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: fontSize,
-          color: onPressed == null
-              ? Colors.grey
-              : Color.fromRGBO(45, 194, 98, 1.0),
+          color: onPressed == null ? Colors.grey : Colors.white,
         ),
         textAlign: TextAlign.center,
       ),
