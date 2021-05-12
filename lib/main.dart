@@ -35,7 +35,7 @@ final themeData = ThemeData(
   fontFamily: 'Ubuntu',
   brightness: Brightness.dark,
   hintColor: Colors.grey,
-  accentColor: Color.fromRGBO(45, 194, 98, 1.0),
+  accentColor: Color.fromRGBO(45, 194, 98, 0.2),
   buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
   buttonTheme: ButtonThemeData().copyWith(
     buttonColor: Color.fromRGBO(45, 194, 98, 1.0),

@@ -1,12 +1,7 @@
-import 'dart:async';
-
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/subscription_purchased_event.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/login_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
@@ -21,141 +16,122 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
-  StreamSubscription _userAuthEventSubscription;
   double _featureIndex = 0;
 
   @override
-  void initState() {
-    _userAuthEventSubscription =
-        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
-      setState(() {});
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _userAuthEventSubscription.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    var hasConfiguredAccount = Configuration.instance.hasConfiguredAccount();
-    var hasSubscription = BillingService.instance.getSubscription() != null;
-    if (hasConfiguredAccount && hasSubscription) {
-      return Container();
-    } else {
-      return _getBody(context);
-    }
+    return Scaffold(body: _getBody(), resizeToAvoidBottomInset: false);
   }
 
-  Widget _getBody(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(8, 40, 8, 8),
-      child: Column(
-        children: [
-          Text.rich(
-            TextSpan(
-              children: <TextSpan>[
-                TextSpan(
-                  text: "with ",
-                  style: TextStyle(
-                    fontSize: 16,
+  Widget _getBody() {
+    return SingleChildScrollView(
+      physics: NeverScrollableScrollPhysics(),
+      child: Container(
+        padding: EdgeInsets.fromLTRB(8, 40, 8, 8),
+        child: Column(
+          children: [
+            Text.rich(
+              TextSpan(
+                children: <TextSpan>[
+                  TextSpan(
+                    text: "with ",
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-                TextSpan(
-                  text: "ente",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Montserrat',
-                    fontSize: 16,
+                  TextSpan(
+                    text: "ente",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Montserrat',
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          Padding(
-            padding: EdgeInsets.all(2),
-          ),
-          Text.rich(
-            TextSpan(
-              children: <TextSpan>[
-                TextSpan(
-                  text: "your ",
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-                TextSpan(
-                  text: "memories",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                TextSpan(
-                  text: " are",
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-              ],
+            Padding(
+              padding: EdgeInsets.all(2),
             ),
-            textAlign: TextAlign.center,
-          ),
-          Padding(
-            padding: EdgeInsets.all(24),
-          ),
-          _getFeatureSlider(),
-          new DotsIndicator(
-            dotsCount: 3,
-            position: _featureIndex,
-            decorator: DotsDecorator(
-              color: Colors.white24, // Inactive color
-              activeColor: Theme.of(context).buttonColor,
+            Text.rich(
+              TextSpan(
+                children: <TextSpan>[
+                  TextSpan(
+                    text: "your ",
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  TextSpan(
+                    text: "memories",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  TextSpan(
+                    text: " are",
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(28),
-          ),
-          _getSignUpButton(context),
-          Padding(
-            padding: EdgeInsets.all(4),
-          ),
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            child: Container(
-              width: double.infinity,
+            Padding(
+              padding: EdgeInsets.all(24),
+            ),
+            _getFeatureSlider(),
+            new DotsIndicator(
+              dotsCount: 3,
+              position: _featureIndex,
+              decorator: DotsDecorator(
+                color: Colors.white24, // Inactive color
+                activeColor: Theme.of(context).buttonColor,
+              ),
+            ),
+            Padding(
               padding: EdgeInsets.all(28),
-              child: Center(
-                child: Hero(
-                  tag: "sign_in",
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: Text(
-                      "sign in",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        letterSpacing: 0.6,
+            ),
+            _getSignUpButton(context),
+            Padding(
+              padding: EdgeInsets.all(4),
+            ),
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(28),
+                child: Center(
+                  child: Hero(
+                    tag: "sign_in",
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: Text(
+                        "sign in",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          letterSpacing: 0.6,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
+              onTap: _navigateToSignInPage,
             ),
-            onTap: _navigateToSignInPage,
-          ),
-          Padding(
-            padding: EdgeInsets.all(4),
-          ),
-          Divider(
-            height: 1,
-            color: Theme.of(context).buttonColor.withOpacity(0.5),
-          ),
-        ],
+            Padding(
+              padding: EdgeInsets.all(4),
+            ),
+            Divider(
+              height: 1,
+              color: Theme.of(context).buttonColor.withOpacity(0.5),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -173,7 +149,7 @@ class _LandingPageState extends State<LandingPage> {
           padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
           side: BorderSide(
             width: 2,
-            color: Theme.of(context).accentColor,
+            color: Theme.of(context).buttonColor,
           ),
         ),
         child: Hero(
@@ -196,7 +172,8 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Widget _getFeatureSlider() {
-    return Expanded(
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: 320),
       child: PageView(
         children: [
           _getProtectedFeature(),

@@ -174,7 +174,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
                 side: BorderSide(
                   width: 1,
-                  color: Theme.of(context).accentColor.withOpacity(0.4),
+                  color: Theme.of(context).buttonColor.withOpacity(0.4),
                 ),
               ),
               child: Row(
@@ -224,7 +224,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
                 side: BorderSide(
                   width: 1,
-                  color: Theme.of(context).accentColor.withOpacity(0.4),
+                  color: Theme.of(context).buttonColor.withOpacity(0.4),
                 ),
               ),
               child: Row(
@@ -393,7 +393,7 @@ class IncomingCollectionItem extends StatelessWidget {
                       margin: EdgeInsets.fromLTRB(0, 0, 4, 0),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Theme.of(context).accentColor,
+                        color: Theme.of(context).buttonColor,
                       ),
                     ),
                   ),

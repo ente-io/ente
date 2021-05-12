@@ -183,12 +183,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             ),
             side: BorderSide(
               width: 1,
-              color: Theme.of(context).accentColor.withOpacity(0.4),
+              color: Theme.of(context).buttonColor.withOpacity(0.4),
             ),
           ),
           child: Icon(
             Icons.add,
-            color: Theme.of(context).accentColor.withOpacity(0.7),
+            color: Theme.of(context).buttonColor.withOpacity(0.7),
           ),
           onPressed: () async {
             await showToast(

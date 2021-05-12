@@ -67,7 +67,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
     final icon = _event.status == SyncStatus.completed_backup
         ? Icon(
             Icons.cloud_done_outlined,
-            color: Theme.of(context).accentColor,
+            color: Theme.of(context).buttonColor,
           )
         : _inProgressIcon;
     return AnimatedContainer(
@@ -118,7 +118,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
               children: [
                 Icon(
                   Icons.error_outline,
-                  color: Theme.of(context).accentColor,
+                  color: Theme.of(context).buttonColor,
                 ),
                 Padding(padding: EdgeInsets.all(4)),
                 Text("your subscription has expired"),
@@ -154,7 +154,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
               children: [
                 Icon(
                   Icons.error_outline,
-                  color: Theme.of(context).accentColor,
+                  color: Theme.of(context).buttonColor,
                 ),
                 Padding(padding: EdgeInsets.all(4)),
                 Text("storage limit exceeded"),
@@ -189,7 +189,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
               children: [
                 Icon(
                   Icons.error_outline,
-                  color: Theme.of(context).accentColor,
+                  color: Theme.of(context).buttonColor,
                 ),
                 Padding(padding: EdgeInsets.all(4)),
                 Text(_event.reason ?? "upload failed"),

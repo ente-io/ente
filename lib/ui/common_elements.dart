@@ -26,7 +26,7 @@ Widget button(
         ),
         padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
         side: BorderSide(
-          width: 2,
+          width: onPressed == null ? 1 : 2,
           color: onPressed == null
               ? Colors.grey
               : Color.fromRGBO(45, 194, 98, 1.0),

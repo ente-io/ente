@@ -542,7 +542,7 @@ class FaqWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ExpansionCard(
       title: Text(faq.q),
-      color: Theme.of(context).accentColor,
+      color: Theme.of(context).buttonColor,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),
@@ -664,7 +664,7 @@ class SubscriptionPlanWidget extends StatelessWidget {
                   ? Expanded(
                       child: Icon(
                         Icons.check_circle,
-                        color: Theme.of(context).accentColor,
+                        color: Theme.of(context).buttonColor,
                       ),
                     )
                   : Container(),

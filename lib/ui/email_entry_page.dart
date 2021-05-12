@@ -219,7 +219,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 padding: EdgeInsets.all(20),
               ),
               _getAgreement(),
-              Padding(padding: EdgeInsets.all(16)),
+              Padding(padding: EdgeInsets.all(20)),
               Container(
                 width: double.infinity,
                 height: 64,

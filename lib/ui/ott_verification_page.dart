@@ -44,7 +44,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               Text(
                 Configuration.instance.getEmail(),
                 style: TextStyle(
-                  color: Theme.of(context).accentColor,
+                  color: Theme.of(context).buttonColor,
                   fontSize: 18,
                 ),
               ),
@@ -72,6 +72,9 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                     setState(() {});
                   },
                 ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(12),
               ),
               Container(
                 padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),

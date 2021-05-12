@@ -311,7 +311,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
           border: widget.selectedFiles.files.contains(file)
               ? Border.all(
                   width: 4.0,
-                  color: Theme.of(context).accentColor,
+                  color: Theme.of(context).buttonColor,
                 )
               : null,
         ),

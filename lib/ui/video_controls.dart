@@ -288,7 +288,7 @@ class _VideoControlsState extends State<VideoControls> {
           },
           colors: chewieController.materialProgressColors ??
               ChewieProgressColors(
-                  playedColor: Theme.of(context).accentColor,
+                  playedColor: Theme.of(context).buttonColor,
                   handleColor: Colors.white,
                   bufferedColor: Colors.white,
                   backgroundColor: Theme.of(context).disabledColor),

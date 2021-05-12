@@ -162,7 +162,7 @@ class MemoryWidget extends StatelessWidget {
         border: isSeen
             ? Border()
             : Border.all(
-                color: Theme.of(context).accentColor,
+                color: Theme.of(context).buttonColor,
                 width: isSeen ? 0 : 2,
               ),
         borderRadius: BorderRadius.circular(40),

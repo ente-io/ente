@@ -7,6 +7,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
@@ -59,27 +60,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             padding: EdgeInsets.only(left: 60, right: 60),
             width: double.infinity,
             height: 64,
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
-                side: BorderSide(
-                  width: 2,
-                  color: Theme.of(context).accentColor,
-                ),
-              ),
-              child: Text(
-                "preserve",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  letterSpacing: 1.0,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
-              ),
+            child: button(
+              "preserve",
+              fontSize: 18,
               onPressed: _backedupFolders.length == 0
                   ? null
                   : () {
