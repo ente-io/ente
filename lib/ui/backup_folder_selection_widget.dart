@@ -7,28 +7,9 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
-
-void showBackupFolderSelectionDialog(BuildContext context) {
-  Future.delayed(
-    Duration.zero,
-    () => showDialog(
-      context: context,
-      builder: (context) {
-        return WillPopScope(
-          onWillPop: () async => false,
-          child: AlertDialog(
-            content: const BackupFolderSelectionWidget("start backup"),
-            backgroundColor: Colors.black.withOpacity(0.8),
-          ),
-        );
-      },
-      barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.85),
-    ),
-  );
-}
 
 class BackupFolderSelectionWidget extends StatefulWidget {
   final String buttonText;
@@ -69,7 +50,7 @@ class _BackupFolderSelectionWidgetState
             padding: EdgeInsets.all(4),
           ),
           Text(
-            "select photos to preserve",
+            "select folders to preserve",
             style: TextStyle(fontSize: 20),
           ),
           Padding(
@@ -82,16 +63,9 @@ class _BackupFolderSelectionWidgetState
           Container(
             width: double.infinity,
             height: 64,
-            child: RaisedButton(
-              child: Text(
-                widget.buttonText,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  letterSpacing: 1.0,
-                ),
-                textAlign: TextAlign.center,
-              ),
+            child: button(
+              widget.buttonText,
+              fontSize: 18,
               onPressed: _backedupFolders.length == 0
                   ? null
                   : () {
@@ -99,9 +73,6 @@ class _BackupFolderSelectionWidgetState
                       Bus.instance.fire(BackupFoldersUpdatedEvent());
                       Navigator.pop(context);
                     },
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
             ),
           ),
         ],
@@ -122,24 +93,49 @@ class _BackupFolderSelectionWidgetState
           });
           final List<Widget> foldersWidget = [];
           for (final file in snapshot.data) {
-            foldersWidget.add(Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: CheckboxListTile(
-                value: _backedupFolders.contains(file.deviceFolder),
-                title: Row(
-                  children: [
-                    _getThumbnail(file),
-                    Padding(padding: EdgeInsets.all(8)),
-                    Flexible(
-                      child: Text(
-                        file.deviceFolder,
-                        style: TextStyle(fontSize: 16, height: 1.5),
-                        overflow: TextOverflow.clip,
+            foldersWidget.add(
+              InkWell(
+                child: Container(
+                  color: _backedupFolders.contains(file.deviceFolder)
+                      ? Color.fromRGBO(10, 20, 20, 1.0)
+                      : null,
+                  padding: EdgeInsets.fromLTRB(24, 20, 24, 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        child: Expanded(
+                          child: Row(
+                            children: [
+                              _getThumbnail(file),
+                              Padding(padding: EdgeInsets.all(10)),
+                              Expanded(
+                                child: Text(
+                                  file.deviceFolder,
+                                  style: TextStyle(fontSize: 16, height: 1.5),
+                                  overflow: TextOverflow.clip,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                      Checkbox(
+                        value: _backedupFolders.contains(file.deviceFolder),
+                        onChanged: (value) {
+                          if (value) {
+                            _backedupFolders.add(file.deviceFolder);
+                          } else {
+                            _backedupFolders.remove(file.deviceFolder);
+                          }
+                          setState(() {});
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                onChanged: (value) async {
+                onTap: () {
+                  final value = !_backedupFolders.contains(file.deviceFolder);
                   if (value) {
                     _backedupFolders.add(file.deviceFolder);
                   } else {
@@ -148,7 +144,7 @@ class _BackupFolderSelectionWidgetState
                   setState(() {});
                 },
               ),
-            ));
+            );
           }
 
           final scrollController = ScrollController();
