@@ -21,14 +21,13 @@ class _LoadingPhotosPageState extends State<LoadingPhotosPage> {
   );
   final List<String> _messages = [
     "web.ente.io has a slick uploader",
-    "ente has preserved over 500,000 files so far",
+    "we have preserved over 500,000 files so far",
     "all our apps are open source",
-    "ente's encryption protocols have been reviewed by engineers at Google, Apple, Amazon, and Facebook",
+    "our encryption protocols have been reviewed by engineers at Google, Apple, Amazon, and Facebook",
     "you can share files and folders with your loved ones, end-to-end encrypted",
     "our mobile apps run in the background to encrypt and backup new photos you take",
-    "ente uses Xchacha20Poly1305 to safely encrypt your data",
+    "we use Xchacha20Poly1305 to safely encrypt your data",
     "one of our data centers is in a fall out shelter 25m underground",
-    "web.ente.io has a slick uploader",
   ];
 
   @override
