@@ -151,23 +151,35 @@ class _SignInHeaderState extends State<SignInHeader> {
 
   Container _getSignUpButton(BuildContext context) {
     return Container(
-      width: 340,
-      height: 54,
-      padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-      child: RaisedButton(
-        child: Text(
-          "sign up",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            letterSpacing: 1.0,
+      padding: EdgeInsets.only(left: 80, right: 80),
+      width: double.infinity,
+      height: 64,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
-          textAlign: TextAlign.center,
+          padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+          side: BorderSide(
+            width: 2,
+            color: Theme.of(context).accentColor,
+          ),
+        ),
+        child: Hero(
+          tag: "sign_up",
+          child: Material(
+            type: MaterialType.transparency,
+            child: Text(
+              "sign up",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                letterSpacing: 1.0,
+              ),
+            ),
+          ),
         ),
         onPressed: _navigateToSignUpPage,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
       ),
     );
   }
