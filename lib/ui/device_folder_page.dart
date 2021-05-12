@@ -94,7 +94,7 @@ class _BackupConfigurationHeaderWidgetState
               } else {
                 current.remove(widget.path);
               }
-              Configuration.instance.setPathsToBackUp(current);
+              await Configuration.instance.setPathsToBackUp(current);
               setState(() {});
               Bus.instance.fire(BackupFoldersUpdatedEvent());
             },
