@@ -19,6 +19,19 @@ class PasswordReentryPage extends StatefulWidget {
 
 class _PasswordReentryPageState extends State<PasswordReentryPage> {
   final _passwordController = TextEditingController();
+  FocusNode _passwordFocusNode = FocusNode();
+  bool _passwordInFocus = false;
+  bool _passwordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordFocusNode.addListener(() {
+      setState(() {
+        _passwordInFocus = _passwordFocusNode.hasFocus;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +57,22 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             decoration: InputDecoration(
               hintText: "enter your password",
               contentPadding: EdgeInsets.all(20),
+              suffixIcon: _passwordInFocus
+                  ? IconButton(
+                      icon: Icon(
+                        _passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.white.withOpacity(0.5),
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
+                      },
+                    )
+                  : null,
             ),
             style: TextStyle(
               fontSize: 14,
@@ -51,8 +80,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             controller: _passwordController,
             autofocus: false,
             autocorrect: false,
-            obscureText: true,
+            obscureText: !_passwordVisible,
             keyboardType: TextInputType.visiblePassword,
+            focusNode: _passwordFocusNode,
             onChanged: (_) {
               setState(() {});
             },
