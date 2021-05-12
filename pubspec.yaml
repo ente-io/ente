@@ -77,6 +77,7 @@ dependencies:
   quiver: ^3.0.1
   move_to_background: ^1.0.2
   loading_animations: ^2.1.0
+  dots_indicator: ^2.0.0
 
 dev_dependencies:
   flutter_test:
