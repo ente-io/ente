@@ -49,6 +49,9 @@ class _LoadingPhotosPageState extends State<LoadingPhotosPage> {
     });
 
     Timer.periodic(Duration(seconds: 5), (Timer timer) {
+      if (!mounted) {
+        return;
+      }
       if (_currentPage < _messages.length - 1) {
         _currentPage++;
       } else {
