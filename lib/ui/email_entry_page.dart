@@ -98,6 +98,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             "sign up",
             style: TextStyle(
               fontSize: 18,
+              letterSpacing: 0.6,
             ),
           ),
         ),
