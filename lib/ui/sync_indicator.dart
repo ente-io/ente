@@ -20,7 +20,10 @@ class _SyncIndicatorState extends State<SyncIndicator> {
   SyncStatusUpdate _event;
   double _containerHeight = 48;
   StreamSubscription<SyncStatusUpdate> _subscription;
-  static const _inProgressIcon = CircularProgressIndicator(strokeWidth: 2);
+  static const _inProgressIcon = CircularProgressIndicator(
+    strokeWidth: 2,
+    valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(45, 194, 98, 1.0)),
+  );
 
   @override
   void initState() {
