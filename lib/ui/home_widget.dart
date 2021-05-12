@@ -23,6 +23,7 @@ import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/grant_permissions_page.dart';
+import 'package:photos/ui/loading_photos_page.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/nav_bar.dart';
@@ -162,7 +163,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!SyncService.instance.hasGrantedPermissions()) {
       return GrantPermissionsPage();
     }
-    if (Configuration.instance.getPathsToBackUp().length == 0) {
+    if (!SyncService.instance.hasCompletedFirstImport()) {
+      return LoadingPhotosPage();
+    }
+    if (Configuration.instance.getPathsToBackUp().isEmpty) {
       return BackupFolderSelectionPage();
     }
 

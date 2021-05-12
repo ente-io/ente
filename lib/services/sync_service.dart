@@ -232,7 +232,10 @@ class SyncService {
         toTime = DateTime(toYear).microsecondsSinceEpoch;
       }
       await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
-      _prefs.setBool(kHasCompletedFirstImportKey, true);
+    }
+    if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
+        !_prefs.getBool(kHasCompletedFirstImportKey)) {
+      await _prefs.setBool(kHasCompletedFirstImportKey, true);
       Bus.instance
           .fire(SyncStatusUpdate(SyncStatus.completed_first_gallery_import));
     }
