@@ -318,7 +318,7 @@ class FileUploader {
       // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
       if (file.location == null ||
           (file.location.latitude == 0 && file.location.longitude == 0)) {
-        final latLong = await (await file.getAsset()).latlngAsync();
+        final latLong = await asset.latlngAsync();
         file.location = Location(latLong.latitude, latLong.longitude);
       }
 
