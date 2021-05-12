@@ -13,23 +13,37 @@ final nothingToSeeHere = Center(
   ),
 );
 
-RaisedButton button(
+Widget button(
   String text, {
   double fontSize = 14,
   VoidCallback onPressed,
 }) {
-  return RaisedButton(
-    child: Text(
-      text,
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: fontSize,
+  return InkWell(
+    child: OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+        side: BorderSide(
+          width: 2,
+          color: onPressed == null
+              ? Colors.grey
+              : Color.fromRGBO(45, 194, 98, 1.0),
+        ),
       ),
-      textAlign: TextAlign.center,
-    ),
-    onPressed: onPressed,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: fontSize,
+          color: onPressed == null
+              ? Colors.grey
+              : Color.fromRGBO(45, 194, 98, 1.0),
+        ),
+        textAlign: TextAlign.center,
+      ),
+      onPressed: onPressed,
     ),
   );
 }
