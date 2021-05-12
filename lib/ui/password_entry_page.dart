@@ -41,6 +41,12 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       _passwordController2 = TextEditingController();
   double _passwordStrength = 0;
   String _password;
+  bool _password1Visible = false;
+  bool _password2Visible = false;
+  FocusNode _password1FocusNode = FocusNode();
+  FocusNode _password2FocusNode = FocusNode();
+  bool _password1InFocus = false;
+  bool _password2InFocus = false;
 
   @override
   void initState() {
@@ -49,6 +55,16 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     if (_password != null) {
       Future.delayed(Duration.zero, () => _showRecoveryCodeDialog(_password));
     }
+    _password1FocusNode.addListener(() {
+      setState(() {
+        _password1InFocus = _password1FocusNode.hasFocus;
+      });
+    });
+    _password2FocusNode.addListener(() {
+      setState(() {
+        _password2InFocus = _password2FocusNode.hasFocus;
+      });
+    });
   }
 
   @override
@@ -80,10 +96,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       children: [
         FlutterPasswordStrength(
           password: _passwordController1.text,
-          backgroundColor: Colors.grey[850],
+          backgroundColor: Colors.white.withOpacity(0.1),
           strengthCallback: (strength) {
             _passwordStrength = strength;
           },
+          strengthColors: passwordStrengthColors,
         ),
         SingleChildScrollView(
           child: Container(
@@ -121,7 +138,24 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     decoration: InputDecoration(
                       hintText: "password",
                       contentPadding: EdgeInsets.all(20),
+                      suffixIcon: _password1InFocus
+                          ? IconButton(
+                              icon: Icon(
+                                _password1Visible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.white.withOpacity(0.5),
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _password1Visible = !_password1Visible;
+                                });
+                              },
+                            )
+                          : null,
                     ),
+                    obscureText: !_password1Visible,
                     controller: _passwordController1,
                     autofocus: false,
                     autocorrect: false,
@@ -129,6 +163,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     onChanged: (_) {
                       setState(() {});
                     },
+                    textInputAction: TextInputAction.next,
+                    focusNode: _password1FocusNode,
                   ),
                 ),
                 Padding(padding: EdgeInsets.all(8)),
@@ -138,15 +174,32 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     decoration: InputDecoration(
                       hintText: "password again",
                       contentPadding: EdgeInsets.all(20),
+                      suffixIcon: _password2InFocus
+                          ? IconButton(
+                              icon: Icon(
+                                _password2Visible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.white.withOpacity(0.5),
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _password2Visible = !_password2Visible;
+                                });
+                              },
+                            )
+                          : null,
                     ),
+                    obscureText: !_password2Visible,
                     controller: _passwordController2,
                     autofocus: false,
                     autocorrect: false,
-                    obscureText: true,
                     keyboardType: TextInputType.visiblePassword,
                     onChanged: (_) {
                       setState(() {});
                     },
+                    focusNode: _password2FocusNode,
                   ),
                 ),
                 Padding(padding: EdgeInsets.all(20)),

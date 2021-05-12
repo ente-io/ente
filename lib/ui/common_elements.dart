@@ -47,3 +47,29 @@ Widget button(
 }
 
 final emptyContainer = Container();
+
+Animatable<Color> passwordStrengthColors = TweenSequence<Color>(
+  [
+    TweenSequenceItem(
+      weight: 1.0,
+      tween: ColorTween(
+        begin: Colors.red,
+        end: Colors.yellow,
+      ),
+    ),
+    TweenSequenceItem(
+      weight: 1.0,
+      tween: ColorTween(
+        begin: Colors.yellow,
+        end: Colors.lightGreen,
+      ),
+    ),
+    TweenSequenceItem(
+      weight: 1.0,
+      tween: ColorTween(
+        begin: Colors.lightGreen,
+        end: Color.fromRGBO(45, 194, 98, 1.0),
+      ),
+    ),
+  ],
+);

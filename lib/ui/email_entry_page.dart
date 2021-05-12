@@ -45,32 +45,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   bool _password1InFocus = false;
   bool _password2InFocus = false;
 
-  Animatable<Color> _passwordStrengthColors = TweenSequence<Color>(
-    [
-      TweenSequenceItem(
-        weight: 1.0,
-        tween: ColorTween(
-          begin: Colors.red,
-          end: Colors.yellow,
-        ),
-      ),
-      TweenSequenceItem(
-        weight: 1.0,
-        tween: ColorTween(
-          begin: Colors.yellow,
-          end: Colors.lightGreen,
-        ),
-      ),
-      TweenSequenceItem(
-        weight: 1.0,
-        tween: ColorTween(
-          begin: Colors.lightGreen,
-          end: Color.fromRGBO(45, 194, 98, 1.0),
-        ),
-      ),
-    ],
-  );
-
   @override
   void initState() {
     _email = _config.getEmail();
@@ -120,7 +94,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           strengthCallback: (strength) {
             _passwordStrength = strength;
           },
-          strengthColors: _passwordStrengthColors,
+          strengthColors: passwordStrengthColors,
         ),
         Expanded(
           child: ListView(
@@ -144,6 +118,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   autocorrect: false,
                   keyboardType: TextInputType.emailAddress,
                   initialValue: _email,
+                  textInputAction: TextInputAction.next,
                 ),
               ),
               Padding(padding: EdgeInsets.all(8)),
@@ -180,6 +155,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   onChanged: (_) {
                     setState(() {});
                   },
+                  textInputAction: TextInputAction.next,
                 ),
               ),
               Padding(padding: EdgeInsets.all(8)),
