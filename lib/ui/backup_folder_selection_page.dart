@@ -8,6 +8,7 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/home_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
@@ -42,7 +43,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
-            padding: EdgeInsets.all(6),
+            padding: EdgeInsets.all(12),
           ),
           Center(
               child: SectionTitle(
@@ -50,7 +51,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             alignment: Alignment.center,
           )),
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(12),
           ),
           Expanded(child: _getFolderList()),
           Padding(
@@ -65,10 +66,19 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               fontSize: 18,
               onPressed: _backedupFolders.length == 0
                   ? null
-                  : () {
-                      Configuration.instance.setPathsToBackUp(_backedupFolders);
+                  : () async {
+                      await Configuration.instance
+                          .setPathsToBackUp(_backedupFolders);
                       Bus.instance.fire(BackupFoldersUpdatedEvent());
-                      Navigator.pop(context);
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (BuildContext context) {
+                            return Scaffold(
+                              body: HomeWidget(),
+                            );
+                          },
+                        ),
+                      );
                     },
             ),
           ),
