@@ -138,15 +138,7 @@ class _SignInHeaderState extends State<SignInHeader> {
                 ),
               ),
             ),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return LoginPage();
-                  },
-                ),
-              );
-            },
+            onTap: _navigateToSignInPage,
           ),
           Divider(
             height: 4,
@@ -172,31 +164,7 @@ class _SignInHeaderState extends State<SignInHeader> {
           ),
           textAlign: TextAlign.center,
         ),
-        onPressed: () {
-          var page;
-          if (Configuration.instance.getToken() == null) {
-            page = EmailEntryPage();
-          } else {
-            // No key
-            if (Configuration.instance.getKeyAttributes() == null) {
-              // Never had a key
-              page = PasswordEntryPage();
-            } else if (Configuration.instance.getKey() == null) {
-              // Yet to decrypt the key
-              page = PasswordReentryPage();
-            } else {
-              // All is well, user just has not subscribed
-              page = SubscriptionPage(isOnboarding: true);
-            }
-          }
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return page;
-              },
-            ),
-          );
-        },
+        onPressed: _navigateToSignUpPage,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
