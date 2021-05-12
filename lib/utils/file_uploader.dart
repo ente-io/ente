@@ -257,11 +257,32 @@ class FileUploader {
           file.toString() +
           ", isForced: " +
           forcedUpload.toString());
-      final asset = await file.getAsset();
+      final asset = await file
+          .getAsset()
+          .timeout(Duration(seconds: 3))
+          .catchError((e) async {
+            if (e is TimeoutException) {
+              _logger.info("Asset fetch timed out for " + file.toString());
+              return await file.getAsset();
+            } else {
+              throw e;
+            }
+          });
+      _logger.info("Got asset for " + file.toString());
       if (asset == null) {
         await _onInvalidFileError(file);
       }
-      sourceFile = (await asset.originFile);
+      sourceFile = await asset.originFile
+          .timeout(Duration(seconds: 3))
+          .catchError((e) async {
+        if (e is TimeoutException) {
+          _logger.info("Origin file fetch timed out for " + file.toString());
+          return await asset.originFile;
+        } else {
+          throw e;
+        }
+      });
+      _logger.info("Got origin file for " + file.toString());
       var key;
       var isAlreadyUploadedFile = file.uploadedFileID != null;
       if (isAlreadyUploadedFile) {
