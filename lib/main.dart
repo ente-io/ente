@@ -50,6 +50,9 @@ final themeData = ThemeData(
   dialogTheme: DialogTheme().copyWith(
     backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
   ),
+  textSelectionTheme: TextSelectionThemeData().copyWith(
+    cursorColor: Colors.white.withOpacity(0.5),
+  ),
 );
 
 void main() async {
