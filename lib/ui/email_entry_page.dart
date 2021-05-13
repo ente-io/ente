@@ -154,7 +154,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   onChanged: (_) {
                     setState(() {});
                   },
-                  textInputAction: TextInputAction.next,
+                  onEditingComplete: () {
+                    _password1FocusNode.unfocus();
+                    _password2FocusNode.requestFocus();
+                  },
                 ),
               ),
               Padding(padding: EdgeInsets.all(8)),
