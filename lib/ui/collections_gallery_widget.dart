@@ -327,7 +327,7 @@ class CollectionItem extends StatelessWidget {
         ],
       ),
       onTap: () {
-        routeToPage(context, CollectionPage(c.collection));
+        routeToPage(context, CollectionPage(c));
       },
     );
   }

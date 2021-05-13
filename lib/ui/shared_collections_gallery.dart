@@ -346,7 +346,7 @@ class OutgoingCollectionItem extends StatelessWidget {
       ),
       onTap: () {
         final page = CollectionPage(
-          c.collection,
+          c,
           tagPrefix: "outgoing_collection",
         );
         routeToPage(context, page);
@@ -419,7 +419,7 @@ class IncomingCollectionItem extends StatelessWidget {
         ],
       ),
       onTap: () {
-        routeToPage(context, SharedCollectionPage(c.collection));
+        routeToPage(context, SharedCollectionPage(c));
       },
     );
   }

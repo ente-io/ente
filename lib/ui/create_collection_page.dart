@@ -211,7 +211,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         PageTransition(
             type: PageTransitionType.bottomToTop,
             child: CollectionPage(
-              collection,
+              CollectionWithThumbnail(collection, null),
             )));
   }
 

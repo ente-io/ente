@@ -20,6 +20,7 @@ typedef GalleryLoader = Future<List<File>>
 
 class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
+  final List<File> initialFiles;
   final Stream<FilesUpdatedEvent> reloadEvent;
   final Stream<Event> forceReloadEvent;
   final SelectedFiles selectedFiles;
@@ -31,6 +32,7 @@ class Gallery extends StatefulWidget {
     @required this.asyncLoader,
     @required this.selectedFiles,
     @required this.tagPrefix,
+    this.initialFiles,
     this.reloadEvent,
     this.forceReloadEvent,
     this.header,
@@ -75,6 +77,9 @@ class _GalleryState extends State<Gallery> {
           setState(() {});
         }
       });
+    }
+    if (widget.initialFiles != null) {
+      _onFilesLoaded(widget.initialFiles);
     }
     _loadFiles(limit: kInitialLoadLimit).then((files) {
       _onFilesLoaded(files);

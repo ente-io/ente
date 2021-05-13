@@ -29,6 +29,7 @@ class DeviceFolderPage extends StatelessWidget {
       header: Configuration.instance.hasConfiguredAccount()
           ? _getHeaderWidget()
           : Container(),
+      initialFiles: [folder.thumbnail],
     );
     return Scaffold(
       body: Stack(
