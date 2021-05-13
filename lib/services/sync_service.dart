@@ -126,18 +126,16 @@ class SyncService {
         if (e.type == DioErrorType.connectTimeout ||
             e.type == DioErrorType.sendTimeout ||
             e.type == DioErrorType.receiveTimeout ||
-            e.type == DioErrorType.cancel ||
             e.type == DioErrorType.other) {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.paused,
               reason: "waiting for network..."));
           return false;
         }
-      } else {
-        _logger.severe("backup failed", e, s);
-        Bus.instance
-            .fire(SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
-        throw e;
       }
+      _logger.severe("backup failed", e, s);
+      Bus.instance
+          .fire(SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
+      throw e;
     } finally {
       _existingSync.complete(successful);
       _existingSync = null;
