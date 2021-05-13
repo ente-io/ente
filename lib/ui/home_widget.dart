@@ -142,11 +142,17 @@ class _HomeWidgetState extends State<HomeWidget> {
         body: _getBody(),
       ),
       onWillPop: () async {
-        if (Platform.isAndroid) {
-          MoveToBackground.moveTaskToBack();
-          return false;
+        if (_selectedTabIndex == 0) {
+          if (Platform.isAndroid) {
+            MoveToBackground.moveTaskToBack();
+            return false;
+          } else {
+            return true;
+          }
         } else {
-          return true;
+          Bus.instance
+              .fire(TabChangedEvent(0, TabChangedEventSource.back_button));
+          return false;
         }
       },
     );

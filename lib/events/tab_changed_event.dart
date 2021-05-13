@@ -14,4 +14,5 @@ enum TabChangedEventSource {
   tab_bar,
   page_view,
   collections_page,
+  back_button,
 }
