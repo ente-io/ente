@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
@@ -36,11 +38,11 @@ class CollectionPage extends StatelessWidget {
     return Scaffold(
       body: Stack(children: [
         Padding(
-          padding: const EdgeInsets.only(top: 80),
+          padding: EdgeInsets.only(top: Platform.isAndroid ? 80 : 100),
           child: gallery,
         ),
         Container(
-          height: 80,
+          height: Platform.isAndroid ? 80 : 100,
           child: GalleryAppBarWidget(
             GalleryAppBarType.collection,
             c.collection.name,
