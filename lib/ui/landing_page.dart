@@ -176,167 +176,24 @@ class _LandingPageState extends State<LandingPage> {
       constraints: BoxConstraints(maxHeight: 320),
       child: PageView(
         children: [
-          _getProtectedFeature(),
-          _getPreservedFeature(),
-          _getAccessibleFeature(),
+          FeatureItemWidget(
+              "assets/protected.png",
+              "protected",
+              "end-to-end encrypted with your password,",
+              "visible only to you"),
+          FeatureItemWidget("assets/synced.png", "synced",
+              "available across all your devices,", "web, android and ios"),
+          FeatureItemWidget(
+              "assets/preserved.png",
+              "preserved",
+              "reliably replicated to a fallout shelter,",
+              "designed to outlive"),
         ],
         onPageChanged: (index) {
           setState(() {
             _featureIndex = double.parse(index.toString());
           });
         },
-      ),
-    );
-  }
-
-  Widget _getProtectedFeature() {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Image.asset(
-            "assets/protected.png",
-            height: 170,
-          ),
-          Padding(padding: EdgeInsets.all(16)),
-          Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "protected",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).buttonColor,
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(12)),
-                Container(
-                  child: Text(
-                    "end-to-end encrypted with your password,",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(2)),
-                Container(
-                  child: Text(
-                    "visible only to you",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _getPreservedFeature() {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Image.asset(
-            "assets/protected.png",
-            height: 170,
-          ),
-          Padding(padding: EdgeInsets.all(10)),
-          Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "preserved",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(6)),
-                Container(
-                  child: Text(
-                    "reliably saved to multiple locations,",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white70,
-                    ),
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(2)),
-                Container(
-                  child: Text(
-                    "including a fallout shelter",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white70,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _getAccessibleFeature() {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Image.asset(
-            "assets/protected.png",
-            height: 170,
-          ),
-          Padding(padding: EdgeInsets.all(10)),
-          Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "accessible",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                Padding(padding: EdgeInsets.all(6)),
-                Container(
-                  child: Text(
-                    "available on all your devices,",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white70,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(padding: EdgeInsets.all(2)),
-          Container(
-            child: Text(
-              "android, ios and desktop",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white70,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -389,6 +246,69 @@ class _LandingPageState extends State<LandingPage> {
         builder: (BuildContext context) {
           return page;
         },
+      ),
+    );
+  }
+}
+
+class FeatureItemWidget extends StatelessWidget {
+  final String assetPath, featureTitle, firstLine, secondLine;
+  const FeatureItemWidget(
+    this.assetPath,
+    this.featureTitle,
+    this.firstLine,
+    this.secondLine, {
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Image.asset(
+            assetPath,
+            height: 170,
+          ),
+          Padding(padding: EdgeInsets.all(16)),
+          Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  featureTitle,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).buttonColor,
+                  ),
+                ),
+                Padding(padding: EdgeInsets.all(12)),
+                Container(
+                  child: Text(
+                    firstLine,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                ),
+                Padding(padding: EdgeInsets.all(2)),
+                Container(
+                  child: Text(
+                    secondLine,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
