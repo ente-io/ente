@@ -72,22 +72,28 @@ class _GalleryState extends State<Gallery> {
           widget.forceReloadEvent.listen((event) async {
         _logger.info("Force reload triggered");
         final files = await _loadFiles();
-        final hasReloaded = _onFilesLoaded(files);
-        if (!hasReloaded && mounted) {
-          setState(() {});
-        }
+        _setFilesAndReload(files);
       });
     }
     if (widget.initialFiles != null) {
       _onFilesLoaded(widget.initialFiles);
     }
     _loadFiles(limit: kInitialLoadLimit).then((files) {
-      _onFilesLoaded(files);
+      _setFilesAndReload(files);
       if (files.length == kInitialLoadLimit) {
-        _loadFiles().then((files) => _onFilesLoaded(files));
+        _loadFiles().then((files) {
+          _setFilesAndReload(files);
+        });
       }
     });
     super.initState();
+  }
+
+  void _setFilesAndReload(List<File> files) {
+    final hasReloaded = _onFilesLoaded(files);
+    if (!hasReloaded && mounted) {
+      setState(() {});
+    }
   }
 
   Future<List<File>> _loadFiles({int limit}) async {
