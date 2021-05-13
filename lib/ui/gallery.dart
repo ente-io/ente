@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
@@ -20,6 +21,7 @@ typedef GalleryLoader = Future<List<File>>
 class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
   final Stream<FilesUpdatedEvent> reloadEvent;
+  final Stream<Event> forceReloadEvent;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
   final Widget header;
@@ -30,6 +32,7 @@ class Gallery extends StatefulWidget {
     @required this.selectedFiles,
     @required this.tagPrefix,
     this.reloadEvent,
+    this.forceReloadEvent,
     this.header,
     this.footer,
   });
@@ -50,6 +53,7 @@ class _GalleryState extends State<Gallery> {
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
+  StreamSubscription<Event> _forceReloadEventSubscription;
 
   @override
   void initState() {
@@ -59,6 +63,16 @@ class _GalleryState extends State<Gallery> {
       _reloadEventSubscription = widget.reloadEvent.listen((event) {
         _logger.info("Building gallery because reload event fired");
         _loadFiles();
+      });
+    }
+    if (widget.forceReloadEvent != null) {
+      _forceReloadEventSubscription =
+          widget.forceReloadEvent.listen((event) async {
+        _logger.info("Force reload triggered");
+        bool hasReloaded = await _loadFiles();
+        if (!hasReloaded && mounted) {
+          setState(() {});
+        }
       });
     }
     _loadFiles(limit: kInitialLoadLimit).then((value) => _loadFiles());
@@ -74,6 +88,7 @@ class _GalleryState extends State<Gallery> {
     final duration = Duration(microseconds: endTime - startTime);
     _logger.info(
         "Time taken to load: " + duration.inMilliseconds.toString() + "ms");
+    _logger.info("Loaded " + files.length.toString() + " files");
     final collatedFiles = _collateFiles(files);
     if (_collatedFiles.length != collatedFiles.length) {
       if (mounted) {
@@ -83,15 +98,17 @@ class _GalleryState extends State<Gallery> {
           _collatedFiles = collatedFiles;
         });
       }
+      return true;
     } else {
       _collatedFiles = collatedFiles;
+      return false;
     }
-    return true;
   }
 
   @override
   void dispose() {
-    _reloadEventSubscription.cancel();
+    _reloadEventSubscription?.cancel();
+    _forceReloadEventSubscription?.cancel();
     super.dispose();
   }
 

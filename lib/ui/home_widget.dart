@@ -59,7 +59,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
   StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
-  StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
 
   @override
   void initState() {
@@ -124,10 +123,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       );
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
-      setState(() {});
-    });
-    _backupFoldersUpdatedEvent =
-        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
       setState(() {});
     });
     _initDeepLinks();
@@ -254,6 +249,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      forceReloadEvent: Bus.instance.on<BackupFoldersUpdatedEvent>(),
       tagPrefix: "home_gallery",
       selectedFiles: _selectedFiles,
       header: header,
@@ -324,7 +320,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     _subscriptionPurchaseEvent.cancel();
     _triggerLogoutEvent.cancel();
     _loggedOutEvent.cancel();
-    _backupFoldersUpdatedEvent.cancel();
     super.dispose();
   }
 }
