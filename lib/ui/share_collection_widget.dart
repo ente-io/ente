@@ -9,7 +9,6 @@ import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -71,7 +70,7 @@ class _SharingDialogState extends State<SharingDialog> {
         child: button(
           "add",
           onPressed: () {
-            _addEmailToCollection(_email);
+            _addEmailToCollection(_email.trim());
           },
         ),
       ));
