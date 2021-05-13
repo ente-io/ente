@@ -229,11 +229,16 @@ class FilesDB {
       int startTime, int endTime, List<String> paths,
       {int limit, bool asc}) async {
     final db = await instance.database;
+    String inParam = "";
+    for (final path in paths) {
+      inParam += "'" + path + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN (?)) OR ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1))',
-      whereArgs: [startTime, endTime, paths.join(", ")],
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1))',
+      whereArgs: [startTime, endTime],
       orderBy: '$columnCreationTime ' + (asc ?? false ? 'ASC' : 'DESC'),
       limit: limit,
     );
