@@ -131,12 +131,6 @@ class FilesDB {
     await db.delete(table);
   }
 
-  Future<int> insert(File file) async {
-    final db = await instance.database;
-    return await db.insert(table, _getRowForFile(file),
-        conflictAlgorithm: ConflictAlgorithm.replace);
-  }
-
   Future<void> insertMultiple(List<File> files) async {
     final startTime = DateTime.now();
     final db = await instance.database;
