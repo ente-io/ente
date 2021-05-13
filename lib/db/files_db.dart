@@ -235,7 +235,18 @@ class FilesDB {
       orderBy: '$columnCreationTime ' + (asc ?? false ? 'ASC' : 'DESC'),
       limit: limit,
     );
-    return _convertToFiles(results);
+    final uploadedFileIDs = Set<int>();
+    final files = _convertToFiles(results);
+    final List<File> deduplicatedFiles = [];
+    for (final file in files) {
+      final id = file.uploadedFileID;
+      if (id != null && id != -1 && uploadedFileIDs.contains(id)) {
+        continue;
+      }
+      uploadedFileIDs.add(id);
+      deduplicatedFiles.add(file);
+    }
+    return deduplicatedFiles;
   }
 
   Future<List<File>> getFilesInCollection(
