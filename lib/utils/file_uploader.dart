@@ -250,7 +250,7 @@ class FileUploader {
         "_thumbnail" +
         (_isBackground ? "_bg" : "") +
         ".encrypted";
-    var sourceFile;
+    io.File sourceFile;
 
     try {
       _logger.info("Trying to upload " +
@@ -282,6 +282,9 @@ class FileUploader {
           throw e;
         }
       });
+      if (!sourceFile.existsSync()) {
+        await _onInvalidFileError(file);
+      }
       var key;
       var isAlreadyUploadedFile = file.uploadedFileID != null;
       if (isAlreadyUploadedFile) {
