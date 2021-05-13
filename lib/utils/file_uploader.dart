@@ -262,13 +262,13 @@ class FileUploader {
           .getAsset()
           .timeout(Duration(seconds: 3))
           .catchError((e) async {
-            if (e is TimeoutException) {
-              _logger.info("Asset fetch timed out for " + file.toString());
-              return await file.getAsset();
-            } else {
-              throw e;
-            }
-          });
+        if (e is TimeoutException) {
+          _logger.info("Asset fetch timed out for " + file.toString());
+          return await file.getAsset();
+        } else {
+          throw e;
+        }
+      });
       if (asset == null) {
         await _onInvalidFileError(file);
       }
