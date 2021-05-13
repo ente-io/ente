@@ -198,7 +198,6 @@ class FilesDB {
       ],
     );
     final ids = Set<int>();
-    ;
     for (final result in results) {
       ids.add(result[columnUploadedFileID]);
     }
