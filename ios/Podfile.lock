@@ -1,5 +1,5 @@
 PODS:
-  - background_fetch (0.7.1):
+  - background_fetch (0.7.2):
     - Flutter
   - connectivity (0.0.1):
     - Flutter
@@ -17,6 +17,11 @@ PODS:
     - SDWebImageWebPCoder
   - flutter_inappwebview (0.0.1):
     - Flutter
+    - flutter_inappwebview/Core (= 0.0.1)
+    - OrderedSet (~> 5.0)
+  - flutter_inappwebview/Core (0.0.1):
+    - Flutter
+    - OrderedSet (~> 5.0)
   - flutter_keyboard_visibility (0.0.1):
     - Flutter
   - flutter_secure_storage (3.3.1):
@@ -25,9 +30,7 @@ PODS:
     - Flutter
   - flutter_user_agent (1.2.2):
     - Flutter
-  - flutter_webview_plugin (0.0.1):
-    - Flutter
-  - fluttercontactpicker (3.1.1):
+  - fluttercontactpicker (4.4.0):
     - Flutter
   - fluttertoast (0.0.2):
     - Flutter
@@ -51,6 +54,9 @@ PODS:
   - Mantle (2.1.1):
     - Mantle/extobjc (= 2.1.1)
   - Mantle/extobjc (2.1.1)
+  - move_to_background (0.0.1):
+    - Flutter
+  - OrderedSet (5.0.0)
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider (0.0.1):
@@ -66,9 +72,9 @@ PODS:
     - Flutter
   - shared_preferences (0.0.1):
     - Flutter
-  - sqflite (0.0.1):
+  - sqflite (0.0.2):
     - Flutter
-    - FMDB (~> 2.7.2)
+    - FMDB (>= 2.7.5)
   - Toast (4.0.0)
   - uni_links (0.0.1):
     - Flutter
@@ -92,11 +98,11 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - flutter_user_agent (from `.symlinks/plugins/flutter_user_agent/ios`)
-  - flutter_webview_plugin (from `.symlinks/plugins/flutter_webview_plugin/ios`)
   - fluttercontactpicker (from `.symlinks/plugins/fluttercontactpicker/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - in_app_purchase (from `.symlinks/plugins/in_app_purchase/ios`)
   - local_auth (from `.symlinks/plugins/local_auth/ios`)
+  - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
@@ -113,6 +119,7 @@ SPEC REPOS:
     - FMDB
     - libwebp
     - Mantle
+    - OrderedSet
     - Reachability
     - SDWebImage
     - SDWebImageWebPCoder
@@ -143,8 +150,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_sodium/ios"
   flutter_user_agent:
     :path: ".symlinks/plugins/flutter_user_agent/ios"
-  flutter_webview_plugin:
-    :path: ".symlinks/plugins/flutter_webview_plugin/ios"
   fluttercontactpicker:
     :path: ".symlinks/plugins/fluttercontactpicker/ios"
   fluttertoast:
@@ -153,6 +158,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/in_app_purchase/ios"
   local_auth:
     :path: ".symlinks/plugins/local_auth/ios"
+  move_to_background:
+    :path: ".symlinks/plugins/move_to_background/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider:
@@ -175,26 +182,27 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock/ios"
 
 SPEC CHECKSUMS:
-  background_fetch: f77e9d12c29db274e83565952268ec846eac7252
+  background_fetch: 79a5891a4742df7cf1b21a55334da74191c2894f
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   crisp: 31665a818a3b0231a343d5a0d617a41d63b09646
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
-  flutter_email_sender: f787522d0e82f50e5766c1213dbffff22fdcf009
+  flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
   flutter_image_compress: 082f8daaf6c1b0c9fe798251c750ef0ecd98d7ae
-  flutter_inappwebview: 69dfbac46157b336ffbec19ca6dfd4638c7bf189
+  flutter_inappwebview: bfd58618f49dc62f2676de690fc6dcda1d6c3721
   flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
   flutter_sodium: c84426b4de738514b5b66cfdeb8a06634e72fe0b
   flutter_user_agent: 27c45d034dc31b80948d29998cea52cd3a7bf936
-  flutter_webview_plugin: ed9e8a6a96baf0c867e90e1bce2673913eeac694
-  fluttercontactpicker: ff27c428495f982a1b04a6c3015052bfff25bb05
+  fluttercontactpicker: 36cf7811f583f3c5aec3c53efcbf366b9cdfdf51
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   in_app_purchase: 3e2155afa9d03d4fa32d9e62d567885080ce97d6
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
   local_auth: 25938960984c3a7f6e3253e3f8d962fdd16852bd
   Mantle: 35238ae6f2e2b2d474fa7b67fee82a59fea71915
+  move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
+  OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   photo_manager: f7c619c2cc8c2adb8d85c63363babac477de9c67
@@ -203,7 +211,7 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
-  sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
+  sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
@@ -212,4 +220,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: a226c065c368c69fce961535a41a0b30b1ab932d
 
-COCOAPODS: 1.9.3
+COCOAPODS: 1.10.1
