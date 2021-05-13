@@ -60,39 +60,51 @@ class _GalleryState extends State<Gallery> {
     _logger = Logger("Gallery_" + widget.tagPrefix);
     _logger.info("initState");
     if (widget.reloadEvent != null) {
-      _reloadEventSubscription = widget.reloadEvent.listen((event) {
+      _reloadEventSubscription = widget.reloadEvent.listen((event) async {
         _logger.info("Building gallery because reload event fired");
-        _loadFiles();
+        _loadFiles().then((files) => _onFilesLoaded(files));
       });
     }
     if (widget.forceReloadEvent != null) {
       _forceReloadEventSubscription =
           widget.forceReloadEvent.listen((event) async {
         _logger.info("Force reload triggered");
-        bool hasReloaded = await _loadFiles();
+        final files = await _loadFiles();
+        final hasReloaded = _onFilesLoaded(files);
         if (!hasReloaded && mounted) {
           setState(() {});
         }
       });
     }
-    _loadFiles(limit: kInitialLoadLimit).then((value) => _loadFiles());
+    _loadFiles(limit: kInitialLoadLimit).then((files) {
+      _onFilesLoaded(files);
+      if (files.length == kInitialLoadLimit) {
+        _loadFiles().then((files) => _onFilesLoaded(files));
+      }
+    });
     super.initState();
   }
 
-  Future<bool> _loadFiles({int limit}) async {
+  Future<List<File>> _loadFiles({int limit}) async {
     _logger.info("Loading files");
     final startTime = DateTime.now().microsecondsSinceEpoch;
     final files = await widget
         .asyncLoader(0, DateTime.now().microsecondsSinceEpoch, limit: limit);
     final endTime = DateTime.now().microsecondsSinceEpoch;
     final duration = Duration(microseconds: endTime - startTime);
-    _logger.info(
-        "Time taken to load: " + duration.inMilliseconds.toString() + "ms");
-    _logger.info("Loaded " + files.length.toString() + " files");
+    _logger.info("Time taken to load " +
+        files.length.toString() +
+        " files :" +
+        duration.inMilliseconds.toString() +
+        "ms");
+    return files;
+  }
+
+  // Collates files and returns `true` if it resulted in a gallery reload
+  bool _onFilesLoaded(List<File> files) {
     final collatedFiles = _collateFiles(files);
     if (_collatedFiles.length != collatedFiles.length) {
       if (mounted) {
-        _logger.info("Days updated");
         setState(() {
           _hasLoadedFiles = true;
           _collatedFiles = collatedFiles;
