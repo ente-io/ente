@@ -126,10 +126,6 @@ class _LandingPageState extends State<LandingPage> {
             Padding(
               padding: EdgeInsets.all(4),
             ),
-            Divider(
-              height: 1,
-              color: Theme.of(context).buttonColor.withOpacity(0.5),
-            ),
           ],
         ),
       ),
