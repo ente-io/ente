@@ -42,7 +42,7 @@ class GrantPermissionsPage extends StatelessWidget {
           Container(
             width: double.infinity,
             height: 64,
-            padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+            padding: const EdgeInsets.fromLTRB(64, 0, 64, 0),
             child: button(
               "grant permission",
               fontSize: 16,
