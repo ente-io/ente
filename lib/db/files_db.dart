@@ -655,6 +655,9 @@ class FilesDB {
 
   Map<String, dynamic> _getRowForFile(File file) {
     final row = new Map<String, dynamic>();
+    if (file.generatedID != null) {
+      row[columnGeneratedID] = file.generatedID;
+    }
     row[columnLocalID] = file.localID;
     row[columnUploadedFileID] = file.uploadedFileID ?? -1;
     row[columnOwnerID] = file.ownerID;
