@@ -265,7 +265,7 @@ class FeatureItemWidget extends StatelessWidget {
         children: [
           Image.asset(
             assetPath,
-            height: 170,
+            height: 160,
           ),
           Padding(padding: EdgeInsets.all(16)),
           Container(
