@@ -318,6 +318,7 @@ class CollectionsService {
     params["collectionID"] = collectionID;
     for (final file in files) {
       final key = decryptFileKey(file);
+      file.generatedID = null; // So that a new entry is created in the FilesDB
       file.collectionID = collectionID;
       final encryptedKeyData =
           CryptoUtil.encryptSync(key, getCollectionKey(collectionID));
