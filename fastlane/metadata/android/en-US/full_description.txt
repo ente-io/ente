@@ -1,0 +1,11 @@
+ente provides a simple way to back up your memories.
+
+ente encrypts your photos and videos with your password before backing them up to the cloud, so only you can view them.
+
+ente stores your encrypted data across multiple locations, including an underground fall out shelter, so your memories are preserved forever.
+
+ente lets you share your albums and folders with your loved ones, end-to-end encrypted.
+
+ente has an open architecture and source code that has been peer-reviewed trusted.
+
+ente is available on android, ios and the web.
