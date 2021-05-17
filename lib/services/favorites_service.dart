@@ -8,6 +8,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 
@@ -46,6 +47,7 @@ class FavoritesService {
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, [file]));
     } else {
       await _collectionsService.addToCollection(collectionID, [file]);
+      SyncService.instance.syncWithRemote(silently: true);
     }
   }
 

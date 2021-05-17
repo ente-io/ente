@@ -341,7 +341,6 @@ class CollectionsService {
         .then((value) async {
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
-      SyncService.instance.syncWithRemote(silently: true);
     });
   }
 
