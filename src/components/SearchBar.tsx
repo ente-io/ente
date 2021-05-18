@@ -11,7 +11,7 @@ const Wrapper = styled.div<{ open: boolean }>`
     top: 0;
     width: 100%;
     z-index: 2000;
-    opacity: ${(props) => (props.open ? '100' : '0')};
+    display: ${(props) => (props.open ? 'block' : 'none')};
 `;
 
 export default function SearchBar(props) {
