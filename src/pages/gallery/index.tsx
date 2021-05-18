@@ -53,6 +53,8 @@ import { getSelectedFileIds } from 'utils/file';
 import { addFilesToCollection } from 'utils/collection';
 import SelectedFileOptions from './components/SelectedFileOptions';
 import { errorCodes } from 'utils/common/errorUtil';
+import SearchButton from 'components/SearchButton';
+import SearchBar from 'components/Seachbar';
 
 export enum FILE_TYPE {
     IMAGE,
@@ -110,6 +112,7 @@ export default function Gallery() {
     });
 
     const loadingBar = useRef(null);
+    const [searchView, setSearchView] = useState(false);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
@@ -281,6 +284,7 @@ export default function Gallery() {
                 onHide={() => setDialogView(false)}
                 attributes={dialogMessage}
             />
+            <SearchBar open={searchView} />
             <Collections
                 collections={collections}
                 selected={Number(router.query.collection)}
@@ -353,7 +357,7 @@ export default function Gallery() {
                     {constants.INSTALL_MOBILE_APP()}
                 </Alert>
             )}
-            {selected.count > 0 && (
+            {selected.count > 0 ? (
                 <SelectedFileOptions
                     addToCollectionHelper={addToCollectionHelper}
                     showCreateCollectionModal={showCreateCollectionModal}
@@ -362,6 +366,11 @@ export default function Gallery() {
                         setCollectionSelectorAttributes
                     }
                     deleteFileHelper={deleteFileHelper}
+                />
+            ) : (
+                <SearchButton
+                    open={searchView}
+                    onClick={() => setSearchView((view) => !view)}
                 />
             )}
         </FullScreenDropZone>
