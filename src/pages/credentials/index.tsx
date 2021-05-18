@@ -12,7 +12,9 @@ import CryptoWorker, {
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
-import PassPhraseForm from 'components/PassphraseForm';
+import SingleInputForm from 'components/SingleInputForm';
+import Container from 'components/Container';
+import { Button, Card } from 'react-bootstrap';
 
 export default function Credentials() {
     const router = useRouter();
@@ -72,17 +74,42 @@ export default function Credentials() {
     };
 
     return (
-        <PassPhraseForm
-            callback={verifyPassphrase}
-            title={constants.ENTER_PASSPHRASE}
-            placeholder={constants.RETURN_PASSPHRASE_HINT}
-            buttonText={constants.VERIFY_PASSPHRASE}
-            fieldType="password"
-            alternateOption={{
-                text: constants.FORGOT_PASSWORD,
-                click: () => router.push('/recover'),
-            }}
-            back={logoutUser}
-        />
+        <>
+            <Container>
+                <Card
+                    style={{ minWidth: '320px', padding: '40px 30px' }}
+                    className="text-center"
+                >
+                    <Card.Body>
+                        <Card.Title style={{ marginBottom: '24px' }}>
+                            {constants.ENTER_PASSPHRASE}
+                        </Card.Title>
+                        <SingleInputForm
+                            callback={verifyPassphrase}
+                            placeholder={constants.RETURN_PASSPHRASE_HINT}
+                            buttonText={constants.VERIFY_PASSPHRASE}
+                            fieldType="password"
+                        />
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                marginTop: '12px',
+                            }}
+                        >
+                            <Button
+                                variant="link"
+                                onClick={() => router.push('/recover')}
+                            >
+                                {constants.FORGOT_PASSWORD}
+                            </Button>
+                            <Button variant="link" onClick={logoutUser}>
+                                {constants.GO_BACK}
+                            </Button>
+                        </div>
+                    </Card.Body>
+                </Card>
+            </Container>
+        </>
     );
 }
