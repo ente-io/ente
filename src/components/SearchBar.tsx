@@ -10,7 +10,7 @@ const Wrapper = styled.div<{ open: boolean }>`
     position: fixed;
     top: 0;
     width: 100%;
-    z-index: 2000;
+    z-index: 200;
     display: ${(props) => (props.open ? 'block' : 'none')};
 `;
 

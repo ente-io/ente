@@ -8,7 +8,7 @@ function UploadButton({ openFileUploader }) {
                 position: 'absolute',
                 right: '30px',
                 top: '20px',
-                zIndex: 100,
+                zIndex: 1000,
                 cursor: 'pointer',
             }}
         >
