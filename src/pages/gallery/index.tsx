@@ -76,6 +76,8 @@ export type selectedState = {
     [k: number]: boolean;
     count: number;
 };
+export type SetFiles = React.Dispatch<React.SetStateAction<File[]>>;
+export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
 
 export default function Gallery() {
@@ -253,6 +255,15 @@ export default function Gallery() {
             syncWithRemote
         );
     };
+    const restoreGallery = async () => {
+        loadingBar.current?.continuousStart();
+        const files = await getLocalFiles();
+        const collections = await getLocalCollections();
+        setFiles(files);
+        setCollections(collections);
+        setSinceTime(new Date().getTime());
+        loadingBar.current?.complete();
+    };
     return (
         <FullScreenDropZone
             getRootProps={getRootProps}
@@ -285,7 +296,15 @@ export default function Gallery() {
                 onHide={() => setDialogView(false)}
                 attributes={dialogMessage}
             />
-            <SearchBar open={searchView} setOpen={setSearchView} />
+            <SearchBar
+                isOpen={searchView}
+                setOpen={setSearchView}
+                loadingBar={loadingBar.current}
+                files={files}
+                setFiles={setFiles}
+                setCollections={setCollections}
+                restoreGallery={restoreGallery}
+            />
             <Collections
                 collections={collections}
                 selected={Number(router.query.collection)}
