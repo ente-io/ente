@@ -194,6 +194,7 @@ export default function Gallery() {
                             action: logoutUser,
                             variant: 'primary',
                         },
+                        nonClosable: true,
                     });
                     break;
                 case errorCodes.ERR_KEY_MISSING:
@@ -328,7 +329,7 @@ export default function Gallery() {
                 files={files}
                 collections={collections}
                 setDialogMessage={setDialogMessage}
-                setPlanModalView={setPlanModalView}
+                showPlanSelectorModal={() => setPlanModalView(true)}
             />
             <UploadButton openFileUploader={openFileUploader} />
             <PhotoFrame

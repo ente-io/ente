@@ -9,7 +9,7 @@ import CryptoWorker, {
     setSessionKeys,
     generateAndSaveIntermediateKeyAttributes,
 } from 'utils/crypto';
-import PasswordForm from 'components/PasswordForm';
+import SetPasswordForm from 'components/SetPasswordForm';
 import { KeyAttributes } from 'types';
 import { setJustSignedUp } from 'utils/storage';
 import RecoveryKeyModal from 'components/RecoveryKeyModal';
@@ -52,24 +52,16 @@ export default function Generate() {
             setFieldError('confirm', constants.PASSWORD_GENERATION_FAILED);
             return;
         }
-        const masterKeyEncryptedWithKek: B64EncryptionResult = await cryptoWorker.encryptToB64(
-            masterKey,
-            kek.key
-        );
-        const masterKeyEncryptedWithRecoveryKey: B64EncryptionResult = await cryptoWorker.encryptToB64(
-            masterKey,
-            recoveryKey
-        );
-        const recoveryKeyEncryptedWithMasterKey: B64EncryptionResult = await cryptoWorker.encryptToB64(
-            recoveryKey,
-            masterKey
-        );
+        const masterKeyEncryptedWithKek: B64EncryptionResult =
+            await cryptoWorker.encryptToB64(masterKey, kek.key);
+        const masterKeyEncryptedWithRecoveryKey: B64EncryptionResult =
+            await cryptoWorker.encryptToB64(masterKey, recoveryKey);
+        const recoveryKeyEncryptedWithMasterKey: B64EncryptionResult =
+            await cryptoWorker.encryptToB64(recoveryKey, masterKey);
 
         const keyPair = await cryptoWorker.generateKeyPair();
-        const encryptedKeyPairAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(
-            keyPair.privateKey,
-            masterKey
-        );
+        const encryptedKeyPairAttributes: B64EncryptionResult =
+            await cryptoWorker.encryptToB64(keyPair.privateKey, masterKey);
 
         const keyAttributes: KeyAttributes = {
             kekSalt,
@@ -101,7 +93,7 @@ export default function Generate() {
 
     return (
         <>
-            <PasswordForm
+            <SetPasswordForm
                 callback={onSubmit}
                 buttonText={constants.SET_PASSPHRASE}
                 back={logoutUser}

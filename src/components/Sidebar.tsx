@@ -32,7 +32,7 @@ interface Props {
     files: File[];
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
-    setPlanModalView;
+    showPlanSelectorModal: () => void;
 }
 export default function Sidebar(props: Props) {
     const [usage, SetUsage] = useState<string>(null);
@@ -44,6 +44,7 @@ export default function Sidebar(props: Props) {
     }, []);
     const [isOpen, setIsOpen] = useState(false);
     const [recoverModalView, setRecoveryModalView] = useState(false);
+    const [accountDeleteModalView, setAccountDeleteModalView] = useState(false);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -93,7 +94,7 @@ export default function Sidebar(props: Props) {
     const router = useRouter();
     function onManageClick() {
         setIsOpen(false);
-        props.setPlanModalView(true);
+        props.showPlanSelectorModal();
     }
     return (
         <Menu
@@ -234,7 +235,7 @@ export default function Sidebar(props: Props) {
             ></div>
             <LinkButton
                 variant="danger"
-                style={{ marginTop: '30px', marginBottom: '50px' }}
+                style={{ marginTop: '30px' }}
                 onClick={() =>
                     props.setDialogMessage({
                         title: `${constants.CONFIRM} ${constants.LOGOUT}`,
@@ -251,6 +252,7 @@ export default function Sidebar(props: Props) {
             >
                 logout
             </LinkButton>
+            <div style={{ marginBottom: '50px' }} />
         </Menu>
     );
 }
