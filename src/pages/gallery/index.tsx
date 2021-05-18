@@ -54,7 +54,7 @@ import { addFilesToCollection } from 'utils/collection';
 import SelectedFileOptions from './components/SelectedFileOptions';
 import { errorCodes } from 'utils/common/errorUtil';
 import SearchButton from 'components/SearchButton';
-import SearchBar from 'components/Seachbar';
+import SearchBar from 'components/SearchBar';
 
 export enum FILE_TYPE {
     IMAGE,
