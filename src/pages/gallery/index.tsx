@@ -285,7 +285,7 @@ export default function Gallery() {
                 onHide={() => setDialogView(false)}
                 attributes={dialogMessage}
             />
-            <SearchBar open={searchView} />
+            <SearchBar open={searchView} setOpen={setSearchView} />
             <Collections
                 collections={collections}
                 selected={Number(router.query.collection)}
@@ -371,7 +371,7 @@ export default function Gallery() {
             ) : (
                 <SearchButton
                     open={searchView}
-                    onClick={() => setSearchView((view) => !view)}
+                    onClick={() => setSearchView(true)}
                 />
             )}
         </FullScreenDropZone>
