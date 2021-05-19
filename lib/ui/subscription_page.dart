@@ -146,7 +146,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _buildPlans(final appBarSize) {
-    List<Widget> planWidgets = _getPlanWidgets();
     final pageSize = MediaQuery.of(context).size.height;
     final notifySize = MediaQuery.of(context).padding.top;
     final widgets = List<Widget>();
@@ -186,13 +185,21 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       ));
     }
-    widgets.addAll([
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: planWidgets,
-      ),
-      Padding(padding: EdgeInsets.all(8)),
-    ]);
+    final isActiveStripeSubscriber =
+        _currentSubscription.paymentProvider == kStripe &&
+            _currentSubscription.isValid();
+    if (isActiveStripeSubscriber) {
+      widgets.add(Container(child: Text("")));
+    } else {
+      List<Widget> planWidgets = _getPlanWidgets();
+      widgets.addAll([
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: planWidgets,
+        ),
+        Padding(padding: EdgeInsets.all(8)),
+      ]);
+    }
 
     if (_hasActiveSubscription &&
         _currentSubscription.productID != kFreeProductID) {
@@ -202,6 +209,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           alignment: Alignment.center,
           child: GestureDetector(
             onTap: () {
+              if (isActiveStripeSubscriber) {
+                return;
+              }
               if (Platform.isAndroid) {
                 launch(
                     "https://play.google.com/store/account/subscriptions?sku=" +
@@ -212,7 +222,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
             },
             child: Container(
-              padding: EdgeInsets.all(80),
+              padding: EdgeInsets.fromLTRB(40, 80, 40, 80),
               child: Column(
                 children: [
                   Text(
@@ -228,13 +238,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   Padding(padding: EdgeInsets.all(8)),
                   RichText(
                     text: TextSpan(
-                      text: "payment details",
+                      text: isActiveStripeSubscriber
+                          ? "visit web.ente.io to manage your subscription"
+                          : "payment details",
                       style: TextStyle(
-                        color: Colors.blue,
+                        color: isActiveStripeSubscriber
+                            ? Colors.white
+                            : Colors.blue,
                         fontFamily: 'Ubuntu',
                         fontSize: 15,
                       ),
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -304,10 +319,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       );
     }
-    final isStripeSubscriber = _currentSubscription.paymentProvider == kStripe;
     for (final plan in _plans.plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      if (!isStripeSubscriber && (productID == null || productID.isEmpty)) {
+      if (productID == null || productID.isEmpty) {
         continue;
       }
       final isActive =
@@ -317,11 +331,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           child: InkWell(
             onTap: () async {
               if (isActive) {
-                return;
-              }
-              if (isStripeSubscriber) {
-                showErrorDialog(context, "sorry",
-                    "please visit web.ente.io to manage your subscription");
                 return;
               }
               await _dialog.show();
