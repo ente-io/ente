@@ -14,7 +14,6 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -58,8 +57,7 @@ class SyncService {
 
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       _logger.info("Connectivity change detected " + result.toString());
-      if (Configuration.instance.hasConfiguredAccount() &&
-          BillingService.instance.getSubscription() != null) {
+      if (Configuration.instance.hasConfiguredAccount()) {
         sync();
       }
     });
@@ -318,12 +316,6 @@ class SyncService {
   }
 
   Future<bool> _uploadDiff() async {
-    if (!BillingService.instance.hasActiveSubscription()) {
-      await BillingService.instance.fetchSubscription();
-      if (!BillingService.instance.hasActiveSubscription()) {
-        throw NoActiveSubscriptionError();
-      }
-    }
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     var filesToBeUploaded =
         await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
