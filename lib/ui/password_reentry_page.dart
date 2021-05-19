@@ -4,10 +4,8 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/recovery_page.dart';
-import 'package:photos/ui/subscription_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class PasswordReentryPage extends StatefulWidget {
@@ -113,18 +111,8 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       return;
                     }
                     await dialog.hide();
-                    if (!BillingService.instance.hasActiveSubscription()) {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) {
-                            return SubscriptionPage(isOnboarding: true);
-                          },
-                        ),
-                      );
-                    } else {
-                      Bus.instance.fire(SubscriptionPurchasedEvent());
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    }
+                    Bus.instance.fire(SubscriptionPurchasedEvent());
+                    Navigator.of(context).popUntil((route) => route.isFirst);
                   }
                 : null,
           ),
