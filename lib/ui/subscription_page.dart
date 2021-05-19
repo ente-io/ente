@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/expansion_card.dart';
 import 'package:photos/ui/progress_dialog.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -134,20 +135,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
     return Scaffold(
       appBar: appBar,
-      body: _getBody(appBar.preferredSize.height),
+      body: _getBody(),
     );
   }
 
-  Widget _getBody(final appBarSize) {
+  Widget _getBody() {
     if (_hasLoadedData) {
-      return _buildPlans(appBarSize);
+      return _buildPlans();
     }
     return loadWidget;
   }
 
-  Widget _buildPlans(final appBarSize) {
-    final pageSize = MediaQuery.of(context).size.height;
-    final notifySize = MediaQuery.of(context).padding.top;
+  Widget _buildPlans() {
     final widgets = List<Widget>();
     if (widget.isOnboarding) {
       widgets.add(Padding(
@@ -198,6 +197,20 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       Padding(padding: EdgeInsets.all(8)),
     ]);
 
+    if (_hasActiveSubscription) {
+      widgets.add(
+        Text(
+          "valid till " +
+              getDateAndMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
+                  _currentSubscription.expiryTime)),
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.6),
+            fontSize: 14,
+          ),
+        ),
+      );
+    }
+
     if (_hasActiveSubscription &&
         _currentSubscription.productID != kFreeProductID) {
       widgets.addAll([
@@ -222,17 +235,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               padding: EdgeInsets.fromLTRB(40, 80, 40, 80),
               child: Column(
                 children: [
-                  Text(
-                    "next renewal on " +
-                        getDateAndMonthAndYear(
-                            DateTime.fromMicrosecondsSinceEpoch(
-                                _currentSubscription.expiryTime)),
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
-                      fontSize: 14,
-                    ),
-                  ),
-                  Padding(padding: EdgeInsets.all(8)),
                   RichText(
                     text: TextSpan(
                       text: isActiveStripeSubscriber
@@ -254,7 +256,12 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ),
         ),
       ]);
-    } else {
+    }
+    if (widget.isOnboarding &&
+        _currentSubscription.productID == kFreeProductID) {
+      widgets.addAll([_getSkipButton(_plans.freePlan)]);
+    }
+    if (_currentSubscription.productID == kFreeProductID) {
       widgets.addAll([
         Align(
           alignment: Alignment.center,
@@ -262,7 +269,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             behavior: HitTestBehavior.translucent,
             onTap: () {
               showModalBottomSheet<void>(
-                backgroundColor: Colors.grey[900],
+                backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
                 barrierColor: Colors.black87,
                 context: context,
                 builder: (context) {
@@ -271,7 +278,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               );
             },
             child: Container(
-              padding: EdgeInsets.all(40),
+              padding: EdgeInsets.all(0),
               child: RichText(
                 text: TextSpan(
                   text: "questions?",
@@ -284,16 +291,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             ),
           ),
         ),
-        Expanded(child: Container()),
       ]);
-    }
-    if (widget.isOnboarding &&
-        _currentSubscription.productID == kFreeProductID) {
-      widgets.addAll([_getSkipButton(_plans.freePlan)]);
     }
     return SingleChildScrollView(
       child: Container(
-        height: pageSize - (appBarSize + notifySize),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: widgets,
@@ -342,8 +343,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   List<Widget> _getMobilePlanWidgets() {
     final List<Widget> planWidgets = [];
-    if (!widget.isOnboarding &&
-        _hasActiveSubscription &&
+    if (_hasActiveSubscription &&
         _currentSubscription.productID == kFreeProductID) {
       planWidgets.add(
         SubscriptionPlanWidget(
@@ -438,85 +438,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     return planWidgets;
   }
 
-  GestureDetector _getSkipButton(FreePlan plan) {
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      child: Container(
-        padding: EdgeInsets.fromLTRB(40, 20, 40, 20),
-        margin: EdgeInsets.only(bottom: 40),
-        child: Column(
-          children: [
-            Icon(
-              Icons.fast_forward_outlined,
-              color: Colors.white.withOpacity(0.8),
-            ),
-            Text(
-              "skip",
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white.withOpacity(0.8),
-              ),
-            ),
-          ],
-        ),
+  Widget _getSkipButton(FreePlan plan) {
+    return Container(
+      width: double.infinity,
+      height: 64,
+      margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
+      padding: const EdgeInsets.fromLTRB(64, 0, 64, 0),
+      child: button(
+        "continue on free plan",
+        fontSize: 16,
+        onPressed: () async {
+          if (widget.isOnboarding) {
+            showToast("thank you for signing up!");
+            Bus.instance.fire(SubscriptionPurchasedEvent());
+          }
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        },
       ),
-      onTap: () {
-        AlertDialog alert = AlertDialog(
-          title: Text("sure?"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "you will only be able to backup " +
-                    convertBytesToReadableFormat(plan.storage) +
-                    " for the next " +
-                    plan.duration.toString() +
-                    " " +
-                    plan.period,
-                style: TextStyle(
-                  height: 1.4,
-                ),
-              ),
-              Padding(padding: EdgeInsets.all(8)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    child: Text(
-                      "review plans",
-                      style: TextStyle(color: Theme.of(context).buttonColor),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context, rootNavigator: true).pop('dialog');
-                    },
-                  ),
-                  TextButton(
-                    child: Text(
-                      "ok",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    onPressed: () {
-                      if (widget.isOnboarding) {
-                        showToast("thank you for signing up!");
-                        Bus.instance.fire(SubscriptionPurchasedEvent());
-                      }
-                      Navigator.of(context, rootNavigator: true).pop('dialog');
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return alert;
-          },
-        );
-      },
     );
   }
 }
