@@ -188,18 +188,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final isActiveStripeSubscriber =
         _currentSubscription.paymentProvider == kStripe &&
             _currentSubscription.isValid();
-    if (isActiveStripeSubscriber) {
-      widgets.add(Container(child: Text("")));
-    } else {
-      List<Widget> planWidgets = _getPlanWidgets();
-      widgets.addAll([
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: planWidgets,
-        ),
-        Padding(padding: EdgeInsets.all(8)),
-      ]);
-    }
+    widgets.addAll([
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: isActiveStripeSubscriber
+            ? _getStripePlanWidgets()
+            : _getMobilePlanWidgets(),
+      ),
+      Padding(padding: EdgeInsets.all(8)),
+    ]);
 
     if (_hasActiveSubscription &&
         _currentSubscription.productID != kFreeProductID) {
@@ -305,7 +302,45 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
-  List<Widget> _getPlanWidgets() {
+  List<Widget> _getStripePlanWidgets() {
+    final List<Widget> planWidgets = [];
+    BillingPlan currentPlan = _plans.plans
+        .where((plan) => plan.stripeID == _currentSubscription.productID)
+        .toList()[0];
+
+    for (final plan in _plans.plans) {
+      final productID = plan.stripeID;
+      if (productID == null ||
+          productID.isEmpty ||
+          currentPlan.period != plan.period) {
+        continue;
+      }
+      final isActive =
+          _hasActiveSubscription && _currentSubscription.productID == productID;
+      planWidgets.add(
+        Material(
+          child: InkWell(
+            onTap: () async {
+              if (isActive) {
+                return;
+              }
+              showErrorDialog(context, "sorry",
+                  "please visit web.ente.io to manage your subscription");
+            },
+            child: SubscriptionPlanWidget(
+              storage: plan.storage,
+              price: plan.price,
+              period: plan.period,
+              isActive: isActive,
+            ),
+          ),
+        ),
+      );
+    }
+    return planWidgets;
+  }
+
+  List<Widget> _getMobilePlanWidgets() {
     final List<Widget> planWidgets = [];
     if (!widget.isOnboarding &&
         _hasActiveSubscription &&
