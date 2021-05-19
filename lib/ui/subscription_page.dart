@@ -44,7 +44,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Future<int> _usageFuture;
   bool _hasActiveSubscription;
   BillingPlans _plans;
-  bool _hasLoadedData;
+  bool _hasLoadedData = false;
 
   @override
   void initState() {
