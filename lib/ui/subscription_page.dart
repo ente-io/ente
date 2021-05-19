@@ -43,19 +43,26 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   ProgressDialog _dialog;
   Future<int> _usageFuture;
   bool _hasActiveSubscription;
+  BillingPlans _plans;
+  bool _hasLoadedData;
 
   @override
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
-    _currentSubscription = _billingService.getSubscription();
-    _hasActiveSubscription =
-        _currentSubscription != null && _currentSubscription.isValid();
-    if (_currentSubscription != null) {
+    _billingService.fetchSubscription().then((subscription) async {
+      _currentSubscription = subscription;
+      _hasActiveSubscription = _currentSubscription.isValid();
+      _plans = await _billingService.getBillingPlans();
       _usageFuture = _billingService.fetchUsage();
-    }
-
+      _hasLoadedData = true;
+      setState(() {});
+    });
+    _setupPurchaseUpdateStreamListener();
     _dialog = createProgressDialog(context, "please wait...");
+    super.initState();
+  }
 
+  void _setupPurchaseUpdateStreamListener() {
     _purchaseUpdateSubscription = InAppPurchaseConnection
         .instance.purchaseUpdatedStream
         .listen((purchases) async {
@@ -71,7 +78,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               purchase.verificationData.serverVerificationData,
             );
             await InAppPurchaseConnection.instance.completePurchase(purchase);
-            Bus.instance.fire(SubscriptionPurchasedEvent());
             String text = "thank you for subscribing!";
             if (!widget.isOnboarding) {
               final isUpgrade = _hasActiveSubscription &&
@@ -85,15 +91,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
             }
             showToast(text);
-            if (_currentSubscription != null) {
-              _currentSubscription = _billingService.getSubscription();
-              _hasActiveSubscription = _currentSubscription != null &&
-                  _currentSubscription.isValid();
-              setState(() {});
-            } else {
+            _currentSubscription = newSubscription;
+            _hasActiveSubscription = _currentSubscription.isValid();
+            setState(() {});
+            await _dialog.hide();
+            Bus.instance.fire(SubscriptionPurchasedEvent());
+            if (widget.isOnboarding) {
               Navigator.of(context).popUntil((route) => route.isFirst);
             }
-            await _dialog.hide();
           } catch (e) {
             _logger.warning("Could not complete payment ", e);
             await _dialog.hide();
@@ -113,7 +118,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         }
       }
     });
-    super.initState();
   }
 
   @override
@@ -135,23 +139,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _getBody(final appBarSize) {
-    return FutureBuilder<BillingPlans>(
-      future: _billingService.getBillingPlans(),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData) {
-          return _buildPlans(context, snapshot.data, appBarSize);
-        } else if (snapshot.hasError) {
-          return Text("Oops, something went wrong.");
-        } else {
-          return loadWidget;
-        }
-      },
-    );
+    if (_hasLoadedData) {
+      return _buildPlans(appBarSize);
+    }
+    return loadWidget;
   }
 
-  Widget _buildPlans(
-      BuildContext context, BillingPlans plans, final appBarSize) {
-    List<Widget> planWidgets = _getPlanWidgets(plans, context);
+  Widget _buildPlans(final appBarSize) {
+    List<Widget> planWidgets = _getPlanWidgets();
     final pageSize = MediaQuery.of(context).size.height;
     final notifySize = MediaQuery.of(context).padding.top;
     final widgets = List<Widget>();
@@ -281,9 +276,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       ]);
     }
     if (widget.isOnboarding &&
-        (_currentSubscription == null ||
-            _currentSubscription.productID == kFreeProductID)) {
-      widgets.addAll([_getSkipButton(plans.freePlan)]);
+        _currentSubscription.productID == kFreeProductID) {
+      widgets.addAll([_getSkipButton(_plans.freePlan)]);
     }
     return SingleChildScrollView(
       child: Container(
@@ -296,26 +290,24 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
-  List<Widget> _getPlanWidgets(BillingPlans plans, BuildContext context) {
-    final planWidgets = List<Widget>();
+  List<Widget> _getPlanWidgets() {
+    final List<Widget> planWidgets = [];
     if (!widget.isOnboarding &&
         _hasActiveSubscription &&
         _currentSubscription.productID == kFreeProductID) {
       planWidgets.add(
         SubscriptionPlanWidget(
-          storage: plans.freePlan.storage,
+          storage: _plans.freePlan.storage,
           price: "free",
           period: "",
           isActive: true,
         ),
       );
     }
-    for (final plan in plans.plans) {
+    final isStripeSubscriber = _currentSubscription.paymentProvider == kStripe;
+    for (final plan in _plans.plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      final hasSubscribedOverStripe =
-          _currentSubscription.productID == plan.stripeID;
-      if (!hasSubscribedOverStripe &&
-          (productID == null || productID.isEmpty)) {
+      if (isStripeSubscriber && (productID == null || productID.isEmpty)) {
         continue;
       }
       final isActive =
@@ -327,9 +319,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (isActive) {
                 return;
               }
-              if (_currentSubscription.paymentProvider == kStripe) {
+              if (isStripeSubscriber) {
                 showErrorDialog(context, "sorry",
-                    "please visit photos.ente.io to manage your subscription");
+                    "please visit web.ente.io to manage your subscription");
                 return;
               }
               await _dialog.show();

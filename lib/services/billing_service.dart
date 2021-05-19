@@ -9,13 +9,11 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class BillingService {
   BillingService._privateConstructor();
 
   static final BillingService instance = BillingService._privateConstructor();
-  static const subscriptionKey = "subscription";
 
   final _logger = Logger("BillingService");
   final _dio = Network.instance.getDio();
@@ -23,11 +21,9 @@ class BillingService {
 
   bool _isOnSubscriptionPage = false;
 
-  SharedPreferences _prefs;
   Future<BillingPlans> _future;
 
   Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
     InAppPurchaseConnection.enablePendingPurchases();
     // if (Platform.isIOS && kDebugMode) {
     //   await FlutterInappPurchase.instance.initConnection;
@@ -84,9 +80,7 @@ class BillingService {
           },
         ),
       );
-      final subscription = Subscription.fromMap(response.data["subscription"]);
-      await setSubscription(subscription);
-      return subscription;
+      return Subscription.fromMap(response.data["subscription"]);
     } catch (e) {
       throw e;
     }
@@ -103,12 +97,9 @@ class BillingService {
         ),
       );
       final subscription = Subscription.fromMap(response.data["subscription"]);
-      await setSubscription(subscription);
       return subscription;
     } on DioError catch (e) {
-      if (e.response != null && e.response.statusCode == 404) {
-        _prefs.remove(subscriptionKey);
-      }
+      _logger.severe(e);
       throw e;
     }
   }
@@ -131,26 +122,6 @@ class BillingService {
     } catch (e) {
       throw e;
     }
-  }
-
-  Subscription getSubscription() {
-    final jsonValue = _prefs.getString(subscriptionKey);
-    if (jsonValue == null) {
-      return null;
-    } else {
-      return Subscription.fromJson(jsonValue);
-    }
-  }
-
-  bool hasActiveSubscription() {
-    final subscription = getSubscription();
-    return subscription != null &&
-        subscription.expiryTime > DateTime.now().microsecondsSinceEpoch;
-  }
-
-  Future<void> setSubscription(Subscription subscription) async {
-    await _prefs.setString(
-        subscriptionKey, subscription == null ? null : subscription.toJson());
   }
 
   void setIsOnSubscriptionPage(bool isOnSubscriptionPage) {
