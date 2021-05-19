@@ -278,7 +278,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               );
             },
             child: Container(
-              padding: EdgeInsets.all(0),
+              padding: EdgeInsets.all(40),
               child: RichText(
                 text: TextSpan(
                   text: "questions?",
