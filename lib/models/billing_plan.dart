@@ -126,6 +126,7 @@ class BillingPlan {
   final String id;
   final String androidID;
   final String iosID;
+  final String stripeID;
   final int storage;
   final String price;
   final String period;
@@ -134,6 +135,7 @@ class BillingPlan {
     this.id,
     this.androidID,
     this.iosID,
+    this.stripeID,
     this.storage,
     this.price,
     this.period,
@@ -143,6 +145,7 @@ class BillingPlan {
     String id,
     String androidID,
     String iosID,
+    String stripeID,
     int storage,
     String price,
     String period,
@@ -151,6 +154,7 @@ class BillingPlan {
       id: id ?? this.id,
       androidID: androidID ?? this.androidID,
       iosID: iosID ?? this.iosID,
+      stripeID: stripeID ?? this.stripeID,
       storage: storage ?? this.storage,
       price: price ?? this.price,
       period: period ?? this.period,
@@ -162,6 +166,7 @@ class BillingPlan {
       'id': id,
       'androidID': androidID,
       'iosID': iosID,
+      'stripeID': stripeID,
       'storage': storage,
       'price': price,
       'period': period,
@@ -175,6 +180,7 @@ class BillingPlan {
       id: map['id'],
       androidID: map['androidID'],
       iosID: map['iosID'],
+      stripeID: map['stripeID'],
       storage: map['storage'],
       price: map['price'],
       period: map['period'],
@@ -188,7 +194,7 @@ class BillingPlan {
 
   @override
   String toString() {
-    return 'BillingPlan(id: $id, androidID: $androidID, iosID: $iosID, storage: $storage, price: $price, period: $period)';
+    return 'BillingPlan(id: $id, androidID: $androidID, iosID: $iosID, stripeID: $stripeID, storage: $storage, price: $price, period: $period)';
   }
 
   @override
@@ -199,6 +205,7 @@ class BillingPlan {
         o.id == id &&
         o.androidID == androidID &&
         o.iosID == iosID &&
+        o.stripeID == stripeID &&
         o.storage == storage &&
         o.price == price &&
         o.period == period;
@@ -209,6 +216,7 @@ class BillingPlan {
     return id.hashCode ^
         androidID.hashCode ^
         iosID.hashCode ^
+        stripeID.hashCode ^
         storage.hashCode ^
         price.hashCode ^
         period.hashCode;
