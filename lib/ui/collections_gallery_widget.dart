@@ -13,7 +13,6 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/ui/collection_page.dart';
@@ -145,7 +144,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             Padding(padding: EdgeInsets.all(10)),
             SectionTitle("on ente"),
             Padding(padding: EdgeInsets.all(12)),
-            BillingService.instance.hasActiveSubscription()
+            Configuration.instance.hasConfiguredAccount()
                 ? GridView.builder(
                     shrinkWrap: true,
                     padding: EdgeInsets.fromLTRB(0, 0, 12, 0),

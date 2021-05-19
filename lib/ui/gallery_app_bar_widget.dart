@@ -161,7 +161,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getActions(BuildContext context) {
     List<Widget> actions = List<Widget>();
-    if (BillingService.instance.hasActiveSubscription()) {
+    if (Configuration.instance.hasConfiguredAccount()) {
       actions.add(IconButton(
         icon:
             Icon(Platform.isAndroid ? Icons.add_outlined : CupertinoIcons.add),
