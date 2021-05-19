@@ -277,18 +277,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       showToast("password changed successfully");
       Navigator.of(context).pop();
       if (widget.mode == PasswordEntryMode.reset) {
-        if (!BillingService.instance.hasActiveSubscription()) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return SubscriptionPage(isOnboarding: true);
-              },
-            ),
-          );
-        } else {
-          Bus.instance.fire(SubscriptionPurchasedEvent());
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        }
+        Bus.instance.fire(SubscriptionPurchasedEvent());
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e, s) {
       _logger.severe(e, s);
