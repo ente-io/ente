@@ -307,7 +307,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     final isStripeSubscriber = _currentSubscription.paymentProvider == kStripe;
     for (final plan in _plans.plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      if (isStripeSubscriber && (productID == null || productID.isEmpty)) {
+      if (!isStripeSubscriber && (productID == null || productID.isEmpty)) {
         continue;
       }
       final isActive =
