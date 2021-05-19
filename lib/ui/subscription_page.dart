@@ -312,7 +312,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
     for (final plan in plans.plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      if (productID == null || productID.isEmpty) {
+      final hasSubscribedOverStripe =
+          _currentSubscription.productID == plan.stripeID;
+      if (!hasSubscribedOverStripe &&
+          (productID == null || productID.isEmpty)) {
         continue;
       }
       final isActive =
