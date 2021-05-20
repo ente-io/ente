@@ -255,14 +255,9 @@ export default function Gallery() {
             syncWithRemote
         );
     };
-    const restoreGallery = async () => {
-        loadingBar.current?.continuousStart();
-        const files = await getLocalFiles();
-        const collections = await getLocalCollections();
+    const updateFiles = (files: File[]) => {
         setFiles(files);
-        setCollections(collections);
         setSinceTime(new Date().getTime());
-        loadingBar.current?.complete();
     };
     return (
         <FullScreenDropZone
@@ -300,10 +295,8 @@ export default function Gallery() {
                 isOpen={searchView}
                 setOpen={setSearchView}
                 loadingBar={loadingBar.current}
-                files={files}
-                setFiles={setFiles}
+                setFiles={updateFiles}
                 setCollections={setCollections}
-                restoreGallery={restoreGallery}
             />
             <Collections
                 collections={collections}
@@ -362,6 +355,7 @@ export default function Gallery() {
                 isFirstLoad={isFirstLoad}
                 openFileUploader={openFileUploader}
                 loadingBar={loadingBar}
+                searchMode={searchView}
             />
             {files.length < 30 && (
                 <Alert

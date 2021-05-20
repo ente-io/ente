@@ -1,13 +1,18 @@
 import { Formik } from 'formik';
 import { SetCollections, SetFiles } from 'pages/gallery';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form } from 'react-bootstrap';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 import * as Yup from 'yup';
-import { File } from 'services/fileService';
-import * as chrono from 'chrono-node';
-import { getNonEmptyCollections } from 'services/collectionService';
+import { File, getLocalFiles } from 'services/fileService';
+import {
+    Collection,
+    getLocalCollections,
+    getNonEmptyCollections,
+} from 'services/collectionService';
+import { parseHumanDate, searchLocation } from 'services/searchService';
+import { getFilesWithCreationDay, getFilesInsideBbox } from 'utils/search';
 
 const Wrapper = styled.div<{ open: boolean }>`
     background-color: #111;
@@ -34,41 +39,54 @@ interface Props {
     isOpen: boolean;
     setOpen: (value) => void;
     loadingBar: any;
-    files: File[];
     setFiles: SetFiles;
     setCollections: SetCollections;
-    restoreGallery: () => Promise<void>;
 }
 export default function SearchBar(props: Props) {
-    const isSameDay = (baseDate) => (compareDate) => {
-        return (
-            baseDate.getMonth() === compareDate.getMonth() &&
-            baseDate.getDate() === compareDate.getDate()
-        );
-    };
+    const [allFiles, setAllFiles] = useState<File[]>([]);
+    const [allCollections, setAllCollections] = useState<Collection[]>([]);
+
+    useEffect(() => {
+        const main = async () => {
+            setAllFiles(await getLocalFiles());
+            setAllCollections(await getLocalCollections());
+        };
+        main();
+    }, []);
 
     const searchFiles = async (values: formValues) => {
-        const searchDate = chrono.parseDate(values.searchPhrase);
-        console.log(searchDate);
-        const searchDateComparer = isSameDay(searchDate);
-        const filesWithSameDate = props.files.filter((file) => {
-            if (
-                searchDateComparer(new Date(file.metadata.creationTime / 1000))
-            ) {
-                console.log(new Date(file.metadata.creationTime / 1000));
-                return true;
+        props.loadingBar.continuousStart();
+
+        let resultFiles: File[] = [];
+
+        const searchedDate = parseHumanDate(values.searchPhrase);
+        if (searchedDate != null) {
+            const filesWithSameDate = getFilesWithCreationDay(
+                allFiles,
+                searchedDate
+            );
+            resultFiles.push(...filesWithSameDate);
+        } else {
+            const bbox = await searchLocation(values.searchPhrase);
+            if (bbox) {
+                const filesTakenAtLocation = getFilesInsideBbox(allFiles, bbox);
+                resultFiles.push(...filesTakenAtLocation);
             }
-            return false;
-        });
-        props.setFiles(filesWithSameDate);
-        props.setCollections((collection) =>
-            getNonEmptyCollections(collection, filesWithSameDate)
+        }
+
+        props.setFiles(resultFiles);
+        props.setCollections(
+            getNonEmptyCollections(allCollections, resultFiles)
+        );
+        await new Promise((resolve) =>
+            setTimeout(() => resolve(props.loadingBar.complete()), 5000)
         );
     };
-    const closeSearchBar = async ({ resetForm }) => {
+    const closeSearchBar = ({ resetForm }) => {
         props.setOpen(false);
+        props.setFiles(allFiles);
+        props.setCollections(allCollections);
         resetForm();
-        await props.restoreGallery();
     };
     return (
         <Wrapper open={props.isOpen}>
@@ -117,9 +135,7 @@ export default function SearchBar(props: Props) {
                                 alignItems: 'center',
                                 cursor: 'pointer',
                             }}
-                            onClick={async () =>
-                                await closeSearchBar({ resetForm })
-                            }
+                            onClick={() => closeSearchBar({ resetForm })}
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
