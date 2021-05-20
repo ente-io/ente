@@ -32,10 +32,10 @@ packages:
   background_fetch:
     dependency: "direct main"
     description:
-      name: background_fetch
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.7.2"
+      path: "thirdparty/flutter_background_fetch"
+      relative: true
+    source: path
+    version: "1.0.0-nullsafety.2"
   boolean_selector:
     dependency: transitive
     description:

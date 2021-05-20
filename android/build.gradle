@@ -18,7 +18,7 @@ allprojects {
         google()
         jcenter()
         maven {
-            url "${project(':background_fetch').projectDir}/libs" // for background_fetch
+            url "../../thirdparty/flutter_background_fetch/android/libs" // for background_fetch
         }
     }
 }

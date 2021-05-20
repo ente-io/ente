@@ -67,7 +67,8 @@ dependencies:
   expansion_card: ^0.1.0
   flutter_password_strength: ^0.1.6
   flutter_inappwebview: ^5.3.2
-  background_fetch: ^0.7.2
+  background_fetch:
+    path: thirdparty/flutter_background_fetch
   # flutter_inapp_purchase: ^3.0.1
   google_nav_bar: ^5.0.5
   package_info_plus: ^1.0.1
