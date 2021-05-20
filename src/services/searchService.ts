@@ -1,8 +1,13 @@
 import HTTPService from './HTTPService';
+import * as chrono from 'chrono-node';
 
 export const getMapboxToken = () => {
     return process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 };
+
+export function parseHumanDate(humanDate: string) {
+    return chrono.parseDate(humanDate);
+}
 
 export async function searchLocation(
     location: string

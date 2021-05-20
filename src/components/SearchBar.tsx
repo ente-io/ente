@@ -6,14 +6,13 @@ import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 import * as Yup from 'yup';
 import { File, getLocalFiles } from 'services/fileService';
-import * as chrono from 'chrono-node';
 import {
     Collection,
     getLocalCollections,
     getNonEmptyCollections,
 } from 'services/collectionService';
-import { searchLocation } from 'services/searchService';
-import { getFilesInsideBbox } from 'utils/search';
+import { parseHumanDate, searchLocation } from 'services/searchService';
+import { getFilesWithCreationDay, getFilesInsideBbox } from 'utils/search';
 
 const Wrapper = styled.div<{ open: boolean }>`
     background-color: #111;
@@ -54,36 +53,33 @@ export default function SearchBar(props: Props) {
         };
         main();
     }, []);
-    const isSameDay = (baseDate) => (compareDate) => {
-        return (
-            baseDate.getMonth() === compareDate.getMonth() &&
-            baseDate.getDate() === compareDate.getDate()
-        );
-    };
 
     const searchFiles = async (values: formValues) => {
         props.loadingBar.continuousStart();
+
         let resultFiles: File[] = [];
-        const searchDate = chrono.parseDate(values.searchPhrase);
-        if (searchDate != null) {
-            const searchDateComparer = isSameDay(searchDate);
-            const filesWithSameDate = allFiles.filter((file) =>
-                searchDateComparer(new Date(file.metadata.creationTime / 1000))
+
+        const searchedDate = parseHumanDate(values.searchPhrase);
+        if (searchedDate != null) {
+            const filesWithSameDate = getFilesWithCreationDay(
+                allFiles,
+                searchedDate
             );
-            resultFiles = filesWithSameDate;
+            resultFiles.push(...filesWithSameDate);
         } else {
             const bbox = await searchLocation(values.searchPhrase);
             if (bbox) {
-                const filesAtLocation = getFilesInsideBbox(allFiles, bbox);
-                resultFiles = filesAtLocation;
+                const filesTakenAtLocation = getFilesInsideBbox(allFiles, bbox);
+                resultFiles.push(...filesTakenAtLocation);
             }
         }
+
         props.setFiles(resultFiles);
         props.setCollections(
             getNonEmptyCollections(allCollections, resultFiles)
         );
         await new Promise((resolve) =>
-            setTimeout(() => resolve(props.loadingBar.complete()), 100)
+            setTimeout(() => resolve(props.loadingBar.complete()), 5000)
         );
     };
     const closeSearchBar = ({ resetForm }) => {

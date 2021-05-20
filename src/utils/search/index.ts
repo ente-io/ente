@@ -18,3 +18,18 @@ export function getFilesInsideBbox(
         }
     });
 }
+
+const isSameDay = (baseDate) => (compareDate) => {
+    return (
+        baseDate.getMonth() === compareDate.getMonth() &&
+        baseDate.getDate() === compareDate.getDate()
+    );
+};
+
+export function getFilesWithCreationDay(files: File[], searchedDate: Date) {
+    const isSearchedDate = isSameDay(searchedDate);
+
+    return files.filter((file) =>
+        isSearchedDate(new Date(file.metadata.creationTime / 1000))
+    );
+}
