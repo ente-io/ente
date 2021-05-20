@@ -169,8 +169,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text("current usage is " +
-                    convertBytesToGBs(snapshot.data).toString() +
-                    " GB"),
+                    convertBytesToReadableFormat(snapshot.data).toString()),
               );
             } else if (snapshot.hasError) {
               return Container();
