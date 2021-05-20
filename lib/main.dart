@@ -12,6 +12,7 @@ import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/memories_service.dart';
+import 'package:photos/services/notification_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/home_widget.dart';
@@ -118,6 +119,7 @@ Future<void> _init(bool isBackground) async {
   _logger.info("Initializing...");
   InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
+  await NotificationService.instance.init();
   await Network.instance.init();
   await Configuration.instance.init();
   await BillingService.instance.init();

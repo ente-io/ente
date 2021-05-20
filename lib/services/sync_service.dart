@@ -4,6 +4,7 @@ import 'package:computer/computer.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
@@ -15,6 +16,7 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/notification_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/utils/file_sync_util.dart';
@@ -44,6 +46,8 @@ class SyncService {
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
+  static const kLastStorageLimitExceededNotificationPushTime =
+      "last_storage_limit_exceeded_notification_push_time";
   static const kLastBackgroundUploadDetectedTime =
       "last_background_upload_detected_time";
   static const kDiffLimit = 2500;
@@ -114,6 +118,7 @@ class SyncService {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
           error: NoActiveSubscriptionError()));
     } on StorageLimitExceededError {
+      _showStorageLimitExceededNotification();
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error,
           error: StorageLimitExceededError()));
     } on UnauthorizedError {
@@ -448,5 +453,16 @@ class SyncService {
             data: {
           "fileIDs": fileIDs,
         });
+  }
+
+  void _showStorageLimitExceededNotification() async {
+    final lastNotificationShownTime =
+        _prefs.getInt(kLastStorageLimitExceededNotificationPushTime) ?? 0;
+    final now = DateTime.now().microsecondsSinceEpoch;
+    if ((now - lastNotificationShownTime) > MICRO_SECONDS_IN_DAY) {
+      await _prefs.setInt(kLastStorageLimitExceededNotificationPushTime, now);
+      NotificationService.instance.showNotification(
+          "storage limit exceeded", "sorry, we had to pause your backups");
+    }
   }
 }
