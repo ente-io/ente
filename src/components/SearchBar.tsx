@@ -1,6 +1,6 @@
 import { Formik } from 'formik';
 import { SetCollections, SetFiles } from 'pages/gallery';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Form } from 'react-bootstrap';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
@@ -53,6 +53,15 @@ export default function SearchBar(props: Props) {
         };
         main();
     }, []);
+
+    const searchBarRef = useRef(null);
+    useEffect(() => {
+        if (props.isOpen) {
+            setTimeout(() => {
+                searchBarRef.current?.focus();
+            }, 200);
+        }
+    }, [props.isOpen]);
 
     const searchFiles = async (values: formValues) => {
         props.loadingBar.continuousStart();
@@ -121,6 +130,7 @@ export default function SearchBar(props: Props) {
                                     placeholder={constants.SEARCH_HINT}
                                     value={values.searchPhrase}
                                     onChange={handleChange('searchPhrase')}
+                                    ref={searchBarRef}
                                     isInvalid={Boolean(
                                         touched.searchPhrase &&
                                             errors.searchPhrase
