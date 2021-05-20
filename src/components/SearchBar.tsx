@@ -111,14 +111,14 @@ export default function SearchBar(props: Props) {
                         <div
                             style={{
                                 flex: 1,
-                                maxWidth: '700px',
+                                maxWidth: '600px',
                                 margin: '10px',
                             }}
                         >
                             <Form noValidate onSubmit={handleSubmit}>
                                 <Form.Control
                                     type={'search'}
-                                    placeholder={'search your photos'}
+                                    placeholder={constants.SEARCH_HINT}
                                     value={values.searchPhrase}
                                     onChange={handleChange('searchPhrase')}
                                     isInvalid={Boolean(

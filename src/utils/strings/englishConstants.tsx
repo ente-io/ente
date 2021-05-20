@@ -296,6 +296,7 @@ const englishConstants = {
     SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
+    SEARCH_HINT: 'search your photos',
 };
 
 export default englishConstants;
