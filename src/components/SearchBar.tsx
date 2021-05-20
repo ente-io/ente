@@ -64,7 +64,7 @@ export default function SearchBar(props: Props) {
     }, [props.isOpen]);
 
     const searchFiles = async (values: formValues) => {
-        props.loadingBar.continuousStart();
+        props.loadingBar.current?.continuousStart();
 
         let resultFiles: File[] = [];
 
@@ -88,7 +88,10 @@ export default function SearchBar(props: Props) {
             getNonEmptyCollections(allCollections, resultFiles)
         );
         await new Promise((resolve) =>
-            setTimeout(() => resolve(props.loadingBar.complete()), 5000)
+            setTimeout(
+                () => resolve(props.loadingBar.current?.complete()),
+                5000
+            )
         );
     };
     const closeSearchBar = ({ resetForm }) => {

@@ -294,7 +294,7 @@ export default function Gallery() {
             <SearchBar
                 isOpen={searchView}
                 setOpen={setSearchView}
-                loadingBar={loadingBar.current}
+                loadingBar={loadingBar}
                 setFiles={updateFiles}
                 setCollections={setCollections}
             />
