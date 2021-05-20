@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
@@ -43,7 +44,6 @@ class LazyLoadingGallery extends StatefulWidget {
 class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   static const kSubGalleryItemLimit = 80;
   static const kRecycleLimit = 400;
-  static const kMicroSecondsInADay = 86400000000;
   static const kNumberOfDaysToRenderBeforeAndAfter = 8;
 
   static final Logger _logger = Logger("LazyLoadingGallery");
@@ -99,7 +99,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
         final files = await widget.asyncLoader(
             dayStartTime.microsecondsSinceEpoch,
-            dayStartTime.microsecondsSinceEpoch + kMicroSecondsInADay - 1);
+            dayStartTime.microsecondsSinceEpoch + MICRO_SECONDS_IN_DAY - 1);
         if (files.isEmpty) {
           // All files on this day were deleted, let gallery trigger the reload
         } else {
