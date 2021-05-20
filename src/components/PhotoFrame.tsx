@@ -85,6 +85,7 @@ interface Props {
     isFirstLoad;
     openFileUploader;
     loadingBar;
+    searchMode: boolean;
 }
 
 const PhotoFrame = ({
@@ -98,6 +99,7 @@ const PhotoFrame = ({
     isFirstLoad,
     openFileUploader,
     loadingBar,
+    searchMode,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -258,7 +260,7 @@ const PhotoFrame = ({
 
     return (
         <>
-            {!isFirstLoad && files.length == 0 ? (
+            {!isFirstLoad && files.length == 0 && !searchMode ? (
                 <div
                     style={{
                         height: '60%',
@@ -308,15 +310,13 @@ const PhotoFrame = ({
                                 ) {
                                     currentDate =
                                         item.metadata.creationTime / 1000;
-                                    const dateTimeFormat = new Intl.DateTimeFormat(
-                                        'en-IN',
-                                        {
+                                    const dateTimeFormat =
+                                        new Intl.DateTimeFormat('en-IN', {
                                             weekday: 'short',
                                             year: 'numeric',
                                             month: 'long',
                                             day: 'numeric',
-                                        }
-                                    );
+                                        });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TIME,
                                         date: isSameDay(
