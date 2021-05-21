@@ -1,4 +1,4 @@
-import React, { Props } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 const Wrapper = styled.button<{ open: boolean }>`
@@ -13,12 +13,19 @@ const Wrapper = styled.button<{ open: boolean }>`
     border-radius: 50%;
     color: #fff;
 `;
-export default function SearchButton(props) {
-    if (props.open) {
+interface Props {
+    isOpen: boolean;
+    onClick;
+    height?: number;
+    viewBox?: string;
+    width?: number;
+}
+export default function SearchButton(props: Props) {
+    if (props.isOpen) {
         return <div />;
     }
     return (
-        <Wrapper open={props.open} onClick={props.onClick}>
+        <Wrapper open={props.isOpen} onClick={props.onClick}>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height={props.height}
