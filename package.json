@@ -41,6 +41,7 @@
     "react-window-infinite-loader": "^1.0.5",
     "scrypt-js": "^3.0.1",
     "styled-components": "^5.2.0",
+    "use-debounce": "^6.0.1",
     "xml-js": "^1.6.11",
     "yup": "^0.29.3"
   },
