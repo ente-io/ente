@@ -2,6 +2,7 @@ import { SetCollections, SetFiles } from 'pages/gallery';
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
+import { components } from 'react-select';
 import { useDebouncedCallback } from 'use-debounce';
 import { File, getLocalFiles } from 'services/fileService';
 import {
@@ -13,6 +14,8 @@ import { Bbox, parseHumanDate, searchLocation } from 'services/searchService';
 import { getFilesWithCreationDay, getFilesInsideBbox } from 'utils/search';
 import constants from 'utils/strings/constants';
 import { formatDate } from 'utils/common';
+import LocationIcon from './LocationIcon';
+import DateIcon from './DateIcon';
 
 const Wrapper = styled.div<{ open: boolean }>`
     background-color: #111;
@@ -127,6 +130,25 @@ export default function SearchBar(props: Props) {
         resetForm();
     };
 
+    const getIconByType = (type: SearchType) => (
+        <span style={{ marginRight: '5px' }}>
+            {type === SearchType.DATE ? <DateIcon /> : <LocationIcon />}
+        </span>
+    );
+    const { Option, SingleValue } = components;
+    const SingleValueWithIcon = (props) => (
+        <SingleValue {...props}>
+            {getIconByType(props.data.type)}
+            {props.data.label}
+        </SingleValue>
+    );
+    const OptionWithIcon = (props) => (
+        <Option {...props}>
+            {getIconByType(props.data.type)}
+            {props.data.label}
+        </Option>
+    );
+
     const customStyles = {
         control: (provided, { isFocused }) => ({
             ...provided,
@@ -182,6 +204,10 @@ export default function SearchBar(props: Props) {
                     }}
                 >
                     <AsyncSelect
+                        components={{
+                            Option: OptionWithIcon,
+                            SingleValue: SingleValueWithIcon,
+                        }}
                         cacheOptions
                         ref={searchBarRef}
                         placeholder={constants.SEARCH_HINT}
