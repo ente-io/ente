@@ -1,18 +1,17 @@
-import { Formik } from 'formik';
 import { SetCollections, SetFiles } from 'pages/gallery';
 import React, { useEffect, useState, useRef } from 'react';
-import { Form } from 'react-bootstrap';
 import styled from 'styled-components';
-import constants from 'utils/strings/constants';
-import * as Yup from 'yup';
+import AsyncSelect from 'react-select/async';
 import { File, getLocalFiles } from 'services/fileService';
 import {
     Collection,
     getLocalCollections,
     getNonEmptyCollections,
 } from 'services/collectionService';
-import { parseHumanDate, searchLocation } from 'services/searchService';
+import { Bbox, parseHumanDate, searchLocation } from 'services/searchService';
 import { getFilesWithCreationDay, getFilesInsideBbox } from 'utils/search';
+import constants from 'utils/strings/constants';
+import { formatDate } from 'utils/common';
 
 const Wrapper = styled.div<{ open: boolean }>`
     background-color: #111;
@@ -32,8 +31,14 @@ const Wrapper = styled.div<{ open: boolean }>`
     display: ${(props) => (props.open ? 'flex' : 'none')};
 `;
 
-interface formValues {
-    searchPhrase: string;
+enum SearchType {
+    DATE,
+    LOCATION,
+}
+interface SearchParams {
+    type: SearchType;
+    label: string;
+    value: Bbox | Date;
 }
 interface Props {
     isOpen: boolean;
@@ -63,35 +68,58 @@ export default function SearchBar(props: Props) {
         }
     }, [props.isOpen]);
 
-    const searchFiles = async (values: formValues) => {
-        props.loadingBar.current?.continuousStart();
+    const getOptions = (inputValue) => {
+        return getAutoCompleteSuggestion(inputValue);
+    };
+    const getAutoCompleteSuggestion = async (searchPhrase: string) => {
+        const searchedDate = parseHumanDate(searchPhrase);
+        let option = new Array<SearchParams>();
+        if (searchedDate != null) {
+            option.push({
+                type: SearchType.DATE,
+                value: searchedDate,
+                label: formatDate(searchedDate),
+            });
+        }
+        const searchResults = await searchLocation(searchPhrase);
+        option.push(
+            ...searchResults.map(
+                (searchResult) =>
+                    ({
+                        type: SearchType.LOCATION,
+                        value: searchResult.bbox,
+                        label: searchResult.placeName,
+                    } as SearchParams)
+            )
+        );
+        return option;
+    };
 
+    const filterFiles = (selectedOption: SearchParams) => {
+        if (!selectedOption) {
+            return;
+        }
         let resultFiles: File[] = [];
 
-        const searchedDate = parseHumanDate(values.searchPhrase);
-        if (searchedDate != null) {
-            const filesWithSameDate = getFilesWithCreationDay(
-                allFiles,
-                searchedDate
-            );
-            resultFiles.push(...filesWithSameDate);
-        } else {
-            const bbox = await searchLocation(values.searchPhrase);
-            if (bbox) {
+        switch (selectedOption.type) {
+            case SearchType.DATE:
+                const searchedDate = selectedOption.value as Date;
+                const filesWithSameDate = getFilesWithCreationDay(
+                    allFiles,
+                    searchedDate
+                );
+                console.log(filesWithSameDate);
+                resultFiles = filesWithSameDate;
+            case SearchType.LOCATION:
+                const bbox = selectedOption.value as Bbox;
+
                 const filesTakenAtLocation = getFilesInsideBbox(allFiles, bbox);
-                resultFiles.push(...filesTakenAtLocation);
-            }
+                resultFiles = filesTakenAtLocation;
         }
 
         props.setFiles(resultFiles);
         props.setCollections(
             getNonEmptyCollections(allCollections, resultFiles)
-        );
-        await new Promise((resolve) =>
-            setTimeout(
-                () => resolve(props.loadingBar.current?.complete()),
-                5000
-            )
         );
     };
     const closeSearchBar = ({ resetForm }) => {
@@ -100,68 +128,88 @@ export default function SearchBar(props: Props) {
         props.setCollections(allCollections);
         resetForm();
     };
+
+    const customStyles = {
+        control: (provided, { isFocused }) => ({
+            ...provided,
+            backgroundColor: '#282828',
+            color: '#d1d1d1',
+            borderColor: isFocused && '#2dc262',
+            boxShadow: isFocused && '0 0 3px #2dc262',
+            ':hover': {
+                borderColor: '#2dc262',
+            },
+        }),
+        input: (provided) => ({
+            ...provided,
+            color: '#d1d1d1',
+        }),
+        menu: (provided) => ({
+            ...provided,
+            backgroundColor: '#282828',
+        }),
+        option: (provided, { isFocused }) => ({
+            ...provided,
+            backgroundColor: isFocused && '#343434',
+        }),
+        dropdownIndicator: (provided) => ({
+            ...provided,
+            display: 'none',
+        }),
+        indicatorSeparator: (provided) => ({
+            ...provided,
+            display: 'none',
+        }),
+        clearIndicator: (provided) => ({
+            ...provided,
+            ':hover': { color: '#d2d2d2' },
+        }),
+        singleValue: (provided, state) => ({
+            ...provided,
+            backgroundColor: '#282828',
+            color: '#d1d1d1',
+        }),
+    };
     return (
         <Wrapper open={props.isOpen}>
-            <Formik<formValues>
-                initialValues={{ searchPhrase: '' }}
-                onSubmit={searchFiles}
-                validationSchema={Yup.object().shape({
-                    searchPhrase: Yup.string().required(constants.REQUIRED),
-                })}
-                validateOnChange={false}
-                validateOnBlur={false}
-            >
-                {({
-                    values,
-                    touched,
-                    errors,
-                    handleChange,
-                    handleSubmit,
-                    resetForm,
-                }) => (
-                    <>
-                        <div
-                            style={{
-                                flex: 1,
-                                maxWidth: '600px',
-                                margin: '10px',
-                            }}
-                        >
-                            <Form noValidate onSubmit={handleSubmit}>
-                                <Form.Control
-                                    type={'search'}
-                                    placeholder={constants.SEARCH_HINT}
-                                    value={values.searchPhrase}
-                                    onChange={handleChange('searchPhrase')}
-                                    ref={searchBarRef}
-                                    isInvalid={Boolean(
-                                        touched.searchPhrase &&
-                                            errors.searchPhrase
-                                    )}
-                                />
-                            </Form>
-                        </div>
-                        <div
-                            style={{
-                                margin: '0',
-                                display: 'flex',
-                                alignItems: 'center',
-                                cursor: 'pointer',
-                            }}
-                            onClick={() => closeSearchBar({ resetForm })}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                height={25}
-                                viewBox={`0 0 25 25`}
-                                width={25}
-                            >
-                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path>
-                            </svg>
-                        </div>
-                    </>
-                )}
-            </Formik>
+            <>
+                <div
+                    style={{
+                        flex: 1,
+                        maxWidth: '600px',
+                        margin: '10px',
+                    }}
+                >
+                    <AsyncSelect
+                        cacheOptions
+                        ref={searchBarRef}
+                        placeholder={constants.SEARCH_HINT}
+                        loadOptions={getOptions}
+                        onChange={filterFiles}
+                        isClearable
+                        styles={customStyles}
+                        noOptionsMessage={() => null}
+                    />
+                </div>
+                <div
+                    style={{
+                        margin: '0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                    }}
+                    onClick={() => closeSearchBar({ resetForm: () => null })}
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height={25}
+                        viewBox={`0 0 25 25`}
+                        width={25}
+                    >
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path>
+                    </svg>
+                </div>
+            </>
         </Wrapper>
     );
 }
