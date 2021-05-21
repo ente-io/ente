@@ -258,6 +258,7 @@ export default function Gallery() {
     const updateFiles = (files: File[]) => {
         setFiles(files);
         setSinceTime(new Date().getTime());
+        selectCollection(null);
     };
     return (
         <FullScreenDropZone
