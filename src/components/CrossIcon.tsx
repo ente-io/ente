@@ -8,7 +8,7 @@ export default function DateIcon(props) {
             viewBox={props.viewBox}
             width={props.width}
         >
-            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm-4.5-7a2.5 2.5 0 0 0 0 5 2.5 2.5 0 0 0 0-5z"></path>
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path>
         </svg>
     );
 }

@@ -16,6 +16,7 @@ import constants from 'utils/strings/constants';
 import { formatDate } from 'utils/common';
 import LocationIcon from './LocationIcon';
 import DateIcon from './DateIcon';
+import CrossIcon from './CrossIcon';
 
 const Wrapper = styled.div<{ open: boolean }>`
     background-color: #111;
@@ -227,14 +228,7 @@ export default function SearchBar(props: Props) {
                     }}
                     onClick={() => closeSearchBar({ resetForm: () => null })}
                 >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        height={25}
-                        viewBox={`0 0 25 25`}
-                        width={25}
-                    >
-                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path>
-                    </svg>
+                    <CrossIcon />
                 </div>
             </>
         </Wrapper>
