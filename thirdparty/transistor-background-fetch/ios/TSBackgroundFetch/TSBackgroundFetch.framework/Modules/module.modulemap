@@ -1,0 +1,6 @@
+framework module TSBackgroundFetch {
+  umbrella header "TSBackgroundFetch.h"
+
+  export *
+  module * { export * }
+}

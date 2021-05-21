@@ -1,0 +1,138 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion rootProject.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    publishing {
+        publications {
+            tslocationmanager(MavenPublication) {
+                groupId 'com.transistorsoft'
+                artifactId 'tsbackgroundfetch'
+                version VERSION_NAME
+                artifact("$buildDir/outputs/aar/tsbackgroundfetch-release.aar")
+
+            }
+        }
+        repositories {
+            maven {
+                url "$buildDir/repo"
+            }
+        }
+    }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    //implementation "androidx.appcompat:appcompat:$rootProject.appCompatVersion"
+
+}
+
+// Build Release
+task buildRelease { task ->
+    task.dependsOn 'cordovaRelease'
+    task.dependsOn 'reactNativeRelease'
+    task.dependsOn 'nativeScriptRelease'
+    task.dependsOn 'flutterRelease'
+}
+
+// Publish Release.
+task publishRelease { task ->
+    task.dependsOn 'assembleRelease'
+}
+tasks["publishRelease"].mustRunAfter("assembleRelease")
+tasks["publishRelease"].finalizedBy("publish")
+
+def WORKSPACE_PATH = "/Volumes/Glyph2TB/Users/chris/workspace"
+
+// Build local maven repo.
+def LIBRARY_PATH = "com/transistorsoft/tsbackgroundfetch"
+task buildLocalRepository { task ->
+    task.dependsOn 'publishRelease'
+    doLast {
+        delete "$buildDir/repo-local"
+        copy {
+            from "$buildDir/repo/$LIBRARY_PATH/$VERSION_NAME"
+            into "$buildDir/repo-local/$LIBRARY_PATH/$VERSION_NAME"
+        }
+        copy {
+            from("$buildDir/repo/$LIBRARY_PATH/maven-metadata.xml")
+            into("$buildDir/repo-local/$LIBRARY_PATH")
+        }
+    }
+}
+
+def cordovaDir = "$WORKSPACE_PATH/cordova/background-geolocation/cordova-plugin-background-fetch"
+task cordovaRelease { task ->
+    task.dependsOn 'buildLocalRepository'
+    doLast {
+        delete "$cordovaDir/src/android/libs"
+        copy {
+            // Maven repo format.
+            from("$buildDir/repo-local")
+            into("$cordovaDir/src/android/libs")
+            // OLD FORMAT
+            //from("$buildDir/outputs/aar/tsbackgroundfetch-release.aar")
+            //into("$cordovaDir/src/android/libs/tsbackgroundfetch")
+            //rename(/(.*)-release/, '$1-' + VERSION_NAME)
+        }
+    }
+}
+
+def reactNativeDir = "$WORKSPACE_PATH/react/background-geolocation/react-native-background-fetch"
+task reactNativeRelease { task ->
+    task.dependsOn 'buildLocalRepository'
+    doLast {
+        delete "$reactNativeDir/android/libs"
+        copy {
+            // Maven repo format.
+            from("$buildDir/repo-local")
+            into("$reactNativeDir/android/libs")
+            // OLD format.
+            //from("$buildDir/outputs/aar/tsbackgroundfetch-release.aar")
+            //into("$reactNativeDir/android/libs")
+            //rename(/(.*)-release/, '$1-' + VERSION_NAME)
+        }
+    }
+}
+
+def flutterDir = "$WORKSPACE_PATH/background-geolocation/flutter/flutter_background_fetch"
+task flutterRelease { task ->
+    task.dependsOn 'buildLocalRepository'
+    doLast {
+        delete "$flutterDir/android/libs"
+        copy {
+            // Maven repo format.
+            from("$buildDir/repo-local")
+            into("$flutterDir/android/libs")
+            // OLD format.
+            //from("$buildDir/outputs/aar/tsbackgroundfetch-release.aar")
+            //into("$flutterDir/android/libs")
+            //rename(/(.*)-release/, '$1-' + VERSION_NAME)
+        }
+    }
+}
+
+task nativeScriptRelease(type: Copy) {
+    from('./build/outputs/aar/tsbackgroundfetch-release.aar')
+    into("$WORKSPACE_PATH/NativeScript/background-geolocation/nativescript-background-fetch/src/platforms/android/libs")
+    rename('tsbackgroundfetch-release.aar', 'tsbackgroundfetch.aar')
+}
