@@ -17,9 +17,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven {
-            url "../../thirdparty/flutter_background_fetch/android/libs" // for background_fetch
-        }
     }
 }
 
