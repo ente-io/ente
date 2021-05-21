@@ -1,5 +1,5 @@
 cd thirdparty/transistor-background-fetch/android
-./gradlew :tsbackgroundfetch:publishRelease
+gradle :tsbackgroundfetch:publishRelease
 cd ../../../
 mkdir android/app/libs
 cp -rf thirdparty/transistor-background-fetch/android/tsbackgroundfetch/build/repo/* android/app/libs
