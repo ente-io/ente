@@ -2,6 +2,7 @@ import { SetCollections, SetFiles } from 'pages/gallery';
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
+import { useDebouncedCallback } from 'use-debounce';
 import { File, getLocalFiles } from 'services/fileService';
 import {
     Collection,
@@ -68,9 +69,6 @@ export default function SearchBar(props: Props) {
         }
     }, [props.isOpen]);
 
-    const getOptions = (inputValue) => {
-        return getAutoCompleteSuggestion(inputValue);
-    };
     const getAutoCompleteSuggestion = async (searchPhrase: string) => {
         const searchedDate = parseHumanDate(searchPhrase);
         let option = new Array<SearchParams>();
@@ -170,6 +168,9 @@ export default function SearchBar(props: Props) {
             color: '#d1d1d1',
         }),
     };
+
+    const getOptions = useDebouncedCallback(getAutoCompleteSuggestion, 250);
+
     return (
         <Wrapper open={props.isOpen}>
             <>
