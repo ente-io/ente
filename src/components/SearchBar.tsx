@@ -11,9 +11,12 @@ import {
     getNonEmptyCollections,
 } from 'services/collectionService';
 import { Bbox, parseHumanDate, searchLocation } from 'services/searchService';
-import { getFilesWithCreationDay, getFilesInsideBbox } from 'utils/search';
+import {
+    getFilesWithCreationDay,
+    getFilesInsideBbox,
+    formatDateForLabel,
+} from 'utils/search';
 import constants from 'utils/strings/constants';
-import { formatDate } from 'utils/common';
 import LocationIcon from './LocationIcon';
 import DateIcon from './DateIcon';
 import CrossIcon from './CrossIcon';
@@ -80,7 +83,7 @@ export default function SearchBar(props: Props) {
             option.push({
                 type: SearchType.DATE,
                 value: searchedDate,
-                label: formatDate(searchedDate),
+                label: formatDateForLabel(searchedDate),
             });
         }
         const searchResults = await searchLocation(searchPhrase);
@@ -110,8 +113,8 @@ export default function SearchBar(props: Props) {
                     allFiles,
                     searchedDate
                 );
-                console.log(filesWithSameDate);
                 resultFiles = filesWithSameDate;
+                break;
             case SearchType.LOCATION:
                 const bbox = selectedOption.value as Bbox;
 
@@ -209,12 +212,12 @@ export default function SearchBar(props: Props) {
                             Option: OptionWithIcon,
                             SingleValue: SingleValueWithIcon,
                         }}
-                        cacheOptions
                         ref={searchBarRef}
                         placeholder={constants.SEARCH_HINT}
                         loadOptions={getOptions}
                         onChange={filterFiles}
                         isClearable
+                        escapeClearsValue
                         styles={customStyles}
                         noOptionsMessage={() => null}
                     />

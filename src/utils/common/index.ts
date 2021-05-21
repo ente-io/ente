@@ -30,10 +30,3 @@ export function reverseString(title: string) {
         ?.split(' ')
         .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
 }
-
-export function formatDate(date: Date) {
-    return new Intl.DateTimeFormat('en-IN', {
-        month: 'long',
-        day: 'numeric',
-    }).format(date);
-}
