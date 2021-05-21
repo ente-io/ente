@@ -28,11 +28,6 @@ android {
 
             }
         }
-        repositories {
-            maven {
-                url "$buildDir/repo"
-            }
-        }
     }
 }
 
