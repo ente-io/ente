@@ -134,22 +134,26 @@ export default function SearchBar(props: Props) {
         resetForm();
     };
 
-    const getIconByType = (type: SearchType) => (
-        <span style={{ marginRight: '5px' }}>
-            {type === SearchType.DATE ? <DateIcon /> : <LocationIcon />}
-        </span>
+    const getIconByType = (type: SearchType) =>
+        type === SearchType.DATE ? <DateIcon /> : <LocationIcon />;
+
+    const LabelWithIcon = (props: { type: SearchType; label: string }) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+            <span style={{ marginRight: '10px' }}>
+                {getIconByType(props.type)}
+            </span>
+            <span>{props.label}</span>
+        </div>
     );
     const { Option, SingleValue } = components;
     const SingleValueWithIcon = (props) => (
         <SingleValue {...props}>
-            {getIconByType(props.data.type)}
-            {props.data.label}
+            <LabelWithIcon type={props.data.type} label={props.data.label} />
         </SingleValue>
     );
     const OptionWithIcon = (props) => (
         <Option {...props}>
-            {getIconByType(props.data.type)}
-            {props.data.label}
+            <LabelWithIcon type={props.data.type} label={props.data.label} />
         </Option>
     );
 
@@ -170,6 +174,7 @@ export default function SearchBar(props: Props) {
         }),
         menu: (provided) => ({
             ...provided,
+            marginTop: '10px',
             backgroundColor: '#282828',
         }),
         option: (provided, { isFocused }) => ({
