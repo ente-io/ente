@@ -99,6 +99,7 @@ void _backgroundTask(String taskId) async {
   _logger.info("[BackgroundFetch] Event received: $taskId");
   _scheduleBGTaskKill(taskId);
   await _init(true);
+  UpdateService.instance.showUpdateNotification();
   await _sync(isAppInBackground: true);
   BackgroundFetch.finish(taskId);
 }

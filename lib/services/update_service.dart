@@ -3,29 +3,35 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/network.dart';
+import 'package:photos/services/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UpdateService {
   UpdateService._privateConstructor();
-  static final UpdateService instance = UpdateService._privateConstructor();
 
-  final _logger = Logger("UpdateService");
+  static final UpdateService instance = UpdateService._privateConstructor();
+  static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
+
   LatestVersionInfo _latestVersion;
+  final _logger = Logger("UpdateService");
   PackageInfo _packageInfo;
+  SharedPreferences _prefs;
 
   Future<void> init() async {
     _packageInfo = await PackageInfo.fromPlatform();
+    _prefs = await SharedPreferences.getInstance();
   }
 
   Future<bool> shouldUpdate() async {
-    _logger.info(_packageInfo.packageName);
     if (!isIndependent()) {
       return false;
     }
     try {
-    _latestVersion = await _getLatestVersionInfo();
-    final currentVersionCode = int.parse(_packageInfo.buildNumber);
-    return currentVersionCode < _latestVersion.code;
+      _latestVersion = await _getLatestVersionInfo();
+      final currentVersionCode = int.parse(_packageInfo.buildNumber);
+      return currentVersionCode < _latestVersion.code;
     } catch (e) {
       _logger.severe(e);
       return false;
@@ -34,6 +40,27 @@ class UpdateService {
 
   LatestVersionInfo getLatestVersionInfo() {
     return _latestVersion;
+  }
+
+  Future<void> showUpdateNotification() async {
+    if (!isIndependent()) {
+      return;
+    }
+    final shouldUpdate = await this.shouldUpdate();
+    final lastNotificationShownTime =
+        _prefs.getInt(kUpdateAvailableShownTimeKey) ?? 0;
+    final now = DateTime.now().microsecondsSinceEpoch;
+    final hasBeen3DaysSinceLastNotification =
+        (now - lastNotificationShownTime) > (3 * MICRO_SECONDS_IN_DAY);
+    if (shouldUpdate &&
+        hasBeen3DaysSinceLastNotification &&
+        _latestVersion.shouldNotify) {
+      NotificationService.instance.showNotification(
+          "update available", "click to install our best version yet!");
+      await _prefs.setInt(kUpdateAvailableShownTimeKey, now);
+    } else {
+      _logger.info("Debouncing notification");
+    }
   }
 
   Future<LatestVersionInfo> _getLatestVersionInfo() async {
@@ -62,6 +89,7 @@ class LatestVersionInfo {
   final bool shouldForceUpdate;
   final String url;
   final int size;
+  final bool shouldNotify;
 
   LatestVersionInfo(
     this.name,
@@ -70,6 +98,7 @@ class LatestVersionInfo {
     this.shouldForceUpdate,
     this.url,
     this.size,
+    this.shouldNotify,
   );
 
   factory LatestVersionInfo.fromMap(Map<String, dynamic> map) {
@@ -80,6 +109,7 @@ class LatestVersionInfo {
       map['shouldForceUpdate'],
       map['url'],
       map['size'],
+      map['shouldNotify'],
     );
   }
 }
