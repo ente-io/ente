@@ -13,7 +13,7 @@ class Network {
     _dio = Dio(BaseOptions(headers: {
       HttpHeaders.userAgentHeader: FlutterUserAgent.userAgent,
       'X-Client-Version': packageInfo.version,
-      'X-Package-Name': packageInfo.packageName,
+      'X-Client-Package': packageInfo.packageName,
     }));
   }
 
