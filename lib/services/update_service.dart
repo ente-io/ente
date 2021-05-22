@@ -9,6 +9,7 @@ class UpdateService {
   UpdateService._privateConstructor();
   static final UpdateService instance = UpdateService._privateConstructor();
 
+  final _logger = Logger("UpdateService");
   LatestVersionInfo _latestVersion;
   PackageInfo _packageInfo;
 
@@ -17,13 +18,18 @@ class UpdateService {
   }
 
   Future<bool> shouldUpdate() async {
-    Logger("UpdateService").info(_packageInfo.packageName);
+    _logger.info(_packageInfo.packageName);
     if (!isIndependent()) {
       return false;
     }
+    try {
     _latestVersion = await _getLatestVersionInfo();
     final currentVersionCode = int.parse(_packageInfo.buildNumber);
     return currentVersionCode < _latestVersion.code;
+    } catch (e) {
+      _logger.severe(e);
+      return false;
+    }
   }
 
   LatestVersionInfo getLatestVersionInfo() {
