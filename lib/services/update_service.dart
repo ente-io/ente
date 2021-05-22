@@ -56,7 +56,7 @@ class UpdateService {
         hasBeen3DaysSinceLastNotification &&
         _latestVersion.shouldNotify) {
       NotificationService.instance.showNotification(
-          "update available", "click to install our best version yet!");
+          "update available", "click to install our best version yet");
       await _prefs.setInt(kUpdateAvailableShownTimeKey, now);
     } else {
       _logger.info("Debouncing notification");
