@@ -141,12 +141,12 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
     } catch (e) {
       Logger("ApkDownloader").severe(e);
       AlertDialog alert = AlertDialog(
-        title: Text("download failed"),
-        content: Text("we could not complete the download, please retry later"),
+        title: Text("sorry"),
+        content: Text("the download could not be completed"),
         actions: [
           TextButton(
             child: Text(
-              "ok",
+              "ignore",
               style: TextStyle(
                 color: Colors.white,
               ),
@@ -154,6 +154,25 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
             onPressed: () {
               Navigator.of(context, rootNavigator: true).pop('dialog');
               Navigator.of(context, rootNavigator: true).pop('dialog');
+            },
+          ),
+          TextButton(
+            child: Text(
+              "retry",
+              style: TextStyle(
+                color: Theme.of(context).buttonColor,
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pop('dialog');
+              Navigator.of(context, rootNavigator: true).pop('dialog');
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return ApkDownloaderDialog(widget.versionInfo);
+                },
+                barrierDismissible: false,
+              );
             },
           ),
         ],
