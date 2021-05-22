@@ -9,10 +9,11 @@ class Network {
 
   Future<void> init() async {
     await FlutterUserAgent.init();
-    final version = await _getAppVersion();
+    final packageInfo = await PackageInfo.fromPlatform();
     _dio = Dio(BaseOptions(headers: {
       HttpHeaders.userAgentHeader: FlutterUserAgent.userAgent,
-      'X-Client-Version': version,
+      'X-Client-Version': packageInfo.version,
+      'X-Package-Name': packageInfo.packageName,
     }));
   }
 

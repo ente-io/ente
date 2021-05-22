@@ -59,7 +59,15 @@ android {
            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
            storePassword keystoreProperties['storePassword']
        }
-   }
+    }
+    
+    flavorDimensions "default"
+    productFlavors {
+        independent {
+            dimension "default"
+            applicationIdSuffix ".independent"
+        }
+    }
 
     buildTypes {
         release {
