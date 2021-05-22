@@ -136,13 +136,37 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
           _downloadProgress = count / widget.versionInfo.size;
         });
       });
+      Navigator.of(context, rootNavigator: true).pop('dialog');
+      OpenFile.open(_saveUrl);
     } catch (e) {
       Logger("ApkDownloader").severe(e);
-      Navigator.pop(context);
-      showGenericErrorDialog(context);
+      AlertDialog alert = AlertDialog(
+        title: Text("download failed"),
+        content: Text("we could not complete the download, please retry later"),
+        actions: [
+          TextButton(
+            child: Text(
+              "ok",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pop('dialog');
+              Navigator.of(context, rootNavigator: true).pop('dialog');
+            },
+          ),
+        ],
+      );
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return alert;
+        },
+        barrierColor: Colors.black87,
+      );
       return;
     }
-    Navigator.pop(context);
-    OpenFile.open(_saveUrl);
   }
 }
