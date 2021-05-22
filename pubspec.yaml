@@ -79,6 +79,7 @@ dependencies:
   loading_animations: ^2.1.0
   dots_indicator: ^2.0.0
   flutter_local_notifications: ^5.0.0+4
+  open_file: ^3.2.1
 
 dev_dependencies:
   flutter_test:

@@ -17,6 +17,8 @@ import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/update_service.dart';
+import 'package:photos/ui/app_update_dialog.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/extents_page_view.dart';
@@ -126,6 +128,18 @@ class _HomeWidgetState extends State<HomeWidget> {
       setState(() {});
     });
     _initDeepLinks();
+    UpdateService.instance.shouldUpdate().then((shouldUpdate) {
+      if (shouldUpdate) {
+        Future.delayed(Duration.zero, () {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AppUpdateDialog(
+                    UpdateService.instance.getLatestVersionInfo());
+              });
+        });
+      }
+    });
     super.initState();
   }
 
