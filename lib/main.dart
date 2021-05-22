@@ -14,6 +14,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/notification_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/home_widget.dart';
 import 'package:photos/ui/lock_screen.dart';
@@ -122,6 +123,7 @@ Future<void> _init(bool isBackground) async {
   await NotificationService.instance.init();
   await Network.instance.init();
   await Configuration.instance.init();
+  await UpdateService.instance.init();
   await BillingService.instance.init();
   await CollectionsService.instance.init();
   await FileUploader.instance.init(isBackground);

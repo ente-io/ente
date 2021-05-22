@@ -10,18 +10,19 @@ class UpdateService {
   static final UpdateService instance = UpdateService._privateConstructor();
 
   LatestVersionInfo _latestVersion;
+  PackageInfo _packageInfo;
+
+  Future<void> init() async {
+    _packageInfo = await PackageInfo.fromPlatform();
+  }
 
   Future<bool> shouldUpdate() async {
-    final platform = await PackageInfo.fromPlatform();
-    Logger("UpdateService").info(platform.packageName);
-    if (Platform.isIOS) {
-      return false;
-    }
-    if (!kDebugMode && platform.packageName != "io.ente.photos.independent") {
+    Logger("UpdateService").info(_packageInfo.packageName);
+    if (!isIndependent()) {
       return false;
     }
     _latestVersion = await _getLatestVersionInfo();
-    final currentVersionCode = int.parse(platform.buildNumber);
+    final currentVersionCode = int.parse(_packageInfo.buildNumber);
     return currentVersionCode < _latestVersion.code;
   }
 
@@ -34,6 +35,17 @@ class UpdateService {
         .getDio()
         .get("https://static.ente.io/independent-release-info.json");
     return LatestVersionInfo.fromMap(response.data["latestVersion"]);
+  }
+
+  bool isIndependent() {
+    if (Platform.isIOS) {
+      return false;
+    }
+    if (!kDebugMode &&
+        _packageInfo.packageName != "io.ente.photos.independent") {
+      return false;
+    }
+    return true;
   }
 }
 
