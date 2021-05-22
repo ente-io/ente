@@ -9,7 +9,11 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
-            "program": "lib/main.dart"
+            "program": "lib/main.dart",
+            "args": [
+                "--flavor",
+                "playstore"
+            ]
         }
     ]
 }

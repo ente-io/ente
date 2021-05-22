@@ -67,6 +67,9 @@ android {
             dimension "default"
             applicationIdSuffix ".independent"
         }
+        playstore {
+            dimension "default"
+        }
     }
 
     buildTypes {
