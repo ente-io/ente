@@ -332,7 +332,7 @@ export default function App({ Component, pageProps, err }) {
                     </EnteSpinner>
                 </Container>
             ) : (
-                <Component err={err} />
+                <Component err={err} setLoading={setLoading} />
             )}
         </>
     );
