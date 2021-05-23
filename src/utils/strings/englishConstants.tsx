@@ -301,6 +301,28 @@ const englishConstants = {
     SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
+    TERMS_AND_CONDITIONS: () => (
+        <p>
+            i agree to the{' '}
+            <a href="https://ente.io/terms" target="_blank">
+                terms of service
+            </a>{' '}
+            and{' '}
+            <a href="https://ente.io/privacy" target="_blank">
+                privacy policy
+            </a>{' '}
+        </p>
+    ),
+    CONFIRM_PASSWORD_NOT_SAVED: () => (
+        <p>
+            i understand that if i lose my password , i may lose my data since
+            my data is{' '}
+            <a href="https://ente.io/encryption" target="_blank">
+                end-to-end encrypted
+            </a>{' '}
+            with ente
+        </p>
+    ),
 };
 
 export default englishConstants;

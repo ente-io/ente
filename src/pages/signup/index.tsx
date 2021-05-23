@@ -27,7 +27,8 @@ interface FormValues {
 export default function SignUp() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-
+    const [acceptTerms, setAcceptTerms] = useState(false);
+    const [understood, setUnderstood] = useState(false);
     useEffect(() => {
         router.prefetch('/verify');
         const user = getData(LS_KEYS.USER);
@@ -73,7 +74,7 @@ export default function SignUp() {
 
     return (
         <Container>
-            <Card style={{ minWidth: '400px' }} className="text-center">
+            <Card style={{ width: '400px' }} className="text-center">
                 <Card.Body style={{ padding: '40px 30px' }}>
                     <Card.Title style={{ marginBottom: '20px' }}>
                         {constants.SIGN_UP}
@@ -114,6 +115,7 @@ export default function SignUp() {
                                         isInvalid={Boolean(
                                             touched.email && errors.email
                                         )}
+                                        autoFocus={true}
                                         disabled={loading}
                                     />
                                     <FormControl.Feedback type="invalid">
@@ -130,7 +132,6 @@ export default function SignUp() {
                                             touched.passphrase &&
                                                 errors.passphrase
                                         )}
-                                        autoFocus={true}
                                         disabled={loading}
                                     />
                                     <Form.Control.Feedback type="invalid">
@@ -154,10 +155,34 @@ export default function SignUp() {
                                         {errors.confirm}
                                     </Form.Control.Feedback>
                                 </Form.Group>
-
+                                <br />
+                                <Form.Group
+                                    style={{ marginBottom: '0' }}
+                                    controlId="formBasicCheckbox-1"
+                                >
+                                    <Form.Check
+                                        checked={acceptTerms}
+                                        onChange={(e) =>
+                                            setAcceptTerms(e.target.checked)
+                                        }
+                                        type="checkbox"
+                                        label={constants.TERMS_AND_CONDITIONS()}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="formBasicCheckbox-2">
+                                    <Form.Check
+                                        checked={understood}
+                                        onChange={(e) =>
+                                            setUnderstood(e.target.checked)
+                                        }
+                                        type="checkbox"
+                                        label={constants.CONFIRM_PASSWORD_NOT_SAVED()}
+                                    />
+                                </Form.Group>
                                 <SubmitButton
                                     buttonText={constants.SUBMIT}
                                     loading={loading}
+                                    disabled={!acceptTerms || !understood}
                                 />
                             </Form>
                         )}
