@@ -11,7 +11,12 @@ import Container from 'components/Container';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import SubmitButton from 'components/SubmitButton';
 import { Button } from 'react-bootstrap';
-import { generateKeyAttributes } from 'utils/crypto';
+import {
+    generateIntermediateKeyAttributes,
+    generateKeyAttributes,
+    setSessionKeys,
+} from 'utils/crypto';
+import { setJustSignedUp } from 'utils/storage';
 
 interface FormValues {
     email: string;
@@ -44,8 +49,19 @@ export default function SignUp() {
         }
         try {
             if (passphrase === confirm) {
-                const keyAttributes = await generateKeyAttributes(passphrase);
+                const { keyAttributes, masterKey } =
+                    await generateKeyAttributes(passphrase);
                 setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
+                const intermediateKeyAttribute =
+                    await generateIntermediateKeyAttributes(
+                        passphrase,
+                        keyAttributes,
+                        masterKey
+                    );
+                setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttribute);
+
+                await setSessionKeys(masterKey);
+                setJustSignedUp(true);
                 router.push('/verify');
             } else {
                 setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
