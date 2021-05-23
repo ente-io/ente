@@ -19,22 +19,32 @@ export interface KEK {
     memLimit: number;
 }
 
-export default function Generate() {
+export default function Generate(props) {
     const [token, setToken] = useState<string>();
     const router = useRouter();
     const [recoverModalView, setRecoveryModalView] = useState(false);
 
     useEffect(() => {
+        props.setLoading(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const keyAttributes = getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES);
         router.prefetch('/gallery');
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
             router.push('/');
+            return;
+        }
+        setToken(user.token);
+        if (keyAttributes) {
+            const main = async () => {
+                await putAttributes(user.token, keyAttributes);
+                setRecoveryModalView(true);
+            };
+            main();
         } else if (key) {
             router.push('/gallery');
-        } else {
-            setToken(user.token);
         }
+        props.setLoading(false);
     }, []);
 
     const onSubmit = async (passphrase, setFieldError) => {
@@ -43,11 +53,7 @@ export default function Generate() {
                 passphrase
             );
 
-            await putAttributes(
-                token,
-                getData(LS_KEYS.USER).name,
-                keyAttributes
-            );
+            await putAttributes(token, keyAttributes);
             const intermediateKeyAttribute =
                 await generateIntermediateKeyAttributes(
                     passphrase,
