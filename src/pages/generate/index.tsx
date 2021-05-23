@@ -26,20 +26,20 @@ export default function Generate(props) {
     const [recoverModalView, setRecoveryModalView] = useState(false);
 
     useEffect(() => {
-        props.setLoading(true);
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        const keyAttributes: KeyAttributes = getData(
-            LS_KEYS.ORIGINAL_KEY_ATTRIBUTES
-        );
-        router.prefetch('/gallery');
-        const user = getData(LS_KEYS.USER);
-        if (!user?.token) {
-            router.push('/');
-            return;
-        }
-        setToken(user.token);
-        if (keyAttributes?.encryptedKey) {
-            const main = async () => {
+        const main = async () => {
+            props.setLoading(true);
+            const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+            const keyAttributes: KeyAttributes = getData(
+                LS_KEYS.ORIGINAL_KEY_ATTRIBUTES
+            );
+            router.prefetch('/gallery');
+            const user = getData(LS_KEYS.USER);
+            if (!user?.token) {
+                router.push('/');
+                return;
+            }
+            setToken(user.token);
+            if (keyAttributes?.encryptedKey) {
                 try {
                     await putAttributes(user.token, keyAttributes);
                 } catch (e) {
@@ -47,12 +47,12 @@ export default function Generate(props) {
                 }
                 setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, null);
                 setRecoveryModalView(true);
-            };
-            main();
-        } else if (key) {
-            router.push('/gallery');
-        }
-        props.setLoading(false);
+            } else if (key) {
+                router.push('/gallery');
+            }
+            props.setLoading(false);
+        };
+        main();
     }, []);
 
     const onSubmit = async (passphrase, setFieldError) => {
