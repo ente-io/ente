@@ -2,7 +2,7 @@ import router from 'next/router';
 import { DeadCenter, FILE_TYPE } from 'pages/gallery';
 import PreviewCard from 'pages/gallery/components/PreviewCard';
 import React, { useState } from 'react';
-import { Alert, Button } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { File } from 'services/fileService';
 import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
@@ -359,13 +359,9 @@ const PhotoFrame = ({
                                 timeStampList.push({
                                     itemType: ITEM_TYPE.BANNER,
                                     banner: (
-                                        <Alert
-                                            variant="success"
+                                        <div
                                             style={{
                                                 color: '#979797',
-                                                backgroundColor: '#191919',
-                                                border: 'none',
-                                                margin: 0,
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
@@ -373,7 +369,7 @@ const PhotoFrame = ({
                                             }}
                                         >
                                             {constants.INSTALL_MOBILE_APP()}
-                                        </Alert>
+                                        </div>
                                     ),
                                 });
                             const extraRowsToRender = Math.ceil(
