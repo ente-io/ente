@@ -367,6 +367,9 @@ const PhotoFrame = ({
                                                 backgroundColor:
                                                     'rgb(25, 25, 25)',
                                                 border: 'none',
+                                                margin: 0,
+                                                display: 'flex',
+                                                alignItems: 'center',
                                             }}
                                         >
                                             {constants.INSTALL_MOBILE_APP()}
