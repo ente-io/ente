@@ -390,8 +390,9 @@ const PhotoFrame = ({
                                         return (
                                             <ListItem
                                                 style={
-                                                    index ===
-                                                    timeStampList.length - 1
+                                                    timeStampList[index]
+                                                        .itemType ===
+                                                    ITEM_TYPE.BANNER
                                                         ? {
                                                               ...style,
                                                               top: Math.max(
