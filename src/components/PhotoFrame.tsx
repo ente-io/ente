@@ -2,7 +2,7 @@ import router from 'next/router';
 import { DeadCenter, FILE_TYPE } from 'pages/gallery';
 import PreviewCard from 'pages/gallery/components/PreviewCard';
 import React, { useState } from 'react';
-import { Button } from 'react-bootstrap';
+import { Alert, Button } from 'react-bootstrap';
 import { File } from 'services/fileService';
 import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
@@ -23,6 +23,7 @@ interface TimeStampListItem {
     items?: File[];
     itemStartIndex?: number;
     date?: string;
+    banner?: any;
 }
 
 const Container = styled.div`
@@ -31,7 +32,7 @@ const Container = styled.div`
     width: 100%;
     flex-wrap: wrap;
     margin: 0 auto;
-    margin-bottom: 40px;
+    margin-bottom: 1rem;
 
     .pswp-thumbnail {
         display: inline-block;
@@ -72,6 +73,7 @@ const DateContainer = styled.div`
 enum ITEM_TYPE {
     TIME = 'TIME',
     TILE = 'TILE',
+    BANNER = 'BANNER',
 }
 
 interface Props {
@@ -308,15 +310,13 @@ const PhotoFrame = ({
                                 ) {
                                     currentDate =
                                         item.metadata.creationTime / 1000;
-                                    const dateTimeFormat = new Intl.DateTimeFormat(
-                                        'en-IN',
-                                        {
+                                    const dateTimeFormat =
+                                        new Intl.DateTimeFormat('en-IN', {
                                             weekday: 'short',
                                             year: 'numeric',
                                             month: 'long',
                                             day: 'numeric',
-                                        }
-                                    );
+                                        });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TIME,
                                         date: isSameDay(
@@ -355,6 +355,20 @@ const PhotoFrame = ({
                                     }
                                 }
                             });
+                            files.length < 30 &&
+                                timeStampList.push({
+                                    itemType: ITEM_TYPE.BANNER,
+                                    banner: (
+                                        <Alert
+                                            variant="success"
+                                            style={{
+                                                textAlign: 'center',
+                                            }}
+                                        >
+                                            {constants.INSTALL_MOBILE_APP()}
+                                        </Alert>
+                                    ),
+                                });
                             const extraRowsToRender = Math.ceil(
                                 (NO_OF_PAGES * height) / IMAGE_CONTAINER_HEIGHT
                             );
@@ -362,9 +376,9 @@ const PhotoFrame = ({
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                        ITEM_TYPE.TIME
-                                            ? DATE_CONTAINER_HEIGHT
-                                            : IMAGE_CONTAINER_HEIGHT
+                                        ITEM_TYPE.TILE
+                                            ? IMAGE_CONTAINER_HEIGHT
+                                            : DATE_CONTAINER_HEIGHT
                                     }
                                     height={height}
                                     width={width}
@@ -374,14 +388,35 @@ const PhotoFrame = ({
                                 >
                                     {({ index, style }) => {
                                         return (
-                                            <ListItem style={style}>
+                                            <ListItem
+                                                style={
+                                                    index ===
+                                                    timeStampList.length - 1
+                                                        ? {
+                                                              ...style,
+                                                              top: Math.max(
+                                                                  Number(
+                                                                      style.top
+                                                                  ),
+                                                                  height - 45
+                                                              ),
+                                                              height:
+                                                                  width < 450
+                                                                      ? Number(
+                                                                            style.height
+                                                                        ) * 2
+                                                                      : style.height,
+                                                          }
+                                                        : style
+                                                }
+                                            >
                                                 <ListContainer
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                        ITEM_TYPE.TIME
-                                                            ? 1
-                                                            : columns
+                                                        ITEM_TYPE.TILE
+                                                            ? columns
+                                                            : 1
                                                     }
                                                 >
                                                     {timeStampList[index]
@@ -394,6 +429,16 @@ const PhotoFrame = ({
                                                                 ].date
                                                             }
                                                         </DateContainer>
+                                                    ) : timeStampList[index]
+                                                          .itemType ===
+                                                      ITEM_TYPE.BANNER ? (
+                                                        <>
+                                                            {
+                                                                timeStampList[
+                                                                    index
+                                                                ].banner
+                                                            }
+                                                        </>
                                                     ) : (
                                                         timeStampList[
                                                             index
