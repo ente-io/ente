@@ -303,9 +303,9 @@ const englishConstants = {
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
     TERMS_AND_CONDITIONS: () => (
         <p>
-            i agree to the{' '}
+            I agree to the{' '}
             <a href="https://ente.io/terms" target="_blank">
-                terms of service
+                terms
             </a>{' '}
             and{' '}
             <a href="https://ente.io/privacy" target="_blank">
