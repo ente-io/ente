@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import constants from 'utils/strings/constants';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
 import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, {
-    generateAndSaveIntermediateKeyAttributes,
+    generateIntermediateKeyAttributes,
     setSessionKeys,
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
@@ -53,11 +53,13 @@ export default function Credentials() {
                     kek
                 );
                 if (isFirstLogin()) {
-                    generateAndSaveIntermediateKeyAttributes(
-                        passphrase,
-                        keyAttributes,
-                        key
-                    );
+                    const intermediateKeyAttributes =
+                        await generateIntermediateKeyAttributes(
+                            passphrase,
+                            keyAttributes,
+                            key
+                        );
+                    setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttributes);
                 }
                 setSessionKeys(key);
                 router.push('/gallery');
