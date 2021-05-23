@@ -308,7 +308,7 @@ sentryInit();
 export default function App({ Component, pageProps, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [offline, setOffline] = useState(false);
+    const [offline, setOffline] = useState(typeof window !== 'undefined' && !window.navigator.onLine);
     useEffect(() => {
         if (
           !("serviceWorker" in navigator) ||
@@ -374,7 +374,7 @@ export default function App({ Component, pageProps, err }) {
                     />
                 </FlexContainer>
             </Navbar>
-            {offline && <OfflineContainer>You are offline. Cached memories are being shown.</OfflineContainer>}
+            {offline && <OfflineContainer>{constants.OFFLINE_MSG}</OfflineContainer>}
             {loading ? (
                 <Container>
                     <EnteSpinner>
