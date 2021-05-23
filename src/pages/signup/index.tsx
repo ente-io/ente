@@ -155,9 +155,11 @@ export default function SignUp() {
                                         {errors.confirm}
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <br />
                                 <Form.Group
-                                    style={{ marginBottom: '0' }}
+                                    style={{
+                                        marginBottom: '0',
+                                        textAlign: 'left',
+                                    }}
                                     controlId="formBasicCheckbox-1"
                                 >
                                     <Form.Check
@@ -169,6 +171,7 @@ export default function SignUp() {
                                         label={constants.TERMS_AND_CONDITIONS()}
                                     />
                                 </Form.Group>
+                                <br />
                                 <SubmitButton
                                     buttonText={constants.SUBMIT}
                                     loading={loading}
