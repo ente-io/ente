@@ -169,20 +169,10 @@ export default function SignUp() {
                                         label={constants.TERMS_AND_CONDITIONS()}
                                     />
                                 </Form.Group>
-                                <Form.Group controlId="formBasicCheckbox-2">
-                                    <Form.Check
-                                        checked={understood}
-                                        onChange={(e) =>
-                                            setUnderstood(e.target.checked)
-                                        }
-                                        type="checkbox"
-                                        label={constants.CONFIRM_PASSWORD_NOT_SAVED()}
-                                    />
-                                </Form.Group>
                                 <SubmitButton
                                     buttonText={constants.SUBMIT}
                                     loading={loading}
-                                    disabled={!acceptTerms || !understood}
+                                    disabled={!acceptTerms}
                                 />
                             </Form>
                         )}
