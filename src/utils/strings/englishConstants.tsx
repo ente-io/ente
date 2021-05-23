@@ -163,12 +163,14 @@ const englishConstants = {
             <a
                 href="https://play.google.com/store/apps/details?id=io.ente.photos"
                 target="_blank"
+                style={{ color: '#2dc262' }}
             >
                 android
             </a>{' '}
             or{' '}
             <a
                 href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                style={{ color: '#2dc262' }}
                 target="_blank"
             >
                 ios app{' '}

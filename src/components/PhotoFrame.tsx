@@ -362,7 +362,6 @@ const PhotoFrame = ({
                                         <Alert
                                             variant="success"
                                             style={{
-                                                textAlign: 'center',
                                                 color: 'rgb(151, 151, 151)',
                                                 backgroundColor:
                                                     'rgb(25, 25, 25)',
@@ -370,6 +369,7 @@ const PhotoFrame = ({
                                                 margin: 0,
                                                 display: 'flex',
                                                 alignItems: 'center',
+                                                justifyContent: 'center',
                                             }}
                                         >
                                             {constants.INSTALL_MOBILE_APP()}
