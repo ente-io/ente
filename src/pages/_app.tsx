@@ -203,10 +203,10 @@ const GlobalStyles = createGlobalStyle`
         background: #d1d1d1;
     }
     .bm-cross-button {
-        top: 20px;
+        top: 20px !important;
     }
     .bm-item-list {
-        display: flex;
+        display: flex !important;
         flex-direction: column;
         max-height: 100%;
         flex: 1;
@@ -243,22 +243,22 @@ const GlobalStyles = createGlobalStyle`
         width: calc(2.0rem - 4px);
         height: calc(2.0rem - 4px);
         border-radius: calc(2rem - (2.0rem / 2));
+        left: -38px;
     }
     
     .custom-switch.custom-switch-md .custom-control-input:checked ~ .custom-control-label::after {
         transform: translateX(calc(2.0rem - 0.25rem));
         background:#c4c4c4;
     }
+
+    .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #29a354;
+    }
+
     .bold-text{
         color: #ECECEC;
         line-height: 24px;
         font-size: 24px;
-    }
-    .subscription-plan-selector {
-        background: #222;
-    }
-    .subscription-plan-selector:hover {
-        background: #1b1b1b;
     }
     .dropdown-item:active{
         color: #16181b;

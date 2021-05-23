@@ -112,7 +112,7 @@ export default function Sidebar(props: Props) {
             >
                 {user?.email}
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, overflow: 'auto' }}>
                 <div style={{ outline: 'none' }}>
                     <div style={{ display: 'flex' }}>
                         <h5 style={{ margin: '4px 0 12px 2px' }}>
@@ -138,10 +138,10 @@ export default function Sidebar(props: Props) {
                             <p>{constants.SUBSCRIPTION_EXPIRED}</p>
                         )}
                         <Button
-                            variant="link"
+                            variant="outline-success"
+                            block
                             size="sm"
                             onClick={onManageClick}
-                            style={{ paddingLeft: 0, color: '#2dc262' }}
                         >
                             {isSubscribed(subscription)
                                 ? constants.MANAGE
