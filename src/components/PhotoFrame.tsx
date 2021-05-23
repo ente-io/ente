@@ -10,6 +10,7 @@ import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
+import CloudUpload from './CloudUpload';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -68,6 +69,19 @@ const ListContainer = styled.div<{ columns: number }>`
 
 const DateContainer = styled.div`
     padding-top: 15px;
+`;
+
+const EmptyScreen = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    flex: 1;
+    color: #2dc262;
+    
+    & > svg {
+        filter: drop-shadow(3px 3px 5px rgba(45,194,98,0.5));
+    }
 `;
 
 enum ITEM_TYPE {
@@ -261,13 +275,8 @@ const PhotoFrame = ({
     return (
         <>
             {!isFirstLoad && files.length == 0 ? (
-                <div
-                    style={{
-                        height: '60%',
-                        display: 'grid',
-                        placeItems: 'center',
-                    }}
-                >
+                <EmptyScreen>
+                    <CloudUpload width={150} height={150} />
                     <Button
                         variant="outline-success"
                         onClick={openFileUploader}
@@ -280,7 +289,7 @@ const PhotoFrame = ({
                     >
                         {constants.UPLOAD_FIRST_PHOTO}
                     </Button>
-                </div>
+                </EmptyScreen>
             ) : filteredData.length ? (
                 <Container>
                     <AutoSizer>

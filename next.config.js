@@ -4,6 +4,7 @@ const WorkerPlugin = require('worker-plugin');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
     enabled: process.env.ANALYZE === 'true',
 });
+const withWorkbox = require("next-with-workbox");
 
 const {
     NEXT_PUBLIC_SENTRY_DSN: SENTRY_DSN,
@@ -17,7 +18,7 @@ const {
 process.env.SENTRY_DSN = SENTRY_DSN;
 const basePath = '';
 
-module.exports = withBundleAnalyzer({
+module.exports = withWorkbox(withBundleAnalyzer({
     target: 'serverless',
     productionBrowserSourceMaps: true,
     env: {
@@ -25,6 +26,9 @@ module.exports = withBundleAnalyzer({
         // marked for the release they belong to. It may be undefined if running
         // outside of Vercel
         NEXT_PUBLIC_COMMIT_SHA: COMMIT_SHA,
+    },
+    workbox: {
+        swSrc: "src/serviceWorker.js",
     },
     webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
         if (!isServer) {
@@ -64,4 +68,4 @@ module.exports = withBundleAnalyzer({
         }
         return config;
     },
-});
+}));

@@ -65,6 +65,15 @@ function PhotoSwipe(props: Iprops) {
             maxSpreadZoom: 5,
             index: currentIndex,
             showHideOpacity: true,
+            getDoubleTapZoom: function(isMouseClick, item) {
+                if(isMouseClick) {
+                    return 2.5;
+                } else {
+                    // zoom to original if initial zoom is less than 0.7x,
+                    // otherwise to 1.5x, to make sure that double-tap gesture always zooms image
+                    return item.initialZoomLevel < 0.7 ? 1 : 1.5;
+                }
+            },
         };
         let photoSwipe = new Photoswipe(
             pswpElement,

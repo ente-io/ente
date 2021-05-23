@@ -197,6 +197,9 @@ const englishConstants = {
     MANAGEMENT_PORTAL: 'manage payment method',
     CHOOSE_PLAN: 'choose your subscription plan',
     MANAGE_PLAN: 'manage your subscription',
+    CHOOSE_PLAN_BTN: 'choose plan',
+
+    OFFLINE_MSG: 'you are offline, cached memories are being shown',
 
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>

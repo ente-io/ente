@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
@@ -7,9 +7,8 @@ import Container from 'components/Container';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
-
+import { Workbox } from "workbox-window";
 import { sentryInit } from '../utils/sentry';
-import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 
 const GlobalStyles = createGlobalStyle`
@@ -195,12 +194,28 @@ const GlobalStyles = createGlobalStyle`
       }
     .bm-menu {
         background: #131313;
-        padding: 2.5em 1.5em 0;
         font-size: 1.15em;
-        color:#d1d1d1
+        color:#d1d1d1;
+        display: flex;
     }
     .bm-cross {
         background: #d1d1d1;
+    }
+    .bm-cross-button {
+        top: 20px !important;
+    }
+    .bm-item-list {
+        display: flex !important;
+        flex-direction: column;
+        max-height: 100%;
+        flex: 1;
+    }
+    .bm-item {
+        padding: 20px;
+    }
+    .bm-overlay {
+        top: 0;
+        background: rgba(0, 0, 0, 0.8) !important;
     }
     .bg-upload-progress-bar {
         background-color: #2dc262;
@@ -227,22 +242,22 @@ const GlobalStyles = createGlobalStyle`
         width: calc(2.0rem - 4px);
         height: calc(2.0rem - 4px);
         border-radius: calc(2rem - (2.0rem / 2));
+        left: -38px;
     }
     
     .custom-switch.custom-switch-md .custom-control-input:checked ~ .custom-control-label::after {
         transform: translateX(calc(2.0rem - 0.25rem));
         background:#c4c4c4;
     }
+
+    .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #29a354;
+    }
+
     .bold-text{
         color: #ECECEC;
         line-height: 24px;
         font-size: 24px;
-    }
-    .subscription-plan-selector {
-        background: #222;
-    }
-    .subscription-plan-selector:hover {
-        background: #1b1b1b;
     }
     .dropdown-item:active{
         color: #16181b;
@@ -276,6 +291,14 @@ const FlexContainer = styled.div`
     text-align: center;
 `;
 
+const OfflineContainer = styled.div`
+    background-color: #111;
+    padding: 5px 0;
+    font-size: 14px;
+    text-align: center;
+    margin-top: -10px;
+`;
+
 export interface BannerMessage {
     message: string;
     variant: string;
@@ -285,7 +308,23 @@ sentryInit();
 export default function App({ Component, pageProps, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [offline, setOffline] = useState(typeof window !== 'undefined' && !window.navigator.onLine);
+    useEffect(() => {
+        if (
+          !("serviceWorker" in navigator) ||
+          process.env.NODE_ENV !== "production"
+        ) {
+          console.warn("Progressive Web App support is disabled");
+          return;
+        }
+    
+        const wb = new Workbox("sw.js", { scope: "/" });
+        wb.register();
+    }, []);
 
+    const setUserOnline = () => setOffline(false);
+    const setUserOffline = () => setOffline(true);
+    
     useEffect(() => {
         console.log(
             `%c${constants.CONSOLE_WARNING_STOP}`,
@@ -302,7 +341,17 @@ export default function App({ Component, pageProps, err }) {
         router.events.on('routeChangeComplete', () => {
             setLoading(false);
         });
+
+        window.addEventListener('online',  setUserOnline);
+        window.addEventListener('offline', setUserOffline);
+
+        return () => {
+            window.removeEventListener('online', setUserOnline);
+            window.removeEventListener('offline', setUserOffline);
+        }
+
     }, []);
+
     return (
         <>
             <Head>
@@ -325,6 +374,7 @@ export default function App({ Component, pageProps, err }) {
                     />
                 </FlexContainer>
             </Navbar>
+            {offline && <OfflineContainer>{constants.OFFLINE_MSG}</OfflineContainer>}
             {loading ? (
                 <Container>
                     <EnteSpinner>
