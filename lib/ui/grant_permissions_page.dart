@@ -12,6 +12,11 @@ class GrantPermissionsPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          Image.asset(
+            "assets/gallery.png",
+            height: 160,
+          ),
+          Padding(padding: EdgeInsets.all(24)),
           Text.rich(
             TextSpan(
               children: <TextSpan>[
@@ -38,7 +43,7 @@ class GrantPermissionsPage extends StatelessWidget {
             "to access your gallery",
             style: TextStyle(fontSize: 16),
           ),
-          Padding(padding: const EdgeInsets.all(32)),
+          Padding(padding: const EdgeInsets.all(24)),
           Container(
             width: double.infinity,
             height: 64,
@@ -70,7 +75,7 @@ class GrantPermissionsPage extends StatelessWidget {
           ),
           Padding(padding: const EdgeInsets.all(12)),
           Text(
-            "all your photos and videos will be",
+            "all the files you back up will be",
             style: TextStyle(
               color: Colors.white30,
             ),
