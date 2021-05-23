@@ -56,7 +56,7 @@ export async function generateKeyAttributes(
     return { keyAttributes, masterKey };
 }
 
-export async function generateIntermediateKeyAttributes(
+export async function generateAndSaveIntermediateKeyAttributes(
     passphrase,
     existingKeyAttributes,
     key
@@ -71,14 +71,15 @@ export async function generateIntermediateKeyAttributes(
     const encryptedKeyAttributes: B64EncryptionResult =
         await cryptoWorker.encryptToB64(key, intermediateKek.key);
 
-    const intermediateKekAttributes = Object.assign(existingKeyAttributes, {
+    const intermediateKeyAttributes = Object.assign(existingKeyAttributes, {
         kekSalt: intermediateKekSalt,
         encryptedKey: encryptedKeyAttributes.encryptedData,
         keyDecryptionNonce: encryptedKeyAttributes.nonce,
         opsLimit: intermediateKek.opsLimit,
         memLimit: intermediateKek.memLimit,
     });
-    return intermediateKekAttributes;
+    setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttributes);
+    return intermediateKeyAttributes;
 }
 
 export const setSessionKeys = async (key: string) => {

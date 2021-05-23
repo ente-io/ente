@@ -12,7 +12,7 @@ import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import SubmitButton from 'components/SubmitButton';
 import { Button } from 'react-bootstrap';
 import {
-    generateIntermediateKeyAttributes,
+    generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
     setSessionKeys,
 } from 'utils/crypto';
@@ -52,13 +52,11 @@ export default function SignUp() {
                 const { keyAttributes, masterKey } =
                     await generateKeyAttributes(passphrase);
                 setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
-                const intermediateKeyAttribute =
-                    await generateIntermediateKeyAttributes(
-                        passphrase,
-                        keyAttributes,
-                        masterKey
-                    );
-                setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttribute);
+                await generateAndSaveIntermediateKeyAttributes(
+                    passphrase,
+                    keyAttributes,
+                    masterKey
+                );
 
                 await setSessionKeys(masterKey);
                 setJustSignedUp(true);

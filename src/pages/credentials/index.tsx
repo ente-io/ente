@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
 import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, {
-    generateIntermediateKeyAttributes,
+    generateAndSaveIntermediateKeyAttributes,
     setSessionKeys,
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
@@ -53,13 +53,11 @@ export default function Credentials() {
                     kek
                 );
                 if (isFirstLogin()) {
-                    const intermediateKeyAttributes =
-                        await generateIntermediateKeyAttributes(
-                            passphrase,
-                            keyAttributes,
-                            key
-                        );
-                    setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttributes);
+                    await generateAndSaveIntermediateKeyAttributes(
+                        passphrase,
+                        keyAttributes,
+                        key
+                    );
                 }
                 setSessionKeys(key);
                 router.push('/gallery');

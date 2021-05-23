@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     setSessionKeys,
-    generateIntermediateKeyAttributes,
+    generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
 } from 'utils/crypto';
 import SetPasswordForm from 'components/SetPasswordForm';
@@ -62,14 +62,11 @@ export default function Generate(props) {
             );
 
             await putAttributes(token, keyAttributes);
-            const intermediateKeyAttribute =
-                await generateIntermediateKeyAttributes(
-                    passphrase,
-                    keyAttributes,
-                    masterKey
-                );
-            setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttribute);
-
+            await generateAndSaveIntermediateKeyAttributes(
+                passphrase,
+                keyAttributes,
+                masterKey
+            );
             await setSessionKeys(masterKey);
             setJustSignedUp(true);
             setRecoveryModalView(true);
