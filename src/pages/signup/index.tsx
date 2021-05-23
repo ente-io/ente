@@ -3,22 +3,28 @@ import { useRouter } from 'next/router';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
-import Button from 'react-bootstrap/Button';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import { getOtt } from 'services/userService';
 import Container from 'components/Container';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
-import { DisclaimerContainer } from 'components/Container';
 import SubmitButton from 'components/SubmitButton';
+import { Button } from 'react-bootstrap';
+import {
+    generateAndSaveIntermediateKeyAttributes,
+    generateKeyAttributes,
+    setSessionKeys,
+} from 'utils/crypto';
+import { setJustSignedUp } from 'utils/storage';
 
 interface FormValues {
-    name: string;
     email: string;
+    passphrase: string;
+    confirm: string;
 }
 
-export default function Home() {
+export default function SignUp() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
@@ -31,34 +37,61 @@ export default function Home() {
     }, []);
 
     const registerUser = async (
-        { name, email }: FormValues,
+        { email, passphrase, confirm }: FormValues,
         { setFieldError }: FormikHelpers<FormValues>
     ) => {
+        setLoading(true);
         try {
-            setLoading(true);
-            setData(LS_KEYS.USER, { name, email });
+            setData(LS_KEYS.USER, { email });
             await getOtt(email);
-            router.push('/verify');
         } catch (e) {
             setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
+        }
+        try {
+            if (passphrase === confirm) {
+                const { keyAttributes, masterKey } =
+                    await generateKeyAttributes(passphrase);
+                setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
+                await generateAndSaveIntermediateKeyAttributes(
+                    passphrase,
+                    keyAttributes,
+                    masterKey
+                );
+
+                await setSessionKeys(masterKey);
+                setJustSignedUp(true);
+                router.push('/verify');
+            } else {
+                setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
+            }
+        } catch (e) {
+            console.error(e);
+            setFieldError('passphrase', constants.PASSWORD_GENERATION_FAILED);
         }
         setLoading(false);
     };
 
     return (
         <Container>
-            <Card style={{ minWidth: '300px' }} className="text-center">
-                <Card.Body>
+            <Card style={{ minWidth: '400px' }} className="text-center">
+                <Card.Body style={{ padding: '40px 30px' }}>
                     <Card.Title style={{ marginBottom: '20px' }}>
                         {constants.SIGN_UP}
                     </Card.Title>
                     <Formik<FormValues>
-                        initialValues={{ name: '', email: '' }}
+                        initialValues={{
+                            email: '',
+                            passphrase: '',
+                            confirm: '',
+                        }}
                         validationSchema={Yup.object().shape({
-                            name: Yup.string().required(constants.REQUIRED),
                             email: Yup.string()
                                 .email(constants.EMAIL_ERROR)
                                 .required(constants.REQUIRED),
+                            passphrase: Yup.string().required(
+                                constants.REQUIRED
+                            ),
+                            confirm: Yup.string().required(constants.REQUIRED),
                         })}
                         validateOnChange={false}
                         validateOnBlur={false}
@@ -72,21 +105,6 @@ export default function Home() {
                             handleSubmit,
                         }): JSX.Element => (
                             <Form noValidate onSubmit={handleSubmit}>
-                                <Form.Group controlId="registrationForm.name">
-                                    <Form.Control
-                                        type="text"
-                                        placeholder={constants.ENTER_NAME}
-                                        value={values.name}
-                                        onChange={handleChange('name')}
-                                        isInvalid={Boolean(
-                                            touched.name && errors.name
-                                        )}
-                                        disabled={loading}
-                                    />
-                                    <FormControl.Feedback type="invalid">
-                                        {errors.name}
-                                    </FormControl.Feedback>
-                                </Form.Group>
                                 <Form.Group controlId="registrationForm.email">
                                     <Form.Control
                                         type="email"
@@ -102,9 +120,40 @@ export default function Home() {
                                         {errors.email}
                                     </FormControl.Feedback>
                                 </Form.Group>
-                                <DisclaimerContainer>
-                                    {constants.DATA_DISCLAIMER}
-                                </DisclaimerContainer>
+                                <Form.Group>
+                                    <Form.Control
+                                        type="password"
+                                        placeholder={constants.PASSPHRASE_HINT}
+                                        value={values.passphrase}
+                                        onChange={handleChange('passphrase')}
+                                        isInvalid={Boolean(
+                                            touched.passphrase &&
+                                                errors.passphrase
+                                        )}
+                                        autoFocus={true}
+                                        disabled={loading}
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        {errors.passphrase}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+                                <Form.Group>
+                                    <Form.Control
+                                        type="password"
+                                        placeholder={
+                                            constants.RE_ENTER_PASSPHRASE
+                                        }
+                                        value={values.confirm}
+                                        onChange={handleChange('confirm')}
+                                        isInvalid={Boolean(
+                                            touched.confirm && errors.confirm
+                                        )}
+                                        disabled={loading}
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        {errors.confirm}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
 
                                 <SubmitButton
                                     buttonText={constants.SUBMIT}
@@ -113,6 +162,10 @@ export default function Home() {
                             </Form>
                         )}
                     </Formik>
+                    <br />
+                    <Button variant="link" onClick={router.back}>
+                        {constants.GO_BACK}
+                    </Button>
                 </Card.Body>
             </Card>
         </Container>

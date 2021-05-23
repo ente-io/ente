@@ -52,14 +52,10 @@ export const verifyOtt = (email: string, ott: string) => {
     return HTTPService.get(`${ENDPOINT}/users/credentials`, { email, ott });
 };
 
-export const putAttributes = (
-    token: string,
-    name: string,
-    keyAttributes: KeyAttributes
-) => {
+export const putAttributes = (token: string, keyAttributes: KeyAttributes) => {
     return HTTPService.put(
         `${ENDPOINT}/users/attributes`,
-        { name: name ? name : '', keyAttributes: keyAttributes },
+        { keyAttributes: keyAttributes },
         null,
         {
             'X-Auth-Token': token,

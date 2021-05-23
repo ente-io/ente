@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState } from 'react';
 import Container from 'components/Container';
-import styled from 'styled-components';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Button from 'react-bootstrap/Button';
-import { Spinner } from 'react-bootstrap';
 import SubmitButton from './SubmitButton';
 
 interface Props {

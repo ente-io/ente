@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import constants from 'utils/strings/constants';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
 import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
@@ -53,7 +53,7 @@ export default function Credentials() {
                     kek
                 );
                 if (isFirstLogin()) {
-                    generateAndSaveIntermediateKeyAttributes(
+                    await generateAndSaveIntermediateKeyAttributes(
                         passphrase,
                         keyAttributes,
                         key
