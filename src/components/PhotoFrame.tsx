@@ -363,6 +363,10 @@ const PhotoFrame = ({
                                             variant="success"
                                             style={{
                                                 textAlign: 'center',
+                                                color: 'rgb(151, 151, 151)',
+                                                backgroundColor:
+                                                    'rgb(25, 25, 25)',
+                                                border: 'none',
                                             }}
                                         >
                                             {constants.INSTALL_MOBILE_APP()}
