@@ -37,6 +37,7 @@ export default class MyDocument extends Document {
                         content="ente is a privacy focussed photo storage service that offers end-to-end encryption."
                     />
                     <link rel="icon" href="/icon.svg" type="image/png" />
+                    <link rel="manifest" href="manifest.json"></link>
                 </Head>
                 <body>
                     <Main />

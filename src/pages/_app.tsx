@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
@@ -7,9 +7,8 @@ import Container from 'components/Container';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
-
+import { Workbox } from "workbox-window";
 import { sentryInit } from '../utils/sentry';
-import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 
 const GlobalStyles = createGlobalStyle`
@@ -292,6 +291,14 @@ const FlexContainer = styled.div`
     text-align: center;
 `;
 
+const OfflineContainer = styled.div`
+    background-color: #111;
+    padding: 5px 0;
+    font-size: 14px;
+    text-align: center;
+    margin-top: -10px;
+`;
+
 export interface BannerMessage {
     message: string;
     variant: string;
@@ -301,7 +308,23 @@ sentryInit();
 export default function App({ Component, pageProps, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [offline, setOffline] = useState(false);
+    useEffect(() => {
+        if (
+          !("serviceWorker" in navigator) ||
+          process.env.NODE_ENV !== "production"
+        ) {
+          console.warn("Progressive Web App support is disabled");
+          return;
+        }
+    
+        const wb = new Workbox("sw.js", { scope: "/" });
+        wb.register();
+    }, []);
 
+    const setUserOnline = () => setOffline(false);
+    const setUserOffline = () => setOffline(true);
+    
     useEffect(() => {
         console.log(
             `%c${constants.CONSOLE_WARNING_STOP}`,
@@ -318,7 +341,17 @@ export default function App({ Component, pageProps, err }) {
         router.events.on('routeChangeComplete', () => {
             setLoading(false);
         });
+
+        window.addEventListener('online',  setUserOnline);
+        window.addEventListener('offline', setUserOffline);
+
+        return () => {
+            window.removeEventListener('online', setUserOnline);
+            window.removeEventListener('offline', setUserOffline);
+        }
+
     }, []);
+
     return (
         <>
             <Head>
@@ -341,6 +374,7 @@ export default function App({ Component, pageProps, err }) {
                     />
                 </FlexContainer>
             </Navbar>
+            {offline && <OfflineContainer>You are offline. Cached memories are being shown.</OfflineContainer>}
             {loading ? (
                 <Container>
                     <EnteSpinner>

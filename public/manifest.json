@@ -1,0 +1,27 @@
+{
+    "short_name": "ente",
+    "name": "ente | encrypted photo storage",
+    "icons": [
+      {
+        "src": "/images/ente-192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      }
+    ],
+    "start_url": "/",
+    "background_color": "#191919",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#111",
+    "description": "ente provides a simple way to back up your memories.",
+    "related_applications": [
+        {
+          "platform": "play",
+          "url": "https://play.google.com/store/apps/details?id=io.ente.photos",
+          "id": "io.ente.photos"
+        }, {
+          "platform": "itunes",
+          "url": "https://apps.apple.com/in/app/ente-photos/id1542026904"
+        }
+    ]
+}
