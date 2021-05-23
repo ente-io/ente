@@ -349,6 +349,9 @@ export default function Gallery() {
                         width: '100%',
                         textAlign: 'center',
                         marginBottom: '0px',
+                        color: 'rgb(151, 151, 151)',
+                        backgroundColor: 'rgb(25, 25, 25)',
+                        border: 'none',
                     }}
                 >
                     {constants.INSTALL_MOBILE_APP()}
