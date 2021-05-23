@@ -109,7 +109,7 @@ export default function Collections(props: CollectionProps) {
     const user: User = getData(LS_KEYS.USER);
 
     if (!collections || collections.length === 0) {
-        return <Container />;
+        return null;
     }
 
     const collectionOptions = CollectionOptions({

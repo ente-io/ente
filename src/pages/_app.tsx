@@ -195,12 +195,28 @@ const GlobalStyles = createGlobalStyle`
       }
     .bm-menu {
         background: #131313;
-        padding: 2.5em 1.5em 0;
         font-size: 1.15em;
-        color:#d1d1d1
+        color:#d1d1d1;
+        display: flex;
     }
     .bm-cross {
         background: #d1d1d1;
+    }
+    .bm-cross-button {
+        top: 20px;
+    }
+    .bm-item-list {
+        display: flex;
+        flex-direction: column;
+        max-height: 100%;
+        flex: 1;
+    }
+    .bm-item {
+        padding: 20px;
+    }
+    .bm-overlay {
+        top: 0;
+        background: rgba(0, 0, 0, 0.8) !important;
     }
     .bg-upload-progress-bar {
         background-color: #2dc262;
