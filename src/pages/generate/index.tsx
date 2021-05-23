@@ -13,6 +13,8 @@ import SetPasswordForm from 'components/SetPasswordForm';
 import { setJustSignedUp } from 'utils/storage';
 import RecoveryKeyModal from 'components/RecoveryKeyModal';
 import { KeyAttributes } from 'types';
+import Container from 'components/Container';
+import EnteSpinner from 'components/EnteSpinner';
 
 export interface KEK {
     key: string;
@@ -24,10 +26,10 @@ export default function Generate(props) {
     const [token, setToken] = useState<string>();
     const router = useRouter();
     const [recoverModalView, setRecoveryModalView] = useState(false);
-
+    const [loading, setLoading] = useState(false);
     useEffect(() => {
         const main = async () => {
-            props.setLoading(true);
+            setLoading(true);
             const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.ORIGINAL_KEY_ATTRIBUTES
@@ -50,7 +52,7 @@ export default function Generate(props) {
             } else if (key) {
                 router.push('/gallery');
             }
-            props.setLoading(false);
+            setLoading(false);
         };
         main();
     }, []);
@@ -78,21 +80,28 @@ export default function Generate(props) {
 
     return (
         <>
-            {!recoverModalView && (
+            {loading ? (
+                <Container>
+                    <EnteSpinner>
+                        <span className="sr-only">Loading...</span>
+                    </EnteSpinner>
+                </Container>
+            ) : recoverModalView ? (
+                <RecoveryKeyModal
+                    show={recoverModalView}
+                    onHide={() => {
+                        setRecoveryModalView(false);
+                        router.push('/gallery');
+                    }}
+                    somethingWentWrong={() => null}
+                />
+            ) : (
                 <SetPasswordForm
                     callback={onSubmit}
                     buttonText={constants.SET_PASSPHRASE}
                     back={logoutUser}
                 />
             )}
-            <RecoveryKeyModal
-                show={recoverModalView}
-                onHide={() => {
-                    setRecoveryModalView(false);
-                    router.push('/gallery');
-                }}
-                somethingWentWrong={() => null}
-            />
         </>
     );
 }
