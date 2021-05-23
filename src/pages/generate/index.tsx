@@ -12,6 +12,7 @@ import {
 import SetPasswordForm from 'components/SetPasswordForm';
 import { setJustSignedUp } from 'utils/storage';
 import RecoveryKeyModal from 'components/RecoveryKeyModal';
+import { KeyAttributes } from 'types';
 
 export interface KEK {
     key: string;
@@ -27,7 +28,9 @@ export default function Generate(props) {
     useEffect(() => {
         props.setLoading(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        const keyAttributes = getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES);
+        const keyAttributes: KeyAttributes = getData(
+            LS_KEYS.ORIGINAL_KEY_ATTRIBUTES
+        );
         router.prefetch('/gallery');
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
@@ -35,9 +38,14 @@ export default function Generate(props) {
             return;
         }
         setToken(user.token);
-        if (keyAttributes) {
+        if (keyAttributes?.encryptedKey) {
             const main = async () => {
-                await putAttributes(user.token, keyAttributes);
+                try {
+                    await putAttributes(user.token, keyAttributes);
+                } catch (e) {
+                    //ignore
+                }
+                setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, null);
                 setRecoveryModalView(true);
             };
             main();
@@ -73,11 +81,13 @@ export default function Generate(props) {
 
     return (
         <>
-            <SetPasswordForm
-                callback={onSubmit}
-                buttonText={constants.SET_PASSPHRASE}
-                back={logoutUser}
-            />
+            {!recoverModalView && (
+                <SetPasswordForm
+                    callback={onSubmit}
+                    buttonText={constants.SET_PASSPHRASE}
+                    back={logoutUser}
+                />
+            )}
             <RecoveryKeyModal
                 show={recoverModalView}
                 onHide={() => {
