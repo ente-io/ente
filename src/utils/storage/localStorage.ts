@@ -2,6 +2,7 @@ export enum LS_KEYS {
     USER = 'user',
     SESSION = 'session',
     KEY_ATTRIBUTES = 'keyAttributes',
+    ORIGINAL_KEY_ATTRIBUTES = 'originalKeyAttributes',
     SUBSCRIPTION = 'subscription',
     PLANS = 'plans',
     IS_FIRST_LOGIN = 'isFirstLogin',
