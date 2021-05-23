@@ -91,7 +91,7 @@ export default function Collections(props: CollectionProps) {
     }
 
     useEffect(() => {
-        updateScrollObj;
+        updateScrollObj();
     }, [collectionRef.current]);
 
     useEffect(() => {
