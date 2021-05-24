@@ -1,31 +1,23 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Wrapper = styled.button<{ open: boolean }>`
+const Wrapper = styled.button<{ isOpen: boolean }>`
     border: none;
     background-color: #404040;
     position: fixed;
     z-index: 1;
     bottom: 50px;
+    display: ${(props) => (!props.isOpen ? 'block' : 'none')};
     right: 50px;
     width: 60px;
     height: 60px;
     border-radius: 50%;
     color: #fff;
 `;
-interface Props {
-    isOpen: boolean;
-    onClick;
-    height?: number;
-    viewBox?: string;
-    width?: number;
-}
-export default function SearchButton(props: Props) {
-    if (props.isOpen) {
-        return <div />;
-    }
+
+export default function SearchButton(props) {
     return (
-        <Wrapper open={props.isOpen} onClick={props.onClick}>
+        <Wrapper isOpen={props.isOpen} onClick={props.onClick}>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height={props.height}
