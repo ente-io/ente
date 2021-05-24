@@ -189,9 +189,9 @@ export default function Upload(props: Props) {
             );
         } catch (err) {
             props.setBannerMessage(err.message);
+            setProgressView(false);
             throw err;
         } finally {
-            setProgressView(false);
             props.syncWithRemote();
         }
     };
