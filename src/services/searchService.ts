@@ -8,10 +8,6 @@ export interface LocationSearchResponse {
     bbox: Bbox;
 }
 export const getMapboxToken = () => {
-    console.log(
-        process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
-        process.env.NEXT_PUBLIC_SENTRY_DSN
-    );
     return process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 };
 
