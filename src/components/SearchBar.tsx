@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
-import { useThrottledCallback } from 'use-debounce';
+import debounce from 'debounce-promise';
 import { File, getLocalFiles } from 'services/fileService';
 import {
     Collection,
@@ -99,6 +99,8 @@ export default function SearchBar(props: Props) {
         );
         return option;
     };
+
+    const getOptions = debounce(getAutoCompleteSuggestion, 250);
 
     const filterFiles = (selectedOption: SearchParams) => {
         if (!selectedOption) {
@@ -199,8 +201,6 @@ export default function SearchBar(props: Props) {
             color: '#d1d1d1',
         }),
     };
-
-    const getOptions = useThrottledCallback(getAutoCompleteSuggestion, 250);
 
     return (
         <Wrapper open={props.isOpen}>
