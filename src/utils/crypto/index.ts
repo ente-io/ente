@@ -7,14 +7,21 @@ import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getActualKey, getToken } from 'utils/common/key';
 import { SetRecoveryKey } from 'services/userService';
+export interface ComlinkWorker {
+    comlink: any;
+    worker: Worker;
+}
 
-const CryptoWorker: any =
-    runningInBrowser() &&
-    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
-
-export const getDedicatedCryptoWorker = (): any =>
-    runningInBrowser() &&
-    Comlink.wrap(new Worker('worker/crypto.worker.js', { type: 'module' }));
+export const getDedicatedCryptoWorker = (): ComlinkWorker => {
+    if (runningInBrowser()) {
+        const worker = new Worker('worker/crypto.worker.js', {
+            type: 'module',
+        });
+        const comlink = Comlink.wrap(worker);
+        return { comlink, worker };
+    }
+};
+const CryptoWorker: any = getDedicatedCryptoWorker()?.comlink;
 
 export async function generateKeyAttributes(
     passphrase: string
