@@ -100,7 +100,7 @@ export default function SearchBar(props: Props) {
         return option;
     };
 
-    const getOptions = debounce(getAutoCompleteSuggestion, 250);
+    const getOptions = debounce(getAutoCompleteSuggestion, 100);
 
     const filterFiles = (selectedOption: SearchParams) => {
         if (!selectedOption) {
