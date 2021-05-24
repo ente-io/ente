@@ -158,11 +158,7 @@ export default function Sidebar(props: Props) {
                         {usage ? (
                             constants.USAGE_INFO(
                                 usage,
-                                Math.ceil(
-                                    Number(
-                                        convertBytesToGBs(subscription?.storage)
-                                    )
-                                )
+                                Number(convertBytesToGBs(subscription?.storage))
                             )
                         ) : (
                             <div style={{ textAlign: 'center' }}>
