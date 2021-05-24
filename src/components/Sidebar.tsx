@@ -158,9 +158,7 @@ export default function Sidebar(props: Props) {
                         {usage ? (
                             constants.USAGE_INFO(
                                 usage,
-                                Math.ceil(
-                                    Number(convertBytesToGBs(subscription?.storage))
-                                )
+                                Number(convertBytesToGBs(subscription?.storage))
                             )
                         ) : (
                             <div style={{ textAlign: 'center' }}>
@@ -182,11 +180,17 @@ export default function Sidebar(props: Props) {
                         background: '#242424',
                         width: '100%',
                     }}
-                ></div>
-                <LinkButton style={{ marginTop: '30px' }} onClick={openFeedbackURL}>
+                />
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={openFeedbackURL}
+                >
                     {constants.REQUEST_FEATURE}
                 </LinkButton>
-                <LinkButton style={{ marginTop: '30px' }} onClick={openSupportMail}>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={openSupportMail}
+                >
                     {constants.SUPPORT}
                 </LinkButton>
                 <>
@@ -226,7 +230,7 @@ export default function Sidebar(props: Props) {
                         background: '#242424',
                         width: '100%',
                     }}
-                ></div>
+                />
                 <LinkButton
                     variant="danger"
                     style={{ marginTop: '30px' }}
@@ -246,6 +250,12 @@ export default function Sidebar(props: Props) {
                 >
                     logout
                 </LinkButton>
+                <div
+                    style={{
+                        marginTop: '40px',
+                        width: '100%',
+                    }}
+                />
             </div>
         </Menu>
     );
