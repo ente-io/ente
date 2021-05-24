@@ -77,8 +77,11 @@ export default function SearchBar(props: Props) {
     }, [props.isOpen]);
 
     const getAutoCompleteSuggestion = async (searchPhrase: string) => {
-        const searchedDate = parseHumanDate(searchPhrase);
         let option = new Array<Suggestion>();
+        if (!searchPhrase?.length) {
+            return option;
+        }
+        const searchedDate = parseHumanDate(searchPhrase);
         if (searchedDate != null) {
             option.push({
                 type: SuggestionType.DATE,
