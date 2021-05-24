@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Modal } from 'react-bootstrap';
+import { Form, Modal, Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
 import billingService, { Plan, Subscription } from 'services/billingService';
@@ -21,18 +21,47 @@ import { DeadCenter, SetLoading } from '..';
 import LinkButton from './LinkButton';
 import { reverseString } from 'utils/common';
 import { SetDialogMessage } from 'components/MessageDialog';
+import ArrowEast from 'components/ArrowEast';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
-    padding-top: 20px;
-    border-radius: 10%;
-    height: 192px;
+    border-radius: 20px;
     width: 250px;
-    border: 2px solid #868686;
+    border: 2px solid #333;
+    padding: 30px;
     margin: 10px;
     text-align: center;
     font-size: 20px;
+    background-color: #ffffff00;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
     cursor: ${(props) => (props.selected ? 'not-allowed' : 'pointer')};
     border-color: ${(props) => props.selected && '#56e066'};
+    transition: all 0.3s ease-out;
+    overflow: hidden;
+    position: relative;
+
+    & > div:first-child::before {
+        content: ' ';
+        height: 600px;
+        width: 50px;
+        background-color: #444;
+        left: 0;
+        top: -50%;
+        position: absolute;
+        transform: rotate(45deg) translateX(-200px);
+        transition: all 0.5s ease-out;
+    }
+
+    &:hover {
+        transform: scale(1.2);
+        background-color: #ffffff11;
+    }
+
+    &:hover > div:first-child::before {
+        transform: rotate(45deg) translateX(300px);
+    }
 `;
 
 interface Props {
@@ -119,10 +148,6 @@ function PlanSelector(props: Props) {
         ?.map((plan) => (
             <PlanIcon
                 key={plan.stripeID}
-                onClick={async () =>
-                    !isUserSubscribedPlan(plan, subscription) &&
-                    (await onPlanSelect(plan))
-                }
                 className="subscription-plan-selector"
                 selected={isUserSubscribedPlan(plan, subscription)}
             >
@@ -132,6 +157,7 @@ function PlanSelector(props: Props) {
                             color: '#ECECEC',
                             fontWeight: 900,
                             fontSize: '72px',
+                            lineHeight: '72px'
                         }}
                     >
                         {convertBytesToGBs(plan.storage, 0)}
@@ -149,8 +175,18 @@ function PlanSelector(props: Props) {
                 </div>
                 <div
                     className={`bold-text`}
-                    style={{ color: '#aaa' }}
+                    style={{ color: '#aaa', lineHeight: '36px', fontSize: '20px' }}
                 >{`${plan.price} / ${plan.period}`}</div>
+                <Button
+                    variant="outline-success"
+                    block
+                    style={{ marginTop: '30px'}}
+                    disabled={isUserSubscribedPlan(plan, subscription)}
+                    onClick={async () => (await onPlanSelect(plan))}
+                >
+                    {constants.CHOOSE_PLAN_BTN}
+                    <ArrowEast style={{ marginLeft: '10px' }} />
+                </Button>
             </PlanIcon>
         ));
     return (
@@ -183,13 +219,13 @@ function PlanSelector(props: Props) {
                             className={`bold-text`}
                             style={{ fontSize: '20px' }}
                         >
-                            {constants.YEARLY}
+                            {constants.MONTHLY}
                         </span>
 
                         <Form.Switch
-                            checked={planPeriod == PLAN_PERIOD.MONTH}
+                            checked={planPeriod === PLAN_PERIOD.YEAR}
                             id={`plan-period-toggler`}
-                            style={{ marginLeft: '15px', marginTop: '-4px' }}
+                            style={{ margin: '-4px 0 20px 15px' }}
                             className={`custom-switch-md`}
                             onChange={togglePeriod}
                         />
@@ -197,7 +233,7 @@ function PlanSelector(props: Props) {
                             className={`bold-text`}
                             style={{ fontSize: '20px' }}
                         >
-                            {constants.MONTHLY}
+                            {constants.YEARLY}
                         </span>
                     </div>
                 </DeadCenter>
@@ -290,7 +326,7 @@ function PlanSelector(props: Props) {
                         <LinkButton
                             variant="primary"
                             onClick={props.closeModal}
-                            style={{ color: 'rgb(121, 121, 121)' }}
+                            style={{ color: 'rgb(121, 121, 121)', marginTop: '20px' }}
                         >
                             {isOnFreePlan(subscription)
                                 ? constants.SKIP

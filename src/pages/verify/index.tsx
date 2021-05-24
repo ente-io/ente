@@ -18,6 +18,7 @@ import {
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
+import { clearKeys } from 'utils/storage/sessionStorage';
 
 const Image = styled.img`
     width: 350px;
@@ -74,6 +75,7 @@ export default function Verify() {
             clearFiles();
             setIsFirstLogin(true);
             if (resp.data.keyAttributes?.encryptedKey) {
+                clearKeys();
                 router.push('/credentials');
             } else {
                 router.push('/generate');

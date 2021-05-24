@@ -5,8 +5,11 @@ import { File, fileAttribute } from './fileService';
 import { Collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity, WaitFor2Seconds } from 'utils/common';
-import { ErrorHandler } from 'utils/common/errorUtil';
-import { getDedicatedCryptoWorker } from 'utils/crypto';
+import {
+    ErrorHandler,
+    THUMBNAIL_GENERATION_FAILED,
+} from 'utils/common/errorUtil';
+import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
 import * as convert from 'xml-js';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { getToken } from 'utils/common/key';
@@ -120,7 +123,7 @@ export enum UPLOAD_STAGES {
 }
 
 class UploadService {
-    private cryptoWorkers = [];
+    private cryptoWorkers = new Array<ComlinkWorker>(MAX_CONCURRENT_UPLOADS);
     private uploadURLs: UploadURL[] = [];
     private uploadURLFetchInProgress: Promise<any> = null;
     private perFileProgress: number;
@@ -132,20 +135,6 @@ class UploadService {
     private progressBarProps;
     private uploadErrors: Error[];
     private existingFilesCollectionWise: Map<number, File[]>;
-    constructor() {
-        const main = async () => {
-            try {
-                for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
-                    this.cryptoWorkers.push(
-                        await new (getDedicatedCryptoWorker())()
-                    );
-                }
-            } catch (e) {
-                // ignore
-            }
-        };
-        main();
-    }
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
         existingFiles: File[],
@@ -160,9 +149,8 @@ class UploadService {
             this.uploadErrors = [];
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-            this.existingFilesCollectionWise = sortFilesIntoCollections(
-                existingFiles
-            );
+            this.existingFilesCollectionWise =
+                sortFilesIntoCollections(existingFiles);
             this.updateProgressBarUI();
 
             let metadataFiles: globalThis.File[] = [];
@@ -216,9 +204,10 @@ class UploadService {
                 i < Math.min(MAX_CONCURRENT_UPLOADS, this.totalFileCount);
                 i++
             ) {
+                this.cryptoWorkers[i] = getDedicatedCryptoWorker();
                 uploadProcesses.push(
                     this.uploader(
-                        this.cryptoWorkers[i],
+                        await new this.cryptoWorkers[i].comlink(),
                         new FileReader(),
                         this.filesToBeUploaded.pop()
                     )
@@ -232,6 +221,10 @@ class UploadService {
             this.filesToBeUploaded = [];
             console.error(e);
             throw e;
+        } finally {
+            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+                this.cryptoWorkers[i]?.worker.terminate();
+            }
         }
     }
 
@@ -254,14 +247,8 @@ class UploadService {
                 this.fileProgress.delete(rawFile.name);
                 return;
             }
-            let {
-                file: encryptedFile,
-                fileKey: encryptedKey,
-            }: EncryptedFile = await this.encryptFile(
-                worker,
-                file,
-                collection.key
-            );
+            let { file: encryptedFile, fileKey: encryptedKey }: EncryptedFile =
+                await this.encryptFile(worker, file, collection.key);
             let backupedFile: BackupedFile = await this.uploadToBucket(
                 encryptedFile
             );
@@ -300,11 +287,8 @@ class UploadService {
     }
 
     private updateProgressBarUI() {
-        const {
-            setPercentComplete,
-            setFileCounter,
-            setFileProgress,
-        } = this.progressBarProps;
+        const { setPercentComplete, setFileCounter, setFileProgress } =
+            this.progressBarProps;
         setFileCounter({
             finished: this.filesCompleted,
             total: this.totalFileCount,
@@ -424,25 +408,15 @@ class UploadService {
         encryptionKey: string
     ): Promise<EncryptedFile> {
         try {
-            const {
-                key: fileKey,
-                file: encryptedFiledata,
-            }: EncryptionResult = isDataStream(file.filedata)
-                ? await this.encryptFileStream(worker, file.filedata)
-                : await worker.encryptFile(file.filedata);
+            const { key: fileKey, file: encryptedFiledata }: EncryptionResult =
+                isDataStream(file.filedata)
+                    ? await this.encryptFileStream(worker, file.filedata)
+                    : await worker.encryptFile(file.filedata);
 
-            const {
-                file: encryptedThumbnail,
-            }: EncryptionResult = await worker.encryptThumbnail(
-                file.thumbnail,
-                fileKey
-            );
-            const {
-                file: encryptedMetadata,
-            }: EncryptionResult = await worker.encryptMetadata(
-                file.metadata,
-                fileKey
-            );
+            const { file: encryptedThumbnail }: EncryptionResult =
+                await worker.encryptThumbnail(file.thumbnail, fileKey);
+            const { file: encryptedMetadata }: EncryptionResult =
+                await worker.encryptMetadata(file.metadata, fileKey);
 
             const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
                 fileKey,
@@ -468,11 +442,8 @@ class UploadService {
     private async encryptFileStream(worker, fileData: DataStream) {
         const { stream, chunkCount } = fileData;
         const fileStreamReader = stream.getReader();
-        const {
-            key,
-            decryptionHeader,
-            pushState,
-        } = await worker.initChunkEncryption();
+        const { key, decryptionHeader, pushState } =
+            await worker.initChunkEncryption();
         let ref = { pullCount: 1 };
         const encryptedFileStream = new ReadableStream({
             async pull(controller) {
@@ -664,22 +635,31 @@ class UploadService {
                 image.setAttribute('src', imageURL);
                 await new Promise((resolve, reject) => {
                     image.onload = () => {
-                        const thumbnailWidth =
-                            (image.width * THUMBNAIL_HEIGHT) / image.height;
-                        canvas.width = thumbnailWidth;
-                        canvas.height = THUMBNAIL_HEIGHT;
-                        canvas_CTX.drawImage(
-                            image,
-                            0,
-                            0,
-                            thumbnailWidth,
-                            THUMBNAIL_HEIGHT
-                        );
-                        image = undefined;
-                        resolve(null);
+                        try {
+                            const thumbnailWidth =
+                                (image.width * THUMBNAIL_HEIGHT) / image.height;
+                            canvas.width = thumbnailWidth;
+                            canvas.height = THUMBNAIL_HEIGHT;
+                            canvas_CTX.drawImage(
+                                image,
+                                0,
+                                0,
+                                thumbnailWidth,
+                                THUMBNAIL_HEIGHT
+                            );
+                            image = undefined;
+                            resolve(null);
+                        } catch (e) {
+                            console.error(e);
+                            reject(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`);
+                        }
                     };
                     setTimeout(
-                        () => reject(null),
+                        () =>
+                            reject(
+                                `${THUMBNAIL_GENERATION_FAILED} err:
+                                    wait time exceeded`
+                            ),
                         WAIT_TIME_THUMBNAIL_GENERATION
                     );
                 });
@@ -688,26 +668,35 @@ class UploadService {
                     let video = document.createElement('video');
                     imageURL = URL.createObjectURL(file);
                     video.addEventListener('timeupdate', function () {
-                        const thumbnailWidth =
-                            (video.videoWidth * THUMBNAIL_HEIGHT) /
-                            video.videoHeight;
-                        canvas.width = thumbnailWidth;
-                        canvas.height = THUMBNAIL_HEIGHT;
-                        canvas_CTX.drawImage(
-                            video,
-                            0,
-                            0,
-                            thumbnailWidth,
-                            THUMBNAIL_HEIGHT
-                        );
-                        video = null;
-                        resolve(null);
+                        try {
+                            const thumbnailWidth =
+                                (video.videoWidth * THUMBNAIL_HEIGHT) /
+                                video.videoHeight;
+                            canvas.width = thumbnailWidth;
+                            canvas.height = THUMBNAIL_HEIGHT;
+                            canvas_CTX.drawImage(
+                                video,
+                                0,
+                                0,
+                                thumbnailWidth,
+                                THUMBNAIL_HEIGHT
+                            );
+                            video = null;
+                            resolve(null);
+                        } catch (e) {
+                            console.error(e);
+                            reject(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`);
+                        }
                     });
                     video.preload = 'metadata';
                     video.src = imageURL;
                     video.currentTime = 3;
                     setTimeout(
-                        () => reject(null),
+                        () =>
+                            reject(
+                                `${THUMBNAIL_GENERATION_FAILED} err:
+                                wait time exceeded`
+                            ),
                         WAIT_TIME_THUMBNAIL_GENERATION
                     );
                 });
@@ -895,10 +884,8 @@ class UploadService {
         ] of multipartUploadURLs.partURLs.entries()) {
             let combinedChunks = [];
             for (let i = 0; i < CHUNKS_COMBINED_FOR_UPLOAD; i++) {
-                let {
-                    done,
-                    value: chunk,
-                } = await streamEncryptedFileReader.read();
+                let { done, value: chunk } =
+                    await streamEncryptedFileReader.read();
                 if (done) {
                     break;
                 }

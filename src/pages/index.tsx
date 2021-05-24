@@ -97,13 +97,9 @@ export default function Home() {
                         )}
                     </Formik>
                     <br />
-                    <Card.Link
-                        href="#"
-                        onClick={register}
-                        style={{ fontSize: '14px' }}
-                    >
+                    <Button variant="link" onClick={register}>
                         {constants.NO_ACCOUNT}
-                    </Card.Link>
+                    </Button>
                 </Card.Body>
             </Card>
         </Container>

@@ -29,7 +29,7 @@ export async function convertHEIC2JPEG(fileBlob: Blob): Promise<Blob> {
 }
 
 export function fileIsHEIC(name: string) {
-    return name.endsWith(TYPE_HEIC);
+    return name.toLowerCase().endsWith(TYPE_HEIC);
 }
 
 export function sortFilesIntoCollections(files: File[]) {

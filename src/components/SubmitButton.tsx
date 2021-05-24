@@ -5,14 +5,15 @@ interface Props {
     loading: boolean;
     buttonText: string;
     inline?: any;
+    disabled?: boolean;
 }
-const SubmitButton = ({ loading, buttonText, inline }: Props) => (
+const SubmitButton = ({ loading, buttonText, inline, disabled }: Props) => (
     <Button
         className="submitButton"
         variant="outline-success"
         type="submit"
         block={!inline}
-        disabled={loading}
+        disabled={loading || disabled}
         style={{ padding: '6px 1em' }}
     >
         {loading ? (

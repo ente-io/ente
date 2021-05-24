@@ -10,6 +10,7 @@ import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
+import CloudUpload from './CloudUpload';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -23,6 +24,7 @@ interface TimeStampListItem {
     items?: File[];
     itemStartIndex?: number;
     date?: string;
+    banner?: any;
 }
 
 const Container = styled.div`
@@ -31,7 +33,7 @@ const Container = styled.div`
     width: 100%;
     flex-wrap: wrap;
     margin: 0 auto;
-    margin-bottom: 40px;
+    margin-bottom: 1rem;
 
     .pswp-thumbnail {
         display: inline-block;
@@ -69,9 +71,23 @@ const DateContainer = styled.div`
     padding-top: 15px;
 `;
 
+const EmptyScreen = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    flex: 1;
+    color: #2dc262;
+
+    & > svg {
+        filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
+    }
+`;
+
 enum ITEM_TYPE {
     TIME = 'TIME',
     TILE = 'TILE',
+    BANNER = 'BANNER',
 }
 
 interface Props {
@@ -261,13 +277,8 @@ const PhotoFrame = ({
     return (
         <>
             {!isFirstLoad && files.length == 0 && !searchMode ? (
-                <div
-                    style={{
-                        height: '60%',
-                        display: 'grid',
-                        placeItems: 'center',
-                    }}
-                >
+                <EmptyScreen>
+                    <CloudUpload width={150} height={150} />
                     <Button
                         variant="outline-success"
                         onClick={openFileUploader}
@@ -280,7 +291,7 @@ const PhotoFrame = ({
                     >
                         {constants.UPLOAD_FIRST_PHOTO}
                     </Button>
-                </div>
+                </EmptyScreen>
             ) : filteredData.length ? (
                 <Container>
                     <AutoSizer>
@@ -355,6 +366,24 @@ const PhotoFrame = ({
                                     }
                                 }
                             });
+                            files.length < 30 &&
+                                !searchMode &&
+                                timeStampList.push({
+                                    itemType: ITEM_TYPE.BANNER,
+                                    banner: (
+                                        <div
+                                            style={{
+                                                color: '#979797',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                textAlign: 'center',
+                                            }}
+                                        >
+                                            {constants.INSTALL_MOBILE_APP()}
+                                        </div>
+                                    ),
+                                });
                             const extraRowsToRender = Math.ceil(
                                 (NO_OF_PAGES * height) / IMAGE_CONTAINER_HEIGHT
                             );
@@ -362,9 +391,9 @@ const PhotoFrame = ({
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                        ITEM_TYPE.TIME
-                                            ? DATE_CONTAINER_HEIGHT
-                                            : IMAGE_CONTAINER_HEIGHT
+                                        ITEM_TYPE.TILE
+                                            ? IMAGE_CONTAINER_HEIGHT
+                                            : DATE_CONTAINER_HEIGHT
                                     }
                                     height={height}
                                     width={width}
@@ -374,14 +403,36 @@ const PhotoFrame = ({
                                 >
                                     {({ index, style }) => {
                                         return (
-                                            <ListItem style={style}>
+                                            <ListItem
+                                                style={
+                                                    timeStampList[index]
+                                                        .itemType ===
+                                                    ITEM_TYPE.BANNER
+                                                        ? {
+                                                              ...style,
+                                                              top: Math.max(
+                                                                  Number(
+                                                                      style.top
+                                                                  ),
+                                                                  height - 45
+                                                              ),
+                                                              height:
+                                                                  width < 450
+                                                                      ? Number(
+                                                                            style.height
+                                                                        ) * 2
+                                                                      : style.height,
+                                                          }
+                                                        : style
+                                                }
+                                            >
                                                 <ListContainer
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                        ITEM_TYPE.TIME
-                                                            ? 1
-                                                            : columns
+                                                        ITEM_TYPE.TILE
+                                                            ? columns
+                                                            : 1
                                                     }
                                                 >
                                                     {timeStampList[index]
@@ -394,6 +445,16 @@ const PhotoFrame = ({
                                                                 ].date
                                                             }
                                                         </DateContainer>
+                                                    ) : timeStampList[index]
+                                                          .itemType ===
+                                                      ITEM_TYPE.BANNER ? (
+                                                        <>
+                                                            {
+                                                                timeStampList[
+                                                                    index
+                                                                ].banner
+                                                            }
+                                                        </>
                                                     ) : (
                                                         timeStampList[
                                                             index

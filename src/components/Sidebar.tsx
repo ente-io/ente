@@ -104,7 +104,7 @@ export default function Sidebar(props: Props) {
         >
             <div
                 style={{
-                    marginBottom: '28px',
+                    marginBottom: '8px',
                     outline: 'none',
                     color: 'rgb(45, 194, 98)',
                     fontSize: '16px',
@@ -112,147 +112,151 @@ export default function Sidebar(props: Props) {
             >
                 {user?.email}
             </div>
-            <div style={{ outline: 'none' }}>
-                <div style={{ display: 'flex' }}>
-                    <h5 style={{ margin: '4px 0 12px 2px' }}>
-                        {constants.SUBSCRIPTION_PLAN}
-                    </h5>
-                    <div style={{ marginLeft: '10px' }}>
-                        {
-                            <Button
-                                variant={
-                                    isSubscribed(subscription)
-                                        ? 'outline-secondary'
-                                        : 'outline-success'
-                                }
-                                size="sm"
-                                onClick={onManageClick}
-                            >
-                                {isSubscribed(subscription)
-                                    ? constants.MANAGE
-                                    : constants.SUBSCRIBE}
-                            </Button>
-                        }
+            <div style={{ flex: 1, overflow: 'auto' }}>
+                <div style={{ outline: 'none' }}>
+                    <div style={{ display: 'flex' }}>
+                        <h5 style={{ margin: '4px 0 12px 2px' }}>
+                            {constants.SUBSCRIPTION_PLAN}
+                        </h5>
                     </div>
-                </div>
-                <div style={{ color: '#959595' }}>
-                    {isSubscriptionActive(subscription) ? (
-                        isOnFreePlan(subscription) ? (
-                            constants.FREE_SUBSCRIPTION_INFO(
-                                subscription?.expiryTime
-                            )
-                        ) : isSubscriptionCancelled(subscription) ? (
-                            constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
-                                subscription?.expiryTime
+                    <div style={{ color: '#959595' }}>
+                        {isSubscriptionActive(subscription) ? (
+                            isOnFreePlan(subscription) ? (
+                                constants.FREE_SUBSCRIPTION_INFO(
+                                    subscription?.expiryTime
+                                )
+                            ) : isSubscriptionCancelled(subscription) ? (
+                                constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
+                                    subscription?.expiryTime
+                                )
+                            ) : (
+                                constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
+                                    subscription?.expiryTime
+                                )
                             )
                         ) : (
-                            constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
-                                subscription?.expiryTime
-                            )
-                        )
-                    ) : (
-                        <p>{constants.SUBSCRIPTION_EXPIRED}</p>
-                    )}
+                            <p>{constants.SUBSCRIPTION_EXPIRED}</p>
+                        )}
+                        <Button
+                            variant="outline-success"
+                            block
+                            size="sm"
+                            onClick={onManageClick}
+                        >
+                            {isSubscribed(subscription)
+                                ? constants.MANAGE
+                                : constants.SUBSCRIBE}
+                        </Button>
+                    </div>
                 </div>
-            </div>
-            <div style={{ outline: 'none', marginTop: '30px' }}></div>
-            <div>
-                <h5 style={{ marginBottom: '12px' }}>
-                    {constants.USAGE_DETAILS}
-                </h5>
-                <div style={{ color: '#959595' }}>
-                    {usage ? (
-                        constants.USAGE_INFO(
-                            usage,
-                            Math.ceil(
+                <div style={{ outline: 'none', marginTop: '30px' }}></div>
+                <div>
+                    <h5 style={{ marginBottom: '12px' }}>
+                        {constants.USAGE_DETAILS}
+                    </h5>
+                    <div style={{ color: '#959595' }}>
+                        {usage ? (
+                            constants.USAGE_INFO(
+                                usage,
                                 Number(convertBytesToGBs(subscription?.storage))
                             )
-                        )
-                    ) : (
-                        <div style={{ textAlign: 'center' }}>
-                            <EnteSpinner
-                                style={{
-                                    borderWidth: '2px',
-                                    width: '20px',
-                                    height: '20px',
-                                }}
-                            />
-                        </div>
-                    )}
+                        ) : (
+                            <div style={{ textAlign: 'center' }}>
+                                <EnteSpinner
+                                    style={{
+                                        borderWidth: '2px',
+                                        width: '20px',
+                                        height: '20px',
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
-            <div
-                style={{
-                    height: '1px',
-                    marginTop: '40px',
-                    background: '#242424',
-                    width: '100%',
-                }}
-            ></div>
-            <LinkButton style={{ marginTop: '30px' }} onClick={openFeedbackURL}>
-                {constants.REQUEST_FEATURE}
-            </LinkButton>
-            <LinkButton style={{ marginTop: '30px' }} onClick={openSupportMail}>
-                {constants.SUPPORT}
-            </LinkButton>
-            <>
-                <RecoveryKeyModal
-                    show={recoverModalView}
-                    onHide={() => setRecoveryModalView(false)}
-                    somethingWentWrong={() =>
-                        props.setDialogMessage({
-                            title: constants.RECOVER_KEY_GENERATION_FAILED,
-                            close: { variant: 'danger' },
-                        })
-                    }
+                <div
+                    style={{
+                        height: '1px',
+                        marginTop: '40px',
+                        background: '#242424',
+                        width: '100%',
+                    }}
                 />
                 <LinkButton
                     style={{ marginTop: '30px' }}
-                    onClick={() => setRecoveryModalView(true)}
+                    onClick={openFeedbackURL}
                 >
-                    {constants.DOWNLOAD_RECOVERY_KEY}
+                    {constants.REQUEST_FEATURE}
                 </LinkButton>
-            </>
-            <LinkButton
-                style={{ marginTop: '30px' }}
-                onClick={() => {
-                    setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-                    router.push('changePassword');
-                }}
-            >
-                {constants.CHANGE_PASSWORD}
-            </LinkButton>
-            <LinkButton style={{ marginTop: '30px' }} onClick={exportFiles}>
-                {constants.EXPORT}
-            </LinkButton>
-            <div
-                style={{
-                    height: '1px',
-                    marginTop: '40px',
-                    background: '#242424',
-                    width: '100%',
-                }}
-            ></div>
-            <LinkButton
-                variant="danger"
-                style={{ marginTop: '30px' }}
-                onClick={() =>
-                    props.setDialogMessage({
-                        title: `${constants.CONFIRM} ${constants.LOGOUT}`,
-                        content: constants.LOGOUT_MESSAGE,
-                        staticBackdrop: true,
-                        proceed: {
-                            text: constants.LOGOUT,
-                            action: logoutUser,
-                            variant: 'danger',
-                        },
-                        close: { text: constants.CANCEL },
-                    })
-                }
-            >
-                logout
-            </LinkButton>
-            <div style={{ marginBottom: '50px' }} />
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={openSupportMail}
+                >
+                    {constants.SUPPORT}
+                </LinkButton>
+                <>
+                    <RecoveryKeyModal
+                        show={recoverModalView}
+                        onHide={() => setRecoveryModalView(false)}
+                        somethingWentWrong={() =>
+                            props.setDialogMessage({
+                                title: constants.RECOVER_KEY_GENERATION_FAILED,
+                                close: { variant: 'danger' },
+                            })
+                        }
+                    />
+                    <LinkButton
+                        style={{ marginTop: '30px' }}
+                        onClick={() => setRecoveryModalView(true)}
+                    >
+                        {constants.DOWNLOAD_RECOVERY_KEY}
+                    </LinkButton>
+                </>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
+                        router.push('changePassword');
+                    }}
+                >
+                    {constants.CHANGE_PASSWORD}
+                </LinkButton>
+                <LinkButton style={{ marginTop: '30px' }} onClick={exportFiles}>
+                    {constants.EXPORT}
+                </LinkButton>
+                <div
+                    style={{
+                        height: '1px',
+                        marginTop: '40px',
+                        background: '#242424',
+                        width: '100%',
+                    }}
+                />
+                <LinkButton
+                    variant="danger"
+                    style={{ marginTop: '30px' }}
+                    onClick={() =>
+                        props.setDialogMessage({
+                            title: `${constants.CONFIRM} ${constants.LOGOUT}`,
+                            content: constants.LOGOUT_MESSAGE,
+                            staticBackdrop: true,
+                            proceed: {
+                                text: constants.LOGOUT,
+                                action: logoutUser,
+                                variant: 'danger',
+                            },
+                            close: { text: constants.CANCEL },
+                        })
+                    }
+                >
+                    logout
+                </LinkButton>
+                <div
+                    style={{
+                        marginTop: '40px',
+                        width: '100%',
+                    }}
+                />
+            </div>
         </Menu>
     );
 }

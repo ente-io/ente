@@ -61,7 +61,7 @@ const englishConstants = {
     ENTER_ALBUM_NAME: 'album name',
     CLOSE: 'close',
     NO: 'no',
-    NOTHING_HERE: `nothing to see here, yet 👀`,
+    NOTHING_HERE: `nothing to see here, yet`,
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
@@ -90,7 +90,7 @@ const englishConstants = {
     SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew it',
 
     STORAGE_QUOTA_EXCEEDED:
-        'you have exceeded your storage quota, please upgrade your plan from the mobile app',
+        'you have exceeded your storage quota, please upgrade your plan',
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
@@ -163,12 +163,14 @@ const englishConstants = {
             <a
                 href="https://play.google.com/store/apps/details?id=io.ente.photos"
                 target="_blank"
+                style={{ color: '#2dc262' }}
             >
                 android
             </a>{' '}
             or{' '}
             <a
                 href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                style={{ color: '#2dc262' }}
                 target="_blank"
             >
                 ios app{' '}
@@ -195,6 +197,9 @@ const englishConstants = {
     MANAGEMENT_PORTAL: 'manage payment method',
     CHOOSE_PLAN: 'choose your subscription plan',
     MANAGE_PLAN: 'manage your subscription',
+    CHOOSE_PLAN_BTN: 'choose plan',
+
+    OFFLINE_MSG: 'you are offline, cached memories are being shown',
 
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
@@ -297,6 +302,28 @@ const englishConstants = {
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
     SEARCH_HINT: 'search your photos',
+    TERMS_AND_CONDITIONS: () => (
+        <p>
+            I agree to the{' '}
+            <a href="https://ente.io/terms" target="_blank">
+                terms
+            </a>{' '}
+            and{' '}
+            <a href="https://ente.io/privacy" target="_blank">
+                privacy policy
+            </a>{' '}
+        </p>
+    ),
+    CONFIRM_PASSWORD_NOT_SAVED: () => (
+        <p>
+            i understand that if i lose my password , i may lose my data since
+            my data is{' '}
+            <a href="https://ente.io/encryption" target="_blank">
+                end-to-end encrypted
+            </a>{' '}
+            with ente
+        </p>
+    ),
 };
 
 export default englishConstants;

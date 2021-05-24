@@ -2,8 +2,8 @@ import CollectionShare from 'components/CollectionShare';
 import { SetDialogMessage } from 'components/MessageDialog';
 import NavigationButton, {
     SCROLL_DIRECTION,
-} from 'components/navigationButton';
-import React, { useEffect, useRef, useState } from 'react';
+} from 'components/NavigationButton';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { OverlayTrigger } from 'react-bootstrap';
 import { Collection, CollectionType } from 'services/collectionService';
 import { User } from 'services/userService';
@@ -30,6 +30,7 @@ const Container = styled.div`
     height: 50px;
     display: flex;
     max-width: 100%;
+    position: relative;
     @media (min-width: 1000px) {
         width: 1000px;
     }
@@ -50,6 +51,7 @@ const Wrapper = styled.div`
     white-space: nowrap;
     overflow: auto;
     max-width: 100%;
+    scroll-behavior: smooth;
 `;
 
 const Chip = styled.button<{ active: boolean }>`
@@ -77,6 +79,20 @@ export default function Collections(props: CollectionProps) {
     const collectionRef = useRef<HTMLDivElement>(null);
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
+    const [scrollObj, setScrollObj] = useState<{
+        scrollLeft?: number, scrollWidth?: number, clientWidth?: number
+    }>({});
+
+    const updateScrollObj = () => {
+        if (collectionRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = collectionRef.current;
+            setScrollObj({ scrollLeft, scrollWidth, clientWidth });
+        }
+    }
+
+    useEffect(() => {
+        updateScrollObj();
+    }, [collectionRef.current]);
 
     useEffect(() => {
         if (!collectionRef?.current) {
@@ -89,11 +105,13 @@ export default function Collections(props: CollectionProps) {
         setSelectedCollectionID(collection?.id);
         selectCollection(collection?.id);
     };
+
     const user: User = getData(LS_KEYS.USER);
 
     if (!collections || collections.length === 0) {
-        return <Container />;
+        return null;
     }
+
     const collectionOptions = CollectionOptions({
         syncWithRemote: props.syncWithRemote,
         setCollectionNamerAttributes: props.setCollectionNamerAttributes,
@@ -104,6 +122,11 @@ export default function Collections(props: CollectionProps) {
         showCollectionShareModal: setCollectionShareModalView.bind(null, true),
         redirectToAll: selectCollection.bind(null, null),
     });
+
+    const scrollCollection = (direction: SCROLL_DIRECTION) => () => {
+        collectionRef.current.scrollBy(250 * direction, 0);
+    }
+
     return (
         <>
             <CollectionShare
@@ -116,11 +139,11 @@ export default function Collections(props: CollectionProps) {
                 syncWithRemote={props.syncWithRemote}
             />
             <Container>
-                <NavigationButton
-                    collectionRef={collectionRef}
+                {scrollObj.scrollLeft > 0 && <NavigationButton
                     scrollDirection={SCROLL_DIRECTION.LEFT}
-                />
-                <Wrapper ref={collectionRef}>
+                    onClick={scrollCollection(SCROLL_DIRECTION.LEFT)}
+                />}
+                <Wrapper ref={collectionRef} onScroll={updateScrollObj}>
                     <Chip active={!selected} onClick={clickHandler()}>
                         All
                         <div
@@ -159,10 +182,10 @@ export default function Collections(props: CollectionProps) {
                         </Chip>
                     ))}
                 </Wrapper>
-                <NavigationButton
-                    collectionRef={collectionRef}
+                {scrollObj.scrollLeft < (scrollObj.scrollWidth - scrollObj.clientWidth) && <NavigationButton
                     scrollDirection={SCROLL_DIRECTION.RIGHT}
-                />
+                    onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)}
+                />}
             </Container>
         </>
     );

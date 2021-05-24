@@ -364,20 +364,6 @@ export default function Gallery() {
                 loadingBar={loadingBar}
                 searchMode={searchMode}
             />
-            {files.length < 30 && !searchMode && (
-                <Alert
-                    variant="success"
-                    style={{
-                        position: 'fixed',
-                        bottom: '1%',
-                        width: '100%',
-                        textAlign: 'center',
-                        marginBottom: '0px',
-                    }}
-                >
-                    {constants.INSTALL_MOBILE_APP()}
-                </Alert>
-            )}
             {selected.count > 0 ? (
                 <SelectedFileOptions
                     addToCollectionHelper={addToCollectionHelper}
