@@ -123,6 +123,7 @@ export default function Upload(props: Props) {
 
     const uploadFilesToExistingCollection = async (collection) => {
         try {
+            setUploadStage(UPLOAD_STAGES.START);
             setProgressView(true);
 
             let filesWithCollectionToUpload: FileWithCollection[] =
@@ -141,6 +142,8 @@ export default function Upload(props: Props) {
         collectionName
     ) => {
         try {
+            setUploadStage(UPLOAD_STAGES.START);
+            setProgressView(true);
             let filesWithCollectionToUpload = new Array<FileWithCollection>();
             try {
                 if (strategy == UPLOAD_STRATEGY.SINGLE_COLLECTION) {
@@ -165,7 +168,6 @@ export default function Upload(props: Props) {
                 });
                 throw e;
             }
-            setProgressView(true);
             await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
             console.error('Failed to upload files to new collections', e);
