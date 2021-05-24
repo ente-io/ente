@@ -125,7 +125,7 @@ const getCollections = async (
         return await Promise.all(promises);
     } catch (e) {
         console.error('getCollections failed- ', e);
-        throw new Error(e?.status?.toString());
+        throw e;
     }
 };
 
@@ -333,10 +333,8 @@ export const addToCollection = async (
         await Promise.all(
             files.map(async (file) => {
                 file.collectionID = collection.id;
-                const newEncryptedKey: B64EncryptionResult = await worker.encryptToB64(
-                    file.key,
-                    collection.key
-                );
+                const newEncryptedKey: B64EncryptionResult =
+                    await worker.encryptToB64(file.key, collection.key);
                 file.encryptedKey = newEncryptedKey.encryptedData;
                 file.keyDecryptionNonce = newEncryptedKey.nonce;
                 if (params['files'] == undefined) {

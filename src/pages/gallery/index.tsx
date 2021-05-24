@@ -36,7 +36,7 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import { logoutUser } from 'services/userService';
+import { isTokenValid, logoutUser } from 'services/userService';
 import AlertBanner from './components/AlertBanner';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import { useDropzone } from 'react-dropzone';
@@ -161,6 +161,9 @@ export default function Gallery() {
     const syncWithRemote = async () => {
         try {
             checkConnectivity();
+            if (!(await isTokenValid())) {
+                throw new Error(errorCodes.ERR_SESSION_EXPIRED);
+            }
             loadingBar.current?.continuousStart();
             await billingService.updatePlans();
             await billingService.syncSubscription();
@@ -198,6 +201,9 @@ export default function Gallery() {
                         },
                         nonClosable: true,
                     });
+                    break;
+                case errorCodes.ERR_NO_INTERNET_CONNECTION:
+                    setBannerMessage(constants.NO_INTERNET_CONNECTION);
                     break;
                 case errorCodes.ERR_KEY_MISSING:
                     clearKeys();
