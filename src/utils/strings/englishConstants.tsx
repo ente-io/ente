@@ -90,7 +90,7 @@ const englishConstants = {
     SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew it',
 
     STORAGE_QUOTA_EXCEEDED:
-        'you have exceeded your storage quota, please upgrade your plan from the mobile app',
+        'you have exceeded your storage quota, please upgrade your plan',
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
