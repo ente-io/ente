@@ -33,7 +33,7 @@ export function getFilesWithCreationDay(files: File[], searchedDate: Date) {
         isSearchedDate(new Date(file.metadata.creationTime / 1000))
     );
 }
-export function formatDateForLabel(date: Date) {
+export function getFormattedDate(date: Date) {
     return new Intl.DateTimeFormat('en-IN', {
         month: 'long',
         day: 'numeric',

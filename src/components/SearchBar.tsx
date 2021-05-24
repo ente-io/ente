@@ -14,7 +14,7 @@ import { Bbox, parseHumanDate, searchLocation } from 'services/searchService';
 import {
     getFilesWithCreationDay,
     getFilesInsideBbox,
-    formatDateForLabel,
+    getFormattedDate,
 } from 'utils/search';
 import constants from 'utils/strings/constants';
 import LocationIcon from './LocationIcon';
@@ -39,12 +39,12 @@ const Wrapper = styled.div<{ open: boolean }>`
     display: ${(props) => (props.open ? 'flex' : 'none')};
 `;
 
-enum SearchType {
+enum SuggestionType {
     DATE,
     LOCATION,
 }
-interface SearchParams {
-    type: SearchType;
+interface Suggestion {
+    type: SuggestionType;
     label: string;
     value: Bbox | Date;
 }
@@ -78,12 +78,12 @@ export default function SearchBar(props: Props) {
 
     const getAutoCompleteSuggestion = async (searchPhrase: string) => {
         const searchedDate = parseHumanDate(searchPhrase);
-        let option = new Array<SearchParams>();
+        let option = new Array<Suggestion>();
         if (searchedDate != null) {
             option.push({
-                type: SearchType.DATE,
+                type: SuggestionType.DATE,
                 value: searchedDate,
-                label: formatDateForLabel(searchedDate),
+                label: getFormattedDate(searchedDate),
             });
         }
         const searchResults = await searchLocation(searchPhrase);
@@ -91,10 +91,10 @@ export default function SearchBar(props: Props) {
             ...searchResults.map(
                 (searchResult) =>
                     ({
-                        type: SearchType.LOCATION,
+                        type: SuggestionType.LOCATION,
                         value: searchResult.bbox,
                         label: searchResult.placeName,
-                    } as SearchParams)
+                    } as Suggestion)
             )
         );
         return option;
@@ -102,14 +102,14 @@ export default function SearchBar(props: Props) {
 
     const getOptions = debounce(getAutoCompleteSuggestion, 100);
 
-    const filterFiles = (selectedOption: SearchParams) => {
+    const filterFiles = (selectedOption: Suggestion) => {
         if (!selectedOption) {
             return;
         }
         let resultFiles: File[] = [];
 
         switch (selectedOption.type) {
-            case SearchType.DATE:
+            case SuggestionType.DATE:
                 const searchedDate = selectedOption.value as Date;
                 const filesWithSameDate = getFilesWithCreationDay(
                     allFiles,
@@ -117,7 +117,7 @@ export default function SearchBar(props: Props) {
                 );
                 resultFiles = filesWithSameDate;
                 break;
-            case SearchType.LOCATION:
+            case SuggestionType.LOCATION:
                 const bbox = selectedOption.value as Bbox;
 
                 const filesTakenAtLocation = getFilesInsideBbox(allFiles, bbox);
@@ -136,10 +136,10 @@ export default function SearchBar(props: Props) {
         resetForm();
     };
 
-    const getIconByType = (type: SearchType) =>
-        type === SearchType.DATE ? <DateIcon /> : <LocationIcon />;
+    const getIconByType = (type: SuggestionType) =>
+        type === SuggestionType.DATE ? <DateIcon /> : <LocationIcon />;
 
-    const LabelWithIcon = (props: { type: SearchType; label: string }) => (
+    const LabelWithIcon = (props: { type: SuggestionType; label: string }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
             <span style={{ marginRight: '10px' }}>
                 {getIconByType(props.type)}
