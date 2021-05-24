@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
-import { useDebouncedCallback } from 'use-debounce';
+import { useThrottledCallback } from 'use-debounce';
 import { File, getLocalFiles } from 'services/fileService';
 import {
     Collection,
@@ -200,7 +200,7 @@ export default function SearchBar(props: Props) {
         }),
     };
 
-    const getOptions = useDebouncedCallback(getAutoCompleteSuggestion, 250);
+    const getOptions = useThrottledCallback(getAutoCompleteSuggestion, 250);
 
     return (
         <Wrapper open={props.isOpen}>
