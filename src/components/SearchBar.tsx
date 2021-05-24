@@ -65,7 +65,7 @@ export default function SearchBar(props: Props) {
             setAllCollections(await getLocalCollections());
         };
         main();
-    }, []);
+    }, [props.isOpen]);
 
     const searchBarRef = useRef(null);
     useEffect(() => {
@@ -103,7 +103,7 @@ export default function SearchBar(props: Props) {
         return option;
     };
 
-    const getOptions = debounce(getAutoCompleteSuggestion, 100);
+    const getOptions = debounce(getAutoCompleteSuggestion, 250);
 
     const filterFiles = (selectedOption: Suggestion) => {
         if (!selectedOption) {
