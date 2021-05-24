@@ -9,7 +9,7 @@ import {
     ErrorHandler,
     THUMBNAIL_GENERATION_FAILED,
 } from 'utils/common/errorUtil';
-import { getDedicatedCryptoWorker } from 'utils/crypto';
+import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
 import * as convert from 'xml-js';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { getToken } from 'utils/common/key';
@@ -123,7 +123,7 @@ export enum UPLOAD_STAGES {
 }
 
 class UploadService {
-    private cryptoWorkers = [];
+    private cryptoWorkers = new Array<ComlinkWorker>(MAX_CONCURRENT_UPLOADS);
     private uploadURLs: UploadURL[] = [];
     private uploadURLFetchInProgress: Promise<any> = null;
     private perFileProgress: number;
@@ -135,20 +135,6 @@ class UploadService {
     private progressBarProps;
     private uploadErrors: Error[];
     private existingFilesCollectionWise: Map<number, File[]>;
-    constructor() {
-        const main = async () => {
-            try {
-                for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
-                    this.cryptoWorkers.push(
-                        await new (getDedicatedCryptoWorker())()
-                    );
-                }
-            } catch (e) {
-                // ignore
-            }
-        };
-        main();
-    }
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
         existingFiles: File[],
@@ -218,9 +204,10 @@ class UploadService {
                 i < Math.min(MAX_CONCURRENT_UPLOADS, this.totalFileCount);
                 i++
             ) {
+                this.cryptoWorkers[i] = getDedicatedCryptoWorker();
                 uploadProcesses.push(
                     this.uploader(
-                        this.cryptoWorkers[i],
+                        await new this.cryptoWorkers[i].comlink(),
                         new FileReader(),
                         this.filesToBeUploaded.pop()
                     )
@@ -234,6 +221,10 @@ class UploadService {
             this.filesToBeUploaded = [];
             console.error(e);
             throw e;
+        } finally {
+            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+                this.cryptoWorkers[i]?.worker.terminate();
+            }
         }
     }
 
