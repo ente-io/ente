@@ -19,9 +19,9 @@ import {
 import constants from 'utils/strings/constants';
 import LocationIcon from './LocationIcon';
 import DateIcon from './DateIcon';
-import CrossIcon from './CrossIcon';
+import SearchIcon from './SearchIcon';
 
-const Wrapper = styled.div<{ open: boolean }>`
+const Wrapper = styled.div`
     background-color: #111;
     color: #fff;
     min-height: 64px;
@@ -36,7 +36,6 @@ const Wrapper = styled.div<{ open: boolean }>`
     justify-content: center;
     z-index: 200;
     padding: 0 20%;
-    display: ${(props) => (props.open ? 'flex' : 'none')};
 `;
 
 enum SuggestionType {
@@ -65,15 +64,6 @@ export default function SearchBar(props: Props) {
             setAllCollections(await getLocalCollections());
         };
         main();
-    }, [props.isOpen]);
-
-    const searchBarRef = useRef(null);
-    useEffect(() => {
-        if (props.isOpen) {
-            setTimeout(() => {
-                searchBarRef.current?.focus();
-            }, 200);
-        }
     }, [props.isOpen]);
 
     const getAutoCompleteSuggestion = async (searchPhrase: string) => {
@@ -107,6 +97,7 @@ export default function SearchBar(props: Props) {
 
     const filterFiles = (selectedOption: Suggestion) => {
         if (!selectedOption) {
+            resetSearch();
             return;
         }
         let resultFiles: File[] = [];
@@ -126,17 +117,16 @@ export default function SearchBar(props: Props) {
                 const filesTakenAtLocation = getFilesInsideBbox(allFiles, bbox);
                 resultFiles = filesTakenAtLocation;
         }
-
+        props.setOpen(true);
         props.setFiles(resultFiles);
         props.setCollections(
             getNonEmptyCollections(allCollections, resultFiles)
         );
     };
-    const closeSearchBar = ({ resetForm }) => {
+    const resetSearch = () => {
         props.setOpen(false);
         props.setFiles(allFiles);
         props.setCollections(allCollections);
-        resetForm();
     };
 
     const getIconByType = (type: SuggestionType) =>
@@ -150,7 +140,7 @@ export default function SearchBar(props: Props) {
             <span>{props.label}</span>
         </div>
     );
-    const { Option, SingleValue } = components;
+    const { Option, SingleValue, Control } = components;
     const SingleValueWithIcon = (props) => (
         <SingleValue {...props}>
             <LabelWithIcon type={props.data.type} label={props.data.label} />
@@ -161,13 +151,21 @@ export default function SearchBar(props: Props) {
             <LabelWithIcon type={props.data.type} label={props.data.label} />
         </Option>
     );
+    const ControlWithIcon = (props) => (
+        <Control {...props}>
+            <span style={{ paddingLeft: '10px' }}>
+                <SearchIcon />
+            </span>
+            {props.children}
+        </Control>
+    );
 
     const customStyles = {
         control: (provided, { isFocused }) => ({
             ...provided,
             backgroundColor: '#282828',
             color: '#d1d1d1',
-            borderColor: isFocused && '#2dc262',
+            borderColor: isFocused ? '#2dc262' : '#444',
             boxShadow: isFocused && '0 0 3px #2dc262',
             ':hover': {
                 borderColor: '#2dc262',
@@ -206,7 +204,7 @@ export default function SearchBar(props: Props) {
     };
 
     return (
-        <Wrapper open={props.isOpen}>
+        <Wrapper>
             <>
                 <div
                     style={{
@@ -219,8 +217,8 @@ export default function SearchBar(props: Props) {
                         components={{
                             Option: OptionWithIcon,
                             SingleValue: SingleValueWithIcon,
+                            Control: ControlWithIcon,
                         }}
-                        ref={searchBarRef}
                         placeholder={constants.SEARCH_HINT}
                         loadOptions={getOptions}
                         onChange={filterFiles}
@@ -229,17 +227,6 @@ export default function SearchBar(props: Props) {
                         styles={customStyles}
                         noOptionsMessage={() => null}
                     />
-                </div>
-                <div
-                    style={{
-                        margin: '0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        cursor: 'pointer',
-                    }}
-                    onClick={() => closeSearchBar({ resetForm: () => null })}
-                >
-                    <CrossIcon />
                 </div>
             </>
         </Wrapper>

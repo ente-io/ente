@@ -53,7 +53,6 @@ import { getSelectedFileIds } from 'utils/file';
 import { addFilesToCollection } from 'utils/collection';
 import SelectedFileOptions from './components/SelectedFileOptions';
 import { errorCodes } from 'utils/common/errorUtil';
-import SearchButton from 'components/SearchButton';
 import SearchBar from 'components/SearchBar';
 
 export enum FILE_TYPE {
@@ -364,7 +363,7 @@ export default function Gallery() {
                 loadingBar={loadingBar}
                 searchMode={searchMode}
             />
-            {selected.count > 0 ? (
+            {selected.count > 0 && (
                 <SelectedFileOptions
                     addToCollectionHelper={addToCollectionHelper}
                     showCreateCollectionModal={showCreateCollectionModal}
@@ -373,11 +372,6 @@ export default function Gallery() {
                         setCollectionSelectorAttributes
                     }
                     deleteFileHelper={deleteFileHelper}
-                />
-            ) : (
-                <SearchButton
-                    isOpen={searchMode}
-                    onClick={() => setSearchMode(true)}
                 />
             )}
         </FullScreenDropZone>
