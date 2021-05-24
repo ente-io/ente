@@ -114,7 +114,7 @@ export default function Gallery() {
     });
 
     const loadingBar = useRef(null);
-    const [searchView, setSearchView] = useState(false);
+    const [searchMode, setSearchMode] = useState(false);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
@@ -258,6 +258,7 @@ export default function Gallery() {
     const updateFiles = (files: File[]) => {
         setFiles(files);
         setSinceTime(new Date().getTime());
+        selectCollection(null);
     };
     return (
         <FullScreenDropZone
@@ -292,8 +293,8 @@ export default function Gallery() {
                 attributes={dialogMessage}
             />
             <SearchBar
-                isOpen={searchView}
-                setOpen={setSearchView}
+                isOpen={searchMode}
+                setOpen={setSearchMode}
                 loadingBar={loadingBar}
                 setFiles={updateFiles}
                 setCollections={setCollections}
@@ -355,9 +356,9 @@ export default function Gallery() {
                 isFirstLoad={isFirstLoad}
                 openFileUploader={openFileUploader}
                 loadingBar={loadingBar}
-                searchMode={searchView}
+                searchMode={searchMode}
             />
-            {files.length < 30 && (
+            {files.length < 30 && !searchMode && (
                 <Alert
                     variant="success"
                     style={{
@@ -383,8 +384,8 @@ export default function Gallery() {
                 />
             ) : (
                 <SearchButton
-                    open={searchView}
-                    onClick={() => setSearchView(true)}
+                    isOpen={searchMode}
+                    onClick={() => setSearchMode(true)}
                 />
             )}
         </FullScreenDropZone>
