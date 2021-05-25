@@ -59,6 +59,9 @@ export default function SearchBar(props: Props) {
     const [allCollections, setAllCollections] = useState<Collection[]>([]);
 
     useEffect(() => {
+        if (!props.isOpen) {
+            return;
+        }
         const main = async () => {
             setAllFiles(await getLocalFiles());
             setAllCollections(await getLocalCollections());
@@ -97,9 +100,12 @@ export default function SearchBar(props: Props) {
 
     const filterFiles = (selectedOption: Suggestion) => {
         if (!selectedOption) {
-            resetSearch();
+            if (props.isOpen) {
+                resetSearch();
+            }
             return;
         }
+        props.setOpen(true);
         let resultFiles: File[] = [];
 
         switch (selectedOption.type) {
@@ -117,7 +123,6 @@ export default function SearchBar(props: Props) {
                 const filesTakenAtLocation = getFilesInsideBbox(allFiles, bbox);
                 resultFiles = filesTakenAtLocation;
         }
-        props.setOpen(true);
         props.setFiles(resultFiles);
         props.setCollections(
             getNonEmptyCollections(allCollections, resultFiles)
@@ -161,8 +166,8 @@ export default function SearchBar(props: Props) {
     );
 
     const customStyles = {
-        control: (provided, { isFocused }) => ({
-            ...provided,
+        control: (style, { isFocused }) => ({
+            ...style,
             backgroundColor: '#282828',
             color: '#d1d1d1',
             borderColor: isFocused ? '#2dc262' : '#444',
@@ -171,33 +176,33 @@ export default function SearchBar(props: Props) {
                 borderColor: '#2dc262',
             },
         }),
-        input: (provided) => ({
-            ...provided,
+        input: (style) => ({
+            ...style,
             color: '#d1d1d1',
         }),
-        menu: (provided) => ({
-            ...provided,
+        menu: (style) => ({
+            ...style,
             marginTop: '10px',
             backgroundColor: '#282828',
         }),
-        option: (provided, { isFocused }) => ({
-            ...provided,
+        option: (style, { isFocused }) => ({
+            ...style,
             backgroundColor: isFocused && '#343434',
         }),
-        dropdownIndicator: (provided) => ({
-            ...provided,
+        dropdownIndicator: (style) => ({
+            ...style,
             display: 'none',
         }),
-        indicatorSeparator: (provided) => ({
-            ...provided,
+        indicatorSeparator: (style) => ({
+            ...style,
             display: 'none',
         }),
-        clearIndicator: (provided) => ({
-            ...provided,
-            ':hover': { color: '#d2d2d2' },
+        clearIndicator: (style) => ({
+            ...style,
+            ':hover': { color: '#d2d2d2', cursor: 'pointer' },
         }),
-        singleValue: (provided, state) => ({
-            ...provided,
+        singleValue: (style) => ({
+            ...style,
             backgroundColor: '#282828',
             color: '#d1d1d1',
         }),
