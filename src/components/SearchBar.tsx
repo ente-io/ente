@@ -59,7 +59,7 @@ export default function SearchBar(props: Props) {
     const [allCollections, setAllCollections] = useState<Collection[]>([]);
 
     useEffect(() => {
-        if (!props.isOpen) {
+        if (!props.isOpen && allFiles?.length > 0) {
             return;
         }
         const main = async () => {
