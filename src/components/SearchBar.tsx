@@ -90,11 +90,11 @@ export default function SearchBar(props: Props) {
         option.push(
             ...searchResults.map(
                 (searchResult) =>
-                ({
-                    type: SuggestionType.LOCATION,
-                    value: searchResult.bbox,
-                    label: searchResult.placeName,
-                } as Suggestion)
+                    ({
+                        type: SuggestionType.LOCATION,
+                        value: searchResult.bbox,
+                        label: searchResult.placeName,
+                    } as Suggestion)
             )
         );
         return option;
@@ -220,16 +220,17 @@ export default function SearchBar(props: Props) {
             ...style,
             display: 'none',
         }),
-        singleValue: (style) => ({
+        singleValue: (style, state) => ({
             ...style,
             backgroundColor: '#282828',
             color: '#d1d1d1',
+            display: state.selectProps.menuIsOpen ? 'none' : 'block',
         }),
         placeholder: (style) => ({
             ...style,
             color: '#686868',
             wordSpacing: '2px',
-        })
+        }),
     };
 
     return (
