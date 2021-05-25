@@ -96,8 +96,12 @@ Future<void> deleteFilesOnDeviceOnly(
       localIDs.add(file.localID);
     }
   }
-  final deletedIDs =
-      (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
+  var deletedIDs;
+  try {
+    deletedIDs = (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
+  } catch (e, s) {
+    _logger.severe("Could not delete file", e, s);
+  }
   final List<File> deletedFiles = [];
   for (final file in files) {
     // Remove only those files that have been removed from disk
