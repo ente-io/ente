@@ -174,6 +174,7 @@ export default function SearchBar(props: Props) {
             boxShadow: isFocused && '0 0 3px #2dc262',
             ':hover': {
                 borderColor: '#2dc262',
+                cursor: 'text',
             },
         }),
         input: (style) => ({
