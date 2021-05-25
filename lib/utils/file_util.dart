@@ -49,15 +49,17 @@ void preloadThumbnail(File file) {
       return;
     }
     file.getAsset().then((asset) {
-      asset
-          .thumbDataWithSize(
-        THUMBNAIL_SMALL_SIZE,
-        THUMBNAIL_SMALL_SIZE,
-        quality: THUMBNAIL_QUALITY,
-      )
-          .then((data) {
-        ThumbnailLruCache.put(file, data, THUMBNAIL_SMALL_SIZE);
-      });
+      if (asset != null) {
+        asset
+            .thumbDataWithSize(
+          THUMBNAIL_SMALL_SIZE,
+          THUMBNAIL_SMALL_SIZE,
+          quality: THUMBNAIL_QUALITY,
+        )
+            .then((data) {
+          ThumbnailLruCache.put(file, data, THUMBNAIL_SMALL_SIZE);
+        });
+      }
     });
   }
 }
