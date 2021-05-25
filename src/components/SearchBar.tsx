@@ -171,7 +171,12 @@ export default function SearchBar(props: Props) {
     );
     const ControlWithIcon = (props) => (
         <Control {...props}>
-            <span style={{ paddingLeft: '10px' }}>
+            <span
+                style={{
+                    paddingLeft: '10px',
+                    color: props.isFocused && '#2dc262',
+                }}
+            >
                 <SearchIcon />
             </span>
             {props.children}
@@ -213,7 +218,7 @@ export default function SearchBar(props: Props) {
         }),
         clearIndicator: (style) => ({
             ...style,
-            ':hover': { color: '#d2d2d2', cursor: 'pointer' },
+            display: 'none',
         }),
         singleValue: (style) => ({
             ...style,
