@@ -90,11 +90,11 @@ export default function SearchBar(props: Props) {
         option.push(
             ...searchResults.map(
                 (searchResult) =>
-                    ({
-                        type: SuggestionType.LOCATION,
-                        value: searchResult.bbox,
-                        label: searchResult.placeName,
-                    } as Suggestion)
+                ({
+                    type: SuggestionType.LOCATION,
+                    value: searchResult.bbox,
+                    label: searchResult.placeName,
+                } as Suggestion)
             )
         );
         return option;
@@ -220,6 +220,11 @@ export default function SearchBar(props: Props) {
             backgroundColor: '#282828',
             color: '#d1d1d1',
         }),
+        placeholder: (style) => ({
+            ...style,
+            color: '#686868',
+            wordSpacing: '2px',
+        })
     };
 
     return (
@@ -238,7 +243,7 @@ export default function SearchBar(props: Props) {
                         Control: ControlWithIcon,
                     }}
                     ref={selectRef}
-                    placeholder={constants.SEARCH_HINT}
+                    placeholder={constants.SEARCH_HINT()}
                     loadOptions={getOptions}
                     onChange={filterFiles}
                     isClearable
