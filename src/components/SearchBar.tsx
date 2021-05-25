@@ -20,6 +20,7 @@ import constants from 'utils/strings/constants';
 import LocationIcon from './LocationIcon';
 import DateIcon from './DateIcon';
 import SearchIcon from './SearchIcon';
+import CrossIcon from './CrossIcon';
 
 const Wrapper = styled.div`
     background-color: #111;
@@ -103,9 +104,6 @@ export default function SearchBar(props: Props) {
 
     const filterFiles = (selectedOption: Suggestion) => {
         if (!selectedOption) {
-            if (props.isOpen) {
-                resetSearch();
-            }
             return;
         }
         props.setOpen(true);
@@ -132,10 +130,16 @@ export default function SearchBar(props: Props) {
         );
     };
     const resetSearch = () => {
-        props.setOpen(false);
-        props.setFiles(allFiles);
-        props.setCollections(allCollections);
-        setTimeout(() => selectRef.current?.blur(), 0);
+        if (props.isOpen) {
+            props.loadingBar.current?.continuousStart();
+            props.setFiles(allFiles);
+            props.setCollections(allCollections);
+            setTimeout(() => {
+                selectRef.current?.blur();
+                props.loadingBar.current?.complete();
+            }, 0);
+            props.setOpen(false);
+        }
     };
 
     //==========================
@@ -242,6 +246,9 @@ export default function SearchBar(props: Props) {
                         styles={customStyles}
                         noOptionsMessage={() => null}
                     />
+                </div>
+                <div style={{ cursor: 'pointer' }} onClick={resetSearch}>
+                    <CrossIcon />
                 </div>
             </>
         </Wrapper>
