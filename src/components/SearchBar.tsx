@@ -38,7 +38,6 @@ const Wrapper = styled.div`
     z-index: 200;
     padding: 0 20%;
 `;
-
 enum SuggestionType {
     DATE,
     LOCATION,
@@ -132,7 +131,6 @@ export default function SearchBar(props: Props) {
     const resetSearch = () => {
         if (props.isOpen) {
             selectRef.current.select.state.value = null;
-            console.log(selectRef.current);
             props.loadingBar.current?.continuousStart();
             props.setFiles(allFiles);
             props.setCollections(allCollections);
@@ -172,9 +170,9 @@ export default function SearchBar(props: Props) {
     const ControlWithIcon = (props) => (
         <Control {...props}>
             <span
+                className={'icon'}
                 style={{
                     paddingLeft: '10px',
-                    color: props.isFocused && '#2dc262',
                 }}
             >
                 <SearchIcon />
@@ -193,6 +191,7 @@ export default function SearchBar(props: Props) {
             ':hover': {
                 borderColor: '#2dc262',
                 cursor: 'text',
+                '&>.icon': { color: '#2dc262' },
             },
         }),
         input: (style) => ({
