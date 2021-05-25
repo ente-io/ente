@@ -26,26 +26,6 @@ class SupportSectionWidget extends StatelessWidget {
         SettingsSectionTitle("support"),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  final endpoint = Configuration.instance.getHttpEndpoint() +
-                      "/users/roadmap";
-                  final isLoggedIn = Configuration.instance.getToken() != null;
-                  final url = isLoggedIn
-                      ? endpoint + "?token=" + Configuration.instance.getToken()
-                      : ROADMAP_URL;
-                  return WebPage("roadmap", url);
-                },
-              ),
-            );
-          },
-          child: SettingsTextItem(text: "roadmap", icon: Icons.navigate_next),
-        ),
-        Divider(height: 4),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
           onTap: () async {
             final Email email = Email(
               recipients: ['hey@ente.io'],
@@ -101,6 +81,26 @@ class SupportSectionWidget extends StatelessWidget {
           },
           child: SettingsTextItem(
               text: "report bug 🐞", icon: Icons.navigate_next),
+        ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  final endpoint = Configuration.instance.getHttpEndpoint() +
+                      "/users/roadmap";
+                  final isLoggedIn = Configuration.instance.getToken() != null;
+                  final url = isLoggedIn
+                      ? endpoint + "?token=" + Configuration.instance.getToken()
+                      : ROADMAP_URL;
+                  return WebPage("roadmap", url);
+                },
+              ),
+            );
+          },
+          child: SettingsTextItem(text: "roadmap", icon: Icons.navigate_next),
         ),
         Divider(height: 4),
         GestureDetector(
