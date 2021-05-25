@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
-// import 'package:crisp/crisp.dart';
+import 'package:crisp/crisp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:path_provider/path_provider.dart';
@@ -58,20 +58,20 @@ class SupportSectionWidget extends StatelessWidget {
           },
           child: SettingsTextItem(text: "email", icon: Icons.navigate_next),
         ),
-        // Divider(height: 4),
-        // GestureDetector(
-        //   behavior: HitTestBehavior.translucent,
-        //   onTap: () async {
-        //     Navigator.of(context).push(
-        //       MaterialPageRoute(
-        //         builder: (BuildContext context) {
-        //           return CrispChatPage();
-        //         },
-        //       ),
-        //     );
-        //   },
-        //   child: SettingsTextItem(text: "chat", icon: Icons.navigate_next),
-        // ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return CrispChatPage();
+                },
+              ),
+            );
+          },
+          child: SettingsTextItem(text: "chat", icon: Icons.navigate_next),
+        ),
         Divider(height: 4),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -115,18 +115,18 @@ class CrispChatPage extends StatefulWidget {
 
 class _CrispChatPageState extends State<CrispChatPage> {
   static const websiteID = "86d56ea2-68a2-43f9-8acb-95e06dee42e8";
-  // CrispMain _crisp;
+  CrispMain _crisp;
 
   @override
   void initState() {
-    // _crisp = CrispMain(
-    //   websiteId: websiteID,
-    // );
-    // _crisp.register(
-    //   user: CrispUser(
-    //     email: Configuration.instance.getEmail(),
-    //   ),
-    // );
+    _crisp = CrispMain(
+      websiteId: websiteID,
+    );
+    _crisp.register(
+      user: CrispUser(
+        email: Configuration.instance.getEmail(),
+      ),
+    );
     super.initState();
   }
 
@@ -136,7 +136,10 @@ class _CrispChatPageState extends State<CrispChatPage> {
       appBar: AppBar(
         title: Text("support chat"),
       ),
-      body: Center(child: Text("unavailable")),
+      body: CrispView(
+        crispMain: _crisp,
+        loadingWidget: loadWidget,
+      ),
     );
   }
 }
