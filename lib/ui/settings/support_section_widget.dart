@@ -14,6 +14,7 @@ import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share/share.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SupportSectionWidget extends StatelessWidget {
   const SupportSectionWidget({Key key}) : super(key: key);
@@ -100,6 +101,14 @@ class SupportSectionWidget extends StatelessWidget {
           },
           child: SettingsTextItem(
               text: "report bug 🐞", icon: Icons.navigate_next),
+        ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            launch("https://reddit.com/r/enteio");
+          },
+          child: SettingsTextItem(text: "community", icon: Icons.navigate_next),
         ),
       ]),
     );
