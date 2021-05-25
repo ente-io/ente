@@ -57,7 +57,7 @@ interface Props {
 export default function SearchBar(props: Props) {
     const [allFiles, setAllFiles] = useState<File[]>([]);
     const [allCollections, setAllCollections] = useState<Collection[]>([]);
-
+    const selectRef = useRef(null);
     useEffect(() => {
         if (!props.isOpen && allFiles?.length > 0) {
             return;
@@ -69,6 +69,9 @@ export default function SearchBar(props: Props) {
         main();
     }, [props.isOpen]);
 
+    //==========================
+    // Functionality
+    //==========================
     const getAutoCompleteSuggestion = async (searchPhrase: string) => {
         let option = new Array<Suggestion>();
         if (!searchPhrase?.length) {
@@ -132,7 +135,12 @@ export default function SearchBar(props: Props) {
         props.setOpen(false);
         props.setFiles(allFiles);
         props.setCollections(allCollections);
+        setTimeout(() => selectRef.current?.blur(), 0);
     };
+
+    //==========================
+    // UI
+    //==========================
 
     const getIconByType = (type: SuggestionType) =>
         type === SuggestionType.DATE ? <DateIcon /> : <LocationIcon />;
@@ -225,6 +233,7 @@ export default function SearchBar(props: Props) {
                             SingleValue: SingleValueWithIcon,
                             Control: ControlWithIcon,
                         }}
+                        ref={selectRef}
                         placeholder={constants.SEARCH_HINT}
                         loadOptions={getOptions}
                         onChange={filterFiles}
