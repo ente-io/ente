@@ -131,13 +131,14 @@ export default function SearchBar(props: Props) {
     };
     const resetSearch = () => {
         if (props.isOpen) {
+            selectRef.current.select.state.value = null;
+            console.log(selectRef.current);
             props.loadingBar.current?.continuousStart();
             props.setFiles(allFiles);
             props.setCollections(allCollections);
             setTimeout(() => {
-                selectRef.current?.blur();
                 props.loadingBar.current?.complete();
-            }, 0);
+            }, 10);
             props.setOpen(false);
         }
     };
@@ -223,34 +224,36 @@ export default function SearchBar(props: Props) {
 
     return (
         <Wrapper>
-            <>
-                <div
-                    style={{
-                        flex: 1,
-                        maxWidth: '600px',
-                        margin: '10px',
+            <div
+                style={{
+                    flex: 1,
+                    maxWidth: '600px',
+                    margin: '10px',
+                }}
+            >
+                <AsyncSelect
+                    components={{
+                        Option: OptionWithIcon,
+                        SingleValue: SingleValueWithIcon,
+                        Control: ControlWithIcon,
                     }}
-                >
-                    <AsyncSelect
-                        components={{
-                            Option: OptionWithIcon,
-                            SingleValue: SingleValueWithIcon,
-                            Control: ControlWithIcon,
-                        }}
-                        ref={selectRef}
-                        placeholder={constants.SEARCH_HINT}
-                        loadOptions={getOptions}
-                        onChange={filterFiles}
-                        isClearable
-                        escapeClearsValue
-                        styles={customStyles}
-                        noOptionsMessage={() => null}
-                    />
-                </div>
-                <div style={{ cursor: 'pointer' }} onClick={resetSearch}>
-                    <CrossIcon />
-                </div>
-            </>
+                    ref={selectRef}
+                    placeholder={constants.SEARCH_HINT}
+                    loadOptions={getOptions}
+                    onChange={filterFiles}
+                    isClearable
+                    escapeClearsValue
+                    styles={customStyles}
+                    noOptionsMessage={() => null}
+                />
+            </div>
+            <div style={{ width: '24px' }}>
+                {props.isOpen && (
+                    <div style={{ cursor: 'pointer' }} onClick={resetSearch}>
+                        <CrossIcon />
+                    </div>
+                )}
+            </div>
         </Wrapper>
     );
 }
