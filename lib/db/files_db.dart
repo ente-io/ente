@@ -224,7 +224,7 @@ class FilesDB {
     final db = await instance.database;
     String inParam = "";
     for (final path in paths) {
-      inParam += "'" + path + "',";
+      inParam += "'" + path.replaceAll("'", "''") + "',";
     }
     inParam = inParam.substring(0, inParam.length - 1);
     final results = await db.query(
