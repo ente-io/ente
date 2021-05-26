@@ -55,21 +55,10 @@ const SearchButton = styled.div`
 `;
 
 const SearchStats = styled.div`
-    @media (min-width: 1000px) {
-        width: 1000px;
-    }
-
-    @media (min-width: 450px) and (max-width: 1000px) {
-        width: 600px;
-    }
-
-    @media (max-width: 450px) {
-        width: 100%;
-    }
-    margin: auto;
-    color: #979797;
     display: flex;
+    justify-content: center;
     align-items: center;
+    color: #979797;
 `;
 
 export enum SuggestionType {
