@@ -27,6 +27,7 @@ const Wrapper = styled.div<{ width: number }>`
     position: fixed;
     z-index: 1000;
     top: 0;
+    opacity: 0;
     left: ${(props) => `max(0px, 50% - min(360px,${props.width / 2}px))`};
     width: 100%;
     max-width: 720px;
@@ -72,7 +73,7 @@ export interface Suggestion {
 }
 interface Props {
     isOpen: boolean;
-    isFirstLoad: boolean;
+    isFirstFetch: boolean;
     setOpen: (value) => void;
     loadingBar: any;
     setFiles: SetFiles;
@@ -132,11 +133,11 @@ export default function SearchBar(props: Props) {
         option.push(
             ...searchResults.map(
                 (searchResult) =>
-                ({
-                    type: SuggestionType.LOCATION,
-                    value: searchResult.bbox,
-                    label: searchResult.place,
-                } as Suggestion)
+                    ({
+                        type: SuggestionType.LOCATION,
+                        value: searchResult.bbox,
+                        label: searchResult.place,
+                    } as Suggestion)
             )
         );
         return option;
@@ -285,51 +286,52 @@ export default function SearchBar(props: Props) {
         }),
     };
     return (
-        !props.isFirstLoad && (
-            <>
-                {windowWidth > 1000 || props.isOpen ? (
-                    <Wrapper width={windowWidth}>
-                        <div
-                            style={{
-                                flex: 1,
-                                margin: '10px',
+        <>
+            {windowWidth > 1000 || props.isOpen ? (
+                <Wrapper
+                    width={windowWidth}
+                    className={!props.isFirstFetch && 'fadeIn'}
+                >
+                    <div
+                        style={{
+                            flex: 1,
+                            margin: '10px',
+                        }}
+                    >
+                        <AsyncSelect
+                            components={{
+                                Option: OptionWithIcon,
+                                Control: ControlWithIcon,
                             }}
-                        >
-                            <AsyncSelect
-                                components={{
-                                    Option: OptionWithIcon,
-                                    Control: ControlWithIcon,
-                                }}
-                                ref={selectRef}
-                                placeholder={constants.SEARCH_HINT()}
-                                loadOptions={getOptions}
-                                onChange={filterFiles}
-                                isClearable
-                                escapeClearsValue
-                                styles={customStyles}
-                                noOptionsMessage={() => null}
-                            />
-                        </div>
-                        <div style={{ width: '24px' }}>
-                            {props.isOpen && (
-                                <div
-                                    style={{ cursor: 'pointer' }}
-                                    onClick={resetSearch}
-                                >
-                                    <CrossIcon />
-                                </div>
-                            )}
-                        </div>
-                    </Wrapper>
-                ) : (
-                    <SearchButton onClick={() => props.setOpen(true)}>
-                        <SearchIcon />
-                    </SearchButton>
-                )}
-                {props.isOpen && stats && (
-                    <SearchStats>{constants.SEARCH_STATS(stats)}</SearchStats>
-                )}
-            </>
-        )
+                            ref={selectRef}
+                            placeholder={constants.SEARCH_HINT()}
+                            loadOptions={getOptions}
+                            onChange={filterFiles}
+                            isClearable
+                            escapeClearsValue
+                            styles={customStyles}
+                            noOptionsMessage={() => null}
+                        />
+                    </div>
+                    <div style={{ width: '24px' }}>
+                        {props.isOpen && (
+                            <div
+                                style={{ cursor: 'pointer' }}
+                                onClick={resetSearch}
+                            >
+                                <CrossIcon />
+                            </div>
+                        )}
+                    </div>
+                </Wrapper>
+            ) : (
+                <SearchButton onClick={() => props.setOpen(true)}>
+                    <SearchIcon />
+                </SearchButton>
+            )}
+            {props.isOpen && stats && (
+                <SearchStats>{constants.SEARCH_STATS(stats)}</SearchStats>
+            )}
+        </>
     );
 }
