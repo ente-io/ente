@@ -179,6 +179,7 @@ export default function SearchBar(props: Props) {
                 props.loadingBar.current?.complete();
             }, 10);
             props.setOpen(false);
+            setStats(null);
         }
     };
 
@@ -272,7 +273,7 @@ export default function SearchBar(props: Props) {
             wordSpacing: '2px',
         }),
     };
-
+    console.log(stats);
     return (
         <>
             {windowWidth > 450 || props.isOpen ? (
@@ -291,7 +292,6 @@ export default function SearchBar(props: Props) {
                             }}
                             ref={selectRef}
                             placeholder={constants.SEARCH_HINT()}
-                            defaultOptions={getDefaultSuggestions()}
                             loadOptions={getOptions}
                             onChange={filterFiles}
                             isClearable
@@ -316,7 +316,7 @@ export default function SearchBar(props: Props) {
                     <SearchIcon />
                 </SearchButton>
             )}
-            {props.isOpen && (
+            {props.isOpen && stats && (
                 <SearchStats>{constants.SEARCH_STATS(stats)}</SearchStats>
             )}
         </>
