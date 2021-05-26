@@ -6,6 +6,16 @@
         "src": "/images/ente-192.png",
         "type": "image/png",
         "sizes": "192x192"
+      },
+      {
+        "src": "/images/ente-256.png",
+        "type": "image/png",
+        "sizes": "256x256"
+      },
+      {
+        "src": "/images/ente-512.png",
+        "type": "image/png",
+        "sizes": "512x512"
       }
     ],
     "start_url": "/",
