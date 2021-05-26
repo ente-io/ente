@@ -1,5 +1,5 @@
 import router from 'next/router';
-import { DeadCenter, FILE_TYPE } from 'pages/gallery';
+import { DeadCenter, FILE_TYPE, Search } from 'pages/gallery';
 import PreviewCard from 'pages/gallery/components/PreviewCard';
 import React, { useState } from 'react';
 import { Button } from 'react-bootstrap';
@@ -11,6 +11,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import CloudUpload from './CloudUpload';
+import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -102,6 +103,7 @@ interface Props {
     openFileUploader;
     loadingBar;
     searchMode: boolean;
+    search: Search
 }
 
 const PhotoFrame = ({
@@ -116,6 +118,7 @@ const PhotoFrame = ({
     openFileUploader,
     loadingBar,
     searchMode,
+    search,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -253,6 +256,12 @@ const PhotoFrame = ({
             dataIndex: index,
         }))
         .filter((item) => {
+            if (search.date && !isSameDayAnyYear(new Date(item.metadata.creationTime / 1000))(search.date)) {
+                return false;
+            }
+            if (search.location && !isInsideBox(item.metadata, search.location)) {
+                return false;
+            }
             if (!idSet.has(item.id)) {
                 if (
                     !router.query.collection ||

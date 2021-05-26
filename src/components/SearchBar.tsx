@@ -4,16 +4,13 @@ import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
 import debounce from 'debounce-promise';
-import { File, getLocalFiles } from 'services/fileService';
+import { File } from 'services/fileService';
 import {
     Collection,
     getLocalCollections,
-    getNonEmptyCollections,
 } from 'services/collectionService';
 import { Bbox, parseHumanDate, searchLocation } from 'services/searchService';
 import {
-    getFilesWithCreationDay,
-    getFilesInsideBbox,
     getFormattedDate,
     getDefaultSuggestions,
 } from 'utils/search';
@@ -75,18 +72,19 @@ interface Props {
     isFirstFetch: boolean;
     setOpen: (value) => void;
     loadingBar: any;
-    setFiles: SetFiles;
     setCollections: SetCollections;
+    setSearch: React.Dispatch<React.SetStateAction<{
+        date?: Date,
+        location?: Bbox
+    }>>;
+    files: File[];
 }
 interface Stats {
     resultCount: number;
     timeTaken: number;
 }
 export default function SearchBar(props: Props) {
-    const [allFiles, setAllFiles] = useState<File[]>([]);
-    const [allCollections, setAllCollections] = useState<Collection[]>([]);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    const [stats, setStats] = useState<Stats>(null);
     const selectRef = useRef(null);
     useEffect(() => {
         if (props.isOpen) {
@@ -94,14 +92,6 @@ export default function SearchBar(props: Props) {
                 selectRef.current?.focus();
             }, 250);
         }
-        if (!props.isOpen && allFiles?.length > 0) {
-            return;
-        }
-        const main = async () => {
-            setAllFiles(await getLocalFiles());
-            setAllCollections(await getLocalCollections());
-        };
-        main();
     }, [props.isOpen]);
 
     useEffect(() => {
@@ -148,46 +138,35 @@ export default function SearchBar(props: Props) {
         if (!selectedOption) {
             return;
         }
-        const startTime = Date.now();
+        // const startTime = Date.now();
         props.setOpen(true);
-        let resultFiles: File[] = [];
 
         switch (selectedOption.type) {
             case SuggestionType.DATE:
                 const searchedDate = selectedOption.value as Date;
-                const filesWithSameDate = getFilesWithCreationDay(
-                    allFiles,
-                    searchedDate
-                );
-                resultFiles = filesWithSameDate;
+                
+                props.setSearch({
+                    date: searchedDate,
+                })
                 break;
             case SuggestionType.LOCATION:
                 const bbox = selectedOption.value as Bbox;
-
-                const filesTakenAtLocation = getFilesInsideBbox(allFiles, bbox);
-                resultFiles = filesTakenAtLocation;
+                props.setSearch({
+                    location: bbox,
+                })
+                break;
         }
-        props.setFiles(resultFiles);
-        props.setCollections(
-            getNonEmptyCollections(allCollections, resultFiles)
-        );
-        const timeTaken = (Date.now() - startTime) / 1000;
-        setStats({
-            timeTaken,
-            resultCount: resultFiles.length,
-        });
     };
     const resetSearch = () => {
         if (props.isOpen) {
             selectRef.current.select.state.value = null;
             props.loadingBar.current?.continuousStart();
-            props.setFiles(allFiles);
-            props.setCollections(allCollections);
+            // props.setFiles(allFiles);
+            props.setSearch({});
             setTimeout(() => {
                 props.loadingBar.current?.complete();
             }, 10);
             props.setOpen(false);
-            setStats(null);
         }
     };
 
@@ -327,9 +306,6 @@ export default function SearchBar(props: Props) {
                 <SearchButton onClick={() => props.setOpen(true)}>
                     <SearchIcon />
                 </SearchButton>
-            )}
-            {props.isOpen && stats && (
-                <SearchStats>{constants.SEARCH_STATS(stats)}</SearchStats>
             )}
         </>
     );

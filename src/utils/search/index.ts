@@ -1,26 +1,25 @@
 import { Suggestion, SuggestionType } from 'components/SearchBar';
 import { File } from 'services/fileService';
+import { Bbox } from 'services/searchService';
 
-export function getFilesInsideBbox(
-    files: File[],
-    bbox: [number, number, number, number]
+export function isInsideBox(
+    file: { longitude: number, latitude: number },
+    bbox: Bbox,
 ) {
-    return files.filter((file) => {
-        if (file.metadata.latitude == null && file.metadata.longitude == null) {
-            return false;
-        }
-        if (
-            file.metadata.longitude >= bbox[0] &&
-            file.metadata.latitude >= bbox[1] &&
-            file.metadata.longitude <= bbox[2] &&
-            file.metadata.latitude <= bbox[3]
-        ) {
-            return true;
-        }
-    });
+    if (file.latitude == null && file.longitude == null) {
+        return false;
+    }
+    if (
+        file.longitude >= bbox[0] &&
+        file.latitude >= bbox[1] &&
+        file.longitude <= bbox[2] &&
+        file.latitude <= bbox[3]
+    ) {
+        return true;
+    }
 }
 
-const isSameDay = (baseDate) => (compareDate) => {
+export const isSameDay = (baseDate) => (compareDate) => {
     return (
         baseDate.getMonth() === compareDate.getMonth() &&
         baseDate.getDate() === compareDate.getDate()
