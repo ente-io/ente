@@ -123,7 +123,7 @@ export default function Gallery() {
         }
         const main = async () => {
             setIsFirstLoad(isFirstLogin());
-            setIsFirstFetch(false);
+            setIsFirstFetch(true);
             if (justSignedUp()) {
                 setPlanModalView(true);
             }
