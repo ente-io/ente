@@ -27,7 +27,6 @@ const Wrapper = styled.div<{ width: number }>`
     position: fixed;
     z-index: 1000;
     top: 0;
-    opacity: 0;
     left: ${(props) => `max(0px, 50% - min(360px,${props.width / 2}px))`};
     width: 100%;
     max-width: 720px;
@@ -290,7 +289,7 @@ export default function SearchBar(props: Props) {
             {windowWidth > 1000 || props.isOpen ? (
                 <Wrapper
                     width={windowWidth}
-                    className={!props.isFirstFetch && 'fadeIn'}
+                    className={!props.isFirstFetch ? 'fadeIn' : ' fadeOut'}
                 >
                     <div
                         style={{
