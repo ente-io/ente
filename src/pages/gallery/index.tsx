@@ -89,6 +89,7 @@ export default function Gallery() {
     const [bannerMessage, setBannerMessage] = useState<string>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
+    const [isFirstFetch, setIsFirstFetch] = useState(false);
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [dialogView, setDialogView] = useState(false);
@@ -122,6 +123,7 @@ export default function Gallery() {
         }
         const main = async () => {
             setIsFirstLoad(isFirstLogin());
+            setIsFirstFetch(false);
             if (justSignedUp()) {
                 setPlanModalView(true);
             }
@@ -146,6 +148,7 @@ export default function Gallery() {
             await syncWithRemote();
             setIsFirstLoad(false);
             setJustSignedUp(false);
+            setIsFirstFetch(false);
         };
         main();
     }, []);
@@ -301,7 +304,7 @@ export default function Gallery() {
                 isOpen={searchMode}
                 setOpen={setSearchMode}
                 loadingBar={loadingBar}
-                isFirstLoad={isFirstLoad}
+                isFirstFetch={isFirstFetch}
                 setFiles={updateFiles}
                 setCollections={setCollections}
             />
