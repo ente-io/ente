@@ -240,6 +240,7 @@ export default function SearchBar(props: Props) {
                 cursor: 'text',
                 '&>.icon': { color: '#2dc262' },
             },
+            '&>.icon': { color: props.isOpen && '#2dc262' },
         }),
         input: (style) => ({
             ...style,
