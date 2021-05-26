@@ -281,7 +281,6 @@ export default function SearchBar(props: Props) {
             wordSpacing: '2px',
         }),
     };
-    console.log(stats);
     return (
         <>
             {windowWidth > 450 || props.isOpen ? (
