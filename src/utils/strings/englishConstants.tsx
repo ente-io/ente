@@ -301,7 +301,7 @@ const englishConstants = {
     SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
-    SEARCH_HINT: () => <span>New York, April 14, christmas...</span>,
+    SEARCH_HINT: () => <span>New York, April 14, Christmas...</span>,
     TERMS_AND_CONDITIONS: () => (
         <p>
             I agree to the{' '}
