@@ -200,7 +200,7 @@ export default function SearchBar(props: Props) {
 
     const LabelWithIcon = (props: { type: SuggestionType; label: string }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '6px', marginBottom: '2px' }}>
+            <span style={{ paddingRight: '10px', paddingBottom: '4px' }}>
                 {getIconByType(props.type)}
             </span>
             <span>{props.label}</span>
@@ -219,6 +219,7 @@ export default function SearchBar(props: Props) {
                 className={'icon'}
                 style={{
                     paddingLeft: '10px',
+                    paddingBottom: '4px',
                 }}
             >
                 {props.getValue().length == 0 || props.menuIsOpen ? (
