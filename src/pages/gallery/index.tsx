@@ -54,6 +54,7 @@ import { addFilesToCollection } from 'utils/collection';
 import SelectedFileOptions from './components/SelectedFileOptions';
 import { errorCodes } from 'utils/common/errorUtil';
 import SearchBar from 'components/SearchBar';
+import { Bbox } from 'services/searchService';
 
 export enum FILE_TYPE {
     IMAGE,
@@ -278,7 +279,7 @@ export default function Gallery() {
         selectCollection(null);
     };
 
-    const updateSearch = (search: setSearch) => {
+    const updateSearch = (search: Search) => {
         setSearch(search);
         setSinceTime(new Date().getTime());
     }
