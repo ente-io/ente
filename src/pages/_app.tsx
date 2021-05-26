@@ -185,6 +185,7 @@ const GlobalStyles = createGlobalStyle`
         height: 16px;
         top:25px;
         left: 32px;
+        z-index:100 !important;
     }
     .bm-burger-bars {
         background: #bdbdbd;

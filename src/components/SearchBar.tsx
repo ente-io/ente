@@ -23,20 +23,34 @@ import SearchIcon from './SearchIcon';
 import CrossIcon from './CrossIcon';
 
 const Wrapper = styled.div`
-    background-color: #111;
-    color: #fff;
-    min-height: 64px;
-    align-items: center;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
-    margin-bottom: 10px;
     position: fixed;
+    z-index: 1000;
     top: 0;
+    left: max(0px, 50% - 310px);
     width: 100%;
+    max-width: 620px;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 200;
-    padding: 0 20%;
+    padding: 0 5%;
+    background-color: #111;
+    color: #fff;
+    min-height: 64px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+    margin-bottom: 10px;
+`;
+
+const SearchButton = styled.div`
+    top: 1px;
+    z-index: 100;
+    right: 80px;
+    color: #fff;
+    cursor: pointer;
+    min-height: 64px;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `;
 enum SuggestionType {
     DATE,
@@ -57,6 +71,8 @@ interface Props {
 export default function SearchBar(props: Props) {
     const [allFiles, setAllFiles] = useState<File[]>([]);
     const [allCollections, setAllCollections] = useState<Collection[]>([]);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
     const selectRef = useRef(null);
     useEffect(() => {
         if (!props.isOpen && allFiles?.length > 0) {
@@ -69,6 +85,11 @@ export default function SearchBar(props: Props) {
         main();
     }, [props.isOpen]);
 
+    useEffect(() => {
+        window.addEventListener('resize', () =>
+            setWindowWidth(window.innerWidth)
+        );
+    });
     //==========================
     // Functionality
     //==========================
@@ -232,12 +253,11 @@ export default function SearchBar(props: Props) {
         }),
     };
 
-    return (
+    return windowWidth > 450 || props.isOpen ? (
         <Wrapper>
             <div
                 style={{
                     flex: 1,
-                    maxWidth: '600px',
                     margin: '10px',
                 }}
             >
@@ -265,5 +285,9 @@ export default function SearchBar(props: Props) {
                 )}
             </div>
         </Wrapper>
+    ) : (
+        <SearchButton onClick={() => props.setOpen(true)}>
+            <SearchIcon />
+        </SearchButton>
     );
 }
