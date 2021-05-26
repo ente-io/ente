@@ -78,6 +78,10 @@ export type selectedState = {
 export type SetFiles = React.Dispatch<React.SetStateAction<File[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
+export type Search = {
+    date?: Date;
+    location?: Bbox;
+}
 
 export default function Gallery() {
     const router = useRouter();
@@ -102,6 +106,11 @@ export default function Gallery() {
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
+    const [search, setSearch] = useState<Search>({
+        date: null,
+        location: null,
+    });
+
     const {
         getRootProps,
         getInputProps,
@@ -268,6 +277,11 @@ export default function Gallery() {
         setSinceTime(new Date().getTime());
         selectCollection(null);
     };
+
+    const updateSearch = (search: setSearch) => {
+        setSearch(search);
+        setSinceTime(new Date().getTime());
+    }
     return (
         <FullScreenDropZone
             getRootProps={getRootProps}
@@ -305,8 +319,9 @@ export default function Gallery() {
                 setOpen={setSearchMode}
                 loadingBar={loadingBar}
                 isFirstFetch={isFirstFetch}
-                setFiles={updateFiles}
                 setCollections={setCollections}
+                setSearch={updateSearch}
+                files={files}
             />
             <Collections
                 collections={collections}
@@ -366,6 +381,7 @@ export default function Gallery() {
                 openFileUploader={openFileUploader}
                 loadingBar={loadingBar}
                 searchMode={searchMode}
+                search={search}
             />
             {selected.count > 0 && (
                 <SelectedFileOptions
