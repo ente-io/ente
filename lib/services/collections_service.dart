@@ -402,15 +402,19 @@ class CollectionsService {
   Collection _getCollectionWithDecryptedName(Collection collection) {
     if (collection.encryptedName != null &&
         collection.encryptedName.isNotEmpty) {
-      var result = CryptoUtil.decryptSync(
-          Sodium.base642bin(collection.encryptedName),
-          _getDecryptedKey(collection),
-          Sodium.base642bin(collection.nameDecryptionNonce));
       var name;
       try {
+        final result = CryptoUtil.decryptSync(
+            Sodium.base642bin(collection.encryptedName),
+            _getDecryptedKey(collection),
+            Sodium.base642bin(collection.nameDecryptionNonce));
         name = utf8.decode(result);
-      } catch (e) {
-        _logger.severe(e);
+      } catch (e, s) {
+        _logger.severe(
+            "Error while decrypting collection name: " +
+                collection.id.toString(),
+            e,
+            s);
         name = "Unknown Album";
       }
       return collection.copyWith(name: name);
