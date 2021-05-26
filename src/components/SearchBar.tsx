@@ -29,7 +29,7 @@ const Wrapper = styled.div`
     top: 0;
     left: max(0px, 50% - 310px);
     width: 100%;
-    max-width: 620px;
+    max-width: 720px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -79,7 +79,6 @@ interface Props {
 }
 interface Stats {
     resultCount: number;
-    timeTaken: number;
 }
 export default function SearchBar(props: Props) {
     const [allFiles, setAllFiles] = useState<File[]>([]);
@@ -164,7 +163,6 @@ export default function SearchBar(props: Props) {
         );
         const timeTaken = (Date.now() - startTime) / 1000;
         setStats({
-            timeTaken,
             resultCount: resultFiles.length,
         });
     };

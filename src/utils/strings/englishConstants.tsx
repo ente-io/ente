@@ -301,7 +301,7 @@ const englishConstants = {
     SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
-    SEARCH_HINT: () => <span>New York, April 14 ...</span>,
+    SEARCH_HINT: () => <span>New York, April 14, christmas...</span>,
     TERMS_AND_CONDITIONS: () => (
         <p>
             I agree to the{' '}
@@ -324,11 +324,10 @@ const englishConstants = {
             with ente
         </p>
     ),
-    SEARCH_STATS: ({ resultCount, timeTaken }) => (
+    SEARCH_STATS: ({ resultCount }) => (
         <span>
             found <span style={{ color: '#2dc262' }}>{resultCount}</span>{' '}
-            memories ( <span style={{ color: '#2dc262' }}> {timeTaken}</span>{' '}
-            seconds )
+            memories
         </span>
     ),
 };
