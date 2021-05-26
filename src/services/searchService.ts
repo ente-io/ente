@@ -24,5 +24,5 @@ export async function searchLocation(
         query: searchPhrase,
         limit: 4,
     });
-    return resp.data;
+    return resp.data.result;
 }
