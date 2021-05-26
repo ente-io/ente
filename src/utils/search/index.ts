@@ -1,3 +1,4 @@
+import { Suggestion, SuggestionType } from 'components/SearchBar';
 import { File } from 'services/fileService';
 
 export function getFilesInsideBbox(
@@ -38,4 +39,34 @@ export function getFormattedDate(date: Date) {
         month: 'long',
         day: 'numeric',
     }).format(date);
+}
+
+export function getDefaultSuggestion() {
+    return [
+        {
+            label: 'Christmas',
+            value: new Date(2021, 11, 25),
+            type: SuggestionType.DATE,
+        },
+        {
+            label: 'Christmas Eve',
+            value: new Date(2021, 11, 24),
+            type: SuggestionType.DATE,
+        },
+        {
+            label: 'New Year',
+            value: new Date(2021, 0, 1),
+            type: SuggestionType.DATE,
+        },
+        {
+            label: 'New Year Eve',
+            value: new Date(2021, 11, 31),
+            type: SuggestionType.DATE,
+        },
+        {
+            label: "Valentine's Day",
+            value: new Date(2021, 1, 14),
+            type: SuggestionType.DATE,
+        },
+    ] as Suggestion[];
 }

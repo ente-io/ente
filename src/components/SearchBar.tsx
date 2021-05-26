@@ -15,6 +15,7 @@ import {
     getFilesWithCreationDay,
     getFilesInsideBbox,
     getFormattedDate,
+    getDefaultSuggestion,
 } from 'utils/search';
 import constants from 'utils/strings/constants';
 import LocationIcon from './LocationIcon';
@@ -71,11 +72,11 @@ const SearchStats = styled.div`
     align-items: center;
 `;
 
-enum SuggestionType {
+export enum SuggestionType {
     DATE,
     LOCATION,
 }
-interface Suggestion {
+export interface Suggestion {
     type: SuggestionType;
     label: string;
     value: Bbox | Date;
@@ -300,6 +301,7 @@ export default function SearchBar(props: Props) {
                             }}
                             ref={selectRef}
                             placeholder={constants.SEARCH_HINT()}
+                            defaultOptions={getDefaultSuggestion()}
                             loadOptions={getOptions}
                             onChange={filterFiles}
                             isClearable
