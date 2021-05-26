@@ -52,6 +52,25 @@ const SearchButton = styled.div`
     align-items: center;
     justify-content: center;
 `;
+
+const SearchStats = styled.div`
+    @media (min-width: 1000px) {
+        width: 1000px;
+    }
+
+    @media (min-width: 450px) and (max-width: 1000px) {
+        width: 600px;
+    }
+
+    @media (max-width: 450px) {
+        width: 100%;
+    }
+    margin: auto;
+    color: #979797;
+    display: flex;
+    align-items: center;
+`;
+
 enum SuggestionType {
     DATE,
     LOCATION,
@@ -68,11 +87,15 @@ interface Props {
     setFiles: SetFiles;
     setCollections: SetCollections;
 }
+interface Stats {
+    resultCount: number;
+    timeTaken: number;
+}
 export default function SearchBar(props: Props) {
     const [allFiles, setAllFiles] = useState<File[]>([]);
     const [allCollections, setAllCollections] = useState<Collection[]>([]);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
+    const [stats, setStats] = useState<Stats>(null);
     const selectRef = useRef(null);
     useEffect(() => {
         if (!props.isOpen && allFiles?.length > 0) {
@@ -126,6 +149,7 @@ export default function SearchBar(props: Props) {
         if (!selectedOption) {
             return;
         }
+        const startTime = Date.now();
         props.setOpen(true);
         let resultFiles: File[] = [];
 
@@ -148,6 +172,11 @@ export default function SearchBar(props: Props) {
         props.setCollections(
             getNonEmptyCollections(allCollections, resultFiles)
         );
+        const timeTaken = (Date.now() - startTime) / 1000;
+        setStats({
+            timeTaken,
+            resultCount: resultFiles.length,
+        });
     };
     const resetSearch = () => {
         if (props.isOpen) {
@@ -253,41 +282,51 @@ export default function SearchBar(props: Props) {
         }),
     };
 
-    return windowWidth > 450 || props.isOpen ? (
-        <Wrapper>
-            <div
-                style={{
-                    flex: 1,
-                    margin: '10px',
-                }}
-            >
-                <AsyncSelect
-                    components={{
-                        Option: OptionWithIcon,
-                        SingleValue: SingleValueWithIcon,
-                        Control: ControlWithIcon,
-                    }}
-                    ref={selectRef}
-                    placeholder={constants.SEARCH_HINT()}
-                    loadOptions={getOptions}
-                    onChange={filterFiles}
-                    isClearable
-                    escapeClearsValue
-                    styles={customStyles}
-                    noOptionsMessage={() => null}
-                />
-            </div>
-            <div style={{ width: '24px' }}>
-                {props.isOpen && (
-                    <div style={{ cursor: 'pointer' }} onClick={resetSearch}>
-                        <CrossIcon />
+    return (
+        <>
+            {windowWidth > 450 || props.isOpen ? (
+                <Wrapper>
+                    <div
+                        style={{
+                            flex: 1,
+                            margin: '10px',
+                        }}
+                    >
+                        <AsyncSelect
+                            components={{
+                                Option: OptionWithIcon,
+                                SingleValue: SingleValueWithIcon,
+                                Control: ControlWithIcon,
+                            }}
+                            ref={selectRef}
+                            placeholder={constants.SEARCH_HINT()}
+                            loadOptions={getOptions}
+                            onChange={filterFiles}
+                            isClearable
+                            escapeClearsValue
+                            styles={customStyles}
+                            noOptionsMessage={() => null}
+                        />
                     </div>
-                )}
-            </div>
-        </Wrapper>
-    ) : (
-        <SearchButton onClick={() => props.setOpen(true)}>
-            <SearchIcon />
-        </SearchButton>
+                    <div style={{ width: '24px' }}>
+                        {props.isOpen && (
+                            <div
+                                style={{ cursor: 'pointer' }}
+                                onClick={resetSearch}
+                            >
+                                <CrossIcon />
+                            </div>
+                        )}
+                    </div>
+                </Wrapper>
+            ) : (
+                <SearchButton onClick={() => props.setOpen(true)}>
+                    <SearchIcon />
+                </SearchButton>
+            )}
+            {props.isOpen && (
+                <SearchStats>{constants.SEARCH_STATS(stats)}</SearchStats>
+            )}
+        </>
     );
 }

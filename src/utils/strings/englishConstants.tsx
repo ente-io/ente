@@ -324,6 +324,13 @@ const englishConstants = {
             with ente
         </p>
     ),
+    SEARCH_STATS: ({ resultCount, timeTaken }) => (
+        <span>
+            found <span style={{ color: '#2dc262' }}>{resultCount}</span>{' '}
+            memories ( <span style={{ color: '#2dc262' }}> {timeTaken}</span>{' '}
+            seconds )
+        </span>
+    ),
 };
 
 export default englishConstants;
