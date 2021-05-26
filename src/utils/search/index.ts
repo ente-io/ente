@@ -41,7 +41,7 @@ export function getFormattedDate(date: Date) {
     }).format(date);
 }
 
-export function getDefaultSuggestion() {
+export function getDefaultSuggestions() {
     return [
         {
             label: 'Christmas',

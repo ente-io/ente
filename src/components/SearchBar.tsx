@@ -15,7 +15,7 @@ import {
     getFilesWithCreationDay,
     getFilesInsideBbox,
     getFormattedDate,
-    getDefaultSuggestion,
+    getDefaultSuggestions,
 } from 'utils/search';
 import constants from 'utils/strings/constants';
 import LocationIcon from './LocationIcon';
@@ -105,8 +105,8 @@ export default function SearchBar(props: Props) {
     //==========================
     // Functionality
     //==========================
-    const getAutoCompleteSuggestion = async (searchPhrase: string) => {
-        let option = getDefaultSuggestion().filter((suggestion) =>
+    const getAutoCompleteSuggestions = async (searchPhrase: string) => {
+        let option = getDefaultSuggestions().filter((suggestion) =>
             suggestion.label.toLowerCase().includes(searchPhrase.toLowerCase())
         );
 
@@ -135,7 +135,7 @@ export default function SearchBar(props: Props) {
         return option;
     };
 
-    const getOptions = debounce(getAutoCompleteSuggestion, 250);
+    const getOptions = debounce(getAutoCompleteSuggestions, 250);
 
     const filterFiles = (selectedOption: Suggestion) => {
         if (!selectedOption) {
@@ -291,7 +291,7 @@ export default function SearchBar(props: Props) {
                             }}
                             ref={selectRef}
                             placeholder={constants.SEARCH_HINT()}
-                            defaultOptions={getDefaultSuggestion()}
+                            defaultOptions={getDefaultSuggestions()}
                             loadOptions={getOptions}
                             onChange={filterFiles}
                             isClearable
