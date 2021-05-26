@@ -127,6 +127,7 @@ export default function PreviewCard(props: IProps) {
             main();
         }
         return () => {
+            // cool cool cool
             isMounted.current = false;
         };
     }, [file]);
