@@ -324,10 +324,11 @@ const englishConstants = {
             with ente
         </p>
     ),
-    SEARCH_STATS: ({ resultCount }) => (
+    SEARCH_STATS: ({ resultCount, timeTaken }) => (
         <span>
             found <span style={{ color: '#2dc262' }}>{resultCount}</span>{' '}
-            memories
+            memories ( <span style={{ color: '#2dc262' }}> {timeTaken}</span>{' '}
+            seconds )
         </span>
     ),
 };

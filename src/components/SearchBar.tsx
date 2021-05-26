@@ -79,6 +79,7 @@ interface Props {
 }
 interface Stats {
     resultCount: number;
+    timeTaken: number;
 }
 export default function SearchBar(props: Props) {
     const [allFiles, setAllFiles] = useState<File[]>([]);
@@ -171,6 +172,7 @@ export default function SearchBar(props: Props) {
         );
         const timeTaken = (Date.now() - startTime) / 1000;
         setStats({
+            timeTaken,
             resultCount: resultFiles.length,
         });
     };
