@@ -23,11 +23,11 @@ import DateIcon from './DateIcon';
 import SearchIcon from './SearchIcon';
 import CrossIcon from './CrossIcon';
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ width: number }>`
     position: fixed;
     z-index: 1000;
     top: 0;
-    left: max(0px, 50% - 310px);
+    left: ${(props) => `max(0px, 50% - min(360px,${props.width / 2}px))`};
     width: 100%;
     max-width: 720px;
     display: flex;
@@ -283,8 +283,8 @@ export default function SearchBar(props: Props) {
     };
     return (
         <>
-            {windowWidth > 450 || props.isOpen ? (
-                <Wrapper>
+            {windowWidth > 1000 || props.isOpen ? (
+                <Wrapper width={windowWidth}>
                     <div
                         style={{
                             flex: 1,
