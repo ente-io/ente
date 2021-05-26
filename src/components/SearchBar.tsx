@@ -126,7 +126,7 @@ export default function SearchBar(props: Props) {
                     ({
                         type: SuggestionType.LOCATION,
                         value: searchResult.bbox,
-                        label: searchResult.placeName,
+                        label: searchResult.place,
                     } as Suggestion)
             )
         );
