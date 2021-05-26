@@ -1,4 +1,4 @@
-import { SetCollections, SetFiles } from 'pages/gallery';
+import { Search, SetCollections, SetFiles } from 'pages/gallery';
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
@@ -73,10 +73,7 @@ interface Props {
     setOpen: (value) => void;
     loadingBar: any;
     setCollections: SetCollections;
-    setSearch: React.Dispatch<React.SetStateAction<{
-        date?: Date,
-        location?: Bbox
-    }>>;
+    setSearch: React.Dispatch<React.SetStateAction<Search>>;
     files: File[];
 }
 interface Stats {
