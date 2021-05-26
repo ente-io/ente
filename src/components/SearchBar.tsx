@@ -206,12 +206,8 @@ export default function SearchBar(props: Props) {
             <span>{props.label}</span>
         </div>
     );
-    const { Option, SingleValue, Control } = components;
-    const SingleValueWithIcon = (props) => (
-        <SingleValue {...props}>
-            <LabelWithIcon type={props.data.type} label={props.data.label} />
-        </SingleValue>
-    );
+    const { Option, Control } = components;
+
     const OptionWithIcon = (props) => (
         <Option {...props}>
             <LabelWithIcon type={props.data.type} label={props.data.label} />
@@ -225,7 +221,13 @@ export default function SearchBar(props: Props) {
                     paddingLeft: '10px',
                 }}
             >
-                <SearchIcon />
+                {props.getValue().length == 0 || props.menuIsOpen ? (
+                    <SearchIcon />
+                ) : props.getValue()[0].type == SuggestionType.DATE ? (
+                    <DateIcon />
+                ) : (
+                    <LocationIcon />
+                )}
             </span>
             {props.children}
         </Control>
@@ -243,7 +245,6 @@ export default function SearchBar(props: Props) {
                 cursor: 'text',
                 '&>.icon': { color: '#2dc262' },
             },
-            '&>.icon': { color: props.isOpen && '#2dc262' },
         }),
         input: (style) => ({
             ...style,
@@ -296,7 +297,6 @@ export default function SearchBar(props: Props) {
                             <AsyncSelect
                                 components={{
                                     Option: OptionWithIcon,
-                                    SingleValue: SingleValueWithIcon,
                                     Control: ControlWithIcon,
                                 }}
                                 ref={selectRef}
