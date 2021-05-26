@@ -25,7 +25,7 @@ interface CollectionProps {
 }
 
 const Container = styled.div`
-    margin: 0 auto;
+    margin: 10px auto;
     overflow-y: hidden;
     height: 50px;
     display: flex;
@@ -80,15 +80,18 @@ export default function Collections(props: CollectionProps) {
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
     const [scrollObj, setScrollObj] = useState<{
-        scrollLeft?: number, scrollWidth?: number, clientWidth?: number
+        scrollLeft?: number;
+        scrollWidth?: number;
+        clientWidth?: number;
     }>({});
 
     const updateScrollObj = () => {
         if (collectionRef.current) {
-            const { scrollLeft, scrollWidth, clientWidth } = collectionRef.current;
+            const { scrollLeft, scrollWidth, clientWidth } =
+                collectionRef.current;
             setScrollObj({ scrollLeft, scrollWidth, clientWidth });
         }
-    }
+    };
 
     useEffect(() => {
         updateScrollObj();
@@ -125,7 +128,7 @@ export default function Collections(props: CollectionProps) {
 
     const scrollCollection = (direction: SCROLL_DIRECTION) => () => {
         collectionRef.current.scrollBy(250 * direction, 0);
-    }
+    };
 
     return (
         <>
@@ -139,10 +142,12 @@ export default function Collections(props: CollectionProps) {
                 syncWithRemote={props.syncWithRemote}
             />
             <Container>
-                {scrollObj.scrollLeft > 0 && <NavigationButton
-                    scrollDirection={SCROLL_DIRECTION.LEFT}
-                    onClick={scrollCollection(SCROLL_DIRECTION.LEFT)}
-                />}
+                {scrollObj.scrollLeft > 0 && (
+                    <NavigationButton
+                        scrollDirection={SCROLL_DIRECTION.LEFT}
+                        onClick={scrollCollection(SCROLL_DIRECTION.LEFT)}
+                    />
+                )}
                 <Wrapper ref={collectionRef} onScroll={updateScrollObj}>
                     <Chip active={!selected} onClick={clickHandler()}>
                         All
@@ -182,10 +187,13 @@ export default function Collections(props: CollectionProps) {
                         </Chip>
                     ))}
                 </Wrapper>
-                {scrollObj.scrollLeft < (scrollObj.scrollWidth - scrollObj.clientWidth) && <NavigationButton
-                    scrollDirection={SCROLL_DIRECTION.RIGHT}
-                    onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)}
-                />}
+                {scrollObj.scrollLeft <
+                    scrollObj.scrollWidth - scrollObj.clientWidth && (
+                    <NavigationButton
+                        scrollDirection={SCROLL_DIRECTION.RIGHT}
+                        onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)}
+                    />
+                )}
             </Container>
         </>
     );

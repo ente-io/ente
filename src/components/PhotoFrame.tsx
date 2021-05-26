@@ -78,9 +78,9 @@ const EmptyScreen = styled.div`
     flex-direction: column;
     flex: 1;
     color: #2dc262;
-    
+
     & > svg {
-        filter: drop-shadow(3px 3px 5px rgba(45,194,98,0.5));
+        filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
     }
 `;
 
@@ -101,6 +101,7 @@ interface Props {
     isFirstLoad;
     openFileUploader;
     loadingBar;
+    searchMode: boolean;
 }
 
 const PhotoFrame = ({
@@ -114,6 +115,7 @@ const PhotoFrame = ({
     isFirstLoad,
     openFileUploader,
     loadingBar,
+    searchMode,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -274,7 +276,7 @@ const PhotoFrame = ({
 
     return (
         <>
-            {!isFirstLoad && files.length == 0 ? (
+            {!isFirstLoad && files.length == 0 && !searchMode ? (
                 <EmptyScreen>
                     <CloudUpload width={150} height={150} />
                     <Button
@@ -365,6 +367,7 @@ const PhotoFrame = ({
                                 }
                             });
                             files.length < 30 &&
+                                !searchMode &&
                                 timeStampList.push({
                                     itemType: ITEM_TYPE.BANNER,
                                     banner: (
