@@ -197,7 +197,7 @@ export default function SearchBar(props: Props) {
 
     const LabelWithIcon = (props: { type: SuggestionType; label: string }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '10px' }}>
+            <span style={{ marginRight: '10px', padding: '2px' }}>
                 {getIconByType(props.type)}
             </span>
             <span>{props.label}</span>
