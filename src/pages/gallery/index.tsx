@@ -84,6 +84,14 @@ export type Search = {
     location?: Bbox;
 }
 
+const AlertContainer = styled.div`
+    background-color: #111;
+    padding: 5px 0;
+    font-size: 14px;
+    text-align: center;
+    margin-top: -10px;
+`;
+
 export default function Gallery() {
     const router = useRouter();
     const [collections, setCollections] = useState<Collection[]>([]);
@@ -296,11 +304,9 @@ export default function Gallery() {
             )}
             <LoadingBar color="#2dc262" ref={loadingBar} />
             {isFirstLoad && (
-                <div className="text-center">
-                    <Alert variant="success">
-                        {constants.INITIAL_LOAD_DELAY_WARNING}
-                    </Alert>
-                </div>
+                <AlertContainer>
+                    {constants.INITIAL_LOAD_DELAY_WARNING}
+                </AlertContainer>
             )}
             <PlanSelector
                 modalView={planModalView}
