@@ -87,6 +87,11 @@ export default function SearchBar(props: Props) {
     const [stats, setStats] = useState<Stats>(null);
     const selectRef = useRef(null);
     useEffect(() => {
+        if (props.isOpen) {
+            setTimeout(() => {
+                selectRef.current?.focus();
+            }, 250);
+        }
         if (!props.isOpen && allFiles?.length > 0) {
             return;
         }
