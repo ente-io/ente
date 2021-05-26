@@ -1,9 +1,8 @@
-import React, { SyntheticEvent, useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { File } from 'services/fileService';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
-import { getToken } from 'utils/common/key';
 import useLongPress from 'utils/common/useLongPress';
 
 interface IProps {
@@ -114,17 +113,22 @@ export default function PreviewCard(props: IProps) {
         onSelect,
         selectOnClick,
     } = props;
-
+    const isMounted = useRef(true);
     useEffect(() => {
         if (file && !file.msrc) {
             const main = async () => {
                 const url = await DownloadManager.getPreview(file);
-                setImgSrc(url);
-                file.msrc = url;
-                updateUrl(url);
+                if (isMounted.current) {
+                    setImgSrc(url);
+                    file.msrc = url;
+                    updateUrl(url);
+                }
             };
             main();
         }
+        return () => {
+            isMounted.current = false;
+        };
     }, [file]);
 
     const handleClick = () => {
