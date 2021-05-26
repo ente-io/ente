@@ -16,7 +16,7 @@ export default function LocationIcon(props) {
 }
 
 LocationIcon.defaultProps = {
-    height: 24,
-    width: 24,
+    height: 20,
+    width: 20,
     viewBox: '0 0 24 24',
 };

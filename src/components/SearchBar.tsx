@@ -132,11 +132,11 @@ export default function SearchBar(props: Props) {
         option.push(
             ...searchResults.map(
                 (searchResult) =>
-                    ({
-                        type: SuggestionType.LOCATION,
-                        value: searchResult.bbox,
-                        label: searchResult.place,
-                    } as Suggestion)
+                ({
+                    type: SuggestionType.LOCATION,
+                    value: searchResult.bbox,
+                    label: searchResult.place,
+                } as Suggestion)
             )
         );
         return option;
@@ -200,7 +200,7 @@ export default function SearchBar(props: Props) {
 
     const LabelWithIcon = (props: { type: SuggestionType; label: string }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '10px', padding: '2px' }}>
+            <span style={{ marginRight: '6px', marginBottom: '2px' }}>
                 {getIconByType(props.type)}
             </span>
             <span>{props.label}</span>

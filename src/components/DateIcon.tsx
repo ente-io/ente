@@ -14,7 +14,7 @@ export default function DateIcon(props) {
 }
 
 DateIcon.defaultProps = {
-    height: 24,
-    width: 24,
+    height: 20,
+    width: 20,
     viewBox: '0 0 24 24',
 };
