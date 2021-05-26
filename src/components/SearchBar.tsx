@@ -106,7 +106,10 @@ export default function SearchBar(props: Props) {
     // Functionality
     //==========================
     const getAutoCompleteSuggestion = async (searchPhrase: string) => {
-        let option = new Array<Suggestion>();
+        let option = getDefaultSuggestion().filter((suggestion) =>
+            suggestion.label.toLowerCase().includes(searchPhrase.toLowerCase())
+        );
+
         if (!searchPhrase?.length) {
             return option;
         }
