@@ -183,7 +183,7 @@ const GlobalStyles = createGlobalStyle`
         position: fixed;
         width: 24px;
         height: 16px;
-        top:25px;
+        top:27px;
         left: 32px;
         z-index:100 !important;
     }
