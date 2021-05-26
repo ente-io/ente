@@ -28,6 +28,7 @@
     "libsodium-wrappers": "^0.7.8",
     "localforage": "^1.9.0",
     "next": "9.5.3",
+    "next-on-netlify": "^3.0.1",
     "next-with-workbox": "^2.0.1",
     "node-forge": "^0.10.0",
     "photoswipe": "file:./thirdparty/photoswipe",
@@ -65,7 +66,6 @@
     "@types/styled-components": "^5.1.3",
     "@types/yup": "^0.29.7",
     "babel-plugin-styled-components": "^1.11.1",
-    "next-on-netlify": "^2.4.0",
     "typescript": "^4.1.3",
     "worker-plugin": "^5.0.0"
   },
