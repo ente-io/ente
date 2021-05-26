@@ -301,6 +301,7 @@ export default function Gallery() {
                 isOpen={searchMode}
                 setOpen={setSearchMode}
                 loadingBar={loadingBar}
+                isFirstLoad={isFirstLoad}
                 setFiles={updateFiles}
                 setCollections={setCollections}
             />

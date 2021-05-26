@@ -72,6 +72,7 @@ export interface Suggestion {
 }
 interface Props {
     isOpen: boolean;
+    isFirstLoad: boolean;
     setOpen: (value) => void;
     loadingBar: any;
     setFiles: SetFiles;
@@ -282,50 +283,52 @@ export default function SearchBar(props: Props) {
         }),
     };
     return (
-        <>
-            {windowWidth > 1000 || props.isOpen ? (
-                <Wrapper width={windowWidth}>
-                    <div
-                        style={{
-                            flex: 1,
-                            margin: '10px',
-                        }}
-                    >
-                        <AsyncSelect
-                            components={{
-                                Option: OptionWithIcon,
-                                SingleValue: SingleValueWithIcon,
-                                Control: ControlWithIcon,
+        !props.isFirstLoad && (
+            <>
+                {windowWidth > 1000 || props.isOpen ? (
+                    <Wrapper width={windowWidth}>
+                        <div
+                            style={{
+                                flex: 1,
+                                margin: '10px',
                             }}
-                            ref={selectRef}
-                            placeholder={constants.SEARCH_HINT()}
-                            loadOptions={getOptions}
-                            onChange={filterFiles}
-                            isClearable
-                            escapeClearsValue
-                            styles={customStyles}
-                            noOptionsMessage={() => null}
-                        />
-                    </div>
-                    <div style={{ width: '24px' }}>
-                        {props.isOpen && (
-                            <div
-                                style={{ cursor: 'pointer' }}
-                                onClick={resetSearch}
-                            >
-                                <CrossIcon />
-                            </div>
-                        )}
-                    </div>
-                </Wrapper>
-            ) : (
-                <SearchButton onClick={() => props.setOpen(true)}>
-                    <SearchIcon />
-                </SearchButton>
-            )}
-            {props.isOpen && stats && (
-                <SearchStats>{constants.SEARCH_STATS(stats)}</SearchStats>
-            )}
-        </>
+                        >
+                            <AsyncSelect
+                                components={{
+                                    Option: OptionWithIcon,
+                                    SingleValue: SingleValueWithIcon,
+                                    Control: ControlWithIcon,
+                                }}
+                                ref={selectRef}
+                                placeholder={constants.SEARCH_HINT()}
+                                loadOptions={getOptions}
+                                onChange={filterFiles}
+                                isClearable
+                                escapeClearsValue
+                                styles={customStyles}
+                                noOptionsMessage={() => null}
+                            />
+                        </div>
+                        <div style={{ width: '24px' }}>
+                            {props.isOpen && (
+                                <div
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={resetSearch}
+                                >
+                                    <CrossIcon />
+                                </div>
+                            )}
+                        </div>
+                    </Wrapper>
+                ) : (
+                    <SearchButton onClick={() => props.setOpen(true)}>
+                        <SearchIcon />
+                    </SearchButton>
+                )}
+                {props.isOpen && stats && (
+                    <SearchStats>{constants.SEARCH_STATS(stats)}</SearchStats>
+                )}
+            </>
+        )
     );
 }
