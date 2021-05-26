@@ -36,7 +36,7 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import { logoutUser } from 'services/userService';
+import { isTokenValid, logoutUser } from 'services/userService';
 import AlertBanner from './components/AlertBanner';
 import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
 import { useDropzone } from 'react-dropzone';
@@ -53,6 +53,7 @@ import { getSelectedFileIds } from 'utils/file';
 import { addFilesToCollection } from 'utils/collection';
 import SelectedFileOptions from './components/SelectedFileOptions';
 import { errorCodes } from 'utils/common/errorUtil';
+import SearchBar from 'components/SearchBar';
 
 export enum FILE_TYPE {
     IMAGE,
@@ -74,6 +75,8 @@ export type selectedState = {
     [k: number]: boolean;
     count: number;
 };
+export type SetFiles = React.Dispatch<React.SetStateAction<File[]>>;
+export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
 
 export default function Gallery() {
@@ -110,6 +113,7 @@ export default function Gallery() {
     });
 
     const loadingBar = useRef(null);
+    const [searchMode, setSearchMode] = useState(false);
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
@@ -156,6 +160,9 @@ export default function Gallery() {
     const syncWithRemote = async () => {
         try {
             checkConnectivity();
+            if (!(await isTokenValid())) {
+                throw new Error(errorCodes.ERR_SESSION_EXPIRED);
+            }
             loadingBar.current?.continuousStart();
             await billingService.updatePlans();
             await billingService.syncSubscription();
@@ -193,6 +200,9 @@ export default function Gallery() {
                         },
                         nonClosable: true,
                     });
+                    break;
+                case errorCodes.ERR_NO_INTERNET_CONNECTION:
+                    setBannerMessage(constants.NO_INTERNET_CONNECTION);
                     break;
                 case errorCodes.ERR_KEY_MISSING:
                     clearKeys();
@@ -250,6 +260,11 @@ export default function Gallery() {
             syncWithRemote
         );
     };
+    const updateFiles = (files: File[]) => {
+        setFiles(files);
+        setSinceTime(new Date().getTime());
+        selectCollection(null);
+    };
     return (
         <FullScreenDropZone
             getRootProps={getRootProps}
@@ -281,6 +296,14 @@ export default function Gallery() {
                 show={dialogView}
                 onHide={() => setDialogView(false)}
                 attributes={dialogMessage}
+            />
+            <SearchBar
+                isOpen={searchMode}
+                setOpen={setSearchMode}
+                loadingBar={loadingBar}
+                isFirstLoad={isFirstLoad}
+                setFiles={updateFiles}
+                setCollections={setCollections}
             />
             <Collections
                 collections={collections}
@@ -339,6 +362,7 @@ export default function Gallery() {
                 isFirstLoad={isFirstLoad}
                 openFileUploader={openFileUploader}
                 loadingBar={loadingBar}
+                searchMode={searchMode}
             />
             {selected.count > 0 && (
                 <SelectedFileOptions

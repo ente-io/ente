@@ -27,6 +27,7 @@ import LinkButton from 'pages/gallery/components/LinkButton';
 import { downloadApp } from 'utils/common';
 import { logoutUser } from 'services/userService';
 import { SetDialogMessage } from './MessageDialog';
+import { LogoImage } from 'pages/_app';
 
 interface Props {
     files: File[];
@@ -102,9 +103,15 @@ export default function Sidebar(props: Props) {
             onStateChange={(state) => setIsOpen(state.isOpen)}
             itemListElement="div"
         >
+            <div style={{ display: 'flex', textAlign: 'center' }}>
+                <LogoImage
+                    style={{ height: '24px', padding: '3px' }}
+                    alt="logo"
+                    src="/icon.svg"
+                />
+            </div>
             <div
                 style={{
-                    marginBottom: '8px',
                     outline: 'none',
                     color: 'rgb(45, 194, 98)',
                     fontSize: '16px',
@@ -112,7 +119,7 @@ export default function Sidebar(props: Props) {
             >
                 {user?.email}
             </div>
-            <div style={{ flex: 1, overflow: 'auto' }}>
+            <div style={{ flex: 1, overflow: 'auto', paddingTop: '0' }}>
                 <div style={{ outline: 'none' }}>
                     <div style={{ display: 'flex' }}>
                         <h5 style={{ margin: '4px 0 12px 2px' }}>

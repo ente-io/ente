@@ -7,7 +7,7 @@ import Container from 'components/Container';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
-import { Workbox } from "workbox-window";
+import { Workbox } from 'workbox-window';
 import { sentryInit } from '../utils/sentry';
 import EnteSpinner from 'components/EnteSpinner';
 
@@ -183,8 +183,9 @@ const GlobalStyles = createGlobalStyle`
         position: fixed;
         width: 24px;
         height: 16px;
-        top:25px;
+        top:27px;
         left: 32px;
+        z-index:100 !important;
     }
     .bm-burger-bars {
         background: #bdbdbd;
@@ -281,7 +282,7 @@ const GlobalStyles = createGlobalStyle`
     }
 `;
 
-const Image = styled.img`
+export const LogoImage = styled.img`
     max-height: 28px;
     margin-right: 5px;
 `;
@@ -308,23 +309,25 @@ sentryInit();
 export default function App({ Component, pageProps, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [offline, setOffline] = useState(typeof window !== 'undefined' && !window.navigator.onLine);
+    const [offline, setOffline] = useState(
+        typeof window !== 'undefined' && !window.navigator.onLine
+    );
     useEffect(() => {
         if (
-          !("serviceWorker" in navigator) ||
-          process.env.NODE_ENV !== "production"
+            !('serviceWorker' in navigator) ||
+            process.env.NODE_ENV !== 'production'
         ) {
-          console.warn("Progressive Web App support is disabled");
-          return;
+            console.warn('Progressive Web App support is disabled');
+            return;
         }
-    
-        const wb = new Workbox("sw.js", { scope: "/" });
+
+        const wb = new Workbox('sw.js', { scope: '/' });
         wb.register();
     }, []);
 
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
-    
+
     useEffect(() => {
         console.log(
             `%c${constants.CONSOLE_WARNING_STOP}`,
@@ -342,14 +345,13 @@ export default function App({ Component, pageProps, err }) {
             setLoading(false);
         });
 
-        window.addEventListener('online',  setUserOnline);
+        window.addEventListener('online', setUserOnline);
         window.addEventListener('offline', setUserOffline);
 
         return () => {
             window.removeEventListener('online', setUserOnline);
             window.removeEventListener('offline', setUserOffline);
-        }
-
+        };
     }, []);
 
     return (
@@ -367,14 +369,16 @@ export default function App({ Component, pageProps, err }) {
             <GlobalStyles />
             <Navbar>
                 <FlexContainer>
-                    <Image
+                    <LogoImage
                         style={{ height: '24px', padding: '3px' }}
                         alt="logo"
                         src="/icon.svg"
                     />
                 </FlexContainer>
             </Navbar>
-            {offline && <OfflineContainer>{constants.OFFLINE_MSG}</OfflineContainer>}
+            {offline && (
+                <OfflineContainer>{constants.OFFLINE_MSG}</OfflineContainer>
+            )}
             {loading ? (
                 <Container>
                     <EnteSpinner>
