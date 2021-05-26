@@ -1,6 +1,7 @@
 import HTTPService from './HTTPService';
 import * as chrono from 'chrono-node';
 import { getEndpoint } from 'utils/common/apiUtil';
+import { getToken } from 'utils/common/key';
 
 const ENDPOINT = getEndpoint();
 
@@ -20,9 +21,15 @@ export function parseHumanDate(humanDate: string) {
 export async function searchLocation(
     searchPhrase: string
 ): Promise<LocationSearchResponse[]> {
-    const resp = await HTTPService.get(`${ENDPOINT}/search/location`, {
-        query: searchPhrase,
-        limit: 4,
-    });
-    return resp.data.result;
+    const resp = await HTTPService.get(
+        `${ENDPOINT}/search/location`,
+        {
+            query: searchPhrase,
+            limit: 4,
+        },
+        {
+            'X-Auth-Token': getToken(),
+        }
+    );
+    return resp.data.results;
 }
