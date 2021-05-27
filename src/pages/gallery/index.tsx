@@ -124,7 +124,7 @@ export default function Gallery() {
         date: null,
         location: null,
     });
-
+    const [uploadInProgress, setUploadInProgress] = useState(false);
     const {
         getRootProps,
         getInputProps,
@@ -134,6 +134,7 @@ export default function Gallery() {
         noClick: true,
         noKeyboard: true,
         accept: 'image/*, video/*, application/json, ',
+        disabled: uploadInProgress,
     });
 
     const loadingBar = useRef(null);
@@ -378,6 +379,7 @@ export default function Gallery() {
                 setLoading={setLoading}
                 setCollectionNamerAttributes={setCollectionNamerAttributes}
                 setDialogMessage={setDialogMessage}
+                setUploadInProgress={setUploadInProgress}
             />
             <Sidebar
                 files={files}
