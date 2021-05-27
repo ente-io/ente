@@ -129,6 +129,7 @@ const PhotoFrame = ({
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const fetching: { [k: number]: boolean } = {};
+    const startTime = Date.now();
 
     useEffect(() => {
         if (searchMode) {
@@ -263,7 +264,6 @@ const PhotoFrame = ({
     };
 
     let idSet = new Set();
-    const startTime = Date.now();
     const filteredData = files
         .map((item, index) => ({
             ...item,
