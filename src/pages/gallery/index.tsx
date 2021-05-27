@@ -341,6 +341,7 @@ export default function Gallery() {
             />
             <Collections
                 collections={collections}
+                searchMode={searchMode}
                 selected={Number(router.query.collection)}
                 selectCollection={selectCollection}
                 syncWithRemote={syncWithRemote}
