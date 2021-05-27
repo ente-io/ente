@@ -22,6 +22,7 @@ interface CollectionProps {
     syncWithRemote: () => Promise<void>;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     startLoadingBar: () => void;
+    searchMode: boolean;
 }
 
 const Container = styled.div`
@@ -131,70 +132,75 @@ export default function Collections(props: CollectionProps) {
     };
 
     return (
-        <>
-            <CollectionShare
-                show={collectionShareModalView}
-                onHide={() => setCollectionShareModalView(false)}
-                collection={getSelectedCollection(
-                    selectedCollectionID,
-                    props.collections
-                )}
-                syncWithRemote={props.syncWithRemote}
-            />
-            <Container>
-                {scrollObj.scrollLeft > 0 && (
-                    <NavigationButton
-                        scrollDirection={SCROLL_DIRECTION.LEFT}
-                        onClick={scrollCollection(SCROLL_DIRECTION.LEFT)}
-                    />
-                )}
-                <Wrapper ref={collectionRef} onScroll={updateScrollObj}>
-                    <Chip active={!selected} onClick={clickHandler()}>
-                        All
-                        <div
-                            style={{ display: 'inline-block', width: '24px' }}
+        !props.searchMode && (
+            <>
+                <CollectionShare
+                    show={collectionShareModalView}
+                    onHide={() => setCollectionShareModalView(false)}
+                    collection={getSelectedCollection(
+                        selectedCollectionID,
+                        props.collections
+                    )}
+                    syncWithRemote={props.syncWithRemote}
+                />
+                <Container>
+                    {scrollObj.scrollLeft > 0 && (
+                        <NavigationButton
+                            scrollDirection={SCROLL_DIRECTION.LEFT}
+                            onClick={scrollCollection(SCROLL_DIRECTION.LEFT)}
                         />
-                    </Chip>
-                    {collections?.map((item) => (
-                        <Chip
-                            key={item.id}
-                            active={selected === item.id}
-                            onClick={clickHandler(item)}
-                        >
-                            {item.name}
-                            {item.type != CollectionType.favorites &&
-                            item.owner.id === user?.id ? (
-                                <OverlayTrigger
-                                    rootClose
-                                    trigger="click"
-                                    placement="bottom"
-                                    overlay={collectionOptions}
-                                >
-                                    <OptionIcon
-                                        onClick={() =>
-                                            setSelectedCollectionID(item.id)
-                                        }
-                                    />
-                                </OverlayTrigger>
-                            ) : (
-                                <div
-                                    style={{
-                                        display: 'inline-block',
-                                        width: '24px',
-                                    }}
-                                />
-                            )}
+                    )}
+                    <Wrapper ref={collectionRef} onScroll={updateScrollObj}>
+                        <Chip active={!selected} onClick={clickHandler()}>
+                            All
+                            <div
+                                style={{
+                                    display: 'inline-block',
+                                    width: '24px',
+                                }}
+                            />
                         </Chip>
-                    ))}
-                </Wrapper>
-                {scrollObj.scrollLeft <
-                    scrollObj.scrollWidth - scrollObj.clientWidth && (
-                    <NavigationButton
-                        scrollDirection={SCROLL_DIRECTION.RIGHT}
-                        onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)}
-                    />
-                )}
-            </Container>
-        </>
+                        {collections?.map((item) => (
+                            <Chip
+                                key={item.id}
+                                active={selected === item.id}
+                                onClick={clickHandler(item)}
+                            >
+                                {item.name}
+                                {item.type != CollectionType.favorites &&
+                                item.owner.id === user?.id ? (
+                                    <OverlayTrigger
+                                        rootClose
+                                        trigger="click"
+                                        placement="bottom"
+                                        overlay={collectionOptions}
+                                    >
+                                        <OptionIcon
+                                            onClick={() =>
+                                                setSelectedCollectionID(item.id)
+                                            }
+                                        />
+                                    </OverlayTrigger>
+                                ) : (
+                                    <div
+                                        style={{
+                                            display: 'inline-block',
+                                            width: '24px',
+                                        }}
+                                    />
+                                )}
+                            </Chip>
+                        ))}
+                    </Wrapper>
+                    {scrollObj.scrollLeft <
+                        scrollObj.scrollWidth - scrollObj.clientWidth && (
+                        <NavigationButton
+                            scrollDirection={SCROLL_DIRECTION.RIGHT}
+                            onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)}
+                        />
+                    )}
+                </Container>
+            </>
+        )
     );
 }

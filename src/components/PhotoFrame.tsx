@@ -1,7 +1,13 @@
 import router from 'next/router';
-import { DeadCenter, FILE_TYPE, Search } from 'pages/gallery';
+import {
+    DeadCenter,
+    FILE_TYPE,
+    Search,
+    SetFiles,
+    setSearchStats,
+} from 'pages/gallery';
 import PreviewCard from 'pages/gallery/components/PreviewCard';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { File } from 'services/fileService';
 import styled from 'styled-components';
@@ -17,8 +23,6 @@ const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
-
-type SetFiles = React.Dispatch<React.SetStateAction<File[]>>;
 
 interface TimeStampListItem {
     itemType: ITEM_TYPE;
@@ -103,7 +107,8 @@ interface Props {
     openFileUploader;
     loadingBar;
     searchMode: boolean;
-    search: Search
+    search: Search;
+    setSearchStats: setSearchStats;
 }
 
 const PhotoFrame = ({
@@ -119,11 +124,21 @@ const PhotoFrame = ({
     loadingBar,
     searchMode,
     search,
+    setSearchStats,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const fetching: { [k: number]: boolean } = {};
+    const startTime = Date.now();
 
+    useEffect(() => {
+        if (searchMode) {
+            setSearchStats({
+                resultCount: filteredData.length,
+                timeTaken: (Date.now() - startTime) / 1000,
+            });
+        }
+    }, [search]);
     const updateUrl = (index: number) => (url: string) => {
         files[index] = {
             ...files[index],
@@ -249,17 +264,24 @@ const PhotoFrame = ({
     };
 
     let idSet = new Set();
-
     const filteredData = files
         .map((item, index) => ({
             ...item,
             dataIndex: index,
         }))
         .filter((item) => {
-            if (search.date && !isSameDayAnyYear(new Date(item.metadata.creationTime / 1000))(search.date)) {
+            if (
+                search.date &&
+                !isSameDayAnyYear(new Date(item.metadata.creationTime / 1000))(
+                    search.date
+                )
+            ) {
                 return false;
             }
-            if (search.location && !isInsideBox(item.metadata, search.location)) {
+            if (
+                search.location &&
+                !isInsideBox(item.metadata, search.location)
+            ) {
                 return false;
             }
             if (!idSet.has(item.id)) {
