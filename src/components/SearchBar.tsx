@@ -49,6 +49,7 @@ const SearchStatsContainer = styled.div`
     justify-content: center;
     align-items: center;
     color: #979797;
+    margin-bottom: 8px;
 `;
 
 export enum SuggestionType {
@@ -252,17 +253,14 @@ export default function SearchBar(props: Props) {
         }),
     };
     return (
-        <>
+        <div className={!props.isFirstFetch ? 'fadeIn' : ' fadeOut'}>
             {props.searchStats && (
                 <SearchStatsContainer>
                     {constants.SEARCH_STATS(props.searchStats)}
                 </SearchStatsContainer>
             )}
             {windowWidth > 1000 || props.isOpen ? (
-                <Wrapper
-                    width={windowWidth}
-                    className={!props.isFirstFetch ? 'fadeIn' : ' fadeOut'}
-                >
+                <Wrapper width={windowWidth}>
                     <div
                         style={{
                             flex: 1,
@@ -300,6 +298,6 @@ export default function SearchBar(props: Props) {
                     <SearchIcon />
                 </SearchButton>
             )}
-        </>
+        </div>
     );
 }
