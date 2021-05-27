@@ -58,24 +58,13 @@ class HTTPService {
      * provided by axios. Here, only the set headers are spread
      * over what was sent in config.
      */
-    public async request(
-        config: AxiosRequestConfig,
-        customConfig?: any,
-        retryCounter = 2
-    ) {
-        try {
-            // eslint-disable-next-line no-param-reassign
-            config.headers = {
-                ...this.headers,
-                ...config.headers,
-            };
-            return await axios({ ...config, ...customConfig });
-        } catch (e) {
-            retryCounter > 0 &&
-                config.method !== 'GET' &&
-                (await this.request(config, customConfig, retryCounter - 1));
-            throw e;
-        }
+    public async request(config: AxiosRequestConfig, customConfig?: any) {
+        // eslint-disable-next-line no-param-reassign
+        config.headers = {
+            ...this.headers,
+            ...config.headers,
+        };
+        return await axios({ ...config, ...customConfig });
     }
 
     /**

@@ -58,6 +58,13 @@ export default function Upload(props: Props) {
             props.setLoading(false);
         }
     }, [props.acceptedFiles]);
+
+    const uploadInit = function () {
+        setUploadStage(UPLOAD_STAGES.START);
+        setFileCounter({ current: 0, total: 0 });
+        setFileProgress(new Map<string, number>());
+        setPercentComplete(0);
+    };
     const showCreateCollectionModal = (fileAnalysisResult?: AnalysisResult) => {
         props.setCollectionNamerAttributes({
             title: constants.CREATE_COLLECTION,
@@ -123,7 +130,7 @@ export default function Upload(props: Props) {
 
     const uploadFilesToExistingCollection = async (collection) => {
         try {
-            setUploadStage(UPLOAD_STAGES.START);
+            uploadInit();
             setProgressView(true);
 
             let filesWithCollectionToUpload: FileWithCollection[] =
@@ -142,7 +149,7 @@ export default function Upload(props: Props) {
         collectionName
     ) => {
         try {
-            setUploadStage(UPLOAD_STAGES.START);
+            uploadInit();
             setProgressView(true);
             let filesWithCollectionToUpload = new Array<FileWithCollection>();
             try {

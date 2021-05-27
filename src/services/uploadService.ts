@@ -187,7 +187,7 @@ class UploadService {
                 this.updateProgressBarUI();
             }
 
-            progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOADING);
+            progressBarProps.setUploadStage(UPLOAD_STAGES.START);
             this.totalFileCount = actualFiles.length;
             this.perFileProgress = 100 / actualFiles.length;
             this.filesCompleted = 0;
@@ -213,6 +213,7 @@ class UploadService {
                     )
                 );
             }
+            progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOADING);
             await Promise.all(uploadProcesses);
             progressBarProps.setUploadStage(UPLOAD_STAGES.FINISH);
             progressBarProps.setPercentComplete(FILE_UPLOAD_COMPLETED);
@@ -540,11 +541,10 @@ class UploadService {
             if (!token) {
                 return;
             }
-            const response = await HTTPService.post(
-                `${ENDPOINT}/files`,
-                uploadFile,
-                null,
-                { 'X-Auth-Token': token }
+            const response = await this.retryPromise(
+                HTTPService.post(`${ENDPOINT}/files`, uploadFile, null, {
+                    'X-Auth-Token': token,
+                })
             );
 
             return response.data;
@@ -853,12 +853,14 @@ class UploadService {
         filename: string
     ): Promise<string> {
         try {
-            await HTTPService.put(
-                fileUploadURL.url,
-                file,
-                null,
-                null,
-                this.trackUploadProgress(filename)
+            await this.retryPromise(
+                HTTPService.put(
+                    fileUploadURL.url,
+                    file,
+                    null,
+                    null,
+                    this.trackUploadProgress(filename)
+                )
             );
             return fileUploadURL.objectKey;
         } catch (e) {
@@ -894,12 +896,14 @@ class UploadService {
                 }
             }
             let uploadChunk = Uint8Array.from(combinedChunks);
-            const response = await HTTPService.put(
-                fileUploadURL,
-                uploadChunk,
-                null,
-                null,
-                this.trackUploadProgress(filename, percentPerPart, index)
+            const response = await this.retryPromise(
+                HTTPService.put(
+                    fileUploadURL,
+                    uploadChunk,
+                    null,
+                    null,
+                    this.trackUploadProgress(filename, percentPerPart, index)
+                )
             );
             resParts.push({
                 PartNumber: index + 1,
@@ -911,9 +915,11 @@ class UploadService {
             { CompleteMultipartUpload: { Part: resParts } },
             options
         );
-        await HTTPService.post(multipartUploadURLs.completeURL, body, null, {
-            'content-type': 'text/xml',
-        });
+        await this.retryPromise(
+            HTTPService.post(multipartUploadURLs.completeURL, body, null, {
+                'content-type': 'text/xml',
+            })
+        );
         return multipartUploadURLs.objectKey;
     }
 
@@ -1021,6 +1027,18 @@ class UploadService {
         }
 
         return dd;
+    }
+    private async retryPromise(promise: Promise<any>, retryCount: number = 2) {
+        try {
+            const resp = await promise;
+            return resp;
+        } catch (e) {
+            if (retryCount > 0) {
+                await this.retryPromise(promise, retryCount - 1);
+            } else {
+                throw e;
+            }
+        }
     }
 }
 
