@@ -21,6 +21,7 @@ interface Props {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setLoading: SetLoading;
     setDialogMessage: SetDialogMessage;
+    setUploadInProgress: any;
 }
 
 export enum UPLOAD_STRATEGY {
@@ -185,6 +186,7 @@ export default function Upload(props: Props) {
         filesWithCollectionToUpload: FileWithCollection[]
     ) => {
         try {
+            props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
@@ -196,6 +198,7 @@ export default function Upload(props: Props) {
                     setFileProgress,
                 }
             );
+            props.setUploadInProgress(false);
         } catch (err) {
             props.setBannerMessage(err.message);
             setProgressView(false);
