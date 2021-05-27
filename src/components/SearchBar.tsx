@@ -248,6 +248,7 @@ export default function SearchBar(props: Props) {
             ...style,
             color: '#686868',
             wordSpacing: '2px',
+            whiteSpace: 'nowrap',
         }),
     };
     return (
