@@ -13,6 +13,20 @@ interface IQueryPrams {
  * Service to manage all HTTP calls.
  */
 class HTTPService {
+    constructor() {
+        axios.interceptors.response.use(
+            (response) => {
+                return Promise.resolve(response);
+            },
+            (err) => {
+                if (!err.response) {
+                    return Promise.reject(err);
+                }
+                const response = err.response;
+                return Promise.reject(response);
+            }
+        );
+    }
     /**
      * header object to be append to all api calls.
      */
