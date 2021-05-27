@@ -1,19 +1,12 @@
-import { Search, SetCollections, SetFiles } from 'pages/gallery';
+import { Search, SearchStats, SetCollections } from 'pages/gallery';
 import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
 import debounce from 'debounce-promise';
 import { File } from 'services/fileService';
-import {
-    Collection,
-    getLocalCollections,
-} from 'services/collectionService';
 import { Bbox, parseHumanDate, searchLocation } from 'services/searchService';
-import {
-    getFormattedDate,
-    getDefaultSuggestions,
-} from 'utils/search';
+import { getFormattedDate, getDefaultSuggestions } from 'utils/search';
 import constants from 'utils/strings/constants';
 import LocationIcon from './LocationIcon';
 import DateIcon from './DateIcon';
@@ -51,7 +44,7 @@ const SearchButton = styled.div`
     justify-content: center;
 `;
 
-const SearchStats = styled.div`
+const SearchStatsContainer = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
@@ -73,12 +66,9 @@ interface Props {
     setOpen: (value) => void;
     loadingBar: any;
     setCollections: SetCollections;
-    setSearch: React.Dispatch<React.SetStateAction<Search>>;
+    setSearch: (search: Search) => void;
     files: File[];
-}
-interface Stats {
-    resultCount: number;
-    timeTaken: number;
+    searchStats: SearchStats;
 }
 export default function SearchBar(props: Props) {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -141,16 +131,16 @@ export default function SearchBar(props: Props) {
         switch (selectedOption.type) {
             case SuggestionType.DATE:
                 const searchedDate = selectedOption.value as Date;
-                
+
                 props.setSearch({
                     date: searchedDate,
-                })
+                });
                 break;
             case SuggestionType.LOCATION:
                 const bbox = selectedOption.value as Bbox;
                 props.setSearch({
                     location: bbox,
-                })
+                });
                 break;
         }
     };
@@ -262,6 +252,11 @@ export default function SearchBar(props: Props) {
     };
     return (
         <>
+            {props.searchStats && (
+                <SearchStatsContainer>
+                    {constants.SEARCH_STATS(props.searchStats)}
+                </SearchStatsContainer>
+            )}
             {windowWidth > 1000 || props.isOpen ? (
                 <Wrapper
                     width={windowWidth}

@@ -71,6 +71,13 @@ export const DeadCenter = styled.div`
     text-align: center;
     flex-direction: column;
 `;
+const AlertContainer = styled.div`
+    background-color: #111;
+    padding: 5px 0;
+    font-size: 14px;
+    text-align: center;
+    margin-top: -10px;
+`;
 
 export type selectedState = {
     [k: number]: boolean;
@@ -79,18 +86,16 @@ export type selectedState = {
 export type SetFiles = React.Dispatch<React.SetStateAction<File[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
+export type setSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
+
 export type Search = {
     date?: Date;
     location?: Bbox;
+};
+export interface SearchStats {
+    resultCount: number;
+    timeTaken: number;
 }
-
-const AlertContainer = styled.div`
-    background-color: #111;
-    padding: 5px 0;
-    font-size: 14px;
-    text-align: center;
-    margin-top: -10px;
-`;
 
 export default function Gallery() {
     const router = useRouter();
@@ -133,6 +138,8 @@ export default function Gallery() {
 
     const loadingBar = useRef(null);
     const [searchMode, setSearchMode] = useState(false);
+    const [searchStats, setSearchStats] = useState(null);
+
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
@@ -290,7 +297,8 @@ export default function Gallery() {
     const updateSearch = (search: Search) => {
         setSearch(search);
         setSinceTime(new Date().getTime());
-    }
+        setSearchStats(null);
+    };
     return (
         <FullScreenDropZone
             getRootProps={getRootProps}
@@ -329,6 +337,7 @@ export default function Gallery() {
                 setCollections={setCollections}
                 setSearch={updateSearch}
                 files={files}
+                searchStats={searchStats}
             />
             <Collections
                 collections={collections}
@@ -389,6 +398,7 @@ export default function Gallery() {
                 loadingBar={loadingBar}
                 searchMode={searchMode}
                 search={search}
+                setSearchStats={setSearchStats}
             />
             {selected.count > 0 && (
                 <SelectedFileOptions
