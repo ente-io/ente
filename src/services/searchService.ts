@@ -17,11 +17,14 @@ export const getMapboxToken = () => {
 
 export function parseHumanDate(humanDate: string): DateValue[] {
     const date = chrono.parseDate(humanDate);
+    const date1 = chrono.parseDate(humanDate + ' 1');
     if (date != null) {
         return [
             { date: date.getDate(), month: date.getMonth() },
             { month: date.getMonth() },
         ];
+    } else if (date1) {
+        return [{ month: date1.getMonth() }];
     } else {
         return [];
     }
