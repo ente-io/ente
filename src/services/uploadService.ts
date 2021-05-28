@@ -935,9 +935,13 @@ class UploadService {
                 filename &&
                     this.fileProgress.set(
                         filename,
-                        Math.round(
-                            percentPerPart * index +
-                                (percentPerPart * event.loaded) / event.total
+                        Math.min(
+                            Math.round(
+                                percentPerPart * index +
+                                    (percentPerPart * event.loaded) /
+                                        event.total
+                            ),
+                            98
                         )
                     );
                 this.updateProgressBarUI();

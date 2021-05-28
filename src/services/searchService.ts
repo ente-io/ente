@@ -5,7 +5,7 @@ import { getToken } from 'utils/common/key';
 import { DateValue, Suggestion, SuggestionType } from 'components/SearchBar';
 
 const ENDPOINT = getEndpoint();
-
+const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 export type Bbox = [number, number, number, number];
 export interface LocationSearchResponse {
     place: string;
@@ -19,10 +19,21 @@ export function parseHumanDate(humanDate: string): DateValue[] {
     const date = chrono.parseDate(humanDate);
     const date1 = chrono.parseDate(humanDate + ' 1');
     if (date != null) {
-        return [
-            { date: date.getDate(), month: date.getMonth() },
+        const dates = [
             { month: date.getMonth() },
+            { date: date.getDate(), month: date.getMonth() },
         ];
+        let reverse = false;
+        humanDate.split('').forEach((c) => {
+            if (DIGITS.has(c)) {
+                reverse = true;
+            }
+        });
+        if (reverse) {
+            return dates.reverse();
+        } else {
+            return dates;
+        }
     } else if (date1) {
         return [{ month: date1.getMonth() }];
     } else {
