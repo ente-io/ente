@@ -489,14 +489,14 @@ class UploadService {
                     uploadPartCount
                 );
             } else {
-                const fileUploadURL = uploadURLs[0];
+                const fileUploadURL = uploadURLs.pop();
                 fileObjectKey = await this.putFile(
                     fileUploadURL,
                     file.file.encryptedData,
                     file.filename
                 );
             }
-            const thumbnailUploadURL = uploadURLs[1];
+            const thumbnailUploadURL = uploadURLs.pop();
             thumbnailObjectKey = await this.putFile(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData as Uint8Array,
