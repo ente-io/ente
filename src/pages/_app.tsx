@@ -320,18 +320,17 @@ export default function App({ Component, pageProps, err }) {
     const [offline, setOffline] = useState(
         typeof window !== 'undefined' && !window.navigator.onLine
     );
-    useEffect(() => {
-        if (
-            !('serviceWorker' in navigator) ||
-            process.env.NODE_ENV !== 'production'
-        ) {
-            console.warn('Progressive Web App support is disabled');
-            return;
-        }
-
-        const wb = new Workbox('sw.js', { scope: '/' });
-        wb.register();
-    }, []);
+    // useEffect(() => {
+    //     // if (
+    //     //     !('serviceWorker' in navigator) ||
+    //     //     process.env.NODE_ENV !== 'production'
+    //     // ) {
+    //     //     console.warn('Progressive Web App support is disabled');
+    //     //     return;
+    //     // }
+    //     // const wb = new Workbox('sw.js', { scope: '/' });
+    //     // wb.register();
+    // }, []);
 
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
