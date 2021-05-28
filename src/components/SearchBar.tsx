@@ -31,12 +31,12 @@ const Wrapper = styled.div<{ width: number }>`
     margin-bottom: 10px;
 `;
 
-const SearchButton = styled.div`
+const SearchButton = styled.div<{ disabled: boolean }>`
     top: 1px;
     z-index: 100;
     right: 80px;
     color: #fff;
-    cursor: pointer;
+    cursor: ${(props) => !props.disabled && 'pointer'};
     min-height: 64px;
     position: fixed;
     display: flex;
@@ -253,7 +253,7 @@ export default function SearchBar(props: Props) {
         }),
     };
     return (
-        <div className={!props.isFirstFetch ? 'fadeIn' : ' fadeOut'}>
+        <>
             {props.searchStats && (
                 <SearchStatsContainer>
                     {constants.SEARCH_STATS(props.searchStats)}
@@ -268,6 +268,7 @@ export default function SearchBar(props: Props) {
                         }}
                     >
                         <AsyncSelect
+                            isDisabled={props.isFirstFetch}
                             components={{
                                 Option: OptionWithIcon,
                                 Control: ControlWithIcon,
@@ -294,10 +295,13 @@ export default function SearchBar(props: Props) {
                     </div>
                 </Wrapper>
             ) : (
-                <SearchButton onClick={() => props.setOpen(true)}>
+                <SearchButton
+                    disabled={props.isFirstFetch}
+                    onClick={() => !props.isFirstFetch && props.setOpen(true)}
+                >
                     <SearchIcon />
                 </SearchButton>
             )}
-        </div>
+        </>
     );
 }

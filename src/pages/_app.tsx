@@ -280,14 +280,6 @@ const GlobalStyles = createGlobalStyle`
     .arrow::after{
         border-bottom-color:#282828 !important;
     }
-    .fadeOut {
-        opacity: 0;
-    }
-    .fadeIn{
-        opacity:1;
-        transition: opacity 0.5s;
-   
-   }
 `;
 
 export const LogoImage = styled.img`
