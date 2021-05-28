@@ -331,10 +331,7 @@ export default function App({ Component, pageProps, err }) {
         //     // const wb = new Workbox('sw.js', { scope: '/' });
         //     // wb.register();
 
-        if (
-            'serviceWorker' in navigator ||
-            process.env.NODE_ENV !== 'production'
-        ) {
+        if ('serviceWorker' in navigator) {
             navigator.serviceWorker
                 .getRegistrations()
                 .then(function (registrations) {
