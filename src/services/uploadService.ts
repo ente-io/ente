@@ -473,7 +473,6 @@ class UploadService {
     private async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
         try {
             let fileObjectKey, thumbnailObjectKey;
-            const uploadURLs = await this.fetchUploadURLSeparately();
             if (isDataStream(file.file.encryptedData)) {
                 const { chunkCount, stream } = file.file.encryptedData;
                 const uploadPartCount = Math.ceil(
@@ -489,14 +488,14 @@ class UploadService {
                     uploadPartCount
                 );
             } else {
-                const fileUploadURL = uploadURLs[0];
+                const fileUploadURL = await this.getUploadURL();
                 fileObjectKey = await this.putFile(
                     fileUploadURL,
                     file.file.encryptedData,
                     file.filename
                 );
             }
-            const thumbnailUploadURL = uploadURLs[1];
+            const thumbnailUploadURL = await this.getUploadURL();
             thumbnailObjectKey = await this.putFile(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData as Uint8Array,
@@ -1041,26 +1040,6 @@ class UploadService {
             } else {
                 throw e;
             }
-        }
-    }
-    private async fetchUploadURLSeparately(): Promise<[UploadURL, UploadURL]> {
-        try {
-            const token = getToken();
-            if (!token) {
-                return;
-            }
-            const response = await HTTPService.get(
-                `${ENDPOINT}/files/upload-urls`,
-                {
-                    count: 2,
-                },
-                { 'X-Auth-Token': token }
-            );
-
-            return response.data['urls'];
-        } catch (e) {
-            console.log('failed to fetch url ');
-            throw e;
         }
     }
 }
