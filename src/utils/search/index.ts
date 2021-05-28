@@ -31,7 +31,6 @@ export const isSameDay = (baseDate: DateValue) => (compareDate: Date) => {
     if (baseDate.year) {
         same = baseDate.year === compareDate.getFullYear();
     }
-    console.log(baseDate, compareDate.getMonth(), same);
 
     return same;
 };
