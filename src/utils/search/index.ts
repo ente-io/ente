@@ -1,10 +1,10 @@
-import { Suggestion, SuggestionType } from 'components/SearchBar';
+import { DateValue, Suggestion, SuggestionType } from 'components/SearchBar';
 import { File } from 'services/fileService';
 import { Bbox } from 'services/searchService';
 
 export function isInsideBox(
-    file: { longitude: number, latitude: number },
-    bbox: Bbox,
+    file: { longitude: number; latitude: number },
+    bbox: Bbox
 ) {
     if (file.latitude == null && file.longitude == null) {
         return false;
@@ -19,53 +19,37 @@ export function isInsideBox(
     }
 }
 
-export const isSameDay = (baseDate) => (compareDate) => {
-    return (
-        baseDate.getMonth() === compareDate.getMonth() &&
-        baseDate.getDate() === compareDate.getDate()
-    );
+export const isSameDay = (baseDate: DateValue) => (compareDate: Date) => {
+    let same = true;
+
+    if (baseDate.month) {
+        same = baseDate.month === compareDate.getMonth();
+    }
+    if (baseDate.date) {
+        same = baseDate.date === compareDate.getDate();
+    }
+    if (baseDate.year) {
+        same = baseDate.year === compareDate.getFullYear();
+    }
+
+    return same;
 };
 
-export function getFilesWithCreationDay(files: File[], searchedDate: Date) {
+export function getFilesWithCreationDay(
+    files: File[],
+    searchedDate: DateValue
+) {
     const isSearchedDate = isSameDay(searchedDate);
-
     return files.filter((file) =>
         isSearchedDate(new Date(file.metadata.creationTime / 1000))
     );
 }
-export function getFormattedDate(date: Date) {
-    return new Intl.DateTimeFormat('en-IN', {
-        month: 'long',
-        day: 'numeric',
-    }).format(date);
-}
-
-export function getDefaultSuggestions() {
-    return [
-        {
-            label: 'Christmas',
-            value: new Date(2021, 11, 25),
-            type: SuggestionType.DATE,
-        },
-        {
-            label: 'Christmas Eve',
-            value: new Date(2021, 11, 24),
-            type: SuggestionType.DATE,
-        },
-        {
-            label: 'New Year',
-            value: new Date(2021, 0, 1),
-            type: SuggestionType.DATE,
-        },
-        {
-            label: 'New Year Eve',
-            value: new Date(2021, 11, 31),
-            type: SuggestionType.DATE,
-        },
-        {
-            label: "Valentine's Day",
-            value: new Date(2021, 1, 14),
-            type: SuggestionType.DATE,
-        },
-    ] as Suggestion[];
+export function getFormattedDate(date: DateValue) {
+    var options = {};
+    date.date && (options['day'] = 'numeric');
+    date.month && (options['month'] = 'long');
+    date.year && (options['year'] = 'numeric');
+    return new Intl.DateTimeFormat('en-IN', options).format(
+        new Date(date.year ?? 1, date.month ?? 1, date.date ?? 1)
+    );
 }
