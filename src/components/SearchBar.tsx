@@ -13,7 +13,7 @@ import DateIcon from './DateIcon';
 import SearchIcon from './SearchIcon';
 import CrossIcon from './CrossIcon';
 
-const Wrapper = styled.div<{ width: number }>`
+const Wrapper = styled.div<{ width: number; isDisabled: boolean }>`
     position: fixed;
     z-index: 1000;
     top: 0;
@@ -28,15 +28,19 @@ const Wrapper = styled.div<{ width: number }>`
     color: #fff;
     min-height: 64px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+    transition: opacity 1s ease;
+    opacity: ${(props) => (props.isDisabled ? 0 : 1)};
     margin-bottom: 10px;
 `;
 
-const SearchButton = styled.div<{ disabled: boolean }>`
+const SearchButton = styled.div<{ isDisabled: boolean }>`
     top: 1px;
     z-index: 100;
     right: 80px;
     color: #fff;
-    cursor: ${(props) => !props.disabled && 'pointer'};
+    cursor: pointer;
+    transition: opacity 1s ease;
+    opacity: ${(props) => (props.isDisabled ? 0 : 1)};
     min-height: 64px;
     position: fixed;
     display: flex;
@@ -260,7 +264,7 @@ export default function SearchBar(props: Props) {
                 </SearchStatsContainer>
             )}
             {windowWidth > 1000 || props.isOpen ? (
-                <Wrapper width={windowWidth}>
+                <Wrapper isDisabled={props.isFirstFetch} width={windowWidth}>
                     <div
                         style={{
                             flex: 1,
@@ -268,7 +272,6 @@ export default function SearchBar(props: Props) {
                         }}
                     >
                         <AsyncSelect
-                            isDisabled={props.isFirstFetch}
                             components={{
                                 Option: OptionWithIcon,
                                 Control: ControlWithIcon,
@@ -296,7 +299,7 @@ export default function SearchBar(props: Props) {
                 </Wrapper>
             ) : (
                 <SearchButton
-                    disabled={props.isFirstFetch}
+                    isDisabled={props.isFirstFetch}
                     onClick={() => !props.isFirstFetch && props.setOpen(true)}
                 >
                     <SearchIcon />
