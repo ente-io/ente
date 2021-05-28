@@ -225,7 +225,7 @@ export default function Gallery() {
                         proceed: {
                             text: constants.LOGIN,
                             action: logoutUser,
-                            variant: 'primary',
+                            variant: 'success',
                         },
                         nonClosable: true,
                     });
