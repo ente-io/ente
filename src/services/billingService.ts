@@ -2,7 +2,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 const ENDPOINT = getEndpoint();
 import { getStripePublishableKey, getToken } from 'utils/common/key';
-import { runningInBrowser } from 'utils/common/';
+import { checkConnectivity, runningInBrowser } from 'utils/common/';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
 import { convertBytesToGBs } from 'utils/billingUtil';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
@@ -44,11 +44,15 @@ export const FREE_PLAN = 'free';
 class billingService {
     private stripe: Stripe;
     constructor() {
-        let publishableKey = getStripePublishableKey();
-        const main = async () => {
-            this.stripe = await loadStripe(publishableKey);
-        };
-        runningInBrowser() && main();
+        try {
+            let publishableKey = getStripePublishableKey();
+            const main = async () => {
+                this.stripe = await loadStripe(publishableKey);
+            };
+            runningInBrowser() && checkConnectivity() && main();
+        } catch (e) {
+            console.warn(e);
+        }
     }
     public async updatePlans() {
         try {
