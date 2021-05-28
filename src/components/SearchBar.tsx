@@ -33,7 +33,6 @@ const Wrapper = styled.div<{ width: number; isDisabled: boolean }>`
     background-color: #111;
     color: #fff;
     min-height: 64px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
     transition: opacity 1s ease;
     opacity: ${(props) => (props.isDisabled ? 0 : 1)};
     margin-bottom: 10px;
@@ -226,7 +225,7 @@ export default function SearchBar(props: Props) {
             backgroundColor: '#282828',
             color: '#d1d1d1',
             borderColor: isFocused ? '#2dc262' : '#444',
-            boxShadow: isFocused && '0 0 3px #2dc262',
+            boxShadow: 'none',
             ':hover': {
                 borderColor: '#2dc262',
                 cursor: 'text',
