@@ -22,7 +22,7 @@ export function isInsideBox(
 export const isSameDay = (baseDate: DateValue) => (compareDate: Date) => {
     let same = true;
 
-    if (baseDate.month) {
+    if (baseDate.month || baseDate.month === 0) {
         same = baseDate.month === compareDate.getMonth();
     }
     if (baseDate.date) {
@@ -47,7 +47,7 @@ export function getFilesWithCreationDay(
 export function getFormattedDate(date: DateValue) {
     var options = {};
     date.date && (options['day'] = 'numeric');
-    date.month && (options['month'] = 'long');
+    (date.month || date.month === 0) && (options['month'] = 'long');
     date.year && (options['year'] = 'numeric');
     return new Intl.DateTimeFormat('en-IN', options).format(
         new Date(date.year ?? 1, date.month ?? 1, date.date ?? 1)
