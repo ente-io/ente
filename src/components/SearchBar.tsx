@@ -5,8 +5,14 @@ import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
 import debounce from 'debounce-promise';
 import { File } from 'services/fileService';
-import { Bbox, parseHumanDate, searchLocation } from 'services/searchService';
-import { getFormattedDate, getDefaultSuggestions } from 'utils/search';
+import {
+    Bbox,
+    getHolidaySuggestion,
+    getYearSuggestion,
+    parseHumanDate,
+    searchLocation,
+} from 'services/searchService';
+import { getFormattedDate } from 'utils/search';
 import constants from 'utils/strings/constants';
 import LocationIcon from './LocationIcon';
 import DateIcon from './DateIcon';
@@ -60,10 +66,15 @@ export enum SuggestionType {
     DATE,
     LOCATION,
 }
+export interface DateValue {
+    date?: number;
+    month?: number;
+    year?: number;
+}
 export interface Suggestion {
     type: SuggestionType;
     label: string;
-    value: Bbox | Date;
+    value: Bbox | DateValue;
 }
 interface Props {
     isOpen: boolean;
@@ -95,21 +106,25 @@ export default function SearchBar(props: Props) {
     // Functionality
     //==========================
     const getAutoCompleteSuggestions = async (searchPhrase: string) => {
-        let option = getDefaultSuggestions().filter((suggestion) =>
-            suggestion.label.toLowerCase().includes(searchPhrase.toLowerCase())
-        );
-
+        searchPhrase = searchPhrase.trim();
         if (!searchPhrase?.length) {
-            return option;
+            return [];
         }
-        const searchedDate = parseHumanDate(searchPhrase);
-        if (searchedDate != null) {
-            option.push({
+        let option = [
+            ...getHolidaySuggestion(searchPhrase),
+            ...getYearSuggestion(searchPhrase),
+        ];
+
+        const searchedDates = parseHumanDate(searchPhrase);
+
+        option.push(
+            ...searchedDates.map((searchedDate) => ({
                 type: SuggestionType.DATE,
                 value: searchedDate,
                 label: getFormattedDate(searchedDate),
-            });
-        }
+            }))
+        );
+
         const searchResults = await searchLocation(searchPhrase);
         option.push(
             ...searchResults.map(
@@ -135,7 +150,7 @@ export default function SearchBar(props: Props) {
 
         switch (selectedOption.type) {
             case SuggestionType.DATE:
-                const searchedDate = selectedOption.value as Date;
+                const searchedDate = selectedOption.value as DateValue;
 
                 props.setSearch({
                     date: searchedDate,

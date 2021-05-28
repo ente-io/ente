@@ -53,7 +53,7 @@ import { getSelectedFileIds } from 'utils/file';
 import { addFilesToCollection } from 'utils/collection';
 import SelectedFileOptions from './components/SelectedFileOptions';
 import { errorCodes } from 'utils/common/errorUtil';
-import SearchBar from 'components/SearchBar';
+import SearchBar, { DateValue } from 'components/SearchBar';
 import { Bbox } from 'services/searchService';
 
 export enum FILE_TYPE {
@@ -89,7 +89,7 @@ export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
 export type setSearchStats = React.Dispatch<React.SetStateAction<SearchStats>>;
 
 export type Search = {
-    date?: Date;
+    date?: DateValue;
     location?: Bbox;
 };
 export interface SearchStats {

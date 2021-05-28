@@ -272,8 +272,8 @@ const PhotoFrame = ({
         .filter((item) => {
             if (
                 search.date &&
-                !isSameDayAnyYear(new Date(item.metadata.creationTime / 1000))(
-                    search.date
+                !isSameDayAnyYear(search.date)(
+                    new Date(item.metadata.creationTime / 1000)
                 )
             ) {
                 return false;
