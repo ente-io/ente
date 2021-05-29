@@ -91,12 +91,12 @@ class _LoadingPhotosPageState extends State<LoadingPhotosPage> {
                 fontSize: 16,
               ),
             ),
-            Padding(padding: EdgeInsets.all(6)),
+            Padding(padding: EdgeInsets.all(8)),
             Text(
               "this might take upto 30 seconds 🐣",
               style: TextStyle(color: Colors.white.withOpacity(0.3)),
             ),
-            Padding(padding: const EdgeInsets.all(60.0)),
+            Padding(padding: const EdgeInsets.all(70)),
             Text(
               "did you know?",
               style: TextStyle(
@@ -104,7 +104,7 @@ class _LoadingPhotosPageState extends State<LoadingPhotosPage> {
                 color: Theme.of(context).buttonColor,
               ),
             ),
-            Padding(padding: const EdgeInsets.all(12)),
+            Padding(padding: EdgeInsets.all(8)),
             Container(
               height: 80,
               child: PageView.builder(
