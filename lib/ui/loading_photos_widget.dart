@@ -5,15 +5,16 @@ import 'package:loading_animations/loading_animations.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
+import 'package:photos/utils/navigation_util.dart';
 
-class LoadingPhotosPage extends StatefulWidget {
-  const LoadingPhotosPage({Key key}) : super(key: key);
+class LoadingPhotosWidget extends StatefulWidget {
+  const LoadingPhotosWidget({Key key}) : super(key: key);
 
   @override
-  _LoadingPhotosPageState createState() => _LoadingPhotosPageState();
+  _LoadingPhotosWidgetState createState() => _LoadingPhotosWidgetState();
 }
 
-class _LoadingPhotosPageState extends State<LoadingPhotosPage> {
+class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   StreamSubscription<SyncStatusUpdate> _firstImportEvent;
   int _currentPage = 0;
   PageController _pageController = PageController(
@@ -37,13 +38,7 @@ class _LoadingPhotosPageState extends State<LoadingPhotosPage> {
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (mounted &&
           event.status == SyncStatus.completed_first_gallery_import) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return BackupFolderSelectionPage();
-            },
-          ),
-        );
+        routeToPage(context, BackupFolderSelectionPage());
       }
     });
 

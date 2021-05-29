@@ -11,6 +11,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
@@ -175,6 +176,7 @@ class SyncService {
 
   Future<void> onPermissionGranted() async {
     await _prefs.setBool(kHasGrantedPermissionsKey, true);
+    Bus.instance.fire(PermissionGrantedEvent());
     _doSync();
   }
 

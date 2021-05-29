@@ -8,14 +8,14 @@ import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
 import 'package:photos/ui/subscription_page.dart';
 
-class LandingPage extends StatefulWidget {
-  const LandingPage({Key key}) : super(key: key);
+class LandingPageWidget extends StatefulWidget {
+  const LandingPageWidget({Key key}) : super(key: key);
 
   @override
-  _LandingPageState createState() => _LandingPageState();
+  _LandingPageWidgetState createState() => _LandingPageWidgetState();
 }
 
-class _LandingPageState extends State<LandingPage> {
+class _LandingPageWidgetState extends State<LandingPageWidget> {
   double _featureIndex = 0;
 
   @override

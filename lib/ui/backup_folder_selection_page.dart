@@ -8,7 +8,6 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/ui/home_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
@@ -46,10 +45,17 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             padding: EdgeInsets.all(12),
           ),
           Center(
-              child: SectionTitle(
-            "select folders to preserve",
-            alignment: Alignment.center,
-          )),
+            child: Hero(
+              tag: "select_folders",
+              child: Material(
+                type: MaterialType.transparency,
+                child: SectionTitle(
+                  "select folders to preserve",
+                  alignment: Alignment.center,
+                ),
+              ),
+            ),
+          ),
           Padding(
             padding: EdgeInsets.all(12),
           ),
@@ -70,15 +76,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       await Configuration.instance
                           .setPathsToBackUp(_backedupFolders);
                       Bus.instance.fire(BackupFoldersUpdatedEvent());
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) {
-                            return Scaffold(
-                              body: HomeWidget(),
-                            );
-                          },
-                        ),
-                      );
+                      Navigator.of(context).pop();
                     },
             ),
           ),
@@ -94,6 +92,19 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               textAlign: TextAlign.center,
             ),
           ),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () async {
+              Navigator.of(context).pop();
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(40, 8, 40, 20),
+              child: Text(
+                "skip",
+                style: TextStyle(color: Colors.white.withOpacity(0.8)),
+              ),
+            ),
+          )
         ],
       ),
     );

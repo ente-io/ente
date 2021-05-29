@@ -11,7 +11,9 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
@@ -21,21 +23,23 @@ import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/app_update_dialog.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
+import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/gallery_footer_widget.dart';
-import 'package:photos/ui/grant_permissions_page.dart';
-import 'package:photos/ui/loading_photos_page.dart';
+import 'package:photos/ui/grant_permissions_widget.dart';
+import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/nav_bar.dart';
 import 'package:photos/ui/settings_button.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/ui/landing_page.dart';
+import 'package:photos/ui/landing_page_widget.dart';
 import 'package:photos/ui/sync_indicator.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
@@ -61,6 +65,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
   StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
+  StreamSubscription<PermissionGrantedEvent> _permissionGrantedEvent;
+  StreamSubscription<SyncStatusUpdate> _firstImportEvent;
+  StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
 
   @override
   void initState() {
@@ -127,6 +134,25 @@ class _HomeWidgetState extends State<HomeWidget> {
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
     });
+    _permissionGrantedEvent =
+        Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _firstImportEvent =
+        Bus.instance.on<SyncStatusUpdate>().listen((event) async {
+      if (mounted &&
+          event.status == SyncStatus.completed_first_gallery_import) {
+        setState(() {});
+      }
+    });
+    _backupFoldersUpdatedEvent =
+        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) async {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     _initDeepLinks();
     UpdateService.instance.shouldUpdate().then((shouldUpdate) {
       if (shouldUpdate) {
@@ -174,23 +200,22 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _getBody() {
     if (!Configuration.instance.hasConfiguredAccount()) {
-      return LandingPage();
+      return LandingPageWidget();
     }
     if (!SyncService.instance.hasGrantedPermissions()) {
-      return GrantPermissionsPage();
+      return GrantPermissionsWidget();
     }
     if (!SyncService.instance.hasCompletedFirstImport()) {
-      return LoadingPhotosPage();
-    }
-    if (Configuration.instance.getPathsToBackUp().isEmpty) {
-      return BackupFolderSelectionPage();
+      return LoadingPhotosWidget();
     }
 
     return Stack(
       children: [
         ExtentsPageView(
           children: [
-            _getMainGalleryWidget(),
+            Configuration.instance.getPathsToBackUp().isEmpty
+                ? _getBackupFolderSelectionHook()
+                : _getMainGalleryWidget(),
             _deviceFolderGalleryWidget,
             _sharedCollectionGallery,
           ],
@@ -286,6 +311,36 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
+  Widget _getBackupFolderSelectionHook() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _headerWidgetWithSettingsButton,
+        Center(
+          child: Hero(
+            tag: "select_folders",
+            child: Material(
+              type: MaterialType.transparency,
+              child: Container(
+                width: double.infinity,
+                height: 80,
+                padding: const EdgeInsets.fromLTRB(64, 0, 64, 0),
+                child: button(
+                  "select folders\nto preserve",
+                  fontSize: 16,
+                  onPressed: () async {
+                    routeToPage(context, BackupFolderSelectionPage());
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(padding: EdgeInsets.all(50)),
+      ],
+    );
+  }
+
   Widget _buildBottomNavigationBar() {
     return Container(
       decoration: BoxDecoration(
@@ -340,6 +395,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _subscriptionPurchaseEvent.cancel();
     _triggerLogoutEvent.cancel();
     _loggedOutEvent.cancel();
+    _permissionGrantedEvent.cancel();
+    _firstImportEvent.cancel();
     super.dispose();
   }
 }

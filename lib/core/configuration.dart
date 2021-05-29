@@ -37,6 +37,8 @@ class Configuration {
   static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
   static const keyShouldHideFromRecents = "should_hide_from_recents";
   static const keyShouldShowLockScreen = "should_show_lock_screen";
+  static const keyHasSkippedBackupFolderSelection =
+      "has_skipped_backup_folder_selection";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const nameKey = "name";
   static const secretKeyKey = "secret_key";
@@ -425,5 +427,13 @@ class Configuration {
 
   String getVolatilePassword() {
     return _volatilePassword;
+  }
+
+  Future<void> skipBackupFolderSelection() async {
+    await _preferences.setBool(keyHasSkippedBackupFolderSelection, true);
+  }
+
+  bool hasSkippedBackupFolderSelection() {
+    return _preferences.getBool(keyHasSkippedBackupFolderSelection) ?? false;
   }
 }
