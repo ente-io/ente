@@ -91,7 +91,7 @@ class _LoadingPhotosPageState extends State<LoadingPhotosPage> {
                 fontSize: 16,
               ),
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            Padding(padding: EdgeInsets.all(10)),
             Text(
               "this might take upto 30 seconds 🐣",
               style: TextStyle(color: Colors.white.withOpacity(0.3)),
@@ -130,7 +130,7 @@ class _LoadingPhotosPageState extends State<LoadingPhotosPage> {
         text,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: Colors.white.withOpacity(0.6),
+          color: Colors.white.withOpacity(0.7),
           height: 1.5,
         ),
       ),
