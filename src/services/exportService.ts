@@ -10,7 +10,7 @@ enum ExportNotification {
     ABORT = 'export aborted',
 }
 class ExportService {
-    ElectronAPIs: any = runningInBrowser() && window.ElectronAPIs;
+    ElectronAPIs: any = runningInBrowser() && window['ElectronAPIs'];
 
     exportInProgress: Promise<void> = null;
 

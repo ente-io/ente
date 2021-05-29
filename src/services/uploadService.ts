@@ -581,36 +581,36 @@ class UploadService {
                 return;
             }
             if (
-                metadataJSON.photoTakenTime &&
-                metadataJSON.photoTakenTime.timestamp
+                metadataJSON['photoTakenTime'] &&
+                metadataJSON['photoTakenTime'].timestamp
             ) {
-                metaDataObject.creationTime = metadataJSON.photoTakenTime.timestamp * 1000000;
+                metaDataObject['creationTime'] = metadataJSON['photoTakenTime'].timestamp * 1000000;
             }
             if (
-                metadataJSON.modificationTime &&
-                metadataJSON.modificationTime.timestamp
+                metadataJSON['modificationTime'] &&
+                metadataJSON['modificationTime'].timestamp
             ) {
-                metaDataObject.modificationTime = metadataJSON.modificationTime.timestamp * 1000000;
+                metaDataObject['modificationTime'] = metadataJSON['modificationTime'].timestamp * 1000000;
             }
             let locationData = null;
             if (
-                metadataJSON.geoData &&
-                (metadataJSON.geoData.latitude !== 0.0 ||
-                    metadataJSON.geoData.longitude !== 0.0)
+                metadataJSON['geoData'] &&
+                (metadataJSON['geoData'].latitude !== 0.0 ||
+                    metadataJSON['geoData'].longitude !== 0.0)
             ) {
-                locationData = metadataJSON.geoData;
+                locationData = metadataJSON['geoData'];
             } else if (
-                metadataJSON.geoDataExif &&
-                (metadataJSON.geoDataExif.latitude !== 0.0 ||
-                    metadataJSON.geoDataExif.longitude !== 0.0)
+                metadataJSON['geoDataExif'] &&
+                (metadataJSON['geoDataExif'].latitude !== 0.0 ||
+                    metadataJSON['geoDataExif'].longitude !== 0.0)
             ) {
-                locationData = metadataJSON.geoDataExif;
+                locationData = metadataJSON['geoDataExif'];
             }
             if (locationData !== null) {
-                metaDataObject.latitude = locationData.latitude;
-                metaDataObject.longitude = locationData.longitude;
+                metaDataObject['latitude'] = locationData.latitude;
+                metaDataObject['longitude'] = locationData.longitude;
             }
-            this.metadataMap.set(metadataJSON.title, metaDataObject);
+            this.metadataMap.set(metadataJSON['title'], metaDataObject);
         } catch (e) {
             console.error(e);
             // ignore

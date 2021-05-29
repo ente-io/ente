@@ -91,7 +91,7 @@ export default function Upload(props: Props) {
         if (props.acceptedFiles.length === 0) {
             return null;
         }
-        const paths: string[] = props.acceptedFiles.map((file) => file.path);
+        const paths: string[] = props.acceptedFiles.map((file) => file['path']);
         paths.sort();
         const firstPath = paths[0];
         const lastPath = paths[paths.length - 1];
@@ -115,7 +115,7 @@ export default function Upload(props: Props) {
     function getCollectionWiseFiles() {
         const collectionWiseFiles = new Map<string, any>();
         for (const file of props.acceptedFiles) {
-            const filePath = file.path;
+            const filePath = file['path'];
             const folderPath = filePath.substr(0, filePath.lastIndexOf('/'));
             const folderName = folderPath.substr(
                 folderPath.lastIndexOf('/') + 1,

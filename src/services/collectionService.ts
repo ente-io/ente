@@ -317,17 +317,17 @@ export const addToCollection = async (
         const params = {};
         const worker = await new CryptoWorker();
         const token = getToken();
-        params.collectionID = collection.id;
+        params['collectionID'] = collection.id;
         await Promise.all(
             files.map(async (file) => {
                 file.collectionID = collection.id;
                 const newEncryptedKey: B64EncryptionResult = await worker.encryptToB64(file.key, collection.key);
                 file.encryptedKey = newEncryptedKey.encryptedData;
                 file.keyDecryptionNonce = newEncryptedKey.nonce;
-                if (params.files === undefined) {
-                    params.files = [];
+                if (params['files'] === undefined) {
+                    params['files'] = [];
                 }
-                params.files.push({
+                params['files'].push({
                     id: file.id,
                     encryptedKey: file.encryptedKey,
                     keyDecryptionNonce: file.keyDecryptionNonce,
@@ -349,13 +349,13 @@ const removeFromCollection = async (collection: Collection, files: File[]) => {
     try {
         const params = {};
         const token = getToken();
-        params.collectionID = collection.id;
+        params['collectionID'] = collection.id;
         await Promise.all(
             files.map(async (file) => {
-                if (params.fileIDs === undefined) {
-                    params.fileIDs = [];
+                if (params['fileIDs'] === undefined) {
+                    params['fileIDs'] = [];
                 }
-                params.fileIDs.push(file.id);
+                params['fileIDs'].push(file.id);
             }),
         );
         await HTTPService.post(

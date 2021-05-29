@@ -7,10 +7,6 @@ export enum SCROLL_DIRECTION {
     RIGHT = +1,
 }
 
-interface Props {
-    scrollDirection: SCROLL_DIRECTION;
-}
-
 const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
     height: 40px;
     width: 40px;
@@ -49,7 +45,7 @@ const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
     }
 `;
 
-const NavigationButton = ({scrollDirection, ...rest}: Props) => (
+const NavigationButton = ({scrollDirection, ...rest}) => (
     <Wrapper
         direction={scrollDirection}
         {...rest}
