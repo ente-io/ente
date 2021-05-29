@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io' as io;
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -15,7 +14,7 @@ import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/network.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/thumbnail_util.dart';
@@ -24,7 +23,7 @@ import 'crypto_util.dart';
 
 final _logger = Logger("FileUtil");
 
-void preloadFile(File file) {
+void preloadFile(ente.File file) {
   if (file.fileType == FileType.video) {
     return;
   }
@@ -41,7 +40,7 @@ void preloadFile(File file) {
   }
 }
 
-void preloadThumbnail(File file) {
+void preloadThumbnail(ente.File file) {
   if (file.localID == null) {
     getThumbnailFromServer(file);
   } else {
@@ -64,7 +63,7 @@ void preloadThumbnail(File file) {
   }
 }
 
-Future<io.File> getNativeFile(File file) async {
+Future<io.File> getNativeFile(ente.File file) async {
   if (file.localID == null) {
     return getFileFromServer(file);
   } else {
@@ -72,7 +71,7 @@ Future<io.File> getNativeFile(File file) async {
   }
 }
 
-Future<Uint8List> getBytes(File file, {int quality = 100}) async {
+Future<Uint8List> getBytes(ente.File file, {int quality = 100}) async {
   if (file.localID == null) {
     return getFileFromServer(file).then((file) => file.readAsBytesSync());
   } else {
@@ -80,7 +79,7 @@ Future<Uint8List> getBytes(File file, {int quality = 100}) async {
   }
 }
 
-Future<Uint8List> getBytesFromDisk(File file, {int quality = 100}) async {
+Future<Uint8List> getBytesFromDisk(ente.File file, {int quality = 100}) async {
   final originalBytes = (await file.getAsset()).originBytes;
   if (extension(file.title) == ".HEIC" || quality != 100) {
     return originalBytes.then((bytes) {
@@ -97,7 +96,7 @@ Future<Uint8List> getBytesFromDisk(File file, {int quality = 100}) async {
 final Map<int, Future<io.File>> fileDownloadsInProgress =
     Map<int, Future<io.File>>();
 
-Future<io.File> getFileFromServer(File file,
+Future<io.File> getFileFromServer(ente.File file,
     {ProgressCallback progressCallback}) async {
   final cacheManager = file.fileType == FileType.video
       ? VideoCacheManager.instance
@@ -118,7 +117,8 @@ Future<io.File> getFileFromServer(File file,
   });
 }
 
-Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
+Future<io.File> _downloadAndDecrypt(
+    ente.File file, BaseCacheManager cacheManager,
     {ProgressCallback progressCallback}) async {
   _logger.info("Downloading file " + file.uploadedFileID.toString());
   final encryptedFilePath = Configuration.instance.getTempDirectory() +
@@ -161,7 +161,7 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
     encryptedFile.deleteSync();
     var fileExtension = extension(file.title).substring(1).toLowerCase();
     var outputFile = decryptedFile;
-    if (Platform.isAndroid && fileExtension == "heic") {
+    if (io.Platform.isAndroid && fileExtension == "heic") {
       outputFile = await FlutterImageCompress.compressAndGetFile(
         decryptedFilePath,
         decryptedFilePath + ".jpg",
@@ -184,7 +184,7 @@ Future<io.File> _downloadAndDecrypt(File file, BaseCacheManager cacheManager,
   });
 }
 
-Uint8List decryptFileKey(File file) {
+Uint8List decryptFileKey(ente.File file) {
   final encryptedKey = Sodium.base642bin(file.encryptedKey);
   final nonce = Sodium.base642bin(file.keyDecryptionNonce);
   final collectionKey =
@@ -201,7 +201,7 @@ Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
   );
 }
 
-void clearCache(File file) {
+void clearCache(ente.File file) {
   if (file.fileType == FileType.video) {
     VideoCacheManager.instance.removeFile(file.getDownloadUrl());
   } else {
