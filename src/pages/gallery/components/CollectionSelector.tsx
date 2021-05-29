@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { Card, Modal } from 'react-bootstrap';
+import React, {useEffect} from 'react';
+import {Card, Modal} from 'react-bootstrap';
+import styled from 'styled-components';
+import {CollectionAndItsLatestFile} from 'services/collectionService';
 import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
-import styled from 'styled-components';
-import { CollectionAndItsLatestFile } from 'services/collectionService';
 
 export const CollectionIcon = styled.div`
     width: 200px;
@@ -67,7 +67,7 @@ function CollectionSelector({
                     </Card.Text>
                 </Card>
             </CollectionIcon>
-        )
+        ),
     );
 
     return (

@@ -30,7 +30,7 @@ module.exports = withWorkbox(withBundleAnalyzer({
     workbox: {
         swSrc: "src/serviceWorker.js",
     },
-    webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    webpack: (config, { isServer, webpack }) => {
         if (!isServer) {
             config.plugins.push(
                 new WorkerPlugin({

@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/router';
-import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import React, {useEffect, useRef, useState} from 'react';
+import {useRouter} from 'next/router';
+import {clearKeys, getKey, SESSION_KEYS} from 'utils/storage/sessionStorage';
 import {
     File,
     getLocalFiles,
@@ -9,8 +9,6 @@ import {
 } from 'services/fileService';
 import styled from 'styled-components';
 import LoadingBar from 'react-top-loading-bar';
-import Collections from './components/Collections';
-import Upload from './components/Upload';
 import {
     Collection,
     syncCollections,
@@ -21,40 +19,41 @@ import {
     getNonEmptyCollections,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import { Alert } from 'react-bootstrap';
 import billingService from 'services/billingService';
-import PlanSelector from './components/PlanSelector';
-import { checkSubscriptionPurchase } from 'utils/billingUtil';
+import {checkSubscriptionPurchase} from 'utils/billingUtil';
 
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
-import UploadButton from './components/UploadButton';
-import { checkConnectivity } from 'utils/common';
+import {checkConnectivity} from 'utils/common';
 import {
     isFirstLogin,
     justSignedUp,
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import { isTokenValid, logoutUser } from 'services/userService';
-import AlertBanner from './components/AlertBanner';
-import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
-import { useDropzone } from 'react-dropzone';
+import {isTokenValid, logoutUser} from 'services/userService';
+import MessageDialog, {MessageAttributes} from 'components/MessageDialog';
+import {useDropzone} from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
-import CollectionNamer, {
-    CollectionNamerAttributes,
-} from './components/CollectionNamer';
+import {LoadingOverlay} from 'components/LoadingOverlay';
+import PhotoFrame from 'components/PhotoFrame';
+import {getSelectedFileIds} from 'utils/file';
+import {addFilesToCollection} from 'utils/collection';
+import {errorCodes} from 'utils/common/errorUtil';
+import SearchBar, {DateValue} from 'components/SearchBar';
+import {Bbox} from 'services/searchService';
+import SelectedFileOptions from './components/SelectedFileOptions';
 import CollectionSelector, {
     CollectionSelectorAttributes,
 } from './components/CollectionSelector';
-import { LoadingOverlay } from 'components/LoadingOverlay';
-import PhotoFrame from 'components/PhotoFrame';
-import { getSelectedFileIds } from 'utils/file';
-import { addFilesToCollection } from 'utils/collection';
-import SelectedFileOptions from './components/SelectedFileOptions';
-import { errorCodes } from 'utils/common/errorUtil';
-import SearchBar, { DateValue } from 'components/SearchBar';
-import { Bbox } from 'services/searchService';
+import CollectionNamer, {
+    CollectionNamerAttributes,
+} from './components/CollectionNamer';
+import AlertBanner from './components/AlertBanner';
+import UploadButton from './components/UploadButton';
+import PlanSelector from './components/PlanSelector';
+import Upload from './components/Upload';
+import Collections from './components/Collections';
 
 export enum FILE_TYPE {
     IMAGE,
@@ -100,25 +99,22 @@ export interface SearchStats {
 export default function Gallery() {
     const router = useRouter();
     const [collections, setCollections] = useState<Collection[]>([]);
-    const [collectionsAndTheirLatestFile, setCollectionsAndTheirLatestFile] =
-        useState<CollectionAndItsLatestFile[]>([]);
+    const [collectionsAndTheirLatestFile, setCollectionsAndTheirLatestFile] = useState<CollectionAndItsLatestFile[]>([]);
     const [files, setFiles] = useState<File[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [bannerMessage, setBannerMessage] = useState<string>(null);
     const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
-    const [selected, setSelected] = useState<selectedState>({ count: 0 });
+    const [selected, setSelected] = useState<selectedState>({count: 0});
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [dialogView, setDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
-        useState<CollectionSelectorAttributes>(null);
+    const [collectionSelectorAttributes, setCollectionSelectorAttributes] = useState<CollectionSelectorAttributes>(null);
     const [collectionSelectorView, setCollectionSelectorView] = useState(false);
 
-    const [collectionNamerAttributes, setCollectionNamerAttributes] =
-        useState<CollectionNamerAttributes>(null);
+    const [collectionNamerAttributes, setCollectionNamerAttributes] = useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [search, setSearch] = useState<Search>({
         date: null,
@@ -158,13 +154,12 @@ export default function Gallery() {
             const collections = await getLocalCollections();
             const nonEmptyCollections = getNonEmptyCollections(
                 collections,
-                files
+                files,
             );
-            const collectionsAndTheirLatestFile =
-                await getCollectionsAndTheirLatestFile(
-                    nonEmptyCollections,
-                    files
-                );
+            const collectionsAndTheirLatestFile = await getCollectionsAndTheirLatestFile(
+                nonEmptyCollections,
+                files,
+            );
             setFiles(files);
             setCollections(nonEmptyCollections);
             setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
@@ -182,7 +177,7 @@ export default function Gallery() {
     useEffect(() => setDialogView(true), [dialogMessage]);
     useEffect(
         () => setCollectionSelectorView(true),
-        [collectionSelectorAttributes]
+        [collectionSelectorAttributes],
     );
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
 
@@ -196,16 +191,15 @@ export default function Gallery() {
             await billingService.updatePlans();
             await billingService.syncSubscription();
             const collections = await syncCollections();
-            const { files, isUpdated } = await syncFiles(collections);
+            const {files, isUpdated} = await syncFiles(collections);
             const nonEmptyCollections = getNonEmptyCollections(
                 collections,
-                files
+                files,
             );
-            const collectionAndItsLatestFile =
-                await getCollectionsAndTheirLatestFile(
-                    nonEmptyCollections,
-                    files
-                );
+            const collectionAndItsLatestFile = await getCollectionsAndTheirLatestFile(
+                nonEmptyCollections,
+                files,
+            );
             const favItemIds = await getFavItemIds(files);
             setCollections(nonEmptyCollections);
             if (isUpdated) {
@@ -216,40 +210,40 @@ export default function Gallery() {
             setSinceTime(new Date().getTime());
         } catch (e) {
             switch (e.message) {
-                case errorCodes.ERR_SESSION_EXPIRED:
-                    setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
-                    setDialogMessage({
-                        title: constants.SESSION_EXPIRED,
-                        content: constants.SESSION_EXPIRED_MESSAGE,
-                        staticBackdrop: true,
-                        proceed: {
-                            text: constants.LOGIN,
-                            action: logoutUser,
-                            variant: 'success',
-                        },
-                        nonClosable: true,
-                    });
-                    break;
-                case errorCodes.ERR_NO_INTERNET_CONNECTION:
-                    setBannerMessage(constants.NO_INTERNET_CONNECTION);
-                    break;
-                case errorCodes.ERR_KEY_MISSING:
-                    clearKeys();
-                    router.push('/credentials');
-                    break;
+            case errorCodes.ERR_SESSION_EXPIRED:
+                setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
+                setDialogMessage({
+                    title: constants.SESSION_EXPIRED,
+                    content: constants.SESSION_EXPIRED_MESSAGE,
+                    staticBackdrop: true,
+                    proceed: {
+                        text: constants.LOGIN,
+                        action: logoutUser,
+                        variant: 'success',
+                    },
+                    nonClosable: true,
+                });
+                break;
+            case errorCodes.ERR_NO_INTERNET_CONNECTION:
+                setBannerMessage(constants.NO_INTERNET_CONNECTION);
+                break;
+            case errorCodes.ERR_KEY_MISSING:
+                clearKeys();
+                router.push('/credentials');
+                break;
             }
         } finally {
             loadingBar.current?.complete();
         }
     };
 
-    const clearSelection = function () {
-        setSelected({ count: 0 });
+    const clearSelection = function() {
+        setSelected({count: 0});
     };
 
     const selectCollection = (id?: number) => {
         const href = `/gallery?collection=${id || ''}`;
-        router.push(href, undefined, { shallow: true });
+        router.push(href, undefined, {shallow: true});
     };
 
     if (!files) {
@@ -257,7 +251,7 @@ export default function Gallery() {
     }
     const addToCollectionHelper = (
         collectionName: string,
-        collection: Collection
+        collection: Collection,
     ) => {
         loadingBar.current?.continuousStart();
         addFilesToCollection(
@@ -268,31 +262,24 @@ export default function Gallery() {
             syncWithRemote,
             selectCollection,
             collectionName,
-            collection
+            collection,
         );
     };
 
-    const showCreateCollectionModal = () =>
-        setCollectionNamerAttributes({
-            title: constants.CREATE_COLLECTION,
-            buttonText: constants.CREATE,
-            autoFilledName: '',
-            callback: (collectionName) =>
-                addToCollectionHelper(collectionName, null),
-        });
+    const showCreateCollectionModal = () => setCollectionNamerAttributes({
+        title: constants.CREATE_COLLECTION,
+        buttonText: constants.CREATE,
+        autoFilledName: '',
+        callback: (collectionName) => addToCollectionHelper(collectionName, null),
+    });
 
     const deleteFileHelper = () => {
         loadingBar.current?.continuousStart();
         deleteFiles(
             getSelectedFileIds(selected),
             clearSelection,
-            syncWithRemote
+            syncWithRemote,
         );
-    };
-    const updateFiles = (files: File[]) => {
-        setFiles(files);
-        setSinceTime(new Date().getTime());
-        selectCollection(null);
     };
 
     const updateSearch = (search: Search) => {
@@ -325,7 +312,7 @@ export default function Gallery() {
             />
             <AlertBanner bannerMessage={bannerMessage} />
             <MessageDialog
-                size={'lg'}
+                size="lg"
                 show={dialogView}
                 onHide={() => setDialogView(false)}
                 attributes={dialogMessage}
@@ -374,7 +361,7 @@ export default function Gallery() {
                 }
                 closeCollectionSelector={setCollectionSelectorView.bind(
                     null,
-                    false
+                    false,
                 )}
                 setLoading={setLoading}
                 setCollectionNamerAttributes={setCollectionNamerAttributes}

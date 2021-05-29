@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Modal } from 'react-bootstrap';
+import {Button, Modal} from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
 export interface MessageAttributes {
@@ -41,7 +41,7 @@ export default function MessageDialog({
             backdrop={attributes.staticBackdrop ? 'static' : 'true'}
         >
             <Modal.Header
-                style={{ borderBottom: 'none' }}
+                style={{borderBottom: 'none'}}
                 closeButton={!attributes.nonClosable}
             >
                 {attributes.title && (
@@ -51,12 +51,12 @@ export default function MessageDialog({
                 )}
             </Modal.Header>
             {(children || attributes?.content) && (
-                <Modal.Body style={{ borderTop: '1px solid #444' }}>
-                    {children ? children : <h5>{attributes.content}</h5>}
+                <Modal.Body style={{borderTop: '1px solid #444'}}>
+                    {children || <h5>{attributes.content}</h5>}
                 </Modal.Body>
             )}
             {(attributes.close || attributes.proceed) && (
-                <Modal.Footer style={{ borderTop: 'none' }}>
+                <Modal.Footer style={{borderTop: 'none'}}>
                     <div
                         style={{
                             display: 'flex',

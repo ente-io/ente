@@ -1,6 +1,8 @@
 import React from 'react';
-import { Alert, Button, Modal, ProgressBar } from 'react-bootstrap';
-import { UPLOAD_STAGES } from 'services/uploadService';
+import {
+    Alert, Button, Modal, ProgressBar,
+} from 'react-bootstrap';
+import {UPLOAD_STAGES} from 'services/uploadService';
 import constants from 'utils/strings/constants';
 
 interface Props {
@@ -12,10 +14,10 @@ interface Props {
     show;
 }
 export default function UploadProgress(props: Props) {
-    let fileProgressStatuses = [];
+    const fileProgressStatuses = [];
     if (props.fileProgress) {
-        for (let [fileName, progress] of props.fileProgress) {
-            fileProgressStatuses.push({ fileName, progress });
+        for (const [fileName, progress] of props.fileProgress) {
+            fileProgressStatuses.push({fileName, progress});
         }
         fileProgressStatuses.sort((a, b) => {
             if (b.progress !== -1 && a.progress === -1) return 1;
@@ -25,9 +27,9 @@ export default function UploadProgress(props: Props) {
         <Modal
             show={props.show}
             onHide={
-                props.uploadStage !== UPLOAD_STAGES.FINISH
-                    ? () => null
-                    : props.closeModal
+                props.uploadStage !== UPLOAD_STAGES.FINISH ?
+                    () => null :
+                    props.closeModal
             }
             aria-labelledby="contained-modal-title-vcenter"
             centered
@@ -44,12 +46,12 @@ export default function UploadProgress(props: Props) {
                     }}
                 >
                     <h4>
-                        {props.uploadStage == UPLOAD_STAGES.UPLOADING
-                            ? props.fileCounter.total > 1 &&
+                        {props.uploadStage === UPLOAD_STAGES.UPLOADING ?
+                            props.fileCounter.total > 1 &&
                               constants.UPLOAD[props.uploadStage](
-                                  props.fileCounter
-                              )
-                            : constants.UPLOAD[props.uploadStage]}
+                                  props.fileCounter,
+                              ) :
+                            constants.UPLOAD[props.uploadStage]}
                     </h4>
                 </div>
                 {props.now === 100 ? (
@@ -62,7 +64,7 @@ export default function UploadProgress(props: Props) {
                     <ProgressBar
                         now={props.now}
                         animated
-                        variant={'upload-progress-bar'}
+                        variant="upload-progress-bar"
                     />
                 )}
                 {fileProgressStatuses?.length > 0 && (
@@ -73,23 +75,23 @@ export default function UploadProgress(props: Props) {
                             maxHeight: '250px',
                         }}
                     >
-                        {fileProgressStatuses.map(({ fileName, progress }) => (
-                            <li style={{ marginTop: '12px' }}>
-                                {props.now === 100
-                                    ? fileName
-                                    : constants.FILE_UPLOAD_PROGRESS(
-                                          fileName,
-                                          progress
-                                      )}
+                        {fileProgressStatuses.map(({fileName, progress}) => (
+                            <li key={fileName} style={{marginTop: '12px'}}>
+                                {props.now === 100 ?
+                                    fileName :
+                                    constants.FILE_UPLOAD_PROGRESS(
+                                        fileName,
+                                        progress,
+                                    )}
                             </li>
                         ))}
                     </ul>
                 )}
                 {props.now === 100 && (
-                    <Modal.Footer style={{ border: 'none' }}>
+                    <Modal.Footer style={{border: 'none'}}>
                         <Button
                             variant="outline-secondary"
-                            style={{ width: '100%' }}
+                            style={{width: '100%'}}
                             onClick={props.closeModal}
                         >
                             {constants.CLOSE}

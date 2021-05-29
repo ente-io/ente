@@ -1,10 +1,10 @@
-import { Search, SearchStats, SetCollections } from 'pages/gallery';
-import React, { useEffect, useState, useRef } from 'react';
+import {Search, SearchStats, SetCollections} from 'pages/gallery';
+import React, {useEffect, useState, useRef} from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
-import { components } from 'react-select';
+import {components} from 'react-select';
 import debounce from 'debounce-promise';
-import { File } from 'services/fileService';
+import {File} from 'services/fileService';
 import {
     Bbox,
     getHolidaySuggestion,
@@ -12,7 +12,7 @@ import {
     parseHumanDate,
     searchLocation,
 } from 'services/searchService';
-import { getFormattedDate } from 'utils/search';
+import {getFormattedDate} from 'utils/search';
 import constants from 'utils/strings/constants';
 import LocationIcon from './LocationIcon';
 import DateIcon from './DateIcon';
@@ -97,19 +97,17 @@ export default function SearchBar(props: Props) {
     }, [props.isOpen]);
 
     useEffect(() => {
-        window.addEventListener('resize', () =>
-            setWindowWidth(window.innerWidth)
-        );
+        window.addEventListener('resize', () => setWindowWidth(window.innerWidth));
     });
-    //==========================
+    // = =========================
     // Functionality
-    //==========================
+    // = =========================
     const getAutoCompleteSuggestions = async (searchPhrase: string) => {
         searchPhrase = searchPhrase.trim();
         if (!searchPhrase?.length) {
             return [];
         }
-        let option = [
+        const option = [
             ...getHolidaySuggestion(searchPhrase),
             ...getYearSuggestion(searchPhrase),
         ];
@@ -121,19 +119,18 @@ export default function SearchBar(props: Props) {
                 type: SuggestionType.DATE,
                 value: searchedDate,
                 label: getFormattedDate(searchedDate),
-            }))
+            })),
         );
 
         const searchResults = await searchLocation(searchPhrase);
         option.push(
             ...searchResults.map(
-                (searchResult) =>
-                    ({
-                        type: SuggestionType.LOCATION,
-                        value: searchResult.bbox,
-                        label: searchResult.place,
-                    } as Suggestion)
-            )
+                (searchResult) => ({
+                    type: SuggestionType.LOCATION,
+                    value: searchResult.bbox,
+                    label: searchResult.place,
+                } as Suggestion),
+            ),
         );
         return option;
     };
@@ -148,19 +145,16 @@ export default function SearchBar(props: Props) {
         props.setOpen(true);
 
         switch (selectedOption.type) {
-            case SuggestionType.DATE:
-                const searchedDate = selectedOption.value as DateValue;
-
-                props.setSearch({
-                    date: searchedDate,
-                });
-                break;
-            case SuggestionType.LOCATION:
-                const bbox = selectedOption.value as Bbox;
-                props.setSearch({
-                    location: bbox,
-                });
-                break;
+        case SuggestionType.DATE:
+            props.setSearch({
+                date: selectedOption.value as DateValue,
+            });
+            break;
+        case SuggestionType.LOCATION:
+            props.setSearch({
+                location: selectedOption.value as Bbox,
+            });
+            break;
         }
     };
     const resetSearch = () => {
@@ -176,22 +170,21 @@ export default function SearchBar(props: Props) {
         }
     };
 
-    //==========================
+    // = =========================
     // UI
-    //==========================
+    // = =========================
 
-    const getIconByType = (type: SuggestionType) =>
-        type === SuggestionType.DATE ? <DateIcon /> : <LocationIcon />;
+    const getIconByType = (type: SuggestionType) => (type === SuggestionType.DATE ? <DateIcon /> : <LocationIcon />);
 
     const LabelWithIcon = (props: { type: SuggestionType; label: string }) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ paddingRight: '10px', paddingBottom: '4px' }}>
+        <div style={{display: 'flex', alignItems: 'center'}}>
+            <span style={{paddingRight: '10px', paddingBottom: '4px'}}>
                 {getIconByType(props.type)}
             </span>
             <span>{props.label}</span>
         </div>
     );
-    const { Option, Control } = components;
+    const {Option, Control} = components;
 
     const OptionWithIcon = (props) => (
         <Option {...props}>
@@ -201,15 +194,15 @@ export default function SearchBar(props: Props) {
     const ControlWithIcon = (props) => (
         <Control {...props}>
             <span
-                className={'icon'}
+                className="icon"
                 style={{
                     paddingLeft: '10px',
                     paddingBottom: '4px',
                 }}
             >
-                {props.getValue().length == 0 || props.menuIsOpen ? (
+                {props.getValue().length === 0 || props.menuIsOpen ? (
                     <SearchIcon />
-                ) : props.getValue()[0].type == SuggestionType.DATE ? (
+                ) : props.getValue()[0].type === SuggestionType.DATE ? (
                     <DateIcon />
                 ) : (
                     <LocationIcon />
@@ -220,16 +213,16 @@ export default function SearchBar(props: Props) {
     );
 
     const customStyles = {
-        control: (style, { isFocused }) => ({
+        control: (style, {isFocused}) => ({
             ...style,
-            backgroundColor: '#282828',
-            color: '#d1d1d1',
-            borderColor: isFocused ? '#2dc262' : '#444',
-            boxShadow: 'none',
+            'backgroundColor': '#282828',
+            'color': '#d1d1d1',
+            'borderColor': isFocused ? '#2dc262' : '#444',
+            'boxShadow': 'none',
             ':hover': {
-                borderColor: '#2dc262',
-                cursor: 'text',
-                '&>.icon': { color: '#2dc262' },
+                'borderColor': '#2dc262',
+                'cursor': 'text',
+                '&>.icon': {color: '#2dc262'},
             },
         }),
         input: (style) => ({
@@ -241,7 +234,7 @@ export default function SearchBar(props: Props) {
             marginTop: '10px',
             backgroundColor: '#282828',
         }),
-        option: (style, { isFocused }) => ({
+        option: (style, {isFocused}) => ({
             ...style,
             backgroundColor: isFocused && '#343434',
         }),
@@ -300,10 +293,10 @@ export default function SearchBar(props: Props) {
                             noOptionsMessage={() => null}
                         />
                     </div>
-                    <div style={{ width: '24px' }}>
+                    <div style={{width: '24px'}}>
                         {props.isOpen && (
                             <div
-                                style={{ cursor: 'pointer' }}
+                                style={{cursor: 'pointer'}}
                                 onClick={resetSearch}
                             >
                                 <CrossIcon />

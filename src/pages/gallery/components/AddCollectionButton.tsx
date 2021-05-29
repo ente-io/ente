@@ -1,8 +1,8 @@
 import React from 'react';
-import { Card } from 'react-bootstrap';
+import {Card} from 'react-bootstrap';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
-import { CollectionIcon } from './CollectionSelector';
+import {CollectionIcon} from './CollectionSelector';
 
 const ImageContainer = styled.div`
     min-height: 192px;
@@ -15,12 +15,12 @@ const ImageContainer = styled.div`
     cursor: pointer;
 `;
 
-export default function AddCollectionButton({ showNextModal }) {
+export default function AddCollectionButton({showNextModal}) {
     return (
-        <CollectionIcon style={{ margin: '10px' }} onClick={showNextModal}>
+        <CollectionIcon style={{margin: '10px'}} onClick={showNextModal}>
             <Card>
                 <ImageContainer>+</ImageContainer>
-                <Card.Text style={{ textAlign: 'center' }}>
+                <Card.Text style={{textAlign: 'center'}}>
                     {constants.CREATE_COLLECTION}
                 </Card.Text>
             </Card>

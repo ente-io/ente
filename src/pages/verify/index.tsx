@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import Container from 'components/Container';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
 import constants from 'utils/strings/constants';
-import styled from 'styled-components';
-import { LS_KEYS, getData, setData } from 'utils/storage/localStorage';
-import { useRouter } from 'next/router';
-import { Formik, FormikHelpers } from 'formik';
+import {LS_KEYS, getData, setData} from 'utils/storage/localStorage';
+import {useRouter} from 'next/router';
+import {Formik, FormikHelpers} from 'formik';
 import * as Yup from 'yup';
 import {
     verifyOtt,
@@ -16,15 +14,9 @@ import {
     clearFiles,
     isTokenValid,
 } from 'services/userService';
-import { setIsFirstLogin } from 'utils/storage';
+import {setIsFirstLogin} from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
-import { clearKeys } from 'utils/storage/sessionStorage';
-
-const Image = styled.img`
-    width: 350px;
-    margin-bottom: 20px;
-    max-width: 100%;
-`;
+import {clearKeys} from 'utils/storage/sessionStorage';
 
 interface formValues {
     ott: string;
@@ -57,8 +49,8 @@ export default function Verify() {
     }, []);
 
     const onSubmit = async (
-        { ott }: formValues,
-        { setFieldError }: FormikHelpers<formValues>
+        {ott}: formValues,
+        {setFieldError}: FormikHelpers<formValues>,
     ) => {
         try {
             setLoading(true);
@@ -69,7 +61,7 @@ export default function Verify() {
                 token: resp.data.token,
                 id: resp.data.id,
             });
-            const { subscription, keyAttributes } = resp.data;
+            const {subscription, keyAttributes} = resp.data;
             keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
             subscription && setData(LS_KEYS.SUBSCRIPTION, subscription);
             clearFiles();
@@ -92,7 +84,7 @@ export default function Verify() {
 
     const resendEmail = async () => {
         setResend(1);
-        const resp = await getOtt(email);
+        await getOtt(email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };
@@ -103,19 +95,19 @@ export default function Verify() {
 
     return (
         <Container>
-            <Card style={{ minWidth: '300px' }} className="text-center">
+            <Card style={{minWidth: '300px'}} className="text-center">
                 <Card.Body>
                     <Card.Title
-                        style={{ fontWeight: 'bold', marginBottom: '24px' }}
+                        style={{fontWeight: 'bold', marginBottom: '24px'}}
                     >
                         {constants.VERIFY_EMAIL}
                     </Card.Title>
-                    {constants.EMAIL_SENT({ email })}
+                    {constants.EMAIL_SENT({email})}
                     {constants.CHECK_INBOX}
                     <br />
                     <br />
                     <Formik<formValues>
-                        initialValues={{ ott: '' }}
+                        initialValues={{ott: ''}}
                         validationSchema={Yup.object().shape({
                             ott: Yup.string().required(constants.REQUIRED),
                         })}
@@ -138,11 +130,11 @@ export default function Verify() {
                                         value={values.ott}
                                         onChange={handleChange('ott')}
                                         isInvalid={Boolean(
-                                            touched.ott && errors.ott
+                                            touched.ott && errors.ott,
                                         )}
                                         placeholder={constants.ENTER_OTT}
                                         disabled={loading}
-                                        autoFocus={true}
+                                        autoFocus
                                     />
                                     <Form.Control.Feedback type="invalid">
                                         {errors.ott}
@@ -152,7 +144,7 @@ export default function Verify() {
                                     buttonText={constants.VERIFY}
                                     loading={loading}
                                 />
-                                <div style={{ marginTop: '24px' }}>
+                                <div style={{marginTop: '24px'}}>
                                     {resend === 0 && (
                                         <a href="#" onClick={resendEmail}>
                                             {constants.RESEND_MAIL}
@@ -164,7 +156,7 @@ export default function Verify() {
                                     {resend === 2 && (
                                         <span>{constants.SENT}</span>
                                     )}
-                                    <div style={{ marginTop: '8px' }}>
+                                    <div style={{marginTop: '8px'}}>
                                         <a href="#" onClick={logoutUser}>
                                             {constants.CHANGE_EMAIL}
                                         </a>

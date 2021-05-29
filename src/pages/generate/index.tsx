@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import constants from 'utils/strings/constants';
-import { logoutUser, putAttributes } from 'services/userService';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { useRouter } from 'next/router';
-import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import {logoutUser, putAttributes} from 'services/userService';
+import {getData, LS_KEYS, setData} from 'utils/storage/localStorage';
+import {useRouter} from 'next/router';
+import {getKey, SESSION_KEYS} from 'utils/storage/sessionStorage';
 import {
     setSessionKeys,
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
 } from 'utils/crypto';
 import SetPasswordForm from 'components/SetPasswordForm';
-import { setJustSignedUp } from 'utils/storage';
+import {setJustSignedUp} from 'utils/storage';
 import RecoveryKeyModal from 'components/RecoveryKeyModal';
-import { KeyAttributes } from 'types';
+import {KeyAttributes} from 'types';
 import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 
@@ -22,7 +22,7 @@ export interface KEK {
     memLimit: number;
 }
 
-export default function Generate(props) {
+export default function Generate() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
     const [recoverModalView, setRecoveryModalView] = useState(false);
@@ -32,7 +32,7 @@ export default function Generate(props) {
             setLoading(true);
             const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
             const keyAttributes: KeyAttributes = getData(
-                LS_KEYS.ORIGINAL_KEY_ATTRIBUTES
+                LS_KEYS.ORIGINAL_KEY_ATTRIBUTES,
             );
             router.prefetch('/gallery');
             const user = getData(LS_KEYS.USER);
@@ -45,7 +45,7 @@ export default function Generate(props) {
                 try {
                     await putAttributes(user.token, keyAttributes);
                 } catch (e) {
-                    //ignore
+                    // ignore
                 }
                 setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, null);
                 setRecoveryModalView(true);
@@ -59,15 +59,15 @@ export default function Generate(props) {
 
     const onSubmit = async (passphrase, setFieldError) => {
         try {
-            const { keyAttributes, masterKey } = await generateKeyAttributes(
-                passphrase
+            const {keyAttributes, masterKey} = await generateKeyAttributes(
+                passphrase,
             );
 
             await putAttributes(token, keyAttributes);
             await generateAndSaveIntermediateKeyAttributes(
                 passphrase,
                 keyAttributes,
-                masterKey
+                masterKey,
             );
             await setSessionKeys(masterKey);
             setJustSignedUp(true);

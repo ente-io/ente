@@ -1,13 +1,14 @@
-import { SetDialogMessage } from 'components/MessageDialog';
-import { ListGroup, Popover } from 'react-bootstrap';
+import React from 'react';
+import {SetDialogMessage} from 'components/MessageDialog';
+import {ListGroup, Popover} from 'react-bootstrap';
 import {
     Collection,
     deleteCollection,
     renameCollection,
 } from 'services/collectionService';
-import { getSelectedCollection } from 'utils/collection';
+import {getSelectedCollection} from 'utils/collection';
 import constants from 'utils/strings/constants';
-import { SetCollectionNamerAttributes } from './CollectionNamer';
+import {SetCollectionNamerAttributes} from './CollectionNamer';
 import LinkButton from './LinkButton';
 
 interface Props {
@@ -23,7 +24,7 @@ interface Props {
 const CollectionOptions = (props: Props) => {
     const collectionRename = async (
         selectedCollection: Collection,
-        newName: string
+        newName: string,
     ) => {
         if (selectedCollection.name !== newName) {
             await renameCollection(selectedCollection, newName);
@@ -36,16 +37,16 @@ const CollectionOptions = (props: Props) => {
             buttonText: constants.RENAME,
             autoFilledName: getSelectedCollection(
                 props.selectedCollectionID,
-                props.collections
+                props.collections,
             )?.name,
             callback: (newName) => {
                 props.startLoadingBar();
                 collectionRename(
                     getSelectedCollection(
                         props.selectedCollectionID,
-                        props.collections
+                        props.collections,
                     ),
-                    newName
+                    newName,
                 );
             },
         });
@@ -63,7 +64,7 @@ const CollectionOptions = (props: Props) => {
                         props.selectedCollectionID,
                         props.syncWithRemote,
                         props.redirectToAll,
-                        props.setDialogMessage
+                        props.setDialogMessage,
                     );
                 },
                 variant: 'danger',
@@ -76,7 +77,7 @@ const CollectionOptions = (props: Props) => {
 
     const MenuLink = (props) => (
         <LinkButton
-            style={{ fontSize: '14px', fontWeight: 700, padding: '8px 1em' }}
+            style={{fontSize: '14px', fontWeight: 700, padding: '8px 1em'}}
             {...props}
         >
             {props.children}
@@ -94,9 +95,9 @@ const CollectionOptions = (props: Props) => {
         </ListGroup.Item>
     );
     return (
-        <Popover id="collection-options" style={{ borderRadius: '10px' }}>
-            <Popover.Content style={{ padding: 0, border: 'none' }}>
-                <ListGroup style={{ borderRadius: '8px' }}>
+        <Popover id="collection-options" style={{borderRadius: '10px'}}>
+            <Popover.Content style={{padding: 0, border: 'none'}}>
+                <ListGroup style={{borderRadius: '8px'}}>
                     <MenuItem>
                         <MenuLink onClick={showRenameCollectionModal}>
                             {constants.RENAME}

@@ -4,8 +4,8 @@ import {
     CollectionType,
     createCollection,
 } from 'services/collectionService';
-import { getSelectedFiles } from 'utils/file';
-import { File } from 'services/fileService';
+import {getSelectedFiles} from 'utils/file';
+import {File} from 'services/fileService';
 
 export async function addFilesToCollection(
     setCollectionSelectorView: (value: boolean) => void,
@@ -15,14 +15,14 @@ export async function addFilesToCollection(
     syncWithRemote: () => Promise<void>,
     selectCollection: (id: number) => void,
     collectionName: string,
-    existingCollection: Collection
+    existingCollection: Collection,
 ) {
     setCollectionSelectorView(false);
     let collection;
     if (!existingCollection) {
         collection = await createCollection(
             collectionName,
-            CollectionType.album
+            CollectionType.album,
         );
     } else {
         collection = existingCollection;
@@ -35,5 +35,5 @@ export async function addFilesToCollection(
 }
 
 export function getSelectedCollection(collectionID: number, collections) {
-    return collections.find((collection) => collection.id == collectionID);
+    return collections.find((collection) => collection.id === collectionID);
 }

@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 
 export const getColor = (props) => {
     if (props.isDragActive) {
         return '#00e676';
-    } else {
-        return '#191919';
     }
+    return '#191919';
 };
 
 export const enableBorder = (props) => (props.isDragActive ? 'solid' : 'none');

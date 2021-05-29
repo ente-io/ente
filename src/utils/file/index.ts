@@ -1,5 +1,5 @@
-import { deleteFiles, File } from 'services/fileService';
-import { runningInBrowser } from 'utils/common';
+import {File} from 'services/fileService';
+import {runningInBrowser} from 'utils/common';
 
 const TYPE_HEIC = 'heic';
 
@@ -7,7 +7,7 @@ export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
     });
-    var a = document.createElement('a');
+    const a = document.createElement('a');
     a.href = URL.createObjectURL(file);
     a.download = filename;
 
@@ -34,9 +34,9 @@ export function fileIsHEIC(name: string) {
 
 export function sortFilesIntoCollections(files: File[]) {
     const collectionWiseFiles = new Map<number, File[]>();
-    for (let file of files) {
+    for (const file of files) {
         if (!collectionWiseFiles.has(file.collectionID)) {
-            collectionWiseFiles.set(file.collectionID, new Array<File>());
+            collectionWiseFiles.set(file.collectionID, []);
         }
         collectionWiseFiles.get(file.collectionID).push(file);
     }
@@ -44,8 +44,8 @@ export function sortFilesIntoCollections(files: File[]) {
 }
 
 export function getSelectedFileIds(selectedFiles) {
-    let filesIDs: number[] = [];
-    for (let [key, val] of Object.entries(selectedFiles)) {
+    const filesIDs: number[] = [];
+    for (const [key, val] of Object.entries(selectedFiles)) {
         if (typeof val === 'boolean' && val) {
             filesIDs.push(Number(key));
         }
@@ -53,9 +53,9 @@ export function getSelectedFileIds(selectedFiles) {
     return filesIDs;
 }
 export function getSelectedFiles(selectedFiles, files: File[]): File[] {
-    let filesIDs = new Set(getSelectedFileIds(selectedFiles));
-    let filesToDelete: File[] = [];
-    for (let file of files) {
+    const filesIDs = new Set(getSelectedFileIds(selectedFiles));
+    const filesToDelete: File[] = [];
+    for (const file of files) {
         if (filesIDs.has(file.id)) {
             filesToDelete.push(file);
         }

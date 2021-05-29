@@ -1,5 +1,4 @@
-import axios, { AxiosRequestConfig } from 'axios';
-import { clearData } from 'utils/storage/localStorage';
+import axios, {AxiosRequestConfig} from 'axios';
 
 interface IHTTPHeaders {
     [headerKey: string]: any;
@@ -15,18 +14,17 @@ interface IQueryPrams {
 class HTTPService {
     constructor() {
         axios.interceptors.response.use(
-            (response) => {
-                return Promise.resolve(response);
-            },
+            (response) => Promise.resolve(response),
             (err) => {
                 if (!err.response) {
                     return Promise.reject(err);
                 }
-                const response = err.response;
+                const {response} = err;
                 return Promise.reject(response);
-            }
+            },
         );
     }
+
     /**
      * header object to be append to all api calls.
      */
@@ -78,7 +76,7 @@ class HTTPService {
             ...this.headers,
             ...config.headers,
         };
-        return await axios({ ...config, ...customConfig });
+        return await axios({...config, ...customConfig});
     }
 
     /**
@@ -88,7 +86,7 @@ class HTTPService {
         url: string,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any
+        customConfig?: any,
     ) {
         return this.request(
             {
@@ -97,7 +95,7 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig
+            customConfig,
         );
     }
 
@@ -109,7 +107,7 @@ class HTTPService {
         data?: any,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any
+        customConfig?: any,
     ) {
         return this.request(
             {
@@ -119,7 +117,7 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig
+            customConfig,
         );
     }
 
@@ -131,7 +129,7 @@ class HTTPService {
         data: any,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any
+        customConfig?: any,
     ) {
         return this.request(
             {
@@ -141,7 +139,7 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig
+            customConfig,
         );
     }
 
@@ -153,7 +151,7 @@ class HTTPService {
         data: any,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any
+        customConfig?: any,
     ) {
         return this.request(
             {
@@ -163,7 +161,7 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig
+            customConfig,
         );
     }
 }

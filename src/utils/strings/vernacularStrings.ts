@@ -1,4 +1,4 @@
-import { runningInBrowser } from 'utils/common';
+import {runningInBrowser} from 'utils/common';
 import englishConstants from './englishConstants';
 
 /** Enums of supported locale */
@@ -15,6 +15,7 @@ export enum locale {
  *
  * @param strings
  * @param keys
+ * @returns string
  */
 export function template(strings: TemplateStringsArray, ...keys: string[]) {
     return (...values: any[]) => {
@@ -44,10 +45,10 @@ export type VernacularConstants<T> = {
  */
 export const getLocale = (lang: string) => {
     switch (lang) {
-        case locale.hi:
-            return locale.hi;
-        default:
-            return locale.en;
+    case locale.hi:
+        return locale.hi;
+    default:
+        return locale.en;
     }
 };
 

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import { RewriteFrames, CaptureConsole } from '@sentry/integrations';
+import {RewriteFrames, CaptureConsole} from '@sentry/integrations';
 
 export const sentryInit = () => {
     if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
@@ -16,21 +16,21 @@ export const sentryInit = () => {
                     iteratee: (frame) => {
                         frame.filename = frame.filename.replace(
                             process.env.NEXT_PUBLIC_SENTRY_SERVER_ROOT_DIR,
-                            'app:///'
+                            'app:///',
                         );
                         frame.filename = frame.filename.replace(
                             '.next',
-                            '_next'
+                            '_next',
                         );
                         return frame;
                     },
-                })
+                }),
             );
         }
         integrations.push(
             new CaptureConsole({
                 levels: ['error'],
-            })
+            }),
         );
 
         Sentry.init({

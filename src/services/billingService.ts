@@ -1,12 +1,13 @@
-import { getEndpoint } from 'utils/common/apiUtil';
+import {getEndpoint} from 'utils/common/apiUtil';
+import {getStripePublishableKey, getToken} from 'utils/common/key';
+import {checkConnectivity, runningInBrowser} from 'utils/common/';
+import {setData, LS_KEYS} from 'utils/storage/localStorage';
+import {convertBytesToGBs} from 'utils/billingUtil';
+import {loadStripe, Stripe} from '@stripe/stripe-js';
+import {SUBSCRIPTION_VERIFICATION_ERROR} from 'utils/common/errorUtil';
 import HTTPService from './HTTPService';
+
 const ENDPOINT = getEndpoint();
-import { getStripePublishableKey, getToken } from 'utils/common/key';
-import { checkConnectivity, runningInBrowser } from 'utils/common/';
-import { setData, LS_KEYS } from 'utils/storage/localStorage';
-import { convertBytesToGBs } from 'utils/billingUtil';
-import { loadStripe, Stripe } from '@stripe/stripe-js';
-import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
 
 export enum PAYMENT_INTENT_STATUS {
     SUCCESS = 'success',
@@ -43,9 +44,10 @@ export interface SubscriptionUpdateResponse {
 export const FREE_PLAN = 'free';
 class billingService {
     private stripe: Stripe;
+
     constructor() {
         try {
-            let publishableKey = getStripePublishableKey();
+            const publishableKey = getStripePublishableKey();
             const main = async () => {
                 this.stripe = await loadStripe(publishableKey);
             };
@@ -54,15 +56,17 @@ class billingService {
             console.warn(e);
         }
     }
+
     public async updatePlans() {
         try {
             const response = await HTTPService.get(`${ENDPOINT}/billing/plans`);
-            const plans = response.data['plans'];
+            const {plans} = response.data;
             setData(LS_KEYS.PLANS, plans);
         } catch (e) {
             console.error('failed to get plans', e);
         }
     }
+
     public async syncSubscription() {
         try {
             const response = await HTTPService.get(
@@ -70,19 +74,20 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                }
+                },
             );
-            const subscription = response.data['subscription'];
+            const {subscription} = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            console.error(`failed to get user's subscription details`, e);
+            console.error('failed to get user\'s subscription details', e);
         }
     }
+
     public async buyPaidSubscription(productID) {
         try {
             const response = await this.createCheckoutSession(productID);
             await this.stripe.redirectToCheckout({
-                sessionId: response.data['sessionID'],
+                sessionId: response.data.sessionID,
             });
         } catch (e) {
             console.error('unable to buy subscription', e);
@@ -100,26 +105,28 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                }
+                },
             );
-            const result: SubscriptionUpdateResponse = response.data['result'];
+            const {result} = response.data;
             switch (result.status) {
-                case PAYMENT_INTENT_STATUS.SUCCESS:
-                    // subscription updated successfully
-                    // no-op required
-                    break;
-                case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
-                    throw new Error(
-                        PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD
-                    );
-                case PAYMENT_INTENT_STATUS.REQUIRE_ACTION:
-                    const { error } = await this.stripe.confirmCardPayment(
-                        result.clientSecret
+            case PAYMENT_INTENT_STATUS.SUCCESS:
+                // subscription updated successfully
+                // no-op required
+                break;
+            case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
+                throw new Error(
+                    PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD,
+                );
+            case PAYMENT_INTENT_STATUS.REQUIRE_ACTION:
+                {
+                    const {error} = await this.stripe.confirmCardPayment(
+                        result.clientSecret,
                     );
                     if (error) {
                         throw error;
                     }
-                    break;
+                }
+                break;
             }
         } catch (e) {
             console.error(e);
@@ -140,9 +147,9 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                }
+                },
             );
-            const subscription = response.data['subscription'];
+            const {subscription} = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
             console.error(e);
@@ -158,9 +165,9 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                }
+                },
             );
-            const subscription = response.data['subscription'];
+            const {subscription} = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
             console.error(e);
@@ -176,12 +183,12 @@ class billingService {
             },
             {
                 'X-Auth-Token': getToken(),
-            }
+            },
         );
     }
 
     public async verifySubscription(
-        sessionID: string = null
+        sessionID: string = null,
     ): Promise<Subscription> {
         try {
             const response = await HTTPService.post(
@@ -194,9 +201,9 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                }
+                },
             );
-            const subscription = response.data['subscription'];
+            const {subscription} = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
             return subscription;
         } catch (err) {
@@ -212,22 +219,23 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                }
+                },
             );
-            window.location.href = response.data['url'];
+            window.location.href = response.data.url;
         } catch (e) {
             console.error('unable to get customer portal url');
             throw e;
         }
     }
+
     public async getUsage() {
         try {
             const response = await HTTPService.get(
                 `${ENDPOINT}/billing/usage`,
-                { startTime: 0, endTime: Date.now() * 1000 },
+                {startTime: 0, endTime: Date.now() * 1000},
                 {
                     'X-Auth-Token': getToken(),
-                }
+                },
             );
             return convertBytesToGBs(response.data.usage);
         } catch (e) {

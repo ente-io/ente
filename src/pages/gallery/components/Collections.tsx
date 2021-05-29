@@ -1,18 +1,20 @@
 import CollectionShare from 'components/CollectionShare';
-import { SetDialogMessage } from 'components/MessageDialog';
+import {SetDialogMessage} from 'components/MessageDialog';
 import NavigationButton, {
     SCROLL_DIRECTION,
 } from 'components/NavigationButton';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { OverlayTrigger } from 'react-bootstrap';
-import { Collection, CollectionType } from 'services/collectionService';
-import { User } from 'services/userService';
+import React, {
+    useEffect, useRef, useState,
+} from 'react';
+import {OverlayTrigger} from 'react-bootstrap';
+import {Collection, CollectionType} from 'services/collectionService';
+import {User} from 'services/userService';
 import styled from 'styled-components';
-import { getSelectedCollection } from 'utils/collection';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { SetCollectionNamerAttributes } from './CollectionNamer';
+import {getSelectedCollection} from 'utils/collection';
+import {getData, LS_KEYS} from 'utils/storage/localStorage';
+import {SetCollectionNamerAttributes} from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
-import OptionIcon, { OptionIconWrapper } from './OptionIcon';
+import OptionIcon, {OptionIconWrapper} from './OptionIcon';
 
 interface CollectionProps {
     collections: Collection[];
@@ -61,8 +63,7 @@ const Chip = styled.button<{ active: boolean }>`
     padding-left: 24px;
     margin: 3px;
     border: none;
-    background-color: ${(props) =>
-        props.active ? '#fff' : 'rgba(255, 255, 255, 0.3)'};
+    background-color: ${(props) => (props.active ? '#fff' : 'rgba(255, 255, 255, 0.3)')};
     outline: none !important;
     &:hover {
         background-color: ${(props) => !props.active && '#bbbbbb'};
@@ -74,12 +75,10 @@ const Chip = styled.button<{ active: boolean }>`
 `;
 
 export default function Collections(props: CollectionProps) {
-    const { selected, collections, selectCollection } = props;
-    const [selectedCollectionID, setSelectedCollectionID] =
-        useState<number>(null);
+    const {selected, collections, selectCollection} = props;
+    const [selectedCollectionID, setSelectedCollectionID] = useState<number>(null);
     const collectionRef = useRef<HTMLDivElement>(null);
-    const [collectionShareModalView, setCollectionShareModalView] =
-        useState(false);
+    const [collectionShareModalView, setCollectionShareModalView] = useState(false);
     const [scrollObj, setScrollObj] = useState<{
         scrollLeft?: number;
         scrollWidth?: number;
@@ -88,9 +87,8 @@ export default function Collections(props: CollectionProps) {
 
     const updateScrollObj = () => {
         if (collectionRef.current) {
-            const { scrollLeft, scrollWidth, clientWidth } =
-                collectionRef.current;
-            setScrollObj({ scrollLeft, scrollWidth, clientWidth });
+            const {scrollLeft, scrollWidth, clientWidth} = collectionRef.current;
+            setScrollObj({scrollLeft, scrollWidth, clientWidth});
         }
     };
 
@@ -139,7 +137,7 @@ export default function Collections(props: CollectionProps) {
                     onHide={() => setCollectionShareModalView(false)}
                     collection={getSelectedCollection(
                         selectedCollectionID,
-                        props.collections
+                        props.collections,
                     )}
                     syncWithRemote={props.syncWithRemote}
                 />
@@ -152,7 +150,7 @@ export default function Collections(props: CollectionProps) {
                     )}
                     <Wrapper ref={collectionRef} onScroll={updateScrollObj}>
                         <Chip active={!selected} onClick={clickHandler()}>
-                            All
+                        All
                             <div
                                 style={{
                                     display: 'inline-block',
@@ -167,28 +165,26 @@ export default function Collections(props: CollectionProps) {
                                 onClick={clickHandler(item)}
                             >
                                 {item.name}
-                                {item.type != CollectionType.favorites &&
+                                {item.type !== CollectionType.favorites &&
                                 item.owner.id === user?.id ? (
-                                    <OverlayTrigger
-                                        rootClose
-                                        trigger="click"
-                                        placement="bottom"
-                                        overlay={collectionOptions}
-                                    >
-                                        <OptionIcon
-                                            onClick={() =>
-                                                setSelectedCollectionID(item.id)
-                                            }
+                                        <OverlayTrigger
+                                            rootClose
+                                            trigger="click"
+                                            placement="bottom"
+                                            overlay={collectionOptions}
+                                        >
+                                            <OptionIcon
+                                                onClick={() => setSelectedCollectionID(item.id)}
+                                            />
+                                        </OverlayTrigger>
+                                    ) : (
+                                        <div
+                                            style={{
+                                                display: 'inline-block',
+                                                width: '24px',
+                                            }}
                                         />
-                                    </OverlayTrigger>
-                                ) : (
-                                    <div
-                                        style={{
-                                            display: 'inline-block',
-                                            width: '24px',
-                                        }}
-                                    />
-                                )}
+                                    )}
                             </Chip>
                         ))}
                     </Wrapper>

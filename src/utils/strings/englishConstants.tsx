@@ -1,10 +1,10 @@
-import constants from './constants';
+import React from 'react';
 
 /**
  * Global English constants.
  */
 
-const dateString = function (date) {
+const dateString = function(date) {
     return new Date(date / 1000).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -19,14 +19,14 @@ const englishConstants = {
     ENTER_NAME: 'your name',
     EMAIL: 'email',
     ENTER_EMAIL: 'email',
-    DATA_DISCLAIMER: `we'll never share your data with anyone else.`,
+    DATA_DISCLAIMER: 'we\'ll never share your data with anyone else.',
     SUBMIT: 'submit',
     EMAIL_ERROR: 'enter a valid email',
     REQUIRED: 'required',
     VERIFY_EMAIL: 'verify email',
-    EMAIL_SENT: ({ email }) => (
+    EMAIL_SENT: ({email}) => (
         <p>
-            we have sent a mail to <b>{email}</b>
+        we have sent a mail to <b>{email}</b>
         </p>
     ),
     CHECK_INBOX: 'please check your inbox (and spam) to complete verification',
@@ -46,43 +46,44 @@ const englishConstants = {
         'please enter a password that we can use to encrypt your data',
     PASSPHRASE_DISCLAIMER: () => (
         <p>
-            we don't store your password, so if you forget,
-            <strong> we will not be able to help you</strong> recover your data.
+        we don't store your password, so if you forget,
+            <strong> we will not be able to help you</strong>
+            {' '}
+        recover your data.
         </p>
     ),
     PASSPHRASE_HINT: 'password',
     RE_ENTER_PASSPHRASE: 'password again',
     CONFIRM_PASSPHRASE: 'confirm your password',
-    PASSPHRASE_MATCH_ERROR: `passwords don't match`,
+    PASSPHRASE_MATCH_ERROR: 'passwords don\'t match',
     CONSOLE_WARNING_STOP: 'STOP!',
-    CONSOLE_WARNING_DESC: `This is a browser feature intended for developers. Please don't copy-paste unverified code here.`,
-    SELECT_COLLECTION: `select an album to upload to`,
-    CREATE_COLLECTION: `create album`,
+    CONSOLE_WARNING_DESC: 'This is a browser feature intended for developers. Please don\'t copy-paste unverified code here.',
+    SELECT_COLLECTION: 'select an album to upload to',
+    CREATE_COLLECTION: 'create album',
     ENTER_ALBUM_NAME: 'album name',
     CLOSE: 'close',
     NO: 'no',
-    NOTHING_HERE: `nothing to see here, yet`,
+    NOTHING_HERE: 'nothing to see here, yet',
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
-        2: (fileCounter) =>
-            `${fileCounter.finished} / ${fileCounter.total} files backed up`,
+        2: (fileCounter) => `${fileCounter.finished} / ${fileCounter.total} files backed up`,
         3: 'backup complete!',
     },
-    UPLOADING_FILES: `file upload`,
+    UPLOADING_FILES: 'file upload',
     FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
     FILE_UPLOAD_PROGRESS: (name, progress) => (
         <div id={name}>
             <strong>{name}</strong>
-            {` - `}
+            {' - '}
             {(() => {
                 switch (progress) {
-                    case -1:
-                        return 'failed';
-                    case -2:
-                        return 'already uploaded, skipping...';
-                    default:
-                        return `${progress}%`;
+                case -1:
+                    return 'failed';
+                case -2:
+                    return 'already uploaded, skipping...';
+                default:
+                    return `${progress}%`;
                 }
             })()}
         </div>
@@ -94,7 +95,7 @@ const englishConstants = {
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
-    NO_ACCOUNT: "don't have an account?",
+    NO_ACCOUNT: 'don\'t have an account?',
     ALBUM_NAME: 'album name',
     CREATE: 'create',
     DOWNLOAD: 'download',
@@ -122,7 +123,7 @@ const englishConstants = {
     SESSION_EXPIRED: 'session expired',
     SYNC_FAILED:
         'failed to sync with remote server, please refresh page to try again',
-    PASSWORD_GENERATION_FAILED: `your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser`,
+    PASSWORD_GENERATION_FAILED: 'your browser was unable to generate a strong enough password  that meets ente\'s encryption standards, please try using the mobile app or another browser',
     CHANGE_PASSWORD: 'change password',
     GO_BACK: 'go back',
     DOWNLOAD_RECOVERY_KEY: 'recovery key',
@@ -133,7 +134,7 @@ const englishConstants = {
     RECOVER_KEY_GENERATION_FAILED:
         'recovery code could be generated, please try again',
     KEY_NOT_STORED_DISCLAIMER:
-        "we don't store this key, so please save this in a safe place",
+        'we don\'t store this key, so please save this in a safe place',
     RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
     FORGOT_PASSWORD: 'forgot password?',
     RECOVER_ACCOUNT: 'recover account',
@@ -159,23 +160,26 @@ const englishConstants = {
     MESSAGE: 'message',
     INSTALL_MOBILE_APP: () => (
         <div>
-            install our{' '}
+        install our{' '}
             <a
                 href="https://play.google.com/store/apps/details?id=io.ente.photos"
                 target="_blank"
-                style={{ color: '#2dc262' }}
+                style={{color: '#2dc262'}} rel="noreferrer"
             >
-                android
-            </a>{' '}
-            or{' '}
+              android
+            </a>
+            {' '}
+        or
+            {' '}
             <a
                 href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                style={{ color: '#2dc262' }}
-                target="_blank"
+                style={{color: '#2dc262'}}
+                target="_blank" rel="noreferrer"
             >
-                ios app{' '}
+              ios app
+                {' '}
             </a>
-            to automatically backup all your photos
+        to automatically backup all your photos
         </div>
     ),
     DOWNLOAD_APP_MESSAGE: () => (
@@ -204,39 +208,47 @@ const englishConstants = {
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
-                you are on the <strong>free</strong> plan that expires on{' '}
+            you are on the <strong>free</strong>
+                {' '}
+            plan that expires on{' '}
                 {dateString(expiryTime)}
             </p>
         </>
     ),
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <p>your subscription will renew on {dateString(expiryTime)}</p>
+        <p>
+        your subscription will renew on{dateString(expiryTime)}
+        </p>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
-                your subscription will be cancelled on {dateString(expiryTime)}
+            your subscription will be cancelled on {dateString(expiryTime)}
             </p>
         </>
     ),
 
     USAGE_INFO: (usage, quota) => (
         <p>
-            you have used {usage} GB out of your {quota} GB quota
+        you have used {usage}
+            {' '}
+        GB out of your{quota}
+            {' '}
+        GB quota
         </p>
     ),
 
     SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
         <>
             <p>we've received your payment</p>
-            your subscription is valid till{' '}
+        your subscription is valid till{' '}
             <strong>{dateString(expiryTime)}</strong>
         </>
     ),
     SUBSCRIPTION_PURCHASE_CANCELLED:
         'your purchase was canceled, please try again if you want to subscribe',
-    SUBSCRIPTION_VERIFICATION_FAILED: `we were not able to verify your purchase, verification can take few hours`,
+    SUBSCRIPTION_VERIFICATION_FAILED: 'we were not able to verify your purchase, verification can take few hours',
     SUBSCRIPTION_PURCHASE_FAILED:
         'subscription purchase failed , please try again later',
 
@@ -253,8 +265,8 @@ const englishConstants = {
     CANCEL_SUBSCRIPTION_MESSAGE: () => (
         <>
             <p>
-                all of your data will be deleted from our servers at the end of
-                this billing period.
+            all of your data will be deleted from our servers at the end of
+            this billing period.
             </p>
             <p>are you sure that you want to unsubscribe?</p>
         </>
@@ -264,13 +276,12 @@ const englishConstants = {
 
     ACTIVATE_SUBSCRIPTION: 'reactivate subscription',
     CONFIRM_ACTIVATE_SUBSCRIPTION: 'confirm subscription activation',
-    ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
-        `once reactivated, you will be billed on ${dateString(expiryTime)}`,
+    ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) => `once reactivated, you will be billed on ${dateString(expiryTime)}`,
     SUBSCRIPTION_ACTIVATE_SUCCESS: 'subscription successfully activated',
     SUBSCRIPTION_ACTIVATE_FAILED: 'failed to reactivate subscription renewals',
 
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
-    CANCEL_SUBSCRIPTION_ON_MOBILE: `please cancel your subscription from the mobile app to activate a subscription here`,
+    CANCEL_SUBSCRIPTION_ON_MOBILE: 'please cancel your subscription from the mobile app to activate a subscription here',
     RENAME: 'rename',
     RENAME_COLLECTION: 'rename album',
     CONFIRM_DELETE_COLLECTION: 'confirm album deletion',
@@ -280,8 +291,8 @@ const englishConstants = {
         <>
             <p>are you sure you want to delete this album?</p>
             <p>
-                all files that are present only in this album will be
-                permanently deleted
+            all files that are present only in this album will be
+            permanently deleted
             </p>
         </>
     ),
@@ -292,43 +303,53 @@ const englishConstants = {
     ZERO_SHAREES: () => (
         <>
             <p>currently shared with no one 😔</p>
-            <em style={{ color: '#777' }}>"memories are fonder when shared"</em>
+            <em style={{color: '#777'}}>"memories are fonder when shared"</em>
         </>
     ),
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
-    ALREADY_SHARED: (email) =>
-        `oops, you're already sharing this with ${email}`,
+    ALREADY_SHARED: (email) => `oops, you're already sharing this with ${email}`,
     SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
     SEARCH_HINT: () => <span>New York, April 14, Christmas...</span>,
     TERMS_AND_CONDITIONS: () => (
         <p>
-            I agree to the{' '}
-            <a href="https://ente.io/terms" target="_blank">
-                terms
-            </a>{' '}
-            and{' '}
-            <a href="https://ente.io/privacy" target="_blank">
-                privacy policy
-            </a>{' '}
+        I agree to the{' '}
+            <a href="https://ente.io/terms" target="_blank" rel="noreferrer">
+            terms
+            </a>
+            {' '}
+        and
+            {' '}
+            <a href="https://ente.io/privacy" target="_blank" rel="noreferrer">
+            privacy policy
+            </a>
+            {' '}
         </p>
     ),
     CONFIRM_PASSWORD_NOT_SAVED: () => (
         <p>
-            i understand that if i lose my password , i may lose my data since
-            my data is{' '}
-            <a href="https://ente.io/encryption" target="_blank">
-                end-to-end encrypted
-            </a>{' '}
-            with ente
+        i understand that if i lose my password , i may lose my data since
+        my data is{' '}
+            <a href="https://ente.io/encryption" target="_blank" rel="noreferrer">
+            end-to-end encrypted
+            </a>
+            {' '}
+        with ente
         </p>
     ),
-    SEARCH_STATS: ({ resultCount, timeTaken }) => (
+    SEARCH_STATS: ({resultCount, timeTaken}) => (
         <span>
-            found <span style={{ color: '#2dc262' }}>{resultCount}</span>{' '}
-            memories ( <span style={{ color: '#2dc262' }}> {timeTaken}</span>{' '}
-            seconds )
+        found <span style={{color: '#2dc262'}}>{resultCount}</span>
+            {' '}
+        memories (
+            {' '}
+            <span style={{color: '#2dc262'}}>
+                {' '}
+                {timeTaken}
+            </span>
+            {' '}
+        seconds )
         </span>
     ),
 };

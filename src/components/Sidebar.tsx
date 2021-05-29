@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 
-import { slide as Menu } from 'react-burger-menu';
-import billingService, { Subscription } from 'services/billingService';
+import {slide as Menu} from 'react-burger-menu';
+import billingService, {Subscription} from 'services/billingService';
 import constants from 'utils/strings/constants';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { getToken } from 'utils/common/key';
-import { getEndpoint } from 'utils/common/apiUtil';
-import { Button } from 'react-bootstrap';
+import {getData, LS_KEYS, setData} from 'utils/storage/localStorage';
+import {getToken} from 'utils/common/key';
+import {getEndpoint} from 'utils/common/apiUtil';
+import {Button} from 'react-bootstrap';
 import {
     isSubscriptionActive,
     convertBytesToGBs,
@@ -17,17 +17,17 @@ import {
 } from 'utils/billingUtil';
 
 import exportService from 'services/exportService';
-import { File } from 'services/fileService';
+import {File} from 'services/fileService';
 import isElectron from 'is-electron';
-import { Collection } from 'services/collectionService';
-import { useRouter } from 'next/router';
-import RecoveryKeyModal from './RecoveryKeyModal';
-import EnteSpinner from './EnteSpinner';
+import {Collection} from 'services/collectionService';
+import {useRouter} from 'next/router';
 import LinkButton from 'pages/gallery/components/LinkButton';
-import { downloadApp } from 'utils/common';
-import { logoutUser } from 'services/userService';
-import { SetDialogMessage } from './MessageDialog';
-import { LogoImage } from 'pages/_app';
+import {downloadApp} from 'utils/common';
+import {logoutUser} from 'services/userService';
+import {LogoImage} from 'pages/_app';
+import {SetDialogMessage} from './MessageDialog';
+import EnteSpinner from './EnteSpinner';
+import RecoveryKeyModal from './RecoveryKeyModal';
 
 interface Props {
     files: File[];
@@ -45,7 +45,6 @@ export default function Sidebar(props: Props) {
     }, []);
     const [isOpen, setIsOpen] = useState(false);
     const [recoverModalView, setRecoveryModalView] = useState(false);
-    const [accountDeleteModalView, setAccountDeleteModalView] = useState(false);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -60,13 +59,12 @@ export default function Sidebar(props: Props) {
     }, [isOpen]);
 
     function openFeedbackURL() {
-        const feedbackURL: string =
-            getEndpoint() + '/users/feedback?token=' + getToken();
-        var win = window.open(feedbackURL, '_blank');
+        const feedbackURL: string = `${getEndpoint()}/users/feedback?token=${getToken()}`;
+        const win = window.open(feedbackURL, '_blank');
         win.focus();
     }
     function openSupportMail() {
-        var a = document.createElement('a');
+        const a = document.createElement('a');
         a.href = 'mailto:contact@ente.io';
         a.target = '_blank';
         a.rel = 'noreferrer noopener';
@@ -103,9 +101,9 @@ export default function Sidebar(props: Props) {
             onStateChange={(state) => setIsOpen(state.isOpen)}
             itemListElement="div"
         >
-            <div style={{ display: 'flex', textAlign: 'center' }}>
+            <div style={{display: 'flex', textAlign: 'center'}}>
                 <LogoImage
-                    style={{ height: '24px', padding: '3px' }}
+                    style={{height: '24px', padding: '3px'}}
                     alt="logo"
                     src="/icon.svg"
                 />
@@ -119,26 +117,26 @@ export default function Sidebar(props: Props) {
             >
                 {user?.email}
             </div>
-            <div style={{ flex: 1, overflow: 'auto', paddingTop: '0' }}>
-                <div style={{ outline: 'none' }}>
-                    <div style={{ display: 'flex' }}>
-                        <h5 style={{ margin: '4px 0 12px 2px' }}>
+            <div style={{flex: 1, overflow: 'auto', paddingTop: '0'}}>
+                <div style={{outline: 'none'}}>
+                    <div style={{display: 'flex'}}>
+                        <h5 style={{margin: '4px 0 12px 2px'}}>
                             {constants.SUBSCRIPTION_PLAN}
                         </h5>
                     </div>
-                    <div style={{ color: '#959595' }}>
+                    <div style={{color: '#959595'}}>
                         {isSubscriptionActive(subscription) ? (
                             isOnFreePlan(subscription) ? (
                                 constants.FREE_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime
+                                    subscription?.expiryTime,
                                 )
                             ) : isSubscriptionCancelled(subscription) ? (
                                 constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime
+                                    subscription?.expiryTime,
                                 )
                             ) : (
                                 constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime
+                                    subscription?.expiryTime,
                                 )
                             )
                         ) : (
@@ -150,25 +148,25 @@ export default function Sidebar(props: Props) {
                             size="sm"
                             onClick={onManageClick}
                         >
-                            {isSubscribed(subscription)
-                                ? constants.MANAGE
-                                : constants.SUBSCRIBE}
+                            {isSubscribed(subscription) ?
+                                constants.MANAGE :
+                                constants.SUBSCRIBE}
                         </Button>
                     </div>
                 </div>
-                <div style={{ outline: 'none', marginTop: '30px' }}></div>
+                <div style={{outline: 'none', marginTop: '30px'}} />
                 <div>
-                    <h5 style={{ marginBottom: '12px' }}>
+                    <h5 style={{marginBottom: '12px'}}>
                         {constants.USAGE_DETAILS}
                     </h5>
-                    <div style={{ color: '#959595' }}>
+                    <div style={{color: '#959595'}}>
                         {usage ? (
                             constants.USAGE_INFO(
                                 usage,
-                                Number(convertBytesToGBs(subscription?.storage))
+                                Number(convertBytesToGBs(subscription?.storage)),
                             )
                         ) : (
-                            <div style={{ textAlign: 'center' }}>
+                            <div style={{textAlign: 'center'}}>
                                 <EnteSpinner
                                     style={{
                                         borderWidth: '2px',
@@ -189,13 +187,13 @@ export default function Sidebar(props: Props) {
                     }}
                 />
                 <LinkButton
-                    style={{ marginTop: '30px' }}
+                    style={{marginTop: '30px'}}
                     onClick={openFeedbackURL}
                 >
                     {constants.REQUEST_FEATURE}
                 </LinkButton>
                 <LinkButton
-                    style={{ marginTop: '30px' }}
+                    style={{marginTop: '30px'}}
                     onClick={openSupportMail}
                 >
                     {constants.SUPPORT}
@@ -204,30 +202,28 @@ export default function Sidebar(props: Props) {
                     <RecoveryKeyModal
                         show={recoverModalView}
                         onHide={() => setRecoveryModalView(false)}
-                        somethingWentWrong={() =>
-                            props.setDialogMessage({
-                                title: constants.RECOVER_KEY_GENERATION_FAILED,
-                                close: { variant: 'danger' },
-                            })
-                        }
+                        somethingWentWrong={() => props.setDialogMessage({
+                            title: constants.RECOVER_KEY_GENERATION_FAILED,
+                            close: {variant: 'danger'},
+                        })}
                     />
                     <LinkButton
-                        style={{ marginTop: '30px' }}
+                        style={{marginTop: '30px'}}
                         onClick={() => setRecoveryModalView(true)}
                     >
                         {constants.DOWNLOAD_RECOVERY_KEY}
                     </LinkButton>
                 </>
                 <LinkButton
-                    style={{ marginTop: '30px' }}
+                    style={{marginTop: '30px'}}
                     onClick={() => {
-                        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
+                        setData(LS_KEYS.SHOW_BACK_BUTTON, {value: true});
                         router.push('changePassword');
                     }}
                 >
                     {constants.CHANGE_PASSWORD}
                 </LinkButton>
-                <LinkButton style={{ marginTop: '30px' }} onClick={exportFiles}>
+                <LinkButton style={{marginTop: '30px'}} onClick={exportFiles}>
                     {constants.EXPORT}
                 </LinkButton>
                 <div
@@ -240,22 +236,20 @@ export default function Sidebar(props: Props) {
                 />
                 <LinkButton
                     variant="danger"
-                    style={{ marginTop: '30px' }}
-                    onClick={() =>
-                        props.setDialogMessage({
-                            title: `${constants.CONFIRM} ${constants.LOGOUT}`,
-                            content: constants.LOGOUT_MESSAGE,
-                            staticBackdrop: true,
-                            proceed: {
-                                text: constants.LOGOUT,
-                                action: logoutUser,
-                                variant: 'danger',
-                            },
-                            close: { text: constants.CANCEL },
-                        })
-                    }
+                    style={{marginTop: '30px'}}
+                    onClick={() => props.setDialogMessage({
+                        title: `${constants.CONFIRM} ${constants.LOGOUT}`,
+                        content: constants.LOGOUT_MESSAGE,
+                        staticBackdrop: true,
+                        proceed: {
+                            text: constants.LOGOUT,
+                            action: logoutUser,
+                            variant: 'danger',
+                        },
+                        close: {text: constants.CANCEL},
+                    })}
                 >
-                    logout
+                  logout
                 </LinkButton>
                 <div
                     style={{

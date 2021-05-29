@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, {useState, useEffect} from 'react';
 import constants from 'utils/strings/constants';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { useRouter } from 'next/router';
-import { getKey, SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
-import { B64EncryptionResult } from 'services/uploadService';
+import {getData, LS_KEYS, setData} from 'utils/storage/localStorage';
+import {useRouter} from 'next/router';
+import {B64EncryptionResult} from 'services/uploadService';
 import CryptoWorker, {
     setSessionKeys,
     generateAndSaveIntermediateKeyAttributes,
 } from 'utils/crypto';
-import { getActualKey } from 'utils/common/key';
-import { logoutUser, setKeys, UpdatedKey } from 'services/userService';
+import {getActualKey} from 'utils/common/key';
+import {setKeys, UpdatedKey} from 'services/userService';
 import SetPasswordForm from 'components/SetPasswordForm';
 
 export interface KEK {
@@ -21,7 +20,6 @@ export interface KEK {
 export default function Generate() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
-    const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
@@ -44,8 +42,7 @@ export default function Generate() {
             setFieldError('confirm', constants.PASSWORD_GENERATION_FAILED);
             return;
         }
-        const encryptedKeyAttributes: B64EncryptionResult =
-            await cryptoWorker.encryptToB64(key, kek.key);
+        const encryptedKeyAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(key, kek.key);
         const updatedKey: UpdatedKey = {
             kekSalt,
             encryptedKey: encryptedKeyAttributes.encryptedData,
@@ -60,14 +57,14 @@ export default function Generate() {
         await generateAndSaveIntermediateKeyAttributes(
             passphrase,
             updatedKeyAttributes,
-            key
+            key,
         );
 
         setSessionKeys(key);
         redirectToGallery();
     };
     const redirectToGallery = () => {
-        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
+        setData(LS_KEYS.SHOW_BACK_BUTTON, {value: false});
         router.push('/gallery');
     };
     return (
@@ -75,9 +72,9 @@ export default function Generate() {
             callback={onSubmit}
             buttonText={constants.CHANGE_PASSWORD}
             back={
-                getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
-                    ? redirectToGallery
-                    : null
+                getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?
+                    redirectToGallery :
+                    null
             }
         />
     );

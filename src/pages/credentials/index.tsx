@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
+import React, {useEffect, useState} from 'react';
 
 import constants from 'utils/strings/constants';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { useRouter } from 'next/router';
-import { KeyAttributes } from 'types';
-import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
+import {getData, LS_KEYS} from 'utils/storage/localStorage';
+import {useRouter} from 'next/router';
+import {KeyAttributes} from 'types';
+import {SESSION_KEYS, getKey} from 'utils/storage/sessionStorage';
 import CryptoWorker, {
     generateAndSaveIntermediateKeyAttributes,
     setSessionKeys,
 } from 'utils/crypto';
-import { logoutUser } from 'services/userService';
-import { isFirstLogin } from 'utils/storage';
+import {logoutUser} from 'services/userService';
+import {isFirstLogin} from 'utils/storage';
 import SingleInputForm from 'components/SingleInputForm';
 import Container from 'components/Container';
-import { Button, Card } from 'react-bootstrap';
+import {Button, Card} from 'react-bootstrap';
 
 export default function Credentials() {
     const router = useRouter();
@@ -43,20 +42,20 @@ export default function Credentials() {
                 passphrase,
                 keyAttributes.kekSalt,
                 keyAttributes.opsLimit,
-                keyAttributes.memLimit
+                keyAttributes.memLimit,
             );
 
             try {
                 const key: string = await cryptoWorker.decryptB64(
                     keyAttributes.encryptedKey,
                     keyAttributes.keyDecryptionNonce,
-                    kek
+                    kek,
                 );
                 if (isFirstLogin()) {
                     await generateAndSaveIntermediateKeyAttributes(
                         passphrase,
                         keyAttributes,
-                        key
+                        key,
                     );
                 }
                 setSessionKeys(key);
@@ -68,7 +67,7 @@ export default function Credentials() {
         } catch (e) {
             setFieldError(
                 'passphrase',
-                `${constants.UNKNOWN_ERROR} ${e.message}`
+                `${constants.UNKNOWN_ERROR} ${e.message}`,
             );
         }
     };
@@ -77,11 +76,11 @@ export default function Credentials() {
         <>
             <Container>
                 <Card
-                    style={{ minWidth: '320px', padding: '40px 30px' }}
+                    style={{minWidth: '320px', padding: '40px 30px'}}
                     className="text-center"
                 >
                     <Card.Body>
-                        <Card.Title style={{ marginBottom: '24px' }}>
+                        <Card.Title style={{marginBottom: '24px'}}>
                             {constants.ENTER_PASSPHRASE}
                         </Card.Title>
                         <SingleInputForm

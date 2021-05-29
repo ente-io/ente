@@ -1,7 +1,7 @@
-import { runningInBrowser } from 'utils/common';
-import { Collection } from './collectionService';
+import {runningInBrowser} from 'utils/common';
+import {Collection} from './collectionService';
 import downloadManager from './downloadManager';
-import { File } from './fileService';
+import {File} from './fileService';
 
 enum ExportNotification {
     START = 'export started',
@@ -10,8 +10,10 @@ enum ExportNotification {
     ABORT = 'export aborted',
 }
 class ExportService {
-    ElectronAPIs: any = runningInBrowser() && window['ElectronAPIs'];
+    ElectronAPIs: any = runningInBrowser() && window.ElectronAPIs;
+
     exportInProgress: Promise<void> = null;
+
     abortExport: boolean = false;
 
     async exportFiles(files: File[], collections: Collection[]) {
@@ -22,6 +24,7 @@ class ExportService {
         this.exportInProgress = this.fileExporter(files, collections);
         return this.exportInProgress;
     }
+
     async fileExporter(files: File[], collections: Collection[]) {
         try {
             const dir = await this.ElectronAPIs.selectRootDirectory();
@@ -30,44 +33,43 @@ class ExportService {
                 return;
             }
             const exportedFiles: Set<string> = await this.ElectronAPIs.getExportedFiles(
-                dir
+                dir,
             );
-            this.ElectronAPIs.showOnTray(`starting export`);
+            this.ElectronAPIs.showOnTray('starting export');
             this.ElectronAPIs.registerStopExportListener(
-                () => (this.abortExport = true)
+                () => (this.abortExport = true),
             );
             const collectionIDMap = new Map<number, string>();
-            for (let collection of collections) {
-                let collectionFolderPath = `${dir}/${
+            for (const collection of collections) {
+                const collectionFolderPath = `${dir}/${
                     collection.id
                 }_${this.sanitizeName(collection.name)}`;
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
-                    collectionFolderPath
+                    collectionFolderPath,
                 );
                 collectionIDMap.set(collection.id, collectionFolderPath);
             }
             this.ElectronAPIs.sendNotification(ExportNotification.START);
-            for (let [index, file] of files.entries()) {
+            for (const [index, file] of files.entries()) {
                 if (this.abortExport) {
                     break;
                 }
                 const uid = `${file.id}_${this.sanitizeName(
-                    file.metadata.title
+                    file.metadata.title,
                 )}`;
-                const filePath =
-                    collectionIDMap.get(file.collectionID) + '/' + uid;
+                const filePath = `${collectionIDMap.get(file.collectionID)}/${uid}`;
                 if (!exportedFiles.has(filePath)) {
                     await this.downloadAndSave(file, filePath);
                     this.ElectronAPIs.updateExportRecord(dir, filePath);
                 }
                 this.ElectronAPIs.showOnTray(
-                    `exporting file ${index + 1} / ${files.length}`
+                    `exporting file ${index + 1} / ${files.length}`,
                 );
             }
             this.ElectronAPIs.sendNotification(
-                this.abortExport
-                    ? ExportNotification.ABORT
-                    : ExportNotification.FINISH
+                this.abortExport ?
+                    ExportNotification.ABORT :
+                    ExportNotification.FINISH,
             );
         } catch (e) {
             console.error(e);
@@ -83,9 +85,10 @@ class ExportService {
         this.ElectronAPIs.saveStreamToDisk(path, fileStream);
         this.ElectronAPIs.saveFileToDisk(
             `${path}.json`,
-            JSON.stringify(file.metadata, null, 2)
+            JSON.stringify(file.metadata, null, 2),
         );
     }
+
     private sanitizeName(name) {
         return name.replaceAll('/', '_').replaceAll(' ', '_');
     }

@@ -1,5 +1,5 @@
 // https://stackoverflow.com/a/54749871/2760968
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
 
 export default function useLongPress(callback: () => void, ms = 300) {
     const [startLongPress, setStartLongPress] = useState(false);
@@ -7,13 +7,13 @@ export default function useLongPress(callback: () => void, ms = 300) {
     useEffect(() => {
         let timerId: NodeJS.Timeout;
         if (startLongPress) {
-        timerId = setTimeout(callback, ms);
+            timerId = setTimeout(callback, ms);
         } else {
-        clearTimeout(timerId);
+            clearTimeout(timerId);
         }
 
         return () => {
-        clearTimeout(timerId);
+            clearTimeout(timerId);
         };
     }, [callback, ms, startLongPress]);
 

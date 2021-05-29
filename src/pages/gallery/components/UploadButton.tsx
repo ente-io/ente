@@ -11,7 +11,7 @@ const Wrapper = styled.div`
     min-height: 64px;
     right: 32px;
 `;
-function UploadButton({ openFileUploader }) {
+function UploadButton({openFileUploader}) {
     return (
         <Wrapper onClick={openFileUploader}>
             <svg

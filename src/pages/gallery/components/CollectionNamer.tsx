@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import { Form } from 'react-bootstrap';
+import React, {useEffect, useRef} from 'react';
+import {Form} from 'react-bootstrap';
 import constants from 'utils/strings/constants';
-import { Formik } from 'formik';
+import {Formik} from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from 'components/SubmitButton';
 import MessageDialog from 'components/MessageDialog';
@@ -26,7 +26,7 @@ interface formValues {
     albumName: string;
 }
 
-export default function CollectionNamer({ attributes, ...props }: Props) {
+export default function CollectionNamer({attributes, ...props}: Props) {
     const collectionNameInputRef = useRef(null);
     useEffect(() => {
         if (attributes) {
@@ -40,7 +40,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
             <MessageDialog show={false} onHide={() => null} attributes={{}} />
         );
     }
-    const onSubmit = ({ albumName }: formValues) => {
+    const onSubmit = ({albumName}: formValues) => {
         attributes.callback(albumName);
         props.onHide();
     };
@@ -48,13 +48,13 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
         <MessageDialog
             show={props.show}
             onHide={props.onHide}
-            size={'sm'}
+            size="sm"
             attributes={{
                 title: attributes?.title,
             }}
         >
             <Formik<formValues>
-                initialValues={{ albumName: attributes.autoFilledName }}
+                initialValues={{albumName: attributes.autoFilledName}}
                 validationSchema={Yup.object().shape({
                     albumName: Yup.string().required(constants.REQUIRED),
                 })}
@@ -62,7 +62,9 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                 validateOnBlur={false}
                 onSubmit={onSubmit}
             >
-                {({ values, touched, errors, handleChange, handleSubmit }) => (
+                {({
+                    values, touched, errors, handleChange, handleSubmit,
+                }) => (
                     <Form noValidate onSubmit={handleSubmit}>
                         <Form.Group>
                             <Form.Control
@@ -71,11 +73,11 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                                 value={values.albumName}
                                 onChange={handleChange('albumName')}
                                 isInvalid={Boolean(
-                                    touched.albumName && errors.albumName
+                                    touched.albumName && errors.albumName,
                                 )}
                                 placeholder={constants.ENTER_ALBUM_NAME}
                                 ref={collectionNameInputRef}
-                                autoFocus={true}
+                                autoFocus
                             />
 
                             <Form.Control.Feedback

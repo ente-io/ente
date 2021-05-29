@@ -6,7 +6,7 @@ export class Crypto {
         const encodedMetadata = await libsodium.decryptChaChaOneShot(
             await libsodium.fromB64(file.metadata.encryptedData),
             await libsodium.fromB64(file.metadata.decryptionHeader),
-            file.key
+            file.key,
         );
         return JSON.parse(new TextDecoder().decode(encodedMetadata));
     }
@@ -21,13 +21,13 @@ export class Crypto {
 
     async encryptMetadata(metadata, key) {
         const encodedMetadata = new TextEncoder().encode(
-            JSON.stringify(metadata)
+            JSON.stringify(metadata),
         );
 
         const {
             file: encryptedMetadata,
         } = await libsodium.encryptChaChaOneShot(encodedMetadata, key);
-        const { encryptedData, ...other } = encryptedMetadata;
+        const {encryptedData, ...other} = encryptedMetadata;
         return {
             file: {
                 encryptedData: await libsodium.toB64(encryptedData),
@@ -44,6 +44,7 @@ export class Crypto {
     async encryptFile(fileData, key) {
         return libsodium.encryptChaCha(fileData, key);
     }
+
     async encryptFileChunk(data, pushState, finalChunk) {
         return libsodium.encryptFileChunk(data, pushState, finalChunk);
     }
@@ -135,9 +136,11 @@ export class Crypto {
     async fromB64(string) {
         return libsodium.fromB64(string);
     }
+
     async toHex(string) {
         return libsodium.toHex(string);
     }
+
     async fromHex(string) {
         return libsodium.fromHex(string);
     }

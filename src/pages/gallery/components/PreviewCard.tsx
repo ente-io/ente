@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { File } from 'services/fileService';
+import React, {useEffect, useRef, useState} from 'react';
+import {File} from 'services/fileService';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import Container from 'components/Container';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import constants from 'utils/strings/constants';
-import { Formik, FormikHelpers } from 'formik';
+import {Formik, FormikHelpers} from 'formik';
 import * as Yup from 'yup';
 import Button from 'react-bootstrap/Button';
 import SubmitButton from './SubmitButton';
@@ -21,11 +21,11 @@ function SetPasswordForm(props: Props) {
     const [loading, setLoading] = useState(false);
     const onSubmit = async (
         values: formValues,
-        { setFieldError }: FormikHelpers<formValues>
+        {setFieldError}: FormikHelpers<formValues>,
     ) => {
         setLoading(true);
         try {
-            const { passphrase, confirm } = values;
+            const {passphrase, confirm} = values;
             if (passphrase === confirm) {
                 await props.callback(passphrase, setFieldError);
             } else {
@@ -34,7 +34,7 @@ function SetPasswordForm(props: Props) {
         } catch (e) {
             setFieldError(
                 'passphrase',
-                `${constants.UNKNOWN_ERROR} ${e.message}`
+                `${constants.UNKNOWN_ERROR} ${e.message}`,
             );
         } finally {
             setLoading(false);
@@ -42,20 +42,20 @@ function SetPasswordForm(props: Props) {
     };
     return (
         <Container>
-            <Card style={{ maxWidth: '540px', padding: '20px' }}>
+            <Card style={{maxWidth: '540px', padding: '20px'}}>
                 <Card.Body>
                     <div
                         className="text-center"
-                        style={{ marginBottom: '40px' }}
+                        style={{marginBottom: '40px'}}
                     >
                         <p>{constants.ENTER_ENC_PASSPHRASE}</p>
                         {constants.PASSPHRASE_DISCLAIMER()}
                     </div>
                     <Formik<formValues>
-                        initialValues={{ passphrase: '', confirm: '' }}
+                        initialValues={{passphrase: '', confirm: ''}}
                         validationSchema={Yup.object().shape({
                             passphrase: Yup.string().required(
-                                constants.REQUIRED
+                                constants.REQUIRED,
                             ),
                             confirm: Yup.string().required(constants.REQUIRED),
                         })}
@@ -79,9 +79,9 @@ function SetPasswordForm(props: Props) {
                                         onChange={handleChange('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                                errors.passphrase
+                                                errors.passphrase,
                                         )}
-                                        autoFocus={true}
+                                        autoFocus
                                         disabled={loading}
                                     />
                                     <Form.Control.Feedback type="invalid">
@@ -97,7 +97,7 @@ function SetPasswordForm(props: Props) {
                                         value={values.confirm}
                                         onChange={handleChange('confirm')}
                                         isInvalid={Boolean(
-                                            touched.confirm && errors.confirm
+                                            touched.confirm && errors.confirm,
                                         )}
                                         disabled={loading}
                                     />
@@ -115,7 +115,7 @@ function SetPasswordForm(props: Props) {
                     {props.back && (
                         <div
                             className="text-center"
-                            style={{ marginTop: '20px' }}
+                            style={{marginTop: '20px'}}
                         >
                             <Button variant="link" onClick={props.back}>
                                 {constants.GO_BACK}

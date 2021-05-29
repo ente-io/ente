@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { downloadAsFile } from 'utils/file';
-import { getRecoveryKey } from 'utils/crypto';
-import { setJustSignedUp } from 'utils/storage';
+import React, {useEffect, useState} from 'react';
+import {downloadAsFile} from 'utils/file';
+import {getRecoveryKey} from 'utils/crypto';
 import constants from 'utils/strings/constants';
 import MessageDialog from './MessageDialog';
 import EnteSpinner from './EnteSpinner';
@@ -11,7 +10,7 @@ interface Props {
     onHide: () => void;
     somethingWentWrong: any;
 }
-function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
+function RecoveryKeyModal({somethingWentWrong, ...props}: Props) {
     const [recoveryKey, setRecoveryKey] = useState(null);
     useEffect(() => {
         if (!props.show) {

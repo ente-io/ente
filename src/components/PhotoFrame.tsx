@@ -7,17 +7,17 @@ import {
     setSearchStats,
 } from 'pages/gallery';
 import PreviewCard from 'pages/gallery/components/PreviewCard';
-import React, { useEffect, useState } from 'react';
-import { Button } from 'react-bootstrap';
-import { File } from 'services/fileService';
+import React, {useEffect, useState} from 'react';
+import {Button} from 'react-bootstrap';
+import {File} from 'services/fileService';
 import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { VariableSizeList as List } from 'react-window';
+import {VariableSizeList as List} from 'react-window';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
+import {isInsideBox, isSameDay as isSameDayAnyYear} from 'utils/search';
 import CloudUpload from './CloudUpload';
-import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -205,20 +205,18 @@ const PhotoFrame = ({
             count: checked ? selected.count + 1 : selected.count - 1,
         }));
     };
-    const getThumbnail = (file: File[], index: number) => {
-        return (
-            <PreviewCard
-                key={`tile-${file[index].id}`}
-                file={file[index]}
-                updateUrl={updateUrl(file[index].dataIndex)}
-                onClick={onThumbnailClick(index)}
-                selectable
-                onSelect={handleSelect(file[index].id)}
-                selected={selected[file[index].id]}
-                selectOnClick={selected.count > 0}
-            />
-        );
-    };
+    const getThumbnail = (file: File[], index: number) => (
+        <PreviewCard
+            key={`tile-${file[index].id}`}
+            file={file[index]}
+            updateUrl={updateUrl(file[index].dataIndex)}
+            onClick={onThumbnailClick(index)}
+            selectable
+            onSelect={handleSelect(file[index].id)}
+            selected={selected[file[index].id]}
+            selectOnClick={selected.count > 0}
+        />
+    );
 
     const getSlideData = async (instance: any, index: number, item: File) => {
         if (!item.msrc) {
@@ -263,7 +261,7 @@ const PhotoFrame = ({
         }
     };
 
-    let idSet = new Set();
+    const idSet = new Set();
     const filteredData = files
         .map((item, index) => ({
             ...item,
@@ -273,7 +271,7 @@ const PhotoFrame = ({
             if (
                 search.date &&
                 !isSameDayAnyYear(search.date)(
-                    new Date(item.metadata.creationTime / 1000)
+                    new Date(item.metadata.creationTime / 1000),
                 )
             ) {
                 return false;
@@ -297,17 +295,15 @@ const PhotoFrame = ({
             return false;
         });
 
-    const isSameDay = (first, second) => {
-        return (
-            first.getFullYear() === second.getFullYear() &&
+    const isSameDay = (first, second) => (
+        first.getFullYear() === second.getFullYear() &&
             first.getMonth() === second.getMonth() &&
             first.getDate() === second.getDate()
-        );
-    };
+    );
 
     return (
         <>
-            {!isFirstLoad && files.length == 0 && !searchMode ? (
+            {!isFirstLoad && files.length === 0 && !searchMode ? (
                 <EmptyScreen>
                     <CloudUpload width={150} height={150} />
                     <Button
@@ -326,7 +322,7 @@ const PhotoFrame = ({
             ) : filteredData.length ? (
                 <Container>
                     <AutoSizer>
-                        {({ height, width }) => {
+                        {({height, width}) => {
                             let columns;
                             if (width >= 1000) {
                                 columns = 5;
@@ -345,35 +341,33 @@ const PhotoFrame = ({
                                 if (
                                     !isSameDay(
                                         new Date(
-                                            item.metadata.creationTime / 1000
+                                            item.metadata.creationTime / 1000,
                                         ),
-                                        new Date(currentDate)
+                                        new Date(currentDate),
                                     )
                                 ) {
-                                    currentDate =
-                                        item.metadata.creationTime / 1000;
-                                    const dateTimeFormat =
-                                        new Intl.DateTimeFormat('en-IN', {
-                                            weekday: 'short',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric',
-                                        });
+                                    currentDate = item.metadata.creationTime / 1000;
+                                    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
+                                        weekday: 'short',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                    });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TIME,
                                         date: isSameDay(
                                             new Date(currentDate),
-                                            new Date()
-                                        )
-                                            ? 'Today'
-                                            : isSameDay(
-                                                  new Date(currentDate),
-                                                  new Date(Date.now() - A_DAY)
-                                              )
-                                            ? 'Yesterday'
-                                            : dateTimeFormat.format(
-                                                  currentDate
-                                              ),
+                                            new Date(),
+                                        ) ?
+                                            'Today' :
+                                            isSameDay(
+                                                new Date(currentDate),
+                                                new Date(Date.now() - A_DAY),
+                                            ) ?
+                                                'Yesterday' :
+                                                dateTimeFormat.format(
+                                                    currentDate,
+                                                ),
                                     });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TILE,
@@ -381,20 +375,18 @@ const PhotoFrame = ({
                                         itemStartIndex: index,
                                     });
                                     listItemIndex = 1;
+                                } else if (listItemIndex < columns) {
+                                    timeStampList[
+                                        timeStampList.length - 1
+                                    ].items.push(item);
+                                    listItemIndex++;
                                 } else {
-                                    if (listItemIndex < columns) {
-                                        timeStampList[
-                                            timeStampList.length - 1
-                                        ].items.push(item);
-                                        listItemIndex++;
-                                    } else {
-                                        listItemIndex = 1;
-                                        timeStampList.push({
-                                            itemType: ITEM_TYPE.TILE,
-                                            items: [item],
-                                            itemStartIndex: index,
-                                        });
-                                    }
+                                    listItemIndex = 1;
+                                    timeStampList.push({
+                                        itemType: ITEM_TYPE.TILE,
+                                        items: [item],
+                                        itemStartIndex: index,
+                                    });
                                 }
                             });
                             files.length < 30 &&
@@ -416,58 +408,55 @@ const PhotoFrame = ({
                                     ),
                                 });
                             const extraRowsToRender = Math.ceil(
-                                (NO_OF_PAGES * height) / IMAGE_CONTAINER_HEIGHT
+                                (NO_OF_PAGES * height) / IMAGE_CONTAINER_HEIGHT,
                             );
                             return (
                                 <List
-                                    itemSize={(index) =>
-                                        timeStampList[index].itemType ===
-                                        ITEM_TYPE.TILE
-                                            ? IMAGE_CONTAINER_HEIGHT
-                                            : DATE_CONTAINER_HEIGHT
-                                    }
+                                    itemSize={(index) => (timeStampList[index].itemType ===
+                                        ITEM_TYPE.TILE ?
+                                        IMAGE_CONTAINER_HEIGHT :
+                                        DATE_CONTAINER_HEIGHT)}
                                     height={height}
                                     width={width}
                                     itemCount={timeStampList.length}
                                     key={`${router.query.collection}-${columns}-${sinceTime}`}
                                     overscanCount={extraRowsToRender}
                                 >
-                                    {({ index, style }) => {
-                                        return (
-                                            <ListItem
-                                                style={
+                                    {({index, style}) => (
+                                        <ListItem
+                                            style={
+                                                timeStampList[index]
+                                                    .itemType ===
+                                                    ITEM_TYPE.BANNER ?
+                                                    {
+                                                        ...style,
+                                                        top: Math.max(
+                                                            Number(
+                                                                style.top,
+                                                            ),
+                                                            height - 45,
+                                                        ),
+                                                        height:
+                                                                  width < 450 ?
+                                                                      Number(
+                                                                          style.height,
+                                                                      ) * 2 :
+                                                                      style.height,
+                                                    } :
+                                                    style
+                                            }
+                                        >
+                                            <ListContainer
+                                                columns={
                                                     timeStampList[index]
                                                         .itemType ===
-                                                    ITEM_TYPE.BANNER
-                                                        ? {
-                                                              ...style,
-                                                              top: Math.max(
-                                                                  Number(
-                                                                      style.top
-                                                                  ),
-                                                                  height - 45
-                                                              ),
-                                                              height:
-                                                                  width < 450
-                                                                      ? Number(
-                                                                            style.height
-                                                                        ) * 2
-                                                                      : style.height,
-                                                          }
-                                                        : style
+                                                        ITEM_TYPE.TILE ?
+                                                        columns :
+                                                        1
                                                 }
                                             >
-                                                <ListContainer
-                                                    columns={
-                                                        timeStampList[index]
-                                                            .itemType ===
-                                                        ITEM_TYPE.TILE
-                                                            ? columns
-                                                            : 1
-                                                    }
-                                                >
-                                                    {timeStampList[index]
-                                                        .itemType ===
+                                                {timeStampList[index]
+                                                    .itemType ===
                                                     ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
@@ -477,35 +466,32 @@ const PhotoFrame = ({
                                                             }
                                                         </DateContainer>
                                                     ) : timeStampList[index]
-                                                          .itemType ===
+                                                        .itemType ===
                                                       ITEM_TYPE.BANNER ? (
-                                                        <>
-                                                            {
-                                                                timeStampList[
-                                                                    index
-                                                                ].banner
-                                                            }
-                                                        </>
-                                                    ) : (
-                                                        timeStampList[
-                                                            index
-                                                        ].items.map(
-                                                            (item, idx) => {
-                                                                return getThumbnail(
+                                                            <>
+                                                                {
+                                                                    timeStampList[
+                                                                        index
+                                                                    ].banner
+                                                                }
+                                                            </>
+                                                        ) : (
+                                                            timeStampList[
+                                                                index
+                                                            ].items.map(
+                                                                (item, idx) => getThumbnail(
                                                                     filteredData,
                                                                     timeStampList[
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                        idx
-                                                                );
-                                                            }
-                                                        )
-                                                    )}
-                                                </ListContainer>
-                                            </ListItem>
-                                        );
-                                    }}
+                                                                        idx,
+                                                                ),
+                                                            )
+                                                        )}
+                                            </ListContainer>
+                                        </ListItem>
+                                    )}
                                 </List>
                             );
                         }}

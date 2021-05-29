@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import React, {useState, useEffect} from 'react';
+import {useRouter} from 'next/router';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import constants from 'utils/strings/constants';
-import { Formik, FormikHelpers } from 'formik';
+import {Formik, FormikHelpers} from 'formik';
 import * as Yup from 'yup';
-import { getOtt } from 'services/userService';
+import {getOtt} from 'services/userService';
 import Container from 'components/Container';
-import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
+import {setData, LS_KEYS, getData} from 'utils/storage/localStorage';
 import SubmitButton from 'components/SubmitButton';
-import { Button } from 'react-bootstrap';
+import {Button} from 'react-bootstrap';
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
     setSessionKeys,
 } from 'utils/crypto';
-import { setJustSignedUp } from 'utils/storage';
+import {setJustSignedUp} from 'utils/storage';
 
 interface FormValues {
     email: string;
@@ -28,7 +28,6 @@ export default function SignUp() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
     const [acceptTerms, setAcceptTerms] = useState(false);
-    const [understood, setUnderstood] = useState(false);
     useEffect(() => {
         router.prefetch('/verify');
         const user = getData(LS_KEYS.USER);
@@ -38,25 +37,24 @@ export default function SignUp() {
     }, []);
 
     const registerUser = async (
-        { email, passphrase, confirm }: FormValues,
-        { setFieldError }: FormikHelpers<FormValues>
+        {email, passphrase, confirm}: FormValues,
+        {setFieldError}: FormikHelpers<FormValues>,
     ) => {
         setLoading(true);
         try {
-            setData(LS_KEYS.USER, { email });
+            setData(LS_KEYS.USER, {email});
             await getOtt(email);
         } catch (e) {
             setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
         }
         try {
             if (passphrase === confirm) {
-                const { keyAttributes, masterKey } =
-                    await generateKeyAttributes(passphrase);
+                const {keyAttributes, masterKey} = await generateKeyAttributes(passphrase);
                 setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
                 await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
                     keyAttributes,
-                    masterKey
+                    masterKey,
                 );
 
                 await setSessionKeys(masterKey);
@@ -74,9 +72,9 @@ export default function SignUp() {
 
     return (
         <Container>
-            <Card style={{ width: '400px' }} className="text-center">
-                <Card.Body style={{ padding: '40px 30px' }}>
-                    <Card.Title style={{ marginBottom: '20px' }}>
+            <Card style={{width: '400px'}} className="text-center">
+                <Card.Body style={{padding: '40px 30px'}}>
+                    <Card.Title style={{marginBottom: '20px'}}>
                         {constants.SIGN_UP}
                     </Card.Title>
                     <Formik<FormValues>
@@ -90,7 +88,7 @@ export default function SignUp() {
                                 .email(constants.EMAIL_ERROR)
                                 .required(constants.REQUIRED),
                             passphrase: Yup.string().required(
-                                constants.REQUIRED
+                                constants.REQUIRED,
                             ),
                             confirm: Yup.string().required(constants.REQUIRED),
                         })}
@@ -113,9 +111,9 @@ export default function SignUp() {
                                         value={values.email}
                                         onChange={handleChange('email')}
                                         isInvalid={Boolean(
-                                            touched.email && errors.email
+                                            touched.email && errors.email,
                                         )}
-                                        autoFocus={true}
+                                        autoFocus
                                         disabled={loading}
                                     />
                                     <FormControl.Feedback type="invalid">
@@ -130,7 +128,7 @@ export default function SignUp() {
                                         onChange={handleChange('passphrase')}
                                         isInvalid={Boolean(
                                             touched.passphrase &&
-                                                errors.passphrase
+                                                errors.passphrase,
                                         )}
                                         disabled={loading}
                                     />
@@ -147,7 +145,7 @@ export default function SignUp() {
                                         value={values.confirm}
                                         onChange={handleChange('confirm')}
                                         isInvalid={Boolean(
-                                            touched.confirm && errors.confirm
+                                            touched.confirm && errors.confirm,
                                         )}
                                         disabled={loading}
                                     />
@@ -164,9 +162,7 @@ export default function SignUp() {
                                 >
                                     <Form.Check
                                         checked={acceptTerms}
-                                        onChange={(e) =>
-                                            setAcceptTerms(e.target.checked)
-                                        }
+                                        onChange={(e) => setAcceptTerms(e.target.checked)}
                                         type="checkbox"
                                         label={constants.TERMS_AND_CONDITIONS()}
                                     />

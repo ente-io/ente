@@ -1,13 +1,12 @@
-import { getEndpoint } from 'utils/common/apiUtil';
-import HTTPService from './HTTPService';
+import {getEndpoint} from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
 
-import { Collection } from './collectionService';
-import { DataStream, MetadataObject } from './uploadService';
 import CryptoWorker from 'utils/crypto';
-import { getToken } from 'utils/common/key';
-import { selectedState } from 'pages/gallery';
-import { ErrorHandler } from 'utils/common/errorUtil';
+import {getToken} from 'utils/common/key';
+import {ErrorHandler} from 'utils/common/errorUtil';
+import {DataStream, MetadataObject} from './uploadService';
+import {Collection} from './collectionService';
+import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
 const DIFF_LIMIT: number = 2500;
@@ -40,7 +39,7 @@ export interface File {
 }
 
 export const getLocalFiles = async () => {
-    let files: Array<File> = (await localForage.getItem<File[]>(FILES)) || [];
+    const files: Array<File> = (await localForage.getItem<File[]>(FILES)) || [];
     return files;
 };
 
@@ -48,24 +47,22 @@ export const syncFiles = async (collections: Collection[]) => {
     const localFiles = await getLocalFiles();
     let isUpdated = false;
     let files = await removeDeletedCollectionFiles(collections, localFiles);
-    if (files.length != localFiles.length) {
+    if (files.length !== localFiles.length) {
         isUpdated = true;
         await localForage.setItem('files', files);
     }
-    for (let collection of collections) {
+    for (const collection of collections) {
         if (!getToken()) {
             continue;
         }
-        const lastSyncTime =
-            (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
+        const lastSyncTime = (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
         if (collection.updationTime === lastSyncTime) {
             continue;
         }
         isUpdated = true;
-        let fetchedFiles =
-            (await getFiles(collection, lastSyncTime, DIFF_LIMIT)) ?? [];
+        const fetchedFiles = (await getFiles(collection, lastSyncTime, DIFF_LIMIT)) ?? [];
         files.push(...fetchedFiles);
-        var latestVersionFiles = new Map<string, File>();
+        const latestVersionFiles = new Map<string, File>();
         files.forEach((file) => {
             const uid = `${file.collectionID}-${file.id}`;
             if (
@@ -76,6 +73,7 @@ export const syncFiles = async (collections: Collection[]) => {
             }
         });
         files = [];
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const [_, file] of latestVersionFiles) {
             if (file.isDeleted) {
                 continue;
@@ -83,12 +81,12 @@ export const syncFiles = async (collections: Collection[]) => {
             files.push(file);
         }
         files = files.sort(
-            (a, b) => b.metadata.creationTime - a.metadata.creationTime
+            (a, b) => b.metadata.creationTime - a.metadata.creationTime,
         );
         await localForage.setItem('files', files);
         await localForage.setItem(
             `${collection.id}-time`,
-            collection.updationTime
+            collection.updationTime,
         );
     }
     return {
@@ -104,13 +102,12 @@ export const syncFiles = async (collections: Collection[]) => {
 export const getFiles = async (
     collection: Collection,
     sinceTime: number,
-    limit: number
+    limit: number,
 ): Promise<File[]> => {
     try {
         const worker = await new CryptoWorker();
         const decryptedFiles: File[] = [];
-        let time =
-            sinceTime ||
+        let time = sinceTime ||
             (await localForage.getItem<number>(`${collection.id}-time`)) ||
             0;
         let resp;
@@ -124,11 +121,11 @@ export const getFiles = async (
                 {
                     collectionID: collection.id,
                     sinceTime: time,
-                    limit: limit,
+                    limit,
                 },
                 {
                     'X-Auth-Token': token,
-                }
+                },
             );
 
             decryptedFiles.push(
@@ -138,13 +135,13 @@ export const getFiles = async (
                             file.key = await worker.decryptB64(
                                 file.encryptedKey,
                                 file.keyDecryptionNonce,
-                                collection.key
+                                collection.key,
                             );
                             file.metadata = await worker.decryptMetadata(file);
                         }
                         return file;
-                    }) as Promise<File>[]
-                ))
+                    }) as Promise<File>[],
+                )),
             );
 
             if (resp.data.diff.length) {
@@ -160,10 +157,10 @@ export const getFiles = async (
 
 const removeDeletedCollectionFiles = async (
     collections: Collection[],
-    files: File[]
+    files: File[],
 ) => {
     const syncedCollectionIds = new Set<number>();
-    for (let collection of collections) {
+    for (const collection of collections) {
         syncedCollectionIds.add(collection.id);
     }
     files = files.filter((file) => syncedCollectionIds.has(file.collectionID));
@@ -173,7 +170,7 @@ const removeDeletedCollectionFiles = async (
 export const deleteFiles = async (
     filesToDelete: number[],
     clearSelection: Function,
-    syncWithRemote: Function
+    syncWithRemote: Function,
 ) => {
     try {
         const token = getToken();
@@ -182,11 +179,11 @@ export const deleteFiles = async (
         }
         await HTTPService.post(
             `${ENDPOINT}/files/delete`,
-            { fileIDs: filesToDelete },
+            {fileIDs: filesToDelete},
             null,
             {
                 'X-Auth-Token': token,
-            }
+            },
         );
         clearSelection();
         syncWithRemote();

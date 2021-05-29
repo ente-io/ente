@@ -1,11 +1,11 @@
-import HTTPService from './HTTPService';
-import { KeyAttributes } from 'types';
-import { getEndpoint } from 'utils/common/apiUtil';
-import { clearKeys } from 'utils/storage/sessionStorage';
+import {KeyAttributes} from 'types';
+import {getEndpoint} from 'utils/common/apiUtil';
+import {clearKeys} from 'utils/storage/sessionStorage';
 import router from 'next/router';
-import { clearData } from 'utils/storage/localStorage';
+import {clearData} from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
-import { getToken } from 'utils/common/key';
+import {getToken} from 'utils/common/key';
+import HTTPService from './HTTPService';
 
 export interface UpdatedKey {
     kekSalt: string;
@@ -29,61 +29,51 @@ export interface User {
     email: string;
 }
 
-export const getOtt = (email: string) => {
-    return HTTPService.get(`${ENDPOINT}/users/ott`, {
-        email: email,
-        client: 'web',
-    });
-};
+export const getOtt = (email: string) => HTTPService.get(`${ENDPOINT}/users/ott`, {
+    email,
+    client: 'web',
+});
 export const getPublicKey = async (email: string) => {
     const token = getToken();
 
     const resp = await HTTPService.get(
         `${ENDPOINT}/users/public-key`,
-        { email },
+        {email},
         {
             'X-Auth-Token': token,
-        }
+        },
     );
-    return resp.data['publicKey'];
+    return resp.data.publicKey;
 };
 
-export const verifyOtt = (email: string, ott: string) => {
-    return HTTPService.get(`${ENDPOINT}/users/credentials`, { email, ott });
-};
+export const verifyOtt = (email: string, ott: string) => HTTPService.get(`${ENDPOINT}/users/credentials`, {email, ott});
 
-export const putAttributes = (token: string, keyAttributes: KeyAttributes) => {
-    return HTTPService.put(
-        `${ENDPOINT}/users/attributes`,
-        { keyAttributes: keyAttributes },
-        null,
-        {
-            'X-Auth-Token': token,
-        }
-    );
-};
-
-export const setKeys = (token: string, updatedKey: UpdatedKey) => {
-    return HTTPService.put(`${ENDPOINT}/users/keys`, updatedKey, null, {
+export const putAttributes = (token: string, keyAttributes: KeyAttributes) => HTTPService.put(
+    `${ENDPOINT}/users/attributes`,
+    {keyAttributes},
+    null,
+    {
         'X-Auth-Token': token,
-    });
-};
+    },
+);
 
-export const SetRecoveryKey = (token: string, recoveryKey: RecoveryKey) => {
-    return HTTPService.put(
-        `${ENDPOINT}/users/recovery-key`,
-        recoveryKey,
-        null,
-        {
-            'X-Auth-Token': token,
-        }
-    );
-};
+export const setKeys = (token: string, updatedKey: UpdatedKey) => HTTPService.put(`${ENDPOINT}/users/keys`, updatedKey, null, {
+    'X-Auth-Token': token,
+});
+
+export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) => HTTPService.put(
+    `${ENDPOINT}/users/recovery-key`,
+    recoveryKey,
+    null,
+    {
+        'X-Auth-Token': token,
+    },
+);
 
 export const logoutUser = async () => {
     clearKeys();
     clearData();
-    const cache = await caches.delete('thumbs');
+    await caches.delete('thumbs');
     await clearFiles();
     router.push('/');
 };

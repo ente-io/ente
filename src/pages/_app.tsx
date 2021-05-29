@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
+import React, {useEffect, useState} from 'react';
+import styled, {createGlobalStyle} from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
-import { useRouter } from 'next/router';
+import {useRouter} from 'next/router';
 import Container from 'components/Container';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
-import { Workbox } from 'workbox-window';
-import { sentryInit } from '../utils/sentry';
 import EnteSpinner from 'components/EnteSpinner';
+import {sentryInit} from '../utils/sentry';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -306,11 +305,11 @@ export interface BannerMessage {
 }
 
 sentryInit();
-export default function App({ Component, pageProps, err }) {
+export default function App({Component, err}) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(
-        typeof window !== 'undefined' && !window.navigator.onLine
+        typeof window !== 'undefined' && !window.navigator.onLine,
     );
     useEffect(() => {
         //     // if (
@@ -326,12 +325,12 @@ export default function App({ Component, pageProps, err }) {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker
                 .getRegistrations()
-                .then(function (registrations) {
-                    for (let registration of registrations) {
+                .then((registrations) => {
+                    for (const registration of registrations) {
                         registration.unregister();
                     }
                 })
-                .catch(function (err) {
+                .catch((err) => {
                     console.log('Service Worker registration failed: ', err);
                 });
         }
@@ -343,7 +342,7 @@ export default function App({ Component, pageProps, err }) {
     useEffect(() => {
         console.log(
             `%c${constants.CONSOLE_WARNING_STOP}`,
-            'color: red; font-size: 52px;'
+            'color: red; font-size: 52px;',
         );
         console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
 
@@ -382,7 +381,7 @@ export default function App({ Component, pageProps, err }) {
             <Navbar>
                 <FlexContainer>
                     <LogoImage
-                        style={{ height: '24px', padding: '3px' }}
+                        style={{height: '24px', padding: '3px'}}
                         alt="logo"
                         src="/icon.svg"
                     />

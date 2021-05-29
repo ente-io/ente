@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
-import events from './events';
 import FavButton from 'components/FavButton';
 import {
     addToFavorites,
     removeFromFavorites,
 } from 'services/collectionService';
-import { File } from 'services/fileService';
+import {File} from 'services/fileService';
 import constants from 'utils/strings/constants';
 import DownloadManger from 'services/downloadManager';
+import events from './events';
 
 interface Iprops {
     isOpen: boolean;
@@ -28,7 +28,7 @@ function PhotoSwipe(props: Iprops) {
     let pswpElement;
     const [photoSwipe, setPhotoSwipe] = useState<Photoswipe<any>>();
 
-    const { isOpen } = props;
+    const {isOpen} = props;
     const [isFav, setIsFav] = useState(false);
     const needUpdate = useRef(false);
 
@@ -59,32 +59,31 @@ function PhotoSwipe(props: Iprops) {
     }
 
     const openPhotoSwipe = () => {
-        const { items, currentIndex } = props;
+        const {items, currentIndex} = props;
         const options = {
             history: false,
             maxSpreadZoom: 5,
             index: currentIndex,
             showHideOpacity: true,
-            getDoubleTapZoom: function(isMouseClick, item) {
-                if(isMouseClick) {
+            getDoubleTapZoom(isMouseClick, item) {
+                if (isMouseClick) {
                     return 2.5;
-                } else {
-                    // zoom to original if initial zoom is less than 0.7x,
-                    // otherwise to 1.5x, to make sure that double-tap gesture always zooms image
-                    return item.initialZoomLevel < 0.7 ? 1 : 1.5;
                 }
+                // zoom to original if initial zoom is less than 0.7x,
+                // otherwise to 1.5x, to make sure that double-tap gesture always zooms image
+                return item.initialZoomLevel < 0.7 ? 1 : 1.5;
             },
         };
-        let photoSwipe = new Photoswipe(
+        const photoSwipe = new Photoswipe(
             pswpElement,
             PhotoswipeUIDefault,
             items,
-            options
+            options,
         );
         events.forEach((event) => {
             const callback = props[event];
             if (callback || event === 'destroy') {
-                photoSwipe.listen(event, function (...args) {
+                photoSwipe.listen(event, function(...args) {
                     if (callback) {
                         args.unshift(this);
                         callback(...args);
@@ -101,38 +100,29 @@ function PhotoSwipe(props: Iprops) {
         setPhotoSwipe(photoSwipe);
     };
 
-    const updateItems = (items = []) => {
-        photoSwipe.items = [];
-        items.forEach((item) => {
-            photoSwipe.items.push(item);
-        });
-        photoSwipe.invalidateCurrItems();
-        photoSwipe.updateSize(true);
-    };
-
     const closePhotoSwipe = () => {
         if (photoSwipe) photoSwipe.close();
     };
 
     const handleClose = () => {
-        const { onClose } = props;
+        const {onClose} = props;
         if (typeof onClose === 'function') {
             onClose(needUpdate.current);
         }
-        var videoTags = document.getElementsByTagName('video');
-        for (var videoTag of videoTags) {
+        const videoTags = document.getElementsByTagName('video');
+        for (const videoTag of videoTags) {
             videoTag.pause();
         }
     };
     const isInFav = (file) => {
-        const { favItemIds } = props;
+        const {favItemIds} = props;
         if (favItemIds && file) {
             return favItemIds.has(file.id);
-        } else return false;
+        } return false;
     };
 
     const onFavClick = async (file) => {
-        const { favItemIds } = props;
+        const {favItemIds} = props;
         if (!isInFav(file)) {
             favItemIds.add(file.id);
             addToFavorites(file);
@@ -145,19 +135,19 @@ function PhotoSwipe(props: Iprops) {
         needUpdate.current = true;
     };
     const downloadFile = async (file) => {
-        const { loadingBar } = props;
+        const {loadingBar} = props;
         const a = document.createElement('a');
         a.style.display = 'none';
         loadingBar.current.continuousStart();
         a.href = await DownloadManger.getFile(file);
         loadingBar.current.complete();
-        a.download = file.metadata['title'];
+        a.download = file.metadata.title;
         document.body.appendChild(a);
         a.click();
         a.remove();
     };
-    const { id } = props;
-    let { className } = props;
+    const {id} = props;
+    let {className} = props;
     className = classnames(['pswp', className]).trim();
     return (
         <div

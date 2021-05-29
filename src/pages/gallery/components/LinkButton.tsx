@@ -14,14 +14,14 @@ type Props = React.PropsWithChildren<{
 export default function LinkButton(props: Props) {
     function getButtonColor(variant: string) {
         switch (variant) {
-            case ButtonVariant.success:
-                return '#2dc262';
-            case ButtonVariant.danger:
-                return '#c93f3f';
-            case ButtonVariant.secondary:
-                return '#858585';
-            default:
-                return '#d1d1d1';
+        case ButtonVariant.success:
+            return '#2dc262';
+        case ButtonVariant.danger:
+            return '#c93f3f';
+        case ButtonVariant.secondary:
+            return '#858585';
+        default:
+            return '#d1d1d1';
         }
     }
     return (

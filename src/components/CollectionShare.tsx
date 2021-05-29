@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, {useState} from 'react';
 import constants from 'utils/strings/constants';
-import MessageDialog from './MessageDialog';
-import { Formik, FormikHelpers } from 'formik';
+import {Formik, FormikHelpers} from 'formik';
 import * as Yup from 'yup';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
-import { Button, Col, Table } from 'react-bootstrap';
-import { DeadCenter } from 'pages/gallery';
-import SubmitButton from './SubmitButton';
-import { User } from 'services/userService';
+import {Button, Col, Table} from 'react-bootstrap';
+import {DeadCenter} from 'pages/gallery';
+import {User} from 'services/userService';
 import {
     Collection,
     shareCollection,
     unshareCollection,
 } from 'services/collectionService';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import {getData, LS_KEYS} from 'utils/storage/localStorage';
+import SubmitButton from './SubmitButton';
+import MessageDialog from './MessageDialog';
 
 interface Props {
     show: boolean;
@@ -33,8 +33,8 @@ interface ShareeProps {
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
     const collectionShare = async (
-        { email }: formValues,
-        { resetForm, setFieldError }: FormikHelpers<formValues>
+        {email}: formValues,
+        {resetForm, setFieldError}: FormikHelpers<formValues>,
     ) => {
         try {
             setLoading(true);
@@ -53,17 +53,17 @@ function CollectionShare(props: Props) {
         } catch (e) {
             let errorMessage = null;
             switch (e?.status) {
-                case 400:
-                    errorMessage = constants.SHARING_BAD_REQUEST_ERROR;
-                    break;
-                case 402:
-                    errorMessage = constants.SHARING_DISABLED_FOR_FREE_ACCOUNTS;
-                    break;
-                case 404:
-                    errorMessage = constants.USER_DOES_NOT_EXIST;
-                    break;
-                default:
-                    errorMessage = `${constants.UNKNOWN_ERROR} ${e.message}`;
+            case 400:
+                errorMessage = constants.SHARING_BAD_REQUEST_ERROR;
+                break;
+            case 402:
+                errorMessage = constants.SHARING_DISABLED_FOR_FREE_ACCOUNTS;
+                break;
+            case 404:
+                errorMessage = constants.USER_DOES_NOT_EXIST;
+                break;
+            default:
+                errorMessage = `${constants.UNKNOWN_ERROR} ${e.message}`;
             }
             setFieldError('email', errorMessage);
         } finally {
@@ -75,7 +75,7 @@ function CollectionShare(props: Props) {
         await props.syncWithRemote();
     };
 
-    const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
+    const ShareeRow = ({sharee, collectionUnshare}: ShareeProps) => (
         <tr>
             <td>{sharee.email}</td>
             <td>
@@ -91,7 +91,7 @@ function CollectionShare(props: Props) {
                     }}
                     onClick={() => collectionUnshare(sharee)}
                 >
-                    -
+                  -
                 </Button>
             </td>
         </tr>
@@ -100,12 +100,12 @@ function CollectionShare(props: Props) {
         <MessageDialog
             show={props.show}
             onHide={props.onHide}
-            attributes={{ title: constants.SHARE_COLLECTION }}
+            attributes={{title: constants.SHARE_COLLECTION}}
         >
-            <DeadCenter style={{ width: '85%', margin: 'auto' }}>
+            <DeadCenter style={{width: '85%', margin: 'auto'}}>
                 <p>{constants.SHARE_WITH_PEOPLE}</p>
                 <Formik<formValues>
-                    initialValues={{ email: '' }}
+                    initialValues={{email: ''}}
                     validationSchema={Yup.object().shape({
                         email: Yup.string()
                             .email(constants.EMAIL_ERROR)
@@ -135,9 +135,9 @@ function CollectionShare(props: Props) {
                                         value={values.email}
                                         onChange={handleChange('email')}
                                         isInvalid={Boolean(
-                                            touched.email && errors.email
+                                            touched.email && errors.email,
                                         )}
-                                        autoFocus={true}
+                                        autoFocus
                                         disabled={loading}
                                     />
                                     <FormControl.Feedback type="invalid">
@@ -152,7 +152,7 @@ function CollectionShare(props: Props) {
                                     <SubmitButton
                                         loading={loading}
                                         inline
-                                        buttonText={'+'}
+                                        buttonText="+"
                                     />
                                 </Form.Group>
                             </Form.Row>
@@ -166,7 +166,7 @@ function CollectionShare(props: Props) {
                         background: '#444',
                         width: '100%',
                     }}
-                ></div>
+                />
                 {props.collection?.sharees.length > 0 ? (
                     <>
                         <p>{constants.SHAREES}</p>
@@ -184,7 +184,7 @@ function CollectionShare(props: Props) {
                         </Table>
                     </>
                 ) : (
-                    <div style={{ marginTop: '12px' }}>
+                    <div style={{marginTop: '12px'}}>
                         {constants.ZERO_SHAREES()}
                     </div>
                 )}
