@@ -294,10 +294,11 @@ const FlexContainer = styled.div`
 
 const OfflineContainer = styled.div`
     background-color: #111;
-    padding: 5px 0;
+    padding: 0;
     font-size: 14px;
     text-align: center;
     margin-top: -10px;
+    line-height: 32px;
 `;
 
 export interface BannerMessage {
