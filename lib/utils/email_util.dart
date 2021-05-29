@@ -1,5 +1,5 @@
+import 'package:email_validator/email_validator.dart';
+
 bool isValidEmail(String email) {
-  return RegExp(
-          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-      .hasMatch(email);
+  return EmailValidator.validate(email);
 }

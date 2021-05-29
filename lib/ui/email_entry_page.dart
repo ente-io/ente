@@ -111,7 +111,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   ),
                   onChanged: (value) {
                     setState(() {
-                      _email = value;
+                      _email = value.trim();
                     });
                   },
                   autocorrect: false,
