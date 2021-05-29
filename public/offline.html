@@ -2,8 +2,58 @@
 <html>
     <head>
         <title>ente.io | encrypted photo storage</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                background-color: #252525;
+                padding: 0;
+                margin: 0;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                color: #fff;
+            }
+            nav {
+                background-color: #171717;
+                height: 64px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: rgb(0 0 0 / 70%) 0px 0px 5px;
+            }
+
+            nav > img {
+                height: 24px;
+                padding: 3px;
+                margin: 0 auto;
+            }
+
+            body > div {
+                flex: 1;
+                padding: 10px;
+                text-align: center;
+                max-width: 1000px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                margin: 0 auto;
+            }
+            h2 {
+                margin-top: 0;
+            }
+        </style>
     </head>
     <body>
-        <h1>You are offline!</h1>
+        <nav>
+            <img src='/icon.svg' />
+        </nav>
+        <div>
+            <h2>seems like you are offline :(</h2>
+            <span>please check your internet connection</span>
+        </div>
     </body>
 </html>

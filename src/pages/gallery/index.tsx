@@ -225,7 +225,7 @@ export default function Gallery() {
                 });
                 break;
             case errorCodes.ERR_NO_INTERNET_CONNECTION:
-                setBannerMessage(constants.NO_INTERNET_CONNECTION);
+                // setBannerMessage(constants.NO_INTERNET_CONNECTION);
                 break;
             case errorCodes.ERR_KEY_MISSING:
                 clearKeys();

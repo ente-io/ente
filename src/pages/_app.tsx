@@ -9,6 +9,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import EnteSpinner from 'components/EnteSpinner';
 import {sentryInit} from '../utils/sentry';
+import {Workbox} from 'workbox-window';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -312,28 +313,28 @@ export default function App({Component, err}) {
         typeof window !== 'undefined' && !window.navigator.onLine,
     );
     useEffect(() => {
-        //     // if (
-        //     //     !('serviceWorker' in navigator) ||
-        //     //     process.env.NODE_ENV !== 'production'
-        //     // ) {
-        //     //     console.warn('Progressive Web App support is disabled');
-        //     //     return;
-        //     // }
-        //     // const wb = new Workbox('sw.js', { scope: '/' });
-        //     // wb.register();
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker
-                .getRegistrations()
-                .then((registrations) => {
-                    for (const registration of registrations) {
-                        registration.unregister();
-                    }
-                })
-                .catch((err) => {
-                    console.log('Service Worker registration failed: ', err);
-                });
+        if (
+            !('serviceWorker' in navigator) ||
+            process.env.NODE_ENV !== 'production'
+        ) {
+            console.warn('Progressive Web App support is disabled');
+            return;
         }
+        const wb = new Workbox('sw.js', {scope: '/'});
+        wb.register();
+
+        // if ('serviceWorker' in navigator) {
+        //     navigator.serviceWorker
+        //         .getRegistrations()
+        //         .then((registrations) => {
+        //             for (const registration of registrations) {
+        //                 registration.unregister();
+        //             }
+        //         })
+        //         .catch((err) => {
+        //             console.log('Service Worker registration failed: ', err);
+        //         });
+        // }
     }, []);
 
     const setUserOnline = () => setOffline(false);
@@ -387,9 +388,7 @@ export default function App({Component, err}) {
                     />
                 </FlexContainer>
             </Navbar>
-            {offline && (
-                <OfflineContainer>{constants.OFFLINE_MSG}</OfflineContainer>
-            )}
+            <OfflineContainer>{offline && constants.OFFLINE_MSG}</OfflineContainer>
             {loading ? (
                 <Container>
                     <EnteSpinner>
