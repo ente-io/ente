@@ -1,0 +1,26 @@
+name: flutter_sodium
+description: Flutter bindings for libsodium, a modern, easy-to-use crypto library.
+version: 0.2.0
+homepage: https://github.com/firstfloorsoftware/flutter_sodium
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.12.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  ffi: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.firstfloorsoftware.flutter_sodium
+        pluginClass: FlutterSodiumPlugin
+      ios:
+        pluginClass: FlutterSodiumPlugin

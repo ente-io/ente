@@ -55,7 +55,8 @@ dependencies:
   flutter_secure_storage: ^4.2.0
   uni_links: ^0.5.1
   crisp: ^0.1.3
-  flutter_sodium: ^0.2.0
+  flutter_sodium:
+    path: thirdparty/flutter_sodium
   pedantic: ^1.9.2
   page_transition: "^1.1.7+2"
   scrollable_positioned_list: ^0.1.10
