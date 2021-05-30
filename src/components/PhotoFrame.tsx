@@ -8,7 +8,7 @@ import {
     setSearchStats,
 } from 'pages/gallery';
 import PreviewCard from 'pages/gallery/components/PreviewCard';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { File } from 'services/fileService';
 import styled from 'styled-components';
@@ -140,6 +140,7 @@ const PhotoFrame = ({
     const fetching: { [k: number]: boolean } = {};
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
+    const listRef = useRef(null);
 
     useEffect(() => {
         if (searchMode) {
@@ -149,6 +150,13 @@ const PhotoFrame = ({
             });
         }
     }, [search]);
+
+    useEffect(() => {
+        if (galleryContext.resetList) {
+            listRef.current?.resetAfterIndex(0);
+        }
+    }, [galleryContext.resetList]);
+
     const updateUrl = (index: number) => (url: string) => {
         files[index] = {
             ...files[index],
@@ -470,6 +478,7 @@ const PhotoFrame = ({
                             return (
                                 <List
                                     key={`${router.query.collection}`}
+                                    ref={listRef}
                                     itemSize={getItemSize}
                                     height={height}
                                     width={width}
