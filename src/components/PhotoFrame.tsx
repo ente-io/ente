@@ -2,12 +2,13 @@ import router from 'next/router';
 import {
     DeadCenter,
     FILE_TYPE,
+    GalleryContext,
     Search,
     SetFiles,
     setSearchStats,
 } from 'pages/gallery';
 import PreviewCard from 'pages/gallery/components/PreviewCard';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Button} from 'react-bootstrap';
 import {File} from 'services/fileService';
 import styled from 'styled-components';
@@ -30,6 +31,8 @@ interface TimeStampListItem {
     itemStartIndex?: number;
     date?: string;
     banner?: any;
+    id?: string;
+    height?: number;
 }
 
 const Container = styled.div`
@@ -76,6 +79,14 @@ const DateContainer = styled.div`
     padding-top: 15px;
 `;
 
+const BannerContainer = styled.div`
+    color: #979797;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+`;
+
 const EmptyScreen = styled.div`
     display: flex;
     justify-content: center;
@@ -100,7 +111,6 @@ interface Props {
     setFiles: SetFiles;
     syncWithRemote: () => Promise<void>;
     favItemIds: Set<number>;
-    sinceTime: number;
     setSelected;
     selected;
     isFirstLoad;
@@ -116,7 +126,6 @@ const PhotoFrame = ({
     setFiles,
     syncWithRemote,
     favItemIds,
-    sinceTime,
     setSelected,
     selected,
     isFirstLoad,
@@ -130,6 +139,7 @@ const PhotoFrame = ({
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const fetching: { [k: number]: boolean } = {};
     const startTime = Date.now();
+    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         if (searchMode) {
@@ -220,7 +230,13 @@ const PhotoFrame = ({
 
     const getSlideData = async (instance: any, index: number, item: File) => {
         if (!item.msrc) {
-            const url = await DownloadManager.getPreview(item);
+            let url;
+            if (galleryContext.thumbs.has(item.id)) {
+                url = galleryContext.thumbs.get(item.id);
+            } else {
+                url = await DownloadManager.getPreview(item);
+                galleryContext.thumbs.set(item.id, url);
+            }
             updateUrl(item.dataIndex)(url);
             item.msrc = url;
             if (!item.src) {
@@ -237,7 +253,13 @@ const PhotoFrame = ({
         }
         if (!fetching[item.dataIndex]) {
             fetching[item.dataIndex] = true;
-            const url = await DownloadManager.getFile(item);
+            let url;
+            if (galleryContext.files.has(item.id)) {
+                url = galleryContext.files.get(item.id);
+            } else {
+                url = await DownloadManager.getFile(item);
+                galleryContext.files.set(item.id, url);
+            }
             updateSrcUrl(item.dataIndex, url);
             if (item.metadata.fileType === FILE_TYPE.VIDEO) {
                 item.html = `
@@ -368,6 +390,7 @@ const PhotoFrame = ({
                                                 dateTimeFormat.format(
                                                     currentDate,
                                                 ),
+                                        id: currentDate.toString(),
                                     });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TILE,
@@ -389,106 +412,79 @@ const PhotoFrame = ({
                                     });
                                 }
                             });
-                            files.length < 30 &&
-                                !searchMode &&
+                            files.length < 30 && !searchMode &&
                                 timeStampList.push({
                                     itemType: ITEM_TYPE.BANNER,
                                     banner: (
-                                        <div
-                                            style={{
-                                                color: '#979797',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                textAlign: 'center',
-                                            }}
-                                        >
+                                        <BannerContainer>
                                             {constants.INSTALL_MOBILE_APP()}
-                                        </div>
+                                        </BannerContainer>
                                     ),
+                                    id: 'install-banner',
+                                    height: 48,
                                 });
                             const extraRowsToRender = Math.ceil(
                                 (NO_OF_PAGES * height) / IMAGE_CONTAINER_HEIGHT,
                             );
+
+                            const generateKey = (index) => {
+                                switch (timeStampList[index].itemType) {
+                                case ITEM_TYPE.TILE:
+                                    return `${timeStampList[index].items[0].id}-${timeStampList[index].items.slice(-1)[0].id}`;
+                                default:
+                                    return `${timeStampList[index].id}-${index}`;
+                                }
+                            };
+
+                            const getItemSize = (index) => {
+                                switch (timeStampList[index].itemType) {
+                                case ITEM_TYPE.TIME:
+                                    return DATE_CONTAINER_HEIGHT;
+                                case ITEM_TYPE.TILE:
+                                    return IMAGE_CONTAINER_HEIGHT;
+                                default:
+                                    return timeStampList[index].height;
+                                }
+                            };
+
+                            const renderListItem = (listItem) => {
+                                switch (listItem.itemType) {
+                                case ITEM_TYPE.TIME:
+                                    return (
+                                        <DateContainer>
+                                            {listItem.date}
+                                        </DateContainer>
+                                    );
+                                case ITEM_TYPE.BANNER:
+                                    return listItem.banner;
+                                default:
+                                    return (listItem.items.map(
+                                        (item, idx) => getThumbnail(
+                                            filteredData,
+                                            listItem.itemStartIndex + idx,
+                                        ),
+                                    ));
+                                }
+                            };
+
                             return (
                                 <List
-                                    itemSize={(index) => (timeStampList[index].itemType ===
-                                        ITEM_TYPE.TILE ?
-                                        IMAGE_CONTAINER_HEIGHT :
-                                        DATE_CONTAINER_HEIGHT)}
+                                    itemSize={getItemSize}
                                     height={height}
                                     width={width}
                                     itemCount={timeStampList.length}
-                                    key={`${router.query.collection}-${columns}-${sinceTime}`}
+                                    itemKey={generateKey}
                                     overscanCount={extraRowsToRender}
                                 >
                                     {({index, style}) => (
-                                        <ListItem
-                                            style={
-                                                timeStampList[index]
-                                                    .itemType ===
-                                                    ITEM_TYPE.BANNER ?
-                                                    {
-                                                        ...style,
-                                                        top: Math.max(
-                                                            Number(
-                                                                style.top,
-                                                            ),
-                                                            height - 45,
-                                                        ),
-                                                        height:
-                                                                  width < 450 ?
-                                                                      Number(
-                                                                          style.height,
-                                                                      ) * 2 :
-                                                                      style.height,
-                                                    } :
-                                                    style
-                                            }
-                                        >
+                                        <ListItem style={style}>
                                             <ListContainer
                                                 columns={
-                                                    timeStampList[index]
-                                                        .itemType ===
-                                                        ITEM_TYPE.TILE ?
-                                                        columns :
-                                                        1
+                                                    timeStampList[index].itemType === ITEM_TYPE.TILE ?
+                                                        columns :1
                                                 }
                                             >
-                                                {timeStampList[index]
-                                                    .itemType ===
-                                                    ITEM_TYPE.TIME ? (
-                                                        <DateContainer>
-                                                            {
-                                                                timeStampList[
-                                                                    index
-                                                                ].date
-                                                            }
-                                                        </DateContainer>
-                                                    ) : timeStampList[index]
-                                                        .itemType ===
-                                                      ITEM_TYPE.BANNER ? (
-                                                            <>
-                                                                {
-                                                                    timeStampList[
-                                                                        index
-                                                                    ].banner
-                                                                }
-                                                            </>
-                                                        ) : (
-                                                            timeStampList[
-                                                                index
-                                                            ].items.map(
-                                                                (item, idx) => getThumbnail(
-                                                                    filteredData,
-                                                                    timeStampList[
-                                                                        index
-                                                                    ]
-                                                                        .itemStartIndex +
-                                                                        idx,
-                                                                ),
-                                                            )
-                                                        )}
+                                                {renderListItem(timeStampList[index])}
                                             </ListContainer>
                                         </ListItem>
                                     )}

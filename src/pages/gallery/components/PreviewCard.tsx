@@ -1,9 +1,10 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useContext, useLayoutEffect, useRef, useState} from 'react';
 import {File} from 'services/fileService';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
+import {GalleryContext} from '..';
 
 interface IProps {
     file: File;
@@ -103,6 +104,7 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
 
 export default function PreviewCard(props: IProps) {
     const [imgSrc, setImgSrc] = useState<string>();
+    const {thumbs} = useContext(GalleryContext);
     const {
         file,
         onClick,
@@ -114,17 +116,25 @@ export default function PreviewCard(props: IProps) {
         selectOnClick,
     } = props;
     const isMounted = useRef(true);
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (file && !file.msrc) {
             const main = async () => {
                 const url = await DownloadManager.getPreview(file);
                 if (isMounted.current) {
                     setImgSrc(url);
+                    thumbs.set(file.id, url);
                     file.msrc = url;
                     updateUrl(url);
                 }
             };
-            main();
+
+            if (thumbs.has(file.id)) {
+                const thumbImgSrc = thumbs.get(file.id);
+                setImgSrc(thumbImgSrc);
+                file.msrc = thumbImgSrc;
+            } else {
+                main();
+            }
         }
         return () => {
             isMounted.current = false;

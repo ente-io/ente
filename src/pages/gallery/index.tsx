@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {createContext, useEffect, useRef, useState} from 'react';
 import {useRouter} from 'next/router';
 import {clearKeys, getKey, SESSION_KEYS} from 'utils/storage/sessionStorage';
 import {
@@ -95,6 +95,18 @@ export interface SearchStats {
     timeTaken: number;
 }
 
+type GalleryContextType = {
+    thumbs: Map<number, string>;
+    files: Map<number, string>
+}
+
+const defaultGalleryContext: GalleryContextType = {
+    thumbs: new Map(),
+    files: new Map(),
+};
+
+export const GalleryContext = createContext<GalleryContextType>(defaultGalleryContext);
+
 export default function Gallery() {
     const router = useRouter();
     const [collections, setCollections] = useState<Collection[]>([]);
@@ -102,7 +114,6 @@ export default function Gallery() {
     const [files, setFiles] = useState<File[]>(null);
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
     const [bannerMessage, setBannerMessage] = useState<string>(null);
-    const [sinceTime, setSinceTime] = useState(0);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
     const [selected, setSelected] = useState<selectedState>({count: 0});
@@ -190,7 +201,7 @@ export default function Gallery() {
             await billingService.updatePlans();
             await billingService.syncSubscription();
             const collections = await syncCollections();
-            const {files, isUpdated} = await syncFiles(collections);
+            const {files} = await syncFiles(collections, setFiles);
             const nonEmptyCollections = getNonEmptyCollections(
                 collections,
                 files,
@@ -201,12 +212,11 @@ export default function Gallery() {
             );
             const favItemIds = await getFavItemIds(files);
             setCollections(nonEmptyCollections);
-            if (isUpdated) {
-                setFiles(files);
-            }
+            // if (isUpdated) {
+            //     setFiles(files);
+            // }
             setCollectionsAndTheirLatestFile(collectionAndItsLatestFile);
             setFavItemIds(favItemIds);
-            setSinceTime(new Date().getTime());
         } catch (e) {
             switch (e.message) {
             case errorCodes.ERR_SESSION_EXPIRED:
@@ -283,123 +293,123 @@ export default function Gallery() {
 
     const updateSearch = (search: Search) => {
         setSearch(search);
-        setSinceTime(new Date().getTime());
         setSearchStats(null);
     };
     return (
-        <FullScreenDropZone
-            getRootProps={getRootProps}
-            getInputProps={getInputProps}
-            showCollectionSelector={setCollectionSelectorView.bind(null, true)}
-        >
-            {loading && (
-                <LoadingOverlay>
-                    <EnteSpinner />
-                </LoadingOverlay>
-            )}
-            <LoadingBar color="#2dc262" ref={loadingBar} />
-            {isFirstLoad && (
-                <AlertContainer>
-                    {constants.INITIAL_LOAD_DELAY_WARNING}
-                </AlertContainer>
-            )}
-            <PlanSelector
-                modalView={planModalView}
-                closeModal={() => setPlanModalView(false)}
-                setDialogMessage={setDialogMessage}
-                setLoading={setLoading}
-            />
-            <AlertBanner bannerMessage={bannerMessage} />
-            <MessageDialog
-                size="lg"
-                show={dialogView}
-                onHide={() => setDialogView(false)}
-                attributes={dialogMessage}
-            />
-            <SearchBar
-                isOpen={searchMode}
-                setOpen={setSearchMode}
-                loadingBar={loadingBar}
-                isFirstFetch={isFirstFetch}
-                setCollections={setCollections}
-                setSearch={updateSearch}
-                files={files}
-                searchStats={searchStats}
-            />
-            <Collections
-                collections={collections}
-                searchMode={searchMode}
-                selected={Number(router.query.collection)}
-                selectCollection={selectCollection}
-                syncWithRemote={syncWithRemote}
-                setDialogMessage={setDialogMessage}
-                setCollectionNamerAttributes={setCollectionNamerAttributes}
-                startLoadingBar={loadingBar.current?.continuousStart}
-            />
-            <CollectionNamer
-                show={collectionNamerView}
-                onHide={setCollectionNamerView.bind(null, false)}
-                attributes={collectionNamerAttributes}
-            />
-            <CollectionSelector
-                show={collectionSelectorView}
-                onHide={setCollectionSelectorView.bind(null, false)}
-                collectionsAndTheirLatestFile={collectionsAndTheirLatestFile}
-                directlyShowNextModal={
-                    collectionsAndTheirLatestFile?.length === 0
-                }
-                attributes={collectionSelectorAttributes}
-            />
-            <Upload
-                syncWithRemote={syncWithRemote}
-                setBannerMessage={setBannerMessage}
-                acceptedFiles={acceptedFiles}
-                existingFiles={files}
-                setCollectionSelectorAttributes={
-                    setCollectionSelectorAttributes
-                }
-                closeCollectionSelector={setCollectionSelectorView.bind(
-                    null,
-                    false,
+        <GalleryContext.Provider value={defaultGalleryContext}>
+            <FullScreenDropZone
+                getRootProps={getRootProps}
+                getInputProps={getInputProps}
+                showCollectionSelector={setCollectionSelectorView.bind(null, true)}
+            >
+                {loading && (
+                    <LoadingOverlay>
+                        <EnteSpinner />
+                    </LoadingOverlay>
                 )}
-                setLoading={setLoading}
-                setCollectionNamerAttributes={setCollectionNamerAttributes}
-                setDialogMessage={setDialogMessage}
-                setUploadInProgress={setUploadInProgress}
-            />
-            <Sidebar
-                files={files}
-                collections={collections}
-                setDialogMessage={setDialogMessage}
-                showPlanSelectorModal={() => setPlanModalView(true)}
-            />
-            <UploadButton openFileUploader={openFileUploader} />
-            <PhotoFrame
-                files={files}
-                setFiles={setFiles}
-                syncWithRemote={syncWithRemote}
-                favItemIds={favItemIds}
-                sinceTime={sinceTime}
-                setSelected={setSelected}
-                selected={selected}
-                isFirstLoad={isFirstLoad}
-                openFileUploader={openFileUploader}
-                loadingBar={loadingBar}
-                searchMode={searchMode}
-                search={search}
-                setSearchStats={setSearchStats}
-            />
-            {selected.count > 0 && (
-                <SelectedFileOptions
-                    addToCollectionHelper={addToCollectionHelper}
-                    showCreateCollectionModal={showCreateCollectionModal}
+                <LoadingBar color="#2dc262" ref={loadingBar} />
+                {isFirstLoad && (
+                    <AlertContainer>
+                        {constants.INITIAL_LOAD_DELAY_WARNING}
+                    </AlertContainer>
+                )}
+                <PlanSelector
+                    modalView={planModalView}
+                    closeModal={() => setPlanModalView(false)}
                     setDialogMessage={setDialogMessage}
+                    setLoading={setLoading}
+                />
+                <AlertBanner bannerMessage={bannerMessage} />
+                <MessageDialog
+                    size="lg"
+                    show={dialogView}
+                    onHide={() => setDialogView(false)}
+                    attributes={dialogMessage}
+                />
+                <SearchBar
+                    isOpen={searchMode}
+                    setOpen={setSearchMode}
+                    loadingBar={loadingBar}
+                    isFirstFetch={isFirstFetch}
+                    setCollections={setCollections}
+                    setSearch={updateSearch}
+                    files={files}
+                    searchStats={searchStats}
+                />
+                <Collections
+                    collections={collections}
+                    searchMode={searchMode}
+                    selected={Number(router.query.collection)}
+                    selectCollection={selectCollection}
+                    syncWithRemote={syncWithRemote}
+                    setDialogMessage={setDialogMessage}
+                    setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    startLoadingBar={loadingBar.current?.continuousStart}
+                />
+                <CollectionNamer
+                    show={collectionNamerView}
+                    onHide={setCollectionNamerView.bind(null, false)}
+                    attributes={collectionNamerAttributes}
+                />
+                <CollectionSelector
+                    show={collectionSelectorView}
+                    onHide={setCollectionSelectorView.bind(null, false)}
+                    collectionsAndTheirLatestFile={collectionsAndTheirLatestFile}
+                    directlyShowNextModal={
+                        collectionsAndTheirLatestFile?.length === 0
+                    }
+                    attributes={collectionSelectorAttributes}
+                />
+                <Upload
+                    syncWithRemote={syncWithRemote}
+                    setBannerMessage={setBannerMessage}
+                    acceptedFiles={acceptedFiles}
+                    existingFiles={files}
                     setCollectionSelectorAttributes={
                         setCollectionSelectorAttributes
                     }
-                    deleteFileHelper={deleteFileHelper}
+                    closeCollectionSelector={setCollectionSelectorView.bind(
+                        null,
+                        false,
+                    )}
+                    setLoading={setLoading}
+                    setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    setDialogMessage={setDialogMessage}
+                    setUploadInProgress={setUploadInProgress}
                 />
-            )}
-        </FullScreenDropZone>
+                <Sidebar
+                    files={files}
+                    collections={collections}
+                    setDialogMessage={setDialogMessage}
+                    showPlanSelectorModal={() => setPlanModalView(true)}
+                />
+                <UploadButton openFileUploader={openFileUploader} />
+                <PhotoFrame
+                    files={files}
+                    setFiles={setFiles}
+                    syncWithRemote={syncWithRemote}
+                    favItemIds={favItemIds}
+                    setSelected={setSelected}
+                    selected={selected}
+                    isFirstLoad={isFirstLoad}
+                    openFileUploader={openFileUploader}
+                    loadingBar={loadingBar}
+                    searchMode={searchMode}
+                    search={search}
+                    setSearchStats={setSearchStats}
+                />
+                {selected.count > 0 && (
+                    <SelectedFileOptions
+                        addToCollectionHelper={addToCollectionHelper}
+                        showCreateCollectionModal={showCreateCollectionModal}
+                        setDialogMessage={setDialogMessage}
+                        setCollectionSelectorAttributes={
+                            setCollectionSelectorAttributes
+                        }
+                        deleteFileHelper={deleteFileHelper}
+                    />
+                )}
+            </FullScreenDropZone>
+        </GalleryContext.Provider>
     );
 }

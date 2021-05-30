@@ -159,7 +159,7 @@ const englishConstants = {
     ERROR: 'error',
     MESSAGE: 'message',
     INSTALL_MOBILE_APP: () => (
-        <div>
+        <>
         install our{' '}
             <a
                 href="https://play.google.com/store/apps/details?id=io.ente.photos"
@@ -180,7 +180,7 @@ const englishConstants = {
                 {' '}
             </a>
         to automatically backup all your photos
-        </div>
+        </>
     ),
     DOWNLOAD_APP_MESSAGE: () => (
         <>

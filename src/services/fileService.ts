@@ -43,7 +43,7 @@ export const getLocalFiles = async () => {
     return files;
 };
 
-export const syncFiles = async (collections: Collection[]) => {
+export const syncFiles = async (collections: Collection[], setFiles: (files: File[]) => void) => {
     const localFiles = await getLocalFiles();
     let isUpdated = false;
     let files = await removeDeletedCollectionFiles(collections, localFiles);
@@ -88,6 +88,11 @@ export const syncFiles = async (collections: Collection[]) => {
             `${collection.id}-time`,
             collection.updationTime,
         );
+        setFiles(files.map((item) => ({
+            ...item,
+            w: window.innerWidth,
+            h: window.innerHeight,
+        })));
     }
     return {
         files: files.map((item) => ({
