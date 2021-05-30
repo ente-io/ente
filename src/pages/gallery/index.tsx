@@ -201,6 +201,7 @@ export default function Gallery() {
             await billingService.updatePlans();
             await billingService.syncSubscription();
             const collections = await syncCollections();
+            setCollections(collections);
             const { files } = await syncFiles(collections, setFiles);
             const nonEmptyCollections = getNonEmptyCollections(
                 collections,

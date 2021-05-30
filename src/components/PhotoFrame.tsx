@@ -469,6 +469,7 @@ const PhotoFrame = ({
 
                             return (
                                 <List
+                                    key={`${router.query.collection}`}
                                     itemSize={getItemSize}
                                     height={height}
                                     width={width}
