@@ -75,7 +75,6 @@ const AlertContainer = styled.div`
     padding: 5px 0;
     font-size: 14px;
     text-align: center;
-    margin-top: -10px;
 `;
 
 export type selectedState = {
