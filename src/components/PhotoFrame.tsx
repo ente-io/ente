@@ -238,13 +238,7 @@ const PhotoFrame = ({
 
     const getSlideData = async (instance: any, index: number, item: File) => {
         if (!item.msrc) {
-            let url;
-            if (galleryContext.thumbs.has(item.id)) {
-                url = galleryContext.thumbs.get(item.id);
-            } else {
-                url = await DownloadManager.getPreview(item);
-                galleryContext.thumbs.set(item.id, url);
-            }
+            const url = await DownloadManager.getPreview(item);
             updateUrl(item.dataIndex)(url);
             item.msrc = url;
             if (!item.src) {
@@ -261,13 +255,7 @@ const PhotoFrame = ({
         }
         if (!fetching[item.dataIndex]) {
             fetching[item.dataIndex] = true;
-            let url;
-            if (galleryContext.files.has(item.id)) {
-                url = galleryContext.files.get(item.id);
-            } else {
-                url = await DownloadManager.getFile(item);
-                galleryContext.files.set(item.id, url);
-            }
+            const url = await DownloadManager.getFile(item);
             updateSrcUrl(item.dataIndex, url);
             if (item.metadata.fileType === FILE_TYPE.VIDEO) {
                 item.html = `
