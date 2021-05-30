@@ -99,9 +99,19 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             },
             child: Padding(
               padding: const EdgeInsets.fromLTRB(40, 8, 40, 20),
-              child: Text(
-                "skip",
-                style: TextStyle(color: Colors.white.withOpacity(0.8)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.fast_forward,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                  Padding(padding: EdgeInsets.all(2)),
+                  Text(
+                    "skip",
+                    style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  ),
+                ],
               ),
             ),
           )
