@@ -55,6 +55,13 @@ final themeData = ThemeData(
   textSelectionTheme: TextSelectionThemeData().copyWith(
     cursorColor: Colors.white.withOpacity(0.5),
   ),
+  inputDecorationTheme: InputDecorationTheme().copyWith(
+    focusedBorder: UnderlineInputBorder(
+      borderSide: BorderSide(
+        color: Color.fromRGBO(45, 194, 98, 1.0),
+      ),
+    ),
+  ),
 );
 
 void main() async {
