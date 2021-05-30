@@ -1,7 +1,7 @@
-import {runningInBrowser} from 'utils/common';
-import {Collection} from './collectionService';
+import { runningInBrowser } from 'utils/common';
+import { Collection } from './collectionService';
 import downloadManager from './downloadManager';
-import {File} from './fileService';
+import { File } from './fileService';
 
 enum ExportNotification {
     START = 'export started',

@@ -1,14 +1,14 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import constants from 'utils/strings/constants';
-import {getData, LS_KEYS, setData} from 'utils/storage/localStorage';
-import {useRouter} from 'next/router';
-import {B64EncryptionResult} from 'services/uploadService';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { useRouter } from 'next/router';
+import { B64EncryptionResult } from 'services/uploadService';
 import CryptoWorker, {
     setSessionKeys,
     generateAndSaveIntermediateKeyAttributes,
 } from 'utils/crypto';
-import {getActualKey} from 'utils/common/key';
-import {setKeys, UpdatedKey} from 'services/userService';
+import { getActualKey } from 'utils/common/key';
+import { setKeys, UpdatedKey } from 'services/userService';
 import SetPasswordForm from 'components/SetPasswordForm';
 
 export interface KEK {
@@ -64,7 +64,7 @@ export default function Generate() {
         redirectToGallery();
     };
     const redirectToGallery = () => {
-        setData(LS_KEYS.SHOW_BACK_BUTTON, {value: false});
+        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
         router.push('/gallery');
     };
     return (

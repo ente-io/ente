@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
@@ -7,7 +7,7 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from 'services/collectionService';
-import {File} from 'services/fileService';
+import { File } from 'services/fileService';
 import constants from 'utils/strings/constants';
 import DownloadManger from 'services/downloadManager';
 import events from './events';
@@ -28,7 +28,7 @@ function PhotoSwipe(props: Iprops) {
     let pswpElement;
     const [photoSwipe, setPhotoSwipe] = useState<Photoswipe<any>>();
 
-    const {isOpen} = props;
+    const { isOpen } = props;
     const [isFav, setIsFav] = useState(false);
     const needUpdate = useRef(false);
 
@@ -59,7 +59,7 @@ function PhotoSwipe(props: Iprops) {
     }
 
     const openPhotoSwipe = () => {
-        const {items, currentIndex} = props;
+        const { items, currentIndex } = props;
         const options = {
             history: false,
             maxSpreadZoom: 5,
@@ -105,7 +105,7 @@ function PhotoSwipe(props: Iprops) {
     };
 
     const handleClose = () => {
-        const {onClose} = props;
+        const { onClose } = props;
         if (typeof onClose === 'function') {
             onClose(needUpdate.current);
         }
@@ -115,14 +115,14 @@ function PhotoSwipe(props: Iprops) {
         }
     };
     const isInFav = (file) => {
-        const {favItemIds} = props;
+        const { favItemIds } = props;
         if (favItemIds && file) {
             return favItemIds.has(file.id);
         } return false;
     };
 
     const onFavClick = async (file) => {
-        const {favItemIds} = props;
+        const { favItemIds } = props;
         if (!isInFav(file)) {
             favItemIds.add(file.id);
             addToFavorites(file);
@@ -135,7 +135,7 @@ function PhotoSwipe(props: Iprops) {
         needUpdate.current = true;
     };
     const downloadFile = async (file) => {
-        const {loadingBar} = props;
+        const { loadingBar } = props;
         const a = document.createElement('a');
         a.style.display = 'none';
         loadingBar.current.continuousStart();
@@ -146,8 +146,8 @@ function PhotoSwipe(props: Iprops) {
         a.click();
         a.remove();
     };
-    const {id} = props;
-    let {className} = props;
+    const { id } = props;
+    let { className } = props;
     className = classnames(['pswp', className]).trim();
     return (
         <div

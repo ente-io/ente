@@ -1,18 +1,18 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import constants from 'utils/strings/constants';
-import {logoutUser, putAttributes} from 'services/userService';
-import {getData, LS_KEYS, setData} from 'utils/storage/localStorage';
-import {useRouter} from 'next/router';
-import {getKey, SESSION_KEYS} from 'utils/storage/sessionStorage';
+import { logoutUser, putAttributes } from 'services/userService';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { useRouter } from 'next/router';
+import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     setSessionKeys,
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
 } from 'utils/crypto';
 import SetPasswordForm from 'components/SetPasswordForm';
-import {setJustSignedUp} from 'utils/storage';
+import { setJustSignedUp } from 'utils/storage';
 import RecoveryKeyModal from 'components/RecoveryKeyModal';
-import {KeyAttributes} from 'types';
+import { KeyAttributes } from 'types';
 import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 
@@ -59,7 +59,7 @@ export default function Generate() {
 
     const onSubmit = async (passphrase, setFieldError) => {
         try {
-            const {keyAttributes, masterKey} = await generateKeyAttributes(
+            const { keyAttributes, masterKey } = await generateKeyAttributes(
                 passphrase,
             );
 

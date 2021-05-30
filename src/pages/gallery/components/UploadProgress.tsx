@@ -2,7 +2,7 @@ import React from 'react';
 import {
     Alert, Button, Modal, ProgressBar,
 } from 'react-bootstrap';
-import {UPLOAD_STAGES} from 'services/uploadService';
+import { UPLOAD_STAGES } from 'services/uploadService';
 import constants from 'utils/strings/constants';
 
 interface Props {
@@ -17,7 +17,7 @@ export default function UploadProgress(props: Props) {
     const fileProgressStatuses = [];
     if (props.fileProgress) {
         for (const [fileName, progress] of props.fileProgress) {
-            fileProgressStatuses.push({fileName, progress});
+            fileProgressStatuses.push({ fileName, progress });
         }
         fileProgressStatuses.sort((a, b) => {
             if (b.progress !== -1 && a.progress === -1) return 1;
@@ -75,8 +75,8 @@ export default function UploadProgress(props: Props) {
                             maxHeight: '250px',
                         }}
                     >
-                        {fileProgressStatuses.map(({fileName, progress}) => (
-                            <li key={fileName} style={{marginTop: '12px'}}>
+                        {fileProgressStatuses.map(({ fileName, progress }) => (
+                            <li key={fileName} style={{ marginTop: '12px' }}>
                                 {props.now === 100 ?
                                     fileName :
                                     constants.FILE_UPLOAD_PROGRESS(
@@ -88,10 +88,10 @@ export default function UploadProgress(props: Props) {
                     </ul>
                 )}
                 {props.now === 100 && (
-                    <Modal.Footer style={{border: 'none'}}>
+                    <Modal.Footer style={{ border: 'none' }}>
                         <Button
                             variant="outline-secondary"
-                            style={{width: '100%'}}
+                            style={{ width: '100%' }}
                             onClick={props.closeModal}
                         >
                             {constants.CLOSE}

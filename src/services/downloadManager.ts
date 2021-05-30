@@ -1,9 +1,9 @@
-import {getToken} from 'utils/common/key';
-import {getFileUrl, getThumbnailUrl} from 'utils/common/apiUtil';
+import { getToken } from 'utils/common/key';
+import { getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
 import CryptoWorker from 'utils/crypto';
-import {fileIsHEIC, convertHEIC2JPEG} from 'utils/file';
+import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
 import HTTPService from './HTTPService';
-import {File} from './fileService';
+import { File } from './fileService';
 
 class DownloadManager {
     private fileDownloads = new Map<number, Promise<string>>();
@@ -26,8 +26,8 @@ class DownloadManager {
                     const resp = await HTTPService.get(
                         getThumbnailUrl(file.id),
                         null,
-                        {'X-Auth-Token': token},
-                        {responseType: 'arraybuffer'},
+                        { 'X-Auth-Token': token },
+                        { responseType: 'arraybuffer' },
                     );
                     const worker = await new CryptoWorker();
                     const decrypted: any = await worker.decryptThumbnail(
@@ -81,8 +81,8 @@ class DownloadManager {
             const resp = await HTTPService.get(
                 getFileUrl(file.id),
                 null,
-                {'X-Auth-Token': token},
-                {responseType: 'arraybuffer'},
+                { 'X-Auth-Token': token },
+                { responseType: 'arraybuffer' },
             );
             const decrypted: any = await worker.decryptFile(
                 new Uint8Array(resp.data),
@@ -123,7 +123,7 @@ class DownloadManager {
                 // The following function handles each data chunk
                 function push() {
                     // "done" is a Boolean and value a "Uint8Array"
-                    reader.read().then(async ({done, value}) => {
+                    reader.read().then(async ({ done, value }) => {
                         // Is there more data to read?
                         if (!done) {
                             const buffer = new Uint8Array(

@@ -4,8 +4,8 @@ import {
     CollectionType,
     createCollection,
 } from 'services/collectionService';
-import {getSelectedFiles} from 'utils/file';
-import {File} from 'services/fileService';
+import { getSelectedFiles } from 'utils/file';
+import { File } from 'services/fileService';
 
 export async function addFilesToCollection(
     setCollectionSelectorView: (value: boolean) => void,

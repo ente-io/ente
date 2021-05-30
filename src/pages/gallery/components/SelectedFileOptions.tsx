@@ -1,9 +1,9 @@
 import AddToCollectionBtn from 'components/AddToCollectionBtn';
 import DeleteBtn from 'components/DeleteBtn';
-import {SetDialogMessage} from 'components/MessageDialog';
+import { SetDialogMessage } from 'components/MessageDialog';
 import React from 'react';
 import constants from 'utils/strings/constants';
-import {SetCollectionSelectorAttributes} from './CollectionSelector';
+import { SetCollectionSelectorAttributes } from './CollectionSelector';
 
 interface Props {
     addToCollectionHelper: (collectionName, collection) => void;
@@ -37,7 +37,7 @@ const SelectedFileOptions = ({
                     text: constants.DELETE,
                     variant: 'danger',
                 },
-                close: {text: constants.CANCEL},
+                close: { text: constants.CANCEL },
             })}
         />
     </>

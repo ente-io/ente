@@ -1,7 +1,7 @@
 import * as chrono from 'chrono-node';
-import {getEndpoint} from 'utils/common/apiUtil';
-import {getToken} from 'utils/common/key';
-import {DateValue, Suggestion, SuggestionType} from 'components/SearchBar';
+import { getEndpoint } from 'utils/common/apiUtil';
+import { getToken } from 'utils/common/key';
+import { DateValue, Suggestion, SuggestionType } from 'components/SearchBar';
 import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
@@ -18,8 +18,8 @@ export function parseHumanDate(humanDate: string): DateValue[] {
     const date1 = chrono.parseDate(`${humanDate} 1`);
     if (date !== null) {
         const dates = [
-            {month: date.getMonth()},
-            {date: date.getDate(), month: date.getMonth()},
+            { month: date.getMonth() },
+            { date: date.getDate(), month: date.getMonth() },
         ];
         let reverse = false;
         humanDate.split('').forEach((c) => {
@@ -32,7 +32,7 @@ export function parseHumanDate(humanDate: string): DateValue[] {
         }
         return dates;
     } if (date1) {
-        return [{month: date1.getMonth()}];
+        return [{ month: date1.getMonth() }];
     }
     return [];
 }
@@ -57,22 +57,22 @@ export function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
     return [
         {
             label: 'Christmas',
-            value: {month: 11, date: 25},
+            value: { month: 11, date: 25 },
             type: SuggestionType.DATE,
         },
         {
             label: 'Christmas Eve',
-            value: {month: 11, date: 24},
+            value: { month: 11, date: 24 },
             type: SuggestionType.DATE,
         },
         {
             label: 'New Year',
-            value: {month: 0, date: 1},
+            value: { month: 0, date: 1 },
             type: SuggestionType.DATE,
         },
         {
             label: 'New Year Eve',
-            value: {month: 11, date: 31},
+            value: { month: 11, date: 31 },
             type: SuggestionType.DATE,
         },
     ].filter((suggestion) => suggestion.label.toLowerCase().includes(searchPhrase.toLowerCase()));
@@ -86,7 +86,7 @@ export function getYearSuggestion(searchPhrase: string): Suggestion[] {
                 return [
                     {
                         label: searchPhrase,
-                        value: {year},
+                        value: { year },
                         type: SuggestionType.DATE,
                     },
                 ];

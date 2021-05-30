@@ -1,8 +1,8 @@
-import {B64EncryptionResult} from 'services/uploadService';
+import { B64EncryptionResult } from 'services/uploadService';
 import CryptoWorker from 'utils/crypto';
-import {getData, LS_KEYS} from 'utils/storage/localStorage';
-import {getKey, SESSION_KEYS} from 'utils/storage/sessionStorage';
-import {errorCodes} from './errorUtil';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { errorCodes } from './errorUtil';
 
 export const getActualKey = async () => {
     try {

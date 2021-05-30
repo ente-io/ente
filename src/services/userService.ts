@@ -1,10 +1,10 @@
-import {KeyAttributes} from 'types';
-import {getEndpoint} from 'utils/common/apiUtil';
-import {clearKeys} from 'utils/storage/sessionStorage';
+import { KeyAttributes } from 'types';
+import { getEndpoint } from 'utils/common/apiUtil';
+import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';
-import {clearData} from 'utils/storage/localStorage';
+import { clearData } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
-import {getToken} from 'utils/common/key';
+import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
 
 export interface UpdatedKey {
@@ -38,7 +38,7 @@ export const getPublicKey = async (email: string) => {
 
     const resp = await HTTPService.get(
         `${ENDPOINT}/users/public-key`,
-        {email},
+        { email },
         {
             'X-Auth-Token': token,
         },
@@ -46,11 +46,11 @@ export const getPublicKey = async (email: string) => {
     return resp.data.publicKey;
 };
 
-export const verifyOtt = (email: string, ott: string) => HTTPService.get(`${ENDPOINT}/users/credentials`, {email, ott});
+export const verifyOtt = (email: string, ott: string) => HTTPService.get(`${ENDPOINT}/users/credentials`, { email, ott });
 
 export const putAttributes = (token: string, keyAttributes: KeyAttributes) => HTTPService.put(
     `${ENDPOINT}/users/attributes`,
-    {keyAttributes},
+    { keyAttributes },
     null,
     {
         'X-Auth-Token': token,

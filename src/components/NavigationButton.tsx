@@ -45,7 +45,7 @@ const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
     }
 `;
 
-const NavigationButton = ({scrollDirection, ...rest}) => (
+const NavigationButton = ({ scrollDirection, ...rest }) => (
     <Wrapper
         direction={scrollDirection}
         {...rest}

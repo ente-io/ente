@@ -1,11 +1,11 @@
-import {getEndpoint} from 'utils/common/apiUtil';
+import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
 
 import CryptoWorker from 'utils/crypto';
-import {getToken} from 'utils/common/key';
-import {ErrorHandler} from 'utils/common/errorUtil';
-import {DataStream, MetadataObject} from './uploadService';
-import {Collection} from './collectionService';
+import { getToken } from 'utils/common/key';
+import { ErrorHandler } from 'utils/common/errorUtil';
+import { DataStream, MetadataObject } from './uploadService';
+import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
@@ -184,7 +184,7 @@ export const deleteFiles = async (
         }
         await HTTPService.post(
             `${ENDPOINT}/files/delete`,
-            {fileIDs: filesToDelete},
+            { fileIDs: filesToDelete },
             null,
             {
                 'X-Auth-Token': token,

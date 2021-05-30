@@ -1,5 +1,5 @@
-import {File} from 'services/fileService';
-import {runningInBrowser} from 'utils/common';
+import { File } from 'services/fileService';
+import { runningInBrowser } from 'utils/common';
 
 const TYPE_HEIC = 'heic';
 

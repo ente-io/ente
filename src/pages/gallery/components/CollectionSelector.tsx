@@ -1,7 +1,7 @@
-import React, {useEffect} from 'react';
-import {Card, Modal} from 'react-bootstrap';
+import React, { useEffect } from 'react';
+import { Card, Modal } from 'react-bootstrap';
 import styled from 'styled-components';
-import {CollectionAndItsLatestFile} from 'services/collectionService';
+import { CollectionAndItsLatestFile } from 'services/collectionService';
 import AddCollectionButton from './AddCollectionButton';
 import PreviewCard from './PreviewCard';
 

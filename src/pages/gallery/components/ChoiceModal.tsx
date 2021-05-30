@@ -1,8 +1,8 @@
 import MessageDialog from 'components/MessageDialog';
 import React from 'react';
-import {Button} from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
-import {UPLOAD_STRATEGY} from './Upload';
+import { UPLOAD_STRATEGY } from './Upload';
 
 interface Props {
     uploadFiles;
@@ -19,7 +19,7 @@ function ChoiceModal({
         <MessageDialog
             size="lg"
             {...props}
-            attributes={{title: constants.MULTI_FOLDER_UPLOAD}}
+            attributes={{ title: constants.MULTI_FOLDER_UPLOAD }}
         >
             <p>{constants.UPLOAD_STRATEGY_CHOICE}</p>
             <div

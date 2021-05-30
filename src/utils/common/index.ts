@@ -1,4 +1,4 @@
-import {errorCodes} from './errorUtil';
+import { errorCodes } from './errorUtil';
 
 const TwoSecondInMillSeconds = 2000;
 const DESKTOP_APP_DOWNLOAD_URL = 'https://github.com/ente-io/bhari-frame/releases/';

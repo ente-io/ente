@@ -1,4 +1,4 @@
-import {createProxyMiddleware} from 'http-proxy-middleware';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 export const config = {
     api: {
@@ -11,5 +11,5 @@ const API_ENDPOINT = process.env.NEXT_PUBLIC_ENTE_ENDPOINT || 'https://api.stagi
 export default createProxyMiddleware({
     target: API_ENDPOINT,
     changeOrigin: true,
-    pathRewrite: {'^/api': '/'},
+    pathRewrite: { '^/api': '/' },
 });

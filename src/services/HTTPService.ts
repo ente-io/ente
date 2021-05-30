@@ -1,4 +1,4 @@
-import axios, {AxiosRequestConfig} from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 interface IHTTPHeaders {
     [headerKey: string]: any;
@@ -19,7 +19,7 @@ class HTTPService {
                 if (!err.response) {
                     return Promise.reject(err);
                 }
-                const {response} = err;
+                const { response } = err;
                 return Promise.reject(response);
             },
         );
@@ -76,7 +76,7 @@ class HTTPService {
             ...this.headers,
             ...config.headers,
         };
-        return await axios({...config, ...customConfig});
+        return await axios({ ...config, ...customConfig });
     }
 
     /**

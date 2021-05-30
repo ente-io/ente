@@ -1,18 +1,18 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import constants from 'utils/strings/constants';
-import {Formik, FormikHelpers} from 'formik';
+import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
-import {Button, Col, Table} from 'react-bootstrap';
-import {DeadCenter} from 'pages/gallery';
-import {User} from 'services/userService';
+import { Button, Col, Table } from 'react-bootstrap';
+import { DeadCenter } from 'pages/gallery';
+import { User } from 'services/userService';
 import {
     Collection,
     shareCollection,
     unshareCollection,
 } from 'services/collectionService';
-import {getData, LS_KEYS} from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SubmitButton from './SubmitButton';
 import MessageDialog from './MessageDialog';
 
@@ -33,8 +33,8 @@ interface ShareeProps {
 function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
     const collectionShare = async (
-        {email}: formValues,
-        {resetForm, setFieldError}: FormikHelpers<formValues>,
+        { email }: formValues,
+        { resetForm, setFieldError }: FormikHelpers<formValues>,
     ) => {
         try {
             setLoading(true);
@@ -75,7 +75,7 @@ function CollectionShare(props: Props) {
         await props.syncWithRemote();
     };
 
-    const ShareeRow = ({sharee, collectionUnshare}: ShareeProps) => (
+    const ShareeRow = ({ sharee, collectionUnshare }: ShareeProps) => (
         <tr>
             <td>{sharee.email}</td>
             <td>
@@ -100,12 +100,12 @@ function CollectionShare(props: Props) {
         <MessageDialog
             show={props.show}
             onHide={props.onHide}
-            attributes={{title: constants.SHARE_COLLECTION}}
+            attributes={{ title: constants.SHARE_COLLECTION }}
         >
-            <DeadCenter style={{width: '85%', margin: 'auto'}}>
+            <DeadCenter style={{ width: '85%', margin: 'auto' }}>
                 <p>{constants.SHARE_WITH_PEOPLE}</p>
                 <Formik<formValues>
-                    initialValues={{email: ''}}
+                    initialValues={{ email: '' }}
                     validationSchema={Yup.object().shape({
                         email: Yup.string()
                             .email(constants.EMAIL_ERROR)
@@ -184,7 +184,7 @@ function CollectionShare(props: Props) {
                         </Table>
                     </>
                 ) : (
-                    <div style={{marginTop: '12px'}}>
+                    <div style={{ marginTop: '12px' }}>
                         {constants.ZERO_SHAREES()}
                     </div>
                 )}

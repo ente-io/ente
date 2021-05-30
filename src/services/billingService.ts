@@ -1,10 +1,10 @@
-import {getEndpoint} from 'utils/common/apiUtil';
-import {getStripePublishableKey, getToken} from 'utils/common/key';
-import {checkConnectivity, runningInBrowser} from 'utils/common/';
-import {setData, LS_KEYS} from 'utils/storage/localStorage';
-import {convertBytesToGBs} from 'utils/billingUtil';
-import {loadStripe, Stripe} from '@stripe/stripe-js';
-import {SUBSCRIPTION_VERIFICATION_ERROR} from 'utils/common/errorUtil';
+import { getEndpoint } from 'utils/common/apiUtil';
+import { getStripePublishableKey, getToken } from 'utils/common/key';
+import { checkConnectivity, runningInBrowser } from 'utils/common/';
+import { setData, LS_KEYS } from 'utils/storage/localStorage';
+import { convertBytesToGBs } from 'utils/billingUtil';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
+import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
 import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
@@ -60,7 +60,7 @@ class billingService {
     public async updatePlans() {
         try {
             const response = await HTTPService.get(`${ENDPOINT}/billing/plans`);
-            const {plans} = response.data;
+            const { plans } = response.data;
             setData(LS_KEYS.PLANS, plans);
         } catch (e) {
             console.error('failed to get plans', e);
@@ -76,7 +76,7 @@ class billingService {
                     'X-Auth-Token': getToken(),
                 },
             );
-            const {subscription} = response.data;
+            const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
             console.error('failed to get user\'s subscription details', e);
@@ -107,7 +107,7 @@ class billingService {
                     'X-Auth-Token': getToken(),
                 },
             );
-            const {result} = response.data;
+            const { result } = response.data;
             switch (result.status) {
             case PAYMENT_INTENT_STATUS.SUCCESS:
                 // subscription updated successfully
@@ -119,7 +119,7 @@ class billingService {
                 );
             case PAYMENT_INTENT_STATUS.REQUIRE_ACTION:
                 {
-                    const {error} = await this.stripe.confirmCardPayment(
+                    const { error } = await this.stripe.confirmCardPayment(
                         result.clientSecret,
                     );
                     if (error) {
@@ -149,7 +149,7 @@ class billingService {
                     'X-Auth-Token': getToken(),
                 },
             );
-            const {subscription} = response.data;
+            const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
             console.error(e);
@@ -167,7 +167,7 @@ class billingService {
                     'X-Auth-Token': getToken(),
                 },
             );
-            const {subscription} = response.data;
+            const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
             console.error(e);
@@ -203,7 +203,7 @@ class billingService {
                     'X-Auth-Token': getToken(),
                 },
             );
-            const {subscription} = response.data;
+            const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
             return subscription;
         } catch (err) {
@@ -232,7 +232,7 @@ class billingService {
         try {
             const response = await HTTPService.get(
                 `${ENDPOINT}/billing/usage`,
-                {startTime: 0, endTime: Date.now() * 1000},
+                { startTime: 0, endTime: Date.now() * 1000 },
                 {
                     'X-Auth-Token': getToken(),
                 },

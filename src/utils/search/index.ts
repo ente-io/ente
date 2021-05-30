@@ -1,6 +1,6 @@
-import {DateValue} from 'components/SearchBar';
-import {File} from 'services/fileService';
-import {Bbox} from 'services/searchService';
+import { DateValue } from 'components/SearchBar';
+import { File } from 'services/fileService';
+import { Bbox } from 'services/searchService';
 
 export function isInsideBox(
     file: { longitude: number; latitude: number },

@@ -8,16 +8,16 @@ import {
     setSearchStats,
 } from 'pages/gallery';
 import PreviewCard from 'pages/gallery/components/PreviewCard';
-import React, {useContext, useEffect, useState} from 'react';
-import {Button} from 'react-bootstrap';
-import {File} from 'services/fileService';
+import React, { useContext, useEffect, useState } from 'react';
+import { Button } from 'react-bootstrap';
+import { File } from 'services/fileService';
 import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import {VariableSizeList as List} from 'react-window';
+import { VariableSizeList as List } from 'react-window';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
-import {isInsideBox, isSameDay as isSameDayAnyYear} from 'utils/search';
+import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 import CloudUpload from './CloudUpload';
 
 const DATE_CONTAINER_HEIGHT = 45;
@@ -344,7 +344,7 @@ const PhotoFrame = ({
             ) : filteredData.length ? (
                 <Container>
                     <AutoSizer>
-                        {({height, width}) => {
+                        {({ height, width }) => {
                             let columns;
                             if (width >= 1000) {
                                 columns = 5;
@@ -476,7 +476,7 @@ const PhotoFrame = ({
                                     itemKey={generateKey}
                                     overscanCount={extraRowsToRender}
                                 >
-                                    {({index, style}) => (
+                                    {({ index, style }) => (
                                         <ListItem style={style}>
                                             <ListContainer
                                                 columns={

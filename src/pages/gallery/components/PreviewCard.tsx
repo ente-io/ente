@@ -1,10 +1,10 @@
-import React, {useContext, useLayoutEffect, useRef, useState} from 'react';
-import {File} from 'services/fileService';
+import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
+import { File } from 'services/fileService';
 import styled from 'styled-components';
 import PlayCircleOutline from 'components/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
-import {GalleryContext} from '..';
+import { GalleryContext } from '..';
 
 interface IProps {
     file: File;
@@ -104,7 +104,7 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
 
 export default function PreviewCard(props: IProps) {
     const [imgSrc, setImgSrc] = useState<string>();
-    const {thumbs} = useContext(GalleryContext);
+    const { thumbs } = useContext(GalleryContext);
     const {
         file,
         onClick,

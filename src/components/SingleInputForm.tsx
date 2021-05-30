@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import constants from 'utils/strings/constants';
-import {Form} from 'react-bootstrap';
-import {Formik, FormikHelpers} from 'formik';
+import { Form } from 'react-bootstrap';
+import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
 
@@ -19,7 +19,7 @@ export default function SingleInputForm(props: Props) {
     const [loading, SetLoading] = useState(false);
     const submitForm = async (
         values: formValues,
-        {setFieldError}: FormikHelpers<formValues>,
+        { setFieldError }: FormikHelpers<formValues>,
     ) => {
         SetLoading(true);
         await props.callback(values.passphrase, setFieldError);
@@ -27,7 +27,7 @@ export default function SingleInputForm(props: Props) {
     };
     return (
         <Formik<formValues>
-            initialValues={{passphrase: ''}}
+            initialValues={{ passphrase: '' }}
             onSubmit={submitForm}
             validationSchema={Yup.object().shape({
                 passphrase: Yup.string().required(constants.REQUIRED),

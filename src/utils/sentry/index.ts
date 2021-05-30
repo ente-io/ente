@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import {RewriteFrames, CaptureConsole} from '@sentry/integrations';
+import { RewriteFrames, CaptureConsole } from '@sentry/integrations';
 
 export const sentryInit = () => {
     if (process.env.NEXT_PUBLIC_SENTRY_DSN) {

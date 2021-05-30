@@ -1,22 +1,22 @@
-import React, {useState, useEffect} from 'react';
-import {useRouter} from 'next/router';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import constants from 'utils/strings/constants';
-import {Formik, FormikHelpers} from 'formik';
+import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import {getOtt} from 'services/userService';
+import { getOtt } from 'services/userService';
 import Container from 'components/Container';
-import {setData, LS_KEYS, getData} from 'utils/storage/localStorage';
+import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import SubmitButton from 'components/SubmitButton';
-import {Button} from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
     setSessionKeys,
 } from 'utils/crypto';
-import {setJustSignedUp} from 'utils/storage';
+import { setJustSignedUp } from 'utils/storage';
 
 interface FormValues {
     email: string;
@@ -37,19 +37,19 @@ export default function SignUp() {
     }, []);
 
     const registerUser = async (
-        {email, passphrase, confirm}: FormValues,
-        {setFieldError}: FormikHelpers<FormValues>,
+        { email, passphrase, confirm }: FormValues,
+        { setFieldError }: FormikHelpers<FormValues>,
     ) => {
         setLoading(true);
         try {
-            setData(LS_KEYS.USER, {email});
+            setData(LS_KEYS.USER, { email });
             await getOtt(email);
         } catch (e) {
             setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
         }
         try {
             if (passphrase === confirm) {
-                const {keyAttributes, masterKey} = await generateKeyAttributes(passphrase);
+                const { keyAttributes, masterKey } = await generateKeyAttributes(passphrase);
                 setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
                 await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
@@ -72,9 +72,9 @@ export default function SignUp() {
 
     return (
         <Container>
-            <Card style={{width: '400px'}} className="text-center">
-                <Card.Body style={{padding: '40px 30px'}}>
-                    <Card.Title style={{marginBottom: '20px'}}>
+            <Card style={{ width: '400px' }} className="text-center">
+                <Card.Body style={{ padding: '40px 30px' }}>
+                    <Card.Title style={{ marginBottom: '20px' }}>
                         {constants.SIGN_UP}
                     </Card.Title>
                     <Formik<FormValues>

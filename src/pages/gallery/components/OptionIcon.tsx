@@ -10,13 +10,13 @@ export const OptionIconWrapper = styled.div`
 interface Props {
     onClick: () => void;
 }
-const OptionIcon = ({onClick}: Props) => (
+const OptionIcon = ({ onClick }: Props) => (
     <OptionIconWrapper
         onClick={(e) => {
             onClick();
             e.stopPropagation();
         }}
-        style={{marginBottom: '2px'}}
+        style={{ marginBottom: '2px' }}
     >
         <svg
             xmlns="http://www.w3.org/2000/svg"

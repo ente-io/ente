@@ -1,15 +1,15 @@
-import React, {useState, useEffect} from 'react';
-import {useRouter} from 'next/router';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
 import constants from 'utils/strings/constants';
-import {Formik, FormikHelpers} from 'formik';
+import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import {getOtt} from 'services/userService';
+import { getOtt } from 'services/userService';
 import Container from 'components/Container';
-import {setData, LS_KEYS, getData} from 'utils/storage/localStorage';
+import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import SubmitButton from 'components/SubmitButton';
 
 interface formValues {
@@ -30,13 +30,13 @@ export default function Home() {
     }, []);
 
     const loginUser = async (
-        {email}: formValues,
-        {setFieldError}: FormikHelpers<formValues>,
+        { email }: formValues,
+        { setFieldError }: FormikHelpers<formValues>,
     ) => {
         try {
             setLoading(true);
             await getOtt(email);
-            setData(LS_KEYS.USER, {email});
+            setData(LS_KEYS.USER, { email });
             router.push('/verify');
         } catch (e) {
             setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
@@ -50,13 +50,13 @@ export default function Home() {
 
     return (
         <Container>
-            <Card style={{minWidth: '320px'}} className="text-center">
-                <Card.Body style={{padding: '40px 30px'}}>
-                    <Card.Title style={{marginBottom: '32px'}}>
+            <Card style={{ minWidth: '320px' }} className="text-center">
+                <Card.Body style={{ padding: '40px 30px' }}>
+                    <Card.Title style={{ marginBottom: '32px' }}>
                         {constants.LOGIN}
                     </Card.Title>
                     <Formik<formValues>
-                        initialValues={{email: ''}}
+                        initialValues={{ email: '' }}
                         validationSchema={Yup.object().shape({
                             email: Yup.string()
                                 .email(constants.EMAIL_ERROR)

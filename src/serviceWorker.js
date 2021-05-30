@@ -1,7 +1,7 @@
-import {precacheAndRoute} from 'workbox-precaching';
-import {setDefaultHandler} from 'workbox-routing';
-import {NetworkOnly} from 'workbox-strategies';
-import {pageCache, offlineFallback} from 'workbox-recipes';
+import { precacheAndRoute } from 'workbox-precaching';
+import { setDefaultHandler } from 'workbox-routing';
+import { NetworkOnly } from 'workbox-strategies';
+import { pageCache, offlineFallback } from 'workbox-recipes';
 
 pageCache();
 

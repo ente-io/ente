@@ -1,22 +1,22 @@
-import {getEndpoint} from 'utils/common/apiUtil';
+import { getEndpoint } from 'utils/common/apiUtil';
 import EXIF from 'exif-js';
-import {FILE_TYPE} from 'pages/gallery';
-import {checkConnectivity, WaitFor2Seconds} from 'utils/common';
+import { FILE_TYPE } from 'pages/gallery';
+import { checkConnectivity, WaitFor2Seconds } from 'utils/common';
 import {
     ErrorHandler,
     THUMBNAIL_GENERATION_FAILED,
 } from 'utils/common/errorUtil';
-import {ComlinkWorker, getDedicatedCryptoWorker} from 'utils/crypto';
+import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
 import * as convert from 'xml-js';
-import {ENCRYPTION_CHUNK_SIZE} from 'types';
-import {getToken} from 'utils/common/key';
+import { ENCRYPTION_CHUNK_SIZE } from 'types';
+import { getToken } from 'utils/common/key';
 import {
     fileIsHEIC,
     convertHEIC2JPEG,
     sortFilesIntoCollections,
 } from 'utils/file';
-import {Collection} from './collectionService';
-import {File, fileAttribute} from './fileService';
+import { Collection } from './collectionService';
+import { File, fileAttribute } from './fileService';
 import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
@@ -35,7 +35,7 @@ const WEST_DIRECTION = 'W';
 const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
 const CHUNKS_COMBINED_FOR_UPLOAD = 5;
 const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
-const NULL_LOCATION: Location = {latitude: null, longitude: null};
+const NULL_LOCATION: Location = { latitude: null, longitude: null };
 const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
 const FILE_UPLOAD_FAILED = -1;
 const FILE_UPLOAD_SKIPPED = -2;
@@ -168,7 +168,7 @@ class UploadService {
             const metadataFiles: globalThis.File[] = [];
             const actualFiles: FileWithCollection[] = [];
             filesWithCollectionToUpload.forEach((fileWithCollection) => {
-                const {file} = fileWithCollection;
+                const { file } = fileWithCollection;
                 if (file?.name.substr(0, 1) === '.') {
                     // ignore files with name starting with . (hidden files)
                     return;
@@ -246,7 +246,7 @@ class UploadService {
         reader: FileReader,
         fileWithCollection: FileWithCollection,
     ) {
-        const {file: rawFile, collection} = fileWithCollection;
+        const { file: rawFile, collection } = fileWithCollection;
         this.fileProgress.set(rawFile.name, 0);
         this.updateProgressBarUI();
         try {
@@ -260,7 +260,7 @@ class UploadService {
                 this.fileProgress.delete(rawFile.name);
                 return;
             }
-            let {file: encryptedFile, fileKey: encryptedKey}: EncryptedFile = await this.encryptFile(worker, file, collection.key);
+            let { file: encryptedFile, fileKey: encryptedKey }: EncryptedFile = await this.encryptFile(worker, file, collection.key);
             let backupedFile: BackupedFile = await this.uploadToBucket(
                 encryptedFile,
             );
@@ -299,7 +299,7 @@ class UploadService {
     }
 
     private updateProgressBarUI() {
-        const {setPercentComplete, setFileCounter, setFileProgress} = this.progressBarProps;
+        const { setPercentComplete, setFileCounter, setFileProgress } = this.progressBarProps;
         setFileCounter({
             finished: this.filesCompleted,
             total: this.totalFileCount,
@@ -373,7 +373,7 @@ class UploadService {
                 fileType = FILE_TYPE.IMAGE;
             }
 
-            const {location, creationTime} = await this.getExifData(
+            const { location, creationTime } = await this.getExifData(
                 reader,
                 receivedFile,
                 fileType,
@@ -416,12 +416,12 @@ class UploadService {
         encryptionKey: string,
     ): Promise<EncryptedFile> {
         try {
-            const {key: fileKey, file: encryptedFiledata}: EncryptionResult = isDataStream(file.filedata) ?
+            const { key: fileKey, file: encryptedFiledata }: EncryptionResult = isDataStream(file.filedata) ?
                 await this.encryptFileStream(worker, file.filedata) :
                 await worker.encryptFile(file.filedata);
 
-            const {file: encryptedThumbnail}: EncryptionResult = await worker.encryptThumbnail(file.thumbnail, fileKey);
-            const {file: encryptedMetadata}: EncryptionResult = await worker.encryptMetadata(file.metadata, fileKey);
+            const { file: encryptedThumbnail }: EncryptionResult = await worker.encryptThumbnail(file.thumbnail, fileKey);
+            const { file: encryptedMetadata }: EncryptionResult = await worker.encryptMetadata(file.metadata, fileKey);
 
             const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
                 fileKey,
@@ -445,13 +445,13 @@ class UploadService {
     }
 
     private async encryptFileStream(worker, fileData: DataStream) {
-        const {stream, chunkCount} = fileData;
+        const { stream, chunkCount } = fileData;
         const fileStreamReader = stream.getReader();
-        const {key, decryptionHeader, pushState} = await worker.initChunkEncryption();
-        const ref = {pullCount: 1};
+        const { key, decryptionHeader, pushState } = await worker.initChunkEncryption();
+        const ref = { pullCount: 1 };
         const encryptedFileStream = new ReadableStream({
             async pull(controller) {
-                const {value} = await fileStreamReader.read();
+                const { value } = await fileStreamReader.read();
                 const encryptedFileChunk = await worker.encryptFileChunk(
                     value,
                     pushState,
@@ -468,7 +468,7 @@ class UploadService {
             key,
             file: {
                 decryptionHeader,
-                encryptedData: {stream: encryptedFileStream, chunkCount},
+                encryptedData: { stream: encryptedFileStream, chunkCount },
             },
         };
     }
@@ -477,7 +477,7 @@ class UploadService {
         try {
             let fileObjectKey;
             if (isDataStream(file.file.encryptedData)) {
-                const {chunkCount, stream} = file.file.encryptedData;
+                const { chunkCount, stream } = file.file.encryptedData;
                 const uploadPartCount = Math.ceil(
                     chunkCount / CHUNKS_COMBINED_FOR_UPLOAD,
                 );
@@ -808,7 +808,7 @@ class UploadService {
                             (this.totalFileCount - this.filesCompleted) * 2,
                         ),
                     },
-                    {'X-Auth-Token': token},
+                    { 'X-Auth-Token': token },
                 );
                 const response = await this.uploadURLFetchInProgress;
 
@@ -835,7 +835,7 @@ class UploadService {
                 {
                     count,
                 },
-                {'X-Auth-Token': token},
+                { 'X-Auth-Token': token },
             );
 
             return response.data.urls;
@@ -884,7 +884,7 @@ class UploadService {
         ] of multipartUploadURLs.partURLs.entries()) {
             const combinedChunks = [];
             for (let i = 0; i < CHUNKS_COMBINED_FOR_UPLOAD; i++) {
-                const {done, value: chunk} = await streamEncryptedFileReader.read();
+                const { done, value: chunk } = await streamEncryptedFileReader.read();
                 if (done) {
                     break;
                 }
@@ -907,9 +907,9 @@ class UploadService {
                 ETag: response.headers.etag,
             });
         }
-        const options = {compact: true, ignoreComment: true, spaces: 4};
+        const options = { compact: true, ignoreComment: true, spaces: 4 };
         const body = convert.js2xml(
-            {CompleteMultipartUpload: {Part: resParts}},
+            { CompleteMultipartUpload: { Part: resParts } },
             options,
         );
         await this.retryPromise(
@@ -952,7 +952,7 @@ class UploadService {
         try {
             if (fileType === FILE_TYPE.VIDEO) {
                 // Todo  extract exif data from videos
-                return {location: NULL_LOCATION, creationTime: null};
+                return { location: NULL_LOCATION, creationTime: null };
             }
             const exifData: any = await new Promise((resolve) => {
                 reader.onload = () => {
@@ -961,7 +961,7 @@ class UploadService {
                 reader.readAsArrayBuffer(receivedFile);
             });
             if (!exifData) {
-                return {location: NULL_LOCATION, creationTime: null};
+                return { location: NULL_LOCATION, creationTime: null };
             }
             return {
                 location: this.getEXIFLocation(exifData),
@@ -1016,7 +1016,7 @@ class UploadService {
             lonSecond,
             lonDirection,
         );
-        return {latitude: latFinal * 1.0, longitude: lonFinal * 1.0};
+        return { latitude: latFinal * 1.0, longitude: lonFinal * 1.0 };
     }
 
     private convertDMSToDD(degrees, minutes, seconds, direction) {

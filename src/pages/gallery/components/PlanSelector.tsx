@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from 'react';
-import {Form, Modal, Button} from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Form, Modal, Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 import styled from 'styled-components';
-import billingService, {Plan, Subscription} from 'services/billingService';
+import billingService, { Plan, Subscription } from 'services/billingService';
 import {
     convertBytesToGBs,
     getPlans,
@@ -17,11 +17,11 @@ import {
     hasPaidSubscription,
     isOnFreePlan,
 } from 'utils/billingUtil';
-import {reverseString} from 'utils/common';
-import {SetDialogMessage} from 'components/MessageDialog';
+import { reverseString } from 'utils/common';
+import { SetDialogMessage } from 'components/MessageDialog';
 import ArrowEast from 'components/ArrowEast';
 import LinkButton from './LinkButton';
-import {DeadCenter, SetLoading} from '..';
+import { DeadCenter, SetLoading } from '..';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     border-radius: 20px;
@@ -103,7 +103,7 @@ function PlanSelector(props: Props) {
             props.setDialogMessage({
                 title: constants.ERROR,
                 content: constants.CANCEL_SUBSCRIPTION_ON_MOBILE,
-                close: {variant: 'danger'},
+                close: { variant: 'danger' },
             });
         } else if (hasStripeSubscription(subscription)) {
             props.setDialogMessage({
@@ -123,7 +123,7 @@ function PlanSelector(props: Props) {
                     ),
                     variant: 'success',
                 },
-                close: {text: constants.CANCEL},
+                close: { text: constants.CANCEL },
             });
         } else {
             try {
@@ -133,7 +133,7 @@ function PlanSelector(props: Props) {
                 props.setDialogMessage({
                     title: constants.ERROR,
                     content: constants.SUBSCRIPTION_PURCHASE_FAILED,
-                    close: {variant: 'danger'},
+                    close: { variant: 'danger' },
                 });
             } finally {
                 props.setLoading(false);
@@ -173,19 +173,19 @@ function PlanSelector(props: Props) {
                 </div>
                 <div
                     className="bold-text"
-                    style={{color: '#aaa', lineHeight: '36px', fontSize: '20px'}}
+                    style={{ color: '#aaa', lineHeight: '36px', fontSize: '20px' }}
                 >
                     {`${plan.price} / ${plan.period}`}
                 </div>
                 <Button
                     variant="outline-success"
                     block
-                    style={{marginTop: '30px'}}
+                    style={{ marginTop: '30px' }}
                     disabled={isUserSubscribedPlan(plan, subscription)}
                     onClick={async () => (await onPlanSelect(plan))}
                 >
                     {constants.CHOOSE_PLAN_BTN}
-                    <ArrowEast style={{marginLeft: '10px'}} />
+                    <ArrowEast style={{ marginLeft: '10px' }} />
                 </Button>
             </PlanIcon>
         ));
@@ -212,12 +212,12 @@ function PlanSelector(props: Props) {
                     </span>
                 </Modal.Title>
             </Modal.Header>
-            <Modal.Body style={{marginTop: '20px'}}>
+            <Modal.Body style={{ marginTop: '20px' }}>
                 <DeadCenter>
-                    <div style={{display: 'flex'}}>
+                    <div style={{ display: 'flex' }}>
                         <span
                             className="bold-text"
-                            style={{fontSize: '20px'}}
+                            style={{ fontSize: '20px' }}
                         >
                             {constants.MONTHLY}
                         </span>
@@ -225,13 +225,13 @@ function PlanSelector(props: Props) {
                         <Form.Switch
                             checked={planPeriod === PLAN_PERIOD.YEAR}
                             id="plan-period-toggler"
-                            style={{margin: '-4px 0 20px 15px'}}
+                            style={{ margin: '-4px 0 20px 15px' }}
                             className="custom-switch-md"
                             onChange={togglePeriod}
                         />
                         <span
                             className="bold-text"
-                            style={{fontSize: '20px'}}
+                            style={{ fontSize: '20px' }}
                         >
                             {constants.YEARLY}
                         </span>
@@ -248,7 +248,7 @@ function PlanSelector(props: Props) {
                 >
                     {plans && PlanIcons}
                 </div>
-                <DeadCenter style={{marginBottom: '30px'}}>
+                <DeadCenter style={{ marginBottom: '30px' }}>
                     {hasStripeSubscription(subscription) ? (
                         <>
                             {isSubscriptionCancelled(subscription) ? (
@@ -313,7 +313,7 @@ function PlanSelector(props: Props) {
                                     props.setDialogMessage,
                                     props.setLoading,
                                 )}
-                                style={{marginTop: '20px'}}
+                                style={{ marginTop: '20px' }}
                             >
                                 {constants.MANAGEMENT_PORTAL}
                             </LinkButton>
@@ -322,7 +322,7 @@ function PlanSelector(props: Props) {
                         <LinkButton
                             variant="primary"
                             onClick={props.closeModal}
-                            style={{color: 'rgb(121, 121, 121)', marginTop: '20px'}}
+                            style={{ color: 'rgb(121, 121, 121)', marginTop: '20px' }}
                         >
                             {isOnFreePlan(subscription) ?
                                 constants.SKIP :

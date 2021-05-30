@@ -5,11 +5,11 @@ import billingService, {
     Plan,
     Subscription,
 } from 'services/billingService';
-import {NextRouter} from 'next/router';
-import {SetDialogMessage} from 'components/MessageDialog';
-import {SetLoading} from 'pages/gallery';
-import {getData, LS_KEYS} from './storage/localStorage';
-import {SUBSCRIPTION_VERIFICATION_ERROR} from './common/errorUtil';
+import { NextRouter } from 'next/router';
+import { SetDialogMessage } from 'components/MessageDialog';
+import { SetLoading } from 'pages/gallery';
+import { getData, LS_KEYS } from './storage/localStorage';
+import { SUBSCRIPTION_VERIFICATION_ERROR } from './common/errorUtil';
 
 const STRIPE = 'stripe';
 
@@ -90,7 +90,7 @@ export async function updateSubscription(
             content: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
                 getUserSubscription().expiryTime,
             ),
-            close: {variant: 'success'},
+            close: { variant: 'success' },
         });
     } catch (err) {
         switch (err?.message) {
@@ -109,21 +109,21 @@ export async function updateSubscription(
                         setLoading,
                     ),
                 },
-                close: {text: constants.CANCEL},
+                close: { text: constants.CANCEL },
             });
             break;
         case SUBSCRIPTION_VERIFICATION_ERROR:
             setDialogMessage({
                 title: constants.ERROR,
                 content: constants.SUBSCRIPTION_VERIFICATION_FAILED,
-                close: {variant: 'danger'},
+                close: { variant: 'danger' },
             });
             break;
         default:
             setDialogMessage({
                 title: constants.ERROR,
                 content: constants.SUBSCRIPTION_PURCHASE_FAILED,
-                close: {variant: 'danger'},
+                close: { variant: 'danger' },
             });
         }
     } finally {
@@ -143,13 +143,13 @@ export async function cancelSubscription(
         setDialogMessage({
             title: constants.SUCCESS,
             content: constants.SUBSCRIPTION_CANCEL_SUCCESS,
-            close: {variant: 'success'},
+            close: { variant: 'success' },
         });
     } catch (e) {
         setDialogMessage({
             title: constants.ERROR,
             content: constants.SUBSCRIPTION_CANCEL_FAILED,
-            close: {variant: 'danger'},
+            close: { variant: 'danger' },
         });
     } finally {
         closePlanSelectorModal();
@@ -168,13 +168,13 @@ export async function activateSubscription(
         setDialogMessage({
             title: constants.SUCCESS,
             content: constants.SUBSCRIPTION_ACTIVATE_SUCCESS,
-            close: {variant: 'success'},
+            close: { variant: 'success' },
         });
     } catch (e) {
         setDialogMessage({
             title: constants.ERROR,
             content: constants.SUBSCRIPTION_ACTIVATE_FAILED,
-            close: {variant: 'danger'},
+            close: { variant: 'danger' },
         });
     } finally {
         closePlanSelectorModal();
@@ -193,7 +193,7 @@ export async function updatePaymentMethod(
         setDialogMessage({
             title: constants.ERROR,
             content: constants.UNKNOWN_ERROR,
-            close: {variant: 'danger'},
+            close: { variant: 'danger' },
         });
     } finally {
         setLoading(true);
@@ -211,7 +211,7 @@ export async function checkSubscriptionPurchase(
             setDialogMessage({
                 title: constants.MESSAGE,
                 content: constants.SUBSCRIPTION_PURCHASE_CANCELLED,
-                close: {variant: 'danger'},
+                close: { variant: 'danger' },
             });
         } else if (sessionId) {
             try {
@@ -220,7 +220,7 @@ export async function checkSubscriptionPurchase(
                 );
                 setDialogMessage({
                     title: constants.SUBSCRIPTION_PURCHASE_SUCCESS_TITLE,
-                    close: {variant: 'success'},
+                    close: { variant: 'success' },
                     content: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
                         subscription?.expiryTime,
                     ),
@@ -236,6 +236,6 @@ export async function checkSubscriptionPurchase(
     } catch (e) {
         // ignore
     } finally {
-        router.push('gallery', undefined, {shallow: true});
+        router.push('gallery', undefined, { shallow: true });
     }
 }

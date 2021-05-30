@@ -1,6 +1,6 @@
-import React, {createContext, useEffect, useRef, useState} from 'react';
-import {useRouter} from 'next/router';
-import {clearKeys, getKey, SESSION_KEYS} from 'utils/storage/sessionStorage';
+import React, { createContext, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
+import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     File,
     getLocalFiles,
@@ -20,28 +20,28 @@ import {
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import billingService from 'services/billingService';
-import {checkSubscriptionPurchase} from 'utils/billingUtil';
+import { checkSubscriptionPurchase } from 'utils/billingUtil';
 
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
-import {checkConnectivity} from 'utils/common';
+import { checkConnectivity } from 'utils/common';
 import {
     isFirstLogin,
     justSignedUp,
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import {isTokenValid, logoutUser} from 'services/userService';
-import MessageDialog, {MessageAttributes} from 'components/MessageDialog';
-import {useDropzone} from 'react-dropzone';
+import { isTokenValid, logoutUser } from 'services/userService';
+import MessageDialog, { MessageAttributes } from 'components/MessageDialog';
+import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
-import {LoadingOverlay} from 'components/LoadingOverlay';
+import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
-import {getSelectedFileIds} from 'utils/file';
-import {addFilesToCollection} from 'utils/collection';
-import {errorCodes} from 'utils/common/errorUtil';
-import SearchBar, {DateValue} from 'components/SearchBar';
-import {Bbox} from 'services/searchService';
+import { getSelectedFileIds } from 'utils/file';
+import { addFilesToCollection } from 'utils/collection';
+import { errorCodes } from 'utils/common/errorUtil';
+import SearchBar, { DateValue } from 'components/SearchBar';
+import { Bbox } from 'services/searchService';
 import SelectedFileOptions from './components/SelectedFileOptions';
 import CollectionSelector, {
     CollectionSelectorAttributes,
@@ -116,7 +116,7 @@ export default function Gallery() {
     const [bannerMessage, setBannerMessage] = useState<string>(null);
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
-    const [selected, setSelected] = useState<selectedState>({count: 0});
+    const [selected, setSelected] = useState<selectedState>({ count: 0 });
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [dialogView, setDialogView] = useState(false);
     const [planModalView, setPlanModalView] = useState(false);
@@ -201,7 +201,7 @@ export default function Gallery() {
             await billingService.updatePlans();
             await billingService.syncSubscription();
             const collections = await syncCollections();
-            const {files} = await syncFiles(collections, setFiles);
+            const { files } = await syncFiles(collections, setFiles);
             const nonEmptyCollections = getNonEmptyCollections(
                 collections,
                 files,
@@ -247,12 +247,12 @@ export default function Gallery() {
     };
 
     const clearSelection = function() {
-        setSelected({count: 0});
+        setSelected({ count: 0 });
     };
 
     const selectCollection = (id?: number) => {
         const href = `/gallery?collection=${id || ''}`;
-        router.push(href, undefined, {shallow: true});
+        router.push(href, undefined, { shallow: true });
     };
 
     if (!files) {

@@ -1,20 +1,20 @@
 import CollectionShare from 'components/CollectionShare';
-import {SetDialogMessage} from 'components/MessageDialog';
+import { SetDialogMessage } from 'components/MessageDialog';
 import NavigationButton, {
     SCROLL_DIRECTION,
 } from 'components/NavigationButton';
 import React, {
     useEffect, useRef, useState,
 } from 'react';
-import {OverlayTrigger} from 'react-bootstrap';
-import {Collection, CollectionType} from 'services/collectionService';
-import {User} from 'services/userService';
+import { OverlayTrigger } from 'react-bootstrap';
+import { Collection, CollectionType } from 'services/collectionService';
+import { User } from 'services/userService';
 import styled from 'styled-components';
-import {getSelectedCollection} from 'utils/collection';
-import {getData, LS_KEYS} from 'utils/storage/localStorage';
-import {SetCollectionNamerAttributes} from './CollectionNamer';
+import { getSelectedCollection } from 'utils/collection';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { SetCollectionNamerAttributes } from './CollectionNamer';
 import CollectionOptions from './CollectionOptions';
-import OptionIcon, {OptionIconWrapper} from './OptionIcon';
+import OptionIcon, { OptionIconWrapper } from './OptionIcon';
 
 interface CollectionProps {
     collections: Collection[];
@@ -75,7 +75,7 @@ const Chip = styled.button<{ active: boolean }>`
 `;
 
 export default function Collections(props: CollectionProps) {
-    const {selected, collections, selectCollection} = props;
+    const { selected, collections, selectCollection } = props;
     const [selectedCollectionID, setSelectedCollectionID] = useState<number>(null);
     const collectionRef = useRef<HTMLDivElement>(null);
     const [collectionShareModalView, setCollectionShareModalView] = useState(false);
@@ -87,8 +87,8 @@ export default function Collections(props: CollectionProps) {
 
     const updateScrollObj = () => {
         if (collectionRef.current) {
-            const {scrollLeft, scrollWidth, clientWidth} = collectionRef.current;
-            setScrollObj({scrollLeft, scrollWidth, clientWidth});
+            const { scrollLeft, scrollWidth, clientWidth } = collectionRef.current;
+            setScrollObj({ scrollLeft, scrollWidth, clientWidth });
         }
     };
 

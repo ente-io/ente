@@ -1,14 +1,14 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 
 import constants from 'utils/strings/constants';
-import {getData, LS_KEYS} from 'utils/storage/localStorage';
-import {useRouter} from 'next/router';
-import {KeyAttributes} from 'types';
-import CryptoWorker, {setSessionKeys} from 'utils/crypto';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { useRouter } from 'next/router';
+import { KeyAttributes } from 'types';
+import CryptoWorker, { setSessionKeys } from 'utils/crypto';
 import SingleInputForm from 'components/SingleInputForm';
 import MessageDialog from 'components/MessageDialog';
 import Container from 'components/Container';
-import {Card, Button} from 'react-bootstrap';
+import { Card, Button } from 'react-bootstrap';
 
 export default function Recover() {
     const router = useRouter();
@@ -47,11 +47,11 @@ export default function Recover() {
         <>
             <Container>
                 <Card
-                    style={{minWidth: '320px', padding: '40px 30px'}}
+                    style={{ minWidth: '320px', padding: '40px 30px' }}
                     className="text-center"
                 >
                     <Card.Body>
-                        <Card.Title style={{marginBottom: '24px'}}>
+                        <Card.Title style={{ marginBottom: '24px' }}>
                             {constants.RECOVER_ACCOUNT}
                         </Card.Title>
                         <SingleInputForm

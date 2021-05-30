@@ -1,15 +1,15 @@
-import React, {useEffect, useState} from 'react';
-import UploadService, {FileWithCollection, UPLOAD_STAGES} from 'services/uploadService';
-import {createAlbum} from 'services/collectionService';
-import {File} from 'services/fileService';
+import React, { useEffect, useState } from 'react';
+import UploadService, { FileWithCollection, UPLOAD_STAGES } from 'services/uploadService';
+import { createAlbum } from 'services/collectionService';
+import { File } from 'services/fileService';
 import constants from 'utils/strings/constants';
-import {SetDialogMessage} from 'components/MessageDialog';
+import { SetDialogMessage } from 'components/MessageDialog';
 import UploadProgress from './UploadProgress';
 
 import ChoiceModal from './ChoiceModal';
-import {SetCollectionNamerAttributes} from './CollectionNamer';
-import {SetCollectionSelectorAttributes} from './CollectionSelector';
-import {SetLoading} from '..';
+import { SetCollectionNamerAttributes } from './CollectionNamer';
+import { SetCollectionSelectorAttributes } from './CollectionSelector';
+import { SetLoading } from '..';
 
 interface Props {
     syncWithRemote: () => Promise<void>;
@@ -38,7 +38,7 @@ export default function Upload(props: Props) {
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
         UPLOAD_STAGES.START,
     );
-    const [fileCounter, setFileCounter] = useState({current: 0, total: 0});
+    const [fileCounter, setFileCounter] = useState({ current: 0, total: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<string, number>());
     const [percentComplete, setPercentComplete] = useState(0);
     const [choiceModalView, setChoiceModalView] = useState(false);
@@ -61,7 +61,7 @@ export default function Upload(props: Props) {
 
     const uploadInit = function() {
         setUploadStage(UPLOAD_STAGES.START);
-        setFileCounter({current: 0, total: 0});
+        setFileCounter({ current: 0, total: 0 });
         setFileProgress(new Map<string, number>());
         setPercentComplete(0);
     };
@@ -161,7 +161,7 @@ export default function Upload(props: Props) {
                 for (const [collectionName, files] of collectionWiseFiles) {
                     const collection = await createAlbum(collectionName);
                     for (const file of files) {
-                        filesWithCollectionToUpload.push({collection, file});
+                        filesWithCollectionToUpload.push({ collection, file });
                     }
                 }
             } catch (e) {
@@ -169,7 +169,7 @@ export default function Upload(props: Props) {
                 props.setDialogMessage({
                     title: constants.ERROR,
                     staticBackdrop: true,
-                    close: {variant: 'danger'},
+                    close: { variant: 'danger' },
                     content: constants.CREATE_ALBUM_FAILED,
                 });
                 throw e;

@@ -1,12 +1,12 @@
-import {KEK} from 'pages/generate';
-import {B64EncryptionResult} from 'services/uploadService';
-import {KeyAttributes} from 'types';
+import { KEK } from 'pages/generate';
+import { B64EncryptionResult } from 'services/uploadService';
+import { KeyAttributes } from 'types';
 import * as Comlink from 'comlink';
-import {runningInBrowser} from 'utils/common';
-import {SESSION_KEYS, setKey} from 'utils/storage/sessionStorage';
-import {getData, LS_KEYS, setData} from 'utils/storage/localStorage';
-import {getActualKey, getToken} from 'utils/common/key';
-import {setRecoveryKey} from 'services/userService';
+import { runningInBrowser } from 'utils/common';
+import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getActualKey, getToken } from 'utils/common/key';
+import { setRecoveryKey } from 'services/userService';
 
 export interface ComlinkWorker {
     comlink: any;
@@ -19,7 +19,7 @@ export const getDedicatedCryptoWorker = (): ComlinkWorker => {
             type: 'module',
         });
         const comlink = Comlink.wrap(worker);
-        return {comlink, worker};
+        return { comlink, worker };
     }
 };
 const CryptoWorker: any = getDedicatedCryptoWorker()?.comlink;
@@ -57,7 +57,7 @@ export async function generateKeyAttributes(
         recoveryKeyDecryptionNonce: recoveryKeyEncryptedWithMasterKey.nonce,
     };
 
-    return {keyAttributes, masterKey};
+    return { keyAttributes, masterKey };
 }
 
 export async function generateAndSaveIntermediateKeyAttributes(

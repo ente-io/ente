@@ -1,5 +1,5 @@
-import sodium, {StateAddress} from 'libsodium-wrappers';
-import {ENCRYPTION_CHUNK_SIZE} from 'types';
+import sodium, { StateAddress } from 'libsodium-wrappers';
+import { ENCRYPTION_CHUNK_SIZE } from 'types';
 
 export async function decryptChaChaOneShot(
     data: Uint8Array,
@@ -62,7 +62,7 @@ export async function initChunkDecryption(header: Uint8Array, key: Uint8Array) {
     const decryptionChunkSize = ENCRYPTION_CHUNK_SIZE +
         sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
     const tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
-    return {pullState, decryptionChunkSize, tag};
+    return { pullState, decryptionChunkSize, tag };
 }
 
 export async function decryptChunk(data: Uint8Array, pullState: StateAddress) {
@@ -72,7 +72,7 @@ export async function decryptChunk(data: Uint8Array, pullState: StateAddress) {
         data,
     );
     const newTag = pullResult.tag;
-    return {decryptedData: pullResult.message, newTag};
+    return { decryptedData: pullResult.message, newTag };
 }
 
 export async function encryptChaChaOneShot(data: Uint8Array, key?: string) {

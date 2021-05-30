@@ -24,7 +24,7 @@ const englishConstants = {
     EMAIL_ERROR: 'enter a valid email',
     REQUIRED: 'required',
     VERIFY_EMAIL: 'verify email',
-    EMAIL_SENT: ({email}) => (
+    EMAIL_SENT: ({ email }) => (
         <p>
         we have sent a mail to <b>{email}</b>
         </p>
@@ -164,7 +164,7 @@ const englishConstants = {
             <a
                 href="https://play.google.com/store/apps/details?id=io.ente.photos"
                 target="_blank"
-                style={{color: '#2dc262'}} rel="noreferrer"
+                style={{ color: '#2dc262' }} rel="noreferrer"
             >
               android
             </a>
@@ -173,7 +173,7 @@ const englishConstants = {
             {' '}
             <a
                 href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                style={{color: '#2dc262'}}
+                style={{ color: '#2dc262' }}
                 target="_blank" rel="noreferrer"
             >
               ios app
@@ -303,7 +303,7 @@ const englishConstants = {
     ZERO_SHAREES: () => (
         <>
             <p>currently shared with no one 😔</p>
-            <em style={{color: '#777'}}>"memories are fonder when shared"</em>
+            <em style={{ color: '#777' }}>"memories are fonder when shared"</em>
         </>
     ),
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
@@ -338,13 +338,13 @@ const englishConstants = {
         with ente
         </p>
     ),
-    SEARCH_STATS: ({resultCount, timeTaken}) => (
+    SEARCH_STATS: ({ resultCount, timeTaken }) => (
         <span>
-        found <span style={{color: '#2dc262'}}>{resultCount}</span>
+        found <span style={{ color: '#2dc262' }}>{resultCount}</span>
             {' '}
         memories (
             {' '}
-            <span style={{color: '#2dc262'}}>
+            <span style={{ color: '#2dc262' }}>
                 {' '}
                 {timeTaken}
             </span>

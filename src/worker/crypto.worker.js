@@ -27,7 +27,7 @@ export class Crypto {
         const {
             file: encryptedMetadata,
         } = await libsodium.encryptChaChaOneShot(encodedMetadata, key);
-        const {encryptedData, ...other} = encryptedMetadata;
+        const { encryptedData, ...other } = encryptedMetadata;
         return {
             file: {
                 encryptedData: await libsodium.toB64(encryptedData),

@@ -1,15 +1,15 @@
-import {getEndpoint} from 'utils/common/apiUtil';
-import {getData, LS_KEYS} from 'utils/storage/localStorage';
+import { getEndpoint } from 'utils/common/apiUtil';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
 
-import {getActualKey, getToken} from 'utils/common/key';
+import { getActualKey, getToken } from 'utils/common/key';
 import CryptoWorker from 'utils/crypto';
-import {SetDialogMessage} from 'components/MessageDialog';
+import { SetDialogMessage } from 'components/MessageDialog';
 import constants from 'utils/strings/constants';
-import {getPublicKey, User} from './userService';
-import {B64EncryptionResult} from './uploadService';
+import { getPublicKey, User } from './userService';
+import { B64EncryptionResult } from './uploadService';
 import HTTPService from './HTTPService';
-import {File} from './fileService';
+import { File } from './fileService';
 
 const ENDPOINT = getEndpoint();
 
@@ -98,7 +98,7 @@ const getCollections = async (
             {
                 sinceTime,
             },
-            {'X-Auth-Token': token},
+            { 'X-Auth-Token': token },
         );
         const promises: Promise<Collection>[] = resp.data.collections.map(
             async (collection: Collection) => {
@@ -284,7 +284,7 @@ const postCollection = async (
             `${ENDPOINT}/collections`,
             collectionData,
             null,
-            {'X-Auth-Token': token},
+            { 'X-Auth-Token': token },
         );
         return response.data.collection;
     } catch (e) {
@@ -339,7 +339,7 @@ export const addToCollection = async (
             `${ENDPOINT}/collections/add-files`,
             params,
             null,
-            {'X-Auth-Token': token},
+            { 'X-Auth-Token': token },
         );
     } catch (e) {
         console.error('Add to collection Failed ', e);
@@ -362,7 +362,7 @@ const removeFromCollection = async (collection: Collection, files: File[]) => {
             `${ENDPOINT}/collections/remove-files`,
             params,
             null,
-            {'X-Auth-Token': token},
+            { 'X-Auth-Token': token },
         );
     } catch (e) {
         console.error('remove from collection failed ', e);
@@ -382,7 +382,7 @@ export const deleteCollection = async (
             `${ENDPOINT}/collections/${collectionID}`,
             null,
             null,
-            {'X-Auth-Token': token},
+            { 'X-Auth-Token': token },
         );
         await syncWithRemote();
         redirectToAll();
@@ -391,7 +391,7 @@ export const deleteCollection = async (
         setDialogMessage({
             title: constants.ERROR,
             content: constants.DELETE_COLLECTION_FAILED,
-            close: {variant: 'danger'},
+            close: { variant: 'danger' },
         });
     }
 };

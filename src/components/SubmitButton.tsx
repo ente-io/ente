@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Spinner} from 'react-bootstrap';
+import { Button, Spinner } from 'react-bootstrap';
 
 interface Props {
     loading: boolean;
@@ -16,13 +16,13 @@ const SubmitButton = ({
         type="submit"
         block={!inline}
         disabled={loading || disabled}
-        style={{padding: '6px 1em'}}
+        style={{ padding: '6px 1em' }}
     >
         {loading ? (
             <Spinner
                 as="span"
                 animation="border"
-                style={{width: '22px', height: '22px', borderWidth: '0.20em'}}
+                style={{ width: '22px', height: '22px', borderWidth: '0.20em' }}
             />
         ) : (
             buttonText

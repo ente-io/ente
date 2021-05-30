@@ -1,15 +1,15 @@
-import React, {useEffect, useState} from 'react';
-import styled, {createGlobalStyle} from 'styled-components';
+import React, { useEffect, useState } from 'react';
+import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
-import {useRouter} from 'next/router';
+import { useRouter } from 'next/router';
 import Container from 'components/Container';
 import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import EnteSpinner from 'components/EnteSpinner';
-import {sentryInit} from '../utils/sentry';
-import {Workbox} from 'workbox-window';
+import { sentryInit } from '../utils/sentry';
+import { Workbox } from 'workbox-window';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -307,7 +307,7 @@ export interface BannerMessage {
 }
 
 sentryInit();
-export default function App({Component, err}) {
+export default function App({ Component, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(
@@ -321,7 +321,7 @@ export default function App({Component, err}) {
             console.warn('Progressive Web App support is disabled');
             return;
         }
-        const wb = new Workbox('sw.js', {scope: '/'});
+        const wb = new Workbox('sw.js', { scope: '/' });
         wb.register();
 
         // if ('serviceWorker' in navigator) {
@@ -383,7 +383,7 @@ export default function App({Component, err}) {
             <Navbar>
                 <FlexContainer>
                     <LogoImage
-                        style={{height: '24px', padding: '3px'}}
+                        style={{ height: '24px', padding: '3px' }}
                         alt="logo"
                         src="/icon.svg"
                     />
