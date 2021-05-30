@@ -195,7 +195,9 @@ class SyncService {
 
   Future<void> _doSync() async {
     await _syncWithDevice();
-    await syncWithRemote();
+    if (hasCompletedFirstImport()) {
+      await syncWithRemote();
+    }
   }
 
   Future<void> _syncWithDevice() async {
