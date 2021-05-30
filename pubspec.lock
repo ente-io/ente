@@ -317,9 +317,9 @@ packages:
   flutter_sodium:
     dependency: "direct main"
     description:
-      path: "thirdparty/flutter_sodium"
-      relative: true
-    source: path
+      name: flutter_sodium
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.2.0"
   flutter_test:
     dependency: "direct dev"
