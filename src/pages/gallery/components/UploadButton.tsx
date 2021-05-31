@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ isDisabled: boolean }>`
     position: fixed;
     display: flex;
     align-items: center;
@@ -10,10 +10,12 @@ const Wrapper = styled.div`
     z-index: 100;
     min-height: 64px;
     right: 32px;
+    transition: opacity 1s ease;
+    opacity: ${(props) => (props.isDisabled ? 0 : 1)};
 `;
-function UploadButton({ openFileUploader }) {
+function UploadButton({ openFileUploader, isFirstFetch }) {
     return (
-        <Wrapper onClick={openFileUploader}>
+        <Wrapper onClick={openFileUploader} isDisabled={isFirstFetch}>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
