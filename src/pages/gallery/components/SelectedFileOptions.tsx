@@ -24,7 +24,7 @@ const SelectedFileOptions = ({
             onClick={() => setCollectionSelectorAttributes({
                 callback: (collection) => addToCollectionHelper(null, collection),
                 showNextModal: showCreateCollectionModal,
-                title: 'add to collection',
+                title: constants.ADD_TO_COLLECTION,
             })}
         />
         <DeleteBtn

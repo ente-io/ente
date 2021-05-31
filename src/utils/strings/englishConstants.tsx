@@ -353,6 +353,7 @@ const englishConstants = {
         </span>
     ),
     NOT_FILE_OWNER: 'deleting shared collection files is not allowed',
+    ADD_TO_COLLECTION: 'add to collection',
 };
 
 export default englishConstants;
