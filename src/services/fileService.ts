@@ -187,5 +187,6 @@ export const deleteFiles = async (
         syncWithRemote();
     } catch (e) {
         console.error('delete failed');
+        throw e;
     }
 };

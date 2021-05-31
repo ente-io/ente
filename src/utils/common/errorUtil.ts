@@ -6,6 +6,7 @@ export const errorCodes = {
     ERR_NO_INTERNET_CONNECTION: '1',
     ERR_SESSION_EXPIRED: '401',
     ERR_KEY_MISSING: '2',
+    ERR_FORBIDDEN: '403',
 };
 
 const AXIOS_NETWORK_ERROR = 'Network Error';
