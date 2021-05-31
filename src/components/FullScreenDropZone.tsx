@@ -36,7 +36,7 @@ const Overlay = styled.div<{ isDragActive: boolean }>`
     border-color: ${(props) => getColor(props)};
     border-style: solid;
     background: rgba(0, 0, 0, 0.9);
-    z-index: 2000;
+    z-index: 3000;
 `;
 
 type Props = React.PropsWithChildren<{
