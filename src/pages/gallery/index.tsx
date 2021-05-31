@@ -287,13 +287,35 @@ export default function Gallery() {
         callback: (collectionName) => addToCollectionHelper(collectionName, null),
     });
 
-    const deleteFileHelper = () => {
+    const deleteFileHelper = async () => {
         loadingBar.current?.continuousStart();
-        deleteFiles(
-            getSelectedFileIds(selected),
-            clearSelection,
-            syncWithRemote,
-        );
+        try {
+            await deleteFiles(
+                getSelectedFileIds(selected),
+                clearSelection,
+                syncWithRemote,
+
+            );
+        } catch (e) {
+            loadingBar.current.complete();
+            switch (e.status?.toString()) {
+            case errorCodes.ERR_FORBIDDEN:
+                setDialogMessage({
+                    title: constants.ERROR,
+                    staticBackdrop: true,
+                    close: { variant: 'danger' },
+                    content: constants.NOT_FILE_OWNER,
+                });
+                loadingBar.current.complete();
+                return;
+            }
+            setDialogMessage({
+                title: constants.ERROR,
+                staticBackdrop: true,
+                close: { variant: 'danger' },
+                content: constants.UNKNOWN_ERROR,
+            });
+        }
     };
 
     const updateSearch = (search: Search) => {

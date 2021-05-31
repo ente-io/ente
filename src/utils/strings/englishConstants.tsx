@@ -352,6 +352,7 @@ const englishConstants = {
         seconds )
         </span>
     ),
+    NOT_FILE_OWNER: 'deleting shared collection files is not allowed',
 };
 
 export default englishConstants;
