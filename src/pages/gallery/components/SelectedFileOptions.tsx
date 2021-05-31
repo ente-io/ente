@@ -18,36 +18,29 @@ const SelectedFileOptions = ({
     setDialogMessage,
     setCollectionSelectorAttributes,
     deleteFileHelper,
-}: Props) => {
-    return (
-        <>
-            <AddToCollectionBtn
-                onClick={() =>
-                    setCollectionSelectorAttributes({
-                        callback: (collection) =>
-                            addToCollectionHelper(null, collection),
-                        showNextModal: showCreateCollectionModal,
-                        title: 'add to collection',
-                    })
-                }
-            />
-            <DeleteBtn
-                onClick={() =>
-                    setDialogMessage({
-                        title: constants.CONFIRM_DELETE_FILE,
-                        content: constants.DELETE_FILE_MESSAGE,
-                        staticBackdrop: true,
-                        proceed: {
-                            action: deleteFileHelper,
-                            text: constants.DELETE,
-                            variant: 'danger',
-                        },
-                        close: { text: constants.CANCEL },
-                    })
-                }
-            />
-        </>
-    );
-};
+}: Props) => (
+    <>
+        <AddToCollectionBtn
+            onClick={() => setCollectionSelectorAttributes({
+                callback: (collection) => addToCollectionHelper(null, collection),
+                showNextModal: showCreateCollectionModal,
+                title: constants.ADD_TO_COLLECTION,
+            })}
+        />
+        <DeleteBtn
+            onClick={() => setDialogMessage({
+                title: constants.CONFIRM_DELETE_FILE,
+                content: constants.DELETE_FILE_MESSAGE,
+                staticBackdrop: true,
+                proceed: {
+                    action: deleteFileHelper,
+                    text: constants.DELETE,
+                    variant: 'danger',
+                },
+                close: { text: constants.CANCEL },
+            })}
+        />
+    </>
+);
 
 export default SelectedFileOptions;
