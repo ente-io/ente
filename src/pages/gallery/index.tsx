@@ -188,7 +188,11 @@ export default function Gallery() {
 
     useEffect(() => setDialogView(true), [dialogMessage]);
     useEffect(
-        () => setCollectionSelectorView(true),
+        () => {
+            if (collectionSelectorAttributes) {
+                setCollectionSelectorView(true);
+            }
+        },
         [collectionSelectorAttributes],
     );
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
@@ -384,6 +388,7 @@ export default function Gallery() {
                 <CollectionSelector
                     show={collectionSelectorView}
                     onHide={setCollectionSelectorView.bind(null, false)}
+                    setLoading={setLoading}
                     collectionsAndTheirLatestFile={collectionsAndTheirLatestFile}
                     directlyShowNextModal={
                         collectionsAndTheirLatestFile?.length === 0
