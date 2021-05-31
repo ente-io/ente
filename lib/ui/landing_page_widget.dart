@@ -25,7 +25,6 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 
   Widget _getBody() {
     return SingleChildScrollView(
-      physics: NeverScrollableScrollPhysics(),
       child: Container(
         padding: EdgeInsets.fromLTRB(8, 40, 8, 8),
         child: Column(
