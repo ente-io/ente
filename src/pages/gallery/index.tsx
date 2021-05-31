@@ -394,7 +394,7 @@ export default function Gallery() {
                     setDialogMessage={setDialogMessage}
                     showPlanSelectorModal={() => setPlanModalView(true)}
                 />
-                <UploadButton openFileUploader={openFileUploader} />
+                <UploadButton isFirstFetch={isFirstFetch} openFileUploader={openFileUploader} />
                 <PhotoFrame
                     files={files}
                     setFiles={setFiles}
