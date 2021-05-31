@@ -40,6 +40,7 @@ function CollectionSelector({
 }: Props) {
     useEffect(() => {
         if (directlyShowNextModal && attributes) {
+            props.onHide();
             attributes.showNextModal();
         }
     }, [attributes]);
