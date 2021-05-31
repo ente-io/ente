@@ -45,7 +45,6 @@ export default function FullScreenDropZone(props: Props) {
 
     useEffect(()=>{
         window.addEventListener('keydown', (event)=>{
-            console .log(event.code);
             if (event.code==='Escape') {
                 onDragLeave();
             }
