@@ -3,6 +3,8 @@ import { CustomError } from 'utils/common/errorUtil';
 import { convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
+import { getUint8ArrayView } from './readFileService';
+import { createFFmpeg } from '@ffmpeg/ffmpeg';
 
 const THUMBNAIL_HEIGHT = 720;
 const MAX_ATTEMPTS = 3;
@@ -24,6 +26,7 @@ export async function generateThumbnail(
             if (fileType === FILE_TYPE.IMAGE) {
                 canvas = await generateImageThumbnail(file, isHEIC);
             } else {
+                await ffmpegThumbnailGenerator(file);
                 canvas = await generateVideoThumbnail(file);
             }
             const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
@@ -157,7 +160,7 @@ export async function generateVideoThumbnail(file: globalThis.File) {
     return canvas;
 }
 
-export async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
+async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
     let thumbnailBlob = null;
     let attempts = 0;
     let quality = 1;
@@ -181,4 +184,39 @@ export async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
     );
 
     return thumbnailBlob;
+}
+
+async function ffmpegThumbnailGenerator(file: File) {
+    const ffmpeg = createFFmpeg({
+        log: true,
+    });
+    // const IS_COMPATIBLE = typeof SharedArrayBuffer === 'function';
+    // if (!IS_COMPATIBLE) {
+    //     throw e;
+    // }
+    console.log('Loading ffmpeg-core.js');
+    await ffmpeg.load();
+    console.log('Start transcoding');
+    ffmpeg.FS(
+        'writeFile',
+        file.name,
+        await getUint8ArrayView(new FileReader(), file)
+    );
+
+    await ffmpeg.run(
+        '-i',
+        file.name,
+        '-ss',
+        '00:00:01.000',
+        '-vframes',
+        '1',
+        'thumb.png'
+    );
+    console.log('Complete transcoding');
+    const thumb = ffmpeg.FS('readFile', 'thumb.png');
+    console.log(
+        'created thumbnail url',
+        URL.createObjectURL(new Blob([thumb]))
+    );
+    return null;
 }
