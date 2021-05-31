@@ -181,8 +181,12 @@ export default function Gallery() {
 
     useEffect(() => setDialogView(true), [dialogMessage]);
     useEffect(
-        () => setCollectionSelectorView(true),
-        [collectionSelectorAttributes]
+        () => {
+            if (collectionSelectorAttributes) {
+                setCollectionSelectorView(true);
+            }
+        },
+        [collectionSelectorAttributes],
     );
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
 
@@ -382,6 +386,7 @@ export default function Gallery() {
                     collectionsAndTheirLatestFile?.length === 0
                 }
                 attributes={collectionSelectorAttributes}
+                setLoading={setLoading}
             />
             <Upload
                 syncWithRemote={syncWithRemote}

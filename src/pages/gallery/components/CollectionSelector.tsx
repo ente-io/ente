@@ -28,6 +28,7 @@ export type SetCollectionSelectorAttributes = React.Dispatch<
 interface Props {
     show: boolean;
     onHide: () => void;
+    setLoading:(value :boolean)=>void;
     directlyShowNextModal: boolean;
     collectionsAndTheirLatestFile: CollectionAndItsLatestFile[];
     attributes: CollectionSelectorAttributes;
@@ -36,14 +37,21 @@ function CollectionSelector({
     attributes,
     directlyShowNextModal,
     collectionsAndTheirLatestFile,
+    setLoading,
     ...props
 }: Props) {
     useEffect(() => {
+        setLoading(false);
         if (directlyShowNextModal && attributes) {
             props.onHide();
             attributes.showNextModal();
         }
     }, [attributes]);
+    useEffect(()=>{
+        if (props.show && !attributes) {
+            setLoading(true);
+        }
+    }, [props.show]);
 
     if (!attributes) {
         return <Modal />;
