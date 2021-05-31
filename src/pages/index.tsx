@@ -11,21 +11,28 @@ import { getOtt } from 'services/userService';
 import Container from 'components/Container';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import SubmitButton from 'components/SubmitButton';
+import EnteSpinner from 'components/EnteSpinner';
+
 interface formValues {
     email: string;
 }
 
 export default function Home() {
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [waiting, setWaiting]=useState(false);
     const router = useRouter();
 
     useEffect(() => {
-        router.prefetch('/verify');
-        router.prefetch('/signup');
-        const user = getData(LS_KEYS.USER);
-        if (user?.email) {
-            router.push('/verify');
-        }
+        const main=async ()=>{
+            router.prefetch('/verify');
+            router.prefetch('/signup');
+            const user = getData(LS_KEYS.USER);
+            if (user?.email) {
+                await router.push('/verify');
+            }
+            setLoading(false);
+        };
+        main();
     }, []);
 
     const loginUser = async (
@@ -33,14 +40,14 @@ export default function Home() {
         { setFieldError }: FormikHelpers<formValues>
     ) => {
         try {
-            setLoading(true);
+            setWaiting(true);
             await getOtt(email);
             setData(LS_KEYS.USER, { email });
             router.push('/verify');
         } catch (e) {
             setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
         }
-        setLoading(false);
+        setWaiting(false);
     };
 
     const register = () => {
@@ -48,7 +55,10 @@ export default function Home() {
     };
 
     return (
-        <Container>
+        <Container>{loading ?
+            <EnteSpinner>
+                <span className="sr-only">Loading...</span>
+            </EnteSpinner>:
             <Card style={{ minWidth: '320px' }} className="text-center">
                 <Card.Body style={{ padding: '40px 30px' }}>
                     <Card.Title style={{ marginBottom: '32px' }}>
@@ -91,7 +101,7 @@ export default function Home() {
                                 </Form.Group>
                                 <SubmitButton
                                     buttonText={constants.LOGIN}
-                                    loading={loading}
+                                    loading={waiting}
                                 />
                             </Form>
                         )}
@@ -102,6 +112,7 @@ export default function Home() {
                     </Button>
                 </Card.Body>
             </Card>
+        }
         </Container>
     );
 }
