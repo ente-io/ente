@@ -215,9 +215,6 @@ export default function Gallery() {
             );
             const favItemIds = await getFavItemIds(files);
             setCollections(nonEmptyCollections);
-            // if (isUpdated) {
-            //     setFiles(files);
-            // }
             setCollectionsAndTheirLatestFile(collectionAndItsLatestFile);
             setFavItemIds(favItemIds);
             // Reset react-window offset cache
