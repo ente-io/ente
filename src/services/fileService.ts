@@ -46,10 +46,8 @@ export const getLocalFiles = async () => {
 
 export const syncFiles = async (collections: Collection[]) => {
     const localFiles = await getLocalFiles();
-    let isUpdated = false;
     let files = await removeDeletedCollectionFiles(collections, localFiles);
-    if (files.length != localFiles.length) {
-        isUpdated = true;
+    if (files.length !== localFiles.length) {
         await localForage.setItem('files', files);
     }
     for (let collection of collections) {
@@ -61,9 +59,7 @@ export const syncFiles = async (collections: Collection[]) => {
         if (collection.updationTime === lastSyncTime) {
             continue;
         }
-        isUpdated = true;
-        let fetchedFiles =
-            (await getFiles(collection, lastSyncTime, DIFF_LIMIT)) ?? [];
+        const fetchedFiles = (await getFiles(collection, lastSyncTime, DIFF_LIMIT)) ?? [];
         files.push(...fetchedFiles);
         var latestVersionFiles = new Map<string, File>();
         files.forEach((file) => {
@@ -97,7 +93,6 @@ export const syncFiles = async (collections: Collection[]) => {
             w: window.innerWidth,
             h: window.innerHeight,
         })),
-        isUpdated,
     };
 };
 
