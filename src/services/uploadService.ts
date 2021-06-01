@@ -35,7 +35,7 @@ const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
 const CHUNKS_COMBINED_FOR_UPLOAD = 5;
 const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 const NULL_LOCATION: Location = { latitude: null, longitude: null };
-const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
+const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
 const FILE_UPLOAD_FAILED = -1;
 const FILE_UPLOAD_SKIPPED = -2;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -89,6 +89,7 @@ export interface MetadataObject {
     latitude: number;
     longitude: number;
     fileType: FILE_TYPE;
+    hasStaticThumbnail?: boolean;
 }
 
 interface FileInMemory {
@@ -107,7 +108,7 @@ interface ProcessedFile {
     metadata: fileAttribute;
     filename: string;
 }
-interface BackupedFile extends Omit<ProcessedFile, 'filename'> {}
+interface BackupedFile extends Omit<ProcessedFile, 'filename'> { }
 
 interface uploadFile extends BackupedFile {
     collectionID: number;
@@ -339,7 +340,7 @@ class UploadService {
 
     private async readFile(reader: FileReader, receivedFile: globalThis.File) {
         try {
-            const thumbnail = await this.generateThumbnail(
+            const { thumbnail, hasStaticThumbnail } = await this.generateThumbnail(
                 reader,
                 receivedFile
             );
@@ -387,6 +388,9 @@ class UploadService {
                 },
                 this.metadataMap.get(receivedFileOriginalName)
             );
+            if (hasStaticThumbnail) {
+                metadata["hasStaticThumbnail"] = hasStaticThumbnail
+            }
             const filedata =
                 receivedFile.size > MIN_STREAM_FILE_SIZE
                     ? this.getFileStream(reader, receivedFile)
@@ -619,93 +623,101 @@ class UploadService {
     private async generateThumbnail(
         reader: FileReader,
         file: globalThis.File
-    ): Promise<Uint8Array> {
+    ): Promise<{ thumbnail: Uint8Array, hasStaticThumbnail: boolean }> {
         try {
+            let hasStaticThumbnail = false
             let canvas = document.createElement('canvas');
             let canvas_CTX = canvas.getContext('2d');
             let imageURL = null;
-            let timeout=null;
-            if (file.type.match(TYPE_IMAGE) || fileIsHEIC(file.name)) {
-                if (fileIsHEIC(file.name)) {
-                    file = new globalThis.File(
-                        [await convertHEIC2JPEG(file)],
-                        null,
-                        null
-                    );
-                }
-                let image = new Image();
-                imageURL = URL.createObjectURL(file);
-                image.setAttribute('src', imageURL);
-                await new Promise((resolve, reject) => {
-                    image.onload = () => {
-                        try {
-                            const thumbnailWidth =
-                                (image.width * THUMBNAIL_HEIGHT) / image.height;
-                            canvas.width = thumbnailWidth;
-                            canvas.height = THUMBNAIL_HEIGHT;
-                            canvas_CTX.drawImage(
-                                image,
-                                0,
-                                0,
-                                thumbnailWidth,
-                                THUMBNAIL_HEIGHT
-                            );
-                            image = undefined;
-                            clearTimeout(timeout);
-                            resolve(null);
-                        } catch (e) {
-                            console.error(e);
-                            reject(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`);
-                        }
-                    };
-                    timeout=setTimeout(
-                        () =>
-                            reject(
-                                `${THUMBNAIL_GENERATION_FAILED} err:
-                                    wait time exceeded`
-                            ),
-                        WAIT_TIME_THUMBNAIL_GENERATION
-                    );
-                });
-            } else {
-                await new Promise(async (resolve, reject) => {
-                    let video = document.createElement('video');
+            let timeout = null;
+            try {
+                if (file.type.match(TYPE_IMAGE) || fileIsHEIC(file.name)) {
+                    if (fileIsHEIC(file.name)) {
+                        file = new globalThis.File(
+                            [await convertHEIC2JPEG(file)],
+                            null,
+                            null
+                        );
+                    }
+                    let image = new Image();
                     imageURL = URL.createObjectURL(file);
-                    video.addEventListener('timeupdate', function () {
-                        try {
-                            const thumbnailWidth =
-                                (video.videoWidth * THUMBNAIL_HEIGHT) /
-                                video.videoHeight;
-                            canvas.width = thumbnailWidth;
-                            canvas.height = THUMBNAIL_HEIGHT;
-                            canvas_CTX.drawImage(
-                                video,
-                                0,
-                                0,
-                                thumbnailWidth,
-                                THUMBNAIL_HEIGHT
-                            );
-                            video = null;
-                            resolve(null);
-                        } catch (e) {
-                            console.error(e);
-                            reject(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`);
-                        }
+                    image.setAttribute('src', imageURL);
+                    await new Promise((resolve, reject) => {
+                        image.onload = () => {
+                            try {
+                                const thumbnailWidth =
+                                    (image.width * THUMBNAIL_HEIGHT) / image.height;
+                                canvas.width = thumbnailWidth;
+                                canvas.height = THUMBNAIL_HEIGHT;
+                                canvas_CTX.drawImage(
+                                    image,
+                                    0,
+                                    0,
+                                    thumbnailWidth,
+                                    THUMBNAIL_HEIGHT
+                                );
+                                image = undefined;
+                                clearTimeout(timeout);
+                                resolve(null);
+                            } catch (e) {
+                                console.error(e);
+                                reject(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`);
+                            }
+                        };
+                        timeout = setTimeout(
+                            () =>
+                                reject(
+                                    `${THUMBNAIL_GENERATION_FAILED} err:
+                                    wait time exceeded`
+                                ),
+                            WAIT_TIME_THUMBNAIL_GENERATION
+                        );
                     });
-                    video.preload = 'metadata';
-                    video.src = imageURL;
-                    video.currentTime = 3;
-                    setTimeout(
-                        () =>
-                            reject(
-                                `${THUMBNAIL_GENERATION_FAILED} err:
+                } else {
+                    await new Promise(async (resolve, reject) => {
+                        let video = document.createElement('video');
+                        imageURL = URL.createObjectURL(file);
+                        video.addEventListener('timeupdate', function () {
+                            try {
+                                const thumbnailWidth =
+                                    (video.videoWidth * THUMBNAIL_HEIGHT) /
+                                    video.videoHeight;
+                                canvas.width = thumbnailWidth;
+                                canvas.height = THUMBNAIL_HEIGHT;
+                                canvas_CTX.drawImage(
+                                    video,
+                                    0,
+                                    0,
+                                    thumbnailWidth,
+                                    THUMBNAIL_HEIGHT
+                                );
+                                video = null;
+                                resolve(null);
+                            } catch (e) {
+                                console.error(e);
+                                reject(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`);
+                            }
+                        });
+                        video.preload = 'metadata';
+                        video.src = imageURL;
+                        video.currentTime = 3;
+                        setTimeout(
+                            () =>
+                                reject(
+                                    `${THUMBNAIL_GENERATION_FAILED} err:
                                 wait time exceeded`
-                            ),
-                        WAIT_TIME_THUMBNAIL_GENERATION
-                    );
-                });
+                                ),
+                            WAIT_TIME_THUMBNAIL_GENERATION
+                        );
+                    });
+                }
+                URL.revokeObjectURL(imageURL);
             }
-            URL.revokeObjectURL(imageURL);
+            catch (e) {
+                console.error(e);
+                //ignore and set staticThumbnail
+                hasStaticThumbnail = true;
+            }
             let thumbnailBlob = null,
                 attempts = 0,
                 quality = 1;
@@ -731,7 +743,7 @@ class UploadService {
                 reader,
                 thumbnailBlob
             );
-            return thumbnail;
+            return { thumbnail, hasStaticThumbnail };
         } catch (e) {
             console.error('Error generating thumbnail ', e);
             throw e;
@@ -940,8 +952,8 @@ class UploadService {
                         Math.min(
                             Math.round(
                                 percentPerPart * index +
-                                    (percentPerPart * event.loaded) /
-                                        event.total
+                                (percentPerPart * event.loaded) /
+                                event.total
                             ),
                             98
                         )
