@@ -137,7 +137,7 @@ const PhotoFrame = ({
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
-    const fetching: { [k: number]: boolean } = {};
+    const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
     const listRef = useRef(null);
@@ -152,15 +152,18 @@ const PhotoFrame = ({
     }, [search]);
 
     useEffect(() => {
+        console.log('reset');
         if (galleryContext.resetList) {
             listRef.current?.resetAfterIndex(0);
+            setFetching({});
         }
-    }, [galleryContext.resetList]);
+    }, [files]);
 
     const updateUrl = (index: number) => (url: string) => {
         files[index] = {
             ...files[index],
             msrc: url,
+            src: files[index].src ? files[index].src : url,
             w: window.innerWidth,
             h: window.innerHeight,
         };
@@ -238,7 +241,13 @@ const PhotoFrame = ({
 
     const getSlideData = async (instance: any, index: number, item: File) => {
         if (!item.msrc) {
-            const url = await DownloadManager.getPreview(item);
+            let url: string;
+            if (galleryContext.thumbs.has(item.id)) {
+                url = galleryContext.thumbs.get(item.id);
+            } else {
+                url = await DownloadManager.getPreview(item);
+                galleryContext.thumbs.set(item.id, url);
+            }
             updateUrl(item.dataIndex)(url);
             item.msrc = url;
             if (!item.src) {
@@ -253,9 +262,16 @@ const PhotoFrame = ({
                 // ignore
             }
         }
+        console.log(fetching);
         if (!fetching[item.dataIndex]) {
             fetching[item.dataIndex] = true;
-            const url = await DownloadManager.getFile(item);
+            let url: string;
+            if (galleryContext.files.has(item.id)) {
+                url = galleryContext.files.get(item.id);
+            } else {
+                url = await DownloadManager.getFile(item);
+                galleryContext.files.set(item.id, url);
+            }
             updateSrcUrl(item.dataIndex, url);
             if (item.metadata.fileType === FILE_TYPE.VIDEO) {
                 item.html = `
@@ -265,10 +281,10 @@ const PhotoFrame = ({
                     </video>
                 `;
                 delete item.src;
-                item.w = window.innerWidth;
             } else {
                 item.src = url;
             }
+            item.w = window.innerWidth;
             item.h = window.innerHeight;
             try {
                 instance.invalidateCurrItems();

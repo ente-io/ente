@@ -25,21 +25,12 @@ interface Iprops {
 }
 
 function PhotoSwipe(props: Iprops) {
-    let pswpElement;
+    const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] = useState<Photoswipe<any>>();
 
-    const { isOpen } = props;
+    const { isOpen, items } = props;
     const [isFav, setIsFav] = useState(false);
     const needUpdate = useRef(false);
-
-    useEffect(() => {
-        if (!pswpElement) {
-            return;
-        }
-        if (isOpen) {
-            openPhotoSwipe();
-        }
-    }, [pswpElement]);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -53,6 +44,10 @@ function PhotoSwipe(props: Iprops) {
             closePhotoSwipe();
         };
     }, [isOpen]);
+
+    useEffect(() => {
+        updateItems(items);
+    }, [items]);
 
     function updateFavButton() {
         setIsFav(isInFav(this?.currItem));
@@ -75,7 +70,7 @@ function PhotoSwipe(props: Iprops) {
             },
         };
         const photoSwipe = new Photoswipe(
-            pswpElement,
+            pswpElement.current,
             PhotoswipeUIDefault,
             items,
             options,
@@ -134,6 +129,18 @@ function PhotoSwipe(props: Iprops) {
         }
         needUpdate.current = true;
     };
+
+    const updateItems = (items = []) => {
+        if (photoSwipe) {
+            photoSwipe.items.length = 0;
+            items.forEach((item) => {
+                photoSwipe.items.push(item);
+            });
+            photoSwipe.invalidateCurrItems();
+            // photoSwipe.updateSize(true);
+        }
+    };
+
     const downloadFile = async (file) => {
         const { loadingBar } = props;
         const a = document.createElement('a');
@@ -156,9 +163,7 @@ function PhotoSwipe(props: Iprops) {
             tabIndex={Number('-1')}
             role="dialog"
             aria-hidden="true"
-            ref={(node) => {
-                pswpElement = node;
-            }}
+            ref={pswpElement}
         >
             <div className="pswp__bg" />
             <div className="pswp__scroll-wrap">
