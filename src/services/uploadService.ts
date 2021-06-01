@@ -17,7 +17,6 @@ import {
     fileIsHEIC,
     convertHEIC2JPEG,
     sortFilesIntoCollections,
-    checkFileFormatSupport,
 } from 'utils/file';
 const ENDPOINT = getEndpoint();
 
@@ -622,7 +621,6 @@ class UploadService {
         file: globalThis.File
     ): Promise<Uint8Array> {
         try {
-            checkFileFormatSupport(file.name)
             let canvas = document.createElement('canvas');
             let canvas_CTX = canvas.getContext('2d');
             let imageURL = null;

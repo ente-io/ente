@@ -20,7 +20,6 @@ import CloudUpload from './CloudUpload';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 import { SetDialogMessage } from './MessageDialog';
 import { VIDEO_PLAYBACK_FAILED } from 'utils/common/errorUtil';
-import { checkFileFormatSupport } from 'utils/file';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
@@ -244,12 +243,10 @@ const PhotoFrame = ({
         }
         if (!fetching[item.dataIndex]) {
             fetching[item.dataIndex] = true;
-            let url = null;
-            try {
-                checkFileFormatSupport(item.metadata.title);
-                url = await DownloadManager.getFile(item);
-                if (item.metadata.fileType === FILE_TYPE.VIDEO) {
 
+            const url = await DownloadManager.getFile(item);
+            if (item.metadata.fileType === FILE_TYPE.VIDEO) {
+                try {
                     await new Promise(async (resolve, reject) => {
                         let video = document.createElement('video');
                         video.addEventListener('timeupdate', function () {
@@ -277,48 +274,45 @@ const PhotoFrame = ({
             `;
                     delete item.src;
                     item.w = window.innerWidth;
-
-                } else {
-                    item.src = url;
-                }
-                updateSrcUrl(item.dataIndex, url);
-                item.h = window.innerHeight;
-                try {
-                    instance.invalidateCurrItems();
-                    instance.updateSize(true);
                 } catch (e) {
-                    // ignore
-                }
-            }
-            catch (e) {
 
-                const downloadFile = async () => {
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    url = url ?? await DownloadManager.getFile(item);
-                    a.href = url;
-                    a.download = item.metadata.title;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    setOpen(false)
-                }
-                setDialogMessage({
-                    title: constants.VIDEO_PLAYBACK_FAILED,
-                    content: constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD,
-                    staticBackdrop: true,
-                    proceed: {
-                        text: constants.DOWNLOAD,
-                        action: downloadFile,
-                        variant: 'success',
-                    },
-                    close: {
-                        text: constants.CLOSE,
-                        action: () => setOpen(false)
-                    },
-                });
-                return;
-            };
+                    const downloadFile = async () => {
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = item.metadata.title;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        setOpen(false)
+                    }
+                    setDialogMessage({
+                        title: constants.VIDEO_PLAYBACK_FAILED,
+                        content: constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD,
+                        staticBackdrop: true,
+                        proceed: {
+                            text: constants.DOWNLOAD,
+                            action: downloadFile,
+                            variant: 'success',
+                        },
+                        close: {
+                            text: constants.CLOSE,
+                            action: () => setOpen(false)
+                        },
+                    });
+                    return;
+                };
+            } else {
+                item.src = url;
+            }
+            updateSrcUrl(item.dataIndex, url);
+            item.h = window.innerHeight;
+            try {
+                instance.invalidateCurrItems();
+                instance.updateSize(true);
+            } catch (e) {
+                // ignore
+            }
         }
     }
 
