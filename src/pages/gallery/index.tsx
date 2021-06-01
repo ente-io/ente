@@ -200,7 +200,7 @@ export default function Gallery() {
             await billingService.updatePlans();
             await billingService.syncSubscription();
             const collections = await syncCollections();
-            const { files } = await syncFiles(collections);
+            const { files, isUpdated } = await syncFiles(collections);
             const nonEmptyCollections = getNonEmptyCollections(
                 collections,
                 files
@@ -212,6 +212,9 @@ export default function Gallery() {
                 );
             const favItemIds = await getFavItemIds(files);
             setCollections(nonEmptyCollections);
+            if (isUpdated) {
+                setFiles(files);
+            }
             setCollectionsAndTheirLatestFile(collectionAndItsLatestFile);
             setFavItemIds(favItemIds);
             setSinceTime(new Date().getTime());
