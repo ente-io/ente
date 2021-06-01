@@ -429,6 +429,7 @@ export default function Gallery() {
                 searchMode={searchMode}
                 search={search}
                 setSearchStats={setSearchStats}
+                setDialogMessage={setDialogMessage}
             />
             {selected.count > 0 && (
                 <SelectedFileOptions

@@ -18,11 +18,14 @@ import { VariableSizeList as List } from 'react-window';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import CloudUpload from './CloudUpload';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
+import { SetDialogMessage } from './MessageDialog';
+import { VIDEO_PLAYBACK_FAILED } from 'utils/common/errorUtil';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
+const WAIT_FOR_VIDEO_PLAYBACK=1*1000;
 
 interface TimeStampListItem {
     itemType: ITEM_TYPE;
@@ -109,6 +112,7 @@ interface Props {
     searchMode: boolean;
     search: Search;
     setSearchStats: setSearchStats;
+    setDialogMessage:SetDialogMessage
 }
 
 const PhotoFrame = ({
@@ -125,6 +129,7 @@ const PhotoFrame = ({
     searchMode,
     search,
     setSearchStats,
+    setDialogMessage
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -240,19 +245,65 @@ const PhotoFrame = ({
         if (!fetching[item.dataIndex]) {
             fetching[item.dataIndex] = true;
             const url = await DownloadManager.getFile(item);
-            updateSrcUrl(item.dataIndex, url);
             if (item.metadata.fileType === FILE_TYPE.VIDEO) {
+                try{
+                await new Promise(async (resolve, reject) => {
+                    let video = document.createElement('video');
+                    video.addEventListener('timeupdate', function () {
+                        clearTimeout(t)
+                        resolve(null)
+                    });
+                    video.preload = 'metadata';
+                    video.src = url;
+                    video.currentTime = 3;
+                    const t=setTimeout(
+                        () =>{
+                            reject(
+                                `${VIDEO_PLAYBACK_FAILED} err:
+                                wait time exceeded`
+                            )},
+                            WAIT_FOR_VIDEO_PLAYBACK
+                    );          
+                });
                 item.html = `
-                    <video width="320" height="240" controls>
-                        <source src="${url}" />
-                        Your browser does not support the video tag.
-                    </video>
-                `;
-                delete item.src;
-                item.w = window.innerWidth;
+                <video width="320" height="240" controls>
+                    <source src="${url}" />
+                    Your browser does not support the video tag.
+                </video>
+            `;
+            delete item.src;
+            item.w = window.innerWidth;
+            }catch(e){
+                const downloadFile=()=>{
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download =item.metadata.title;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setOpen(false)
+                }
+                setDialogMessage({
+                    title: constants.VIDEO_PLAYBACK_FAILED,
+                    content: constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD,
+                    staticBackdrop: true,
+                    proceed: {
+                        text: constants.DOWNLOAD,
+                        action: downloadFile,
+                        variant: 'success',
+                    },
+                    close: {
+                        text: constants.CLOSE,
+                        action:()=>setOpen(false)
+                    },
+                });
+                return;
+            }
             } else {
                 item.src = url;
             }
+            updateSrcUrl(item.dataIndex, url);
             item.h = window.innerHeight;
             try {
                 instance.invalidateCurrItems();
