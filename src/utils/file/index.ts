@@ -2,6 +2,7 @@ import { deleteFiles, File } from 'services/fileService';
 import { runningInBrowser } from 'utils/common';
 
 const TYPE_HEIC = 'heic';
+const UNSUPPORTED_FORMATS = ['flv', "mkv", "3gp", "avi", "wmv"];
 
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
@@ -61,4 +62,12 @@ export function getSelectedFiles(selectedFiles, files: File[]): File[] {
         }
     }
     return filesToDelete;
+}
+
+export function checkFileFormatSupport(name :string){
+    for (let format of UNSUPPORTED_FORMATS){
+        if ( name.toLowerCase().endsWith(format)){
+            throw "un supported format";
+        }
+    }
 }

@@ -17,6 +17,7 @@ import {
     fileIsHEIC,
     convertHEIC2JPEG,
     sortFilesIntoCollections,
+    checkFileFormatSupport,
 } from 'utils/file';
 const ENDPOINT = getEndpoint();
 
@@ -621,9 +622,11 @@ class UploadService {
         file: globalThis.File
     ): Promise<Uint8Array> {
         try {
+            checkFileFormatSupport(file.name)
             let canvas = document.createElement('canvas');
             let canvas_CTX = canvas.getContext('2d');
             let imageURL = null;
+            let timeout=null;
             if (file.type.match(TYPE_IMAGE) || fileIsHEIC(file.name)) {
                 if (fileIsHEIC(file.name)) {
                     file = new globalThis.File(
@@ -650,13 +653,14 @@ class UploadService {
                                 THUMBNAIL_HEIGHT
                             );
                             image = undefined;
+                            clearTimeout(timeout);
                             resolve(null);
                         } catch (e) {
                             console.error(e);
                             reject(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`);
                         }
                     };
-                    setTimeout(
+                    timeout=setTimeout(
                         () =>
                             reject(
                                 `${THUMBNAIL_GENERATION_FAILED} err:

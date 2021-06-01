@@ -20,13 +20,13 @@ import CloudUpload from './CloudUpload';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 import { SetDialogMessage } from './MessageDialog';
 import { VIDEO_PLAYBACK_FAILED } from 'utils/common/errorUtil';
+import { checkFileFormatSupport } from 'utils/file';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
-const WAIT_FOR_VIDEO_PLAYBACK=1*1000;
-
+const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 interface TimeStampListItem {
     itemType: ITEM_TYPE;
     items?: File[];
@@ -112,7 +112,7 @@ interface Props {
     searchMode: boolean;
     search: Search;
     setSearchStats: setSearchStats;
-    setDialogMessage:SetDialogMessage
+    setDialogMessage: SetDialogMessage
 }
 
 const PhotoFrame = ({
@@ -244,41 +244,60 @@ const PhotoFrame = ({
         }
         if (!fetching[item.dataIndex]) {
             fetching[item.dataIndex] = true;
-            const url = await DownloadManager.getFile(item);
-            if (item.metadata.fileType === FILE_TYPE.VIDEO) {
-                try{
-                await new Promise(async (resolve, reject) => {
-                    let video = document.createElement('video');
-                    video.addEventListener('timeupdate', function () {
-                        clearTimeout(t)
-                        resolve(null)
-                    });
-                    video.preload = 'metadata';
-                    video.src = url;
-                    video.currentTime = 3;
-                    const t=setTimeout(
-                        () =>{
-                            reject(
-                                `${VIDEO_PLAYBACK_FAILED} err:
+            let url = null;
+            try {
+                checkFileFormatSupport(item.metadata.title);
+                url = await DownloadManager.getFile(item);
+                if (item.metadata.fileType === FILE_TYPE.VIDEO) {
+
+                    await new Promise(async (resolve, reject) => {
+                        let video = document.createElement('video');
+                        video.addEventListener('timeupdate', function () {
+                            clearTimeout(t)
+                            resolve(null)
+                        });
+                        video.preload = 'metadata';
+                        video.src = url;
+                        video.currentTime = 3;
+                        const t = setTimeout(
+                            () => {
+                                reject(
+                                    `${VIDEO_PLAYBACK_FAILED} err:
                                 wait time exceeded`
-                            )},
+                                )
+                            },
                             WAIT_FOR_VIDEO_PLAYBACK
-                    );          
-                });
-                item.html = `
+                        );
+                    });
+                    item.html = `
                 <video width="320" height="240" controls>
                     <source src="${url}" />
                     Your browser does not support the video tag.
                 </video>
             `;
-            delete item.src;
-            item.w = window.innerWidth;
-            }catch(e){
-                const downloadFile=()=>{
+                    delete item.src;
+                    item.w = window.innerWidth;
+
+                } else {
+                    item.src = url;
+                }
+                updateSrcUrl(item.dataIndex, url);
+                item.h = window.innerHeight;
+                try {
+                    instance.invalidateCurrItems();
+                    instance.updateSize(true);
+                } catch (e) {
+                    // ignore
+                }
+            }
+            catch (e) {
+
+                const downloadFile = async () => {
                     const a = document.createElement('a');
                     a.style.display = 'none';
+                    url = url ?? await DownloadManager.getFile(item);
                     a.href = url;
-                    a.download =item.metadata.title;
+                    a.download = item.metadata.title;
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
@@ -295,24 +314,13 @@ const PhotoFrame = ({
                     },
                     close: {
                         text: constants.CLOSE,
-                        action:()=>setOpen(false)
+                        action: () => setOpen(false)
                     },
                 });
                 return;
-            }
-            } else {
-                item.src = url;
-            }
-            updateSrcUrl(item.dataIndex, url);
-            item.h = window.innerHeight;
-            try {
-                instance.invalidateCurrItems();
-                instance.updateSize(true);
-            } catch (e) {
-                // ignore
-            }
+            };
         }
-    };
+    }
 
     let idSet = new Set();
     const filteredData = files
@@ -418,13 +426,13 @@ const PhotoFrame = ({
                                         )
                                             ? 'Today'
                                             : isSameDay(
-                                                  new Date(currentDate),
-                                                  new Date(Date.now() - A_DAY)
-                                              )
-                                            ? 'Yesterday'
-                                            : dateTimeFormat.format(
-                                                  currentDate
-                                              ),
+                                                new Date(currentDate),
+                                                new Date(Date.now() - A_DAY)
+                                            )
+                                                ? 'Yesterday'
+                                                : dateTimeFormat.format(
+                                                    currentDate
+                                                ),
                                     });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TILE,
@@ -473,7 +481,7 @@ const PhotoFrame = ({
                                 <List
                                     itemSize={(index) =>
                                         timeStampList[index].itemType ===
-                                        ITEM_TYPE.TILE
+                                            ITEM_TYPE.TILE
                                             ? IMAGE_CONTAINER_HEIGHT
                                             : DATE_CONTAINER_HEIGHT
                                     }
@@ -489,22 +497,22 @@ const PhotoFrame = ({
                                                 style={
                                                     timeStampList[index]
                                                         .itemType ===
-                                                    ITEM_TYPE.BANNER
+                                                        ITEM_TYPE.BANNER
                                                         ? {
-                                                              ...style,
-                                                              top: Math.max(
-                                                                  Number(
-                                                                      style.top
-                                                                  ),
-                                                                  height - 45
-                                                              ),
-                                                              height:
-                                                                  width < 450
-                                                                      ? Number(
-                                                                            style.height
-                                                                        ) * 2
-                                                                      : style.height,
-                                                          }
+                                                            ...style,
+                                                            top: Math.max(
+                                                                Number(
+                                                                    style.top
+                                                                ),
+                                                                height - 45
+                                                            ),
+                                                            height:
+                                                                width < 450
+                                                                    ? Number(
+                                                                        style.height
+                                                                    ) * 2
+                                                                    : style.height,
+                                                        }
                                                         : style
                                                 }
                                             >
@@ -512,14 +520,14 @@ const PhotoFrame = ({
                                                     columns={
                                                         timeStampList[index]
                                                             .itemType ===
-                                                        ITEM_TYPE.TILE
+                                                            ITEM_TYPE.TILE
                                                             ? columns
                                                             : 1
                                                     }
                                                 >
                                                     {timeStampList[index]
                                                         .itemType ===
-                                                    ITEM_TYPE.TIME ? (
+                                                        ITEM_TYPE.TIME ? (
                                                         <DateContainer>
                                                             {
                                                                 timeStampList[
@@ -528,8 +536,8 @@ const PhotoFrame = ({
                                                             }
                                                         </DateContainer>
                                                     ) : timeStampList[index]
-                                                          .itemType ===
-                                                      ITEM_TYPE.BANNER ? (
+                                                        .itemType ===
+                                                        ITEM_TYPE.BANNER ? (
                                                         <>
                                                             {
                                                                 timeStampList[
@@ -548,7 +556,7 @@ const PhotoFrame = ({
                                                                         index
                                                                     ]
                                                                         .itemStartIndex +
-                                                                        idx
+                                                                    idx
                                                                 );
                                                             }
                                                         )
