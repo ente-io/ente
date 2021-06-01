@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 import CrossIcon from './CrossIcon';
 
-const CloseButtonWrapper=styled.div`
+const CloseButtonWrapper = styled.div`
     position: absolute;
     top:10px;
     right:10px;
@@ -47,9 +47,9 @@ export default function FullScreenDropZone(props: Props) {
     const onDragEnter = () => setIsDragActive(true);
     const onDragLeave = () => setIsDragActive(false);
 
-    useEffect(()=>{
-        window.addEventListener('keydown', (event)=>{
-            if (event.code==='Escape') {
+    useEffect(() => {
+        window.addEventListener('keydown', (event) => {
+            if (event.code === 'Escape') {
                 onDragLeave();
             }
         });
@@ -58,7 +58,6 @@ export default function FullScreenDropZone(props: Props) {
         <DropDiv
             {...props.getRootProps({
                 onDragEnter,
-                onDragLeave,
                 onDrop: (e) => {
                     e.preventDefault();
                     props.showCollectionSelector();
@@ -69,9 +68,10 @@ export default function FullScreenDropZone(props: Props) {
             {isDragActive && (
                 <Overlay
                     onDrop={onDragLeave}
+                    onDragLeave={onDragLeave}
                 >
                     <CloseButtonWrapper onClick={onDragLeave}>
-                        <CrossIcon/>
+                        <CrossIcon />
                     </CloseButtonWrapper>
                     {constants.UPLOAD_DROPZONE_MESSAGE}
                 </Overlay>
