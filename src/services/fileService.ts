@@ -9,7 +9,7 @@ import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
-const DIFF_LIMIT: number = 2500;
+const DIFF_LIMIT: number = 100;
 
 const FILES = 'files';
 
@@ -57,7 +57,7 @@ export const syncFiles = async (collections: Collection[], setFiles: (files: Fil
         if (collection.updationTime === lastSyncTime) {
             continue;
         }
-        const fetchedFiles = (await getFiles(collection, lastSyncTime, DIFF_LIMIT)) ?? [];
+        const fetchedFiles = (await getFiles(collection, lastSyncTime, DIFF_LIMIT, files, setFiles)) ?? [];
         files.push(...fetchedFiles);
         const latestVersionFiles = new Map<string, File>();
         files.forEach((file) => {
@@ -104,6 +104,8 @@ export const getFiles = async (
     collection: Collection,
     sinceTime: number,
     limit: number,
+    files: File[],
+    setFiles: (files: File[]) => void,
 ): Promise<File[]> => {
     try {
         const worker = await new CryptoWorker();
@@ -148,6 +150,9 @@ export const getFiles = async (
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime;
             }
+            setFiles([...(files || []), ...decryptedFiles].filter((item) => !item.isDeleted).sort(
+                (a, b) => b.metadata.creationTime - a.metadata.creationTime,
+            ));
         } while (resp.data.diff.length === limit);
         return decryptedFiles;
     } catch (e) {
