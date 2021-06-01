@@ -28,7 +28,7 @@ export type SetCollectionSelectorAttributes = React.Dispatch<
 interface Props {
     show: boolean;
     onHide: () => void;
-    setLoading:(value :boolean)=>void;
+    setLoading: (value: boolean) => void;
     directlyShowNextModal: boolean;
     collectionsAndTheirLatestFile: CollectionAndItsLatestFile[];
     attributes: CollectionSelectorAttributes;
@@ -47,7 +47,7 @@ function CollectionSelector({
             attributes.showNextModal();
         }
     }, [attributes]);
-    useEffect(()=>{
+    useEffect(() => {
         if (props.show && !attributes) {
             setLoading(true);
         }
@@ -68,7 +68,7 @@ function CollectionSelector({
                 <Card>
                     <PreviewCard
                         file={item.file}
-                        updateUrl={() => {}}
+                        updateUrl={() => { }}
                         forcedEnable
                     />
                     <Card.Text className="text-center">

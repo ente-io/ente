@@ -7,7 +7,7 @@ export interface MessageAttributes {
     staticBackdrop?: boolean;
     nonClosable?: boolean;
     content?: any;
-    close?: { text?: string; variant?: string ,action?:()=>void};
+    close?: { text?: string; variant?: string, action?: () => void };
     proceed?: {
         text: string;
         action: () => void;
@@ -65,11 +65,10 @@ export default function MessageDialog({
                     >
                         {attributes.close && (
                             <Button
-                                variant={`outline-${
-                                    attributes.close?.variant ?? 'secondary'
-                                }`}
-                                onClick={()=>{
-                                    attributes.close.action();
+                                variant={`outline-${attributes.close?.variant ?? 'secondary'
+                                    }`}
+                                onClick={() => {
+                                    attributes.close?.action();
                                     props.onHide();
                                 }}
                                 style={{
@@ -85,9 +84,8 @@ export default function MessageDialog({
                         )}
                         {attributes.proceed && (
                             <Button
-                                variant={`outline-${
-                                    attributes.proceed?.variant ?? 'primary'
-                                }`}
+                                variant={`outline-${attributes.proceed?.variant ?? 'primary'
+                                    }`}
                                 onClick={() => {
                                     attributes.proceed.action();
                                     props.onHide();
