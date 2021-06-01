@@ -98,13 +98,11 @@ export interface SearchStats {
 type GalleryContextType = {
     thumbs: Map<number, string>;
     files: Map<number, string>;
-    resetList?: boolean;
 }
 
 const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
     files: new Map(),
-    resetList: false,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(defaultGalleryContext);
@@ -125,7 +123,6 @@ export default function Gallery() {
     const [loading, setLoading] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] = useState<CollectionSelectorAttributes>(null);
     const [collectionSelectorView, setCollectionSelectorView] = useState(false);
-    const [resetList, setResetList] = useState(false);
     const [collectionNamerAttributes, setCollectionNamerAttributes] = useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [search, setSearch] = useState<Search>({
@@ -221,11 +218,6 @@ export default function Gallery() {
             setCollections(nonEmptyCollections);
             setCollectionsAndTheirLatestFile(collectionAndItsLatestFile);
             setFavItemIds(favItemIds);
-            // Reset react-window offset cache
-            setResetList(true);
-            setTimeout(() => {
-                setResetList(false);
-            }, 1000);
         } catch (e) {
             switch (e.message) {
             case errorCodes.ERR_SESSION_EXPIRED:
@@ -327,10 +319,7 @@ export default function Gallery() {
         setSearchStats(null);
     };
     return (
-        <GalleryContext.Provider value={{
-            ...defaultGalleryContext,
-            resetList,
-        }}>
+        <GalleryContext.Provider value={defaultGalleryContext}>
             <FullScreenDropZone
                 getRootProps={getRootProps}
                 getInputProps={getInputProps}

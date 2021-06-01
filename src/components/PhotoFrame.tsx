@@ -152,11 +152,8 @@ const PhotoFrame = ({
     }, [search]);
 
     useEffect(() => {
-        console.log('reset');
-        if (galleryContext.resetList) {
-            listRef.current?.resetAfterIndex(0);
-            setFetching({});
-        }
+        listRef.current?.resetAfterIndex(0);
+        setFetching({});
     }, [files]);
 
     const updateUrl = (index: number) => (url: string) => {
