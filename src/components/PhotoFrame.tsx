@@ -259,7 +259,6 @@ const PhotoFrame = ({
                 // ignore
             }
         }
-        console.log(fetching);
         if (!fetching[item.dataIndex]) {
             fetching[item.dataIndex] = true;
             let url: string;
