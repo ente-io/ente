@@ -217,7 +217,7 @@ const englishConstants = {
     ),
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
         <p>
-        your subscription will renew on{dateString(expiryTime)}
+        your subscription will renew on {dateString(expiryTime)}
         </p>
     ),
 
@@ -233,7 +233,7 @@ const englishConstants = {
         <p>
         you have used {usage}
             {' '}
-        GB out of your{quota}
+        GB out of your {quota}
             {' '}
         GB quota
         </p>
