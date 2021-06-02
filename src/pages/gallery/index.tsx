@@ -145,6 +145,8 @@ export default function Gallery() {
     const loadingBar = useRef(null);
     const [searchMode, setSearchMode] = useState(false);
     const [searchStats, setSearchStats] = useState(null);
+    const [syncInProgress, setSyncInProgress] = useState(false);
+    const [resync, setResync] = useState(false);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -195,6 +197,11 @@ export default function Gallery() {
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
 
     const syncWithRemote = async () => {
+        if (syncInProgress) {
+            setResync(true);
+            return;
+        }
+        setSyncInProgress(true);
         try {
             checkConnectivity();
             if (!(await isTokenValid())) {
@@ -244,6 +251,11 @@ export default function Gallery() {
             }
         } finally {
             loadingBar.current?.complete();
+        }
+        setSyncInProgress(false);
+        if (resync) {
+            setResync(false);
+            syncWithRemote();
         }
     };
 
