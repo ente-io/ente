@@ -81,6 +81,7 @@ dependencies:
   flutter_local_notifications: ^5.0.0+4
   open_file: ^3.2.1
   email_validator: '^1.0.6'
+  extended_image: ^4.1.0
 
 dev_dependencies:
   flutter_test:

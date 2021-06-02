@@ -27,16 +27,20 @@ void preloadFile(ente.File file) {
   if (file.fileType == FileType.video) {
     return;
   }
+  getImage(file);
+}
+
+Future<io.File> getImage(ente.File file) async {
   if (file.localID == null) {
-    getFileFromServer(file);
+    return getFileFromServer(file);
   } else {
-    if (FileLruCache.get(file) == null) {
-      file.getAsset().then((asset) {
-        asset.file.then((assetFile) {
-          FileLruCache.put(file, assetFile);
-        });
-      });
+    final cachedFile = FileLruCache.get(file);
+    if (cachedFile == null) {
+      final diskFile = await (await file.getAsset()).file;
+      FileLruCache.put(file, diskFile);
+      return diskFile;
     }
+    return cachedFile;
   }
 }
 

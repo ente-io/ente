@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
@@ -9,12 +10,14 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/gallery.dart';
+import 'package:photos/ui/image_editor_page.dart';
 import 'package:photos/ui/video_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -161,8 +164,30 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   AppBar _buildAppBar() {
-    final actions = List<Widget>();
+    final file = _files[_selectedIndex];
+    final List<Widget> actions = [];
     actions.add(_getFavoriteButton());
+    if (file.fileType == FileType.image) {
+      actions.add(
+        Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: IconButton(
+            onPressed: () async {
+              final imageProvider =
+                  ExtendedFileImageProvider(await getImage(file));
+              await precacheImage(imageProvider, context);
+              routeToPage(
+                  context,
+                  ImageEditorPage(
+                    imageProvider,
+                    widget.tagPrefix + file.tag(),
+                  ));
+            },
+            icon: Icon(Icons.edit),
+          ),
+        ),
+      );
+    }
     actions.add(PopupMenuButton(
       itemBuilder: (context) {
         return [
@@ -212,9 +237,9 @@ class _DetailPageState extends State<DetailPage> {
       },
       onSelected: (value) {
         if (value == 1) {
-          share(context, [_files[_selectedIndex]]);
+          share(context, [file]);
         } else if (value == 2) {
-          _displayInfo(_files[_selectedIndex]);
+          _displayInfo(file);
         } else if (value == 3) {
           _showDeleteSheet();
         }
