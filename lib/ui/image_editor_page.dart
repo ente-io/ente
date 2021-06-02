@@ -3,18 +3,28 @@ import 'dart:typed_data';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_editor/image_editor.dart';
+import 'package:logging/logging.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/toast_util.dart';
+import 'package:photos/models/file.dart' as ente;
+import 'package:path/path.dart' as path;
 
 class ImageEditorPage extends StatefulWidget {
   final ImageProvider imageProvider;
+  final ente.File originalFile;
   final String heroTag;
 
-  const ImageEditorPage(this.imageProvider, this.heroTag, {Key key}) : super(key: key);
+  const ImageEditorPage(this.imageProvider, this.originalFile, this.heroTag,
+      {Key key})
+      : super(key: key);
 
   @override
   _ImageEditorPageState createState() => _ImageEditorPageState();
 }
 
 class _ImageEditorPageState extends State<ImageEditorPage> {
+  final _logger = Logger("ImageEditor");
   final GlobalKey<ExtendedImageEditorState> editorKey =
       GlobalKey<ExtendedImageEditorState>();
 
@@ -55,12 +65,15 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildBottomBar() {
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-      _buildFlipButton(),
-      _buildRotateLeftButton(),
-      _buildRotateRightButton(),
-      _buildSaveButton(),
-    ]);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildFlipButton(),
+        _buildRotateLeftButton(),
+        _buildRotateRightButton(),
+        _buildSaveButton(),
+      ],
+    );
   }
 
   Widget _buildFlipButton() {
@@ -149,7 +162,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   Widget _buildSaveButton() {
     return GestureDetector(
       onTap: () {
-        // todo
+        _saveEdits();
       },
       child: Container(
         width: 80,
@@ -171,14 +184,15 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     );
   }
 
-  Future<void> crop([bool test = false]) async {
+  Future<void> _saveEdits() async {
+    final dialog = createProgressDialog(context, "saving...");
+    await dialog.show();
     final ExtendedImageEditorState state = editorKey.currentState;
     if (state == null) {
       return;
     }
     final Rect rect = state.getCropRect();
     if (rect == null) {
-      // showToast('The crop rect is null.');
       return;
     }
     final EditActionDetails action = state.editAction;
@@ -186,11 +200,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
     final bool flipHorizontal = action.flipY;
     final bool flipVertical = action.flipX;
-    // final img = await getImageFromEditorKey(editorKey);
     final Uint8List img = state.rawImageData;
 
     if (img == null) {
-      // showToast('The img is null.');
+      _logger.severe("null rawImageData");
+      showToast("something went wrong");
       return;
     }
 
@@ -216,18 +230,27 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       image: img,
       imageEditorOption: option,
     );
-
-    print('result.length = ${result?.length}');
-
+    _logger.info('result.length = ${result?.length}');
     final Duration diff = DateTime.now().difference(start);
+    _logger.info('image_editor time : $diff');
 
-    print('image_editor time : $diff');
-    // showToast('handle duration: $diff',
-    // duration: const Duration(seconds: 5), dismissOtherToast: true);
-
-    if (result == null) return;
-
-    showPreviewDialog(result);
+    if (result == null) {
+      _logger.severe("null result");
+      showToast("something went wrong");
+      return;
+    }
+    try {
+      await PhotoManager.editor.saveImage(result,
+          title: path.basenameWithoutExtension(widget.originalFile.title) +
+              "_edited_" +
+              DateTime.now().microsecondsSinceEpoch.toString() +
+              path.extension(widget.originalFile.title));
+      showToast("edits saved");
+    } catch (e, s) {
+      showToast("oops, could not save edits");
+      _logger.severe(e, s);
+    }
+    await dialog.hide();
   }
 
   void flip() {
@@ -236,26 +259,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   void rotate(bool right) {
     editorKey.currentState?.rotate(right: right);
-  }
-
-  void showPreviewDialog(Uint8List image) {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext ctx) => GestureDetector(
-        onTap: () => Navigator.pop(context),
-        child: Container(
-          color: Colors.grey.withOpacity(0.5),
-          child: Center(
-            child: SizedBox.fromSize(
-              size: const Size.square(200),
-              child: Container(
-                child: Image.memory(image),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   double sat = 1;
