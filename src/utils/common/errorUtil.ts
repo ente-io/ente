@@ -14,6 +14,7 @@ const AXIOS_NETWORK_ERROR = 'Network Error';
 export const SUBSCRIPTION_VERIFICATION_ERROR = 'Subscription verification failed';
 
 export const THUMBNAIL_GENERATION_FAILED = 'thumbnail generation failed';
+export const VIDEO_PLAYBACK_FAILED = 'video playback failed';
 
 export function ErrorHandler(error) {
     let errorMessage = null;
