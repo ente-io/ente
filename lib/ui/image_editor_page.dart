@@ -243,11 +243,15 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       return;
     }
     try {
-      await PhotoManager.editor.saveImage(result,
-          title: path.basenameWithoutExtension(widget.originalFile.title) +
-              "_edited_" +
-              DateTime.now().microsecondsSinceEpoch.toString() +
-              path.extension(widget.originalFile.title));
+      final asset = await widget.originalFile.getAsset();
+      await PhotoManager.editor.saveImage(
+        result,
+        title: path.basenameWithoutExtension(widget.originalFile.title) +
+            "_edited_" +
+            DateTime.now().microsecondsSinceEpoch.toString() +
+            path.extension(widget.originalFile.title),
+        relativePath: asset.relativePath,
+      );
       showToast("edits saved");
     } catch (e, s) {
       showToast("oops, could not save edits");
