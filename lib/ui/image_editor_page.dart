@@ -111,6 +111,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   Widget _buildRotateLeftButton() {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         rotate(false);
       },
@@ -136,6 +137,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   Widget _buildRotateRightButton() {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         rotate(true);
       },
@@ -161,6 +163,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   Widget _buildSaveButton() {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         _saveEdits();
       },
