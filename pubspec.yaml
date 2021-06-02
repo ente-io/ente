@@ -82,6 +82,7 @@ dependencies:
   open_file: ^3.2.1
   email_validator: '^1.0.6'
   extended_image: ^4.1.0
+  image_editor: ^1.0.0
 
 dev_dependencies:
   flutter_test:

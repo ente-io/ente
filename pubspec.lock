@@ -415,6 +415,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.2"
+  image_editor:
+    dependency: "direct main"
+    description:
+      name: image_editor
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   in_app_purchase:
     dependency: "direct main"
     description:
