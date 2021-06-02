@@ -9,6 +9,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:photos/models/file.dart' as ente;
@@ -248,7 +249,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       return;
     }
     try {
-      final asset = await widget.originalFile.getAsset();
       final fileName =
           path.basenameWithoutExtension(widget.originalFile.title) +
               "_edited_" +
@@ -257,12 +257,13 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       final newAsset = await PhotoManager.editor.saveImage(
         result,
         title: fileName,
-        relativePath: asset.relativePath,
       );
-      final newFile = await ente.File.fromAsset(widget.originalFile.deviceFolder, newAsset);
+      final newFile =
+          await ente.File.fromAsset(widget.originalFile.deviceFolder, newAsset);
       newFile.creationTime = widget.originalFile.creationTime;
       await FilesDB.instance.insertMultiple([newFile]);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
+      SyncService.instance.sync();
       showToast("edits saved");
     } catch (e, s) {
       showToast("oops, could not save edits");
