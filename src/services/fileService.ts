@@ -9,7 +9,7 @@ import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 
 const ENDPOINT = getEndpoint();
-const DIFF_LIMIT: number = 100;
+const DIFF_LIMIT: number = 250;
 
 const FILES = 'files';
 
