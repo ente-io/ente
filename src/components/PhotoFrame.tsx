@@ -119,6 +119,7 @@ interface Props {
     searchMode: boolean;
     search: Search;
     setSearchStats: setSearchStats;
+    deleted?: number[];
 }
 
 const PhotoFrame = ({
@@ -134,6 +135,7 @@ const PhotoFrame = ({
     searchMode,
     search,
     setSearchStats,
+    deleted,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -154,7 +156,7 @@ const PhotoFrame = ({
     useEffect(() => {
         listRef.current?.resetAfterIndex(0);
         setFetching({});
-    }, [files, search]);
+    }, [files, search, deleted]);
 
     const updateUrl = (index: number) => (url: string) => {
         files[index] = {
@@ -298,6 +300,9 @@ const PhotoFrame = ({
             dataIndex: index,
         }))
         .filter((item) => {
+            if (deleted.includes(item.id)) {
+                return false;
+            }
             if (
                 search.date &&
                 !isSameDayAnyYear(search.date)(

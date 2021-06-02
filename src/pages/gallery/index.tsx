@@ -147,6 +147,7 @@ export default function Gallery() {
     const [searchStats, setSearchStats] = useState(null);
     const [syncInProgress, setSyncInProgress] = useState(false);
     const [resync, setResync] = useState(false);
+    const [deleted, setDeleted] = useState<number[]>([]);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -298,12 +299,13 @@ export default function Gallery() {
     const deleteFileHelper = async () => {
         loadingBar.current?.continuousStart();
         try {
+            const fileIds = getSelectedFileIds(selected);
             await deleteFiles(
-                getSelectedFileIds(selected),
+                fileIds,
                 clearSelection,
                 syncWithRemote,
-
             );
+            setDeleted([...deleted, ...fileIds]);
         } catch (e) {
             loadingBar.current.complete();
             switch (e.status?.toString()) {
@@ -433,6 +435,7 @@ export default function Gallery() {
                     searchMode={searchMode}
                     search={search}
                     setSearchStats={setSearchStats}
+                    deleted={deleted}
                 />
                 {selected.count > 0 && (
                     <SelectedFileOptions
