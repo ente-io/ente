@@ -5,10 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:image_editor/image_editor.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/files_db.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:path/path.dart' as path;
+import 'dart:io' as io;
 
 class ImageEditorPage extends StatefulWidget {
   final ImageProvider imageProvider;
@@ -244,14 +249,20 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     }
     try {
       final asset = await widget.originalFile.getAsset();
-      await PhotoManager.editor.saveImage(
+      final fileName =
+          path.basenameWithoutExtension(widget.originalFile.title) +
+              "_edited_" +
+              DateTime.now().microsecondsSinceEpoch.toString() +
+              path.extension(widget.originalFile.title);
+      final newAsset = await PhotoManager.editor.saveImage(
         result,
-        title: path.basenameWithoutExtension(widget.originalFile.title) +
-            "_edited_" +
-            DateTime.now().microsecondsSinceEpoch.toString() +
-            path.extension(widget.originalFile.title),
+        title: fileName,
         relativePath: asset.relativePath,
       );
+      final newFile = await ente.File.fromAsset(widget.originalFile.deviceFolder, newAsset);
+      newFile.creationTime = widget.originalFile.creationTime;
+      await FilesDB.instance.insertMultiple([newFile]);
+      Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
       showToast("edits saved");
     } catch (e, s) {
       showToast("oops, could not save edits");

@@ -73,7 +73,7 @@ Future<List<File>> _getFiles(Map<String, dynamic> args) async {
             entity.modifiedDateTime.microsecondsSinceEpoch) >
         fromTime) {
       try {
-        final file = await File.fromAsset(pathEntity, entity);
+        final file = await File.fromAsset(pathEntity.name, entity);
         if (!files.contains(file)) {
           files.add(file);
         }

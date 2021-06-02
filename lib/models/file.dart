@@ -26,12 +26,11 @@ class File {
 
   File();
 
-  static Future<File> fromAsset(
-      AssetPathEntity pathEntity, AssetEntity asset) async {
+  static Future<File> fromAsset(String pathName, AssetEntity asset) async {
     File file = File();
     file.localID = asset.id;
     file.title = asset.title;
-    file.deviceFolder = pathEntity.name;
+    file.deviceFolder = pathName;
     file.location = Location(asset.latitude, asset.longitude);
     switch (asset.type) {
       case AssetType.image:
