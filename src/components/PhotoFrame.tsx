@@ -154,7 +154,7 @@ const PhotoFrame = ({
     useEffect(() => {
         listRef.current?.resetAfterIndex(0);
         setFetching({});
-    }, [files]);
+    }, [files, search]);
 
     const updateUrl = (index: number) => (url: string) => {
         files[index] = {
