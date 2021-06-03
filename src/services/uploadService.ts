@@ -679,8 +679,11 @@ class UploadService {
                     await new Promise((resolve, reject) => {
                         let video = document.createElement('video');
                         imageURL = URL.createObjectURL(file);
-                        video.addEventListener('timeupdate', function() {
+                        video.addEventListener('timeupdate', function () {
                             try {
+                                if (!video) {
+                                    return;
+                                }
                                 const thumbnailWidth =
                                     (video.videoWidth * THUMBNAIL_HEIGHT) /
                                     video.videoHeight;
@@ -728,7 +731,7 @@ class UploadService {
                 quality /= 2;
                 thumbnailBlob = await new Promise((resolve) => {
                     canvas.toBlob(
-                        function(blob) {
+                        function (blob) {
                             resolve(blob);
                         },
                         'image/jpeg',
