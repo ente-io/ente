@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import constants from 'utils/strings/constants';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
 import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
@@ -24,8 +24,8 @@ export default function Credentials() {
         const user = getData(LS_KEYS.USER);
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        if (!user?.token) {
-            router.push('/');
+        if (!user?.token || !keyAttributes?.memLimit) {
+            clearData();
         } else if (!keyAttributes) {
             router.push('/generate');
         } else if (key) {
