@@ -275,16 +275,16 @@ class UploadService {
             // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
             this.fileProgress.set(rawFile.name, FILE_UPLOAD_FAILED);
             ErrorHandler(e);
-        } finally {
-            this.filesCompleted++;
-            this.updateProgressBarUI();
-            if (this.filesToBeUploaded.length > 0) {
-                await this.uploader(
-                    worker,
-                    reader,
-                    this.filesToBeUploaded.pop(),
-                );
-            }
+        }
+        this.filesCompleted++;
+        this.updateProgressBarUI();
+
+        if (this.filesToBeUploaded.length > 0) {
+            await this.uploader(
+                worker,
+                reader,
+                this.filesToBeUploaded.pop(),
+            );
         }
     }
 
