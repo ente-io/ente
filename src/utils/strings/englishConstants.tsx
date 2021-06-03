@@ -78,12 +78,12 @@ const englishConstants = {
             {' - '}
             {(() => {
                 switch (progress) {
-                case -1:
-                    return 'failed';
-                case -2:
-                    return 'already uploaded, skipping...';
-                default:
-                    return `${progress}%`;
+                    case -1:
+                        return 'failed';
+                    case -2:
+                        return 'already uploaded, skipping...';
+                    default:
+                        return `${progress}%`;
                 }
             })()}
         </div>

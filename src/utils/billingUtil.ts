@@ -94,37 +94,37 @@ export async function updateSubscription(
         });
     } catch (err) {
         switch (err?.message) {
-        case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
-            setDialogMessage({
-                title: constants.UPDATE_PAYMENT_METHOD,
-                content: constants.UPDATE_PAYMENT_METHOD_MESSAGE,
-                staticBackdrop: true,
-                proceed: {
-                    text: constants.UPDATE_PAYMENT_METHOD,
-                    variant: 'success',
-                    action: updatePaymentMethod.bind(
-                        null,
+            case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
+                setDialogMessage({
+                    title: constants.UPDATE_PAYMENT_METHOD,
+                    content: constants.UPDATE_PAYMENT_METHOD_MESSAGE,
+                    staticBackdrop: true,
+                    proceed: {
+                        text: constants.UPDATE_PAYMENT_METHOD,
+                        variant: 'success',
+                        action: updatePaymentMethod.bind(
+                            null,
 
-                        setDialogMessage,
-                        setLoading,
-                    ),
-                },
-                close: { text: constants.CANCEL },
-            });
-            break;
-        case SUBSCRIPTION_VERIFICATION_ERROR:
-            setDialogMessage({
-                title: constants.ERROR,
-                content: constants.SUBSCRIPTION_VERIFICATION_FAILED,
-                close: { variant: 'danger' },
-            });
-            break;
-        default:
-            setDialogMessage({
-                title: constants.ERROR,
-                content: constants.SUBSCRIPTION_PURCHASE_FAILED,
-                close: { variant: 'danger' },
-            });
+                            setDialogMessage,
+                            setLoading,
+                        ),
+                    },
+                    close: { text: constants.CANCEL },
+                });
+                break;
+            case SUBSCRIPTION_VERIFICATION_ERROR:
+                setDialogMessage({
+                    title: constants.ERROR,
+                    content: constants.SUBSCRIPTION_VERIFICATION_FAILED,
+                    close: { variant: 'danger' },
+                });
+                break;
+            default:
+                setDialogMessage({
+                    title: constants.ERROR,
+                    content: constants.SUBSCRIPTION_PURCHASE_FAILED,
+                    close: { variant: 'danger' },
+                });
         }
     } finally {
         setLoading(false);

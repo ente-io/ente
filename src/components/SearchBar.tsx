@@ -145,16 +145,16 @@ export default function SearchBar(props: Props) {
         props.setOpen(true);
 
         switch (selectedOption.type) {
-        case SuggestionType.DATE:
-            props.setSearch({
-                date: selectedOption.value as DateValue,
-            });
-            break;
-        case SuggestionType.LOCATION:
-            props.setSearch({
-                location: selectedOption.value as Bbox,
-            });
-            break;
+            case SuggestionType.DATE:
+                props.setSearch({
+                    date: selectedOption.value as DateValue,
+                });
+                break;
+            case SuggestionType.LOCATION:
+                props.setSearch({
+                    location: selectedOption.value as Bbox,
+                });
+                break;
         }
     };
     const resetSearch = () => {

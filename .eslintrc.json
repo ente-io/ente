@@ -23,20 +23,32 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "indent": ["error", 4],
+        "indent": [
+            "error",
+            4,
+            {
+                "SwitchCase": 1
+            }
+        ],
         "class-methods-use-this": "off",
         "react/prop-types": "off",
         "react/display-name": "off",
         "react/no-unescaped-entities": "off",
         "no-unused-vars": "off",
-        "@typescript-eslint/no-unused-vars": ["error"],
+        "@typescript-eslint/no-unused-vars": [
+            "error"
+        ],
         "require-jsdoc": "off",
         "valid-jsdoc": "off",
         "max-len": "off",
         "new-cap": "off",
         "no-invalid-this": "off",
         "eqeqeq": "error",
-        "object-curly-spacing": ["error", "always"]
+        "object-curly-spacing": [
+            "error",
+            "always"
+        ],
+        "space-before-function-paren": "off"
     },
     "settings": {
         "react": {

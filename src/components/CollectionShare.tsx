@@ -53,17 +53,17 @@ function CollectionShare(props: Props) {
         } catch (e) {
             let errorMessage = null;
             switch (e?.status) {
-            case 400:
-                errorMessage = constants.SHARING_BAD_REQUEST_ERROR;
-                break;
-            case 402:
-                errorMessage = constants.SHARING_DISABLED_FOR_FREE_ACCOUNTS;
-                break;
-            case 404:
-                errorMessage = constants.USER_DOES_NOT_EXIST;
-                break;
-            default:
-                errorMessage = `${constants.UNKNOWN_ERROR} ${e.message}`;
+                case 400:
+                    errorMessage = constants.SHARING_BAD_REQUEST_ERROR;
+                    break;
+                case 402:
+                    errorMessage = constants.SHARING_DISABLED_FOR_FREE_ACCOUNTS;
+                    break;
+                case 404:
+                    errorMessage = constants.USER_DOES_NOT_EXIST;
+                    break;
+                default:
+                    errorMessage = `${constants.UNKNOWN_ERROR} ${e.message}`;
             }
             setFieldError('email', errorMessage);
         } finally {

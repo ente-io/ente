@@ -492,41 +492,41 @@ const PhotoFrame = ({
 
                             const generateKey = (index) => {
                                 switch (timeStampList[index].itemType) {
-                                case ITEM_TYPE.TILE:
-                                    return `${timeStampList[index].items[0].id}-${timeStampList[index].items.slice(-1)[0].id}`;
-                                default:
-                                    return `${timeStampList[index].id}-${index}`;
+                                    case ITEM_TYPE.TILE:
+                                        return `${timeStampList[index].items[0].id}-${timeStampList[index].items.slice(-1)[0].id}`;
+                                    default:
+                                        return `${timeStampList[index].id}-${index}`;
                                 }
                             };
 
                             const getItemSize = (index) => {
                                 switch (timeStampList[index].itemType) {
-                                case ITEM_TYPE.TIME:
-                                    return DATE_CONTAINER_HEIGHT;
-                                case ITEM_TYPE.TILE:
-                                    return IMAGE_CONTAINER_HEIGHT;
-                                default:
-                                    return timeStampList[index].height;
+                                    case ITEM_TYPE.TIME:
+                                        return DATE_CONTAINER_HEIGHT;
+                                    case ITEM_TYPE.TILE:
+                                        return IMAGE_CONTAINER_HEIGHT;
+                                    default:
+                                        return timeStampList[index].height;
                                 }
                             };
 
                             const renderListItem = (listItem) => {
                                 switch (listItem.itemType) {
-                                case ITEM_TYPE.TIME:
-                                    return (
-                                        <DateContainer>
-                                            {listItem.date}
-                                        </DateContainer>
-                                    );
-                                case ITEM_TYPE.BANNER:
-                                    return listItem.banner;
-                                default:
-                                    return (listItem.items.map(
-                                        (item, idx) => getThumbnail(
-                                            filteredData,
-                                            listItem.itemStartIndex + idx,
-                                        ),
-                                    ));
+                                    case ITEM_TYPE.TIME:
+                                        return (
+                                            <DateContainer>
+                                                {listItem.date}
+                                            </DateContainer>
+                                        );
+                                    case ITEM_TYPE.BANNER:
+                                        return listItem.banner;
+                                    default:
+                                        return (listItem.items.map(
+                                            (item, idx) => getThumbnail(
+                                                filteredData,
+                                                listItem.itemStartIndex + idx,
+                                            ),
+                                        ));
                                 }
                             };
 

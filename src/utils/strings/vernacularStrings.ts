@@ -45,10 +45,10 @@ export type VernacularConstants<T> = {
  */
 export const getLocale = (lang: string) => {
     switch (lang) {
-    case locale.hi:
-        return locale.hi;
-    default:
-        return locale.en;
+        case locale.hi:
+            return locale.hi;
+        default:
+            return locale.en;
     }
 };
 

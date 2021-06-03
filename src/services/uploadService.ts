@@ -348,14 +348,14 @@ class UploadService {
 
             let fileType: FILE_TYPE;
             switch (receivedFile.type.split('/')[0]) {
-            case TYPE_IMAGE:
-                fileType = FILE_TYPE.IMAGE;
-                break;
-            case TYPE_VIDEO:
-                fileType = FILE_TYPE.VIDEO;
-                break;
-            default:
-                fileType = FILE_TYPE.OTHERS;
+                case TYPE_IMAGE:
+                    fileType = FILE_TYPE.IMAGE;
+                    break;
+                case TYPE_VIDEO:
+                    fileType = FILE_TYPE.VIDEO;
+                    break;
+                default:
+                    fileType = FILE_TYPE.OTHERS;
             }
             if (
                 fileType === FILE_TYPE.OTHERS &&
