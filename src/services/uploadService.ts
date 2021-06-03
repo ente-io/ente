@@ -670,7 +670,7 @@ class UploadService {
                             () =>
                                 reject(
                                     Error(`${THUMBNAIL_GENERATION_FAILED} err:
-                                    wait time exceeded`),
+                                    wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`),
                                 ),
                             WAIT_TIME_THUMBNAIL_GENERATION,
                         );
@@ -710,7 +710,7 @@ class UploadService {
                             () =>
                                 reject(
                                     Error(`${THUMBNAIL_GENERATION_FAILED} err:
-                                wait time exceeded`),
+                                wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`),
                                 ),
                             WAIT_TIME_THUMBNAIL_GENERATION,
                         );
