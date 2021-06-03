@@ -65,10 +65,9 @@ export default function MessageDialog({
                     >
                         {attributes.close && (
                             <Button
-                                variant={`outline-${attributes.close?.variant ?? 'secondary'
-                                }`}
+                                variant={`outline-${attributes.close?.variant ?? 'secondary'}`}
                                 onClick={() => {
-                                    attributes.close?.action();
+                                    attributes.close?.action && attributes.close?.action();
                                     props.onHide();
                                 }}
                                 style={{
@@ -84,8 +83,7 @@ export default function MessageDialog({
                         )}
                         {attributes.proceed && (
                             <Button
-                                variant={`outline-${attributes.proceed?.variant ?? 'primary'
-                                }`}
+                                variant={`outline-${attributes.proceed?.variant ?? 'primary'}`}
                                 onClick={() => {
                                     attributes.proceed.action();
                                     props.onHide();
