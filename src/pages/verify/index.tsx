@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Container from 'components/Container';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
@@ -17,6 +17,7 @@ import {
 import { setIsFirstLogin } from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
 import { clearKeys } from 'utils/storage/sessionStorage';
+import { AppContext } from 'pages/_app';
 
 interface formValues {
     ott: string;
@@ -27,6 +28,7 @@ export default function Verify() {
     const [loading, setLoading] = useState(false);
     const [resend, setResend] = useState(0);
     const router = useRouter();
+    const appContext = useContext(AppContext);
 
     useEffect(() => {
         const main = async () => {
@@ -46,6 +48,7 @@ export default function Verify() {
             }
         };
         main();
+        appContext.showNavBar(true);
     }, []);
 
     const onSubmit = async (

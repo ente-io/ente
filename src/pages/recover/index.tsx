@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-
+import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
@@ -9,11 +8,14 @@ import SingleInputForm from 'components/SingleInputForm';
 import MessageDialog from 'components/MessageDialog';
 import Container from 'components/Container';
 import { Card, Button } from 'react-bootstrap';
+import { AppContext } from 'pages/_app';
 
 export default function Recover() {
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [messageDialogView, SetMessageDialogView] = useState(false);
+    const appContext = useContext(AppContext);
+
     useEffect(() => {
         router.prefetch('/gallery');
         const user = getData(LS_KEYS.USER);
@@ -25,6 +27,7 @@ export default function Recover() {
         } else {
             setKeyAttributes(keyAttributes);
         }
+        appContext.showNavBar(true);
     }, []);
 
     const recover = async (recoveryKey: string, setFieldError) => {

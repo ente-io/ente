@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/router';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
@@ -17,6 +17,7 @@ import {
     setSessionKeys,
 } from 'utils/crypto';
 import { setJustSignedUp } from 'utils/storage';
+import { AppContext } from 'pages/_app';
 
 interface FormValues {
     email: string;
@@ -28,12 +29,15 @@ export default function SignUp() {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
     const [acceptTerms, setAcceptTerms] = useState(false);
+    const appContext = useContext(AppContext);
+
     useEffect(() => {
         router.prefetch('/verify');
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
             router.push('/verify');
         }
+        appContext.showNavBar(true);
     }, []);
 
     const registerUser = async (

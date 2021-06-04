@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
@@ -10,6 +10,7 @@ import CryptoWorker, {
 import { getActualKey } from 'utils/common/key';
 import { setKeys, UpdatedKey } from 'services/userService';
 import SetPasswordForm from 'components/SetPasswordForm';
+import { AppContext } from 'pages/_app';
 
 export interface KEK {
     key: string;
@@ -20,6 +21,7 @@ export interface KEK {
 export default function Generate() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
+    const appContext = useContext(AppContext);
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
@@ -28,6 +30,7 @@ export default function Generate() {
         } else {
             setToken(user.token);
         }
+        appContext.showNavBar(true);
     }, []);
 
     const onSubmit = async (passphrase, setFieldError) => {

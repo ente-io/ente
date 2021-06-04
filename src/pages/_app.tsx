@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
@@ -307,12 +307,21 @@ export interface BannerMessage {
 }
 
 sentryInit();
+
+type AppContextType = {
+    showNavBar: (show: boolean) => void;
+}
+
+export const AppContext = createContext<AppContextType>(null);
+
 export default function App({ Component, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(
         typeof window !== 'undefined' && !window.navigator.onLine,
     );
+    const [showNavbar, setShowNavBar] = useState(false);
+
     useEffect(() => {
         if (
             !('serviceWorker' in navigator) ||
@@ -367,6 +376,8 @@ export default function App({ Component, err }) {
         };
     }, []);
 
+    const showNavBar = (show: boolean) => setShowNavBar(show);
+
     return (
         <>
             <Head>
@@ -380,7 +391,7 @@ export default function App({ Component, err }) {
                 {/* End Cloudflare Web Analytics  */}
             </Head>
             <GlobalStyles />
-            <Navbar>
+            {showNavbar && <Navbar>
                 <FlexContainer>
                     <LogoImage
                         style={{ height: '24px', padding: '3px' }}
@@ -388,17 +399,21 @@ export default function App({ Component, err }) {
                         src="/icon.svg"
                     />
                 </FlexContainer>
-            </Navbar>
+            </Navbar>}
             <OfflineContainer>{offline && constants.OFFLINE_MSG}</OfflineContainer>
-            {loading ? (
-                <Container>
-                    <EnteSpinner>
-                        <span className="sr-only">Loading...</span>
-                    </EnteSpinner>
-                </Container>
-            ) : (
-                <Component err={err} setLoading={setLoading} />
-            )}
+            <AppContext.Provider value={{
+                showNavBar,
+            }}>
+                {loading ? (
+                    <Container>
+                        <EnteSpinner>
+                            <span className="sr-only">Loading...</span>
+                        </EnteSpinner>
+                    </Container>
+                ) : (
+                    <Component err={err} setLoading={setLoading} />
+                )}
+            </AppContext.Provider>
         </>
     );
 }

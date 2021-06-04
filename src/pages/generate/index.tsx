@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import constants from 'utils/strings/constants';
 import { logoutUser, putAttributes } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
@@ -15,6 +15,7 @@ import RecoveryKeyModal from 'components/RecoveryKeyModal';
 import { KeyAttributes } from 'types';
 import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
+import { AppContext } from 'pages/_app';
 
 export interface KEK {
     key: string;
@@ -27,6 +28,7 @@ export default function Generate() {
     const router = useRouter();
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [loading, setLoading] = useState(false);
+    const appContext = useContext(AppContext);
     useEffect(() => {
         const main = async () => {
             setLoading(true);
@@ -55,6 +57,7 @@ export default function Generate() {
             setLoading(false);
         };
         main();
+        appContext.showNavBar(true);
     }, []);
 
     const onSubmit = async (passphrase, setFieldError) => {

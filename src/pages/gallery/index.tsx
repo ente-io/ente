@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
@@ -54,6 +54,7 @@ import UploadButton from './components/UploadButton';
 import PlanSelector from './components/PlanSelector';
 import Upload from './components/Upload';
 import Collections from './components/Collections';
+import { AppContext } from 'pages/_app';
 
 export enum FILE_TYPE {
     IMAGE,
@@ -148,6 +149,7 @@ export default function Gallery() {
     const [syncInProgress, setSyncInProgress] = useState(false);
     const [resync, setResync] = useState(false);
     const [deleted, setDeleted] = useState<number[]>([]);
+    const appContext = useContext(AppContext);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -184,6 +186,7 @@ export default function Gallery() {
             setIsFirstFetch(false);
         };
         main();
+        appContext.showNavBar(true);
     }, []);
 
     useEffect(() => setDialogView(true), [dialogMessage]);

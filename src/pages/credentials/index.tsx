@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import constants from 'utils/strings/constants';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -14,10 +14,12 @@ import { isFirstLogin } from 'utils/storage';
 import SingleInputForm from 'components/SingleInputForm';
 import Container from 'components/Container';
 import { Button, Card } from 'react-bootstrap';
+import { AppContext } from 'pages/_app';
 
 export default function Credentials() {
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
+    const appContext = useContext(AppContext);
 
     useEffect(() => {
         router.prefetch('/gallery');
@@ -33,6 +35,7 @@ export default function Credentials() {
         } else {
             setKeyAttributes(keyAttributes);
         }
+        appContext.showNavBar(true);
     }, []);
 
     const verifyPassphrase = async (passphrase, setFieldError) => {
