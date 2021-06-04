@@ -87,6 +87,10 @@ const FeatureText = styled.div`
 const Img = styled.img`
     height: 250px;
     object-fit: contain;
+
+    @media(max-width: 400px) {
+        height: 180px;
+    }
 `;
 
 export default function LandingPage() {
