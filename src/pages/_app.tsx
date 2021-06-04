@@ -280,6 +280,17 @@ const GlobalStyles = createGlobalStyle`
     .arrow::after{
         border-bottom-color:#282828 !important;
     }
+    .carousel-inner {
+        padding-bottom: 50px !important;
+    }
+    .carousel-indicators li {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+    .carousel-indicators .active {
+        background-color: #2dc262;
+    }
 `;
 
 export const LogoImage = styled.img`
@@ -297,7 +308,6 @@ const OfflineContainer = styled.div`
     padding: 0;
     font-size: 14px;
     text-align: center;
-    margin-top: -10px;
     line-height: 32px;
 `;
 
