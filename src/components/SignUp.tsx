@@ -176,12 +176,12 @@ export default function SignUp(props: SignUpProps) {
                         loading={loading}
                         disabled={!acceptTerms}
                     />
+                    <br />
+                    <Button block variant="link" onClick={props.login}>
+                        {constants.ACCOUNT_EXISTS}
+                    </Button>
                 </Form>
             )}
         </Formik>
-        <br />
-        <Button variant="link" onClick={props.login}>
-            {constants.ACCOUNT_EXISTS}
-        </Button>
     </>);
 }
