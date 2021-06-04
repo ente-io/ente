@@ -66,7 +66,7 @@ export default function Sidebar(props: Props) {
     function openSupportMail() {
         const a = document.createElement('a');
         a.href = 'mailto:contact@ente.io';
-        a.target = '_blank';
+
         a.rel = 'noreferrer noopener';
         a.click();
     }
