@@ -101,7 +101,7 @@ export default function Sidebar(props: Props) {
             onStateChange={(state) => setIsOpen(state.isOpen)}
             itemListElement="div"
         >
-            <div style={{ display: 'flex', textAlign: 'center' }}>
+            <div style={{ display: 'flex', outline: 'none', textAlign: 'center' }}>
                 <LogoImage
                     style={{ height: '24px', padding: '3px' }}
                     alt="logo"
@@ -117,7 +117,7 @@ export default function Sidebar(props: Props) {
             >
                 {user?.email}
             </div>
-            <div style={{ flex: 1, overflow: 'auto', paddingTop: '0' }}>
+            <div style={{ flex: 1, overflow: 'auto', outline: 'none', paddingTop: '0' }}>
                 <div style={{ outline: 'none' }}>
                     <div style={{ display: 'flex' }}>
                         <h5 style={{ margin: '4px 0 12px 2px' }}>
@@ -249,7 +249,7 @@ export default function Sidebar(props: Props) {
                         close: { text: constants.CANCEL },
                     })}
                 >
-                  logout
+                    {constants.LOGOUT}
                 </LinkButton>
                 <div
                     style={{
