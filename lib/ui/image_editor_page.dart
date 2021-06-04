@@ -36,17 +36,23 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0x00000000),
-        elevation: 0,
-      ),
-      body: Container(
-        child: Column(
-          children: [
-            Expanded(child: _buildImage()),
-            _buildBottomBar(),
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        await _showExitConfirmationDialog();
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color(0x00000000),
+          elevation: 0,
+        ),
+        body: Container(
+          child: Column(
+            children: [
+              Expanded(child: _buildImage()),
+              _buildBottomBar(),
+            ],
+          ),
         ),
       ),
     );
@@ -323,6 +329,35 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       value: con,
       min: 0,
       max: 4,
+    );
+  }
+
+  Future<void> _showExitConfirmationDialog() async {
+    AlertDialog alert = AlertDialog(
+      title: Text("discard edits?"),
+      actions: [
+        TextButton(
+          child: Text("yes", style: TextStyle(color: Colors.red)),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+            Navigator.of(context).pop();
+          },
+        ),
+        TextButton(
+          child: Text("no", style: TextStyle(color: Colors.white)),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+          },
+        ),
+      ],
+    );
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+      barrierColor: Colors.black87,
     );
   }
 }
