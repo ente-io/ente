@@ -58,7 +58,7 @@ function createWindow() {
         splash.loadURL(
             `file://${path.join(process.resourcesPath, 'splash.html')}`
         );
-        mainWindow.loadURL('http://photos.ente.io');
+        mainWindow.loadURL('http://web.ente.io');
     }
     mainWindow.webContents.on('did-fail-load', () => {
         splash.close();
