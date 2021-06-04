@@ -21,7 +21,7 @@ export default function SignUpPage() {
             router.push('/verify');
         }
         setLoading(false);
-        appContext.showNavBar(true);
+        appContext.showNavBar(false);
     }, []);
 
     const login = () => {

@@ -20,7 +20,7 @@ export default function Home() {
             router.push('/verify');
         }
         setLoading(false);
-        appContext.showNavBar(true);
+        appContext.showNavBar(false);
     }, []);
 
     const register = () => {
