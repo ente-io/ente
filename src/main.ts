@@ -17,6 +17,13 @@ let appIsQuitting = false;
 let tray: Tray;
 let mainWindow: BrowserWindow;
 
+
+
+// Disable error dialogs by overriding
+dialog.showErrorBox = function (title, content) {
+    console.log(`${title}\n${content}`);
+};
+
 function createWindow() {
     const appImgPath = isDev
         ? 'build/window-icon.png'
