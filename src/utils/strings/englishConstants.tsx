@@ -57,6 +57,7 @@ const englishConstants = {
     INVALID_CODE: 'invalid verification code',
     SENDING: 'sending...',
     SENT: 'sent!',
+    PASSWORD: 'password',
     ENTER_PASSPHRASE: 'enter your password',
     RETURN_PASSPHRASE_HINT: 'password',
     SET_PASSPHRASE: 'set password',

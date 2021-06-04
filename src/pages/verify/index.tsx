@@ -18,6 +18,7 @@ import { setIsFirstLogin } from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
+import LogoImg from 'components/LogoImg';
 
 interface formValues {
     ott: string;
@@ -48,7 +49,7 @@ export default function Verify() {
             }
         };
         main();
-        appContext.showNavBar(true);
+        appContext.showNavBar(false);
     }, []);
 
     const onSubmit = async (
@@ -99,10 +100,9 @@ export default function Verify() {
     return (
         <Container>
             <Card style={{ minWidth: '300px' }} className="text-center">
-                <Card.Body>
-                    <Card.Title
-                        style={{ fontWeight: 'bold', marginBottom: '24px' }}
-                    >
+                <Card.Body style={{ padding: '40px 30px' }}>
+                    <Card.Title style={{ marginBottom: '32px' }}>
+                        <LogoImg src='/icon.svg' />
                         {constants.VERIFY_EMAIL}
                     </Card.Title>
                     {constants.EMAIL_SENT({ email })}

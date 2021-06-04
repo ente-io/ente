@@ -16,7 +16,7 @@ import {
     setSessionKeys,
 } from 'utils/crypto';
 import { setJustSignedUp } from 'utils/storage';
-import styled from 'styled-components';
+import LogoImg from './LogoImg';
 
 interface FormValues {
     email: string;
@@ -27,14 +27,6 @@ interface FormValues {
 interface SignUpProps {
     login: () => void;
 }
-
-const Img = styled.img`
-    height: 25px;
-    vertical-align: bottom;
-    padding-right: 15px;
-    border-right: 2px solid #aaa;
-    margin-right: 15px;
-`;
 
 export default function SignUp(props: SignUpProps) {
     const router = useRouter();
@@ -77,7 +69,7 @@ export default function SignUp(props: SignUpProps) {
 
     return (<>
         <Card.Title style={{ marginBottom: '32px' }}>
-            <Img src="/icon.svg" />
+            <LogoImg src="/icon.svg" />
             {constants.SIGN_UP}
         </Card.Title>
         <Formik<FormValues>

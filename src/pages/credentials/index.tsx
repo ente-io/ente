@@ -15,6 +15,7 @@ import SingleInputForm from 'components/SingleInputForm';
 import Container from 'components/Container';
 import { Button, Card } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
+import LogoImg from 'components/LogoImg';
 
 export default function Credentials() {
     const router = useRouter();
@@ -35,7 +36,7 @@ export default function Credentials() {
         } else {
             setKeyAttributes(keyAttributes);
         }
-        appContext.showNavBar(true);
+        appContext.showNavBar(false);
     }, []);
 
     const verifyPassphrase = async (passphrase, setFieldError) => {
@@ -79,12 +80,13 @@ export default function Credentials() {
         <>
             <Container>
                 <Card
-                    style={{ minWidth: '320px', padding: '40px 30px' }}
+                    style={{ minWidth: '320px' }}
                     className="text-center"
                 >
-                    <Card.Body>
-                        <Card.Title style={{ marginBottom: '24px' }}>
-                            {constants.ENTER_PASSPHRASE}
+                    <Card.Body style={{ padding: '40px 30px' }}>
+                        <Card.Title style={{ marginBottom: '32px' }}>
+                            <LogoImg src='/icon.svg' />
+                            {constants.PASSWORD}
                         </Card.Title>
                         <SingleInputForm
                             callback={verifyPassphrase}

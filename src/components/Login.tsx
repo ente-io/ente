@@ -10,19 +10,11 @@ import { getOtt } from 'services/userService';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import SubmitButton from 'components/SubmitButton';
 import Button from 'react-bootstrap/Button';
-import styled from 'styled-components';
+import LogoImg from './LogoImg';
 
 interface formValues {
     email: string;
 }
-
-const Img = styled.img`
-    height: 25px;
-    vertical-align: bottom;
-    padding-right: 15px;
-    border-right: 2px solid #aaa;
-    margin-right: 15px;
-`;
 
 interface LoginProps {
     signUp: () => void
@@ -63,7 +55,7 @@ export default function Login(props: LoginProps) {
     return (
         <>
             <Card.Title style={{ marginBottom: '32px' }}>
-                <Img src="/icon.svg" />
+                <LogoImg src="/icon.svg" />
                 {constants.LOGIN}
             </Card.Title>
             <Formik<formValues>
