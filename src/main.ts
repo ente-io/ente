@@ -21,7 +21,7 @@ function createWindow() {
     const appImgPath = isDev
         ? 'build/window-icon.png'
         : path.join(process.resourcesPath, 'window-icon.png');
-    let appIcon = nativeImage.createFromPath(appImgPath);
+    const appIcon = nativeImage.createFromPath(appImgPath);
     // Create the browser window.
     const mainWindow = new BrowserWindow({
         height: 600,
@@ -59,8 +59,8 @@ function createWindow() {
         isDev
             ? mainWindow.loadFile(`../build/error.html`)
             : splash.loadURL(
-                  `file://${path.join(process.resourcesPath, 'error.html')}`
-              );
+                `file://${path.join(process.resourcesPath, 'error.html')}`
+            );
     });
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
@@ -93,14 +93,14 @@ app.on('ready', () => {
     const trayImgPath = isDev
         ? 'build/taskbar-icon.png'
         : path.join(process.resourcesPath, 'taskbar-icon.png');
-    let trayIcon = nativeImage.createFromPath(trayImgPath);
+    const trayIcon = nativeImage.createFromPath(trayImgPath);
     tray = new Tray(trayIcon);
     tray.setToolTip('ente');
     tray.setContextMenu(buildContextMenu());
 });
 
 ipcMain.on('select-dir', async (event) => {
-    let dialogWindow = new BrowserWindow({
+    const dialogWindow = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
@@ -131,7 +131,7 @@ ipcMain.on('send-notification', (event, args) => {
     new Notification(notification).show();
 });
 ipcMain.on('reload-window', (event, args) => {
-    let secondWindow = createWindow();
+    const secondWindow = createWindow();
     mainWindow.destroy();
     mainWindow = secondWindow;
 });
@@ -140,15 +140,15 @@ function buildContextMenu(export_progress: any = null) {
     const contextMenu = Menu.buildFromTemplate([
         ...(export_progress
             ? [
-                  {
-                      label: export_progress,
-                      click: () => mainWindow.show(),
-                  },
-                  {
-                      label: 'stop export',
-                      click: () => mainWindow.webContents.send('stop-export'),
-                  },
-              ]
+                {
+                    label: export_progress,
+                    click: () => mainWindow.show(),
+                },
+                {
+                    label: 'stop export',
+                    click: () => mainWindow.webContents.send('stop-export'),
+                },
+            ]
             : []),
         { type: 'separator' },
         {
