@@ -287,6 +287,7 @@ const GlobalStyles = createGlobalStyle`
         width: 10px;
         height: 10px;
         border-radius: 50%;
+        margin-right: 12px;
     }
     .carousel-indicators .active {
         background-color: #2dc262;

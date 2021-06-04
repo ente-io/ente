@@ -61,6 +61,7 @@ const MobileBox = styled.div`
 const SideBox = styled.div`
     display: flex;
     flex-direction: column;
+    min-width: 320px;
 `;
 
 const Strong = styled.strong`
