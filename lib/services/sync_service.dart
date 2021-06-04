@@ -338,8 +338,12 @@ class SyncService {
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated();
     _logger.info(updatedFileIDs.length.toString() + " files updated.");
 
+    final editedFiles = await _db.getEditedRemoteFiles();
+    _logger.info(editedFiles.length.toString() + " files edited.");
+
     _completedUploads = 0;
-    int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
+    int toBeUploaded =
+        filesToBeUploaded.length + updatedFileIDs.length + editedFiles.length;
 
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
@@ -363,6 +367,14 @@ class SyncService {
               uploadedFile, alreadyUploaded, toBeUploaded));
       futures.add(future);
     }
+
+    for (final file in editedFiles) {
+      final future = _uploader.upload(file, file.collectionID).then(
+          (uploadedFile) async => await _onFileUploaded(
+              uploadedFile, alreadyUploaded, toBeUploaded));
+      futures.add(future);
+    }
+
     try {
       await Future.wait(futures);
     } on InvalidFileError {

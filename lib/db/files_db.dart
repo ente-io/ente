@@ -364,6 +364,18 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
+  Future<List<File>> getEditedRemoteFiles() async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where:
+          '($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1) AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID IS -1)',
+      orderBy: '$columnCreationTime DESC',
+      groupBy: '$columnLocalID',
+    );
+    return _convertToFiles(results);
+  }
+
   Future<List<int>> getUploadedFileIDsToBeUpdated() async {
     final db = await instance.database;
     final rows = await db.query(

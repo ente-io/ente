@@ -267,6 +267,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       final newFile =
           await ente.File.fromAsset(widget.originalFile.deviceFolder, newAsset);
       newFile.creationTime = widget.originalFile.creationTime;
+      if (widget.originalFile.localID == null) {
+        newFile.collectionID = widget.originalFile.collectionID;
+      }
       await FilesDB.instance.insertMultiple([newFile]);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
       SyncService.instance.sync();
