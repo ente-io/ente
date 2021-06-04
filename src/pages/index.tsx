@@ -35,7 +35,7 @@ const SlideContainer = styled.div`
 `;
 
 const DesktopBox = styled.div`
-    flex: 0.75;
+    flex: 1;
     height: 100%;
     padding: 10px;
     display: flex;
