@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 
 /**
  * Global English constants.
@@ -11,7 +12,25 @@ const dateString = function(date) {
         day: 'numeric',
     });
 };
+
+const Strong = styled.strong`
+    color: #ddd;
+`;
+
+const Logo = styled.img`
+    height: 18px;
+    vertical-align: middle;
+    margin-top: -3px;
+`;
+
 const englishConstants = {
+    HERO_HEADER: () => <div>with <Logo src='/icon.svg' /><br/>your <Strong>memories</Strong> are</div>,
+    HERO_SLIDE_1_TITLE: 'protected',
+    HERO_SLIDE_1: 'end-to-end encrypted with your password, visible only to you',
+    HERO_SLIDE_2_TITLE: 'synced',
+    HERO_SLIDE_2: 'available across all your devices, web, android and ios',
+    HERO_SLIDE_3_TITLE: 'preserved',
+    HERO_SLIDE_3: 'reliably replicated to a fallout shelter, designed to outlive',
     COMPANY_NAME: 'ente',
     LOGIN: 'login',
     SIGN_UP: 'sign up',

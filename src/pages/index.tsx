@@ -15,6 +15,7 @@ const Container = styled.div`
     flex: 1;
     align-items: center;
     justify-content: center;
+    background-color: #000;
 
     @media(max-width: 1024px) {
         flex-direction: column;
@@ -54,7 +55,7 @@ const MobileBox = styled.div`
     @media(max-width: 1024px) {
         display: flex;
         flex-direction: column;
-        padding-bottom: 20px
+        padding: 40px 10px;
     }
 `;
 
@@ -62,10 +63,6 @@ const SideBox = styled.div`
     display: flex;
     flex-direction: column;
     min-width: 320px;
-`;
-
-const Strong = styled.strong`
-    color: #fff;
 `;
 
 const TextContainer = styled.div`
@@ -118,23 +115,23 @@ export default function LandingPage() {
             (<>
                 <SlideContainer>
                     <UpperText>
-                        with <Strong>ente</Strong> your <Strong>memories</Strong> are
+                        {constants.HERO_HEADER()}
                     </UpperText>
                     <Carousel controls={false}>
                         <Carousel.Item>
                             <Img src="/images/slide-1.png" />
-                            <FeatureText>protected</FeatureText>
-                            <TextContainer>end-to-end encrypted with your password, visible only to you</TextContainer>
+                            <FeatureText>{constants.HERO_SLIDE_1_TITLE}</FeatureText>
+                            <TextContainer>{constants.HERO_SLIDE_1}</TextContainer>
                         </Carousel.Item>
                         <Carousel.Item>
                             <Img src="/images/slide-2.png" />
-                            <FeatureText>synced</FeatureText>
-                            <TextContainer>available across all your devices, web, android and ios</TextContainer>
+                            <FeatureText>{constants.HERO_SLIDE_2_TITLE}</FeatureText>
+                            <TextContainer>{constants.HERO_SLIDE_2}</TextContainer>
                         </Carousel.Item>
                         <Carousel.Item>
                             <Img src="/images/slide-3.png" />
-                            <FeatureText>preserved</FeatureText>
-                            <TextContainer>reliably replicated to a fallout shelter, designed to outlive</TextContainer>
+                            <FeatureText>{constants.HERO_SLIDE_3_TITLE}</FeatureText>
+                            <TextContainer>{constants.HERO_SLIDE_3}</TextContainer>
                         </Carousel.Item>
                     </Carousel>
                 </SlideContainer>
