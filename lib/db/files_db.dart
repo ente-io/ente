@@ -351,7 +351,7 @@ class FilesDB {
     final db = await instance.database;
     String inParam = "";
     for (final folder in folders) {
-      inParam += "'" + folder + "',";
+      inParam += "'" + folder.replaceAll("'", "''") + "',";
     }
     inParam = inParam.substring(0, inParam.length - 1);
     final results = await db.query(
