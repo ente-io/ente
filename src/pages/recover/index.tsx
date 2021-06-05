@@ -9,6 +9,7 @@ import MessageDialog from 'components/MessageDialog';
 import Container from 'components/Container';
 import { Card, Button } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
+import LogoImg from 'components/LogoImg';
 
 export default function Recover() {
     const router = useRouter();
@@ -27,7 +28,7 @@ export default function Recover() {
         } else {
             setKeyAttributes(keyAttributes);
         }
-        appContext.showNavBar(true);
+        appContext.showNavBar(false);
     }, []);
 
     const recover = async (recoveryKey: string, setFieldError) => {
@@ -50,11 +51,12 @@ export default function Recover() {
         <>
             <Container>
                 <Card
-                    style={{ minWidth: '320px', padding: '40px 30px' }}
+                    style={{ minWidth: '320px' }}
                     className="text-center"
                 >
-                    <Card.Body>
-                        <Card.Title style={{ marginBottom: '24px' }}>
+                    <Card.Body style={{ padding: '40px 30px' }}>
+                        <Card.Title style={{ marginBottom: '32px' }}>
+                            <LogoImg src='/icon.svg' />
                             {constants.RECOVER_ACCOUNT}
                         </Card.Title>
                         <SingleInputForm
