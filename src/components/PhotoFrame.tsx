@@ -18,7 +18,6 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { VariableSizeList as List } from 'react-window';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
-import CloudUpload from './CloudUpload';
 import { SetDialogMessage } from './MessageDialog';
 import { VIDEO_PLAYBACK_FAILED } from 'utils/common/errorUtil';
 
@@ -83,9 +82,6 @@ const DateContainer = styled.div`
 
 const BannerContainer = styled.div`
     color: #979797;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     text-align: center;
 `;
 
@@ -390,7 +386,8 @@ const PhotoFrame = ({
         <>
             {!isFirstLoad && files.length === 0 && !searchMode ? (
                 <EmptyScreen>
-                    <CloudUpload width={150} height={150} />
+                    <img height={150} src='/images/gallery.png' />
+                    <br/>
                     <Button
                         variant="outline-success"
                         onClick={openFileUploader}
