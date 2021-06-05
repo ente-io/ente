@@ -170,6 +170,7 @@ export default function PreviewCard(props: IProps) {
 
     return (
         <Cont
+            id={`thumb-${file.id}`}
             onClick={handleClick}
             disabled={!forcedEnable && !file?.msrc && !imgSrc}
             selected={selected}

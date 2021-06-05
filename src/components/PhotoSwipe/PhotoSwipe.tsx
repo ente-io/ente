@@ -68,6 +68,16 @@ function PhotoSwipe(props: Iprops) {
                 // otherwise to 1.5x, to make sure that double-tap gesture always zooms image
                 return item.initialZoomLevel < 0.7 ? 1 : 1.5;
             },
+            getThumbBoundsFn: (index) => {
+                const file = items[index];
+                const ele = document.getElementById(`thumb-${file.id}`);
+                if (ele) {
+                    const rect = ele.getBoundingClientRect();
+                    const pageYScroll = window.pageYOffset || document.documentElement.scrollTop;
+                    return { x: rect.left, y: rect.top + pageYScroll, w: rect.width };
+                }
+                return null;
+            },
         };
         const photoSwipe = new Photoswipe(
             pswpElement.current,
