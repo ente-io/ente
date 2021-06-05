@@ -378,6 +378,22 @@ const englishConstants = {
     ADD_TO_COLLECTION: 'add to collection',
     VIDEO_PLAYBACK_FAILED: 'video format not supported',
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD: 'this video cannot be played on your browser',
+    METADATA: 'metadata',
+    INFO: 'information',
+    FILE_ID: 'file id',
+    FILE_NAME: 'file name',
+    CREATION_TIME: 'creation time',
+    UPDATED_ON: 'updated on',
+    LOCATION: 'location',
+    SHOW_MAP: 'show on map',
+    EXIF: 'exif',
+    DEVICE: 'device',
+    IMAGE_SIZE: 'image size',
+    FLASH: 'flash',
+    FOCAL_LENGTH: 'focal length',
+    APERTURE: 'aperture',
+    ISO: 'iso',
+    SHOW_ALL: 'show all',
 };
 
 export default englishConstants;

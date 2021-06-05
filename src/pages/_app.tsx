@@ -130,13 +130,19 @@ const GlobalStyles = createGlobalStyle`
         max-width:960px!important;
     }
     .download-btn{
-        margin-top:10px;
-        width: 25px;
-        height: 25px;
         float: right;
         background: url('/download_icon.png') no-repeat;
         cursor: pointer;
-        background-size: cover;
+        background-size: 24px 24px;
+        background-position: center;
+        border: none;
+    }
+    .info-btn{
+        float: right;
+        background: url('/info_icon.png') no-repeat;
+        cursor: pointer;
+        background-size: 24px 24px;
+        background-position: center;
         border: none;
     }
     .btn-success {

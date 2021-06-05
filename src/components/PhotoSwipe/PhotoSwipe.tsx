@@ -10,7 +10,14 @@ import {
 import { File } from 'services/fileService';
 import constants from 'utils/strings/constants';
 import DownloadManger from 'services/downloadManager';
+import EXIF from 'exif-js';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import styled from 'styled-components';
 import events from './events';
+import { formatDateTime } from 'utils/file';
+import { FormCheck } from 'react-bootstrap';
 
 interface Iprops {
     isOpen: boolean;
@@ -24,12 +31,71 @@ interface Iprops {
     loadingBar: any;
 }
 
+const LegendContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+`;
+
+const Legend = styled.span`
+    font-size: 20px;
+    color: #ddd;
+    display: inline;
+`;
+
+const Pre = styled.pre`
+    color: #aaa;
+    padding: 7px 15px;
+`;
+
+const renderInfoItem = (label: string, value: string | JSX.Element) => (
+    <>
+        <Form.Label column sm="4">{label}</Form.Label>
+        <Form.Label column sm="8">{value}</Form.Label>
+    </>
+);
+
+function ExifData(props: { exif: any }) {
+    const { exif } = props;
+    const [showAll, setShowAll] = useState(false);
+
+    const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setShowAll(e.target.checked);
+    };
+
+    const renderAllValues = () => (<Pre>{exif.raw}</Pre>);
+
+    const renderSelectedValues = () => (<>
+        {exif?.Make && exif?.Model && renderInfoItem(constants.DEVICE, `${exif.Make} ${exif.Model}`)}
+        {exif?.ImageWidth && exif?.ImageHeight && renderInfoItem(constants.IMAGE_SIZE, `${exif.ImageWidth} x ${exif.ImageHeight}`)}
+        {exif?.Flash && renderInfoItem(constants.FLASH, exif.Flash)}
+        {exif?.FocalLength && renderInfoItem(constants.FOCAL_LENGTH, exif.FocalLength.toString())}
+        {exif?.ApertureValue && renderInfoItem(constants.APERTURE, exif.ApertureValue.toString())}
+        {exif?.ISOSpeedRatings && renderInfoItem(constants.ISO, exif.ISOSpeedRatings.toString())}
+    </>);
+
+    return (<>
+        <LegendContainer>
+            <Legend>{constants.EXIF}</Legend>
+            <FormCheck>
+                <FormCheck.Label>
+                    <FormCheck.Input onChange={changeHandler}/>
+                    {constants.SHOW_ALL}
+                </FormCheck.Label>
+            </FormCheck>
+        </LegendContainer>
+        {showAll ? renderAllValues() : renderSelectedValues()}
+    </>);
+}
+
 function PhotoSwipe(props: Iprops) {
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] = useState<Photoswipe<any>>();
 
     const { isOpen, items } = props;
     const [isFav, setIsFav] = useState(false);
+    const [showInfo, setShowInfo] = useState(false);
+    const [metadata, setMetaData] = useState<File['metadata']>(null);
+    const [exif, setExif] = useState<any>(null);
     const needUpdate = useRef(false);
 
     useEffect(() => {
@@ -69,14 +135,18 @@ function PhotoSwipe(props: Iprops) {
                 return item.initialZoomLevel < 0.7 ? 1 : 1.5;
             },
             getThumbBoundsFn: (index) => {
-                const file = items[index];
-                const ele = document.getElementById(`thumb-${file.id}`);
-                if (ele) {
-                    const rect = ele.getBoundingClientRect();
-                    const pageYScroll = window.pageYOffset || document.documentElement.scrollTop;
-                    return { x: rect.left, y: rect.top + pageYScroll, w: rect.width };
+                try {
+                    const file = items[index];
+                    const ele = document.getElementById(`thumb-${file.id}`);
+                    if (ele) {
+                        const rect = ele.getBoundingClientRect();
+                        const pageYScroll = window.pageYOffset || document.documentElement.scrollTop;
+                        return { x: rect.left, y: rect.top + pageYScroll, w: rect.width };
+                    }
+                    return null;
+                } catch (e) {
+                    return null;
                 }
-                return null;
             },
         };
         const photoSwipe = new Photoswipe(
@@ -100,6 +170,7 @@ function PhotoSwipe(props: Iprops) {
             }
         });
         photoSwipe.listen('beforeChange', updateFavButton);
+        photoSwipe.listen('resize', checkExifAvailable);
         photoSwipe.init();
         needUpdate.current = false;
         setPhotoSwipe(photoSwipe);
@@ -151,6 +222,37 @@ function PhotoSwipe(props: Iprops) {
         }
     };
 
+    const checkExifAvailable = () => {
+        setExif(null);
+        setTimeout(() => {
+            const img = document.querySelector('.pswp__img:not(.pswp__img--placeholder)');
+            if (img) {
+                // @ts-expect-error
+                EXIF.getData(img, function() {
+                    const exif = EXIF.getAllTags(this);
+                    exif.raw = EXIF.pretty(this);
+                    if (exif.raw) {
+                        setExif(exif);
+                    }
+                });
+            }
+        }, 100);
+    };
+
+    const showExif = () => {
+        const file:File = items[photoSwipe?.getCurrentIndex()];
+        if (file.metadata) {
+            setMetaData(file.metadata);
+            setExif(null);
+            checkExifAvailable();
+            setShowInfo(true);
+        }
+    };
+
+    const handleCloseInfo = () => {
+        setShowInfo(false);
+    };
+
     const downloadFile = async (file) => {
         const { loadingBar } = props;
         const a = document.createElement('a');
@@ -167,76 +269,119 @@ function PhotoSwipe(props: Iprops) {
     let { className } = props;
     className = classnames(['pswp', className]).trim();
     return (
-        <div
-            id={id}
-            className={className}
-            tabIndex={Number('-1')}
-            role="dialog"
-            aria-hidden="true"
-            ref={pswpElement}
-        >
-            <div className="pswp__bg" />
-            <div className="pswp__scroll-wrap">
-                <div className="pswp__container">
-                    <div className="pswp__item" />
-                    <div className="pswp__item" />
-                    <div className="pswp__item" />
-                </div>
-                <div className="pswp__ui pswp__ui--hidden">
-                    <div className="pswp__top-bar">
-                        <div className="pswp__counter" />
+        <>
+            <div
+                id={id}
+                className={className}
+                tabIndex={Number('-1')}
+                role="dialog"
+                aria-hidden="true"
+                ref={pswpElement}
+            >
+                <div className="pswp__bg" />
+                <div className="pswp__scroll-wrap">
+                    <div className="pswp__container">
+                        <div className="pswp__item" />
+                        <div className="pswp__item" />
+                        <div className="pswp__item" />
+                    </div>
+                    <div className="pswp__ui pswp__ui--hidden">
+                        <div className="pswp__top-bar">
+                            <div className="pswp__counter" />
 
-                        <button
-                            className="pswp__button pswp__button--close"
-                            title={constants.CLOSE}
-                        />
+                            <button
+                                className="pswp__button pswp__button--close"
+                                title={constants.CLOSE}
+                            />
 
-                        <button
-                            className="download-btn"
-                            title={constants.DOWNLOAD}
-                            onClick={() => downloadFile(photoSwipe.currItem)}
-                        />
+                            <button
+                                className="pswp__button download-btn"
+                                title={constants.DOWNLOAD}
+                                onClick={() => downloadFile(photoSwipe.currItem)}
+                            />
 
-                        <button
-                            className="pswp__button pswp__button--fs"
-                            title={constants.TOGGLE_FULLSCREEN}
-                        />
-                        <button
-                            className="pswp__button pswp__button--zoom"
-                            title={constants.ZOOM_IN_OUT}
-                        />
-                        <FavButton
-                            size={44}
-                            isClick={isFav}
-                            onClick={() => {
-                                onFavClick(photoSwipe?.currItem);
-                            }}
-                        />
-                        <div className="pswp__preloader">
-                            <div className="pswp__preloader__icn">
-                                <div className="pswp__preloader__cut">
-                                    <div className="pswp__preloader__donut" />
+                            <button
+                                className="pswp__button pswp__button--fs"
+                                title={constants.TOGGLE_FULLSCREEN}
+                            />
+                            <button
+                                className="pswp__button pswp__button--zoom"
+                                title={constants.ZOOM_IN_OUT}
+                            />
+                            <FavButton
+                                size={44}
+                                isClick={isFav}
+                                onClick={() => {
+                                    onFavClick(photoSwipe?.currItem);
+                                }}
+                            />
+                            <button
+                                className="pswp__button info-btn"
+                                title={constants.ZOOM_IN_OUT}
+                                onClick={showExif}
+                            />
+                            <div className="pswp__preloader">
+                                <div className="pswp__preloader__icn">
+                                    <div className="pswp__preloader__cut">
+                                        <div className="pswp__preloader__donut" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                        <div className="pswp__share-tooltip" />
-                    </div>
-                    <button
-                        className="pswp__button pswp__button--arrow--left"
-                        title={constants.PREVIOUS}
-                    />
-                    <button
-                        className="pswp__button pswp__button--arrow--right"
-                        title={constants.NEXT}
-                    />
-                    <div className="pswp__caption">
-                        <div className="pswp__caption__center" />
+                        <div className="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                            <div className="pswp__share-tooltip" />
+                        </div>
+                        <button
+                            className="pswp__button pswp__button--arrow--left"
+                            title={constants.PREVIOUS}
+                        />
+                        <button
+                            className="pswp__button pswp__button--arrow--right"
+                            title={constants.NEXT}
+                        />
+                        <div className="pswp__caption">
+                            <div className="pswp__caption__center" />
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            <Modal show={showInfo} onHide={handleCloseInfo}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{constants.INFO}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Group>
+                        <div>
+                            <Legend>{constants.METADATA}</Legend>
+                        </div>
+                        {renderInfoItem(constants.FILE_ID, items[photoSwipe?.getCurrentIndex()]?.id)}
+                        {metadata?.title && renderInfoItem(constants.FILE_NAME, metadata.title)}
+                        {metadata?.creationTime && renderInfoItem(constants.CREATION_TIME, formatDateTime(metadata.creationTime/1000))}
+                        {metadata?.creationTime && renderInfoItem(constants.UPDATED_ON, formatDateTime(metadata.modificationTime/1000))}
+                        {metadata?.latitude && metadata?.longitude &&
+                            renderInfoItem(constants.LOCATION, (
+                                <a href={`https://www.google.com/maps?q=loc:${metadata.latitude},${metadata.longitude}`} target='_blank'
+                                    rel='noreferrer noopener'
+                                >
+                                    {constants.SHOW_MAP}
+                                </a>
+                            ))
+                        }
+                        {exif && (
+                            <>
+                                <br/><br/>
+                                <ExifData exif={exif}/>
+                            </>
+                        )}
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="outline-secondary" onClick={handleCloseInfo}>
+                        {constants.CLOSE}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>
     );
 }
 

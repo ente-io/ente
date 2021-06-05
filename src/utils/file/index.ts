@@ -71,3 +71,26 @@ export function checkFileFormatSupport(name :string) {
         }
     }
 }
+
+export function formatDate(date: number | Date) {
+    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+    return dateTimeFormat.format(date);
+}
+
+export function formatDateTime(date: number | Date) {
+    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+    const timeFormat = new Intl.DateTimeFormat('en-IN', {
+        timeStyle: 'medium',
+    });
+    return `${dateTimeFormat.format(date)} ${timeFormat.format(date)}`;
+}
