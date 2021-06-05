@@ -295,7 +295,7 @@ function PhotoSwipe(props: Iprops) {
                             />
 
                             <button
-                                className="pswp__button download-btn"
+                                className="pswp-custom download-btn"
                                 title={constants.DOWNLOAD}
                                 onClick={() => downloadFile(photoSwipe.currItem)}
                             />
@@ -316,8 +316,8 @@ function PhotoSwipe(props: Iprops) {
                                 }}
                             />
                             <button
-                                className="pswp__button info-btn"
-                                title={constants.ZOOM_IN_OUT}
+                                className="pswp-custom info-btn"
+                                title={constants.INFO}
                                 onClick={showExif}
                             />
                             <div className="pswp__preloader">

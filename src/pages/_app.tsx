@@ -129,21 +129,28 @@ const GlobalStyles = createGlobalStyle`
     .modal-xl{
         max-width:960px!important;
     }
-    .download-btn{
+    .pswp-custom {
+        opacity: 0.75;
+        transition: opacity .2s;
+        display: inline-block;
         float: right;
-        background: url('/download_icon.png') no-repeat;
         cursor: pointer;
-        background-size: 24px 24px;
-        background-position: center;
         border: none;
+        height: 44px;
+        width: 44px;
+    }
+    .pswp-custom:hover {
+        opacity: 1;
+    }
+    .download-btn{
+        background: url('/download_icon.png') no-repeat;
+        background-size: 20px 20px;
+        background-position: center;
     }
     .info-btn{
-        float: right;
         background: url('/info_icon.png') no-repeat;
-        cursor: pointer;
-        background-size: 24px 24px;
+        background-size: 20px 20px;
         background-position: center;
-        border: none;
     }
     .btn-success {
         background: #2dc262;
