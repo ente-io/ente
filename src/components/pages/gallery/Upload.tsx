@@ -9,7 +9,7 @@ import UploadProgress from './UploadProgress';
 import ChoiceModal from './ChoiceModal';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
-import { SetLoading } from '..';
+import { SetLoading } from 'pages/gallery';
 
 interface Props {
     syncWithRemote: () => Promise<void>;

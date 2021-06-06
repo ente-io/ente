@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import PlayCircleOutline from 'components/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
-import { GalleryContext } from '..';
+import { GalleryContext } from 'pages/gallery';
 
 interface IProps {
     file: File;

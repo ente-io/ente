@@ -42,18 +42,18 @@ import { addFilesToCollection } from 'utils/collection';
 import { errorCodes } from 'utils/common/errorUtil';
 import SearchBar, { DateValue } from 'components/SearchBar';
 import { Bbox } from 'services/searchService';
-import SelectedFileOptions from './components/SelectedFileOptions';
+import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
 import CollectionSelector, {
     CollectionSelectorAttributes,
-} from './components/CollectionSelector';
+} from 'components/pages/gallery/CollectionSelector';
 import CollectionNamer, {
     CollectionNamerAttributes,
-} from './components/CollectionNamer';
-import AlertBanner from './components/AlertBanner';
-import UploadButton from './components/UploadButton';
-import PlanSelector from './components/PlanSelector';
-import Upload from './components/Upload';
-import Collections from './components/Collections';
+} from 'components/pages/gallery/CollectionNamer';
+import AlertBanner from 'components/pages/gallery/AlertBanner';
+import UploadButton from 'components/pages/gallery/UploadButton';
+import PlanSelector from 'components/pages/gallery/PlanSelector';
+import Upload from 'components/pages/gallery/Upload';
+import Collections from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
 
 export enum FILE_TYPE {

@@ -7,7 +7,7 @@ import {
     SetFiles,
     setSearchStats,
 } from 'pages/gallery';
-import PreviewCard from 'pages/gallery/components/PreviewCard';
+import PreviewCard from './pages/gallery/PreviewCard';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { File } from 'services/fileService';

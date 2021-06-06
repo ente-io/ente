@@ -21,7 +21,7 @@ import { File } from 'services/fileService';
 import isElectron from 'is-electron';
 import { Collection } from 'services/collectionService';
 import { useRouter } from 'next/router';
-import LinkButton from 'pages/gallery/components/LinkButton';
+import LinkButton from './pages/gallery/LinkButton';
 import { downloadApp } from 'utils/common';
 import { logoutUser } from 'services/userService';
 import { LogoImage } from 'pages/_app';
