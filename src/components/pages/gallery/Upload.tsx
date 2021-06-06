@@ -48,7 +48,6 @@ export default function Upload(props: Props) {
     const appContext = useContext(AppContext);
 
     useEffect(() => {
-        console.log('acceptedFiles', props.acceptedFiles);
         if (props.acceptedFiles?.length > 0) {
             props.setLoading(true);
             props.setCollectionSelectorAttributes({

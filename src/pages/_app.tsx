@@ -152,6 +152,11 @@ const GlobalStyles = createGlobalStyle`
         background-size: 20px 20px;
         background-position: center;
     }
+    .share-btn{
+        background: url('/share_icon.png') no-repeat;
+        background-size: 20px 20px;
+        background-position: center;
+    }
     .btn-success {
         background: #2dc262;
         border-color: #29a354;
@@ -365,12 +370,7 @@ export default function App({ Component, err }) {
                 if (event.data.action === 'upload-files') {
                     const files = event.data.files;
                     setFiles(files);
-                    console.log(files);
                 }
-            };
-
-            navigator.serviceWorker.onmessageerror = (event) => {
-                console.log(event);
             };
         }
 

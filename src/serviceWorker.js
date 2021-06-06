@@ -15,7 +15,6 @@ registerRoute('/share-target', async ({ event }) => {
         setTimeout(() => {
             client.postMessage({ files, action: 'upload-files' });
         }, 1000);
-        console.log(client);
     }());
     return Response.redirect('./');
 }, 'POST');
