@@ -21,7 +21,7 @@ import { reverseString } from 'utils/common';
 import { SetDialogMessage } from 'components/MessageDialog';
 import ArrowEast from 'components/ArrowEast';
 import LinkButton from './LinkButton';
-import { DeadCenter, SetLoading } from '..';
+import { DeadCenter, SetLoading } from 'pages/gallery';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     border-radius: 20px;

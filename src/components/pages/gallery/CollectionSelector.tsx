@@ -27,7 +27,7 @@ export type SetCollectionSelectorAttributes = React.Dispatch<
 
 interface Props {
     show: boolean;
-    onHide: () => void;
+    onHide: (closeBtnClick?: boolean) => void;
     setLoading: (value: boolean) => void;
     directlyShowNextModal: boolean;
     collectionsAndTheirLatestFile: CollectionAndItsLatestFile[];
@@ -82,7 +82,7 @@ function CollectionSelector({
 
     return (
         <Modal {...props} size="xl" centered>
-            <Modal.Header closeButton>
+            <Modal.Header closeButton onHide={() => props.onHide(true)}>
                 <Modal.Title>{attributes.title}</Modal.Title>
             </Modal.Header>
             <Modal.Body
