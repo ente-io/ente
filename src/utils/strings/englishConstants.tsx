@@ -394,6 +394,8 @@ const englishConstants = {
     APERTURE: 'aperture',
     ISO: 'iso',
     SHOW_ALL: 'show all',
+    LOGIN_TO_UPLOAD_FILES: (count: number) => count === 1 ? `1 file received. login to upload` : `${count} files received. login to upload`,
+    FILES_TO_BE_UPLOADED: (count: number) => count === 1 ? `1 file received. Uploading in a jiffy` : `${count} files received. Uploading in a jiffy`,
 };
 
 export default englishConstants;
