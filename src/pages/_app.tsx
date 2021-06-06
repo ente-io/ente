@@ -317,7 +317,7 @@ const FlexContainer = styled.div`
     text-align: center;
 `;
 
-const OfflineContainer = styled.div`
+export const MessageContainer = styled.div`
     background-color: #111;
     padding: 0;
     font-size: 14px;
@@ -334,6 +334,8 @@ sentryInit();
 
 type AppContextType = {
     showNavBar: (show: boolean) => void;
+    files: File[];
+    resetFiles: () => void;
 }
 
 export const AppContext = createContext<AppContextType>(null);
@@ -345,6 +347,7 @@ export default function App({ Component, err }) {
         typeof window !== 'undefined' && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
+    const [files, setFiles] = useState<File[]>(null);
 
     useEffect(() => {
         if (
@@ -356,6 +359,20 @@ export default function App({ Component, err }) {
         }
         const wb = new Workbox('sw.js', { scope: '/' });
         wb.register();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.onmessage = (event) => {
+                if (event.data.action === 'upload-files') {
+                    const files = event.data.files;
+                    setFiles(files);
+                    console.log(files);
+                }
+            };
+
+            navigator.serviceWorker.onmessageerror = (event) => {
+                console.log(event);
+            };
+        }
 
         // if ('serviceWorker' in navigator) {
         //     navigator.serviceWorker
@@ -373,6 +390,7 @@ export default function App({ Component, err }) {
 
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
+    const resetFiles = () => setFiles(null);
 
     useEffect(() => {
         console.log(
@@ -424,9 +442,15 @@ export default function App({ Component, err }) {
                     />
                 </FlexContainer>
             </Navbar>}
-            <OfflineContainer>{offline && constants.OFFLINE_MSG}</OfflineContainer>
+            <MessageContainer>{offline && constants.OFFLINE_MSG}</MessageContainer>
+            {files &&
+                (router.pathname === '/gallery' ?
+                    <MessageContainer>{constants.FILES_TO_BE_UPLOADED(files.length)}</MessageContainer> :
+                    <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(files.length)}</MessageContainer>)}
             <AppContext.Provider value={{
                 showNavBar,
+                files,
+                resetFiles,
             }}>
                 {loading ? (
                     <Container>

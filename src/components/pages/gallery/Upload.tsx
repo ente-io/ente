@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import UploadService, { FileWithCollection, UPLOAD_STAGES } from 'services/uploadService';
 import { createAlbum } from 'services/collectionService';
 import { File } from 'services/fileService';
@@ -10,6 +10,7 @@ import ChoiceModal from './ChoiceModal';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import { SetLoading } from 'pages/gallery';
+import { AppContext } from 'pages/_app';
 
 interface Props {
     syncWithRemote: () => Promise<void>;
@@ -22,6 +23,7 @@ interface Props {
     setLoading: SetLoading;
     setDialogMessage: SetDialogMessage;
     setUploadInProgress: any;
+    showCollectionSelector: () => void;
 }
 
 export enum UPLOAD_STRATEGY {
@@ -43,18 +45,27 @@ export default function Upload(props: Props) {
     const [percentComplete, setPercentComplete] = useState(0);
     const [choiceModalView, setChoiceModalView] = useState(false);
     const [fileAnalysisResult, setFileAnalysisResult] = useState<AnalysisResult>(null);
+    const appContext = useContext(AppContext);
+
     useEffect(() => {
+        console.log('acceptedFiles', props.acceptedFiles);
         if (props.acceptedFiles?.length > 0) {
             props.setLoading(true);
-            const fileAnalysisResult = analyseUploadFiles();
-            if (!fileAnalysisResult) {
-                setFileAnalysisResult(fileAnalysisResult);
-            }
             props.setCollectionSelectorAttributes({
                 callback: uploadFilesToExistingCollection,
                 showNextModal: nextModal.bind(null, fileAnalysisResult),
                 title: 'upload to collection',
             });
+            if (props.acceptedFiles[0]['path']) {
+                // File selection by drag and drop or selection of file.
+                const fileAnalysisResult = analyseUploadFiles();
+                if (!fileAnalysisResult) {
+                    setFileAnalysisResult(fileAnalysisResult);
+                }
+            } else {
+                // File selection by share target.
+                props.showCollectionSelector();
+            }
             props.setLoading(false);
         }
     }, [props.acceptedFiles]);
@@ -196,6 +207,7 @@ export default function Upload(props: Props) {
                     setFileProgress,
                 },
             );
+            appContext.resetFiles();
             props.setUploadInProgress(false);
         } catch (err) {
             props.setBannerMessage(err.message);

@@ -146,7 +146,7 @@ export default function Gallery() {
     const loadingBar = useRef(null);
     const [searchMode, setSearchMode] = useState(false);
     const [searchStats, setSearchStats] = useState(null);
-    const [syncInProgress, setSyncInProgress] = useState(false);
+    const [syncInProgress, setSyncInProgress] = useState(true);
     const [resync, setResync] = useState(false);
     const [deleted, setDeleted] = useState<number[]>([]);
     const appContext = useContext(AppContext);
@@ -180,7 +180,7 @@ export default function Gallery() {
             const favItemIds = await getFavItemIds(files);
             setFavItemIds(favItemIds);
             await checkSubscriptionPurchase(setDialogMessage, router);
-            await syncWithRemote();
+            await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
             setIsFirstFetch(false);
@@ -200,8 +200,8 @@ export default function Gallery() {
     );
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
 
-    const syncWithRemote = async () => {
-        if (syncInProgress) {
+    const syncWithRemote = async (force = false) => {
+        if (syncInProgress && !force) {
             setResync(true);
             return;
         }
@@ -335,6 +335,24 @@ export default function Gallery() {
         setSearch(search);
         setSearchStats(null);
     };
+
+    const getFilesToBeUploaded = () => {
+        if (syncInProgress) {
+            return [];
+        }
+        if (appContext.files) {
+            return appContext.files;
+        }
+        return acceptedFiles;
+    };
+
+    const closeCollectionSelector = (closeBtnClick?: boolean) => {
+        if (closeBtnClick === true) {
+            appContext.resetFiles();
+        }
+        setCollectionSelectorView(false);
+    };
+
     return (
         <GalleryContext.Provider value={defaultGalleryContext}>
             <FullScreenDropZone
@@ -393,7 +411,7 @@ export default function Gallery() {
                 />
                 <CollectionSelector
                     show={collectionSelectorView}
-                    onHide={setCollectionSelectorView.bind(null, false)}
+                    onHide={closeCollectionSelector}
                     setLoading={setLoading}
                     collectionsAndTheirLatestFile={collectionsAndTheirLatestFile}
                     directlyShowNextModal={
@@ -404,11 +422,10 @@ export default function Gallery() {
                 <Upload
                     syncWithRemote={syncWithRemote}
                     setBannerMessage={setBannerMessage}
-                    acceptedFiles={acceptedFiles}
+                    acceptedFiles={getFilesToBeUploaded()}
                     existingFiles={files}
-                    setCollectionSelectorAttributes={
-                        setCollectionSelectorAttributes
-                    }
+                    showCollectionSelector={setCollectionSelectorView.bind(null, true)}
+                    setCollectionSelectorAttributes={setCollectionSelectorAttributes}
                     closeCollectionSelector={setCollectionSelectorView.bind(
                         null,
                         false,
