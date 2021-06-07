@@ -4,7 +4,7 @@ const WorkerPlugin = require('worker-plugin');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
     enabled: process.env.ANALYZE === 'true',
 });
-const withWorkbox = require("next-with-workbox");
+const withWorkbox = require('next-with-workbox');
 
 const {
     NEXT_PUBLIC_SENTRY_DSN: SENTRY_DSN,
@@ -28,7 +28,8 @@ module.exports = withWorkbox(withBundleAnalyzer({
         NEXT_PUBLIC_COMMIT_SHA: COMMIT_SHA,
     },
     workbox: {
-        swSrc: "src/serviceWorker.js",
+        swSrc: 'src/serviceWorker.js',
+        exclude: ['/manifest.json'],
     },
     webpack: (config, { isServer, webpack }) => {
         if (!isServer) {
@@ -36,7 +37,7 @@ module.exports = withWorkbox(withBundleAnalyzer({
                 new WorkerPlugin({
                     // use "self" as the global object when receiving hot updates.
                     globalObject: 'self',
-                })
+                }),
             );
             config.resolve.alias['@sentry/node'] = '@sentry/browser';
         }
@@ -45,9 +46,9 @@ module.exports = withWorkbox(withBundleAnalyzer({
         config.plugins.push(
             new webpack.DefinePlugin({
                 'process.env.NEXT_IS_SERVER': JSON.stringify(
-                    isServer.toString()
+                    isServer.toString(),
                 ),
-            })
+            }),
         );
         if (
             false &&
@@ -63,7 +64,7 @@ module.exports = withWorkbox(withBundleAnalyzer({
                     ignore: ['node_modules'],
                     stripPrefix: ['webpack://_N_E/'],
                     urlPrefix: `~${basePath}/_next`,
-                })
+                }),
             );
         }
         return config;
