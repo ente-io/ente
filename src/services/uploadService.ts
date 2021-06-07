@@ -196,7 +196,7 @@ class UploadService {
             try {
                 await this.fetchUploadURLs();
             } catch (e) {
-                console.error('error fetching uploadURLs', e);
+                console.error('error fetching uploadURLs', e.message);
                 ErrorHandler(e);
             }
             const uploadProcesses = [];
@@ -219,9 +219,8 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.FINISH);
             progressBarProps.setPercentComplete(FILE_UPLOAD_COMPLETED);
         } catch (e) {
-            console.error('uploading failed with error', e);
+            console.error('uploading failed with error', e.message);
             this.filesToBeUploaded = [];
-            console.error(e);
             throw e;
         } finally {
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
@@ -267,7 +266,7 @@ class UploadService {
             uploadFile = null;
             this.fileProgress.delete(rawFile.name);
         } catch (e) {
-            console.error('file upload failed with error', e);
+            console.error('file upload failed with error', e.message);
             const error = new Error(
                 `Uploading Failed for File - ${rawFile.name}`,
             );
@@ -403,7 +402,7 @@ class UploadService {
                 metadata,
             };
         } catch (e) {
-            console.error('error reading files ', e);
+            console.error('error reading files ', e.message);
             throw e;
         }
     }
@@ -440,7 +439,7 @@ class UploadService {
             };
             return result;
         } catch (e) {
-            console.error('Error encrypting files ', e);
+            console.error('Error encrypting files ', e.message);
             throw e;
         }
     }
@@ -520,7 +519,7 @@ class UploadService {
             };
             return backupedFile;
         } catch (e) {
-            console.error('error uploading to bucket ', e);
+            console.error('error uploading to bucket ', e.message);
             throw e;
         }
     }
@@ -556,7 +555,7 @@ class UploadService {
             );
             return response.data;
         } catch (e) {
-            console.error('upload Files Failed ', e);
+            console.error('upload Files Failed ', e.message);
             throw e;
         }
     }
@@ -617,7 +616,7 @@ class UploadService {
             }
             this.metadataMap.set(metadataJSON['title'], metaDataObject);
         } catch (e) {
-            console.error(e);
+            console.error('error occurred while reading metadata json', e.message);
             // ignore
         }
     }
@@ -658,19 +657,17 @@ class UploadService {
                                     thumbnailWidth,
                                     THUMBNAIL_HEIGHT,
                                 );
-                                image = undefined;
+                                image = null;
                                 clearTimeout(timeout);
                                 resolve(null);
                             } catch (e) {
-                                console.error(e);
-                                reject(Error(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`));
+                                reject(e);
                             }
                         };
                         timeout = setTimeout(
                             () =>
                                 reject(
-                                    Error(`${THUMBNAIL_GENERATION_FAILED} err:
-                                    wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`),
+                                    Error(`wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`),
                                 ),
                             WAIT_TIME_THUMBNAIL_GENERATION,
                         );
@@ -697,10 +694,10 @@ class UploadService {
                                     THUMBNAIL_HEIGHT,
                                 );
                                 video = null;
+                                clearTimeout(timeout);
                                 resolve(null);
                             } catch (e) {
-                                console.error(e);
-                                reject(Error(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`));
+                                reject(e);
                             }
                         });
                         video.preload = 'metadata';
@@ -708,17 +705,14 @@ class UploadService {
                         video.currentTime = 3;
                         setTimeout(
                             () =>
-                                reject(
-                                    Error(`${THUMBNAIL_GENERATION_FAILED} err:
-                                wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`),
-                                ),
+                                reject(Error(`wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`)),
                             WAIT_TIME_THUMBNAIL_GENERATION,
                         );
                     });
                 }
                 URL.revokeObjectURL(imageURL);
             } catch (e) {
-                console.error(e);
+                console.error(`${THUMBNAIL_GENERATION_FAILED} err:`, e.message);
                 // ignore and set staticThumbnail
                 hasStaticThumbnail = true;
             }
@@ -749,7 +743,7 @@ class UploadService {
             );
             return { thumbnail, hasStaticThumbnail };
         } catch (e) {
-            console.error('Error generating thumbnail ', e);
+            console.error('Error generating thumbnail ', e.message);
             throw e;
         }
     }
@@ -803,7 +797,7 @@ class UploadService {
                 reader.readAsArrayBuffer(file);
             });
         } catch (e) {
-            console.error('error reading file to byte-array ', e);
+            console.error('error reading file to byte-array ', e.message);
             throw e;
         }
     }
@@ -823,7 +817,7 @@ class UploadService {
                     return;
                 }
                 this.uploadURLFetchInProgress = HTTPService.get(
-                    `${ENDPOINT}/files/upload-urls`,
+                    `${ENDPOINT} / files / upload - urls`,
                     {
                         count: Math.min(
                             MAX_URL_REQUESTS,
@@ -839,7 +833,7 @@ class UploadService {
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
-            console.error('fetch upload-url failed ', e);
+            console.error('fetch upload-url failed ', e.message);
             throw e;
         }
     }
@@ -853,7 +847,7 @@ class UploadService {
                 return;
             }
             const response = await HTTPService.get(
-                `${ENDPOINT}/files/multipart-upload-urls`,
+                `${ENDPOINT} / files / multipart - upload - urls`,
                 {
                     count,
                 },
@@ -862,7 +856,7 @@ class UploadService {
 
             return response.data['urls'];
         } catch (e) {
-            console.error('fetch multipart-upload-url failed ', e);
+            console.error('fetch multipart-upload-url failed ', e.message);
             throw e;
         }
     }
@@ -884,7 +878,7 @@ class UploadService {
             );
             return fileUploadURL.objectKey;
         } catch (e) {
-            console.error('putFile to dataStore failed ', e);
+            console.error('putFile to dataStore failed ', e.message);
             throw e;
         }
     }
@@ -895,52 +889,57 @@ class UploadService {
         filename: string,
         uploadPartCount: number,
     ) {
-        const streamEncryptedFileReader = file.getReader();
-        const percentPerPart = Math.round(
-            RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount,
-        );
-        const resParts = [];
-        for (const [
-            index,
-            fileUploadURL,
-        ] of multipartUploadURLs.partURLs.entries()) {
-            const combinedChunks = [];
-            for (let i = 0; i < CHUNKS_COMBINED_FOR_UPLOAD; i++) {
-                const { done, value: chunk } =
-                    await streamEncryptedFileReader.read();
-                if (done) {
-                    break;
-                }
-                for (let index = 0; index < chunk.length; index++) {
-                    combinedChunks.push(chunk[index]);
-                }
-            }
-            const uploadChunk = Uint8Array.from(combinedChunks);
-            const response = await this.retryPromise(
-                HTTPService.put(
-                    fileUploadURL,
-                    uploadChunk,
-                    null,
-                    null,
-                    this.trackUploadProgress(filename, percentPerPart, index),
-                ),
+        try {
+            const streamEncryptedFileReader = file.getReader();
+            const percentPerPart = Math.round(
+                RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount,
             );
-            resParts.push({
-                PartNumber: index + 1,
-                ETag: response.headers.etag,
-            });
+            const resParts = [];
+            for (const [
+                index,
+                fileUploadURL,
+            ] of multipartUploadURLs.partURLs.entries()) {
+                const combinedChunks = [];
+                for (let i = 0; i < CHUNKS_COMBINED_FOR_UPLOAD; i++) {
+                    const { done, value: chunk } =
+                        await streamEncryptedFileReader.read();
+                    if (done) {
+                        break;
+                    }
+                    for (let index = 0; index < chunk.length; index++) {
+                        combinedChunks.push(chunk[index]);
+                    }
+                }
+                const uploadChunk = Uint8Array.from(combinedChunks);
+                const response = await this.retryPromise(
+                    HTTPService.put(
+                        fileUploadURL,
+                        uploadChunk,
+                        null,
+                        null,
+                        this.trackUploadProgress(filename, percentPerPart, index),
+                    ),
+                );
+                resParts.push({
+                    PartNumber: index + 1,
+                    ETag: response.headers.etag,
+                });
+            }
+            const options = { compact: true, ignoreComment: true, spaces: 4 };
+            const body = convert.js2xml(
+                { CompleteMultipartUpload: { Part: resParts } },
+                options,
+            );
+            await this.retryPromise(
+                HTTPService.post(multipartUploadURLs.completeURL, body, null, {
+                    'content-type': 'text/xml',
+                }),
+            );
+            return multipartUploadURLs.objectKey;
+        } catch (e) {
+            console.error('put file in parts failed', e.message);
+            throw e;
         }
-        const options = { compact: true, ignoreComment: true, spaces: 4 };
-        const body = convert.js2xml(
-            { CompleteMultipartUpload: { Part: resParts } },
-            options,
-        );
-        await this.retryPromise(
-            HTTPService.post(multipartUploadURLs.completeURL, body, null, {
-                'content-type': 'text/xml',
-            }),
-        );
-        return multipartUploadURLs.objectKey;
     }
 
     private trackUploadProgress(

@@ -42,7 +42,6 @@ export default function Recover() {
             setSessionKeys(masterKey);
             router.push('/changePassword');
         } catch (e) {
-            console.error(e);
             setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);
         }
     };

@@ -63,7 +63,7 @@ class billingService {
             const { plans } = response.data;
             setData(LS_KEYS.PLANS, plans);
         } catch (e) {
-            console.error('failed to get plans', e);
+            console.error('failed to get plans', e.message);
         }
     }
 
@@ -79,7 +79,7 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            console.error('failed to get user\'s subscription details', e);
+            console.error('failed to get user\'s subscription details', e.message);
         }
     }
 
@@ -90,7 +90,7 @@ class billingService {
                 sessionId: response.data.sessionID,
             });
         } catch (e) {
-            console.error('unable to buy subscription', e);
+            console.error('unable to buy subscription', e.message);
             throw e;
         }
     }
@@ -110,8 +110,8 @@ class billingService {
             const { result } = response.data;
             switch (result.status) {
                 case PAYMENT_INTENT_STATUS.SUCCESS:
-                // subscription updated successfully
-                // no-op required
+                    // subscription updated successfully
+                    // no-op required
                     break;
                 case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
                     throw new Error(
@@ -129,7 +129,7 @@ class billingService {
                     break;
             }
         } catch (e) {
-            console.error(e);
+            console.error('updateSubscription failed', e.message);
             throw e;
         }
         try {
@@ -152,7 +152,7 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            console.error(e);
+            console.error('cancel Subscription failed', e.message);
             throw e;
         }
     }
@@ -170,7 +170,7 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            console.error(e);
+            console.error('activate subscription failed', e.message);
             throw e;
         }
     }
@@ -207,7 +207,7 @@ class billingService {
             setData(LS_KEYS.SUBSCRIPTION, subscription);
             return subscription;
         } catch (err) {
-            console.error('Error while verifying subscription', err);
+            console.error('Error while verifying subscription', err.message);
             throw err;
         }
     }
@@ -223,7 +223,7 @@ class billingService {
             );
             window.location.href = response.data.url;
         } catch (e) {
-            console.error('unable to get customer portal url');
+            console.error('unable to get customer portal url', e.message);
             throw e;
         }
     }
@@ -239,7 +239,7 @@ class billingService {
             );
             return convertBytesToGBs(response.data.usage);
         } catch (e) {
-            console.error('error getting usage', e);
+            console.error('error getting usage', e.message);
         }
     }
 }

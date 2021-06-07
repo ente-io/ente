@@ -175,7 +175,7 @@ export default function Upload(props: Props) {
                 }
             } catch (e) {
                 setProgressView(false);
-                console.error('Failed to create album', e.message);
+                console.error('Failed to create album to upload', e.message);
                 props.setDialogMessage({
                     title: constants.ERROR,
                     staticBackdrop: true,

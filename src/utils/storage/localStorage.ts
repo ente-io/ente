@@ -29,7 +29,7 @@ export const getData = (key: LS_KEYS) => {
         const data = localStorage.getItem(key);
         return data && JSON.parse(data);
     } catch (e) {
-        console.error('Failed to Parse JSON');
+        console.error('Failed to Parse JSON', key);
     }
 };
 
