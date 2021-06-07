@@ -10,6 +10,8 @@ import 'photoswipe/dist/photoswipe.css';
 import EnteSpinner from 'components/EnteSpinner';
 import { sentryInit } from '../utils/sentry';
 import { Workbox } from 'workbox-window';
+import { getEndpoint } from 'utils/common/apiUtil';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -345,6 +347,10 @@ type AppContextType = {
 
 export const AppContext = createContext<AppContextType>(null);
 
+const redirectMap = {
+    roadmap: (token: string) => `${getEndpoint()}/users/roadmap?token=${token}`,
+};
+
 export default function App({ Component, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
@@ -353,6 +359,7 @@ export default function App({ Component, err }) {
     );
     const [showNavbar, setShowNavBar] = useState(false);
     const [files, setFiles] = useState<File[]>(null);
+    const [redirectName, setRedirectName] = useState<string>(null);
 
     useEffect(() => {
         if (
@@ -399,9 +406,27 @@ export default function App({ Component, err }) {
         );
         console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
 
+        const query = new URLSearchParams(window.location.search);
+        const redirect = query.get('redirect');
+        if (redirect && redirectMap[redirect]) {
+            const user = getData(LS_KEYS.USER);
+            if (user?.token) {
+                window.location.href = redirectMap[redirect](user.token);
+            } else {
+                setRedirectName(redirect);
+            }
+        }
+
         router.events.on('routeChangeStart', (url: string) => {
             if (window.location.pathname !== url.split('?')[0]) {
                 setLoading(true);
+            }
+
+            if (redirectName) {
+                const user = getData(LS_KEYS.USER);
+                if (user?.token) {
+                    window.location.href = redirectMap[redirectName](user.token);
+                }
             }
         });
 
@@ -416,7 +441,7 @@ export default function App({ Component, err }) {
             window.removeEventListener('online', setUserOnline);
             window.removeEventListener('offline', setUserOffline);
         };
-    }, []);
+    }, [redirectName]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
