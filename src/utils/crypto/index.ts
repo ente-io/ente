@@ -16,9 +16,7 @@ export interface ComlinkWorker {
 
 export const getDedicatedCryptoWorker = (): ComlinkWorker => {
     if (runningInBrowser()) {
-        const worker = new Worker('worker/crypto.worker.js', {
-            type: 'module',
-        });
+        const worker = new Worker(new URL('worker/crypto.worker.js', import.meta.url));
         const comlink = Comlink.wrap(worker);
         return { comlink, worker };
     }
