@@ -437,11 +437,13 @@ export default function App({ Component, err }) {
             <Head>
                 <title>{constants.TITLE}</title>
                 {/* Cloudflare Web Analytics */}
-                <script
-                    defer
-                    src="https://static.cloudflareinsights.com/beacon.min.js"
-                    data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
-                />
+                {process.env.NODE_ENV === 'production' &&
+                    <script
+                        defer
+                        src="https://static.cloudflareinsights.com/beacon.min.js"
+                        data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
+                    />
+                }
                 {/* End Cloudflare Web Analytics  */}
             </Head>
             <GlobalStyles />
