@@ -37,22 +37,14 @@ function CollectionSelector({
     attributes,
     directlyShowNextModal,
     collectionsAndTheirLatestFile,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setLoading,
     ...props
 }: Props) {
     useEffect(() => {
-        // setLoading(false);
         if (directlyShowNextModal && attributes) {
             props.onHide();
             attributes.showNextModal();
         }
     }, [attributes]);
-    // useEffect(()=>{
-    //     if (props.show && !attributes) {
-    //         setLoading(true);
-    //     }
-    // }, [props.show]);
 
     if (!attributes) {
         return <Modal />;
