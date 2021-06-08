@@ -58,6 +58,8 @@ export default function Upload(props: Props) {
                 if (fileAnalysisResult) {
                     setFileAnalysisResult(fileAnalysisResult);
                 }
+            } else {
+                props.acceptedFiles = appContext.sharedFiles;
             }
             props.setCollectionSelectorAttributes({
                 callback: uploadFilesToExistingCollection,
