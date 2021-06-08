@@ -49,7 +49,11 @@ class billingService {
         try {
             const publishableKey = getStripePublishableKey();
             const main = async () => {
-                this.stripe = await loadStripe(publishableKey);
+                try {
+                    this.stripe = await loadStripe(publishableKey);
+                } catch (e) {
+                    console.warn(e);
+                }
             };
             runningInBrowser() && checkConnectivity() && main();
         } catch (e) {
@@ -110,8 +114,8 @@ class billingService {
             const { result } = response.data;
             switch (result.status) {
                 case PAYMENT_INTENT_STATUS.SUCCESS:
-                // subscription updated successfully
-                // no-op required
+                    // subscription updated successfully
+                    // no-op required
                     break;
                 case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
                     throw new Error(
