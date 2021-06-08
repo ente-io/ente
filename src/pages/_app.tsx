@@ -341,8 +341,8 @@ sentryInit();
 
 type AppContextType = {
     showNavBar: (show: boolean) => void;
-    files: File[];
-    resetFiles: () => void;
+    sharedFiles: File[];
+    resetSharedFiles: () => void;
 }
 
 export const AppContext = createContext<AppContextType>(null);
@@ -358,7 +358,7 @@ export default function App({ Component, err }) {
         typeof window !== 'undefined' && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const [files, setFiles] = useState<File[]>(null);
+    const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
 
     useEffect(() => {
@@ -376,28 +376,15 @@ export default function App({ Component, err }) {
             navigator.serviceWorker.onmessage = (event) => {
                 if (event.data.action === 'upload-files') {
                     const files = event.data.files;
-                    setFiles(files);
+                    setSharedFiles(files);
                 }
             };
         }
-
-        // if ('serviceWorker' in navigator) {
-        //     navigator.serviceWorker
-        //         .getRegistrations()
-        //         .then((registrations) => {
-        //             for (const registration of registrations) {
-        //                 registration.unregister();
-        //             }
-        //         })
-        //         .catch((err) => {
-        //             console.log('Service Worker registration failed: ', err);
-        //         });
-        // }
     }, []);
 
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
-    const resetFiles = () => setFiles(null);
+    const resetSharedFiles = () => setSharedFiles(null);
 
     useEffect(() => {
         console.log(
@@ -468,14 +455,14 @@ export default function App({ Component, err }) {
                 </FlexContainer>
             </Navbar>}
             <MessageContainer>{offline && constants.OFFLINE_MSG}</MessageContainer>
-            {files &&
+            {sharedFiles &&
                 (router.pathname === '/gallery' ?
-                    <MessageContainer>{constants.FILES_TO_BE_UPLOADED(files.length)}</MessageContainer> :
-                    <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(files.length)}</MessageContainer>)}
+                    <MessageContainer>{constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}</MessageContainer> :
+                    <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(sharedFiles.length)}</MessageContainer>)}
             <AppContext.Provider value={{
                 showNavBar,
-                files,
-                resetFiles,
+                sharedFiles,
+                resetSharedFiles,
             }}>
                 {loading ? (
                     <Container>

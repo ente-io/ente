@@ -245,9 +245,6 @@ export default function Gallery() {
                         nonClosable: true,
                     });
                     break;
-                case errorCodes.ERR_NO_INTERNET_CONNECTION:
-                // setBannerMessage(constants.NO_INTERNET_CONNECTION);
-                    break;
                 case errorCodes.ERR_KEY_MISSING:
                     clearKeys();
                     router.push('/credentials');
@@ -263,7 +260,7 @@ export default function Gallery() {
         }
     };
 
-    const clearSelection = function() {
+    const clearSelection = function () {
         setSelected({ count: 0 });
     };
 
@@ -336,19 +333,10 @@ export default function Gallery() {
         setSearchStats(null);
     };
 
-    const getFilesToBeUploaded = () => {
-        if (syncInProgress) {
-            return [];
-        }
-        if (appContext.files) {
-            return appContext.files;
-        }
-        return acceptedFiles;
-    };
 
     const closeCollectionSelector = (closeBtnClick?: boolean) => {
         if (closeBtnClick === true) {
-            appContext.resetFiles();
+            appContext.resetSharedFiles();
         }
         setCollectionSelectorView(false);
     };
@@ -422,7 +410,8 @@ export default function Gallery() {
                 <Upload
                     syncWithRemote={syncWithRemote}
                     setBannerMessage={setBannerMessage}
-                    acceptedFiles={getFilesToBeUploaded()}
+                    acceptedFiles={acceptedFiles}
+                    sharedFiles={appContext.sharedFiles}
                     existingFiles={files}
                     showCollectionSelector={setCollectionSelectorView.bind(null, true)}
                     setCollectionSelectorAttributes={setCollectionSelectorAttributes}
