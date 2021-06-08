@@ -28,7 +28,6 @@ export type SetCollectionSelectorAttributes = React.Dispatch<
 interface Props {
     show: boolean;
     onHide: (closeBtnClick?: boolean) => void;
-    setLoading: (value: boolean) => void;
     directlyShowNextModal: boolean;
     collectionsAndTheirLatestFile: CollectionAndItsLatestFile[];
     attributes: CollectionSelectorAttributes;

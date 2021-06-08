@@ -400,7 +400,6 @@ export default function Gallery() {
                 <CollectionSelector
                     show={collectionSelectorView}
                     onHide={closeCollectionSelector}
-                    setLoading={setLoading}
                     collectionsAndTheirLatestFile={collectionsAndTheirLatestFile}
                     directlyShowNextModal={
                         collectionsAndTheirLatestFile?.length === 0
@@ -411,7 +410,6 @@ export default function Gallery() {
                     syncWithRemote={syncWithRemote}
                     setBannerMessage={setBannerMessage}
                     acceptedFiles={acceptedFiles}
-                    sharedFiles={appContext.sharedFiles}
                     existingFiles={files}
                     showCollectionSelector={setCollectionSelectorView.bind(null, true)}
                     setCollectionSelectorAttributes={setCollectionSelectorAttributes}
