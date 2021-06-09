@@ -42,7 +42,6 @@ const Container = styled.div`
     width: 100%;
     flex-wrap: wrap;
     margin: 0 auto;
-    margin-bottom: 1rem;
 
     .pswp-thumbnail {
         display: inline-block;

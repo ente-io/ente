@@ -48,26 +48,27 @@ export default function Upload(props: Props) {
     const appContext = useContext(AppContext);
 
     useEffect(() => {
-        if (props.acceptedFiles?.length > 0) {
+        if (props.acceptedFiles?.length > 0 || appContext.sharedFiles?.length > 0) {
             props.setLoading(true);
+
+            let fileAnalysisResult;
+            if (props.acceptedFiles?.length > 0) {
+                // File selection by drag and drop or selection of file.
+                fileAnalysisResult = analyseUploadFiles();
+                if (fileAnalysisResult) {
+                    setFileAnalysisResult(fileAnalysisResult);
+                }
+            } else {
+                props.acceptedFiles = appContext.sharedFiles;
+            }
             props.setCollectionSelectorAttributes({
                 callback: uploadFilesToExistingCollection,
                 showNextModal: nextModal.bind(null, fileAnalysisResult),
                 title: 'upload to collection',
             });
-            if (props.acceptedFiles[0]['path']) {
-                // File selection by drag and drop or selection of file.
-                const fileAnalysisResult = analyseUploadFiles();
-                if (!fileAnalysisResult) {
-                    setFileAnalysisResult(fileAnalysisResult);
-                }
-            } else {
-                // File selection by share target.
-                props.showCollectionSelector();
-            }
             props.setLoading(false);
         }
-    }, [props.acceptedFiles]);
+    }, [props.acceptedFiles, appContext.sharedFiles]);
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
@@ -95,10 +96,9 @@ export default function Upload(props: Props) {
         fileAnalysisResult?.multipleFolders ?
             setChoiceModalView(true) :
             showCreateCollectionModal(fileAnalysisResult);
-        setFileAnalysisResult(fileAnalysisResult);
     };
 
-    function analyseUploadFiles() {
+    function analyseUploadFiles(): AnalysisResult {
         if (props.acceptedFiles.length === 0) {
             return null;
         }
@@ -206,7 +206,7 @@ export default function Upload(props: Props) {
                     setFileProgress,
                 },
             );
-            appContext.resetFiles();
+            appContext.resetSharedFiles();
             props.setUploadInProgress(false);
         } catch (err) {
             props.setBannerMessage(err.message);

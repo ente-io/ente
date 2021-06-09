@@ -1,4 +1,4 @@
-import { precacheAndRoute } from 'workbox-precaching';
+import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { registerRoute, setDefaultHandler } from 'workbox-routing';
 import { NetworkOnly } from 'workbox-strategies';
 import { pageCache, offlineFallback } from 'workbox-recipes';
@@ -6,6 +6,7 @@ import { pageCache, offlineFallback } from 'workbox-recipes';
 pageCache();
 
 precacheAndRoute(self.__WB_MANIFEST);
+cleanupOutdatedCaches();
 
 registerRoute('/share-target', async ({ event }) => {
     event.waitUntil(async function() {

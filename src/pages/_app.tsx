@@ -10,6 +10,8 @@ import 'photoswipe/dist/photoswipe.css';
 import EnteSpinner from 'components/EnteSpinner';
 import { sentryInit } from '../utils/sentry';
 import { Workbox } from 'workbox-window';
+import { getEndpoint } from 'utils/common/apiUtil';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -339,11 +341,15 @@ sentryInit();
 
 type AppContextType = {
     showNavBar: (show: boolean) => void;
-    files: File[];
-    resetFiles: () => void;
+    sharedFiles: File[];
+    resetSharedFiles: () => void;
 }
 
 export const AppContext = createContext<AppContextType>(null);
+
+const redirectMap = {
+    roadmap: (token: string) => `${getEndpoint()}/users/roadmap?token=${token}`,
+};
 
 export default function App({ Component, err }) {
     const router = useRouter();
@@ -352,7 +358,8 @@ export default function App({ Component, err }) {
         typeof window !== 'undefined' && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const [files, setFiles] = useState<File[]>(null);
+    const [sharedFiles, setSharedFiles] = useState<File[]>(null);
+    const [redirectName, setRedirectName] = useState<string>(null);
 
     useEffect(() => {
         if (
@@ -369,28 +376,15 @@ export default function App({ Component, err }) {
             navigator.serviceWorker.onmessage = (event) => {
                 if (event.data.action === 'upload-files') {
                     const files = event.data.files;
-                    setFiles(files);
+                    setSharedFiles(files);
                 }
             };
         }
-
-        // if ('serviceWorker' in navigator) {
-        //     navigator.serviceWorker
-        //         .getRegistrations()
-        //         .then((registrations) => {
-        //             for (const registration of registrations) {
-        //                 registration.unregister();
-        //             }
-        //         })
-        //         .catch((err) => {
-        //             console.log('Service Worker registration failed: ', err);
-        //         });
-        // }
     }, []);
 
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
-    const resetFiles = () => setFiles(null);
+    const resetSharedFiles = () => setSharedFiles(null);
 
     useEffect(() => {
         console.log(
@@ -399,9 +393,27 @@ export default function App({ Component, err }) {
         );
         console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
 
+        const query = new URLSearchParams(window.location.search);
+        const redirect = query.get('redirect');
+        if (redirect && redirectMap[redirect]) {
+            const user = getData(LS_KEYS.USER);
+            if (user?.token) {
+                window.location.href = redirectMap[redirect](user.token);
+            } else {
+                setRedirectName(redirect);
+            }
+        }
+
         router.events.on('routeChangeStart', (url: string) => {
             if (window.location.pathname !== url.split('?')[0]) {
                 setLoading(true);
+            }
+
+            if (redirectName) {
+                const user = getData(LS_KEYS.USER);
+                if (user?.token) {
+                    window.location.href = redirectMap[redirectName](user.token);
+                }
             }
         });
 
@@ -416,7 +428,7 @@ export default function App({ Component, err }) {
             window.removeEventListener('online', setUserOnline);
             window.removeEventListener('offline', setUserOffline);
         };
-    }, []);
+    }, [redirectName]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
@@ -425,11 +437,13 @@ export default function App({ Component, err }) {
             <Head>
                 <title>{constants.TITLE}</title>
                 {/* Cloudflare Web Analytics */}
-                <script
-                    defer
-                    src="https://static.cloudflareinsights.com/beacon.min.js"
-                    data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
-                />
+                {process.env.NODE_ENV === 'production' &&
+                    <script
+                        defer
+                        src="https://static.cloudflareinsights.com/beacon.min.js"
+                        data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
+                    />
+                }
                 {/* End Cloudflare Web Analytics  */}
             </Head>
             <GlobalStyles />
@@ -443,14 +457,14 @@ export default function App({ Component, err }) {
                 </FlexContainer>
             </Navbar>}
             <MessageContainer>{offline && constants.OFFLINE_MSG}</MessageContainer>
-            {files &&
+            {sharedFiles &&
                 (router.pathname === '/gallery' ?
-                    <MessageContainer>{constants.FILES_TO_BE_UPLOADED(files.length)}</MessageContainer> :
-                    <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(files.length)}</MessageContainer>)}
+                    <MessageContainer>{constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}</MessageContainer> :
+                    <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(sharedFiles.length)}</MessageContainer>)}
             <AppContext.Provider value={{
                 showNavBar,
-                files,
-                resetFiles,
+                sharedFiles,
+                resetSharedFiles,
             }}>
                 {loading ? (
                     <Container>

@@ -49,7 +49,11 @@ class billingService {
         try {
             const publishableKey = getStripePublishableKey();
             const main = async () => {
-                this.stripe = await loadStripe(publishableKey);
+                try {
+                    this.stripe = await loadStripe(publishableKey);
+                } catch (e) {
+                    console.warn(e);
+                }
             };
             runningInBrowser() && checkConnectivity() && main();
         } catch (e) {
