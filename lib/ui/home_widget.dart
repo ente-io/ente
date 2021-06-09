@@ -328,7 +328,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               child: Container(
                 width: double.infinity,
                 height: 80,
-                padding: const EdgeInsets.fromLTRB(64, 0, 64, 0),
+                padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
                 child: button(
                   "select folders\nto preserve",
                   fontSize: 16,
