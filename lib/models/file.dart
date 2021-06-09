@@ -119,7 +119,7 @@ class File {
   }
 
   String getThumbnailUrl() {
-    if (!kDebugMode) {
+    if (kDebugMode) {
       return Configuration.instance.getHttpEndpoint() +
           "/files/preview/" +
           uploadedFileID.toString();
