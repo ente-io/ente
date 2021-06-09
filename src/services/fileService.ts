@@ -156,7 +156,7 @@ export const getFiles = async (
         } while (resp.data.diff.length === limit);
         return decryptedFiles;
     } catch (e) {
-        console.error('Get files failed', e);
+        console.error('Get files failed', e.message);
         ErrorHandler(e);
     }
 };
@@ -194,7 +194,7 @@ export const deleteFiles = async (
         clearSelection();
         syncWithRemote();
     } catch (e) {
-        console.error('delete failed');
+        console.error('delete failed', e.message);
         throw e;
     }
 };

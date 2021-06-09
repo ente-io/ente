@@ -75,6 +75,7 @@ export default function Upload(props: Props) {
         setFileCounter({ current: 0, total: 0 });
         setFileProgress(new Map<string, number>());
         setPercentComplete(0);
+        setProgressView(true);
     };
     const showCreateCollectionModal = (fileAnalysisResult?: AnalysisResult) => {
         props.setCollectionNamerAttributes({
@@ -123,7 +124,7 @@ export default function Upload(props: Props) {
         };
     }
     function getCollectionWiseFiles() {
-        const collectionWiseFiles = new Map<string, any>();
+        const collectionWiseFiles = new Map<string, globalThis.File[]>();
         for (const file of props.acceptedFiles) {
             const filePath = file['path'];
             const folderPath = filePath.substr(0, filePath.lastIndexOf('/'));
@@ -141,15 +142,13 @@ export default function Upload(props: Props) {
     const uploadFilesToExistingCollection = async (collection) => {
         try {
             uploadInit();
-            setProgressView(true);
-
             const filesWithCollectionToUpload: FileWithCollection[] = props.acceptedFiles.map((file) => ({
                 file,
                 collection,
             }));
             await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
-            console.error('Failed to upload files to existing collections', e);
+            console.error('Failed to upload files to existing collections', e.message);
         }
     };
 
@@ -159,15 +158,15 @@ export default function Upload(props: Props) {
     ) => {
         try {
             uploadInit();
-            setProgressView(true);
-            const filesWithCollectionToUpload = [];
-            try {
-                if (strategy === UPLOAD_STRATEGY.SINGLE_COLLECTION) {
-                    const collection = await createAlbum(collectionName);
 
-                    return await uploadFilesToExistingCollection(collection);
-                }
-                const collectionWiseFiles = getCollectionWiseFiles();
+            const filesWithCollectionToUpload = [];
+            let collectionWiseFiles = new Map<string, globalThis.File[]>();
+            if (strategy === UPLOAD_STRATEGY.SINGLE_COLLECTION) {
+                collectionWiseFiles.set(collectionName, props.acceptedFiles);
+            } else {
+                collectionWiseFiles = getCollectionWiseFiles();
+            }
+            try {
                 for (const [collectionName, files] of collectionWiseFiles) {
                     const collection = await createAlbum(collectionName);
                     for (const file of files) {
@@ -175,7 +174,8 @@ export default function Upload(props: Props) {
                     }
                 }
             } catch (e) {
-                console.error('Failed to create album', e);
+                setProgressView(false);
+                console.error('Failed to create album to upload', e.message);
                 props.setDialogMessage({
                     title: constants.ERROR,
                     staticBackdrop: true,
@@ -186,7 +186,7 @@ export default function Upload(props: Props) {
             }
             await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
-            console.error('Failed to upload files to new collections', e);
+            console.error('Failed to upload files to new collections', e.message);
         }
     };
 
