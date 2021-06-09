@@ -161,6 +161,15 @@ class FilesDB {
         "ms.");
   }
 
+  Future<int> insert(File file) async {
+    final db = await instance.database;
+    return db.insert(
+      table,
+      _getRowForFile(file),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<File> getFile(int generatedID) async {
     final db = await instance.database;
     final results = await db.query(table,
@@ -211,7 +220,7 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND ($columnLocalID IS NOT NULL OR ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1))',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
       whereArgs: [startTime, endTime],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -233,7 +242,7 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1))',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
       whereArgs: [startTime, endTime],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,

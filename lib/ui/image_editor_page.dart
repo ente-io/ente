@@ -270,10 +270,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       final newFile =
           await ente.File.fromAsset(widget.originalFile.deviceFolder, newAsset);
       newFile.creationTime = widget.originalFile.creationTime;
-      if (widget.originalFile.localID == null) {
-        newFile.collectionID = widget.originalFile.collectionID;
-      }
-      await FilesDB.instance.insertMultiple([newFile]);
+      newFile.collectionID = widget.originalFile.collectionID;
+      newFile.generatedID = await FilesDB.instance.insert(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
       SyncService.instance.sync();
       showToast("edits saved");
@@ -287,8 +285,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         DetailPage(
           widget.detailPageConfig.copyWith(
             files: files,
-            selectedIndex:
-                files.indexWhere((file) => file.localID == newFile.localID),
+            selectedIndex: files
+                .indexWhere((file) => file.generatedID == newFile.generatedID),
           ),
         ),
       );
