@@ -317,7 +317,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       children: [
         _headerWidgetWithSettingsButton,
         Image.asset(
-          "assets/gallery.png",
+          "assets/preserved.png",
           height: 160,
         ),
         Center(
