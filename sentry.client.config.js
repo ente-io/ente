@@ -9,6 +9,7 @@ Sentry.init({
     tracesSampleRate: 1.0,
     release: 'bada-frame-v' + process.env.npm_package_version,
     environment: process.env.NODE_ENV,
+    attachStacktrace: true,
     // ...
     // Note: if you want to override the automatic release value, do not set a
     // `release` value here - use the environment variable `SENTRY_RELEASE`, so
