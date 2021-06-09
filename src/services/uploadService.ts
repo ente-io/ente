@@ -817,7 +817,7 @@ class UploadService {
                     return;
                 }
                 this.uploadURLFetchInProgress = HTTPService.get(
-                    `${ENDPOINT} / files / upload - urls`,
+                    `${ENDPOINT}/files/upload-urls`,
                     {
                         count: Math.min(
                             MAX_URL_REQUESTS,
