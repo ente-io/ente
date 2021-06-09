@@ -316,6 +316,10 @@ class _HomeWidgetState extends State<HomeWidget> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _headerWidgetWithSettingsButton,
+        Image.asset(
+          "assets/gallery.png",
+          height: 160,
+        ),
         Center(
           child: Hero(
             tag: "select_folders",
