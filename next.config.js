@@ -18,7 +18,6 @@ process.env.SENTRY_DSN = SENTRY_DSN;
 const basePath = '';
 
 module.exports = withWorkbox(withBundleAnalyzer({
-    target: 'serverless',
     productionBrowserSourceMaps: true,
     future: {
         webpack5: true,
