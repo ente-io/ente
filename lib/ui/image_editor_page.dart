@@ -5,25 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:image_editor/image_editor.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/ui/detail_page.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:path/path.dart' as path;
-import 'dart:io' as io;
 
 class ImageEditorPage extends StatefulWidget {
   final ImageProvider imageProvider;
+  final DetailPageConfiguration detailPageConfig;
   final ente.File originalFile;
-  final String heroTag;
 
-  const ImageEditorPage(this.imageProvider, this.originalFile, this.heroTag,
-      {Key key})
-      : super(key: key);
+  const ImageEditorPage(
+    this.imageProvider,
+    this.originalFile,
+    this.detailPageConfig, {
+    Key key,
+  }) : super(key: key);
 
   @override
   _ImageEditorPageState createState() => _ImageEditorPageState();
@@ -60,7 +63,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   Widget _buildImage() {
     return Hero(
-      tag: widget.heroTag,
+      tag: widget.detailPageConfig.tagPrefix + widget.originalFile.tag(),
       child: ExtendedImage(
         image: widget.imageProvider,
         extendedImageEditorKey: editorKey,
@@ -274,6 +277,21 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
       SyncService.instance.sync();
       showToast("edits saved");
+      final existingFiles = widget.detailPageConfig.files;
+      final files = await widget.detailPageConfig.asyncLoader(
+        existingFiles[existingFiles.length - 1].creationTime,
+        existingFiles[0].creationTime,
+      );
+      replacePage(
+        context,
+        DetailPage(
+          widget.detailPageConfig.copyWith(
+            files: files,
+            selectedIndex:
+                files.indexWhere((file) => file.localID == newFile.localID),
+          ),
+        ),
+      );
     } catch (e, s) {
       showToast("oops, could not save edits");
       _logger.severe(e, s);
@@ -343,7 +361,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           child: Text("yes", style: TextStyle(color: Colors.red)),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
-            Navigator.of(context).pop();
+            replacePage(context, DetailPage(widget.detailPageConfig));
           },
         ),
         TextButton(

@@ -4,11 +4,13 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
+import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
+
+import 'package:photos/models/file.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
-import 'package:photos/models/file_type.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/image_editor_page.dart';
 import 'package:photos/ui/video_widget.dart';
@@ -19,18 +21,40 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/utils/toast_util.dart';
 
-class DetailPage extends StatefulWidget {
+class DetailPageConfiguration {
   final List<File> files;
   final GalleryLoader asyncLoader;
   final int selectedIndex;
   final String tagPrefix;
 
-  DetailPage(this.files, this.asyncLoader, this.selectedIndex, this.tagPrefix,
-      {key})
-      : super(key: key);
+  DetailPageConfiguration(
+    this.files,
+    this.asyncLoader,
+    this.selectedIndex,
+    this.tagPrefix,
+  );
+
+  DetailPageConfiguration copyWith({
+    List<File> files,
+    GalleryLoader asyncLoader,
+    int selectedIndex,
+    String tagPrefix,
+  }) {
+    return DetailPageConfiguration(
+      files ?? this.files,
+      asyncLoader ?? this.asyncLoader,
+      selectedIndex ?? this.selectedIndex,
+      tagPrefix ?? this.tagPrefix,
+    );
+  }
+}
+
+class DetailPage extends StatefulWidget {
+  final DetailPageConfiguration config;
+
+  DetailPage(this.config, {key}) : super(key: key);
 
   @override
   _DetailPageState createState() => _DetailPageState();
@@ -49,8 +73,8 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void initState() {
-    _files = widget.files;
-    _selectedIndex = widget.selectedIndex;
+    _files = widget.config.files;
+    _selectedIndex = widget.config.selectedIndex;
     _preloadEntries(_selectedIndex);
     super.initState();
   }
@@ -91,13 +115,13 @@ class _DetailPageState extends State<DetailPage> {
                 _shouldDisableScroll = value;
               });
             },
-            tagPrefix: widget.tagPrefix,
+            tagPrefix: widget.config.tagPrefix,
           );
         } else if (file.fileType == FileType.video) {
           content = VideoWidget(
             file,
             autoPlay: !_hasPageChanged, // Autoplay if it was opened directly
-            tagPrefix: widget.tagPrefix,
+            tagPrefix: widget.config.tagPrefix,
           );
         } else {
           content = Icon(Icons.error);
@@ -123,7 +147,7 @@ class _DetailPageState extends State<DetailPage> {
 
   void _preloadEntries(int index) {
     if (index == 0 && !_hasLoadedTillStart) {
-      widget
+      widget.config
           .asyncLoader(_files[index].creationTime + 1,
               DateTime.now().microsecondsSinceEpoch,
               limit: kLoadLimit, asc: true)
@@ -141,7 +165,7 @@ class _DetailPageState extends State<DetailPage> {
       });
     }
     if (index == _files.length - 1 && !_hasLoadedTillEnd) {
-      widget
+      widget.config
           .asyncLoader(0, _files[index].creationTime - 1, limit: kLoadLimit)
           .then((files) {
         setState(() {
@@ -177,13 +201,14 @@ class _DetailPageState extends State<DetailPage> {
                   await getImage(file),
                   cacheRawData: true);
               await precacheImage(imageProvider, context);
-              routeToPage(
-                  context,
-                  ImageEditorPage(
-                    imageProvider,
-                    file,
-                    widget.tagPrefix + file.tag(),
-                  ));
+              replacePage(
+                context,
+                ImageEditorPage(
+                  imageProvider,
+                  file,
+                  widget.config.copyWith(files: _files),
+                ),
+              );
             },
             icon: Icon(Icons.edit),
           ),
