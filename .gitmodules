@@ -2,3 +2,6 @@
 	path = thirdparty/flutter_photo_manager
 	url = https://github.com/vishnukvmd/flutter_photo_manager
 	branch = master
+[submodule "thirdparty/extended_image"]
+	path = thirdparty/extended_image
+	url = git@github.com:ente-io/extended_image.git
