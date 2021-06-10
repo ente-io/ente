@@ -39,6 +39,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   final GlobalKey<ExtendedImageEditorState> editorKey =
       GlobalKey<ExtendedImageEditorState>();
 
+  double _brightness = 0;
+  double _saturation = 0;
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -86,8 +89,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           hitTestSize: 20.0,
           cornerColor: Color.fromRGBO(45, 150, 98, 1),
         ),
-        brightness: brightness,
-        saturation: saturation,
+        brightness: _brightness,
+        saturation: _saturation,
       ),
     );
   }
@@ -248,8 +251,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       option.addOption(RotateOption(radian.toInt()));
     }
 
-    option.addOption(ColorOption.saturation(saturation + 1));
-    option.addOption(ColorOption.brightness(brightness + 1));
+    option.addOption(ColorOption.saturation(_saturation + 1));
+    option.addOption(ColorOption.brightness(_brightness + 1));
 
     option.outputFormat = const OutputFormat.png(88);
 
@@ -317,9 +320,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     editorKey.currentState?.rotate(right: right);
   }
 
-  double saturation = 0;
-  double brightness = 0;
-
   Widget _buildSat() {
     return Container(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -349,10 +349,10 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               child: SfSlider(
                 onChanged: (value) {
                   setState(() {
-                    saturation = value;
+                    _saturation = value;
                   });
                 },
-                value: saturation,
+                value: _saturation,
                 enableTooltip: true,
                 stepSize: 0.01,
                 min: -1.0,
@@ -394,10 +394,10 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               child: SfSlider(
                 onChanged: (value) {
                   setState(() {
-                    brightness = value;
+                    _brightness = value;
                   });
                 },
-                value: brightness,
+                value: _brightness,
                 enableTooltip: true,
                 stepSize: 0.01,
                 min: -1.0,
