@@ -200,9 +200,9 @@ packages:
   extended_image:
     dependency: "direct main"
     description:
-      name: extended_image
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "thirdparty/extended_image"
+      relative: true
+    source: path
     version: "4.1.0"
   extended_image_library:
     dependency: transitive

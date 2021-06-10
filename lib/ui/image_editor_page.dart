@@ -10,7 +10,6 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/detail_page.dart';
-import 'package:photos/ui/filtered_image.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -76,21 +75,19 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   Widget _buildImage() {
     return Hero(
       tag: widget.detailPageConfig.tagPrefix + widget.originalFile.tag(),
-      child: FilteredImage(
-        saturation: saturation,
-        brightness: brightness,
-        child: ExtendedImage(
-          image: widget.imageProvider,
-          extendedImageEditorKey: editorKey,
-          mode: ExtendedImageMode.editor,
-          fit: BoxFit.contain,
-          initEditorConfigHandler: (_) => EditorConfig(
-            maxScale: 8.0,
-            cropRectPadding: const EdgeInsets.all(20.0),
-            hitTestSize: 20.0,
-            cornerColor: Color.fromRGBO(45, 194, 98, 1.0),
-          ),
+      child: ExtendedImage(
+        image: widget.imageProvider,
+        extendedImageEditorKey: editorKey,
+        mode: ExtendedImageMode.editor,
+        fit: BoxFit.contain,
+        initEditorConfigHandler: (_) => EditorConfig(
+          maxScale: 8.0,
+          cropRectPadding: const EdgeInsets.all(20.0),
+          hitTestSize: 20.0,
+          cornerColor: Color.fromRGBO(45, 194, 98, 1.0),
         ),
+        brightness: brightness,
+        saturation: saturation,
       ),
     );
   }
