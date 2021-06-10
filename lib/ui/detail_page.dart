@@ -206,7 +206,10 @@ class _DetailPageState extends State<DetailPage> {
                 ImageEditorPage(
                   imageProvider,
                   file,
-                  widget.config.copyWith(files: _files),
+                  widget.config.copyWith(
+                    files: _files,
+                    selectedIndex: _selectedIndex,
+                  ),
                 ),
               );
             },
