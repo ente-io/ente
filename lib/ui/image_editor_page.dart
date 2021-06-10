@@ -10,11 +10,14 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/detail_page.dart';
+import 'package:photos/ui/filtered_image.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:path/path.dart' as path;
+import 'package:syncfusion_flutter_core/theme.dart';
+import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 class ImageEditorPage extends StatefulWidget {
   final ImageProvider imageProvider;
@@ -53,7 +56,16 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           child: Column(
             children: [
               Expanded(child: _buildImage()),
+              Padding(padding: EdgeInsets.all(4)),
+              Column(
+                children: [
+                  _buildBrightness(),
+                  _buildSat(),
+                ],
+              ),
+              Padding(padding: EdgeInsets.all(8)),
               _buildBottomBar(),
+              Padding(padding: EdgeInsets.all(6)),
             ],
           ),
         ),
@@ -64,16 +76,20 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   Widget _buildImage() {
     return Hero(
       tag: widget.detailPageConfig.tagPrefix + widget.originalFile.tag(),
-      child: ExtendedImage(
-        image: widget.imageProvider,
-        extendedImageEditorKey: editorKey,
-        mode: ExtendedImageMode.editor,
-        fit: BoxFit.contain,
-        initEditorConfigHandler: (_) => EditorConfig(
-          maxScale: 8.0,
-          cropRectPadding: const EdgeInsets.all(20.0),
-          hitTestSize: 20.0,
-          cornerColor: Color.fromRGBO(45, 194, 98, 1.0),
+      child: FilteredImage(
+        saturation: saturation,
+        brightness: brightness,
+        child: ExtendedImage(
+          image: widget.imageProvider,
+          extendedImageEditorKey: editorKey,
+          mode: ExtendedImageMode.editor,
+          fit: BoxFit.contain,
+          initEditorConfigHandler: (_) => EditorConfig(
+            maxScale: 8.0,
+            cropRectPadding: const EdgeInsets.all(20.0),
+            hitTestSize: 20.0,
+            cornerColor: Color.fromRGBO(45, 194, 98, 1.0),
+          ),
         ),
       ),
     );
@@ -235,9 +251,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       option.addOption(RotateOption(radian.toInt()));
     }
 
-    option.addOption(ColorOption.saturation(sat));
-    option.addOption(ColorOption.brightness(bright));
-    option.addOption(ColorOption.contrast(con));
+    option.addOption(ColorOption.saturation(saturation + 1));
+    option.addOption(ColorOption.brightness(brightness + 1));
 
     option.outputFormat = const OutputFormat.png(88);
 
@@ -305,49 +320,96 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     editorKey.currentState?.rotate(right: right);
   }
 
-  double sat = 1;
-  double bright = 1;
-  double con = 1;
+  double saturation = 0;
+  double brightness = 0;
 
   Widget _buildSat() {
-    return Slider(
-      label: 'sat : ${sat.toStringAsFixed(2)}',
-      onChanged: (double value) {
-        setState(() {
-          sat = value;
-        });
-      },
-      value: sat,
-      min: 0,
-      max: 2,
+    return Container(
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            child: Text(
+              "color",
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 14,
+              ),
+            ),
+          ),
+          Expanded(
+            child: SfSliderTheme(
+              data: SfSliderThemeData(
+                activeTrackHeight: 4,
+                inactiveTrackHeight: 2,
+                inactiveTrackColor: Colors.grey[900],
+                activeTrackColor: Color.fromRGBO(45, 150, 98, 1),
+                thumbColor: Color.fromRGBO(45, 150, 98, 1),
+                thumbRadius: 10,
+                tooltipBackgroundColor: Colors.grey[900],
+              ),
+              child: SfSlider(
+                onChanged: (value) {
+                  setState(() {
+                    saturation = value;
+                  });
+                },
+                value: saturation,
+                enableTooltip: true,
+                stepSize: 0.01,
+                min: -1.0,
+                max: 1.0,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildBrightness() {
-    return Slider(
-      label: 'brightness : ${bright.toStringAsFixed(2)}',
-      onChanged: (double value) {
-        setState(() {
-          bright = value;
-        });
-      },
-      value: bright,
-      min: 0,
-      max: 2,
-    );
-  }
-
-  Widget _buildCon() {
-    return Slider(
-      label: 'con : ${con.toStringAsFixed(2)}',
-      onChanged: (double value) {
-        setState(() {
-          con = value;
-        });
-      },
-      value: con,
-      min: 0,
-      max: 4,
+    return Container(
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            child: Text(
+              "light",
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 14,
+              ),
+            ),
+          ),
+          Expanded(
+            child: SfSliderTheme(
+              data: SfSliderThemeData(
+                activeTrackHeight: 4,
+                inactiveTrackHeight: 2,
+                activeTrackColor: Color.fromRGBO(45, 150, 98, 1),
+                inactiveTrackColor: Colors.grey[900],
+                thumbColor: Color.fromRGBO(45, 150, 98, 1),
+                thumbRadius: 10,
+                tooltipBackgroundColor: Colors.grey[900],
+              ),
+              child: SfSlider(
+                onChanged: (value) {
+                  setState(() {
+                    brightness = value;
+                  });
+                },
+                value: brightness,
+                enableTooltip: true,
+                stepSize: 0.01,
+                min: -1.0,
+                max: 1.0,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

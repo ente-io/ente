@@ -83,6 +83,8 @@ dependencies:
   email_validator: '^1.0.6'
   extended_image: ^4.1.0
   image_editor: ^1.0.0
+  syncfusion_flutter_sliders: ^19.1.67-beta
+  syncfusion_flutter_core: ^19.1.67
 
 dev_dependencies:
   flutter_test:
