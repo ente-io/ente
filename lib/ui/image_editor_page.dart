@@ -41,18 +41,38 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   double _brightness = 0;
   double _saturation = 0;
+  bool _hasEdited = false;
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        await _showExitConfirmationDialog();
+        if (_hasBeenEdited()) {
+          await _showExitConfirmationDialog();
+        } else {
+          replacePage(context, DetailPage(widget.detailPageConfig));
+        }
         return false;
       },
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Color(0x00000000),
           elevation: 0,
+          actions: _hasBeenEdited()
+              ? [
+                  IconButton(
+                    padding: const EdgeInsets.only(right: 16, left: 16),
+                    onPressed: () {
+                      editorKey.currentState.reset();
+                      setState(() {
+                        _brightness = 0;
+                        _saturation = 0;
+                      });
+                    },
+                    icon: Icon(Icons.history),
+                  )
+                ]
+              : [],
         ),
         body: Container(
           child: Column(
@@ -75,6 +95,10 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     );
   }
 
+  bool _hasBeenEdited() {
+    return _hasEdited || _saturation != 0 || _brightness != 0;
+  }
+
   Widget _buildImage() {
     return Hero(
       tag: widget.detailPageConfig.tagPrefix + widget.originalFile.tag(),
@@ -88,6 +112,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           cropRectPadding: const EdgeInsets.all(20.0),
           hitTestSize: 20.0,
           cornerColor: Color.fromRGBO(45, 150, 98, 1),
+          editActionDetailsIsChanged: (_) {
+            setState(() {
+              _hasEdited = true;
+            });
+          },
         ),
         brightness: _brightness,
         saturation: _saturation,
