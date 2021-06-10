@@ -348,6 +348,11 @@ export default function Gallery() {
                 getInputProps={getInputProps}
                 showCollectionSelector={setCollectionSelectorView.bind(null, true)}
             >
+                <button type="button" onClick={() => {
+                    throw new Error('Sentry Frontend Error');
+                }}>
+                    Throw error
+                </button>
                 {loading && (
                     <LoadingOverlay>
                         <EnteSpinner />
