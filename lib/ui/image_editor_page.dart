@@ -84,7 +84,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           maxScale: 8.0,
           cropRectPadding: const EdgeInsets.all(20.0),
           hitTestSize: 20.0,
-          cornerColor: Color.fromRGBO(45, 194, 98, 1.0),
+          cornerColor: Color.fromRGBO(45, 150, 98, 1),
         ),
         brightness: brightness,
         saturation: saturation,
