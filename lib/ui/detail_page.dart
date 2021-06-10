@@ -213,7 +213,10 @@ class _DetailPageState extends State<DetailPage> {
                 ),
               );
             },
-            icon: Icon(Icons.edit),
+            icon: Icon(
+              Icons.edit,
+              size: 24,
+            ),
           ),
         ),
       );
@@ -336,7 +339,7 @@ class _DetailPageState extends State<DetailPage> {
         return Icon(
           Icons.favorite_border,
           color: isLiked ? Colors.pinkAccent : Colors.white,
-          size: 30,
+          size: 24,
         );
       },
     );
