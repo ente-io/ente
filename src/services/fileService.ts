@@ -77,9 +77,26 @@ export const syncFiles = async (collections: Collection[], setFiles: (files: Fil
             }
             files.push(file);
         }
-        files = files.sort(
-            (a, b) => b.metadata.creationTime - a.metadata.creationTime,
-        );
+        // sort according to modification time first
+        files = files.sort((a, b) => {
+            if (!b.metadata?.modificationTime) {
+                return -1;
+            }
+            if (!a.metadata?.modificationTime) {
+                return 1;
+            } else {
+                return b.metadata.modificationTime - a.metadata.modificationTime;
+            }
+        });
+
+        // then sort according to creation time, maintaining ordering according to modification time for files with creation time
+        files = files.map((file, index) => ({ index, file })).sort((a, b) => {
+            let diff = b.file.metadata.creationTime - a.file.metadata.creationTime;
+            if (diff === 0) {
+                diff = a.index - b.index;
+            }
+            return diff;
+        }).map((file) => file.file);
         await localForage.setItem('files', files);
         await localForage.setItem(
             `${collection.id}-time`,
