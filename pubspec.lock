@@ -137,9 +137,11 @@ packages:
   crisp:
     dependency: "direct main"
     description:
-      name: crisp
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "8adaf5d76e384a297008d8154dff002162d8afbd"
+      url: "https://github.com/kcrebound/flutter-crisp.git"
+    source: git
     version: "0.1.6"
   crypto:
     dependency: transitive

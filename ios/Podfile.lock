@@ -38,6 +38,8 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
+  - image_editor (0.0.1):
+    - Flutter
   - in_app_purchase (0.0.1):
     - Flutter
   - libwebp (1.1.0):
@@ -103,6 +105,7 @@ DEPENDENCIES:
   - flutter_user_agent (from `.symlinks/plugins/flutter_user_agent/ios`)
   - fluttercontactpicker (from `.symlinks/plugins/fluttercontactpicker/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - image_editor (from `.symlinks/plugins/image_editor/ios`)
   - in_app_purchase (from `.symlinks/plugins/in_app_purchase/ios`)
   - local_auth (from `.symlinks/plugins/local_auth/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
@@ -158,6 +161,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/fluttercontactpicker/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
+  image_editor:
+    :path: ".symlinks/plugins/image_editor/ios"
   in_app_purchase:
     :path: ".symlinks/plugins/in_app_purchase/ios"
   local_auth:
@@ -203,6 +208,7 @@ SPEC CHECKSUMS:
   fluttercontactpicker: 36cf7811f583f3c5aec3c53efcbf366b9cdfdf51
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  image_editor: c1d038630eedea60d2dee9c14f36aa66c7f9cfab
   in_app_purchase: 3e2155afa9d03d4fa32d9e62d567885080ce97d6
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
   local_auth: 25938960984c3a7f6e3253e3f8d962fdd16852bd

@@ -54,7 +54,8 @@ dependencies:
   computer: ^1.0.2
   flutter_secure_storage: ^4.2.0
   uni_links: ^0.5.1
-  crisp: ^0.1.6
+  crisp:
+    git: https://github.com/kcrebound/flutter-crisp.git
   flutter_sodium: ^0.2.0
   pedantic: ^1.9.2
   page_transition: "^1.1.7+2"
