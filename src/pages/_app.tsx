@@ -109,6 +109,7 @@ const GlobalStyles = createGlobalStyle`
     }
     .modal-backdrop {
         z-index:2000;
+        opacity:0.8 !important;
     }
     .modal .card , .table {
         background-color: #202020;
