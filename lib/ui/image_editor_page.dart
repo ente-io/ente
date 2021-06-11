@@ -14,6 +14,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:photos/models/file.dart' as ente;
+import 'package:photos/models/location.dart';
 import 'package:path/path.dart' as path;
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
@@ -315,6 +316,13 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           await ente.File.fromAsset(widget.originalFile.deviceFolder, newAsset);
       newFile.creationTime = widget.originalFile.creationTime;
       newFile.collectionID = widget.originalFile.collectionID;
+      if (widget.originalFile.location == null ||
+          (widget.originalFile.location.latitude == 0 &&
+              widget.originalFile.location.longitude == 0)) {
+        final latLong =
+            await (await widget.originalFile.getAsset()).latlngAsync();
+        newFile.location = Location(latLong.latitude, latLong.longitude);
+      }
       newFile.generatedID = await FilesDB.instance.insert(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
       SyncService.instance.sync();
