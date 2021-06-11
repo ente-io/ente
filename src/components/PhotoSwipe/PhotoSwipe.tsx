@@ -78,7 +78,7 @@ function ExifData(props: { exif: any }) {
             <Legend>{constants.EXIF}</Legend>
             <FormCheck>
                 <FormCheck.Label>
-                    <FormCheck.Input onChange={changeHandler}/>
+                    <FormCheck.Input onChange={changeHandler} />
                     {constants.SHOW_ALL}
                 </FormCheck.Label>
             </FormCheck>
@@ -158,7 +158,7 @@ function PhotoSwipe(props: Iprops) {
         events.forEach((event) => {
             const callback = props[event];
             if (callback || event === 'destroy') {
-                photoSwipe.listen(event, function(...args) {
+                photoSwipe.listen(event, function (...args) {
                     if (callback) {
                         args.unshift(this);
                         callback(...args);
@@ -166,10 +166,16 @@ function PhotoSwipe(props: Iprops) {
                     if (event === 'destroy') {
                         handleClose();
                     }
+                    if (event === 'close') {
+                        handleClose();
+                    }
                 });
             }
         });
-        photoSwipe.listen('beforeChange', updateFavButton);
+        photoSwipe.listen('beforeChange', function () {
+            updateInfo.call(this);
+            updateFavButton.call(this);
+        });
         photoSwipe.listen('resize', checkExifAvailable);
         photoSwipe.init();
         needUpdate.current = false;
@@ -189,6 +195,7 @@ function PhotoSwipe(props: Iprops) {
         for (const videoTag of videoTags) {
             videoTag.pause();
         }
+        handleCloseInfo();
     };
     const isInFav = (file) => {
         const { favItemIds } = props;
@@ -228,7 +235,7 @@ function PhotoSwipe(props: Iprops) {
             const img = document.querySelector('.pswp__img:not(.pswp__img--placeholder)');
             if (img) {
                 // @ts-expect-error
-                EXIF.getData(img, function() {
+                EXIF.getData(img, function () {
                     const exif = EXIF.getAllTags(this);
                     exif.raw = EXIF.pretty(this);
                     if (exif.raw) {
@@ -239,18 +246,20 @@ function PhotoSwipe(props: Iprops) {
         }, 100);
     };
 
-    const showExif = () => {
-        const file:File = items[photoSwipe?.getCurrentIndex()];
-        if (file.metadata) {
+    function updateInfo() {
+        const file: File = this?.currItem;
+        if (file?.metadata) {
             setMetaData(file.metadata);
             setExif(null);
             checkExifAvailable();
-            setShowInfo(true);
         }
-    };
+    }
 
     const handleCloseInfo = () => {
         setShowInfo(false);
+    };
+    const handleOpenInfo = () => {
+        setShowInfo(true);
     };
 
     const downloadFile = async (file) => {
@@ -318,7 +327,7 @@ function PhotoSwipe(props: Iprops) {
                             <button
                                 className="pswp-custom info-btn"
                                 title={constants.INFO}
-                                onClick={showExif}
+                                onClick={handleOpenInfo}
                             />
                             <div className="pswp__preloader">
                                 <div className="pswp__preloader__icn">
@@ -356,21 +365,18 @@ function PhotoSwipe(props: Iprops) {
                         </div>
                         {renderInfoItem(constants.FILE_ID, items[photoSwipe?.getCurrentIndex()]?.id)}
                         {metadata?.title && renderInfoItem(constants.FILE_NAME, metadata.title)}
-                        {metadata?.creationTime && renderInfoItem(constants.CREATION_TIME, formatDateTime(metadata.creationTime/1000))}
-                        {metadata?.creationTime && renderInfoItem(constants.UPDATED_ON, formatDateTime(metadata.modificationTime/1000))}
-                        {metadata?.latitude && metadata?.longitude &&
+                        {metadata?.creationTime && renderInfoItem(constants.CREATION_TIME, formatDateTime(metadata.creationTime / 1000))}
+                        {metadata?.modificationTime && renderInfoItem(constants.UPDATED_ON, formatDateTime(metadata.modificationTime / 1000))}
+                        {metadata?.latitude && metadata?.longitude ?
                             renderInfoItem(constants.LOCATION, (
-                                <a href={`https://www.google.com/maps?q=loc:${metadata.latitude},${metadata.longitude}`} target='_blank'
-                                    rel='noreferrer noopener'
-                                >
-                                    {constants.SHOW_MAP}
-                                </a>
-                            ))
+                                <code>{`${metadata?.latitude.toFixed(2)}° N, ${metadata?.latitude.toFixed(2)}° E`}</code>
+                            )) :
+                            null
                         }
                         {exif && (
                             <>
-                                <br/><br/>
-                                <ExifData exif={exif}/>
+                                <br /><br />
+                                <ExifData exif={exif} />
                             </>
                         )}
                     </Form.Group>
