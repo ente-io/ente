@@ -188,15 +188,15 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   AppBar _buildAppBar() {
-    final file = _files[_selectedIndex];
     final List<Widget> actions = [];
     actions.add(_getFavoriteButton());
-    if (file.fileType == FileType.image) {
+    if (_files[_selectedIndex].fileType == FileType.image) {
       actions.add(
         Padding(
           padding: const EdgeInsets.only(left: 8),
           child: IconButton(
             onPressed: () async {
+              final file = _files[_selectedIndex];
               final imageProvider = ExtendedFileImageProvider(
                   await getFile(file),
                   cacheRawData: true);
@@ -269,6 +269,7 @@ class _DetailPageState extends State<DetailPage> {
         ];
       },
       onSelected: (value) {
+        final file = _files[_selectedIndex];
         if (value == 1) {
           share(context, [file]);
         } else if (value == 2) {
