@@ -325,6 +325,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         newFile.location = Location(latLong.latitude, latLong.longitude);
       }
       newFile.generatedID = await FilesDB.instance.insert(newFile);
+      await SyncService.instance.trackEditedFile(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
       SyncService.instance.sync();
       showToast("edits saved");

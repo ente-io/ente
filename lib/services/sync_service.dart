@@ -51,6 +51,7 @@ class SyncService {
       "last_storage_limit_exceeded_notification_push_time";
   static const kLastBackgroundUploadDetectedTime =
       "last_background_upload_detected_time";
+  static const kEditedFileIDsKey = "edited_file_ids";
   static const kDiffLimit = 2500;
   static const kBackgroundUploadPollFrequency = Duration(seconds: 1);
 
@@ -193,6 +194,21 @@ class SyncService {
     }, UserCancelledUploadError());
   }
 
+  Future<void> trackEditedFile(File file) async {
+    final editedIDs = getEditedFiles();
+    editedIDs.add(file.localID);
+    await _prefs.setStringList(kEditedFileIDsKey, editedIDs);
+  }
+
+  List<String> getEditedFiles() {
+    if (_prefs.containsKey(kEditedFileIDsKey)) {
+      return _prefs.getStringList(kEditedFileIDsKey);
+    } else {
+      List<String> editedIDs = [];
+      return editedIDs;
+    }
+  }
+
   Future<void> _doSync() async {
     await _syncWithDevice();
     if (hasCompletedFirstImport()) {
@@ -206,6 +222,7 @@ class SyncService {
       return;
     }
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
+    final editedFileIDs = getEditedFiles().toSet();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     if (_isBackground) {
       await PhotoManager.setIgnorePermissionCheck(true);
@@ -222,7 +239,11 @@ class SyncService {
     final startTime = DateTime.now().microsecondsSinceEpoch;
     if (lastDBUpdationTime != 0) {
       await _loadAndStorePhotos(
-          lastDBUpdationTime, syncStartTime, existingLocalFileIDs);
+        lastDBUpdationTime,
+        syncStartTime,
+        existingLocalFileIDs,
+        editedFileIDs,
+      );
     } else {
       // Load from 0 - 01.01.2010
       Bus.instance
@@ -231,12 +252,22 @@ class SyncService {
       var toYear = 2010;
       var toTime = DateTime(toYear).microsecondsSinceEpoch;
       while (toTime < syncStartTime) {
-        await _loadAndStorePhotos(startTime, toTime, existingLocalFileIDs);
+        await _loadAndStorePhotos(
+          startTime,
+          toTime,
+          existingLocalFileIDs,
+          editedFileIDs,
+        );
         startTime = toTime;
         toYear++;
         toTime = DateTime(toYear).microsecondsSinceEpoch;
       }
-      await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
+      await _loadAndStorePhotos(
+        startTime,
+        syncStartTime,
+        existingLocalFileIDs,
+        editedFileIDs,
+      );
     }
     if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
         !_prefs.getBool(kHasCompletedFirstImportKey)) {
@@ -250,7 +281,11 @@ class SyncService {
   }
 
   Future<void> _loadAndStorePhotos(
-      int fromTime, int toTime, Set<String> existingLocalFileIDs) async {
+    int fromTime,
+    int toTime,
+    Set<String> existingLocalFileIDs,
+    Set<String> editedFileIDs,
+  ) async {
     _logger.info("Loading photos from " +
         DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
         " to " +
@@ -258,8 +293,10 @@ class SyncService {
     final files = await getDeviceFiles(fromTime, toTime, _computer);
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
-      final updatedFiles =
-          files.where((file) => existingLocalFileIDs.contains(file.localID));
+      final updatedFiles = files
+          .where((file) => existingLocalFileIDs.contains(file.localID))
+          .toList();
+      updatedFiles.removeWhere((file) => editedFileIDs.contains(file.localID));
       _logger.info(updatedFiles.length.toString() + " files were updated.");
       for (final file in updatedFiles) {
         await _db.updateUploadedFile(
