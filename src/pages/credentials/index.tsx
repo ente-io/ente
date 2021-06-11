@@ -29,6 +29,7 @@ export default function Credentials() {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!user?.token || !keyAttributes?.memLimit) {
             clearData();
+            router.push('/');
         } else if (!keyAttributes) {
             router.push('/generate');
         } else if (key) {
@@ -41,6 +42,9 @@ export default function Credentials() {
 
     const verifyPassphrase = async (passphrase, setFieldError) => {
         try {
+            if (keyAttributes) {
+                router.push('/');
+            }
             const cryptoWorker = await new CryptoWorker();
             let kek: string = null;
             try {
