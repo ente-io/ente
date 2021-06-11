@@ -29,6 +29,7 @@ export default function Credentials() {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!user?.token || !keyAttributes?.memLimit) {
             clearData();
+            router.push('/');
         } else if (!keyAttributes) {
             router.push('/generate');
         } else if (key) {
@@ -41,14 +42,22 @@ export default function Credentials() {
 
     const verifyPassphrase = async (passphrase, setFieldError) => {
         try {
+            if (keyAttributes) {
+                router.push('/');
+            }
             const cryptoWorker = await new CryptoWorker();
-            const kek: string = await cryptoWorker.deriveKey(
-                passphrase,
-                keyAttributes.kekSalt,
-                keyAttributes.opsLimit,
-                keyAttributes.memLimit,
-            );
-
+            let kek: string = null;
+            try {
+                kek = await cryptoWorker.deriveKey(
+                    passphrase,
+                    keyAttributes.kekSalt,
+                    keyAttributes.opsLimit,
+                    keyAttributes.memLimit,
+                );
+            } catch (e) {
+                console.error('failed to deriveKey ', e.message);
+                throw e;
+            }
             try {
                 const key: string = await cryptoWorker.decryptB64(
                     keyAttributes.encryptedKey,
@@ -65,7 +74,6 @@ export default function Credentials() {
                 setSessionKeys(key);
                 router.push('/gallery');
             } catch (e) {
-                console.error(e);
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
             }
         } catch (e) {
@@ -73,6 +81,7 @@ export default function Credentials() {
                 'passphrase',
                 `${constants.UNKNOWN_ERROR} ${e.message}`,
             );
+            console.error('failed to verifyPassphrase ', e.message);
         }
     };
 

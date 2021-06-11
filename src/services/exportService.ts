@@ -41,9 +41,7 @@ class ExportService {
             );
             const collectionIDMap = new Map<number, string>();
             for (const collection of collections) {
-                const collectionFolderPath = `${dir}/${
-                    collection.id
-                }_${this.sanitizeName(collection.name)}`;
+                const collectionFolderPath = `${dir}/${collection.id}_${this.sanitizeName(collection.name)}`;
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
                     collectionFolderPath,
                 );
@@ -72,7 +70,7 @@ class ExportService {
                     ExportNotification.FINISH,
             );
         } catch (e) {
-            console.error(e);
+            console.error(e.message);
         } finally {
             this.exportInProgress = null;
             this.ElectronAPIs.showOnTray();

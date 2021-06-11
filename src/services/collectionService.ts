@@ -115,14 +115,14 @@ const getCollections = async (
                 } catch (e) {
                     console.error(
                         `decryption failed for collection with id=${collection.id}`,
-                        e,
+                        e.message,
                     );
                 }
             },
         );
         return await Promise.all(promises);
     } catch (e) {
-        console.error('getCollections failed- ', e);
+        console.error('getCollections failed- ', e.message);
         throw e;
     }
 };
@@ -152,7 +152,7 @@ export const syncCollections = async () => {
         if (
             !latestCollectionsInstances.has(collection.id) ||
             latestCollectionsInstances.get(collection.id).updationTime <
-                collection.updationTime
+            collection.updationTime
         ) {
             latestCollectionsInstances.set(collection.id, collection);
         }
@@ -270,7 +270,7 @@ export const createCollection = async (
         );
         return createdCollection;
     } catch (e) {
-        console.error('create collection failed', e);
+        console.error('create collection failed', e.message);
         throw e;
     }
 };
@@ -288,7 +288,7 @@ const postCollection = async (
         );
         return response.data.collection;
     } catch (e) {
-        console.error('post Collection failed ', e);
+        console.error('post Collection failed ', e.message);
     }
 };
 
@@ -342,7 +342,7 @@ export const addToCollection = async (
             { 'X-Auth-Token': token },
         );
     } catch (e) {
-        console.error('Add to collection Failed ', e);
+        console.error('Add to collection Failed ', e.message);
     }
 };
 const removeFromCollection = async (collection: Collection, files: File[]) => {
@@ -365,7 +365,7 @@ const removeFromCollection = async (collection: Collection, files: File[]) => {
             { 'X-Auth-Token': token },
         );
     } catch (e) {
-        console.error('remove from collection failed ', e);
+        console.error('remove from collection failed ', e.message);
     }
 };
 
@@ -387,7 +387,7 @@ export const deleteCollection = async (
         await syncWithRemote();
         redirectToAll();
     } catch (e) {
-        console.error('delete collection failed ', e);
+        console.error('delete collection failed ', e.message);
         setDialogMessage({
             title: constants.ERROR,
             content: constants.DELETE_COLLECTION_FAILED,
@@ -450,7 +450,7 @@ export const shareCollection = async (
             },
         );
     } catch (e) {
-        console.error('share collection failed ', e);
+        console.error('share collection failed ', e.message);
         throw e;
     }
 };
@@ -474,7 +474,7 @@ export const unshareCollection = async (
             },
         );
     } catch (e) {
-        console.error('unshare collection failed ', e);
+        console.error('unshare collection failed ', e.message);
         throw e;
     }
 };

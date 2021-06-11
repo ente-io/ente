@@ -50,7 +50,7 @@ class DownloadManager {
             }
             return await this.thumbnailDownloads.get(file.id);
         } catch (e) {
-            console.error('get preview Failed', e);
+            console.error('get preview Failed', e.message);
         }
     }
 
@@ -67,7 +67,7 @@ class DownloadManager {
             }
             return await this.fileDownloads.get(file.id);
         } catch (e) {
-            console.error('Failed to get File', e);
+            console.error('Failed to get File', e.message);
         }
     };
 

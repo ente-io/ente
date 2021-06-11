@@ -76,7 +76,7 @@ export default function Generate() {
             setJustSignedUp(true);
             setRecoveryModalView(true);
         } catch (e) {
-            console.error(e);
+            console.error('failed to generate password', e.message);
             setFieldError('passphrase', constants.PASSWORD_GENERATION_FAILED);
         }
     };
