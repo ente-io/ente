@@ -3,7 +3,7 @@ import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import { getOtt } from 'services/userService';
@@ -26,7 +26,7 @@ export default function Login(props: LoginProps) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const main=async ()=>{
+        const main = async () => {
             router.prefetch('/verify');
             const user = getData(LS_KEYS.USER);
             if (user?.email) {
@@ -51,6 +51,12 @@ export default function Login(props: LoginProps) {
         }
         setWaiting(false);
     };
+    const inputElement = useRef(null);
+    useEffect(() => {
+        setTimeout(() => {
+            inputElement.current?.focus();
+        }, 250);
+    }, []);
 
     return (
         <>
@@ -79,6 +85,7 @@ export default function Login(props: LoginProps) {
                     <Form noValidate onSubmit={handleSubmit}>
                         <Form.Group controlId="formBasicEmail">
                             <Form.Control
+                                ref={inputElement}
                                 type="email"
                                 placeholder={constants.ENTER_EMAIL}
                                 value={values.email}
