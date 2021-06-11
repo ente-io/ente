@@ -198,7 +198,7 @@ class _DetailPageState extends State<DetailPage> {
           child: IconButton(
             onPressed: () async {
               final imageProvider = ExtendedFileImageProvider(
-                  await getImage(file),
+                  await getFile(file),
                   cacheRawData: true);
               await precacheImage(imageProvider, context);
               replacePage(

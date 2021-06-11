@@ -27,10 +27,10 @@ void preloadFile(ente.File file) {
   if (file.fileType == FileType.video) {
     return;
   }
-  getImage(file);
+  getFile(file);
 }
 
-Future<io.File> getImage(ente.File file) async {
+Future<io.File> getFile(ente.File file) async {
   if (file.localID == null) {
     return getFileFromServer(file);
   } else {
@@ -64,14 +64,6 @@ void preloadThumbnail(ente.File file) {
         });
       }
     });
-  }
-}
-
-Future<io.File> getNativeFile(ente.File file) async {
-  if (file.localID == null) {
-    return getFileFromServer(file);
-  } else {
-    return file.getAsset().then((asset) => asset.originFile);
   }
 }
 

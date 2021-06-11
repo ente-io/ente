@@ -7,9 +7,9 @@ import 'package:photos/utils/file_util.dart';
 Future<void> share(BuildContext context, List<File> files) async {
   final dialog = createProgressDialog(context, "preparing...");
   await dialog.show();
-  final pathFutures = List<Future<String>>();
+  final List<Future<String>> pathFutures = [];
   for (File file in files) {
-    pathFutures.add(getNativeFile(file).then((file) => file.path));
+    pathFutures.add(getFile(file).then((file) => file.path));
   }
   final paths = await Future.wait(pathFutures);
   await dialog.hide();
