@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
@@ -88,7 +89,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
               Padding(padding: EdgeInsets.all(8)),
               _buildBottomBar(),
-              Padding(padding: EdgeInsets.all(6)),
+              Padding(padding: EdgeInsets.all(Platform.isIOS ? 16 : 6)),
             ],
           ),
         ),
@@ -139,7 +140,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   Widget _buildFlipButton() {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: HitTestBehavior.translucent,
       onTap: () {
         flip();
       },
@@ -172,7 +173,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   Widget _buildRotateLeftButton() {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: HitTestBehavior.translucent,
       onTap: () {
         rotate(false);
       },
@@ -198,7 +199,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   Widget _buildRotateRightButton() {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: HitTestBehavior.translucent,
       onTap: () {
         rotate(true);
       },
@@ -224,7 +225,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   Widget _buildSaveButton() {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: HitTestBehavior.translucent,
       onTap: () {
         _saveEdits();
       },
@@ -316,9 +317,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           await ente.File.fromAsset(widget.originalFile.deviceFolder, newAsset);
       newFile.creationTime = widget.originalFile.creationTime;
       newFile.collectionID = widget.originalFile.collectionID;
-      if (widget.originalFile.location == null ||
-          (widget.originalFile.location.latitude == 0 &&
-              widget.originalFile.location.longitude == 0)) {
+      newFile.location = widget.originalFile.location;
+      if (newFile.location == null ||
+          (newFile.location.latitude == 0 && newFile.location.longitude == 0)) {
         final latLong =
             await (await widget.originalFile.getAsset()).latlngAsync();
         newFile.location = Location(latLong.latitude, latLong.longitude);
@@ -327,6 +328,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
       SyncService.instance.sync();
       showToast("edits saved");
+      _logger.info("Original file " + widget.originalFile.toString());
+      _logger.info("Saved edits to file " + newFile.toString());
       final existingFiles = widget.detailPageConfig.files;
       final files = await widget.detailPageConfig.asyncLoader(
         existingFiles[existingFiles.length - 1].creationTime,
