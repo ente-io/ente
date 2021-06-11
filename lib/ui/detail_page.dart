@@ -157,11 +157,12 @@ class _DetailPageState extends State<DetailPage> {
           if (files.length < kLoadLimit) {
             _hasLoadedTillStart = true;
           }
-          _selectedIndex = files.length;
+          final length = files.length;
           files.addAll(_files);
           _files = files;
+          _pageController.jumpToPage(length);
+          _selectedIndex = length;
         });
-        _pageController.jumpToPage(_selectedIndex);
       });
     }
     if (index == _files.length - 1 && !_hasLoadedTillEnd) {
