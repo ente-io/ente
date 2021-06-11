@@ -42,9 +42,6 @@ export default function Credentials() {
 
     const verifyPassphrase = async (passphrase, setFieldError) => {
         try {
-            if (keyAttributes) {
-                router.push('/');
-            }
             const cryptoWorker = await new CryptoWorker();
             let kek: string = null;
             try {
