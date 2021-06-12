@@ -8,10 +8,11 @@ import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import EnteSpinner from 'components/EnteSpinner';
-import { sentryInit } from '../utils/sentry';
+import { logError, sentryInit } from '../utils/sentry';
 import { Workbox } from 'workbox-window';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import HTTPService from 'services/HTTPService';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -349,7 +350,7 @@ type AppContextType = {
 export const AppContext = createContext<AppContextType>(null);
 
 const redirectMap = {
-    roadmap: (token: string) => `${getEndpoint()}/users/roadmap?token=${token}`,
+    roadmap: (token: string) => `${getEndpoint()}/users/roadmap?token=${encodeURIComponent(token)}`,
 };
 
 export default function App({ Component, err }) {
@@ -381,6 +382,14 @@ export default function App({ Component, err }) {
                 }
             };
         }
+
+        HTTPService.getInterceptors().response.use(
+            (resp) => resp,
+            (error) => {
+                logError(error);
+                return Promise.reject(error);
+            },
+        );
     }, []);
 
     const setUserOnline = () => setOffline(false);

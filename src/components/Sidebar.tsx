@@ -59,7 +59,7 @@ export default function Sidebar(props: Props) {
     }, [isOpen]);
 
     function openFeedbackURL() {
-        const feedbackURL: string = `${getEndpoint()}/users/feedback?token=${getToken()}`;
+        const feedbackURL: string = `${getEndpoint()}/users/feedback?token=${encodeURIComponent(getToken())}`;
         const win = window.open(feedbackURL, '_blank');
         win.focus();
     }
