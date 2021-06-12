@@ -69,7 +69,8 @@ class _BackupFolderSelectionWidgetState
               onPressed: _backedupFolders.length == 0
                   ? null
                   : () async {
-                      await Configuration.instance.setPathsToBackUp(_backedupFolders);
+                      await Configuration.instance
+                          .setPathsToBackUp(_backedupFolders);
                       Bus.instance.fire(BackupFoldersUpdatedEvent());
                       Navigator.pop(context);
                     },
