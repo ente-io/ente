@@ -30,7 +30,7 @@ export interface User {
 }
 export interface VerificationResponse {
     id: number;
-    encryptedKeys: KeyAttributes;
+    keyAttributes: KeyAttributes;
     encryptedToken?: string;
     token?: string;
 }

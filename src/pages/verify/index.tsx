@@ -60,7 +60,7 @@ export default function Verify() {
         try {
             setLoading(true);
             const resp = await verifyOtt(email, ott);
-            const { encryptedKeys: keyAttributes, encryptedToken, token, id } = resp.data as VerificationResponse;
+            const { keyAttributes, encryptedToken, token, id } = resp.data as VerificationResponse;
             setData(LS_KEYS.USER, {
                 ...getData(LS_KEYS.USER),
                 email,
