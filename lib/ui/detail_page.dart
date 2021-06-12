@@ -6,11 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/files_db.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/image_editor_page.dart';
 import 'package:photos/ui/video_widget.dart';
@@ -224,7 +228,7 @@ class _DetailPageState extends State<DetailPage> {
     }
     actions.add(PopupMenuButton(
       itemBuilder: (context) {
-        return [
+        final items = [
           PopupMenuItem(
             value: 1,
             child: Row(
@@ -253,6 +257,26 @@ class _DetailPageState extends State<DetailPage> {
               ],
             ),
           ),
+        ];
+        if (_files[_selectedIndex].localID == null) {
+          items.add(
+            PopupMenuItem(
+              value: 4,
+              child: Row(
+                children: [
+                  Icon(Platform.isAndroid
+                      ? Icons.download
+                      : CupertinoIcons.cloud_download),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("download"),
+                ],
+              ),
+            ),
+          );
+        }
+        items.add(
           PopupMenuItem(
             value: 3,
             child: Row(
@@ -266,8 +290,9 @@ class _DetailPageState extends State<DetailPage> {
                 Text("delete"),
               ],
             ),
-          )
-        ];
+          ),
+        );
+        return items;
       },
       onSelected: (value) {
         final file = _files[_selectedIndex];
@@ -277,6 +302,8 @@ class _DetailPageState extends State<DetailPage> {
           _displayInfo(file);
         } else if (value == 3) {
           _showDeleteSheet();
+        } else if (value == 4) {
+          _download(file);
         }
       },
     ));
@@ -513,5 +540,20 @@ class _DetailPageState extends State<DetailPage> {
       });
     }
     Navigator.of(context, rootNavigator: true).pop(); // Close dialog
+  }
+
+  Future<void> _download(File file) async {
+    final dialog = createProgressDialog(context, "downloading...");
+    await dialog.show();
+    final savedAsset = await PhotoManager.editor.saveImageWithPath(
+      (await getFile(file)).path,
+      title: file.title,
+    );
+    file.localID = savedAsset.id;
+    await FilesDB.instance.insert(file);
+    await SyncService.instance.trackDownloadedFile(file);
+    Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
+    await dialog.hide();
+    showToast("file saved to gallery");
   }
 }

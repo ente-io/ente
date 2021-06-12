@@ -52,6 +52,7 @@ class SyncService {
   static const kLastBackgroundUploadDetectedTime =
       "last_background_upload_detected_time";
   static const kEditedFileIDsKey = "edited_file_ids";
+  static const kDownloadedFileIDsKey = "downloaded_file_ids";
   static const kDiffLimit = 2500;
   static const kBackgroundUploadPollFrequency = Duration(seconds: 1);
 
@@ -208,6 +209,21 @@ class SyncService {
     }
   }
 
+  Future<void> trackDownloadedFile(File file) async {
+    final downloadedIDs = getDownloadedFiles();
+    downloadedIDs.add(file.localID);
+    await _prefs.setStringList(kDownloadedFileIDsKey, downloadedIDs);
+  }
+
+  List<String> getDownloadedFiles() {
+    if (_prefs.containsKey(kDownloadedFileIDsKey)) {
+      return _prefs.getStringList(kDownloadedFileIDsKey);
+    } else {
+      List<String> downloadedIDs = [];
+      return downloadedIDs;
+    }
+  }
+
   Future<void> _doSync() async {
     await _syncWithDevice();
     if (hasCompletedFirstImport()) {
@@ -222,8 +238,9 @@ class SyncService {
     }
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     final editedFileIDs = getEditedFiles().toSet();
+    final downloadedFileIDs = getDownloadedFiles().toSet();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
-    if (_isBackground) {
+  if (_isBackground) {
       await PhotoManager.setIgnorePermissionCheck(true);
     } else {
       final result = await PhotoManager.requestPermission();
@@ -242,6 +259,7 @@ class SyncService {
         syncStartTime,
         existingLocalFileIDs,
         editedFileIDs,
+        downloadedFileIDs,
       );
     } else {
       // Load from 0 - 01.01.2010
@@ -256,6 +274,7 @@ class SyncService {
           toTime,
           existingLocalFileIDs,
           editedFileIDs,
+          downloadedFileIDs,
         );
         startTime = toTime;
         toYear++;
@@ -266,6 +285,7 @@ class SyncService {
         syncStartTime,
         existingLocalFileIDs,
         editedFileIDs,
+        downloadedFileIDs,
       );
     }
     if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
@@ -284,6 +304,7 @@ class SyncService {
     int toTime,
     Set<String> existingLocalFileIDs,
     Set<String> editedFileIDs,
+    Set<String> downloadedFileIDs,
   ) async {
     _logger.info("Loading photos from " +
         DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
@@ -296,6 +317,8 @@ class SyncService {
           .where((file) => existingLocalFileIDs.contains(file.localID))
           .toList();
       updatedFiles.removeWhere((file) => editedFileIDs.contains(file.localID));
+      updatedFiles
+          .removeWhere((file) => downloadedFileIDs.contains(file.localID));
       _logger.info(updatedFiles.length.toString() + " files were updated.");
       for (final file in updatedFiles) {
         await _db.updateUploadedFile(
