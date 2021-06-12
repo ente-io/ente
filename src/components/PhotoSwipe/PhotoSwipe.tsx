@@ -367,12 +367,6 @@ function PhotoSwipe(props: Iprops) {
                         {metadata?.title && renderInfoItem(constants.FILE_NAME, metadata.title)}
                         {metadata?.creationTime && renderInfoItem(constants.CREATION_TIME, formatDateTime(metadata.creationTime / 1000))}
                         {metadata?.modificationTime && renderInfoItem(constants.UPDATED_ON, formatDateTime(metadata.modificationTime / 1000))}
-                        {metadata?.latitude && metadata?.longitude ?
-                            renderInfoItem(constants.LOCATION, (
-                                <code>{`${metadata?.latitude.toFixed(2)}° N, ${metadata?.latitude.toFixed(2)}° E`}</code>
-                            )) :
-                            null
-                        }
                         {exif && (
                             <>
                                 <br /><br />
