@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/node';
+import * as Sentry from '@sentry/browser';
 import { RewriteFrames, CaptureConsole } from '@sentry/integrations';
 
 export const sentryInit = () => {
@@ -41,4 +41,15 @@ export const sentryInit = () => {
             attachStacktrace: true,
         });
     }
+};
+
+export const logError = (e: any, msg?: string) => {
+    Sentry.captureException(e, {
+        level: Sentry.Severity.Info,
+        contexts: {
+            context: {
+                message: msg,
+            },
+        },
+    });
 };

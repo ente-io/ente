@@ -18,6 +18,7 @@ import {
     convertHEIC2JPEG,
     sortFilesIntoCollections,
 } from 'utils/file';
+import { logError } from 'utils/sentry';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;
@@ -196,7 +197,7 @@ class UploadService {
             try {
                 await this.fetchUploadURLs();
             } catch (e) {
-                console.error('error fetching uploadURLs', e.message);
+                logError(e, 'error fetching uploadURLs');
                 ErrorHandler(e);
             }
             const uploadProcesses = [];
@@ -219,7 +220,7 @@ class UploadService {
             progressBarProps.setUploadStage(UPLOAD_STAGES.FINISH);
             progressBarProps.setPercentComplete(FILE_UPLOAD_COMPLETED);
         } catch (e) {
-            console.error('uploading failed with error', e.message);
+            logError(e, 'uploading failed with error');
             this.filesToBeUploaded = [];
             throw e;
         } finally {
@@ -266,7 +267,7 @@ class UploadService {
             uploadFile = null;
             this.fileProgress.delete(rawFile.name);
         } catch (e) {
-            console.error('file upload failed with error', e.message);
+            logError(e, 'file upload failed with error');
             const error = new Error(
                 `Uploading Failed for File - ${rawFile.name}`,
             );
@@ -402,7 +403,7 @@ class UploadService {
                 metadata,
             };
         } catch (e) {
-            console.error('error reading files ', e.message);
+            logError(e, 'error reading files');
             throw e;
         }
     }
@@ -439,7 +440,7 @@ class UploadService {
             };
             return result;
         } catch (e) {
-            console.error('Error encrypting files ', e.message);
+            logError(e, 'Error encrypting files');
             throw e;
         }
     }
@@ -519,7 +520,7 @@ class UploadService {
             };
             return backupedFile;
         } catch (e) {
-            console.error('error uploading to bucket ', e.message);
+            logError(e, 'error uploading to bucket');
             throw e;
         }
     }
@@ -555,7 +556,7 @@ class UploadService {
             );
             return response.data;
         } catch (e) {
-            console.error('upload Files Failed ', e.message);
+            logError(e, 'upload Files Failed');
             throw e;
         }
     }
@@ -616,7 +617,7 @@ class UploadService {
             }
             this.metadataMap.set(metadataJSON['title'], metaDataObject);
         } catch (e) {
-            console.error('error occurred while reading metadata json', e.message);
+            logError(e);
             // ignore
         }
     }
@@ -662,6 +663,8 @@ class UploadService {
                                 resolve(null);
                             } catch (e) {
                                 reject(e);
+                                logError(e);
+                                reject(Error(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`));
                             }
                         };
                         timeout = setTimeout(
@@ -698,6 +701,8 @@ class UploadService {
                                 resolve(null);
                             } catch (e) {
                                 reject(e);
+                                logError(e);
+                                reject(Error(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`));
                             }
                         });
                         video.preload = 'metadata';
@@ -712,7 +717,7 @@ class UploadService {
                 }
                 URL.revokeObjectURL(imageURL);
             } catch (e) {
-                console.error(`${THUMBNAIL_GENERATION_FAILED} err:`, e.message);
+                logError(e);
                 // ignore and set staticThumbnail
                 hasStaticThumbnail = true;
             }
@@ -743,7 +748,7 @@ class UploadService {
             );
             return { thumbnail, hasStaticThumbnail };
         } catch (e) {
-            console.error('Error generating thumbnail ', e.message);
+            logError(e, 'Error generating thumbnail');
             throw e;
         }
     }
@@ -797,7 +802,7 @@ class UploadService {
                 reader.readAsArrayBuffer(file);
             });
         } catch (e) {
-            console.error('error reading file to byte-array ', e.message);
+            logError(e, 'error reading file to byte-array');
             throw e;
         }
     }
@@ -833,7 +838,7 @@ class UploadService {
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
-            console.error('fetch upload-url failed ', e.message);
+            logError(e, 'fetch upload-url failed ');
             throw e;
         }
     }
@@ -856,7 +861,7 @@ class UploadService {
 
             return response.data['urls'];
         } catch (e) {
-            console.error('fetch multipart-upload-url failed ', e.message);
+            logError(e, 'fetch multipart-upload-url failed');
             throw e;
         }
     }
@@ -878,7 +883,7 @@ class UploadService {
             );
             return fileUploadURL.objectKey;
         } catch (e) {
-            console.error('putFile to dataStore failed ', e.message);
+            logError(e, 'putFile to dataStore failed ');
             throw e;
         }
     }
@@ -937,7 +942,7 @@ class UploadService {
             );
             return multipartUploadURLs.objectKey;
         } catch (e) {
-            console.error('put file in parts failed', e.message);
+            logError(e, 'put file in parts failed');
             throw e;
         }
     }
@@ -989,7 +994,7 @@ class UploadService {
                 creationTime: this.getUNIXTime(exifData),
             };
         } catch (e) {
-            console.error('error reading exif data');
+            logError(e, 'error reading exif data');
             throw e;
         }
     }

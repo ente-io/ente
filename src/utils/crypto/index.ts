@@ -7,6 +7,7 @@ import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getActualKey, getToken } from 'utils/common/key';
 import { setRecoveryKey } from 'services/userService';
+import { logError } from 'utils/sentry';
 
 export interface ComlinkWorker {
     comlink: any;
@@ -113,7 +114,7 @@ export const getRecoveryKey = async () => {
         recoveryKey = await cryptoWorker.toHex(recoveryKey);
         return recoveryKey;
     } catch (e) {
-        console.error('getRecoveryKey failed', e.message);
+        logError(e, 'getRecoveryKey failed');
     }
 };
 

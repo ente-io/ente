@@ -11,6 +11,7 @@ import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import { SetLoading } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
+import { logError } from 'utils/sentry';
 
 interface Props {
     syncWithRemote: () => Promise<void>;
@@ -148,7 +149,7 @@ export default function Upload(props: Props) {
             }));
             await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
-            console.error('Failed to upload files to existing collections', e.message);
+            logError(e, 'Failed to upload files to existing collections');
         }
     };
 
@@ -175,7 +176,7 @@ export default function Upload(props: Props) {
                 }
             } catch (e) {
                 setProgressView(false);
-                console.error('Failed to create album to upload', e.message);
+                logError(e, 'Failed to create album');
                 props.setDialogMessage({
                     title: constants.ERROR,
                     staticBackdrop: true,
@@ -186,7 +187,7 @@ export default function Upload(props: Props) {
             }
             await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
-            console.error('Failed to upload files to new collections', e.message);
+            logError(e, 'Failed to upload files to new collections');
         }
     };
 

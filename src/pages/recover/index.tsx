@@ -10,6 +10,7 @@ import Container from 'components/Container';
 import { Card, Button } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
+import { logError } from 'utils/sentry';
 
 export default function Recover() {
     const router = useRouter();
@@ -42,6 +43,7 @@ export default function Recover() {
             setSessionKeys(masterKey);
             router.push('/changePassword');
         } catch (e) {
+            logError(e);
             setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);
         }
     };

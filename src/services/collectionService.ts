@@ -10,6 +10,7 @@ import { getPublicKey, User } from './userService';
 import { B64EncryptionResult } from './uploadService';
 import HTTPService from './HTTPService';
 import { File } from './fileService';
+import { logError } from 'utils/sentry';
 
 const ENDPOINT = getEndpoint();
 
@@ -113,16 +114,16 @@ const getCollections = async (
                     );
                     return collectionWithSecrets;
                 } catch (e) {
-                    console.error(
+                    logError(
+                        e,
                         `decryption failed for collection with id=${collection.id}`,
-                        e.message,
                     );
                 }
             },
         );
         return await Promise.all(promises);
     } catch (e) {
-        console.error('getCollections failed- ', e.message);
+        logError(e, 'getCollections failed');
         throw e;
     }
 };
@@ -270,7 +271,7 @@ export const createCollection = async (
         );
         return createdCollection;
     } catch (e) {
-        console.error('create collection failed', e.message);
+        logError(e, 'create collection failed');
         throw e;
     }
 };
@@ -288,7 +289,7 @@ const postCollection = async (
         );
         return response.data.collection;
     } catch (e) {
-        console.error('post Collection failed ', e.message);
+        logError(e, 'post Collection failed ');
     }
 };
 
@@ -342,7 +343,7 @@ export const addToCollection = async (
             { 'X-Auth-Token': token },
         );
     } catch (e) {
-        console.error('Add to collection Failed ', e.message);
+        logError(e, 'Add to collection Failed ');
     }
 };
 const removeFromCollection = async (collection: Collection, files: File[]) => {
@@ -365,7 +366,7 @@ const removeFromCollection = async (collection: Collection, files: File[]) => {
             { 'X-Auth-Token': token },
         );
     } catch (e) {
-        console.error('remove from collection failed ', e.message);
+        logError(e, 'remove from collection failed ');
     }
 };
 
@@ -387,7 +388,7 @@ export const deleteCollection = async (
         await syncWithRemote();
         redirectToAll();
     } catch (e) {
-        console.error('delete collection failed ', e.message);
+        logError(e, 'delete collection failed ');
         setDialogMessage({
             title: constants.ERROR,
             content: constants.DELETE_COLLECTION_FAILED,
@@ -450,7 +451,7 @@ export const shareCollection = async (
             },
         );
     } catch (e) {
-        console.error('share collection failed ', e.message);
+        logError(e, 'share collection failed ');
         throw e;
     }
 };
@@ -474,7 +475,7 @@ export const unshareCollection = async (
             },
         );
     } catch (e) {
-        console.error('unshare collection failed ', e.message);
+        logError(e, 'unshare collection failed ');
         throw e;
     }
 };

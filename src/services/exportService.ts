@@ -1,4 +1,5 @@
 import { runningInBrowser } from 'utils/common';
+import { logError } from 'utils/sentry';
 import { Collection } from './collectionService';
 import downloadManager from './downloadManager';
 import { File } from './fileService';
@@ -70,7 +71,7 @@ class ExportService {
                     ExportNotification.FINISH,
             );
         } catch (e) {
-            console.error(e.message);
+            logError(e);
         } finally {
             this.exportInProgress = null;
             this.ElectronAPIs.showOnTray();

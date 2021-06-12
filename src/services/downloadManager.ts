@@ -4,6 +4,7 @@ import CryptoWorker from 'utils/crypto';
 import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
 import HTTPService from './HTTPService';
 import { File } from './fileService';
+import { logError } from 'utils/sentry';
 
 class DownloadManager {
     private fileDownloads = new Map<number, Promise<string>>();
@@ -50,7 +51,7 @@ class DownloadManager {
             }
             return await this.thumbnailDownloads.get(file.id);
         } catch (e) {
-            console.error('get preview Failed', e.message);
+            logError(e, 'get preview Failed');
         }
     }
 
@@ -67,7 +68,7 @@ class DownloadManager {
             }
             return await this.fileDownloads.get(file.id);
         } catch (e) {
-            console.error('Failed to get File', e.message);
+            logError(e, 'Failed to get File');
         }
     };
 
