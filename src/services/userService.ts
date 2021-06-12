@@ -28,12 +28,6 @@ export interface User {
     name: string;
     email: string;
 }
-export interface VerificationResponse {
-    id: number;
-    keyAttributes: KeyAttributes;
-    encryptedToken?: string;
-    token?: string;
-}
 
 export const getOtt = (email: string) => HTTPService.get(`${ENDPOINT}/users/ott`, {
     email,
@@ -52,7 +46,7 @@ export const getPublicKey = async (email: string) => {
     return resp.data.publicKey;
 };
 
-export const verifyOtt = (email: string, ott: string) => HTTPService.post(`${ENDPOINT}/users/verify-email`, { email, ott });
+export const verifyOtt = (email: string, ott: string) => HTTPService.get(`${ENDPOINT}/users/credentials`, { email, ott });
 
 export const putAttributes = (token: string, keyAttributes: KeyAttributes) => HTTPService.put(
     `${ENDPOINT}/users/attributes`,
