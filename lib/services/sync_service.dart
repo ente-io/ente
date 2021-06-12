@@ -138,8 +138,7 @@ class SyncService {
         }
       }
       _logger.severe("backup failed", e, s);
-      Bus.instance
-          .fire(SyncStatusUpdate(SyncStatus.error, reason: "backup failed"));
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
       throw e;
     } finally {
       _existingSync.complete(successful);

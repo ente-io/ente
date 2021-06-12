@@ -7,6 +7,7 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/subscription_page.dart';
+import 'package:photos/utils/email_util.dart';
 
 class SyncIndicator extends StatefulWidget {
   const SyncIndicator({Key key}) : super(key: key);
@@ -183,22 +184,56 @@ class _SyncIndicatorState extends State<SyncIndicator> {
         ),
       );
     } else {
-      return Container(
+      return Center(
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  color: Theme.of(context).buttonColor,
-                ),
-                Padding(padding: EdgeInsets.all(4)),
-                Text(_event.reason ?? "upload failed"),
-              ],
+            Icon(
+              Icons.error_outline,
+              color: Colors.red[400],
+            ),
+            Padding(padding: EdgeInsets.all(4)),
+            Text(
+              "we could not backup your data\nwe will retry later",
+              style: TextStyle(height: 1.4),
+              textAlign: TextAlign.center,
             ),
             Padding(padding: EdgeInsets.all(8)),
+            InkWell(
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+                  side: BorderSide(
+                    width: 1,
+                    color: Colors.orange[300],
+                  ),
+                ),
+                child: Text(
+                  "raise ticket",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.orange[300],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                onPressed: () {
+                  sendLogs(
+                    context,
+                    "support@ente.io",
+                    "Backup failed",
+                  );
+                },
+              ),
+            ),
+            Padding(padding: EdgeInsets.all(16)),
+            Divider(
+              thickness: 2,
+              height: 0,
+            ),
+            Padding(padding: EdgeInsets.all(12)),
           ],
         ),
       );
