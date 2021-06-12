@@ -367,6 +367,12 @@ function PhotoSwipe(props: Iprops) {
                         {metadata?.title && renderInfoItem(constants.FILE_NAME, metadata.title)}
                         {metadata?.creationTime && renderInfoItem(constants.CREATION_TIME, formatDateTime(metadata.creationTime / 1000))}
                         {metadata?.modificationTime && renderInfoItem(constants.UPDATED_ON, formatDateTime(metadata.modificationTime / 1000))}
+                        {metadata?.longitude && metadata?.longitude && renderInfoItem(constants.LOCATION, (
+                            <a href={`https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}`}
+                                target='_blank' rel='noopener noreferrer'>
+                                {constants.SHOW_MAP}
+                            </a>
+                        ))}
                         {exif && (
                             <>
                                 <br /><br />
