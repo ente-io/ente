@@ -847,7 +847,7 @@ class UploadService {
                 return;
             }
             const response = await HTTPService.get(
-                `${ENDPOINT} / files / multipart - upload - urls`,
+                `${ENDPOINT}/files/multipart-upload-urls`,
                 {
                     count,
                 },
