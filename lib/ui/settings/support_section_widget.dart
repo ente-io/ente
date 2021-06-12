@@ -1,10 +1,6 @@
-import 'dart:io';
-
-import 'package:archive/archive_io.dart';
 import 'package:crisp/crisp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -12,8 +8,8 @@ import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SupportSectionWidget extends StatelessWidget {
@@ -57,26 +53,7 @@ class SupportSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            final dialog = createProgressDialog(context, "preparing logs...");
-            await dialog.show();
-            final tempPath = (await getTemporaryDirectory()).path;
-            final zipFilePath = tempPath + "/logs.zip";
-            final logsDirectory = Directory(tempPath + "/logs");
-            var encoder = ZipFileEncoder();
-            encoder.create(zipFilePath);
-            encoder.addDirectory(logsDirectory);
-            encoder.close();
-            await dialog.hide();
-            final Email email = Email(
-              recipients: ['bug@ente.io'],
-              attachmentPaths: [zipFilePath],
-              isHTML: false,
-            );
-            try {
-              await FlutterEmailSender.send(email);
-            } catch (e) {
-              await Share.shareFiles([zipFilePath]);
-            }
+            await sendLogs(context, "bug@ente.io");
             showToast("thanks for reporting a bug!");
           },
           child: SettingsTextItem(
