@@ -159,11 +159,11 @@ export async function decryptAndStoreToken(masterKey: string) {
             keyAttributes.publicKey,
             secretKey,
         );
+        setData(LS_KEYS.USER, {
+            ...user,
+            token: decryptedToken,
+            encryptedToken: null,
+        });
     }
-    setData(LS_KEYS.USER, {
-        ...user,
-        token: decryptedToken,
-        encryptedToken: null,
-    });
 }
 export default CryptoWorker;
