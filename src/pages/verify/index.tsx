@@ -13,7 +13,6 @@ import {
     logoutUser,
     clearFiles,
     isTokenValid,
-    VerificationResponse,
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
@@ -60,18 +59,18 @@ export default function Verify() {
         try {
             setLoading(true);
             const resp = await verifyOtt(email, ott);
-            const { keyAttributes, encryptedToken, token, id } = resp.data as VerificationResponse;
             setData(LS_KEYS.USER, {
                 ...getData(LS_KEYS.USER),
                 email,
-                token,
-                encryptedToken,
-                id,
+                token: resp.data.token,
+                id: resp.data.id,
             });
+            const { subscription, keyAttributes } = resp.data;
             keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+            subscription && setData(LS_KEYS.SUBSCRIPTION, subscription);
             clearFiles();
             setIsFirstLogin(true);
-            if (keyAttributes?.encryptedKey) {
+            if (resp.data.keyAttributes?.encryptedKey) {
                 clearKeys();
                 router.push('/credentials');
             } else {

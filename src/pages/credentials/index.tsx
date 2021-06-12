@@ -6,7 +6,6 @@ import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
 import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, {
-    decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
     setSessionKeys,
 } from 'utils/crypto';
@@ -28,7 +27,7 @@ export default function Credentials() {
         const user = getData(LS_KEYS.USER);
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        if ((!user?.token && !user?.encryptedToken) || !keyAttributes?.memLimit) {
+        if (!user?.token || !keyAttributes?.memLimit) {
             clearData();
             router.push('/');
         } else if (!keyAttributes) {
@@ -69,9 +68,7 @@ export default function Credentials() {
                         key,
                     );
                 }
-                await setSessionKeys(key);
-                await decryptAndStoreToken(key);
-
+                setSessionKeys(key);
                 router.push('/gallery');
             } catch (e) {
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
