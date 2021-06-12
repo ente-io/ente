@@ -79,13 +79,13 @@ class UserService {
     }
   }
 
-  Future<void> getCredentials(BuildContext context, String ott) async {
+  Future<void> verifyEmail(BuildContext context, String ott) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/credentials",
-        queryParameters: {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/verify-email",
+        data: {
           "email": _config.getEmail(),
           "ott": ott,
         },
@@ -95,7 +95,7 @@ class UserService {
         await _saveConfiguration(response);
         showToast("email verification successful!");
         var page;
-        if (Configuration.instance.getKeyAttributes() != null) {
+        if (Configuration.instance.getEncryptedToken() != null) {
           page = PasswordReentryPage();
         } else {
           page = PasswordEntryPage();
@@ -194,11 +194,13 @@ class UserService {
 
   Future<void> _saveConfiguration(Response response) async {
     await Configuration.instance.setUserID(response.data["id"]);
-    await Configuration.instance.setToken(response.data["token"]);
-    final keyAttributes = response.data["keyAttributes"];
-    if (keyAttributes != null) {
+    if (response.data["encryptedToken"] != null) {
       await Configuration.instance
-          .setKeyAttributes(KeyAttributes.fromMap(keyAttributes));
+          .setEncryptedToken(response.data["encryptedToken"]);
+      await Configuration.instance.setKeyAttributes(
+          KeyAttributes.fromMap(response.data["keyAttributes"]));
+    } else {
+      await Configuration.instance.setToken(response.data["token"]);
     }
   }
 }

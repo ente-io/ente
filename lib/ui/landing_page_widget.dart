@@ -195,7 +195,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 
   void _navigateToSignUpPage() {
     var page;
-    if (Configuration.instance.getToken() == null) {
+    if (Configuration.instance.getEncryptedToken() == null) {
       page = EmailEntryPage();
     } else {
       // No key
@@ -221,7 +221,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 
   void _navigateToSignInPage() {
     var page;
-    if (Configuration.instance.getToken() == null) {
+    if (Configuration.instance.getEncryptedToken() == null) {
       page = LoginPage();
     } else {
       // No key

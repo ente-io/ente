@@ -43,6 +43,7 @@ class Configuration {
   static const nameKey = "name";
   static const secretKeyKey = "secret_key";
   static const tokenKey = "token";
+  static const encryptedTokenKey = "encrypted_token";
   static const userIDKey = "user_id";
 
   final kTempFolderDeletionTimeBuffer = Duration(days: 1).inMicroseconds;
@@ -187,7 +188,7 @@ class Configuration {
     );
   }
 
-  Future<void> decryptAndSaveKey(
+  Future<void> decryptAndSaveSecrets(
       String password, KeyAttributes attributes) async {
     final kek = await CryptoUtil.deriveKey(
       utf8.encode(password),
@@ -208,6 +209,11 @@ class Configuration {
         Sodium.base642bin(attributes.secretKeyDecryptionNonce));
     await setKey(Sodium.bin2base64(key));
     await setSecretKey(Sodium.bin2base64(secretKey));
+    final token = CryptoUtil.openSealSync(
+        Sodium.base642bin(getEncryptedToken()),
+        Sodium.base642bin(attributes.publicKey),
+        secretKey);
+    await setToken(Sodium.bin2base64(token));
   }
 
   Future<KeyAttributes> createNewRecoveryKey() async {
@@ -263,6 +269,14 @@ class Configuration {
   Future<void> setToken(String token) async {
     _cachedToken = token;
     await _preferences.setString(tokenKey, token);
+  }
+
+  Future<void> setEncryptedToken(String encryptedToken) async {
+    await _preferences.setString(encryptedTokenKey, encryptedToken);
+  }
+
+  String getEncryptedToken() {
+    return _preferences.getString(encryptedTokenKey);
   }
 
   String getEmail() {

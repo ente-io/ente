@@ -270,7 +270,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       return;
     }
     final ott = Uri.parse(link).queryParameters["ott"];
-    UserService.instance.getCredentials(context, ott);
+    UserService.instance.verifyEmail(context, ott);
   }
 
   Widget _getMainGalleryWidget() {

@@ -86,7 +86,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                           _verificationCodeController.text.isEmpty
                       ? null
                       : () {
-                          UserService.instance.getCredentials(
+                          UserService.instance.verifyEmail(
                               context, _verificationCodeController.text);
                         },
                   fontSize: 18,

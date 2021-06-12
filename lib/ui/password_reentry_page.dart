@@ -100,7 +100,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         createProgressDialog(context, "please wait...");
                     await dialog.show();
                     try {
-                      await Configuration.instance.decryptAndSaveKey(
+                      await Configuration.instance.decryptAndSaveSecrets(
                           _passwordController.text,
                           Configuration.instance.getKeyAttributes());
                     } catch (e) {
