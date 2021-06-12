@@ -46,7 +46,7 @@ export default function MessageDialog({
             >
                 {attributes.title && (
                     <Modal.Title>
-                        <strong>{attributes.title}</strong>
+                        {attributes.title}
                     </Modal.Title>
                 )}
             </Modal.Header>

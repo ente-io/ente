@@ -398,7 +398,7 @@ export default function Gallery() {
                     attributes={collectionNamerAttributes}
                 />
                 <CollectionSelector
-                    show={collectionSelectorView}
+                    show={collectionSelectorView && !(collectionsAndTheirLatestFile?.length === 0)}
                     onHide={closeCollectionSelector}
                     collectionsAndTheirLatestFile={collectionsAndTheirLatestFile}
                     directlyShowNextModal={
