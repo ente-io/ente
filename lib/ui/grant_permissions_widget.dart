@@ -67,14 +67,14 @@ class GrantPermissionsWidget extends StatelessWidget {
           ),
           Padding(padding: const EdgeInsets.all(12)),
           Text(
-            "all the files you back up will be",
+            "all the files you choose to back up",
             style: TextStyle(
               color: Colors.white30,
             ),
           ),
           Padding(padding: const EdgeInsets.all(2)),
           Text(
-            "end-to-end encrypted",
+            "will be end-to-end encrypted",
             style: TextStyle(
               color: Colors.white30,
             ),
