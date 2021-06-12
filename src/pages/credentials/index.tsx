@@ -16,6 +16,7 @@ import Container from 'components/Container';
 import { Button, Card } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
+import { logError } from 'utils/sentry';
 
 export default function Credentials() {
     const router = useRouter();
@@ -71,6 +72,7 @@ export default function Credentials() {
                 setSessionKeys(key);
                 router.push('/gallery');
             } catch (e) {
+                logError(e);
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
             }
         } catch (e) {
