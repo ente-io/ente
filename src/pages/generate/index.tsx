@@ -16,6 +16,7 @@ import { KeyAttributes } from 'types';
 import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
+import { logError } from 'utils/sentry';
 
 export interface KEK {
     key: string;
@@ -76,7 +77,7 @@ export default function Generate() {
             setJustSignedUp(true);
             setRecoveryModalView(true);
         } catch (e) {
-            console.error('failed to generate password', e.message);
+            logError(e, 'failed to generate password');
             setFieldError('passphrase', constants.PASSWORD_GENERATION_FAILED);
         }
     };

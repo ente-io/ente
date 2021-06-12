@@ -6,6 +6,7 @@ import { convertBytesToGBs } from 'utils/billingUtil';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
 import HTTPService from './HTTPService';
+import { logError } from 'utils/sentry';
 
 const ENDPOINT = getEndpoint();
 
@@ -52,12 +53,12 @@ class billingService {
                 try {
                     this.stripe = await loadStripe(publishableKey);
                 } catch (e) {
-                    console.warn(e);
+                    logError(e);
                 }
             };
             runningInBrowser() && checkConnectivity() && main();
         } catch (e) {
-            console.warn(e);
+            logError(e);
         }
     }
 
@@ -67,7 +68,7 @@ class billingService {
             const { plans } = response.data;
             setData(LS_KEYS.PLANS, plans);
         } catch (e) {
-            console.error('failed to get plans', e.message);
+            logError(e, 'failed to get plans');
         }
     }
 
@@ -83,7 +84,7 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            console.error('failed to get user\'s subscription details', e.message);
+            logError(e, 'failed to get user\'s subscription details');
         }
     }
 
@@ -94,7 +95,7 @@ class billingService {
                 sessionId: response.data.sessionID,
             });
         } catch (e) {
-            console.error('unable to buy subscription', e.message);
+            logError(e, 'unable to buy subscription');
             throw e;
         }
     }
@@ -133,7 +134,7 @@ class billingService {
                     break;
             }
         } catch (e) {
-            console.error('updateSubscription failed', e.message);
+            logError(e);
             throw e;
         }
         try {
@@ -156,7 +157,7 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            console.error('cancel Subscription failed', e.message);
+            logError(e);
             throw e;
         }
     }
@@ -174,7 +175,7 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            console.error('activate subscription failed', e.message);
+            logError(e);
             throw e;
         }
     }
@@ -211,7 +212,7 @@ class billingService {
             setData(LS_KEYS.SUBSCRIPTION, subscription);
             return subscription;
         } catch (err) {
-            console.error('Error while verifying subscription', err.message);
+            logError(err, 'Error while verifying subscription');
             throw err;
         }
     }
@@ -227,7 +228,7 @@ class billingService {
             );
             window.location.href = response.data.url;
         } catch (e) {
-            console.error('unable to get customer portal url', e.message);
+            logError(e, 'unable to get customer portal url');
             throw e;
         }
     }
@@ -243,7 +244,7 @@ class billingService {
             );
             return convertBytesToGBs(response.data.usage);
         } catch (e) {
-            console.error('error getting usage', e.message);
+            logError(e, 'error getting usage');
         }
     }
 }

@@ -7,6 +7,7 @@ import { ErrorHandler } from 'utils/common/errorUtil';
 import { DataStream, MetadataObject } from './uploadService';
 import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
+import { logError } from 'utils/sentry';
 
 const ENDPOINT = getEndpoint();
 const DIFF_LIMIT: number = 250;
@@ -173,7 +174,7 @@ export const getFiles = async (
         } while (resp.data.diff.length === limit);
         return decryptedFiles;
     } catch (e) {
-        console.error('Get files failed', e.message);
+        logError(e, 'Get files failed');
         ErrorHandler(e);
     }
 };
@@ -211,7 +212,7 @@ export const deleteFiles = async (
         clearSelection();
         syncWithRemote();
     } catch (e) {
-        console.error('delete failed', e.message);
+        logError(e, 'delete failed');
         throw e;
     }
 };

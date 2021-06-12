@@ -17,6 +17,7 @@ import {
 } from 'utils/crypto';
 import { setJustSignedUp } from 'utils/storage';
 import LogoImg from './LogoImg';
+import { logError } from 'utils/sentry';
 
 interface FormValues {
     email: string;
@@ -61,7 +62,7 @@ export default function SignUp(props: SignUpProps) {
                 setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
             }
         } catch (e) {
-            console.error(e);
+            logError(e);
             setFieldError('passphrase', constants.PASSWORD_GENERATION_FAILED);
         }
         setLoading(false);
