@@ -5,6 +5,7 @@ import PlayCircleOutline from 'components/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
 import { GalleryContext } from 'pages/gallery';
+import { GAP_BTW_TILES } from 'types';
 
 interface IProps {
     file: File;
@@ -71,10 +72,11 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
     background: #222;
     display: flex;
     width: fit-content;
-    height: 192px;
+    margin-bottom: ${GAP_BTW_TILES}px;
     min-width: 100%;
     overflow: hidden;
     position: relative;
+    flex: 1;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     & > img {
