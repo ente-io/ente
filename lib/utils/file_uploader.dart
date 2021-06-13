@@ -358,7 +358,7 @@ class FileUploader {
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
-      var remoteFile;
+      File remoteFile;
       if (isAlreadyUploadedFile) {
         remoteFile = await _updateFile(
           file,
@@ -390,7 +390,7 @@ class FileUploader {
         await FilesDB.instance.update(remoteFile);
       }
       if (!_isBackground) {
-        Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
+        Bus.instance.fire(LocalPhotosUpdatedEvent([remoteFile]));
       }
       _logger.info("File upload complete for " + remoteFile.toString());
       return remoteFile;
