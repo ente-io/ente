@@ -33,7 +33,7 @@ Future<void> deleteFilesFromEverywhere(
       }
     }
   }
-  var deletedIDs;
+  Set<String> deletedIDs = Set<String>();
   try {
     deletedIDs = (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
   } catch (e, s) {
@@ -112,7 +112,7 @@ Future<void> deleteFilesOnDeviceOnly(
       }
     }
   }
-  var deletedIDs;
+  Set<String> deletedIDs = Set<String>();
   try {
     deletedIDs = (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
   } catch (e, s) {
