@@ -25,6 +25,12 @@ export type SetCollectionSelectorAttributes = React.Dispatch<
     React.SetStateAction<CollectionSelectorAttributes>
 >;
 
+const CollectionCard = styled(Card)`
+    display: flex;
+    flex-direction: column;
+    height: 221px;
+`;
+
 interface Props {
     show: boolean;
     onHide: (closeBtnClick?: boolean) => void;
@@ -57,7 +63,7 @@ function CollectionSelector({
                     props.onHide();
                 }}
             >
-                <Card>
+                <CollectionCard>
                     <PreviewCard
                         file={item.file}
                         updateUrl={() => { }}
@@ -66,7 +72,7 @@ function CollectionSelector({
                     <Card.Text className="text-center">
                         {item.collection.name}
                     </Card.Text>
-                </Card>
+                </CollectionCard>
             </CollectionIcon>
         ),
     );

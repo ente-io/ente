@@ -76,6 +76,7 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
     min-width: 100%;
     overflow: hidden;
     position: relative;
+    flex: 1;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
 
     & > img {

@@ -66,7 +66,7 @@ const getTemplateColumns = (columns: number, groups?: number[]):string => {
     if (groups) {
         const sum = groups.reduce((acc, item) => acc + item, 0);
         if (sum < columns) {
-            groups.push(columns - sum);
+            groups[groups.length - 1] += columns - sum;
         }
         return groups.map((x) => `repeat(${x}, 1fr)`).join(` ${SPACE_BTW_DATES}px `);
     } else {
