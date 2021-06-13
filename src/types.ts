@@ -14,3 +14,4 @@ export interface KeyAttributes {
 }
 
 export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
+export const GAP_BTW_TILES = 4;

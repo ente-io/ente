@@ -20,10 +20,11 @@ import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 import { SetDialogMessage } from './MessageDialog';
 import { VIDEO_PLAYBACK_FAILED } from 'utils/common/errorUtil';
+import { GAP_BTW_TILES } from 'types';
 
 const DATE_CONTAINER_HEIGHT = 45;
 const IMAGE_CONTAINER_MAX_HEIGHT = 200;
-const IMAGE_CONTAINER_MAX_WIDTH = 192;
+const IMAGE_CONTAINER_MAX_WIDTH = IMAGE_CONTAINER_MAX_HEIGHT - GAP_BTW_TILES;
 const MIN_COLUMNS = 4;
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
@@ -78,8 +79,8 @@ const getTemplateColumns = (columns: number, groups?: number[]):string => {
 const ListContainer = styled.div<{ columns: number, groups?: number[] }>`
     display: grid;
     grid-template-columns: ${({ columns, groups }) => getTemplateColumns(columns, groups)};
-    grid-column-gap: 8px;
-    padding: 0 8px;
+    grid-column-gap: ${GAP_BTW_TILES}px;
+    padding: 0 ${GAP_BTW_TILES}px;
     width: 100%;
     color: #fff;
 `;
