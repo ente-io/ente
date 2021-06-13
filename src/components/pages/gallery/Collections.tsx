@@ -10,6 +10,7 @@ import { OverlayTrigger } from 'react-bootstrap';
 import { Collection, CollectionType } from 'services/collectionService';
 import { User } from 'services/userService';
 import styled from 'styled-components';
+import { IMAGE_CONTAINER_MAX_WIDTH } from 'types';
 import { getSelectedCollection } from 'utils/collection';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
@@ -30,26 +31,19 @@ interface CollectionProps {
 const Container = styled.div`
     margin: 10px auto;
     overflow-y: hidden;
-    height: 50px;
+    height: 40px;
     display: flex;
-    max-width: 100%;
+    width: 100%;
     position: relative;
-    @media (min-width: 1000px) {
-        width: 1000px;
-    }
+    padding: 0 24px;
 
-    @media (min-width: 450px) and (max-width: 1000px) {
-        width: 600px;
-    }
-
-    @media (max-width: 450px) {
-        width: 100%;
+    @media(max-width: ${IMAGE_CONTAINER_MAX_WIDTH*4}px) {
+        padding: 0 4px;
     }
 `;
 
 const Wrapper = styled.div`
     height: 70px;
-    margin-top: 10px;
     flex: 1;
     white-space: nowrap;
     overflow: auto;

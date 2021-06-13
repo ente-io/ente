@@ -20,17 +20,25 @@ import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 import { SetDialogMessage } from './MessageDialog';
 import { VIDEO_PLAYBACK_FAILED } from 'utils/common/errorUtil';
+import {
+    GAP_BTW_TILES, DATE_CONTAINER_HEIGHT, IMAGE_CONTAINER_MAX_HEIGHT,
+    IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS, SPACE_BTW_DATES,
+} from 'types';
 
-const DATE_CONTAINER_HEIGHT = 45;
-const IMAGE_CONTAINER_HEIGHT = 200;
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
+
 interface TimeStampListItem {
     itemType: ITEM_TYPE;
     items?: File[];
     itemStartIndex?: number;
     date?: string;
+    dates?: {
+        date: string;
+        span: number;
+    }[];
+    groups?: number[];
     banner?: any;
     id?: string;
     height?: number;
@@ -54,34 +62,45 @@ const ListItem = styled.div`
     justify-content: center;
 `;
 
-const ListContainer = styled.div<{ columns: number }>`
+const getTemplateColumns = (columns: number, groups?: number[]):string => {
+    if (groups) {
+        const sum = groups.reduce((acc, item) => acc + item, 0);
+        if (sum < columns) {
+            groups[groups.length - 1] += columns - sum;
+        }
+        return groups.map((x) => `repeat(${x}, 1fr)`).join(` ${SPACE_BTW_DATES}px `);
+    } else {
+        return `repeat(${columns}, 1fr)`;
+    }
+};
+
+const ListContainer = styled.div<{ columns: number, groups?: number[] }>`
     display: grid;
-    grid-template-columns: repeat(${(props) => props.columns}, 1fr);
-    grid-column-gap: 8px;
-    padding: 0 8px;
-    max-width: 100%;
+    grid-template-columns: ${({ columns, groups }) => getTemplateColumns(columns, groups)};
+    grid-column-gap: ${GAP_BTW_TILES}px;
+    padding: 0 24px;
+    width: 100%;
     color: #fff;
 
-    @media (min-width: 1000px) {
-        width: 1000px;
-    }
-
-    @media (min-width: 450px) and (max-width: 1000px) {
-        width: 600px;
-    }
-
-    @media (max-width: 450px) {
-        width: 100%;
+    @media(max-width: ${IMAGE_CONTAINER_MAX_WIDTH*4}px) {
+        padding: 0 4px;
     }
 `;
 
-const DateContainer = styled.div`
-    padding-top: 15px;
+const DateContainer = styled.div<{span: number}>`
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    grid-column: span ${(props) => props.span};
+    display: flex;
+    align-items: center;
+    height: ${DATE_CONTAINER_HEIGHT}px;
 `;
 
-const BannerContainer = styled.div`
+const BannerContainer = styled.div<{span: number}>`
     color: #979797;
     text-align: center;
+    grid-column: span ${(props) => props.span};
 `;
 
 const EmptyScreen = styled.div`
@@ -381,6 +400,73 @@ const PhotoFrame = ({
             first.getDate() === second.getDate()
     );
 
+    /**
+     * Checks and merge multiple dates into a single row.
+     *
+     * @param items
+     * @param columns
+     * @returns
+     */
+    const mergeTimeStampList = (items: TimeStampListItem[], columns: number): TimeStampListItem[] => {
+        const newList: TimeStampListItem[] = [];
+        let index = 0;
+        let newIndex = 0;
+        while (index < items.length) {
+            const currItem = items[index];
+            // If the current item is of type time, then it is not part of an ongoing date.
+            // So, there is a possibility of merge.
+            if (currItem.itemType === ITEM_TYPE.TIME) {
+                // If new list pointer is not at the end of list then
+                // we can add more items to the same list.
+                if (newList[newIndex]) {
+                    // Check if items can be added to same list
+                    if (newList[newIndex + 1].items.length + items[index + 1].items.length <= columns) {
+                        newList[newIndex].dates.push({
+                            date: currItem.date,
+                            span: items[index + 1].items.length,
+                        });
+                        newList[newIndex + 1].items = newList[newIndex + 1].items.concat(items[index + 1].items);
+                        index += 2;
+                    } else {
+                        // Adding items would exceed the number of columns.
+                        // So, move new list pointer to the end. Hence, in next iteration,
+                        // items will be added to a new list.
+                        newIndex += 2;
+                    }
+                } else {
+                    // New list pointer was at the end of list so simply add new items to the list.
+                    newList.push({
+                        ...currItem,
+                        date: null,
+                        dates: [{
+                            date: currItem.date,
+                            span: items[index + 1].items.length,
+                        }],
+                    });
+                    newList.push(items[index + 1]);
+                    index += 2;
+                }
+            } else {
+                // Merge cannot happen. Simply add all items to new list
+                // and set new list point to the end of list.
+                newList.push(currItem);
+                index++;
+                newIndex = newList.length;
+            }
+        }
+        for (let i = 0; i < newList.length; i++) {
+            const currItem = newList[i];
+            const nextItem = newList[i + 1];
+            if (currItem.itemType === ITEM_TYPE.TIME) {
+                if (currItem.dates.length > 1) {
+                    currItem.groups = currItem.dates.map((item) => item.span);
+                    nextItem.groups = currItem.groups;
+                }
+            }
+        }
+        return newList;
+    };
+
     return (
         <>
             {!isFirstLoad && files.length === 0 && !searchMode ? (
@@ -404,34 +490,25 @@ const PhotoFrame = ({
                 <Container>
                     <AutoSizer>
                         {({ height, width }) => {
-                            let columns;
-                            if (width >= 1000) {
-                                columns = 5;
-                            } else if (width < 1000 && width >= 450) {
-                                columns = 3;
-                            } else if (width < 450 && width >= 300) {
-                                columns = 2;
-                            } else {
-                                columns = 1;
+                            let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
+                            let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
+                            let skipMerge = false;
+                            if (columns < MIN_COLUMNS) {
+                                columns = MIN_COLUMNS;
+                                listItemHeight = width / MIN_COLUMNS;
+                                skipMerge = true;
                             }
 
-                            const timeStampList: TimeStampListItem[] = [];
+                            let timeStampList: TimeStampListItem[] = [];
                             let listItemIndex = 0;
                             let currentDate = -1;
                             filteredData.forEach((item, index) => {
-                                if (
-                                    !isSameDay(
-                                        new Date(
-                                            item.metadata.creationTime / 1000,
-                                        ),
-                                        new Date(currentDate),
-                                    )
-                                ) {
+                                if (!isSameDay(new Date(item.metadata.creationTime / 1000), new Date(currentDate))) {
                                     currentDate = item.metadata.creationTime / 1000;
                                     const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
                                         weekday: 'short',
                                         year: 'numeric',
-                                        month: 'long',
+                                        month: 'short',
                                         day: 'numeric',
                                     });
                                     timeStampList.push({
@@ -471,11 +548,16 @@ const PhotoFrame = ({
                                     });
                                 }
                             });
+
+                            if (!skipMerge) {
+                                timeStampList = mergeTimeStampList(timeStampList, columns);
+                            }
+
                             files.length < 30 && !searchMode &&
                                 timeStampList.push({
                                     itemType: ITEM_TYPE.BANNER,
                                     banner: (
-                                        <BannerContainer>
+                                        <BannerContainer span={columns}>
                                             {constants.INSTALL_MOBILE_APP()}
                                         </BannerContainer>
                                     ),
@@ -483,7 +565,7 @@ const PhotoFrame = ({
                                     height: 48,
                                 });
                             const extraRowsToRender = Math.ceil(
-                                (NO_OF_PAGES * height) / IMAGE_CONTAINER_HEIGHT,
+                                (NO_OF_PAGES * height) / IMAGE_CONTAINER_MAX_HEIGHT,
                             );
 
                             const generateKey = (index) => {
@@ -500,35 +582,55 @@ const PhotoFrame = ({
                                     case ITEM_TYPE.TIME:
                                         return DATE_CONTAINER_HEIGHT;
                                     case ITEM_TYPE.TILE:
-                                        return IMAGE_CONTAINER_HEIGHT;
+                                        return listItemHeight;
                                     default:
                                         return timeStampList[index].height;
                                 }
                             };
 
-                            const renderListItem = (listItem) => {
+                            const renderListItem = (listItem: TimeStampListItem) => {
                                 switch (listItem.itemType) {
                                     case ITEM_TYPE.TIME:
-                                        return (
-                                            <DateContainer>
-                                                {listItem.date}
-                                            </DateContainer>
-                                        );
+                                        return listItem.dates ?
+                                            listItem.dates.map((item) => (
+                                                <>
+                                                    <DateContainer key={item.date} span={item.span}>
+                                                        {item.date}
+                                                    </DateContainer>
+                                                    <div />
+                                                </>
+                                            )) :
+                                            (
+                                                <DateContainer span={columns}>
+                                                    {listItem.date}
+                                                </DateContainer>
+                                            );
                                     case ITEM_TYPE.BANNER:
                                         return listItem.banner;
                                     default:
-                                        return (listItem.items.map(
+                                    {
+                                        const ret = (listItem.items.map(
                                             (item, idx) => getThumbnail(
                                                 filteredData,
                                                 listItem.itemStartIndex + idx,
                                             ),
                                         ));
+                                        if (listItem.groups) {
+                                            let sum = 0;
+                                            for (let i = 0; i < listItem.groups.length - 1; i++) {
+                                                sum = sum + listItem.groups[i];
+                                                ret.splice(sum, 0, <div />);
+                                                sum += 1;
+                                            }
+                                        }
+                                        return ret;
+                                    }
                                 }
                             };
 
                             return (
                                 <List
-                                    key={`${columns}-${router.query.collection}`}
+                                    key={`${columns}-${listItemHeight}-${router.query.collection}`}
                                     ref={listRef}
                                     itemSize={getItemSize}
                                     height={height}
@@ -539,12 +641,7 @@ const PhotoFrame = ({
                                 >
                                     {({ index, style }) => (
                                         <ListItem style={style}>
-                                            <ListContainer
-                                                columns={
-                                                    timeStampList[index].itemType === ITEM_TYPE.TILE ?
-                                                        columns :1
-                                                }
-                                            >
+                                            <ListContainer columns={columns} groups={timeStampList[index].groups}>
                                                 {renderListItem(timeStampList[index])}
                                             </ListContainer>
                                         </ListItem>
