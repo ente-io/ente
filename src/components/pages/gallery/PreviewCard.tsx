@@ -85,6 +85,7 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
         min-height: 100%;
         flex: 1;
         ${(props) => props.selected && 'border: 5px solid #2dc262;'}
+        pointer-events: none;
     }
 
     & > svg {
