@@ -1,0 +1,30 @@
+PODS:
+  - FlutterMacOS (2.0.0)
+  - path_provider_macos (0.0.1):
+    - FlutterMacOS
+  - photo_manager (0.0.1):
+    - Flutter
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - path_provider_macos (from `/Users/jinglongcai/.pub-cache/hosted/pub.flutter-io.cn/path_provider_macos-2.0.0//macos/path_provider_macos.podspec`)
+  - photo_manager (from `/Users/jinglongcai/code/flutter/self/pm2//macos/photo_manager.podspec`)
+
+SPEC REPOS:
+  trunk:
+    - FlutterMacOS
+
+EXTERNAL SOURCES:
+  path_provider_macos:
+    :path: "/Users/jinglongcai/.pub-cache/hosted/pub.flutter-io.cn/path_provider_macos-2.0.0//macos/path_provider_macos.podspec"
+  photo_manager:
+    :path: "/Users/jinglongcai/code/flutter/self/pm2//macos/photo_manager.podspec"
+
+SPEC CHECKSUMS:
+  FlutterMacOS: 2f1b456c4d9436c4d4d13919bd3be8ef03ba6322
+  path_provider_macos: a0a3fd666cb7cd0448e936fb4abad4052961002b
+  photo_manager: a8db3597a3b44e17ecb331fa099731c99b849496
+
+PODFILE CHECKSUM: 29369daec14455706c464e51b7b84f58f287700e
+
+COCOAPODS: 1.10.1

@@ -1,0 +1,40 @@
+name: CI
+
+on: [pull_request]
+
+jobs:
+  test_iOS:
+    name: Test iOS on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-java@v1
+        with:
+          java-version: "12.x"
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: beta
+      - run: flutter pub get
+      - run: flutter analyze lib example/lib
+      - run: cd example ; flutter build ios --no-codesign
+  test_android:
+    name: Test android on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-java@v1
+        with:
+          java-version: "12.x"
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: beta
+      - run: flutter pub get
+      - run: flutter analyze lib example/lib
+      - run: sudo echo "y" | sudo $ANDROID_HOME/tools/bin/sdkmanager "ndk;20.0.5594570"
+      - run: cd example; flutter build apk --debug
