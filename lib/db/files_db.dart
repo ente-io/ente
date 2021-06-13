@@ -480,33 +480,16 @@ class FilesDB {
   Future<List<File>> getMatchingFiles(
     String title,
     String deviceFolder,
-    int creationTime,
   ) async {
     final db = await instance.database;
-    var query;
-    if (deviceFolder != null) {
-      query = db.query(
-        table,
-        where: '''$columnTitle=? AND $columnDeviceFolder=? AND 
-          $columnCreationTime=?''',
-        whereArgs: [
-          title,
-          deviceFolder,
-          creationTime,
-        ],
-      );
-    } else {
-      query = db.query(
-        table,
-        where: '''$columnTitle=? AND 
-          $columnCreationTime=?''',
-        whereArgs: [
-          title,
-          creationTime,
-        ],
-      );
-    }
-    final rows = await query;
+    final rows = await db.query(
+      table,
+      where: '''$columnTitle=? AND $columnDeviceFolder=?''',
+      whereArgs: [
+        title,
+        deviceFolder,
+      ],
+    );
     if (rows.isNotEmpty) {
       return _convertToFiles(rows);
     } else {

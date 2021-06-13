@@ -475,8 +475,9 @@ class SyncService {
         localButAddedToNewCollectionOnRemote = 0;
     List<File> toBeInserted = [];
     for (File file in diff) {
-      final existingFiles = await _db.getMatchingFiles(
-          file.title, file.deviceFolder, file.creationTime);
+      final existingFiles = file.deviceFolder == null
+          ? null
+          : await _db.getMatchingFiles(file.title, file.deviceFolder);
       if (existingFiles == null) {
         // File uploaded from a different device
         file.localID = null;
