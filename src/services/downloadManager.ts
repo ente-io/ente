@@ -7,9 +7,9 @@ import { File } from './fileService';
 import { logError } from 'utils/sentry';
 
 class DownloadManager {
-    private fileDownloads = new Map<number, Promise<string>>();
+    private fileDownloads = new Map<number, string>();
 
-    private thumbnailDownloads = new Map<number, Promise<string>>();
+    private thumbnailDownloads = new Map<number, string>();
 
     public async getPreview(file: File) {
         try {
@@ -23,30 +23,7 @@ class DownloadManager {
                 return URL.createObjectURL(await cacheResp.blob());
             }
             if (!this.thumbnailDownloads.get(file.id)) {
-                const download = (async () => {
-                    const resp = await HTTPService.get(
-                        getThumbnailUrl(file.id),
-                        null,
-                        { 'X-Auth-Token': token },
-                        { responseType: 'arraybuffer' },
-                    );
-                    const worker = await new CryptoWorker();
-                    const decrypted: any = await worker.decryptThumbnail(
-                        new Uint8Array(resp.data),
-                        await worker.fromB64(file.thumbnail.decryptionHeader),
-                        file.key,
-                    );
-                    try {
-                        await cache.put(
-                            file.id.toString(),
-                            new Response(new Blob([decrypted])),
-                        );
-                    } catch (e) {
-                        // TODO: handle storage full exception.
-                    }
-
-                    return URL.createObjectURL(new Blob([decrypted]));
-                })();
+                const download = await this.downloadThumb(token, cache, file);
                 this.thumbnailDownloads.set(file.id, download);
             }
             return await this.thumbnailDownloads.get(file.id);
@@ -54,16 +31,35 @@ class DownloadManager {
             logError(e, 'get preview Failed');
         }
     }
+    downloadThumb = async (token: string, cache: Cache, file: File) => {
+        const resp = await HTTPService.get(
+            getThumbnailUrl(file.id),
+            null,
+            { 'X-Auth-Token': token },
+            { responseType: 'arraybuffer' },
+        );
+        const worker = await new CryptoWorker();
+        const decrypted: any = await worker.decryptThumbnail(
+            new Uint8Array(resp.data),
+            await worker.fromB64(file.thumbnail.decryptionHeader),
+            file.key,
+        );
+        try {
+            await cache.put(
+                file.id.toString(),
+                new Response(new Blob([decrypted])),
+            );
+        } catch (e) {
+            // TODO: handle storage full exception.
+        }
+        return URL.createObjectURL(new Blob([decrypted]));
+    }
 
     getFile = async (file: File) => {
         try {
             if (!this.fileDownloads.get(file.id)) {
-                const download = (async () => {
-                    const fileStream = await this.downloadFile(file);
-                    return URL.createObjectURL(
-                        await new Response(fileStream).blob(),
-                    );
-                })();
+                const fileStream = await this.downloadFile(file);
+                const download = URL.createObjectURL(await new Response(fileStream).blob());
                 this.fileDownloads.set(file.id, download);
             }
             return await this.fileDownloads.get(file.id);
