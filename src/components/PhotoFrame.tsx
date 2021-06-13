@@ -33,6 +33,10 @@ interface TimeStampListItem {
     items?: File[];
     itemStartIndex?: number;
     date?: string;
+    dates?: {
+        date: string;
+        span: number;
+    }[];
     banner?: any;
     id?: string;
     height?: number;
@@ -65,12 +69,12 @@ const ListContainer = styled.div<{ columns: number }>`
     color: #fff;
 `;
 
-const DateContainer = styled.div`
+const DateContainer = styled.div<{span: number}>`
     padding-top: 15px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    grid-column: span 2;
+    grid-column: span ${(props) => props.span};
 `;
 
 const BannerContainer = styled.div`
@@ -375,6 +379,45 @@ const PhotoFrame = ({
             first.getDate() === second.getDate()
     );
 
+    const mergeTimeStampList = (items: TimeStampListItem[], columns: number): TimeStampListItem[] => {
+        const newList: TimeStampListItem[] = [];
+        let index = 0;
+        let newIndex = 0;
+        while (index < items.length) {
+            const currItem = items[index];
+            if (currItem.itemType === ITEM_TYPE.TIME) {
+                if (newList[newIndex]) {
+                    if (newList[newIndex + 1].items.length + items[index + 1].items.length <= columns) {
+                        newList[newIndex].dates.push({
+                            date: currItem.date,
+                            span: items[index + 1].items.length,
+                        });
+                        newList[newIndex + 1].items = newList[newIndex + 1].items.concat(items[index + 1].items);
+                        index += 2;
+                    } else {
+                        newIndex += 2;
+                    }
+                } else {
+                    newList.push({
+                        ...currItem,
+                        date: null,
+                        dates: [{
+                            date: currItem.date,
+                            span: items[index + 1].items.length,
+                        }],
+                    });
+                    newList.push(items[index + 1]);
+                    index += 2;
+                }
+            } else {
+                newList.push(currItem);
+                index++;
+                newIndex = newList.length;
+            }
+        }
+        return newList;
+    };
+
     return (
         <>
             {!isFirstLoad && files.length === 0 && !searchMode ? (
@@ -405,23 +448,16 @@ const PhotoFrame = ({
                                 listItemHeight = width / MIN_COLUMNS;
                             }
 
-                            const timeStampList: TimeStampListItem[] = [];
+                            let timeStampList: TimeStampListItem[] = [];
                             let listItemIndex = 0;
                             let currentDate = -1;
                             filteredData.forEach((item, index) => {
-                                if (
-                                    !isSameDay(
-                                        new Date(
-                                            item.metadata.creationTime / 1000,
-                                        ),
-                                        new Date(currentDate),
-                                    )
-                                ) {
+                                if (!isSameDay(new Date(item.metadata.creationTime / 1000), new Date(currentDate))) {
                                     currentDate = item.metadata.creationTime / 1000;
                                     const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
                                         weekday: 'short',
                                         year: 'numeric',
-                                        month: 'long',
+                                        month: 'short',
                                         day: 'numeric',
                                     });
                                     timeStampList.push({
@@ -461,6 +497,9 @@ const PhotoFrame = ({
                                     });
                                 }
                             });
+
+                            timeStampList = mergeTimeStampList(timeStampList, columns);
+
                             files.length < 30 && !searchMode &&
                                 timeStampList.push({
                                     itemType: ITEM_TYPE.BANNER,
@@ -496,14 +535,14 @@ const PhotoFrame = ({
                                 }
                             };
 
-                            const renderListItem = (listItem) => {
+                            const renderListItem = (listItem: TimeStampListItem) => {
                                 switch (listItem.itemType) {
                                     case ITEM_TYPE.TIME:
-                                        return (
-                                            <DateContainer>
-                                                {listItem.date}
+                                        return listItem.dates.map((item) => (
+                                            <DateContainer key={item.date} span={item.span}>
+                                                {item.date}
                                             </DateContainer>
-                                        );
+                                        ));
                                     case ITEM_TYPE.BANNER:
                                         return listItem.banner;
                                     default:
