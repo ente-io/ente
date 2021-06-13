@@ -20,16 +20,14 @@ import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 import { SetDialogMessage } from './MessageDialog';
 import { VIDEO_PLAYBACK_FAILED } from 'utils/common/errorUtil';
-import { GAP_BTW_TILES } from 'types';
+import {
+    GAP_BTW_TILES, DATE_CONTAINER_HEIGHT, IMAGE_CONTAINER_MAX_HEIGHT,
+    IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS, SPACE_BTW_DATES,
+} from 'types';
 
-const DATE_CONTAINER_HEIGHT = 45;
-const IMAGE_CONTAINER_MAX_HEIGHT = 200;
-const IMAGE_CONTAINER_MAX_WIDTH = IMAGE_CONTAINER_MAX_HEIGHT - GAP_BTW_TILES;
-const MIN_COLUMNS = 4;
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
-const SPACE_BTW_DATES = 30;
 
 interface TimeStampListItem {
     itemType: ITEM_TYPE;
@@ -80,17 +78,23 @@ const ListContainer = styled.div<{ columns: number, groups?: number[] }>`
     display: grid;
     grid-template-columns: ${({ columns, groups }) => getTemplateColumns(columns, groups)};
     grid-column-gap: ${GAP_BTW_TILES}px;
-    padding: 0 ${GAP_BTW_TILES}px;
+    padding: 0 24px;
     width: 100%;
     color: #fff;
+
+    @media(max-width: ${IMAGE_CONTAINER_MAX_WIDTH*4}px) {
+        padding: 0 4px;
+    }
 `;
 
 const DateContainer = styled.div<{span: number}>`
-    padding-top: 15px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     grid-column: span ${(props) => props.span};
+    display: flex;
+    align-items: center;
+    height: ${DATE_CONTAINER_HEIGHT}px;
 `;
 
 const BannerContainer = styled.div<{span: number}>`
