@@ -19,12 +19,14 @@ Future<void> deleteFilesFromEverywhere(
     BuildContext context, List<File> files) async {
   final dialog = createProgressDialog(context, "deleting...");
   await dialog.show();
+  _logger.info("Trying to delete files " + files.toString());
   final List<String> localIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
   for (final file in files) {
     if (file.localID != null) {
       final asset = await file.getAsset();
       if (asset == null || !(await asset.exists)) {
+        _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID);
       } else {
         localIDs.add(file.localID);
@@ -96,12 +98,14 @@ Future<void> deleteFilesOnDeviceOnly(
     BuildContext context, List<File> files) async {
   final dialog = createProgressDialog(context, "deleting...");
   await dialog.show();
+  _logger.info("Trying to delete files " + files.toString());
   final List<String> localIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
   for (final file in files) {
     if (file.localID != null) {
       final asset = await file.getAsset();
       if (asset == null || !(await asset.exists)) {
+        _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID);
       } else {
         localIDs.add(file.localID);
