@@ -201,16 +201,17 @@ class FileUploader {
   Future<File> _encryptAndUploadFileToCollection(File file, int collectionID,
       {bool forcedUpload = false}) async {
     _currentlyUploading++;
+    final localID = file.localID;
     try {
       final uploadedFile = await _tryToUpload(file, collectionID, forcedUpload);
-      _queue.remove(file.localID).completer.complete(uploadedFile);
+      _queue.remove(localID).completer.complete(uploadedFile);
       return uploadedFile;
     } catch (e) {
       if (e is LockAlreadyAcquiredError) {
-        _queue[file.localID].status = UploadStatus.in_background;
-        return _queue[file.localID].completer.future;
+        _queue[localID].status = UploadStatus.in_background;
+        return _queue[localID].completer.future;
       } else {
-        _queue.remove(file.localID).completer.completeError(e);
+        _queue.remove(localID).completer.completeError(e);
         return null;
       }
     } finally {
@@ -382,6 +383,10 @@ class FileUploader {
           encryptedMetadata,
           metadataDecryptionHeader,
         );
+        if (asset == null || !(await asset.exists)) {
+          _logger.info("File found to be deleted");
+          remoteFile.localID = null;
+        }
         await FilesDB.instance.update(remoteFile);
       }
       if (!_isBackground) {

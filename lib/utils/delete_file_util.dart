@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -20,10 +19,16 @@ Future<void> deleteFilesFromEverywhere(
     BuildContext context, List<File> files) async {
   final dialog = createProgressDialog(context, "deleting...");
   await dialog.show();
-  final localIDs = List<String>();
+  final List<String> localIDs = [];
+  final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
   for (final file in files) {
     if (file.localID != null) {
-      localIDs.add(file.localID);
+      final asset = await file.getAsset();
+      if (asset == null || !(await asset.exists)) {
+        alreadyDeletedIDs.add(file.localID);
+      } else {
+        localIDs.add(file.localID);
+      }
     }
   }
   var deletedIDs;
@@ -37,8 +42,9 @@ Future<void> deleteFilesFromEverywhere(
   final List<File> deletedFiles = [];
   for (final file in files) {
     if (file.localID != null) {
-      // Remove only those files that have been removed from disk
-      if (deletedIDs.contains(file.localID)) {
+      // Remove only those files that have already been removed from disk
+      if (deletedIDs.contains(file.localID) ||
+          alreadyDeletedIDs.contains(file.localID)) {
         deletedFiles.add(file);
         if (file.uploadedFileID != null) {
           uploadedFileIDsToBeDeleted.add(file.uploadedFileID);
@@ -90,10 +96,16 @@ Future<void> deleteFilesOnDeviceOnly(
     BuildContext context, List<File> files) async {
   final dialog = createProgressDialog(context, "deleting...");
   await dialog.show();
-  final localIDs = List<String>();
+  final List<String> localIDs = [];
+  final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
   for (final file in files) {
     if (file.localID != null) {
-      localIDs.add(file.localID);
+      final asset = await file.getAsset();
+      if (asset == null || !(await asset.exists)) {
+        alreadyDeletedIDs.add(file.localID);
+      } else {
+        localIDs.add(file.localID);
+      }
     }
   }
   var deletedIDs;
@@ -105,13 +117,14 @@ Future<void> deleteFilesOnDeviceOnly(
   final List<File> deletedFiles = [];
   for (final file in files) {
     // Remove only those files that have been removed from disk
-    if (deletedIDs.contains(file.localID)) {
+    if (deletedIDs.contains(file.localID) ||
+        alreadyDeletedIDs.contains(file.localID)) {
       deletedFiles.add(file);
       file.localID = null;
       FilesDB.instance.update(file);
     }
   }
-  if (deletedFiles.isNotEmpty) {
+  if (deletedFiles.isNotEmpty || alreadyDeletedIDs.isNotEmpty) {
     Bus.instance
         .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
   }
