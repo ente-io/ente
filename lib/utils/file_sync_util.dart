@@ -27,6 +27,22 @@ Future<List<File>> getDeviceFiles(
   return files;
 }
 
+Future<Set<String>> getAllLocalIDs() async {
+  final filterOptionGroup = FilterOptionGroup();
+  final assetPaths = await PhotoManager.getAssetPathList(
+    hasAll: true,
+    type: RequestType.common,
+    filterOption: filterOptionGroup,
+  );
+  final ids = new Set<String>();
+  for (final assetPath in assetPaths) {
+    for (final asset in await assetPath.assetList) {
+      ids.add(asset.id);
+    }
+  }
+  return ids;
+}
+
 Future<List<AssetPathEntity>> _getGalleryList(
     final int fromTime, final int toTime) async {
   final filterOptionGroup = FilterOptionGroup();
