@@ -22,7 +22,9 @@ import { SetDialogMessage } from './MessageDialog';
 import { VIDEO_PLAYBACK_FAILED } from 'utils/common/errorUtil';
 
 const DATE_CONTAINER_HEIGHT = 45;
-const IMAGE_CONTAINER_HEIGHT = 200;
+const IMAGE_CONTAINER_MAX_HEIGHT = 200;
+const IMAGE_CONTAINER_MAX_WIDTH = 192;
+const MIN_COLUMNS = 4;
 const NO_OF_PAGES = 2;
 const A_DAY = 24 * 60 * 60 * 1000;
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
@@ -59,24 +61,16 @@ const ListContainer = styled.div<{ columns: number }>`
     grid-template-columns: repeat(${(props) => props.columns}, 1fr);
     grid-column-gap: 8px;
     padding: 0 8px;
-    max-width: 100%;
+    width: 100%;
     color: #fff;
-
-    @media (min-width: 1000px) {
-        width: 1000px;
-    }
-
-    @media (min-width: 450px) and (max-width: 1000px) {
-        width: 600px;
-    }
-
-    @media (max-width: 450px) {
-        width: 100%;
-    }
 `;
 
 const DateContainer = styled.div`
     padding-top: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    grid-column: span 2;
 `;
 
 const BannerContainer = styled.div`
@@ -404,15 +398,11 @@ const PhotoFrame = ({
                 <Container>
                     <AutoSizer>
                         {({ height, width }) => {
-                            let columns;
-                            if (width >= 1000) {
-                                columns = 5;
-                            } else if (width < 1000 && width >= 450) {
-                                columns = 3;
-                            } else if (width < 450 && width >= 300) {
-                                columns = 2;
-                            } else {
-                                columns = 1;
+                            let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
+                            let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
+                            if (columns < MIN_COLUMNS) {
+                                columns = MIN_COLUMNS;
+                                listItemHeight = width / MIN_COLUMNS;
                             }
 
                             const timeStampList: TimeStampListItem[] = [];
@@ -483,7 +473,7 @@ const PhotoFrame = ({
                                     height: 48,
                                 });
                             const extraRowsToRender = Math.ceil(
-                                (NO_OF_PAGES * height) / IMAGE_CONTAINER_HEIGHT,
+                                (NO_OF_PAGES * height) / IMAGE_CONTAINER_MAX_HEIGHT,
                             );
 
                             const generateKey = (index) => {
@@ -500,7 +490,7 @@ const PhotoFrame = ({
                                     case ITEM_TYPE.TIME:
                                         return DATE_CONTAINER_HEIGHT;
                                     case ITEM_TYPE.TILE:
-                                        return IMAGE_CONTAINER_HEIGHT;
+                                        return listItemHeight;
                                     default:
                                         return timeStampList[index].height;
                                 }
@@ -528,7 +518,7 @@ const PhotoFrame = ({
 
                             return (
                                 <List
-                                    key={`${columns}-${router.query.collection}`}
+                                    key={`${columns}-${listItemHeight}-${router.query.collection}`}
                                     ref={listRef}
                                     itemSize={getItemSize}
                                     height={height}
@@ -539,12 +529,7 @@ const PhotoFrame = ({
                                 >
                                     {({ index, style }) => (
                                         <ListItem style={style}>
-                                            <ListContainer
-                                                columns={
-                                                    timeStampList[index].itemType === ITEM_TYPE.TILE ?
-                                                        columns :1
-                                                }
-                                            >
+                                            <ListContainer columns={columns}>
                                                 {renderListItem(timeStampList[index])}
                                             </ListContainer>
                                         </ListItem>

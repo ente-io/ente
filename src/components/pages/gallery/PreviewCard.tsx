@@ -71,7 +71,7 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
     background: #222;
     display: flex;
     width: fit-content;
-    height: 192px;
+    margin-bottom: 8px;
     min-width: 100%;
     overflow: hidden;
     position: relative;
