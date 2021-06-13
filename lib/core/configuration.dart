@@ -213,7 +213,8 @@ class Configuration {
         Sodium.base642bin(getEncryptedToken()),
         Sodium.base642bin(attributes.publicKey),
         secretKey);
-    await setToken(Sodium.bin2base64(token));
+    await setToken(
+        Sodium.bin2base64(token, variant: Sodium.base64VariantUrlsafe));
   }
 
   Future<KeyAttributes> createNewRecoveryKey() async {
