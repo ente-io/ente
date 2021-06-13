@@ -201,11 +201,14 @@ class _DetailPageState extends State<DetailPage> {
           padding: const EdgeInsets.only(left: 8),
           child: IconButton(
             onPressed: () async {
+              final dialog = createProgressDialog(context, "please wait...");
+              await dialog.show();
               final file = _files[_selectedIndex];
               final imageProvider = ExtendedFileImageProvider(
                   await getFile(file),
                   cacheRawData: true);
               await precacheImage(imageProvider, context);
+              await dialog.hide();
               replacePage(
                 context,
                 ImageEditorPage(
