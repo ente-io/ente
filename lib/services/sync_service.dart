@@ -240,7 +240,7 @@ class SyncService {
     final editedFileIDs = getEditedFiles().toSet();
     final downloadedFileIDs = getDownloadedFiles().toSet();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
-  if (_isBackground) {
+    if (_isBackground) {
       await PhotoManager.setIgnorePermissionCheck(true);
     } else {
       final result = await PhotoManager.requestPermission();
@@ -468,6 +468,11 @@ class SyncService {
   }
 
   Future _storeDiff(List<File> diff, int collectionID) async {
+    int existing = 0,
+        updated = 0,
+        remote = 0,
+        localButUpdatedOnRemote = 0,
+        localButAddedToNewCollectionOnRemote = 0;
     List<File> toBeInserted = [];
     for (File file in diff) {
       final existingFiles = await _db.getMatchingFiles(
@@ -476,6 +481,7 @@ class SyncService {
         // File uploaded from a different device
         file.localID = null;
         toBeInserted.add(file);
+        remote++;
       } else {
         // File exists on device
         file.localID = existingFiles[0]
@@ -489,6 +495,9 @@ class SyncService {
             _logger.info("Updated since last installation: " +
                 file.uploadedFileID.toString());
             file.updationTime = null;
+            updated++;
+          } else {
+            existing++;
           }
           toBeInserted.add(file);
         } else {
@@ -496,16 +505,19 @@ class SyncService {
           for (final existingFile in existingFiles) {
             if (file.collectionID == existingFile.collectionID &&
                 file.uploadedFileID == existingFile.uploadedFileID) {
+              // File was updated on remote
               foundMatchingCollection = true;
               file.generatedID = existingFile.generatedID;
               toBeInserted.add(file);
               clearCache(file);
+              localButUpdatedOnRemote++;
               break;
             }
           }
           if (!foundMatchingCollection) {
             // Added to a new collection
             toBeInserted.add(file);
+            localButAddedToNewCollectionOnRemote++;
           }
         }
       }
@@ -515,6 +527,21 @@ class SyncService {
       await _collectionsService.setCollectionSyncTime(
           collectionID, toBeInserted[toBeInserted.length - 1].updationTime);
     }
+    _logger.info(
+      "Diff to be deduplicated was: " +
+          diff.length.toString() +
+          " out of which \n" +
+          existing.toString() +
+          " was uploaded from device, \n" +
+          updated.toString() +
+          " was uploaded from device, but has been updated since and should be reuploaded, \n" +
+          remote.toString() +
+          " was uploaded from remote, \n" +
+          localButUpdatedOnRemote.toString() +
+          " was uploaded from device but updated on remote, and \n" +
+          localButAddedToNewCollectionOnRemote.toString() +
+          " was uploaded from device but added to a new collection on remote.",
+    );
   }
 
   Future<void> deleteFilesOnServer(List<int> fileIDs) async {
