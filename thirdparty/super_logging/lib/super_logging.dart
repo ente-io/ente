@@ -2,6 +2,7 @@ library super_logging;
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -218,16 +219,33 @@ class SuperLogging {
     // write to stdout
     printLog(str);
 
-    // write to logfile
+    // push to log queue
     if (fileIsEnabled) {
-      final strForLogFile = str + '\n';
-      await logFile.writeAsString(strForLogFile,
-          mode: FileMode.append, flush: true);
+      fileQueueEntries.add(str + '\n');
+      if (fileQueueEntries.length == 1) {
+        flushQueue();
+      }
     }
 
     // add error to sentry queue
     if (sentryIsEnabled && rec.error != null) {
       _sendErrorToSentry(rec.error, null);
+    }
+  }
+
+  static final Queue<String> fileQueueEntries = Queue();
+  static bool isFlushing = false;
+
+  static void flushQueue() async {
+    if (isFlushing) {
+      return;
+    }
+    isFlushing = true;
+    final entry = fileQueueEntries.removeFirst();
+    await logFile.writeAsString(entry, mode: FileMode.append, flush: true);
+    isFlushing = false;
+    if (fileQueueEntries.isNotEmpty) {
+      flushQueue();
     }
   }
 
