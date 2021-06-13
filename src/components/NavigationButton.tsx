@@ -10,7 +10,6 @@ export enum SCROLL_DIRECTION {
 const Wrapper = styled.button<{ direction: SCROLL_DIRECTION }>`
     height: 40px;
     width: 40px;
-    margin-top: 10px;
     background-color: #191919;
     border: none;
     color: #eee;

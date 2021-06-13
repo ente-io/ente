@@ -30,7 +30,7 @@ interface CollectionProps {
 const Container = styled.div`
     margin: 10px auto;
     overflow-y: hidden;
-    height: 50px;
+    height: 40px;
     display: flex;
     width: 100%;
     position: relative;
@@ -38,7 +38,6 @@ const Container = styled.div`
 
 const Wrapper = styled.div`
     height: 70px;
-    margin-top: 10px;
     flex: 1;
     white-space: nowrap;
     overflow: auto;
