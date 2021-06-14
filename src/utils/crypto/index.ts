@@ -155,11 +155,13 @@ export async function decryptAndStoreToken(masterKey: string) {
             keyAttributes.secretKeyDecryptionNonce,
             masterKey,
         );
-        decryptedToken = await cryptoWorker.boxSealOpen(
+        const URLUnsafeB64DecryptedToken = await cryptoWorker.boxSealOpen(
             encryptedToken,
             keyAttributes.publicKey,
             secretKey,
         );
+        const decryptedTokenBytes = await cryptoWorker.fromB64(URLUnsafeB64DecryptedToken);
+        decryptedToken = await cryptoWorker.toURLSafeB64(decryptedTokenBytes);
         setData(LS_KEYS.USER, {
             ...user,
             token: decryptedToken,
