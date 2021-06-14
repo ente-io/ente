@@ -14,7 +14,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
-import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/image_editor_page.dart';
 import 'package:photos/ui/video_widget.dart';
@@ -554,7 +554,7 @@ class _DetailPageState extends State<DetailPage> {
     );
     file.localID = savedAsset.id;
     await FilesDB.instance.insert(file);
-    await SyncService.instance.trackDownloadedFile(file);
+    await LocalSyncService.instance.trackDownloadedFile(file);
     Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
     await dialog.hide();
     showToast("file saved to gallery");

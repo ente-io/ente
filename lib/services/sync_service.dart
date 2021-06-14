@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:computer/computer.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -17,10 +16,10 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/notification_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/utils/file_sync_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,28 +30,22 @@ import 'package:photos/core/configuration.dart';
 
 class SyncService {
   final _logger = Logger("SyncService");
+  final _localSyncService = LocalSyncService.instance;
   final _dio = Network.instance.getDio();
   final _db = FilesDB.instance;
   final _uploader = FileUploader.instance;
   final _collectionsService = CollectionsService.instance;
   final _diffFetcher = DiffFetcher();
-  final Computer _computer = Computer();
   bool _syncStopRequested = false;
-  bool _isBackground = false;
   Completer<bool> _existingSync;
   SharedPreferences _prefs;
   SyncStatusUpdate _lastSyncStatusEvent;
   int _completedUploads = 0;
 
-  static const kDbUpdationTimeKey = "db_updation_time";
-  static const kHasCompletedFirstImportKey = "has_completed_firstImport";
-  static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kLastStorageLimitExceededNotificationPushTime =
       "last_storage_limit_exceeded_notification_push_time";
   static const kLastBackgroundUploadDetectedTime =
       "last_background_upload_detected_time";
-  static const kEditedFileIDsKey = "edited_file_ids";
-  static const kDownloadedFileIDsKey = "downloaded_file_ids";
   static const kDiffLimit = 2500;
   static const kBackgroundUploadPollFrequency = Duration(seconds: 1);
 
@@ -77,15 +70,13 @@ class SyncService {
 
   static final SyncService instance = SyncService._privateConstructor();
 
-  Future<void> init(bool isBackground) async {
-    _isBackground = isBackground;
+  Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     if (Platform.isIOS) {
       _logger.info("Clearing file cache");
       await PhotoManager.clearFileCache();
       _logger.info("Cleared file cache");
     }
-    await _computer.turnOn(workersCount: 1);
   }
 
   Future<bool> existingSync() async {
@@ -160,7 +151,8 @@ class SyncService {
   }
 
   bool hasCompletedFirstImport() {
-    return _prefs.getBool(kHasCompletedFirstImportKey) ?? false;
+    return _prefs.getBool(LocalSyncService.kHasCompletedFirstImportKey) ??
+        false;
   }
 
   bool isSyncInProgress() {
@@ -172,11 +164,11 @@ class SyncService {
   }
 
   bool hasGrantedPermissions() {
-    return _prefs.getBool(kHasGrantedPermissionsKey) ?? false;
+    return _prefs.getBool(LocalSyncService.kHasGrantedPermissionsKey) ?? false;
   }
 
   Future<void> onPermissionGranted() async {
-    await _prefs.setBool(kHasGrantedPermissionsKey, true);
+    await _prefs.setBool(LocalSyncService.kHasGrantedPermissionsKey, true);
     Bus.instance.fire(PermissionGrantedEvent());
     _doSync();
   }
@@ -194,150 +186,11 @@ class SyncService {
     }, UserCancelledUploadError());
   }
 
-  Future<void> trackEditedFile(File file) async {
-    final editedIDs = getEditedFiles();
-    editedIDs.add(file.localID);
-    await _prefs.setStringList(kEditedFileIDsKey, editedIDs);
-  }
-
-  List<String> getEditedFiles() {
-    if (_prefs.containsKey(kEditedFileIDsKey)) {
-      return _prefs.getStringList(kEditedFileIDsKey);
-    } else {
-      List<String> editedIDs = [];
-      return editedIDs;
-    }
-  }
-
-  Future<void> trackDownloadedFile(File file) async {
-    final downloadedIDs = getDownloadedFiles();
-    downloadedIDs.add(file.localID);
-    await _prefs.setStringList(kDownloadedFileIDsKey, downloadedIDs);
-  }
-
-  List<String> getDownloadedFiles() {
-    if (_prefs.containsKey(kDownloadedFileIDsKey)) {
-      return _prefs.getStringList(kDownloadedFileIDsKey);
-    } else {
-      List<String> downloadedIDs = [];
-      return downloadedIDs;
-    }
-  }
-
   Future<void> _doSync() async {
-    await _syncWithDevice();
+    await _localSyncService.sync();
     if (hasCompletedFirstImport()) {
       await syncWithRemote();
     }
-  }
-
-  Future<void> _syncWithDevice() async {
-    if (!_prefs.containsKey(kHasGrantedPermissionsKey)) {
-      _logger.info("Skipping local sync since permission has not been granted");
-      return;
-    }
-    final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
-    final editedFileIDs = getEditedFiles().toSet();
-    final downloadedFileIDs = getDownloadedFiles().toSet();
-    final syncStartTime = DateTime.now().microsecondsSinceEpoch;
-    if (_isBackground) {
-      await PhotoManager.setIgnorePermissionCheck(true);
-    } else {
-      final result = await PhotoManager.requestPermission();
-      if (!result) {
-        _logger.severe("Did not get permission");
-        await _prefs.setInt(kDbUpdationTimeKey, syncStartTime);
-        Bus.instance.fire(LocalPhotosUpdatedEvent(List<File>.empty()));
-        return await syncWithRemote();
-      }
-    }
-    final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
-    final startTime = DateTime.now().microsecondsSinceEpoch;
-    if (lastDBUpdationTime != 0) {
-      await _loadAndStorePhotos(
-        lastDBUpdationTime,
-        syncStartTime,
-        existingLocalFileIDs,
-        editedFileIDs,
-        downloadedFileIDs,
-      );
-    } else {
-      // Load from 0 - 01.01.2010
-      Bus.instance
-          .fire(SyncStatusUpdate(SyncStatus.started_first_gallery_import));
-      var startTime = 0;
-      var toYear = 2010;
-      var toTime = DateTime(toYear).microsecondsSinceEpoch;
-      while (toTime < syncStartTime) {
-        await _loadAndStorePhotos(
-          startTime,
-          toTime,
-          existingLocalFileIDs,
-          editedFileIDs,
-          downloadedFileIDs,
-        );
-        startTime = toTime;
-        toYear++;
-        toTime = DateTime(toYear).microsecondsSinceEpoch;
-      }
-      await _loadAndStorePhotos(
-        startTime,
-        syncStartTime,
-        existingLocalFileIDs,
-        editedFileIDs,
-        downloadedFileIDs,
-      );
-    }
-    if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
-        !_prefs.getBool(kHasCompletedFirstImportKey)) {
-      await _prefs.setBool(kHasCompletedFirstImportKey, true);
-      Bus.instance
-          .fire(SyncStatusUpdate(SyncStatus.completed_first_gallery_import));
-    }
-    final endTime = DateTime.now().microsecondsSinceEpoch;
-    final duration = Duration(microseconds: endTime - startTime);
-    _logger.info("Load took " + duration.inMilliseconds.toString() + "ms");
-  }
-
-  Future<void> _loadAndStorePhotos(
-    int fromTime,
-    int toTime,
-    Set<String> existingLocalFileIDs,
-    Set<String> editedFileIDs,
-    Set<String> downloadedFileIDs,
-  ) async {
-    _logger.info("Loading photos from " +
-        DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
-        " to " +
-        DateTime.fromMicrosecondsSinceEpoch(toTime).toString());
-    final files = await getDeviceFiles(fromTime, toTime, _computer);
-    if (files.isNotEmpty) {
-      _logger.info("Fetched " + files.length.toString() + " files.");
-      final updatedFiles = files
-          .where((file) => existingLocalFileIDs.contains(file.localID))
-          .toList();
-      updatedFiles.removeWhere((file) => editedFileIDs.contains(file.localID));
-      updatedFiles
-          .removeWhere((file) => downloadedFileIDs.contains(file.localID));
-      _logger.info(updatedFiles.length.toString() + " files were updated.");
-      for (final file in updatedFiles) {
-        await _db.updateUploadedFile(
-          file.localID,
-          file.title,
-          file.location,
-          file.creationTime,
-          file.modificationTime,
-          null,
-        );
-      }
-      final List<File> allFiles = [];
-      allFiles.addAll(files);
-      files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
-      await _db.insertMultiple(files);
-      _logger.info("Inserted " + files.length.toString() + " files.");
-      Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
-    }
-    await _prefs.setInt(kDbUpdationTimeKey, toTime);
   }
 
   Future<void> syncWithRemote({bool silently = false}) async {

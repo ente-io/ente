@@ -9,6 +9,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/detail_page.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -325,7 +326,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         newFile.location = Location(latLong.latitude, latLong.longitude);
       }
       newFile.generatedID = await FilesDB.instance.insert(newFile);
-      await SyncService.instance.trackEditedFile(newFile);
+      await LocalSyncService.instance.trackEditedFile(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
       SyncService.instance.sync();
       showToast("edits saved");
