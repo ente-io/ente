@@ -163,16 +163,17 @@ class SyncService {
   }
 
   Future<void> deleteFilesOnServer(List<int> fileIDs) async {
-    return await _dio
-        .post(Configuration.instance.getHttpEndpoint() + "/files/delete",
-            options: Options(
-              headers: {
-                "X-Auth-Token": Configuration.instance.getToken(),
-              },
-            ),
-            data: {
-          "fileIDs": fileIDs,
-        });
+    return await _dio.post(
+      Configuration.instance.getHttpEndpoint() + "/files/delete",
+      options: Options(
+        headers: {
+          "X-Auth-Token": Configuration.instance.getToken(),
+        },
+      ),
+      data: {
+        "fileIDs": fileIDs,
+      },
+    );
   }
 
   Future<void> _doSync() async {
