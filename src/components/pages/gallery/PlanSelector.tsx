@@ -19,7 +19,7 @@ import {
 } from 'utils/billingUtil';
 import { reverseString } from 'utils/common';
 import { SetDialogMessage } from 'components/MessageDialog';
-import ArrowEast from 'components/ArrowEast';
+import ArrowEast from 'components/icons/ArrowEast';
 import LinkButton from './LinkButton';
 import { DeadCenter, SetLoading } from 'pages/gallery';
 

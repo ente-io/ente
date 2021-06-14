@@ -1,7 +1,7 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
 import { File } from 'services/fileService';
 import styled from 'styled-components';
-import PlayCircleOutline from 'components/PlayCircleOutline';
+import PlayCircleOutline from 'components/icons/PlayCircleOutline';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
 import { GalleryContext } from 'pages/gallery';
@@ -24,6 +24,7 @@ const Check = styled.input`
     right: 0;
     opacity: 0;
     outline: none;
+    cursor: pointer;
     @media(pointer: coarse) {
         pointer-events: none;
     }

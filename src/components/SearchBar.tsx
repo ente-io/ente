@@ -14,10 +14,10 @@ import {
 } from 'services/searchService';
 import { getFormattedDate } from 'utils/search';
 import constants from 'utils/strings/constants';
-import LocationIcon from './LocationIcon';
-import DateIcon from './DateIcon';
-import SearchIcon from './SearchIcon';
-import CrossIcon from './CrossIcon';
+import LocationIcon from './icons/LocationIcon';
+import DateIcon from './icons/DateIcon';
+import SearchIcon from './icons/SearchIcon';
+import CrossIcon from './icons/CrossIcon';
 
 const Wrapper = styled.div<{ width: number; isDisabled: boolean }>`
     position: fixed;

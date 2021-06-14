@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
-import CrossIcon from './CrossIcon';
+import CrossIcon from './icons/CrossIcon';
 
 const CloseButtonWrapper = styled.div`
     position: absolute;

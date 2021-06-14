@@ -454,6 +454,8 @@ export default function Gallery() {
                             setCollectionSelectorAttributes
                         }
                         deleteFileHelper={deleteFileHelper}
+                        count={selected.count}
+                        clearSelection={clearSelection}
                     />
                 )}
             </FullScreenDropZone>
