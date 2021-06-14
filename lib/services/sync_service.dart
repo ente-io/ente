@@ -135,11 +135,6 @@ class SyncService {
     return _syncStopRequested;
   }
 
-  bool hasCompletedFirstImport() {
-    return _prefs.getBool(LocalSyncService.kHasCompletedFirstImportKey) ??
-        false;
-  }
-
   bool isSyncInProgress() {
     return _existingSync != null;
   }
@@ -148,12 +143,8 @@ class SyncService {
     return _lastSyncStatusEvent;
   }
 
-  bool hasGrantedPermissions() {
-    return _prefs.getBool(LocalSyncService.kHasGrantedPermissionsKey) ?? false;
-  }
-
   Future<void> onPermissionGranted() async {
-    await _prefs.setBool(LocalSyncService.kHasGrantedPermissionsKey, true);
+    await _localSyncService.setPermissionGranted();
     Bus.instance.fire(PermissionGrantedEvent());
     _doSync();
   }
@@ -173,7 +164,7 @@ class SyncService {
 
   Future<void> _doSync() async {
     await _localSyncService.sync();
-    if (hasCompletedFirstImport()) {
+    if (_localSyncService.hasCompletedFirstImport()) {
       await _remoteSyncService.sync();
     }
   }

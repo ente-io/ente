@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -18,8 +19,10 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_update_dialog.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
@@ -29,14 +32,12 @@ import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
 import 'package:photos/ui/gallery_footer_widget.dart';
 import 'package:photos/ui/grant_permissions_widget.dart';
+import 'package:photos/ui/landing_page_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
-import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/nav_bar.dart';
 import 'package:photos/ui/settings_button.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
-import 'package:logging/logging.dart';
-import 'package:photos/ui/landing_page_widget.dart';
 import 'package:photos/ui/sync_indicator.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -202,10 +203,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!Configuration.instance.hasConfiguredAccount()) {
       return LandingPageWidget();
     }
-    if (!SyncService.instance.hasGrantedPermissions()) {
+    if (!LocalSyncService.instance.hasGrantedPermissions()) {
       return GrantPermissionsWidget();
     }
-    if (!SyncService.instance.hasCompletedFirstImport()) {
+    if (!LocalSyncService.instance.hasCompletedFirstImport()) {
       return LoadingPhotosWidget();
     }
 

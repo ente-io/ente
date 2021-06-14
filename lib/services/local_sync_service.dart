@@ -143,6 +143,18 @@ class LocalSyncService {
     }
   }
 
+  bool hasGrantedPermissions() {
+    return _prefs.getBool(kHasGrantedPermissionsKey) ?? false;
+  }
+
+  Future<void> setPermissionGranted() async {
+    await _prefs.setBool(kHasGrantedPermissionsKey, true);
+  }
+
+  bool hasCompletedFirstImport() {
+    return _prefs.getBool(kHasCompletedFirstImportKey) ?? false;
+  }
+
   Future<void> _loadAndStorePhotos(
     int fromTime,
     int toTime,
