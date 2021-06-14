@@ -1,6 +1,5 @@
 import { SetDialogMessage } from 'components/MessageDialog';
 import React from 'react';
-import constants from 'utils/strings/constants';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import styled from 'styled-components';
 import Navbar from 'components/Navbar';
@@ -8,6 +7,7 @@ import DeleteIcon from 'components/icons/DeleteIcon';
 import CrossIcon from 'components/icons/CrossIcon';
 import AddIcon from 'components/icons/AddIcon';
 import { IconButton } from 'components/Container';
+import constants from 'utils/strings/englishConstants';
 
 interface Props {
     addToCollectionHelper: (collectionName, collection) => void;
@@ -22,7 +22,7 @@ interface Props {
 const SelectionBar = styled(Navbar)`
     position: fixed;
     top: 0;
-    color: #aaa;
+    color: #fff;
     z-index: 1001;
     width: 100%;
 `;
@@ -64,7 +64,7 @@ const SelectedFileOptions = ({
         <SelectionBar>
             <SelectionContainer>
                 <IconButton onClick={clearSelection}><CrossIcon /></IconButton>
-                <div>{count} Selected</div>
+                <div>{count} {constants.SELECTED}</div>
             </SelectionContainer>
             <IconButton onClick={addToCollection}><AddIcon /></IconButton>
             <IconButton onClick={deleteHandler}><DeleteIcon /></IconButton>

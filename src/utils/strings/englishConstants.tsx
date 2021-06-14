@@ -376,6 +376,7 @@ const englishConstants = {
     ),
     NOT_FILE_OWNER: 'deleting shared collection files is not allowed',
     ADD_TO_COLLECTION: 'add to collection',
+    SELECTED: 'selected',
     VIDEO_PLAYBACK_FAILED: 'video format not supported',
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD: 'this video cannot be played on your browser',
     METADATA: 'metadata',
