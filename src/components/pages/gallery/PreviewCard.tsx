@@ -24,6 +24,9 @@ const Check = styled.input`
     right: 0;
     opacity: 0;
     outline: none;
+    @media(pointer: coarse) {
+        pointer-events: none;
+    }
 
     &::before {
         content: '';
@@ -38,6 +41,7 @@ const Check = styled.input`
         text-align: center;
         line-height: 16px;
         transition: background-color 0.3s ease;
+        pointer-events: inherit;
     }
     &::after {
         content: '';
@@ -49,6 +53,7 @@ const Check = styled.input`
         opacity: 0;
         transition: transform 0.3s ease;
         position: absolute;
+        pointer-events: inherit;
     }
 
     /** checked */
