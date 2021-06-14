@@ -333,7 +333,7 @@ const englishConstants = {
     SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
-    SEARCH_HINT: () => <span>New York, April 14, Christmas...</span>,
+    SEARCH_HINT: () => <span>try searching for New York, April 14, Christmas...</span>,
     TERMS_AND_CONDITIONS: () => (
         <p>
         I agree to the{' '}
@@ -395,7 +395,7 @@ const englishConstants = {
     ISO: 'iso',
     SHOW_ALL: 'show all',
     LOGIN_TO_UPLOAD_FILES: (count: number) => count === 1 ? `1 file received. login to upload` : `${count} files received. login to upload`,
-    FILES_TO_BE_UPLOADED: (count: number) => count === 1 ? `1 file received. Uploading in a jiffy` : `${count} files received. Uploading in a jiffy`,
+    FILES_TO_BE_UPLOADED: (count: number) => count === 1 ? `1 file received. uploading in a jiffy` : `${count} files received. Uploading in a jiffy`,
 };
 
 export default englishConstants;
