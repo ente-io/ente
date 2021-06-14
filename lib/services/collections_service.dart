@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
-
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
@@ -17,7 +16,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -190,7 +189,7 @@ class CollectionsService {
       }
       throw e;
     }
-    SyncService.instance.syncWithRemote(silently: true);
+    RemoteSyncService.instance.sync(silently: true);
   }
 
   Future<void> unshare(int collectionID, String email) async {
@@ -212,7 +211,7 @@ class CollectionsService {
       _logger.severe(e);
       throw e;
     }
-    SyncService.instance.syncWithRemote(silently: true);
+    RemoteSyncService.instance.sync(silently: true);
   }
 
   Uint8List getCollectionKey(int collectionID) {
@@ -361,7 +360,7 @@ class CollectionsService {
     );
     await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
     Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
-    SyncService.instance.syncWithRemote(silently: true);
+    RemoteSyncService.instance.sync(silently: true);
   }
 
   Future<Collection> createAndCacheCollection(Collection collection) async {

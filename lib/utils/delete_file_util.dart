@@ -9,6 +9,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -90,7 +91,7 @@ Future<void> deleteFilesFromEverywhere(
   await dialog.hide();
   showToast("deleted from everywhere");
   if (uploadedFileIDsToBeDeleted.isNotEmpty) {
-    SyncService.instance.syncWithRemote(silently: true);
+    RemoteSyncService.instance.sync(silently: true);
   }
 }
 

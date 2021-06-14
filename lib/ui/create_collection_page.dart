@@ -9,7 +9,7 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/collection_page.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -232,7 +232,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         }
       }
       await CollectionsService.instance.addToCollection(collectionID, files);
-      SyncService.instance.syncWithRemote(silently: true);
+      RemoteSyncService.instance.sync(silently: true);
       await dialog.hide();
       widget.selectedFiles.clearAll();
       return true;

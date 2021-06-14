@@ -14,6 +14,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/notification_service.dart';
+import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/app_lock.dart';
@@ -137,6 +138,7 @@ Future<void> _init(bool isBackground) async {
   await CollectionsService.instance.init();
   await FileUploader.instance.init(isBackground);
   await LocalSyncService.instance.init(isBackground);
+  await RemoteSyncService.instance.init();
   await SyncService.instance.init();
   await MemoriesService.instance.init();
   _logger.info("Initialization done");
