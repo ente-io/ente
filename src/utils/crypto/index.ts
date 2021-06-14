@@ -143,4 +143,28 @@ async function createNewRecoveryKey() {
 
     return recoveryKey;
 }
+export async function decryptAndStoreToken(masterKey: string) {
+    const cryptoWorker = await new CryptoWorker();
+    const user = getData(LS_KEYS.USER);
+    const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+    let decryptedToken = null;
+    const { encryptedToken } = user;
+    if (encryptedToken && encryptedToken.length > 0) {
+        const secretKey = await cryptoWorker.decryptB64(
+            keyAttributes.encryptedSecretKey,
+            keyAttributes.secretKeyDecryptionNonce,
+            masterKey,
+        );
+        decryptedToken = await cryptoWorker.boxSealOpen(
+            encryptedToken,
+            keyAttributes.publicKey,
+            secretKey,
+        );
+        setData(LS_KEYS.USER, {
+            ...user,
+            token: decryptedToken,
+            encryptedToken: null,
+        });
+    }
+}
 export default CryptoWorker;
