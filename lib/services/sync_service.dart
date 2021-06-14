@@ -162,13 +162,6 @@ class SyncService {
     }, UserCancelledUploadError());
   }
 
-  Future<void> _doSync() async {
-    await _localSyncService.sync();
-    if (_localSyncService.hasCompletedFirstImport()) {
-      await _remoteSyncService.sync();
-    }
-  }
-
   Future<void> deleteFilesOnServer(List<int> fileIDs) async {
     return await _dio
         .post(Configuration.instance.getHttpEndpoint() + "/files/delete",
@@ -180,6 +173,13 @@ class SyncService {
             data: {
           "fileIDs": fileIDs,
         });
+  }
+
+  Future<void> _doSync() async {
+    await _localSyncService.sync();
+    if (_localSyncService.hasCompletedFirstImport()) {
+      await _remoteSyncService.sync();
+    }
   }
 
   void _showStorageLimitExceededNotification() async {
