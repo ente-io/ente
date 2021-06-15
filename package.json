@@ -13,7 +13,7 @@
     "postinstall": "husky install"
   },
   "dependencies": {
-    "@ente-io/next-with-workbox": "^1.0.1",
+    "@ente-io/next-with-workbox": "^1.0.3",
     "@sentry/browser": "^5.21.3",
     "@sentry/integrations": "^5.21.3",
     "@sentry/node": "^5.21.3",
