@@ -5,7 +5,7 @@ import { pageCache, offlineFallback } from 'workbox-recipes';
 
 pageCache();
 
-precacheAndRoute(self.__WB_MANIFEST);
+precacheAndRoute(self.__WB_MANIFEST.filter((item) => !item.url.match(/\/manifest\.json/i)));
 cleanupOutdatedCaches();
 
 registerRoute('/share-target', async ({ event }) => {

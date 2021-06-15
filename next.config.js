@@ -30,7 +30,7 @@ module.exports = withWorkbox(withBundleAnalyzer({
     },
     workbox: {
         swSrc: 'src/serviceWorker.js',
-        exclude: ['/manifest.json'],
+        exclude: [/manifest\.json$/i],
     },
     webpack: (config, { isServer, webpack }) => {
         if (!isServer) {
