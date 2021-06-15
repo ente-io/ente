@@ -101,16 +101,34 @@ class LocalSyncService {
     final endTime = DateTime.now().microsecondsSinceEpoch;
     final duration = Duration(microseconds: endTime - startTime);
     _logger.info("Load took " + duration.inMilliseconds.toString() + "ms");
+  }
 
-    // final sTime = DateTime.now().microsecondsSinceEpoch;
-    // final ids = await getAllLocalIDs();
-    // final eTime = DateTime.now().microsecondsSinceEpoch;
-    // final d = Duration(microseconds: eTime - sTime);
-    // _logger.info("Loading " +
-    //     ids.length.toString() +
-    //     " took " +
-    //     d.inMilliseconds.toString() +
-    //     "ms");
+  Future<bool> syncAll() async {
+    final sTime = DateTime.now().microsecondsSinceEpoch;
+    final localAssets = await getAllLocalAssets();
+    final eTime = DateTime.now().microsecondsSinceEpoch;
+    final d = Duration(microseconds: eTime - sTime);
+    _logger.info("Loading from the beginning returned " +
+        localAssets.length.toString() +
+        " assets and took " +
+        d.inMilliseconds.toString() +
+        "ms");
+    final existingIDs = await _db.getExistingLocalFileIDs();
+    final List<LocalAsset> unsyncedAssets = [];
+    for (final asset in localAssets) {
+      if (!existingIDs.contains(asset.id)) {
+        unsyncedAssets.add(asset);
+      }
+    }
+    if (unsyncedAssets.isEmpty) {
+      return false;
+    }
+    final unsyncedFiles = await convertToFiles(unsyncedAssets, _computer);
+    await _db.insertMultiple(unsyncedFiles);
+    _logger.info(
+        "Inserted " + unsyncedFiles.length.toString() + " unsynced files.");
+    Bus.instance.fire(LocalPhotosUpdatedEvent(unsyncedFiles));
+    return true;
   }
 
   Future<void> trackEditedFile(File file) async {

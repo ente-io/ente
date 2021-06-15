@@ -180,6 +180,10 @@ class SyncService {
     await _localSyncService.sync();
     if (_localSyncService.hasCompletedFirstImport()) {
       await _remoteSyncService.sync();
+      final shouldSync = await _localSyncService.syncAll();
+      if (shouldSync) {
+        await _remoteSyncService.sync();
+      }
     }
   }
 

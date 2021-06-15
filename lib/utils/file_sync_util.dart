@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:computer/computer.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -27,20 +29,49 @@ Future<List<File>> getDeviceFiles(
   return files;
 }
 
-Future<Set<String>> getAllLocalIDs() async {
+Future<List<LocalAsset>> getAllLocalAssets() async {
   final filterOptionGroup = FilterOptionGroup();
   final assetPaths = await PhotoManager.getAssetPathList(
     hasAll: true,
     type: RequestType.common,
     filterOption: filterOptionGroup,
   );
-  final ids = new Set<String>();
+  final List<LocalAsset> assets = [];
   for (final assetPath in assetPaths) {
     for (final asset in await assetPath.assetList) {
-      ids.add(asset.id);
+      assets.add(LocalAsset(asset.id, assetPath.name));
     }
   }
-  return ids;
+  return assets;
+}
+
+Future<List<File>> convertToFiles(
+    List<LocalAsset> assets, Computer computer) async {
+  final List<LocalAsset> recents = [];
+  final List<LocalAssetEntity> entities = [];
+  for (final asset in assets) {
+    if (asset.path == "Recent" || asset.path == "Recents") {
+      recents.add(asset);
+    } else {
+      entities.add(
+          LocalAssetEntity(await AssetEntity.fromId(asset.id), asset.path));
+    }
+  }
+  // Ignore duplicate items in recents
+  for (final recent in recents) {
+    bool presentInOthers = false;
+    for (final entity in entities) {
+      if (recent.id == entity.entity.id) {
+        presentInOthers = true;
+        break;
+      }
+    }
+    if (!presentInOthers) {
+      entities.add(
+          LocalAssetEntity(await AssetEntity.fromId(recent.id), recent.path));
+    }
+  }
+  return await computer.compute(_getFilesFromAssets, param: entities);
 }
 
 Future<List<AssetPathEntity>> _getGalleryList(
@@ -99,4 +130,32 @@ Future<List<File>> _getFiles(Map<String, dynamic> args) async {
     }
   }
   return files;
+}
+
+Future<List<File>> _getFilesFromAssets(List<LocalAssetEntity> assets) async {
+  final List<File> files = [];
+  for (final asset in assets) {
+    files.add(await File.fromAsset(
+      asset.path,
+      asset.entity,
+    ));
+  }
+  return files;
+}
+
+class LocalAsset {
+  final String id;
+  final String path;
+
+  LocalAsset(
+    this.id,
+    this.path,
+  );
+}
+
+class LocalAssetEntity {
+  final AssetEntity entity;
+  final String path;
+
+  LocalAssetEntity(this.entity, this.path);
 }
