@@ -5,7 +5,8 @@ const SENTRY_ENV = process.env.SENTRY_ENV ?? 'development';
 
 Sentry.init({
     dsn: SENTRY_DSN,
-    tracesSampleRate: 1.0,
     environment: SENTRY_ENV,
     release: process.env.SENTRY_RELEASE,
+    debug: true,
+    autoSessionTracking: false,
 });

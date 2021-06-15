@@ -5,10 +5,11 @@ const SENTRY_ENV = process.env.SENTRY_ENV ?? 'development';
 
 Sentry.init({
     dsn: SENTRY_DSN,
-    tracesSampleRate: 1.0,
     environment: SENTRY_ENV,
     release: process.env.SENTRY_RELEASE,
     attachStacktrace: true,
+    debug: true,
+    autoSessionTracking: false,
     // ...
     // Note: if you want to override the automatic release value, do not set a
     // `release` value here - use the environment variable `SENTRY_RELEASE`, so
