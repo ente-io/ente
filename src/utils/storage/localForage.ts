@@ -1,6 +1,6 @@
 import { runningInBrowser } from 'utils/common';
 
-const localForage:LocalForage = runningInBrowser() && require('localforage');
+import localForage from 'localforage';
 
 if (runningInBrowser()) {
     localForage.config({

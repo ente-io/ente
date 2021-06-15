@@ -1,6 +1,5 @@
 // Use the SentryWebpack plugin to upload the source maps during build step
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
-const WorkerPlugin = require('worker-plugin');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
     enabled: process.env.ANALYZE === 'true',
 });
@@ -19,8 +18,10 @@ process.env.SENTRY_DSN = SENTRY_DSN;
 const basePath = '';
 
 module.exports = withWorkbox(withBundleAnalyzer({
-    target: 'serverless',
     productionBrowserSourceMaps: true,
+    future: {
+        webpack5: true,
+    },
     env: {
         // Make the COMMIT_SHA available to the client so that Sentry events can be
         // marked for the release they belong to. It may be undefined if running
@@ -33,12 +34,6 @@ module.exports = withWorkbox(withBundleAnalyzer({
     },
     webpack: (config, { isServer, webpack }) => {
         if (!isServer) {
-            config.plugins.push(
-                new WorkerPlugin({
-                    // use "self" as the global object when receiving hot updates.
-                    globalObject: 'self',
-                }),
-            );
             config.resolve.alias['@sentry/node'] = '@sentry/browser';
         }
         // Define an environment variable so source code can check whether or not
