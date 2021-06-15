@@ -133,6 +133,10 @@ export class Crypto {
         return libsodium.toB64(data);
     }
 
+    async toURLSafeB64(data) {
+        return libsodium.toURLSafeB64(data);
+    }
+
     async fromB64(string) {
         return libsodium.fromB64(string);
     }
