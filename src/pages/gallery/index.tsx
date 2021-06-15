@@ -349,7 +349,7 @@ export default function Gallery() {
                 showCollectionSelector={setCollectionSelectorView.bind(null, true)}
             >
                 <button type="button" onClick={() => {
-                    throw new Error('Sentry Frontend Error');
+                    throw new Error('Sentry Test Frontend Error');
                 }}>
                     Throw error
                 </button>
