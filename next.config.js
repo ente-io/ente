@@ -3,7 +3,7 @@ const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
     enabled: process.env.ANALYZE === 'true',
 });
-const withWorkbox = require('next-with-workbox');
+const withWorkbox = require('@ente-io/next-with-workbox');
 
 const {
     NEXT_PUBLIC_SENTRY_DSN: SENTRY_DSN,

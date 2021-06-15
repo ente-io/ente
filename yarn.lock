@@ -981,6 +981,15 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.5.tgz#8eed982e2ee6f7f4e44c253e12962980791efd46"
   integrity sha512-6U71C2Wp7r5XtFtQzYrW5iKFT67OixrSxjI4MptCHzdSVlgabczzqLe0ZSgnub/5Kp4hSbpDB1tMytZY9pwxxA==
 
+"@ente-io/next-with-workbox@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@ente-io/next-with-workbox/-/next-with-workbox-1.0.1.tgz#18ba42a5e2109898e327cc4c903bad7079115870"
+  integrity sha512-tbFerPDiGPb16hRZ/tjD5eCWVocugoOxqJKbvDOvpbFz9SH9upSuwWTCV4rG0QhwNd2R2kC3tKTDxzWk4b3Gkw==
+  dependencies:
+    clean-webpack-plugin "^3.0.0"
+    glob "^7.1.6"
+    workbox-webpack-plugin "^5.1.4"
+
 "@eslint/eslintrc@^0.4.2":
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-0.4.2.tgz#f63d0ef06f5c0c57d76c4ab5f63d3835c51b0179"
@@ -4366,15 +4375,6 @@ negotiator@0.6.2:
   version "0.6.2"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.2.tgz#feacf7ccf525a77ae9634436a64883ffeca346fb"
   integrity sha512-hZXc7K2e+PgeI1eDBe/10Ard4ekbfrrqG8Ep+8Jmf4JID2bNg7NvCPOZN+kfF574pFQI7mum2AUqDidoKqcTOw==
-
-next-with-workbox@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/next-with-workbox/-/next-with-workbox-2.0.1.tgz#37e25481ce94a02e25f7741e1475499e76f5677a"
-  integrity sha512-nixKm9ei/rP8Zb25a7rBKPUKb0weVIsCBXibvbEnNmU2VAr9xYa6lG3Xyp3aqqlz5Ij7HqgcCCGOyxzCtzAI8w==
-  dependencies:
-    clean-webpack-plugin "^3.0.0"
-    glob "^7.1.6"
-    workbox-webpack-plugin "^5.1.4"
 
 next@^10.2.3:
   version "10.2.3"
