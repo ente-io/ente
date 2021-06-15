@@ -25,10 +25,10 @@ export const isSameDay = (baseDate: DateValue) => (compareDate: Date) => {
     if (baseDate.month || baseDate.month === 0) {
         same = baseDate.month === compareDate.getMonth();
     }
-    if (baseDate.date) {
+    if (same && baseDate.date) {
         same = baseDate.date === compareDate.getDate();
     }
-    if (baseDate.year) {
+    if (same && baseDate.year) {
         same = baseDate.year === compareDate.getFullYear();
     }
 
