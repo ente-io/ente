@@ -329,10 +329,11 @@ class _HomeWidgetState extends State<HomeWidget> {
               child: Container(
                 width: double.infinity,
                 height: 80,
-                padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+                padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
                 child: button(
                   "preserve memories",
                   fontSize: 16,
+                  lineHeight: 1.5,
                   onPressed: () async {
                     routeToPage(context, BackupFolderSelectionPage());
                   },

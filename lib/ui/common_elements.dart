@@ -17,6 +17,7 @@ Widget button(
   String text, {
   double fontSize = 14,
   VoidCallback onPressed,
+  double lineHeight,
 }) {
   return InkWell(
     child: OutlinedButton(
@@ -38,6 +39,7 @@ Widget button(
           fontWeight: FontWeight.bold,
           fontSize: fontSize,
           color: onPressed == null ? Colors.grey : Colors.white,
+          height: lineHeight,
         ),
         textAlign: TextAlign.center,
       ),
