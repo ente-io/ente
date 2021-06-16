@@ -5,7 +5,7 @@ const SENTRY_ENV = process.env.SENTRY_ENV ?? 'development';
 
 Sentry.init({
     dsn: SENTRY_DSN,
-    environment: SENTRY_ENV,
+    enabled: SENTRY_ENV !== 'development',
     release: process.env.SENTRY_RELEASE,
     attachStacktrace: true,
     debug: true,
