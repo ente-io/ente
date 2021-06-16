@@ -24,7 +24,7 @@ class GalleryFooterWidget extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(50, 20, 50, 20),
               side: BorderSide(
                 width: 2,
-                color: Theme.of(context).buttonColor.withOpacity(0.6),
+                color: Theme.of(context).buttonColor.withOpacity(0.7),
               ),
             ),
             child: Row(
@@ -34,7 +34,7 @@ class GalleryFooterWidget extends StatelessWidget {
               children: [
                 Icon(
                   Icons.cloud_upload,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withOpacity(0.8),
                 ),
                 Padding(padding: EdgeInsets.all(6)),
                 Text(
