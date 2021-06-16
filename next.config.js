@@ -22,4 +22,9 @@ module.exports = withSentryConfig(withWorkbox(withBundleAnalyzer({
         swSrc: 'src/serviceWorker.js',
         exclude: [/manifest\.json$/i],
     },
+    webpack: (config) => {
+        config.output.hotUpdateMainFilename =
+            'static/webpack/[fullhash].[runtime].hot-update.json';
+        return config;
+    },
 })), { release: gitSha });
