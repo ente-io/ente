@@ -1,7 +1,7 @@
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
     enabled: process.env.ANALYZE === 'true',
 });
-const withWorkbox = require('next-with-workbox');
+const withWorkbox = require('@ente-io/next-with-workbox');
 
 const { withSentryConfig } = require('@sentry/nextjs');
 
@@ -20,6 +20,6 @@ module.exports = withSentryConfig(withWorkbox(withBundleAnalyzer({
     },
     workbox: {
         swSrc: 'src/serviceWorker.js',
-        exclude: ['/manifest.json'],
+        exclude: [/manifest\.json$/i],
     },
 })), { release: gitSha });

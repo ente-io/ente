@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@sentry/nextjs": "^6.5.1",
+    "@ente-io/next-with-workbox": "^1.0.3",
     "@stripe/stripe-js": "^1.13.2",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
@@ -34,7 +35,6 @@
     "libsodium-wrappers": "^0.7.8",
     "localforage": "^1.9.0",
     "next": "^10.2.3",
-    "next-with-workbox": "^2.0.1",
     "node-forge": "^0.10.0",
     "photoswipe": "file:./thirdparty/photoswipe",
     "react": "16.13.1",
