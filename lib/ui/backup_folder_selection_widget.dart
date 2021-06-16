@@ -63,6 +63,7 @@ class _BackupFolderSelectionWidgetState
           Container(
             width: double.infinity,
             height: 64,
+            padding: EdgeInsets.only(left: 20, right: 20),
             child: button(
               widget.buttonText,
               fontSize: 18,
@@ -98,7 +99,7 @@ class _BackupFolderSelectionWidgetState
               InkWell(
                 child: Container(
                   color: _backedupFolders.contains(file.deviceFolder)
-                      ? Color.fromRGBO(10, 20, 20, 1.0)
+                      ? Color.fromRGBO(16, 32, 32, 1.0)
                       : null,
                   padding: EdgeInsets.fromLTRB(24, 20, 24, 20),
                   child: Row(
@@ -165,7 +166,7 @@ class _BackupFolderSelectionWidgetState
         }
         return Container(
           height: 400,
-          width: 300,
+          width: 340,
           child: child,
         );
       },

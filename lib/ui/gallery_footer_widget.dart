@@ -51,7 +51,9 @@ class GalleryFooterWidget extends StatelessWidget {
                 builder: (context) {
                   return AlertDialog(
                     content: const BackupFolderSelectionWidget("preserve"),
-                    backgroundColor: Colors.black.withOpacity(0.8),
+                    backgroundColor: Color.fromRGBO(8, 18, 18, 1),
+                    insetPadding: const EdgeInsets.all(24),
+                    contentPadding: const EdgeInsets.all(24),
                   );
                 },
                 barrierColor: Colors.black.withOpacity(0.85),
