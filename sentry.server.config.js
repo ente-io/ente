@@ -8,6 +8,5 @@ Sentry.init({
     enabled: SENTRY_ENV !== 'development',
     environment: SENTRY_ENV,
     release: process.env.SENTRY_RELEASE,
-    debug: true,
     autoSessionTracking: false,
 });
