@@ -8,7 +8,7 @@ import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import EnteSpinner from 'components/EnteSpinner';
-import { logError, sentryInit } from '../utils/sentry';
+import { logError } from '../utils/sentry';
 import { Workbox } from 'workbox-window';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -339,7 +339,6 @@ export interface BannerMessage {
     variant: string;
 }
 
-sentryInit();
 
 type AppContextType = {
     showNavBar: (show: boolean) => void;
