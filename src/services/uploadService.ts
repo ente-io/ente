@@ -249,19 +249,18 @@ class UploadService {
                 this.fileProgress.delete(rawFile.name);
                 return;
             }
-            let { file: encryptedFile, fileKey: encryptedKey }: EncryptedFile =
+            let encryptedFile: EncryptedFile =
                 await this.encryptFile(worker, file, collection.key);
             let backupedFile: BackupedFile = await this.uploadToBucket(
-                encryptedFile,
+                encryptedFile.file,
             );
             file = null;
-            encryptedFile = null;
             let uploadFile: uploadFile = this.getUploadFile(
                 collection,
                 backupedFile,
-                encryptedKey,
+                encryptedFile.fileKey,
             );
-            encryptedKey = null;
+            encryptedFile = null;
             backupedFile = null;
             await this.uploadFile(uploadFile);
             uploadFile = null;
