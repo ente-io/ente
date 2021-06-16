@@ -1,47 +1,4 @@
-import * as Sentry from '@sentry/browser';
-import { RewriteFrames, CaptureConsole } from '@sentry/integrations';
-
-export const sentryInit = () => {
-    if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
-        const integrations = [];
-        if (
-            process.env.NEXT_IS_SERVER === 'true' &&
-            process.env.NEXT_PUBLIC_SENTRY_SERVER_ROOT_DIR
-        ) {
-            // For Node.js, rewrite Error.stack to use relative paths, so that source
-            // maps starting with ~/_next map to files in Error.stack with path
-            // app:///_next
-            integrations.push(
-                new RewriteFrames({
-                    iteratee: (frame) => {
-                        frame.filename = frame.filename.replace(
-                            process.env.NEXT_PUBLIC_SENTRY_SERVER_ROOT_DIR,
-                            'app:///',
-                        );
-                        frame.filename = frame.filename.replace(
-                            '.next',
-                            '_next',
-                        );
-                        return frame;
-                    },
-                }),
-            );
-        }
-        integrations.push(
-            new CaptureConsole({
-                levels: ['error'],
-            }),
-        );
-
-        Sentry.init({
-            enabled: process.env.NODE_ENV === 'production',
-            environment: process.env.NODE_ENV,
-            integrations,
-            dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-            attachStacktrace: true,
-        });
-    }
-};
+import * as Sentry from '@sentry/nextjs';
 
 export const logError = (e: any, msg?: string) => {
     Sentry.captureException(e, {

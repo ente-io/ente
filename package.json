@@ -13,12 +13,8 @@
     "postinstall": "husky install"
   },
   "dependencies": {
+    "@sentry/nextjs": "^6.5.1",
     "@ente-io/next-with-workbox": "^1.0.3",
-    "@sentry/browser": "^5.21.3",
-    "@sentry/integrations": "^5.21.3",
-    "@sentry/node": "^5.21.3",
-    "@sentry/types": "^6.6.0",
-    "@sentry/webpack-plugin": "^1.12.1",
     "@stripe/stripe-js": "^1.13.2",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
