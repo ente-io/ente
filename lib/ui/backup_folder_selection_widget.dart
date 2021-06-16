@@ -50,7 +50,7 @@ class _BackupFolderSelectionWidgetState
             padding: EdgeInsets.all(4),
           ),
           Text(
-            "select folders to preserve",
+            "backed up folders",
             style: TextStyle(fontSize: 20),
           ),
           Padding(

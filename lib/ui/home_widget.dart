@@ -331,7 +331,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 height: 80,
                 padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
                 child: button(
-                  "select folders\nto preserve",
+                  "preserve memories",
                   fontSize: 16,
                   onPressed: () async {
                     routeToPage(context, BackupFolderSelectionPage());

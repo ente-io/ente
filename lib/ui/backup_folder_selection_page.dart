@@ -50,7 +50,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               child: Material(
                 type: MaterialType.transparency,
                 child: SectionTitle(
-                  "select folders to preserve",
+                  "preserve memories",
                   alignment: Alignment.center,
                 ),
               ),
