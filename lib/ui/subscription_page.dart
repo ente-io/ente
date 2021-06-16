@@ -442,7 +442,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       width: double.infinity,
       height: 64,
       margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
-      padding: const EdgeInsets.fromLTRB(64, 0, 64, 0),
+      padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
       child: button(
         "continue on free plan",
         fontSize: 16,
