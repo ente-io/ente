@@ -52,6 +52,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 child: SectionTitle(
                   "preserve memories",
                   alignment: Alignment.center,
+                  opacity: 0.9,
                 ),
               ),
             ),
@@ -85,7 +86,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             child: Text(
               "the files within the folders you select will be encrypted and backed up in the background",
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withOpacity(0.36),
                 fontSize: 14,
                 height: 1.3,
               ),
@@ -137,8 +138,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               InkWell(
                 child: Container(
                   color: _backedupFolders.contains(file.deviceFolder)
-                      ? Color.fromRGBO(10, 20, 20, 1.0)
-                      : null,
+                      ? Color.fromRGBO(16, 32, 32, 1)
+                      : Color.fromRGBO(8, 18, 18, 0.4),
                   padding: EdgeInsets.fromLTRB(24, 20, 24, 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -335,8 +335,11 @@ class CollectionItem extends StatelessWidget {
 class SectionTitle extends StatelessWidget {
   final String title;
   final Alignment alignment;
+  final double opacity;
+
   const SectionTitle(
     this.title, {
+    this.opacity: 0.8,
     Key key,
     this.alignment = Alignment.centerLeft,
   }) : super(key: key);
@@ -352,7 +355,7 @@ class SectionTitle extends StatelessWidget {
               title,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).buttonColor.withOpacity(0.8),
+                color: Theme.of(context).buttonColor.withOpacity(this.opacity),
                 fontSize: 20,
                 letterSpacing: 1,
               ),
