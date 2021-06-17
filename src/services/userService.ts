@@ -34,8 +34,8 @@ export interface VerificationResponse {
     encryptedToken?: string;
     token?: string;
 }
-export interface TwoFactorSector {
-    secretKey: string
+export interface TwoFactorSecret {
+    secretCode: string
     qrCode: string
 }
 
@@ -107,5 +107,5 @@ export const setupTwoFactor = async () => {
     const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/setup`, null, {
         'X-Auth-Token': getToken(),
     });
-    return resp.data as TwoFactorSector;
+    return resp.data as TwoFactorSecret;
 };
