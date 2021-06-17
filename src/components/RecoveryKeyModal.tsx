@@ -4,7 +4,25 @@ import { getRecoveryKey } from 'utils/crypto';
 import constants from 'utils/strings/constants';
 import MessageDialog from './MessageDialog';
 import EnteSpinner from './EnteSpinner';
+import styled from 'styled-components';
 
+export const CodeBlock = styled.div<{ height: number }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1a1919;
+    height: ${(props) => props.height}px;
+    padding-left:30px;
+    padding-right:20px;
+    color: white;
+    margin: 20px 0;
+`;
+
+export const FreeFlowText = styled.div`
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    min-width: 30%;
+`;
 interface Props {
     show: boolean;
     onHide: () => void;
@@ -55,34 +73,17 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
             }}
         >
             <p>{constants.RECOVERY_KEY_DESCRIPTION}</p>
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: '#1a1919',
-                    height: '150px',
-                    padding: '40px',
-                    color: 'white',
-                    margin: '20px 0',
-                }}
-            >
+            <CodeBlock height={150}>
                 {recoveryKey ? (
-                    <div
-                        style={{
-                            wordWrap: 'break-word',
-                            overflowWrap: 'break-word',
-                            minWidth: '30%',
-                        }}
-                    >
+                    <FreeFlowText>
                         {recoveryKey}
-                    </div>
+                    </FreeFlowText>
                 ) : (
                     <EnteSpinner />
                 )}
-            </div>
+            </CodeBlock>
             <p>{constants.KEY_NOT_STORED_DISCLAIMER}</p>
-        </MessageDialog>
+        </MessageDialog >
     );
 }
 export default RecoveryKeyModal;
