@@ -28,6 +28,7 @@ import { LogoImage } from 'pages/_app';
 import { SetDialogMessage } from './MessageDialog';
 import EnteSpinner from './EnteSpinner';
 import RecoveryKeyModal from './RecoveryKeyModal';
+import TwoFactorModal from './TwoFactorModal';
 
 interface Props {
     files: File[];
@@ -45,6 +46,7 @@ export default function Sidebar(props: Props) {
     }, []);
     const [isOpen, setIsOpen] = useState(false);
     const [recoverModalView, setRecoveryModalView] = useState(false);
+    const [twoFactorModal, setTwoFactorModal] = useState(true);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -212,6 +214,22 @@ export default function Sidebar(props: Props) {
                         onClick={() => setRecoveryModalView(true)}
                     >
                         {constants.DOWNLOAD_RECOVERY_KEY}
+                    </LinkButton>
+                </>
+                <>
+                    <TwoFactorModal
+                        show={twoFactorModal}
+                        onHide={() => setTwoFactorModal(false)}
+                        somethingWentWrong={() => props.setDialogMessage({
+                            title: constants.TWO_FACTOR_SECRET_FETCHING_FAILED,
+                            close: { variant: 'danger' },
+                        })}
+                    />
+                    <LinkButton
+                        style={{ marginTop: '30px' }}
+                        onClick={() => setTwoFactorModal(true)}
+                    >
+                        {constants.TWO_FACTOR_AUTHENTICATION}
                     </LinkButton>
                 </>
                 <LinkButton

@@ -161,6 +161,9 @@ const GlobalStyles = createGlobalStyle`
         background-size: 20px 20px;
         background-position: center;
     }
+    .btn.focus , .btn:focus{
+        box-shadow: none;
+    }
     .btn-success {
         background: #2dc262;
         border-color: #29a354;
