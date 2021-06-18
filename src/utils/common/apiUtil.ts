@@ -16,3 +16,8 @@ export const getThumbnailUrl = (id: number) => {
     }
     return `https://thumbnails.ente.workers.dev/?fileID=${id}`;
 };
+
+
+export const getSentryTunnelUrl = () => {
+    return `https://sentry-reporter.ente.workers.dev`;
+};
