@@ -402,6 +402,8 @@ const englishConstants = {
     TWO_FACTOR_AUTHENTICATION_QR_INSTRUCTION: 'please scan QR code below with your favorite authenticator app',
     ENTER_CODE_MANUALLY: 'enter the code manually',
     TWO_FACTOR_AUTHENTICATION_MANUAL_CODE_INSTRUCTION: 'please enter this code in your favorite authenticator app',
+    SCAN_QR_CODE: 'scan QR code instead',
+    CONTINUE: 'continue',
 
 };
 
