@@ -23,6 +23,7 @@ class LocalSyncService {
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kEditedFileIDsKey = "edited_file_ids";
   static const kDownloadedFileIDsKey = "downloaded_file_ids";
+  static const kInvalidFileIDsKey = "invalid_file_ids";
 
   LocalSyncService._privateConstructor() {}
 
@@ -41,8 +42,8 @@ class LocalSyncService {
       return;
     }
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
-    final editedFileIDs = getEditedFiles().toSet();
-    final downloadedFileIDs = getDownloadedFiles().toSet();
+    final editedFileIDs = getEditedFileIDs().toSet();
+    final downloadedFileIDs = getDownloadedFileIDs().toSet();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     if (_isBackground) {
       await PhotoManager.setIgnorePermissionCheck(true);
@@ -114,22 +115,26 @@ class LocalSyncService {
         d.inMilliseconds.toString() +
         "ms");
     final existingIDs = await _db.getExistingLocalFileIDs();
+    final invalidIDs = getInvalidFileIDs().toSet();
     final unsyncedFiles =
-        await getUnsyncedFiles(localAssets, existingIDs, _computer);
-    await _db.insertMultiple(unsyncedFiles);
-    _logger.info(
-        "Inserted " + unsyncedFiles.length.toString() + " unsynced files.");
-    Bus.instance.fire(LocalPhotosUpdatedEvent(unsyncedFiles));
-    return true;
+        await getUnsyncedFiles(localAssets, existingIDs, invalidIDs, _computer);
+    if (unsyncedFiles.isNotEmpty) {
+      await _db.insertMultiple(unsyncedFiles);
+      _logger.info(
+          "Inserted " + unsyncedFiles.length.toString() + " unsynced files.");
+      Bus.instance.fire(LocalPhotosUpdatedEvent(unsyncedFiles));
+      return true;
+    }
+    return false;
   }
 
   Future<void> trackEditedFile(File file) async {
-    final editedIDs = getEditedFiles();
+    final editedIDs = getEditedFileIDs();
     editedIDs.add(file.localID);
     await _prefs.setStringList(kEditedFileIDsKey, editedIDs);
   }
 
-  List<String> getEditedFiles() {
+  List<String> getEditedFileIDs() {
     if (_prefs.containsKey(kEditedFileIDsKey)) {
       return _prefs.getStringList(kEditedFileIDsKey);
     } else {
@@ -139,17 +144,32 @@ class LocalSyncService {
   }
 
   Future<void> trackDownloadedFile(File file) async {
-    final downloadedIDs = getDownloadedFiles();
+    final downloadedIDs = getDownloadedFileIDs();
     downloadedIDs.add(file.localID);
     await _prefs.setStringList(kDownloadedFileIDsKey, downloadedIDs);
   }
 
-  List<String> getDownloadedFiles() {
+  List<String> getDownloadedFileIDs() {
     if (_prefs.containsKey(kDownloadedFileIDsKey)) {
       return _prefs.getStringList(kDownloadedFileIDsKey);
     } else {
       List<String> downloadedIDs = [];
       return downloadedIDs;
+    }
+  }
+
+  Future<void> trackInvalidFile(File file) async {
+    final invalidIDs = getInvalidFileIDs();
+    invalidIDs.add(file.localID);
+    await _prefs.setStringList(kInvalidFileIDsKey, invalidIDs);
+  }
+
+  List<String> getInvalidFileIDs() {
+    if (_prefs.containsKey(kInvalidFileIDsKey)) {
+      return _prefs.getStringList(kInvalidFileIDsKey);
+    } else {
+      List<String> invalidIDs = [];
+      return invalidIDs;
     }
   }
 

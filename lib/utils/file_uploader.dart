@@ -22,6 +22,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -416,6 +417,7 @@ class FileUploader {
   Future _onInvalidFileError(File file) async {
     _logger.warning("Invalid file encountered: " + file.toString());
     await FilesDB.instance.deleteLocalFile(file.localID);
+    await LocalSyncService.instance.trackInvalidFile(file);
     throw InvalidFileError();
   }
 
