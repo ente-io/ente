@@ -45,7 +45,32 @@ Future<List<LocalAsset>> getAllLocalAssets() async {
   return assets;
 }
 
-Future<List<File>> convertToFiles(
+Future<List<File>> getUnsyncedFiles(
+    List<LocalAsset> assets, Set<String> existingIDs, Computer computer) async {
+  final args = Map<String, dynamic>();
+  args['assets'] = assets;
+  args['existingIDs'] = existingIDs;
+  final unsyncedAssets =
+      await computer.compute(_getUnsyncedAssets, param: args);
+  if (unsyncedAssets.isEmpty) {
+    return [];
+  }
+  return _convertToFiles(unsyncedAssets, computer);
+}
+
+List<LocalAsset> _getUnsyncedAssets(Map<String, dynamic> args) {
+  final List<LocalAsset> assets = args['assets'];
+  final Set<String> existingIDs = args['existingIDs'];
+  final List<LocalAsset> unsyncedAssets = [];
+  for (final asset in assets) {
+    if (!existingIDs.contains(asset.id)) {
+      unsyncedAssets.add(asset);
+    }
+  }
+  return unsyncedAssets;
+}
+
+Future<List<File>> _convertToFiles(
     List<LocalAsset> assets, Computer computer) async {
   final List<LocalAsset> recents = [];
   final List<LocalAssetEntity> entities = [];

@@ -114,16 +114,8 @@ class LocalSyncService {
         d.inMilliseconds.toString() +
         "ms");
     final existingIDs = await _db.getExistingLocalFileIDs();
-    final List<LocalAsset> unsyncedAssets = [];
-    for (final asset in localAssets) {
-      if (!existingIDs.contains(asset.id)) {
-        unsyncedAssets.add(asset);
-      }
-    }
-    if (unsyncedAssets.isEmpty) {
-      return false;
-    }
-    final unsyncedFiles = await convertToFiles(unsyncedAssets, _computer);
+    final unsyncedFiles =
+        await getUnsyncedFiles(localAssets, existingIDs, _computer);
     await _db.insertMultiple(unsyncedFiles);
     _logger.info(
         "Inserted " + unsyncedFiles.length.toString() + " unsynced files.");
