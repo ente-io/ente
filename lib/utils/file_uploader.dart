@@ -414,7 +414,7 @@ class FileUploader {
   }
 
   Future _onInvalidFileError(File file) async {
-    _logger.severe("Invalid file encountered: " + file.toString());
+    _logger.warning("Invalid file encountered: " + file.toString());
     await FilesDB.instance.deleteLocalFile(file.localID);
     throw InvalidFileError();
   }
