@@ -213,7 +213,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     if (_hasActiveSubscription &&
         _currentSubscription.productID != kFreeProductID) {
       widgets.addAll([
-        Expanded(child: Container()),
         Align(
           alignment: Alignment.center,
           child: GestureDetector(
