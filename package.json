@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@ente-io/next-with-workbox": "^1.0.3",
-    "@sentry/nextjs": "^6.5.1",
+    "@sentry/nextjs": "^6.7.1",
     "@stripe/stripe-js": "^1.13.2",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
