@@ -104,7 +104,17 @@ export const isTokenValid = async () => {
 };
 
 export const setupTwoFactor = async () => {
-    const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/setup`, null, {
+    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/setup`, null, null, {
+        'X-Auth-Token': getToken(),
+    });
+    return resp.data as TwoFactorSecret;
+};
+
+export const enableTwoFactor = async (otp) => {
+    console.log(getToken());
+    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/enable`, {
+        otp,
+    }, null, {
         'X-Auth-Token': getToken(),
     });
     return resp.data as TwoFactorSecret;
