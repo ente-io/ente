@@ -404,6 +404,10 @@ const englishConstants = {
     TWO_FACTOR_AUTHENTICATION_MANUAL_CODE_INSTRUCTION: 'please enter this code in your favorite authenticator app',
     SCAN_QR_CODE: 'scan QR code instead',
     CONTINUE: 'continue',
+    BACK: 'back',
+    ENABLE: 'enable',
+    LOST_DEVICE: 'lost two factor device?',
+    INCORRECT_CODE: 'incorrect code',
 
 };
 

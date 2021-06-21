@@ -317,6 +317,11 @@ const GlobalStyles = createGlobalStyle`
     .carousel-indicators .active {
         background-color: #2dc262;
     }
+    div.otp-input input {
+        width: 2em !important;
+        height: 3em;
+        margin: 0 10px;
+    }
 `;
 
 export const LogoImage = styled.img`
