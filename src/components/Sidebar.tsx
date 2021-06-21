@@ -220,10 +220,6 @@ export default function Sidebar(props: Props) {
                     <TwoFactorModal
                         show={twoFactorModal}
                         onHide={() => setTwoFactorModal(false)}
-                        somethingWentWrong={() => props.setDialogMessage({
-                            title: constants.TWO_FACTOR_SECRET_FETCHING_FAILED,
-                            close: { variant: 'danger' },
-                        })}
                     />
                     <LinkButton
                         style={{ marginTop: '30px' }}
