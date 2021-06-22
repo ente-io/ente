@@ -36,6 +36,7 @@ export default function Verify() {
         const main = async () => {
             router.prefetch('/credentials');
             router.prefetch('/generate');
+            router.prefetch('/twoFactor/verify');
             const user = getData(LS_KEYS.USER);
             if (!user?.email) {
                 router.push('/');

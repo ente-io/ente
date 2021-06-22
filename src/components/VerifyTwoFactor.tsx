@@ -22,12 +22,13 @@ export default function VerifyTwoFactor(props: Props) {
 
     const submitForm = async (
         { otp }: formValues,
-        { setFieldError }: FormikHelpers<formValues>,
+        { setFieldError, resetForm }: FormikHelpers<formValues>,
     ) => {
         try {
             setWaiting(true);
             await props.onSubmit(otp);
         } catch (e) {
+            resetForm();
             setFieldError('otp', `${constants.UNKNOWN_ERROR} ${e.message}`);
         }
         setWaiting(false);
