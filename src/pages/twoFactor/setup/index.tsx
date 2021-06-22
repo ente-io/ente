@@ -37,7 +37,10 @@ export default function SetupTwoFactor() {
         };
         main();
     }, []);
-
+    const onSubmit = async (otp: string) => {
+        await enableTwoFactor(otp);
+        router.push('/gallery');
+    };
     return (
         <Container>
             <Card style={{ minWidth: '300px' }} className="text-center">
@@ -81,7 +84,7 @@ export default function SetupTwoFactor() {
                                 width: '100%',
                             }}
                         />
-                        <VerifyTwoFactor callback={enableTwoFactor} back={router.back} buttonText={constants.ENABLE} />
+                        <VerifyTwoFactor onSubmit={onSubmit} back={router.back} buttonText={constants.ENABLE} />
                         <Button variant="link" onClick={router.back}>
                             {constants.GO_BACK}
                         </Button>

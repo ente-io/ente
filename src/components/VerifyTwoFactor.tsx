@@ -12,7 +12,7 @@ interface formValues {
     otp: string;
 }
 interface Props {
-    callback: any
+    onSubmit: any
     back: any
     buttonText: string;
 }
@@ -26,8 +26,7 @@ export default function VerifyTwoFactor(props: Props) {
     ) => {
         try {
             setWaiting(true);
-            await props.callback(otp);
-            router.push('/gallery');
+            await props.onSubmit(otp);
         } catch (e) {
             setFieldError('otp', `${constants.UNKNOWN_ERROR} ${e.message}`);
         }
