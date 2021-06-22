@@ -13,7 +13,7 @@ import {
     logoutUser,
     clearFiles,
     isTokenValid,
-    VerificationResponse,
+    EmailVerificationResponse,
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
@@ -60,7 +60,12 @@ export default function Verify() {
         try {
             setLoading(true);
             const resp = await verifyOtt(email, ott);
-            const { keyAttributes, encryptedToken, token, id } = resp.data as VerificationResponse;
+            const { keyAttributes, encryptedToken, token, id, twoFactorOTT } = resp.data as EmailVerificationResponse;
+            if (twoFactorOTT) {
+                setData(LS_KEYS.USER, { email, twoFactorOTT });
+                router.push('/twoFactor/verify');
+                return;
+            }
             setData(LS_KEYS.USER, {
                 ...getData(LS_KEYS.USER),
                 email,

@@ -28,12 +28,21 @@ export interface User {
     name: string;
     email: string;
 }
-export interface VerificationResponse {
+export interface EmailVerificationResponse {
+    id: number;
+    keyAttributes?: KeyAttributes;
+    encryptedToken?: string;
+    token?: string;
+    twoFactorOTT: boolean
+}
+
+export interface TwoFactorVerificationResponse {
     id: number;
     keyAttributes: KeyAttributes;
     encryptedToken?: string;
     token?: string;
 }
+
 export interface TwoFactorSecret {
     secretCode: string
     qrCode: string
@@ -110,12 +119,17 @@ export const setupTwoFactor = async () => {
     return resp.data as TwoFactorSecret;
 };
 
-export const enableTwoFactor = async (otp) => {
-    console.log(getToken());
-    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/enable`, {
+export const enableTwoFactor = async (otp: string) => {
+    await HTTPService.post(`${ENDPOINT}/users/two-factor/enable`, {
         otp,
     }, null, {
         'X-Auth-Token': getToken(),
     });
-    return resp.data as TwoFactorSecret;
+};
+
+export const verifyTwoFactor = async (email: string, otp: string, ott: string) => {
+    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/verify`, {
+        email, otp, ott,
+    }, null);
+    return resp.data as TwoFactorVerificationResponse;
 };
