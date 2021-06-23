@@ -34,9 +34,9 @@ export default function Verify() {
 
     useEffect(() => {
         const main = async () => {
+            router.prefetch('/twoFactor/verify');
             router.prefetch('/credentials');
             router.prefetch('/generate');
-            router.prefetch('/twoFactor/verify');
             const user = getData(LS_KEYS.USER);
             if (!user?.email) {
                 router.push('/');
@@ -61,9 +61,9 @@ export default function Verify() {
         try {
             setLoading(true);
             const resp = await verifyOtt(email, ott);
-            const { keyAttributes, encryptedToken, token, id, twoFactorOTT } = resp.data as EmailVerificationResponse;
-            if (twoFactorOTT) {
-                setData(LS_KEYS.USER, { email, twoFactorOTT });
+            const { keyAttributes, encryptedToken, token, id, twoFactorSessionID } = resp.data as EmailVerificationResponse;
+            if (twoFactorSessionID) {
+                setData(LS_KEYS.USER, { email, twoFactorSessionID });
                 router.push('/twoFactor/verify');
                 return;
             }

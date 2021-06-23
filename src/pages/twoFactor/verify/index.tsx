@@ -10,7 +10,7 @@ import constants from 'utils/strings/constants';
 
 export default function Home() {
     const [email, setEmail] = useState('');
-    const [ott, setOTT] = useState('');
+    const [sessionID, setSessionID] = useState('');
 
     useEffect(() => {
         const main = async () => {
@@ -20,14 +20,14 @@ export default function Home() {
                 router.push('/');
             } else {
                 setEmail(user.email);
-                setOTT(user.twoFactorOTT);
+                setSessionID(user.twoFactorSessionID);
             }
         };
         main();
     }, []);
 
     const onSubmit = async (otp: string) => {
-        const resp = await verifyTwoFactor(email, otp, ott);
+        const resp = await verifyTwoFactor(otp, sessionID);
         const { keyAttributes, encryptedToken, token, id } = resp;
         setData(LS_KEYS.USER, {
             email,
@@ -35,7 +35,7 @@ export default function Home() {
             encryptedToken,
             id,
         });
-        keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+        setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
         router.push('/credentials');
     };
     return (
@@ -56,7 +56,7 @@ export default function Home() {
                     >
                         <Button
                             variant="link"
-                            onClick={() => router.push('/recover')}
+                            onClick={() => router.push('/twoFactor/recover')}
                         >
                             {constants.LOST_DEVICE}
                         </Button>

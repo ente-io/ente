@@ -10,6 +10,8 @@ import constants from 'utils/strings/constants';
 import Container from 'components/Container';
 import { useRouter } from 'next/router';
 import VerifyTwoFactor from 'components/VerifyTwoFactor';
+import { B64EncryptionResult } from 'services/uploadService';
+import { encryptWithRecoveryKey } from 'utils/crypto';
 
 
 enum SetupMode {
@@ -26,6 +28,7 @@ margin:1rem;
 export default function SetupTwoFactor() {
     const [setupMode, setSetupMode] = useState<SetupMode>(SetupMode.QR_CODE);
     const [twoFactorSecret, setTwoFactorSecret] = useState<TwoFactorSecret>(null);
+    const [recoveryEncryptedTwoFactorSecret, setRecoveryEncryptedTwoFactorSecret] = useState<B64EncryptionResult>(null);
     const router = useRouter();
     useEffect(() => {
         if (twoFactorSecret) {
@@ -33,12 +36,14 @@ export default function SetupTwoFactor() {
         }
         const main = async () => {
             const twoFactorSecret = await setupTwoFactor();
+            const recoveryEncryptedTwoFactorSecret = await encryptWithRecoveryKey(twoFactorSecret.secretCode);
             setTwoFactorSecret(twoFactorSecret);
+            setRecoveryEncryptedTwoFactorSecret(recoveryEncryptedTwoFactorSecret);
         };
         main();
     }, []);
     const onSubmit = async (otp: string) => {
-        await enableTwoFactor(otp);
+        await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
         router.push('/gallery');
     };
     return (
