@@ -408,6 +408,7 @@ const englishConstants = {
     ENABLE: 'enable',
     LOST_DEVICE: 'lost two factor device?',
     INCORRECT_CODE: 'incorrect code',
+    RECOVER_TWO_FACTOR: 'recover two factor',
 
 };
 
