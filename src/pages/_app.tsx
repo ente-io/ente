@@ -46,6 +46,9 @@ const GlobalStyles = createGlobalStyle`
         color: #aaa;
         font-family:Ubuntu, Arial, sans-serif !important;
     }
+    :is(h1, h2, h3, h4, h5, h6) {
+        color: #d7d7d7;
+      }
 
     #__next {
         flex: 1;
