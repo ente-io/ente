@@ -16,6 +16,7 @@ export const CodeBlock = styled.div<{ height: number }>`
     padding-right:20px;
     color: white;
     margin: 20px 0;
+    width:100%;
 `;
 
 export const FreeFlowText = styled.div`
