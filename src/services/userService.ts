@@ -155,3 +155,9 @@ export const removeTwoFactor = async (sessionID: string, secret: string) => {
     });
     return resp.data as TwoFactorVerificationResponse;
 };
+
+export const disableTwoFactor = async () => {
+    await HTTPService.post(`${ENDPOINT}/users/two-factor/disable`, null, null, {
+        'X-Auth-Token': getToken(),
+    });
+};
