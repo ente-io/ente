@@ -30,6 +30,7 @@ export default function Home() {
         const resp = await verifyTwoFactor(otp, sessionID);
         const { keyAttributes, encryptedToken, token, id } = resp;
         setData(LS_KEYS.USER, {
+            ...getData(LS_KEYS.USER),
             email,
             token,
             encryptedToken,
@@ -44,7 +45,7 @@ export default function Home() {
                 <Card.Body style={{ padding: '40px 30px', minHeight: '400px' }}>
                     <Card.Title style={{ marginBottom: '32px' }}>
                         <LogoImg src='/icon.svg' />
-                        {constants.TWO_FACTOR_AUTHENTICATION}
+                        {constants.TWO_FACTOR}
                     </Card.Title>
                     <VerifyTwoFactor onSubmit={onSubmit} back={router.back} buttonText={constants.VERIFY} />
                     <div

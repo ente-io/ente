@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import VerifyTwoFactor from 'components/VerifyTwoFactor';
 import { B64EncryptionResult } from 'services/uploadService';
 import { encryptWithRecoveryKey } from 'utils/crypto';
+import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 
 
 enum SetupMode {
@@ -35,15 +36,20 @@ export default function SetupTwoFactor() {
             return;
         }
         const main = async () => {
-            const twoFactorSecret = await setupTwoFactor();
-            const recoveryEncryptedTwoFactorSecret = await encryptWithRecoveryKey(twoFactorSecret.secretCode);
-            setTwoFactorSecret(twoFactorSecret);
-            setRecoveryEncryptedTwoFactorSecret(recoveryEncryptedTwoFactorSecret);
+            try {
+                const twoFactorSecret = await setupTwoFactor();
+                const recoveryEncryptedTwoFactorSecret = await encryptWithRecoveryKey(twoFactorSecret.secretCode);
+                setTwoFactorSecret(twoFactorSecret);
+                setRecoveryEncryptedTwoFactorSecret(recoveryEncryptedTwoFactorSecret);
+            } catch (e) {
+                router.push('/gallery');
+            }
         };
         main();
     }, []);
     const onSubmit = async (otp: string) => {
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
+        setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), isTwoFactorEnabled: true });
         router.push('/gallery');
     };
     return (
@@ -53,13 +59,13 @@ export default function SetupTwoFactor() {
                     <DeadCenter>
                         <Card.Title style={{ marginBottom: '32px' }}>
                             <LogoImg src='/icon.svg' />
-                            {constants.TWO_FACTOR_AUTHENTICATION}
+                            {constants.TWO_FACTOR}
                         </Card.Title>
                         {setupMode === SetupMode.QR_CODE ? (
                             <>
-                                <p>{constants.TWO_FACTOR_AUTHENTICATION_QR_INSTRUCTION}</p>
+                                <p>{constants.TWO_FACTOR_QR_INSTRUCTION}</p>
                                 <DeadCenter>
-                                    {!twoFactorSecret ? <EnteSpinner /> :
+                                    {!twoFactorSecret ? <div style={{ height: '200px', width: '200px', margin: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '1px solid #aaa' }}><EnteSpinner /></div> :
                                         <QRCode src={`data:image/png;base64,${twoFactorSecret.qrCode}`} />
                                     }
                                     <Button block variant="link" onClick={() => setSetupMode(SetupMode.MANUAL_CODE)}>
@@ -68,7 +74,7 @@ export default function SetupTwoFactor() {
                                 </DeadCenter>
                             </>
                         ) : (<>
-                            <p>{constants.TWO_FACTOR_AUTHENTICATION_MANUAL_CODE_INSTRUCTION}</p>
+                            <p>{constants.TWO_FACTOR_MANUAL_CODE_INSTRUCTION}</p>
                             <CodeBlock height={100}>
                                 {!twoFactorSecret ? <EnteSpinner /> : (
                                     <FreeFlowText>
@@ -96,6 +102,6 @@ export default function SetupTwoFactor() {
                     </DeadCenter>
                 </Card.Body>
             </Card>
-        </Container>
+        </Container >
     );
 }

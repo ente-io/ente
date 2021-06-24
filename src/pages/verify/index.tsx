@@ -63,7 +63,7 @@ export default function Verify() {
             const resp = await verifyOtt(email, ott);
             const { keyAttributes, encryptedToken, token, id, twoFactorSessionID } = resp.data as EmailVerificationResponse;
             if (twoFactorSessionID) {
-                setData(LS_KEYS.USER, { email, twoFactorSessionID });
+                setData(LS_KEYS.USER, { email, twoFactorSessionID, isTwoFactorEnabled: true });
                 router.push('/twoFactor/verify');
                 return;
             }
