@@ -128,8 +128,8 @@ export const setupTwoFactor = async () => {
 export const enableTwoFactor = async (otp: string, recoveryEncryptedTwoFactorSecret: B64EncryptionResult) => {
     await HTTPService.post(`${ENDPOINT}/users/two-factor/enable`, {
         otp,
-        recoveryEncryptedTwoFactorSecret: recoveryEncryptedTwoFactorSecret.encryptedData,
-        recoveryTwoFactorSecretDecryptionNonce: recoveryEncryptedTwoFactorSecret.nonce,
+        encryptedTwoFactorSecret: recoveryEncryptedTwoFactorSecret.encryptedData,
+        twoFactorSecretDecryptionNonce: recoveryEncryptedTwoFactorSecret.nonce,
     }, null, {
         'X-Auth-Token': getToken(),
     });
