@@ -171,7 +171,7 @@ const GlobalStyles = createGlobalStyle`
         background: #2dc262;
         border-color: #29a354;
     }
-    .btn-success:hover ,.btn-success:focus .btn-success:active{
+    .btn-success:hover .btn-success:focus .btn-success:active {
         background-color: #29a354;
         border-color: #2dc262;
     }
@@ -183,8 +183,9 @@ const GlobalStyles = createGlobalStyle`
         border-color: #2dc262;
         border-width: 2px;
     }
-    .btn-outline-success:hover {
+    .btn-outline-success:hover:enabled {
         background: #2dc262;
+        color: white;
     }
     .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
         border-width: 2px;
