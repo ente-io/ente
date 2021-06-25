@@ -49,7 +49,7 @@ export default function VerifyTwoFactor(props: Props) {
                     handleSubmit,
                 }) => (
                     <Form noValidate onSubmit={handleSubmit} style={{ width: '100%' }}>
-                        <Form.Group controlId="formBasicEmail">
+                        <Form.Group style={{ marginBottom: '32px' }} controlId="formBasicEmail">
                             <DeadCenter>
                                 <OtpInput value={values.otp}
                                     onChange={handleChange('otp')}
@@ -59,7 +59,7 @@ export default function VerifyTwoFactor(props: Props) {
                                     className={'otp-input'}
                                 />
                                 {errors.otp &&
-                                    <div style={{ display: 'block' }} className="invalid-feedback">{constants.INCORRECT_CODE}</div>
+                                    <div style={{ display: 'block', marginTop: '16px' }} className="invalid-feedback">{constants.INCORRECT_CODE}</div>
                                 }
                             </DeadCenter>
                         </Form.Group>
@@ -68,7 +68,6 @@ export default function VerifyTwoFactor(props: Props) {
                             loading={waiting}
                             disabled={values.otp.length < 6}
                         />
-                        <br />
                     </Form>
                 )}
             </Formik>

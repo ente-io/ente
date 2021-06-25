@@ -96,7 +96,7 @@ export default function SetupTwoFactor() {
                             }}
                         />
                         <VerifyTwoFactor onSubmit={onSubmit} back={router.back} buttonText={constants.ENABLE} />
-                        <Button variant="link" onClick={router.back}>
+                        <Button style={{ marginTop: '16px' }} variant="link" onClick={router.back}>
                             {constants.GO_BACK}
                         </Button>
                     </DeadCenter>

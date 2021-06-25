@@ -399,7 +399,7 @@ const englishConstants = {
     FILES_TO_BE_UPLOADED: (count: number) => count === 1 ? `1 file received. uploading in a jiffy` : `${count} files received. Uploading in a jiffy`,
     TWO_FACTOR: 'two-factor',
     TWO_FACTOR_AUTHENTICATION: 'two-factor authentication',
-    TWO_FACTOR_QR_INSTRUCTION: 'please scan QR code below with your favorite authenticator app',
+    TWO_FACTOR_QR_INSTRUCTION: 'scan the QR code below with your favorite authenticator app',
     ENTER_CODE_MANUALLY: 'enter the code manually',
     TWO_FACTOR_MANUAL_CODE_INSTRUCTION: 'please enter this code in your favorite authenticator app',
     SCAN_QR_CODE: 'scan QR code instead',
@@ -415,12 +415,7 @@ const englishConstants = {
     UPDATE_TWO_FACTOR: 'update your authenticator device',
     DISABLE: 'disable',
     RECONFIGURE: 'reconfigure',
-    UPDATE_TWO_FACTOR_MESSAGE: () => (
-        <>
-            <p>are you sure you want to update your second factor,</p>
-            <p>continuing forward will void any previously setup two-factor authentication</p>
-        </>
-    ),
+    UPDATE_TWO_FACTOR_MESSAGE: 'continuing forward will void any previously configured authenticators',
     UPDATE: 'update',
 };
 

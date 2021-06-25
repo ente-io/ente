@@ -58,7 +58,7 @@ function TwoFactorModal(props: Props) {
         props.setDialogMessage({
             title: 'update two-factor',
             staticBackdrop: true,
-            content: constants.UPDATE_TWO_FACTOR_MESSAGE(),
+            content: constants.UPDATE_TWO_FACTOR_MESSAGE,
             close: { text: constants.CANCEL },
             proceed: {
                 variant: 'success',
