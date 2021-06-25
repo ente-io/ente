@@ -189,6 +189,12 @@ const GlobalStyles = createGlobalStyle`
     .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
         border-width: 2px;
     }
+    .btn-link-danger {
+        color: #dc3545;
+    }
+    .btn-link-danger:hover {
+        color: #ff495a;
+    }
     .card {
         background-color: #242424;
         color: #d1d1d1;
