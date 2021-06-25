@@ -38,9 +38,9 @@ function TwoFactorModal(props: Props) {
     }, [props.show]);
     const warnTwoFactorDisable = async () => {
         props.setDialogMessage({
-            title: 'disable two factor',
+            title: 'disable two-factor',
             staticBackdrop: true,
-            content: 'are you sure you want to disable your two factor authentication ',
+            content: 'are you sure you want to disable your two-factor authentication ',
             close: { text: constants.CANCEL },
             proceed: {
                 variant: 'danger',
@@ -56,7 +56,7 @@ function TwoFactorModal(props: Props) {
     };
     const warnTwoFactorReconfigure = async () => {
         props.setDialogMessage({
-            title: 'update two factor',
+            title: 'update two-factor',
             staticBackdrop: true,
             content: constants.UPDATE_TWO_FACTOR_MESSAGE(),
             close: { text: constants.CANCEL },
@@ -79,7 +79,7 @@ function TwoFactorModal(props: Props) {
             onHide={props.onHide}
             {...(!isTwoFactorEnabled && { size: 'lg' })}
             attributes={{
-                title: constants.TWO_FACTOR,
+                title: constants.TWO_FACTOR_AUTHENTICATION,
                 staticBackdrop: true,
             }}
 
@@ -96,11 +96,9 @@ function TwoFactorModal(props: Props) {
                             </Row>
                         </> : (
                             <DeadCenter>
-                                <h4><strong>{constants.TWO_FACTOR_NOT_ENABLED}</strong></h4>
-                                <div style={{ height: '10px' }} />
                                 <p>{constants.TWO_FACTOR_INFO}</p>
                                 <div style={{ height: '10px' }} />
-                                <Button variant="outline-success" size="lg" onClick={() => router.push('/twoFactor/setup')}>{constants.ENABLE_TWO_FACTOR}</Button>
+                                <Button variant="outline-success" onClick={() => router.push('/two-factor/setup')}>{constants.ENABLE_TWO_FACTOR}</Button>
                             </DeadCenter>
                         )
                 }

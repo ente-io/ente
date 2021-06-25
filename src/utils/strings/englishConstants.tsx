@@ -397,7 +397,8 @@ const englishConstants = {
     SHOW_ALL: 'show all',
     LOGIN_TO_UPLOAD_FILES: (count: number) => count === 1 ? `1 file received. login to upload` : `${count} files received. login to upload`,
     FILES_TO_BE_UPLOADED: (count: number) => count === 1 ? `1 file received. uploading in a jiffy` : `${count} files received. Uploading in a jiffy`,
-    TWO_FACTOR: 'two-factor authentication',
+    TWO_FACTOR: 'two-factor',
+    TWO_FACTOR_AUTHENTICATION: 'two-factor authentication',
     TWO_FACTOR_QR_INSTRUCTION: 'please scan QR code below with your favorite authenticator app',
     ENTER_CODE_MANUALLY: 'enter the code manually',
     TWO_FACTOR_MANUAL_CODE_INSTRUCTION: 'please enter this code in your favorite authenticator app',
@@ -406,19 +407,18 @@ const englishConstants = {
     BACK: 'back',
     ENABLE_TWO_FACTOR: 'enable two-factor authentication',
     ENABLE: 'enable',
-    LOST_DEVICE: 'lost two factor device?',
+    LOST_DEVICE: 'lost two-factor device?',
     INCORRECT_CODE: 'incorrect code',
-    RECOVER_TWO_FACTOR: 'recover two factor',
-    TWO_FACTOR_NOT_ENABLED: 'Two factor authentication is not enabled yet.',
-    TWO_FACTOR_INFO: 'Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to log in',
-    DISABLE_TWO_FACTOR: 'disable two factor authentication',
+    RECOVER_TWO_FACTOR: 'recover two-factor',
+    TWO_FACTOR_INFO: 'add an additional layer of security by requiring more than your email and password to log in to your account',
+    DISABLE_TWO_FACTOR: 'disable two-factor authentication',
     UPDATE_TWO_FACTOR: 'update your authenticator device',
     DISABLE: 'disable',
     RECONFIGURE: 'reconfigure',
     UPDATE_TWO_FACTOR_MESSAGE: () => (
         <>
-            <p>are you sure you want to update your two factor factor,</p>
-            <p> continuing forward  will void any previously setup two factor authentication device</p>
+            <p>are you sure you want to update your second factor,</p>
+            <p>continuing forward will void any previously setup two-factor authentication</p>
         </>
     ),
     UPDATE: 'update',
