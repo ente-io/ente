@@ -10,6 +10,7 @@ import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/set_recovery_key_request.dart';
+import 'package:photos/ui/login_page.dart';
 import 'package:photos/ui/ott_verification_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
@@ -225,6 +226,23 @@ class UserService {
       } else {
         showErrorDialog(
             context, "oops", "authentication failed, please try again");
+      }
+    } on DioError catch (e) {
+      await dialog.hide();
+      _logger.severe(e);
+      if (e.response != null && e.response.statusCode == 404) {
+        showToast("session expired");
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return LoginPage();
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      } else {
+        showErrorDialog(context, "incorrect code",
+            "authentication failed, please try again");
       }
     } catch (e) {
       await dialog.hide();
