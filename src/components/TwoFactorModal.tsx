@@ -38,9 +38,9 @@ function TwoFactorModal(props: Props) {
     }, [props.show]);
     const warnTwoFactorDisable = async () => {
         props.setDialogMessage({
-            title: 'disable two-factor',
+            title: constants.DISABLE_TWO_FACTOR,
             staticBackdrop: true,
-            content: 'are you sure you want to disable your two-factor authentication ',
+            content: constants.DISABLE_TWO_FACTOR_MESSAGE,
             close: { text: constants.CANCEL },
             proceed: {
                 variant: 'danger',
@@ -56,7 +56,7 @@ function TwoFactorModal(props: Props) {
     };
     const warnTwoFactorReconfigure = async () => {
         props.setDialogMessage({
-            title: 'update two-factor',
+            title: constants.UPDATE_TWO_FACTOR,
             staticBackdrop: true,
             content: constants.UPDATE_TWO_FACTOR_MESSAGE,
             close: { text: constants.CANCEL },
@@ -89,10 +89,10 @@ function TwoFactorModal(props: Props) {
                     isTwoFactorEnabled ?
                         <>
                             <Row>
-                                <Label>{constants.DISABLE_TWO_FACTOR} </Label><Button variant={'outline-danger'} style={{ width: '30%' }} onClick={warnTwoFactorDisable}>{constants.DISABLE}</Button>
+                                <Label>{constants.DISABLE_TWO_FACTOR_HINT} </Label><Button variant={'outline-danger'} style={{ width: '30%' }} onClick={warnTwoFactorDisable}>{constants.DISABLE}</Button>
                             </Row>
                             <Row>
-                                <Label>{constants.UPDATE_TWO_FACTOR}</Label> <Button variant={'outline-success'} style={{ width: '30%' }} onClick={warnTwoFactorReconfigure}>{constants.RECONFIGURE}</Button>
+                                <Label>{constants.UPDATE_TWO_FACTOR_HINT}</Label> <Button variant={'outline-success'} style={{ width: '30%' }} onClick={warnTwoFactorReconfigure}>{constants.RECONFIGURE}</Button>
                             </Row>
                         </> : (
                             <DeadCenter>

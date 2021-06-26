@@ -411,12 +411,16 @@ const englishConstants = {
     INCORRECT_CODE: 'incorrect code',
     RECOVER_TWO_FACTOR: 'recover two-factor',
     TWO_FACTOR_INFO: 'add an additional layer of security by requiring more than your email and password to log in to your account',
-    DISABLE_TWO_FACTOR: 'disable two-factor authentication',
-    UPDATE_TWO_FACTOR: 'update your authenticator device',
+    DISABLE_TWO_FACTOR_HINT: 'disable two-factor authentication',
+    UPDATE_TWO_FACTOR_HINT: 'update your authenticator device',
     DISABLE: 'disable',
     RECONFIGURE: 'reconfigure',
+    UPDATE_TWO_FACTOR: 'update two-factor',
     UPDATE_TWO_FACTOR_MESSAGE: 'continuing forward will void any previously configured authenticators',
     UPDATE: 'update',
+    DISABLE_TWO_FACTOR: 'disable two-factor',
+    DISABLE_TWO_FACTOR_MESSAGE: 'are you sure you want to disable your two-factor authentication',
+
 };
 
 export default englishConstants;
