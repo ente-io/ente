@@ -13,6 +13,7 @@ import 'package:photos/models/set_recovery_key_request.dart';
 import 'package:photos/ui/ott_verification_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
+import 'package:photos/ui/two_factor_authentication_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -92,13 +93,18 @@ class UserService {
       );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
-        await _saveConfiguration(response);
         showToast("email verification successful!");
         var page;
-        if (Configuration.instance.getEncryptedToken() != null) {
-          page = PasswordReentryPage();
+        final String twoFASessionID = response.data["twoFactorSessionID"];
+        if (twoFASessionID != null && twoFASessionID.isNotEmpty) {
+          page = TwoFactorAuthenticationPage(twoFASessionID);
         } else {
-          page = PasswordEntryPage();
+          await _saveConfiguration(response);
+          if (Configuration.instance.getEncryptedToken() != null) {
+            page = PasswordReentryPage();
+          } else {
+            page = PasswordEntryPage();
+          }
         }
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -189,6 +195,42 @@ class UserService {
     } catch (e) {
       _logger.severe(e);
       throw e;
+    }
+  }
+
+  Future<void> verifyTwoFactor(
+      BuildContext context, String sessionID, String code) async {
+    final dialog = createProgressDialog(context, "authenticating...");
+    await dialog.show();
+    try {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/two-factor/verify",
+        data: {
+          "sessionID": sessionID,
+          "code": code,
+        },
+      );
+      await dialog.hide();
+      if (response != null && response.statusCode == 200) {
+        showToast("authentication successful!");
+        await _saveConfiguration(response);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return PasswordReentryPage();
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      } else {
+        showErrorDialog(
+            context, "oops", "authentication failed, please try again");
+      }
+    } catch (e) {
+      await dialog.hide();
+      _logger.severe(e);
+      showErrorDialog(
+          context, "oops", "authentication failed, please try again");
     }
   }
 
