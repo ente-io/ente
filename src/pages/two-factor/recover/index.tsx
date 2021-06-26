@@ -50,6 +50,7 @@ export default function Recover() {
                 token,
                 encryptedToken,
                 id,
+                isTwoFactorEnabled: false,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
             router.push('/credentials');
