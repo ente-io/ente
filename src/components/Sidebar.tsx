@@ -236,7 +236,7 @@ export default function Sidebar(props: Props) {
                     style={{ marginTop: '30px' }}
                     onClick={() => {
                         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-                        router.push('changePassword');
+                        router.push('change-password');
                     }}
                 >
                     {constants.CHANGE_PASSWORD}
