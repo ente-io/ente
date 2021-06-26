@@ -42,7 +42,7 @@ dependencies:
   archive: ^3.1.2
   flutter_email_sender: ^5.0.0
   like_button: ^2.0.2
-  logging: ^0.11.4
+  logging: ^1.0.1
   flutter_image_compress:
     path: thirdparty/flutter_image_compress
   flutter_typeahead: ^1.8.1
