@@ -64,7 +64,7 @@ export default function Verify() {
             const { keyAttributes, encryptedToken, token, id, twoFactorSessionID } = resp.data as EmailVerificationResponse;
             if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, { email, twoFactorSessionID, isTwoFactorEnabled: true });
-                router.push('/twoFactor/verify');
+                router.push('/two-factor/verify');
                 return;
             }
             setData(LS_KEYS.USER, {

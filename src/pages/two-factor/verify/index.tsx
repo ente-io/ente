@@ -57,7 +57,7 @@ export default function Home() {
                     >
                         <Button
                             variant="link"
-                            onClick={() => router.push('/twoFactor/recover')}
+                            onClick={() => router.push('/two-factor/recover')}
                         >
                             {constants.LOST_DEVICE}
                         </Button>

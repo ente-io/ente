@@ -328,7 +328,7 @@ const GlobalStyles = createGlobalStyle`
         background-color: #2dc262;
     }
     div.otp-input input {
-        width: 2em !important;
+        width: 2.4em !important;
         height: 3em;
         margin: 0 10px;
     }

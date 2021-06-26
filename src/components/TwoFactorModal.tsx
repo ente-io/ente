@@ -70,7 +70,7 @@ function TwoFactorModal(props: Props) {
     const reconfigureTwoFactor = async () => {
         props.setLoading(true);
         await twoFactorDisable();
-        router.push('/twoFactor/setup');
+        router.push('/two-factor/setup');
         props.setLoading(false);
     };
     return (
@@ -98,7 +98,7 @@ function TwoFactorModal(props: Props) {
                             <DeadCenter>
                                 <p>{constants.TWO_FACTOR_INFO}</p>
                                 <div style={{ height: '10px' }} />
-                                <Button variant="outline-success" onClick={() => router.push('/twoFactor/setup')}>{constants.ENABLE_TWO_FACTOR}</Button>
+                                <Button variant="outline-success" onClick={() => router.push('/two-factor/setup')}>{constants.ENABLE_TWO_FACTOR}</Button>
                             </DeadCenter>
                         )
                 }
