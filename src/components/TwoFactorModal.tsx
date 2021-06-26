@@ -68,10 +68,7 @@ function TwoFactorModal(props: Props) {
         });
     };
     const reconfigureTwoFactor = async () => {
-        props.setLoading(true);
-        await twoFactorDisable();
         router.push('/two-factor/setup');
-        props.setLoading(false);
     };
     return (
         <MessageDialog
