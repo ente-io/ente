@@ -27,17 +27,25 @@ export default function Home() {
     }, []);
 
     const onSubmit = async (otp: string) => {
-        const resp = await verifyTwoFactor(otp, sessionID);
-        const { keyAttributes, encryptedToken, token, id } = resp;
-        setData(LS_KEYS.USER, {
-            ...getData(LS_KEYS.USER),
-            email,
-            token,
-            encryptedToken,
-            id,
-        });
-        setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-        router.push('/credentials');
+        try {
+            const resp = await verifyTwoFactor(otp, sessionID);
+            const { keyAttributes, encryptedToken, token, id } = resp;
+            setData(LS_KEYS.USER, {
+                ...getData(LS_KEYS.USER),
+                email,
+                token,
+                encryptedToken,
+                id,
+            });
+            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+            router.push('/credentials');
+        } catch (e) {
+            if (e.status === 404) {
+                logoutUser();
+            } else {
+                throw e;
+            }
+        }
     };
     return (
         <Container>

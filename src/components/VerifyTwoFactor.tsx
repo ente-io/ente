@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Formik, FormikHelpers } from 'formik';
-import router from 'next/router';
 import { DeadCenter } from 'pages/gallery';
 import React, { useRef, useState } from 'react';
-import { Form, FormControl } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 import OtpInput from 'react-otp-input';
 import constants from 'utils/strings/constants';
 import SubmitButton from './SubmitButton';
@@ -64,6 +63,7 @@ export default function VerifyTwoFactor(props: Props) {
                             <DeadCenter>
                                 <OtpInput
                                     ref={otpInputRef}
+                                    shouldAutoFocus
                                     value={values.otp}
                                     onChange={(otp) => {
                                         onChange(otp, handleChange('otp'), submitForm);
