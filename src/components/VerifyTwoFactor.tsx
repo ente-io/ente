@@ -2,7 +2,7 @@
 import { Formik, FormikHelpers } from 'formik';
 import router from 'next/router';
 import { DeadCenter } from 'pages/gallery';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Form, FormControl } from 'react-bootstrap';
 import OtpInput from 'react-otp-input';
 import constants from 'utils/strings/constants';
@@ -19,7 +19,7 @@ interface Props {
 
 export default function VerifyTwoFactor(props: Props) {
     const [waiting, setWaiting] = useState(false);
-
+    const otpInputRef = useRef(null);
     const submitForm = async (
         { otp }: formValues,
         { setFieldError, resetForm }: FormikHelpers<formValues>,
@@ -29,9 +29,19 @@ export default function VerifyTwoFactor(props: Props) {
             await props.onSubmit(otp);
         } catch (e) {
             resetForm();
+            for (let i = 0; i < 6; i++) {
+                otpInputRef.current?.focusPrevInput();
+            }
             setFieldError('otp', `${constants.UNKNOWN_ERROR} ${e.message}`);
         }
         setWaiting(false);
+    };
+
+    const onChange = (otp: string, callback: Function, triggerSubmit: Function) => {
+        callback(otp);
+        if (otp.length === 6) {
+            triggerSubmit(otp);
+        }
     };
     return (
         <>
@@ -47,12 +57,17 @@ export default function VerifyTwoFactor(props: Props) {
                     errors,
                     handleChange,
                     handleSubmit,
+                    submitForm,
                 }) => (
                     <Form noValidate onSubmit={handleSubmit} style={{ width: '100%' }}>
                         <Form.Group style={{ marginBottom: '32px' }} controlId="formBasicEmail">
                             <DeadCenter>
-                                <OtpInput value={values.otp}
-                                    onChange={handleChange('otp')}
+                                <OtpInput
+                                    ref={otpInputRef}
+                                    value={values.otp}
+                                    onChange={(otp) => {
+                                        onChange(otp, handleChange('otp'), submitForm);
+                                    }}
                                     numInputs={6}
                                     separator={'-'}
                                     isInputNum
