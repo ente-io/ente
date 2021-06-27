@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
@@ -15,6 +16,8 @@ import 'package:photos/ui/ott_verification_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
 import 'package:photos/ui/two_factor_authentication_page.dart';
+import 'package:photos/ui/two_factor_recovery_page.dart';
+import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -223,9 +226,6 @@ class UserService {
           ),
           (route) => route.isFirst,
         );
-      } else {
-        showErrorDialog(
-            context, "oops", "authentication failed, please try again");
       }
     } on DioError catch (e) {
       await dialog.hide();
@@ -249,6 +249,120 @@ class UserService {
       _logger.severe(e);
       showErrorDialog(
           context, "oops", "authentication failed, please try again");
+    }
+  }
+
+  Future<void> recoverTwoFactor(BuildContext context, String sessionID) async {
+    final dialog = createProgressDialog(context, "please wait...");
+    await dialog.show();
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/two-factor/recover",
+        queryParameters: {
+          "sessionID": sessionID,
+        },
+      );
+      if (response != null && response.statusCode == 200) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return TwoFactorRecoveryPage(
+                  sessionID,
+                  response.data["encryptedSecret"],
+                  response.data["secretDecryptionNonce"]);
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      }
+    } on DioError catch (e) {
+      _logger.severe(e);
+      if (e.response != null && e.response.statusCode == 404) {
+        showToast("session expired");
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return LoginPage();
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      } else {
+        showErrorDialog(
+            context, "oops", "something went wrong, please try again");
+      }
+    } catch (e) {
+      _logger.severe(e);
+      showErrorDialog(
+          context, "oops", "something went wrong, please try again");
+    } finally {
+      await dialog.hide();
+    }
+  }
+
+  Future<void> removeTwoFactor(
+    BuildContext context,
+    String sessionID,
+    String recoveryKey,
+    String encryptedSecret,
+    String secretDecryptionNonce,
+  ) async {
+    final dialog = createProgressDialog(context, "please wait...");
+    await dialog.show();
+    String secret;
+    try {
+      secret = Sodium.bin2base64(await CryptoUtil.decrypt(
+          Sodium.base642bin(encryptedSecret),
+          Sodium.hex2bin(recoveryKey.trim()),
+          Sodium.base642bin(secretDecryptionNonce)));
+    } catch (e) {
+      await dialog.hide();
+      showErrorDialog(context, "incorrect recovery key",
+          "the recovery key you entered is incorrect");
+      return;
+    }
+    try {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/two-factor/remove",
+        data: {
+          "sessionID": sessionID,
+          "secret": secret,
+        },
+      );
+      if (response != null && response.statusCode == 200) {
+        showToast("two-factor authentication successfully reset");
+        await _saveConfiguration(response);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return PasswordReentryPage();
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      }
+    } on DioError catch (e) {
+      _logger.severe(e);
+      if (e.response != null && e.response.statusCode == 404) {
+        showToast("session expired");
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return LoginPage();
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      } else {
+        showErrorDialog(
+            context, "oops", "something went wrong, please try again");
+      }
+    } catch (e) {
+      _logger.severe(e);
+      showErrorDialog(
+          context, "oops", "something went wrong, please try again");
+    } finally {
+      await dialog.hide();
     }
   }
 

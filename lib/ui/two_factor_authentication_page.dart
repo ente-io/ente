@@ -103,13 +103,7 @@ class _TwoFactorAuthenticationPageState
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return TwoFactorRecoveryPage();
-                },
-              ),
-            );
+            UserService.instance.recoverTwoFactor(context, widget.sessionID);
           },
           child: Container(
             padding: EdgeInsets.all(10),
