@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/backup_folder_selection_widget.dart';
+import 'package:photos/ui/free_space_page.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class BackupSectionWidget extends StatefulWidget {
   BackupSectionWidget({Key key}) : super(key: key);
@@ -63,6 +65,23 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
                   },
                 ),
               ],
+            ),
+          ),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(4)),
+          Divider(height: 4),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(2)),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () async {
+              routeToPage(context, FreeSpacePage());
+            },
+            child: SettingsTextItem(
+              text: "free up space",
+              icon: Icons.navigate_next,
             ),
           ),
         ],
