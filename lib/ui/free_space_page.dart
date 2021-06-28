@@ -118,7 +118,8 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                 Padding(padding: EdgeInsets.all(10)),
                 Expanded(
                   child: Text(
-                    "they can be deleted from this device to free up space",
+                    (count == 1 ? "it" : "they") +
+                        " can be deleted from this device to free up space",
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.3,
@@ -141,7 +142,9 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                 Padding(padding: EdgeInsets.all(10)),
                 Expanded(
                   child: Text(
-                    "you can still access them on ente as long as you have an active subscription",
+                    "you can still access " +
+                        (count == 1 ? "it" : "them") +
+                        " on ente as long as you have an active subscription",
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.3,
