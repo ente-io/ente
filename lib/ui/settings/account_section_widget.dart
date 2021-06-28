@@ -54,7 +54,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
               : Padding(padding: EdgeInsets.all(2)),
           Divider(height: 4),
           Platform.isIOS
-              ? Padding(padding: EdgeInsets.all(2))
+              ? Padding(padding: EdgeInsets.all(8))
               : Padding(padding: EdgeInsets.all(8)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
