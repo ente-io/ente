@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -13,6 +14,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/ui/linear_progress_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -138,36 +140,13 @@ Future<void> deleteFilesOnDeviceOnly(
   await dialog.hide();
 }
 
-Future<void> deleteLocalFiles(List<String> localIDs) async {
+Future<void> deleteLocalFiles(
+    BuildContext context, List<String> localIDs) async {
   List<String> deletedIDs = [];
   if (Platform.isAndroid) {
-    const batchSize = 100;
-    for (int index = 0; index < localIDs.length; index += batchSize) {
-      final ids = localIDs
-          .getRange(index, min(localIDs.length, index + batchSize))
-          .toList();
-      _logger.info("Trying to delete " + ids.toString());
-      try {
-        deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(ids));
-        _logger.info("Deleted " + ids.toString());
-      } catch (e, s) {
-        _logger.severe("Could not delete batch " + ids.toString(), e, s);
-        for (final id in ids) {
-          try {
-            deletedIDs.addAll(await PhotoManager.editor.deleteWithIds([id]));
-            _logger.info("Deleted " + id);
-          } catch (e, s) {
-            _logger.severe("Could not delete file " + id, e, s);
-          }
-        }
-      }
-    }
+    await _deleteLocalFilesOnAndroid(context, localIDs, deletedIDs);
   } else {
-    try {
-      deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(localIDs));
-    } catch (e, s) {
-      _logger.severe("Could not delete files ", e, s);
-    }
+    await _deleteLocalFilesOnIOS(context, localIDs, deletedIDs);
   }
   if (deletedIDs.isNotEmpty) {
     final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
@@ -176,4 +155,59 @@ Future<void> deleteLocalFiles(List<String> localIDs) async {
     Bus.instance
         .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
   }
+}
+
+Future<void> _deleteLocalFilesOnIOS(BuildContext context, List<String> localIDs,
+    List<String> deletedIDs) async {
+  final dialog = createProgressDialog(
+      context, "deleting " + localIDs.length.toString() + " files...");
+  await dialog.show();
+  try {
+    deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(localIDs));
+  } catch (e, s) {
+    _logger.severe("Could not delete files ", e, s);
+  }
+  await dialog.hide();
+}
+
+Future<void> _deleteLocalFilesOnAndroid(BuildContext context,
+    List<String> localIDs, List<String> deletedIDs) async {
+  final dialogKey = GlobalKey<LinearProgressDialogState>();
+  final dialog = LinearProgressDialog(
+    "deleting " + localIDs.length.toString() + " files...",
+    key: dialogKey,
+  );
+  showDialog(
+    context: context,
+    builder: (context) {
+      return dialog;
+    },
+  );
+
+  const batchSize = 100;
+  for (int index = 0; index < localIDs.length; index += batchSize) {
+    if (dialogKey.currentState != null) {
+      dialogKey.currentState.setProgress(index / localIDs.length);
+    }
+    final ids = localIDs
+        .getRange(index, min(localIDs.length, index + batchSize))
+        .toList();
+    _logger.info("Trying to delete " + ids.toString());
+    try {
+      deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(ids));
+      _logger.info("Deleted " + ids.toString());
+    } catch (e, s) {
+      _logger.severe("Could not delete batch " + ids.toString(), e, s);
+      for (final id in ids) {
+        try {
+          deletedIDs.addAll(await PhotoManager.editor.deleteWithIds([id]));
+          _logger.info("Deleted " + id);
+        } catch (e, s) {
+          _logger.severe("Could not delete file " + id, e, s);
+        }
+      }
+    }
+  }
+
+  Navigator.of(dialogKey.currentContext, rootNavigator: true).pop('dialog');
 }

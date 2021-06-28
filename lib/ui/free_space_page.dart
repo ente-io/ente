@@ -139,7 +139,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
           Container(
             width: double.infinity,
             height: 64,
-            padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
+            padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
             child: button(
               "free up " + formatBytes(status.size),
               onPressed: () async {
@@ -154,14 +154,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
   }
 
   Future<void> _freeStorage(BackupStatus status) async {
-    final dialog = createProgressDialog(
-        context,
-        "deleting " +
-            status.localIDs.length.toString() +
-            " backed up files...");
-    await dialog.show();
-    await deleteLocalFiles(status.localIDs);
-    await dialog.hide();
+    await deleteLocalFiles(context, status.localIDs);
     Navigator.of(context).pop(true);
   }
 }
