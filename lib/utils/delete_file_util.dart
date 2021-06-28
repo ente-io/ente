@@ -154,10 +154,6 @@ Future<bool> deleteLocalFiles(
     _logger.info(deletedFiles.length.toString() + " files deleted locally");
     Bus.instance
         .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
-    if (Platform.isIOS) {
-      showToast(
-          "also empty \"Recently Deleted\" from Settings to claim the freed up space");
-    }
     return true;
   } else {
     showToast("could not free up space");
