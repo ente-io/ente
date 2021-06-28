@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'dart:math';
+
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +14,7 @@ import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FreeSpacePage extends StatefulWidget {
   FreeSpacePage({Key key}) : super(key: key);
@@ -20,6 +25,8 @@ class FreeSpacePage extends StatefulWidget {
 
 class _FreeSpacePageState extends State<FreeSpacePage> {
   Future<BackupStatus> _future;
+  final _confettiController =
+      ConfettiController(duration: const Duration(seconds: 1));
 
   @override
   void initState() {
@@ -45,7 +52,20 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
         ),
       ),
       body: Container(
-        child: _getBody(),
+        child: Stack(children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: pi / 2,
+              emissionFrequency: 0,
+              numberOfParticles: 10, // a lot of particles at once
+              gravity: 1,
+              blastDirectionality: BlastDirectionality.explosive,
+            ),
+          ),
+          _getBody(),
+        ]),
       ),
     );
   }
@@ -96,12 +116,13 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                   child: Text(
                     count == 1
                         ? formattedCount.toString() +
-                            " file has been backed up safely in their original quality"
+                            " file on this device has been backed up safely"
                         : formattedCount.toString() +
-                            " files have been backed up safely in their original quality",
+                            " files on this device have been backed up safely",
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       height: 1.3,
+                      color: Colors.white.withOpacity(0.8),
                     ),
                   ),
                 ),
@@ -120,10 +141,11 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                 Padding(padding: EdgeInsets.all(10)),
                 Expanded(
                   child: Text(
-                    "they can be deleted to free up space on this device",
+                    "they can be deleted from this device to free up space",
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       height: 1.3,
+                      color: Colors.white.withOpacity(0.8),
                     ),
                   ),
                 ),
@@ -144,8 +166,9 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                   child: Text(
                     "you can still access them on ente as long as you have an active subscription",
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       height: 1.3,
+                      color: Colors.white.withOpacity(0.8),
                     ),
                   ),
                 ),
@@ -165,16 +188,104 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                 await dialog.show();
                 deleteLocalFiles(status.localIDs);
                 await dialog.hide();
+                // Navigator.of(context).pop();
+                // _confettiController.play();
+                AlertDialog alert = AlertDialog(
+                  title: Text("success"),
+                  content: Text("you have successfully freed up " +
+                      convertBytesToReadableFormat(status.size) +
+                      "!"),
+                  actions: [
+                    TextButton(
+                      child: Text(
+                        "rate us",
+                        style: TextStyle(
+                          color: Theme.of(context).buttonColor,
+                        ),
+                      ),
+                      onPressed: () {
+                        if (Platform.isAndroid) {
+                          launch(
+                              "https://play.google.com/store/apps/details?id=io.ente.photos");
+                        } else {
+                          launch(
+                              "https://apps.apple.com/in/app/ente-photos/id1542026904");
+                        }
+                      },
+                    ),
+                    TextButton(
+                      child: Text(
+                        "ok",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
                 Navigator.of(context).pop();
-                showToast("you have successfully freed up " +
-                    convertBytesToReadableFormat(status.size) +
-                    "!");
+                showConfettiDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return alert;
+                  },
+                  barrierColor: Colors.black87,
+                  confettiAlignment: Alignment.topCenter,
+                  useRootNavigator: false,
+                );
               },
               fontSize: 18,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Future<T> showConfettiDialog<T>({
+    @required BuildContext context,
+    WidgetBuilder builder,
+    bool barrierDismissible = true,
+    Color barrierColor,
+    bool useSafeArea = true,
+    bool useRootNavigator = true,
+    RouteSettings routeSettings,
+    Alignment confettiAlignment = Alignment.center,
+  }) {
+    final pageBuilder = Builder(
+      builder: builder,
+    );
+    ConfettiController _confettiController =
+        ConfettiController(duration: const Duration(seconds: 1));
+    _confettiController.play();
+    return showDialog(
+      context: context,
+      builder: (BuildContext buildContext) {
+        return Stack(
+          children: [
+            pageBuilder,
+            Align(
+              alignment: confettiAlignment,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: pi / 2,
+                emissionFrequency: 0,
+                numberOfParticles: 100, // a lot of particles at once
+                gravity: 1,
+                blastDirectionality: BlastDirectionality.explosive,
+              ),
+            ),
+          ],
+        );
+      },
+      barrierDismissible: barrierDismissible,
+      barrierColor: barrierColor,
+      useSafeArea: useSafeArea,
+      useRootNavigator: useRootNavigator,
+      routeSettings: routeSettings,
     );
   }
 }
