@@ -1,7 +1,3 @@
-import 'dart:io';
-import 'dart:math';
-
-import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +9,6 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class FreeSpacePage extends StatefulWidget {
   FreeSpacePage({Key key}) : super(key: key);
@@ -165,60 +160,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             child: button(
               "free up " + formatBytes(status.size),
               onPressed: () async {
-                final dialog = createProgressDialog(
-                    context,
-                    "deleting " +
-                        status.localIDs.length.toString() +
-                        " backed up files...");
-                await dialog.show();
-                await deleteLocalFiles(status.localIDs);
-                await dialog.hide();
-                AlertDialog alert = AlertDialog(
-                  title: Text("success"),
-                  content: Text("you have successfully freed up " +
-                      formatBytes(status.size) +
-                      "!"),
-                  actions: [
-                    TextButton(
-                      child: Text(
-                        "rate us",
-                        style: TextStyle(
-                          color: Theme.of(context).buttonColor,
-                        ),
-                      ),
-                      onPressed: () {
-                        if (Platform.isAndroid) {
-                          launch(
-                              "https://play.google.com/store/apps/details?id=io.ente.photos");
-                        } else {
-                          launch(
-                              "https://apps.apple.com/in/app/ente-photos/id1542026904");
-                        }
-                      },
-                    ),
-                    TextButton(
-                      child: Text(
-                        "ok",
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                );
-                Navigator.of(context).pop();
-                showConfettiDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return alert;
-                  },
-                  barrierColor: Colors.black87,
-                  confettiAlignment: Alignment.topCenter,
-                  useRootNavigator: false,
-                );
+                await _freeStorage(status);
               },
               fontSize: 18,
             ),
@@ -228,47 +170,15 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     );
   }
 
-  Future<T> showConfettiDialog<T>({
-    @required BuildContext context,
-    WidgetBuilder builder,
-    bool barrierDismissible = true,
-    Color barrierColor,
-    bool useSafeArea = true,
-    bool useRootNavigator = true,
-    RouteSettings routeSettings,
-    Alignment confettiAlignment = Alignment.center,
-  }) {
-    final pageBuilder = Builder(
-      builder: builder,
-    );
-    ConfettiController _confettiController =
-        ConfettiController(duration: const Duration(seconds: 1));
-    _confettiController.play();
-    return showDialog(
-      context: context,
-      builder: (BuildContext buildContext) {
-        return Stack(
-          children: [
-            pageBuilder,
-            Align(
-              alignment: confettiAlignment,
-              child: ConfettiWidget(
-                confettiController: _confettiController,
-                blastDirection: pi / 2,
-                emissionFrequency: 0,
-                numberOfParticles: 100, // a lot of particles at once
-                gravity: 1,
-                blastDirectionality: BlastDirectionality.explosive,
-              ),
-            ),
-          ],
-        );
-      },
-      barrierDismissible: barrierDismissible,
-      barrierColor: barrierColor,
-      useSafeArea: useSafeArea,
-      useRootNavigator: useRootNavigator,
-      routeSettings: routeSettings,
-    );
+  Future<void> _freeStorage(BackupStatus status) async {
+    final dialog = createProgressDialog(
+        context,
+        "deleting " +
+            status.localIDs.length.toString() +
+            " backed up files...");
+    await dialog.show();
+    await deleteLocalFiles(status.localIDs);
+    await dialog.hide();
+    Navigator.of(context).pop(status);
   }
 }

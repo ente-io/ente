@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-void routeToPage(BuildContext context, Widget page) {
-  Navigator.of(context).push(
+Future<T> routeToPage<T extends Object>(BuildContext context, Widget page) {
+  return Navigator.of(context).push(
     _buildPageRoute(page),
   );
 }
@@ -12,7 +12,7 @@ void replacePage(BuildContext context, Widget page) {
   );
 }
 
-PageRouteBuilder<dynamic> _buildPageRoute(Widget page) {
+PageRouteBuilder<T> _buildPageRoute<T extends Object>(Widget page) {
   return PageRouteBuilder(
     pageBuilder: (BuildContext context, Animation<double> animation,
         Animation<double> secondaryAnimation) {
