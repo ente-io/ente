@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
@@ -227,6 +228,7 @@ class EnteApp extends StatelessWidget with WidgetsBindingObserver {
       theme: themeData,
       home: _homeWidget,
       debugShowCheckedModeBanner: false,
+      builder: EasyLoading.init(),
     );
   }
 
