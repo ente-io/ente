@@ -163,19 +163,20 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             height: 64,
             padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
             child: button(
-              "free up " + convertBytesToReadableFormat(status.size),
+              "free up " + formatBytes(status.size),
               onPressed: () async {
-                final dialog =
-                    createProgressDialog(context, "freeing up space...");
+                final dialog = createProgressDialog(
+                    context,
+                    "deleting " +
+                        status.localIDs.length.toString() +
+                        " backed up files...");
                 await dialog.show();
-                deleteLocalFiles(status.localIDs);
+                await deleteLocalFiles(status.localIDs);
                 await dialog.hide();
-                // Navigator.of(context).pop();
-                // _confettiController.play();
                 AlertDialog alert = AlertDialog(
                   title: Text("success"),
                   content: Text("you have successfully freed up " +
-                      convertBytesToReadableFormat(status.size) +
+                      formatBytes(status.size) +
                       "!"),
                   actions: [
                     TextButton(

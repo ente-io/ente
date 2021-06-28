@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -138,10 +140,34 @@ Future<void> deleteFilesOnDeviceOnly(
 
 Future<void> deleteLocalFiles(List<String> localIDs) async {
   List<String> deletedIDs = [];
-  try {
-    deletedIDs = await PhotoManager.editor.deleteWithIds(localIDs);
-  } catch (e, s) {
-    _logger.severe("Could not delete files", e, s);
+  if (Platform.isAndroid) {
+    const batchSize = 100;
+    for (int index = 0; index < localIDs.length; index += batchSize) {
+      final ids = localIDs
+          .getRange(index, min(localIDs.length, index + batchSize))
+          .toList();
+      _logger.info("Trying to delete " + ids.toString());
+      try {
+        deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(ids));
+        _logger.info("Deleted " + ids.toString());
+      } catch (e, s) {
+        _logger.severe("Could not delete batch " + ids.toString(), e, s);
+        for (final id in ids) {
+          try {
+            deletedIDs.addAll(await PhotoManager.editor.deleteWithIds([id]));
+            _logger.info("Deleted " + id);
+          } catch (e, s) {
+            _logger.severe("Could not delete file " + id, e, s);
+          }
+        }
+      }
+    }
+  } else {
+    try {
+      deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(localIDs));
+    } catch (e, s) {
+      _logger.severe("Could not delete files ", e, s);
+    }
   }
   if (deletedIDs.isNotEmpty) {
     final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
