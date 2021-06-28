@@ -213,6 +213,21 @@ class FilesDB {
     return ids;
   }
 
+  Future<Set<String>> getUploadedLocalIDs() async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      columns: [columnLocalID],
+      where:
+          '$columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
+    );
+    final ids = Set<String>();
+    for (final result in results) {
+      ids.add(result[columnLocalID]);
+    }
+    return ids;
+  }
+
   Future<List<File>> getAllFiles(int startTime, int endTime,
       {int limit, bool asc}) async {
     final db = await instance.database;

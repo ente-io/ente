@@ -7,6 +7,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import 'package:photos/models/backed_up_files.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/file_sync_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -171,6 +172,16 @@ class LocalSyncService {
 
   bool hasCompletedFirstImport() {
     return _prefs.getBool(kHasCompletedFirstImportKey) ?? false;
+  }
+
+  Future<BackedUpFiles> getBackupStatus() async {
+    final localIDs = await FilesDB.instance.getUploadedLocalIDs();
+    int space = 0;
+    for (final id in localIDs) {
+      final asset = await AssetEntity.fromId(id);
+      space += (await asset.originFile).lengthSync();
+    }
+    return BackedUpFiles(localIDs, space);
   }
 
   Future<void> _loadAndStorePhotos(
