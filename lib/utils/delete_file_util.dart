@@ -159,8 +159,8 @@ Future<void> deleteLocalFiles(
 
 Future<void> _deleteLocalFilesOnIOS(BuildContext context, List<String> localIDs,
     List<String> deletedIDs) async {
-  final dialog = createProgressDialog(
-      context, "deleting " + localIDs.length.toString() + " files...");
+  final dialog = createProgressDialog(context,
+      "deleting " + localIDs.length.toString() + " backed up files...");
   await dialog.show();
   try {
     deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(localIDs));
@@ -174,7 +174,7 @@ Future<void> _deleteLocalFilesOnAndroid(BuildContext context,
     List<String> localIDs, List<String> deletedIDs) async {
   final dialogKey = GlobalKey<LinearProgressDialogState>();
   final dialog = LinearProgressDialog(
-    "deleting " + localIDs.length.toString() + " files...",
+    "deleting " + localIDs.length.toString() + " backed up files...",
     key: dialogKey,
   );
   showDialog(
@@ -183,8 +183,12 @@ Future<void> _deleteLocalFilesOnAndroid(BuildContext context,
       return dialog;
     },
   );
-
-  const batchSize = 100;
+  const minimumParts = 10;
+  const minimumBatchSize = 1;
+  const maximumBatchSize = 100;
+  final batchSize = min(
+      max(minimumBatchSize, (localIDs.length / minimumParts).round()),
+      maximumBatchSize);
   for (int index = 0; index < localIDs.length; index += batchSize) {
     if (dialogKey.currentState != null) {
       dialogKey.currentState.setProgress(index / localIDs.length);
