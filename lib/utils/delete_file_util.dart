@@ -140,13 +140,13 @@ Future<void> deleteFilesOnDeviceOnly(
   await dialog.hide();
 }
 
-Future<void> deleteLocalFiles(
+Future<bool> deleteLocalFiles(
     BuildContext context, List<String> localIDs) async {
-  List<String> deletedIDs = [];
+  final List<String> deletedIDs = [];
   if (Platform.isAndroid) {
-    await _deleteLocalFilesOnAndroid(context, localIDs, deletedIDs);
+    deletedIDs.addAll(await _deleteLocalFilesOnAndroid(context, localIDs));
   } else {
-    await _deleteLocalFilesOnIOS(context, localIDs, deletedIDs);
+    deletedIDs.addAll(await _deleteLocalFilesOnIOS(context, localIDs));
   }
   if (deletedIDs.isNotEmpty) {
     final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
@@ -154,11 +154,14 @@ Future<void> deleteLocalFiles(
     _logger.info(deletedFiles.length.toString() + " files deleted locally");
     Bus.instance
         .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
+        return true;
+  } else {
+    return false;
   }
 }
 
-Future<void> _deleteLocalFilesOnIOS(BuildContext context, List<String> localIDs,
-    List<String> deletedIDs) async {
+Future<List<String>> _deleteLocalFilesOnIOS(BuildContext context, List<String> localIDs) async {
+  final List<String> deletedIDs = [];
   final dialog = createProgressDialog(context,
       "deleting " + localIDs.length.toString() + " backed up files...");
   await dialog.show();
@@ -168,10 +171,10 @@ Future<void> _deleteLocalFilesOnIOS(BuildContext context, List<String> localIDs,
     _logger.severe("Could not delete files ", e, s);
   }
   await dialog.hide();
+  return deletedIDs;
 }
 
-Future<void> _deleteLocalFilesOnAndroid(BuildContext context,
-    List<String> localIDs, List<String> deletedIDs) async {
+Future<List<String>> _deleteLocalFilesOnAndroid(BuildContext context, List<String> localIDs) async {
   final dialogKey = GlobalKey<LinearProgressDialogState>();
   final dialog = LinearProgressDialog(
     "deleting " + localIDs.length.toString() + " backed up files...",
@@ -189,6 +192,7 @@ Future<void> _deleteLocalFilesOnAndroid(BuildContext context,
   final batchSize = min(
       max(minimumBatchSize, (localIDs.length / minimumParts).round()),
       maximumBatchSize);
+  final List<String> deletedIDs = [];
   for (int index = 0; index < localIDs.length; index += batchSize) {
     if (dialogKey.currentState != null) {
       dialogKey.currentState.setProgress(index / localIDs.length);
@@ -212,6 +216,6 @@ Future<void> _deleteLocalFilesOnAndroid(BuildContext context,
       }
     }
   }
-
   Navigator.of(dialogKey.currentContext, rootNavigator: true).pop('dialog');
+  return deletedIDs;
 }

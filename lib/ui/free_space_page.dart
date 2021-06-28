@@ -7,6 +7,7 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class FreeSpacePage extends StatefulWidget {
   final BackupStatus status;
@@ -155,7 +156,11 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
   }
 
   Future<void> _freeStorage(BackupStatus status) async {
-    await deleteLocalFiles(context, status.localIDs);
-    Navigator.of(context).pop(true);
+    final result = await deleteLocalFiles(context, status.localIDs);
+    if (result) {
+      Navigator.of(context).pop(true);
+    } else {
+      showToast("could not free up space");
+    }
   }
 }
