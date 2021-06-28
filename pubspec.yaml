@@ -92,6 +92,7 @@ dependencies:
   intl: ^0.17.0
   confetti: ^0.5.5
   flutter_easyloading: ^3.0.0
+  device_info: ^2.0.2
 
 dev_dependencies:
   flutter_test:

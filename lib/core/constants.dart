@@ -9,3 +9,4 @@ const String SENTRY_DEBUG_DSN =
     "https://b31c8af8384a4ce980509b8f592a67eb@errors.ente.io/3";
 const String ROADMAP_URL = "https://roadmap.ente.io";
 const int MICRO_SECONDS_IN_DAY = 86400000000;
+const int ANDROID_11_SDK_INT = 30;

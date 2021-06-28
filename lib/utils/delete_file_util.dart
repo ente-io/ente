@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -144,7 +146,12 @@ Future<bool> deleteLocalFiles(
     BuildContext context, List<String> localIDs) async {
   final List<String> deletedIDs = [];
   if (Platform.isAndroid) {
-    deletedIDs.addAll(await _deleteLocalFilesInBatches(context, localIDs));
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    if (androidInfo.version.sdkInt < ANDROID_11_SDK_INT) {
+      deletedIDs.addAll(await _deleteLocalFilesInBatches(context, localIDs));
+    } else {
+      deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localIDs));
+    }
   } else {
     deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localIDs));
   }
