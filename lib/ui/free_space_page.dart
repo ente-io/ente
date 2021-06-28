@@ -159,8 +159,6 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     final result = await deleteLocalFiles(context, status.localIDs);
     if (result) {
       Navigator.of(context).pop(true);
-    } else {
-      showToast("could not free up space");
     }
   }
 }
