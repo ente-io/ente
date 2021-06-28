@@ -13,7 +13,6 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class FreeSpacePage extends StatefulWidget {
@@ -25,8 +24,6 @@ class FreeSpacePage extends StatefulWidget {
 
 class _FreeSpacePageState extends State<FreeSpacePage> {
   Future<BackupStatus> _future;
-  final _confettiController =
-      ConfettiController(duration: const Duration(seconds: 1));
 
   @override
   void initState() {
@@ -51,22 +48,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
           ),
         ),
       ),
-      body: Container(
-        child: Stack(children: [
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirection: pi / 2,
-              emissionFrequency: 0,
-              numberOfParticles: 10, // a lot of particles at once
-              gravity: 1,
-              blastDirectionality: BlastDirectionality.explosive,
-            ),
-          ),
-          _getBody(),
-        ]),
-      ),
+      body: _getBody(),
     );
   }
 
