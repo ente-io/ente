@@ -144,9 +144,9 @@ Future<bool> deleteLocalFiles(
     BuildContext context, List<String> localIDs) async {
   final List<String> deletedIDs = [];
   if (Platform.isAndroid) {
-    deletedIDs.addAll(await _deleteLocalFilesOnAndroid(context, localIDs));
+    deletedIDs.addAll(await _deleteLocalFilesInBatches(context, localIDs));
   } else {
-    deletedIDs.addAll(await _deleteLocalFilesOnIOS(context, localIDs));
+    deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localIDs));
   }
   if (deletedIDs.isNotEmpty) {
     final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
@@ -155,7 +155,8 @@ Future<bool> deleteLocalFiles(
     Bus.instance
         .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
     if (Platform.isIOS) {
-      showToast("also empty \"Recently Deleted\" from Settings to claim the freed up space");
+      showToast(
+          "also empty \"Recently Deleted\" from Settings to claim the freed up space");
     }
     return true;
   } else {
@@ -164,7 +165,8 @@ Future<bool> deleteLocalFiles(
   }
 }
 
-Future<List<String>> _deleteLocalFilesOnIOS(BuildContext context, List<String> localIDs) async {
+Future<List<String>> _deleteLocalFilesInOneShot(
+    BuildContext context, List<String> localIDs) async {
   final List<String> deletedIDs = [];
   final dialog = createProgressDialog(context,
       "deleting " + localIDs.length.toString() + " backed up files...");
@@ -178,7 +180,8 @@ Future<List<String>> _deleteLocalFilesOnIOS(BuildContext context, List<String> l
   return deletedIDs;
 }
 
-Future<List<String>> _deleteLocalFilesOnAndroid(BuildContext context, List<String> localIDs) async {
+Future<List<String>> _deleteLocalFilesInBatches(
+    BuildContext context, List<String> localIDs) async {
   final dialogKey = GlobalKey<LinearProgressDialogState>();
   final dialog = LinearProgressDialog(
     "deleting " + localIDs.length.toString() + " backed up files...",
