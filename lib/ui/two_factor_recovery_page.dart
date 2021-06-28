@@ -1,11 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class TwoFactorRecoveryPage extends StatefulWidget {
