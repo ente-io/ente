@@ -99,7 +99,8 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
                 Expanded(
                   child: Text(
                     (count == 1 ? "it" : "they") +
-                        " can be deleted from this device to free up space",
+                        " can be deleted from this device to free up " +
+                        formatBytes(status.size),
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.3,
