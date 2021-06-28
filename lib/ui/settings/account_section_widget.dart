@@ -18,7 +18,7 @@ class AccountSectionWidget extends StatefulWidget {
 }
 
 class AccountSectionWidgetState extends State<AccountSectionWidget> {
-  double _usageInGBs;
+  String _usage;
 
   @override
   void initState() {
@@ -62,11 +62,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
               Text("total data backed up"),
               Container(
                 height: 20,
-                child: _usageInGBs == null
-                    ? loadWidget
-                    : Text(
-                        _usageInGBs.toString() + " GB",
-                      ),
+                child: _usage == null ? loadWidget : Text(_usage),
               ),
             ],
           ),
@@ -130,7 +126,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
     BillingService.instance.fetchUsage().then((usage) async {
       if (mounted) {
         setState(() {
-          _usageInGBs = convertBytesToGBs(usage);
+          _usage = formatBytes(usage);
         });
       }
     });
