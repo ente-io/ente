@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/file.dart';
@@ -213,19 +214,21 @@ class FilesDB {
     return ids;
   }
 
-  Future<Set<String>> getUploadedLocalIDs() async {
+  Future<BackedUpFileIDs> getBackedUpIDs() async {
     final db = await instance.database;
     final results = await db.query(
       table,
-      columns: [columnLocalID],
+      columns: [columnLocalID, columnUploadedFileID],
       where:
           '$columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
     );
-    final ids = Set<String>();
+    final localIDs = Set<String>();
+    final uploadedIDs = Set<int>();
     for (final result in results) {
-      ids.add(result[columnLocalID]);
+      localIDs.add(result[columnLocalID]);
+      uploadedIDs.add(result[columnUploadedFileID]);
     }
-    return ids;
+    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
 
   Future<List<File>> getAllFiles(int startTime, int endTime,
