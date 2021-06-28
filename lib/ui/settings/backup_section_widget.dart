@@ -11,6 +11,7 @@ import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BackupSectionWidget extends StatefulWidget {
@@ -137,6 +138,10 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             ),
           ),
           onPressed: () {
+            if (Platform.isIOS) {
+              showToast(
+                  "also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space");
+            }
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),
