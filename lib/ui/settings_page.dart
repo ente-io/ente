@@ -1,9 +1,9 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
+import 'package:photos/ui/settings/backup_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
 import 'package:photos/ui/settings/info_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
@@ -28,6 +28,8 @@ class SettingsPage extends StatelessWidget {
     final List<Widget> contents = [];
     if (hasLoggedIn) {
       contents.addAll([
+        BackupSectionWidget(),
+        Padding(padding: EdgeInsets.all(12)),
         AccountSectionWidget(),
         Padding(padding: EdgeInsets.all(12)),
       ]);

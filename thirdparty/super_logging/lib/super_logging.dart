@@ -196,7 +196,6 @@ class SuperLogging {
         error,
         stackTrace: stack,
       );
-      $.info('Error sent to sentry.io: $error');
     } catch (e) {
       $.info('Sending report to sentry.io failed: $e');
       $.info('Original error: $error');

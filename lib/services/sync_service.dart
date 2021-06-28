@@ -10,10 +10,12 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
+import 'package:photos/models/backup_status.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/notification_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
@@ -174,6 +176,32 @@ class SyncService {
         "fileIDs": fileIDs,
       },
     );
+  }
+
+  Future<BackupStatus> getBackupStatus() async {
+    final ids = await FilesDB.instance.getBackedUpIDs();
+    final size = await _getFileSize(ids.uploadedIDs);
+    return BackupStatus(ids.localIDs, size);
+  }
+
+  Future<int> _getFileSize(List<int> fileIDs) async {
+    try {
+      final response = await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/files/size",
+        options: Options(
+          headers: {
+            "X-Auth-Token": Configuration.instance.getToken(),
+          },
+        ),
+        data: {
+          "fileIDs": fileIDs,
+        },
+      );
+      return response.data["size"];
+    } catch (e) {
+      _logger.severe(e);
+      throw e;
+    }
   }
 
   Future<void> _doSync() async {

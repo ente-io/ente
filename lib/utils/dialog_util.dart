@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -47,4 +50,48 @@ void showErrorDialog(BuildContext context, String title, String content) {
 
 void showGenericErrorDialog(BuildContext context) {
   showErrorDialog(context, "something went wrong", "please try again.");
+}
+
+Future<T> showConfettiDialog<T>({
+  @required BuildContext context,
+  WidgetBuilder builder,
+  bool barrierDismissible = true,
+  Color barrierColor,
+  bool useSafeArea = true,
+  bool useRootNavigator = true,
+  RouteSettings routeSettings,
+  Alignment confettiAlignment = Alignment.center,
+}) {
+  final pageBuilder = Builder(
+    builder: builder,
+  );
+  ConfettiController _confettiController =
+      ConfettiController(duration: const Duration(seconds: 1));
+  _confettiController.play();
+  return showDialog(
+    context: context,
+    builder: (BuildContext buildContext) {
+      return Stack(
+        children: [
+          pageBuilder,
+          Align(
+            alignment: confettiAlignment,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: pi / 2,
+              emissionFrequency: 0,
+              numberOfParticles: 100, // a lot of particles at once
+              gravity: 1,
+              blastDirectionality: BlastDirectionality.explosive,
+            ),
+          ),
+        ],
+      );
+    },
+    barrierDismissible: barrierDismissible,
+    barrierColor: barrierColor,
+    useSafeArea: useSafeArea,
+    useRootNavigator: useRootNavigator,
+    routeSettings: routeSettings,
+  );
 }

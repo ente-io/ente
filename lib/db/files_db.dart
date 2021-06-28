@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/file.dart';
@@ -211,6 +212,23 @@ class FilesDB {
       ids.add(result[columnUploadedFileID]);
     }
     return ids;
+  }
+
+  Future<BackedUpFileIDs> getBackedUpIDs() async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      columns: [columnLocalID, columnUploadedFileID],
+      where:
+          '$columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
+    );
+    final localIDs = Set<String>();
+    final uploadedIDs = Set<int>();
+    for (final result in results) {
+      localIDs.add(result[columnLocalID]);
+      uploadedIDs.add(result[columnUploadedFileID]);
+    }
+    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
 
   Future<List<File>> getAllFiles(int startTime, int endTime,
@@ -541,6 +559,34 @@ class FilesDB {
       where: '$columnLocalID =?',
       whereArgs: [localID],
     );
+  }
+
+  Future<void> deleteLocalFiles(List<String> localIDs) async {
+    String inParam = "";
+    for (final localID in localIDs) {
+      inParam += "'" + localID + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    await db.rawQuery('''
+      UPDATE $table
+      SET $columnLocalID = NULL
+      WHERE $columnLocalID IN ($inParam);
+    ''');
+  }
+
+  Future<List<File>> getLocalFiles(List<String> localIDs) async {
+    String inParam = "";
+    for (final localID in localIDs) {
+      inParam += "'" + localID + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnLocalID IN ($inParam)',
+    );
+    return _convertToFiles(results);
   }
 
   Future<int> deleteFromCollection(int uploadedFileID, int collectionID) async {
