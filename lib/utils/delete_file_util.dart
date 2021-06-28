@@ -154,7 +154,7 @@ Future<bool> deleteLocalFiles(
     _logger.info(deletedFiles.length.toString() + " files deleted locally");
     Bus.instance
         .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
-        return true;
+    return true;
   } else {
     return false;
   }
