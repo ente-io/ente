@@ -135,3 +135,19 @@ Future<void> deleteFilesOnDeviceOnly(
   }
   await dialog.hide();
 }
+
+Future<void> deleteLocalFiles(List<String> localIDs) async {
+  List<String> deletedIDs = [];
+  try {
+    deletedIDs = await PhotoManager.editor.deleteWithIds(localIDs);
+  } catch (e, s) {
+    _logger.severe("Could not delete files", e, s);
+  }
+  if (deletedIDs.isNotEmpty) {
+    final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
+    await FilesDB.instance.deleteLocalFiles(deletedIDs);
+    _logger.info(deletedFiles.length.toString() + " files deleted locally");
+    Bus.instance
+        .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
+  }
+}

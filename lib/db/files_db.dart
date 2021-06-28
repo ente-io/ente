@@ -561,6 +561,34 @@ class FilesDB {
     );
   }
 
+  Future<void> deleteLocalFiles(List<String> localIDs) async {
+    String inParam = "";
+    for (final localID in localIDs) {
+      inParam += "'" + localID + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    await db.rawQuery('''
+      UPDATE $table
+      SET $columnLocalID = NULL
+      WHERE $columnLocalID IN ($inParam);
+    ''');
+  }
+
+  Future<List<File>> getLocalFiles(List<String> localIDs) async {
+    String inParam = "";
+    for (final localID in localIDs) {
+      inParam += "'" + localID + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnLocalID IN ($inParam)',
+    );
+    return _convertToFiles(results);
+  }
+
   Future<int> deleteFromCollection(int uploadedFileID, int collectionID) async {
     final db = await instance.database;
     return db.delete(
