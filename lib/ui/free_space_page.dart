@@ -3,29 +3,21 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/backup_status.dart';
-import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class FreeSpacePage extends StatefulWidget {
-  FreeSpacePage({Key key}) : super(key: key);
+  final BackupStatus status;
+
+  FreeSpacePage(this.status, {Key key}) : super(key: key);
 
   @override
   _FreeSpacePageState createState() => _FreeSpacePageState();
 }
 
 class _FreeSpacePageState extends State<FreeSpacePage> {
-  Future<BackupStatus> _future;
-
-  @override
-  void initState() {
-    super.initState();
-    _future = SyncService.instance.getBackupStatus();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,23 +40,11 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
   }
 
   Widget _getBody() {
-    return FutureBuilder<BackupStatus>(
-      future: _future,
-      builder: (_, snapshot) {
-        if (snapshot.hasData) {
-          final status = snapshot.data;
-          Logger("FreeSpacePage").info(
-              "Number of uploaded files: " + status.localIDs.length.toString());
-          Logger("FreeSpacePage")
-              .info("Space consumed: " + status.size.toString());
-          return _getWidget(status);
-        } else if (snapshot.hasError) {
-          return Center(child: Text("oops, something went wrong"));
-        } else {
-          return loadWidget;
-        }
-      },
-    );
+    Logger("FreeSpacePage").info("Number of uploaded files: " +
+        widget.status.localIDs.length.toString());
+    Logger("FreeSpacePage")
+        .info("Space consumed: " + widget.status.size.toString());
+    return _getWidget(widget.status);
   }
 
   Widget _getWidget(BackupStatus status) {
@@ -182,6 +162,6 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     await dialog.show();
     await deleteLocalFiles(status.localIDs);
     await dialog.hide();
-    Navigator.of(context).pop(status);
+    Navigator.of(context).pop(true);
   }
 }

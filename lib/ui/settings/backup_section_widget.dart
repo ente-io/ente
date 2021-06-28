@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/backup_status.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_widget.dart';
 import 'package:photos/ui/free_space_page.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
@@ -81,9 +82,18 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () async {
-              BackupStatus status = await routeToPage(context, FreeSpacePage());
-              if (status != null) {
-                _showSpaceFreedDialog(status);
+              final dialog = createProgressDialog(context, "calculating...");
+              await dialog.show();
+              final status = await SyncService.instance.getBackupStatus();
+              await dialog.hide();
+              if (status.localIDs.isEmpty) {
+                showErrorDialog(context, "✨ all clear",
+                    "you've no files on this device that can be deleted");
+              } else {
+                bool result = await routeToPage(context, FreeSpacePage(status));
+                if (result == true) {
+                  _showSpaceFreedDialog(status);
+                }
               }
             },
             child: SettingsTextItem(
