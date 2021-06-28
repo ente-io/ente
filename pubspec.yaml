@@ -89,6 +89,7 @@ dependencies:
   syncfusion_flutter_sliders: ^19.1.67-beta
   syncfusion_flutter_core: ^19.1.67
   pinput: ^1.2.0
+  intl: ^0.17.0 
 
 dev_dependencies:
   flutter_test:

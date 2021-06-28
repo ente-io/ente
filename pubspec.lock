@@ -432,7 +432,7 @@ packages:
     source: path
     version: "0.3.6"
   intl:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: intl
       url: "https://pub.dartlang.org"
