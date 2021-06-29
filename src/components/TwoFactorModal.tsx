@@ -41,6 +41,7 @@ function TwoFactorModal(props: Props) {
         const main = async () => {
             const isTwoFactorEnabled = await getTwoFactorStatus();
             setTwoFactorStatus(isTwoFactorEnabled);
+            setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), isTwoFactorEnabled: false });
         };
         main();
     }, [props.show]);
