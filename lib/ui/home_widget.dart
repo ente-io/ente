@@ -20,7 +20,6 @@ import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/local_sync_service.dart';
-import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_update_dialog.dart';
