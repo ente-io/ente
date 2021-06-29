@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -396,24 +398,17 @@ class UserService {
 
   Future<bool> enableTwoFactor(
       BuildContext context, String secret, String code) async {
+    var recoveryKey;
+    try {
+      recoveryKey = await getOrCreateRecoveryKey(context);
+    } catch (e) {
+      showGenericErrorDialog(context);
+      return false;
+    }
     final dialog = createProgressDialog(context, "verifying...");
     await dialog.show();
-    var encryptionResult;
-    try {
-      final keyAttributes = _config.getKeyAttributes();
-      final key = _config.getKey();
-      final recoveryKey = CryptoUtil.decryptSync(
-          Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey),
-          key,
-          Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce));
-      encryptionResult =
-          CryptoUtil.encryptSync(Sodium.base642bin(secret), recoveryKey);
-    } catch (e, s) {
-      _logger.severe(e, s);
-      await dialog.hide();
-      showErrorDialog(context, "something went wrong",
-          "please make sure that you've created a recovery key");
-    }
+    final encryptionResult =
+        CryptoUtil.encryptSync(Sodium.base642bin(secret), recoveryKey);
     try {
       await _dio.post(
         _config.getHttpEndpoint() + "/users/two-factor/enable",
@@ -489,6 +484,26 @@ class UserService {
       _logger.severe(e, s);
       throw e;
     }
+  }
+
+  Future<Uint8List> getOrCreateRecoveryKey(BuildContext context) async {
+    final encryptedRecoveryKey =
+        _config.getKeyAttributes().recoveryKeyEncryptedWithMasterKey;
+    if (encryptedRecoveryKey == null || encryptedRecoveryKey.isEmpty) {
+      final dialog = createProgressDialog(context, "please wait...");
+      await dialog.show();
+      try {
+        final keyAttributes = await _config.createNewRecoveryKey();
+        await setRecoveryKey(keyAttributes);
+        await dialog.hide();
+      } catch (e, s) {
+        await dialog.hide();
+        _logger.severe(e, s);
+        throw e;
+      }
+    }
+    final recoveryKey = _config.getRecoveryKey();
+    return recoveryKey;
   }
 
   Future<void> _saveConfiguration(Response response) async {

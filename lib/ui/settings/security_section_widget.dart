@@ -277,23 +277,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   Future<String> _getOrCreateRecoveryKey() async {
-    final encryptedRecoveryKey =
-        _config.getKeyAttributes().recoveryKeyEncryptedWithMasterKey;
-    if (encryptedRecoveryKey == null || encryptedRecoveryKey.isEmpty) {
-      final dialog = createProgressDialog(context, "please wait...");
-      await dialog.show();
-      try {
-        final keyAttributes = await _config.createNewRecoveryKey();
-        await UserService.instance.setRecoveryKey(keyAttributes);
-        await dialog.hide();
-      } catch (e, s) {
-        await dialog.hide();
-        Logger("SecuritySection").severe(e, s);
-        throw e;
-      }
-    }
-    final recoveryKey = _config.getRecoveryKey();
-    return Sodium.bin2hex(recoveryKey);
+    return Sodium.bin2hex(await UserService.instance.getOrCreateRecoveryKey(context));
   }
 
   void _disableTwoFactor() {
