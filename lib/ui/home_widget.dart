@@ -355,43 +355,53 @@ class _HomeWidgetState extends State<HomeWidget> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
           child: GNav(
-              rippleColor: Theme.of(context).buttonColor.withOpacity(0.20),
-              hoverColor: Theme.of(context).buttonColor.withOpacity(0.20),
-              gap: 8,
-              activeColor: Theme.of(context).buttonColor.withOpacity(0.75),
-              iconSize: 24,
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              duration: Duration(milliseconds: 400),
-              tabMargin: EdgeInsets.only(left: 8, right: 8),
-              tabBackgroundColor:
-                  Theme.of(context).appBarTheme.color.withOpacity(0.7),
-              haptic: false,
-              tabs: [
-                GButton(
-                  icon: Icons.photo_library_outlined,
-                  text: 'photos',
-                ),
-                GButton(
-                  icon: Icons.folder_special_outlined,
-                  text: 'albums',
-                ),
-                GButton(
-                  icon: Icons.folder_shared_outlined,
-                  text: 'shared',
-                ),
-              ],
-              selectedIndex: _selectedTabIndex,
-              onTabChange: (index) {
-                setState(() {
-                  Bus.instance.fire(TabChangedEvent(
-                    index,
-                    TabChangedEventSource.tab_bar,
-                  ));
-                });
-              }),
+            rippleColor: Theme.of(context).buttonColor.withOpacity(0.20),
+            hoverColor: Theme.of(context).buttonColor.withOpacity(0.20),
+            gap: 8,
+            activeColor: Theme.of(context).buttonColor.withOpacity(0.75),
+            iconSize: 24,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            duration: Duration(milliseconds: 400),
+            tabMargin: EdgeInsets.only(left: 8, right: 8),
+            tabBackgroundColor:
+                Theme.of(context).appBarTheme.color.withOpacity(0.7),
+            haptic: false,
+            tabs: [
+              GButton(
+                icon: Icons.photo_library_outlined,
+                text: 'photos',
+                onPressed: () {
+                  _onTabChange(0); // To take care of occasional missing events
+                },
+              ),
+              GButton(
+                icon: Icons.folder_special_outlined,
+                text: 'albums',
+                onPressed: () {
+                  _onTabChange(1); // To take care of occasional missing events
+                },
+              ),
+              GButton(
+                icon: Icons.folder_shared_outlined,
+                text: 'shared',
+                onPressed: () {
+                  _onTabChange(2); // To take care of occasional missing events
+                },
+              ),
+            ],
+            selectedIndex: _selectedTabIndex,
+            onTabChange: _onTabChange,
+          ),
         ),
       ),
     );
+  }
+
+  void _onTabChange(int index) {
+    Bus.instance.fire(TabChangedEvent(
+      index,
+      TabChangedEventSource.tab_bar,
+    ));
   }
 
   @override
