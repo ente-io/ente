@@ -432,7 +432,7 @@ class UserService {
       );
       await dialog.hide();
       Navigator.pop(context);
-      showErrorDialog(context, "🔒 success",
+      showErrorDialog(context, "⚡ success",
           "your account is now protected with an additional layer of authentication");
       Bus.instance.fire(TwoFactorStatusChangeEvent(true));
     } catch (e, s) {
