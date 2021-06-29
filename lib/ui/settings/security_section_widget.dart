@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,14 +6,16 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_lock.dart';
+import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/recovery_key_dialog.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/auth_util.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -26,9 +29,23 @@ class SecuritySectionWidget extends StatefulWidget {
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   final _config = Configuration.instance;
 
+  StreamSubscription<TwoFactorStatusChangeEvent> _twoFactorStatusChangeEvent;
+
   @override
   void initState() {
     super.initState();
+    _twoFactorStatusChangeEvent =
+        Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) async {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _twoFactorStatusChangeEvent.cancel();
+    super.dispose();
   }
 
   @override
@@ -92,6 +109,43 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             },
             child: SettingsTextItem(
                 text: "change password", icon: Icons.navigate_next),
+          ),
+          Padding(padding: EdgeInsets.all(2)),
+          Divider(height: 4),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(4)),
+          Container(
+            height: 36,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("two-factor"),
+                FutureBuilder(
+                  future: UserService.instance.fetchTwoFactorStatus(),
+                  builder: (_, snapshot) {
+                    if (snapshot.hasData) {
+                      return Switch(
+                        value: snapshot.data,
+                        onChanged: (value) async {
+                          if (value) {
+                            UserService.instance.setupTwoFactor(context);
+                          } else {
+                            UserService.instance.disableTwoFactor(context);
+                          }
+                        },
+                      );
+                    } else if (snapshot.hasError) {
+                      return Icon(
+                        Icons.error_outline,
+                        color: Colors.white.withOpacity(0.8),
+                      );
+                    }
+                    return loadWidget;
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       );
@@ -217,7 +271,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   Future<String> _getOrCreateRecoveryKey() async {
-    final key = _config.getKey();
     final encryptedRecoveryKey =
         _config.getKeyAttributes().recoveryKeyEncryptedWithMasterKey;
     if (encryptedRecoveryKey == null || encryptedRecoveryKey.isEmpty) {
@@ -233,11 +286,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         throw e;
       }
     }
-    final keyAttributes = _config.getKeyAttributes();
-    final recoveryKey = CryptoUtil.decryptSync(
-        Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey),
-        key,
-        Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce));
+    final recoveryKey = _config.getRecoveryKey();
     return Sodium.bin2hex(recoveryKey);
   }
 }

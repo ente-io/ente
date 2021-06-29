@@ -4,8 +4,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/public_keys_db.dart';
+import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/public_key.dart';
@@ -17,8 +19,10 @@ import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
 import 'package:photos/ui/two_factor_authentication_page.dart';
 import 'package:photos/ui/two_factor_recovery_page.dart';
+import 'package:photos/ui/two_factor_setup_page.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class UserService {
@@ -363,6 +367,127 @@ class UserService {
           context, "oops", "something went wrong, please try again");
     } finally {
       await dialog.hide();
+    }
+  }
+
+  Future<void> setupTwoFactor(BuildContext context) async {
+    final dialog = createProgressDialog(context, "please wait...");
+    await dialog.show();
+    try {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/two-factor/setup",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      await dialog.hide();
+      routeToPage(
+          context,
+          TwoFactorSetupPage(
+              response.data["secretCode"], response.data["qrCode"]));
+    } catch (e, s) {
+      await dialog.hide();
+      _logger.severe(e, s);
+      throw e;
+    }
+  }
+
+  Future<void> enableTwoFactor(
+      BuildContext context, String secret, String code) async {
+    final dialog = createProgressDialog(context, "verifying...");
+    await dialog.show();
+    var encryptionResult;
+    try {
+      final keyAttributes = _config.getKeyAttributes();
+      final key = _config.getKey();
+      final recoveryKey = CryptoUtil.decryptSync(
+          Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey),
+          key,
+          Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce));
+      encryptionResult =
+          CryptoUtil.encryptSync(Sodium.base642bin(secret), recoveryKey);
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await dialog.hide();
+      showErrorDialog(context, "something went wrong",
+          "please make sure that you've created a recovery key");
+    }
+    try {
+      await _dio.post(
+        _config.getHttpEndpoint() + "/users/two-factor/enable",
+        data: {
+          "code": code,
+          "encryptedTwoFactorSecret":
+              Sodium.bin2base64(encryptionResult.encryptedData),
+          "twoFactorSecretDecryptionNonce":
+              Sodium.bin2base64(encryptionResult.nonce),
+        },
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      await dialog.hide();
+      Navigator.pop(context);
+      showErrorDialog(context, "🔒 success",
+          "your account is now protected with an additional layer of authentication");
+      Bus.instance.fire(TwoFactorStatusChangeEvent(true));
+    } catch (e, s) {
+      await dialog.hide();
+      _logger.severe(e, s);
+      if (e is DioError) {
+        if (e.response != null && e.response.statusCode == 401) {
+          showErrorDialog(context, "incorrect code",
+              "please verify the code you have entered");
+          return;
+        }
+      }
+      showErrorDialog(context, "something went wrong",
+          "please contact support if the problem persists");
+    }
+  }
+
+  Future<void> disableTwoFactor(BuildContext context) async {
+    final dialog =
+        createProgressDialog(context, "disabling two-factor authentication...");
+    await dialog.show();
+    try {
+      await _dio.post(
+        _config.getHttpEndpoint() + "/users/two-factor/disable",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      Bus.instance.fire(TwoFactorStatusChangeEvent(false));
+      await dialog.hide();
+      showToast("two-factor authentication has been disabled");
+    } catch (e, s) {
+      await dialog.hide();
+      _logger.severe(e, s);
+      showErrorDialog(context, "something went wrong",
+          "please contact support if the problem persists");
+    }
+  }
+
+  Future<bool> fetchTwoFactorStatus() async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/two-factor/status",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      return response.data["status"];
+    } catch (e, s) {
+      _logger.severe(e, s);
+      throw e;
     }
   }
 
