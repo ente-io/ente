@@ -420,6 +420,10 @@ const englishConstants = {
     UPDATE: 'update',
     DISABLE_TWO_FACTOR: 'disable two-factor',
     DISABLE_TWO_FACTOR_MESSAGE: 'are you sure you want to disable your two-factor authentication',
+    TWO_FACTOR_SETUP_FAILED: 'failed to setup two factor, please try again',
+    TWO_FACTOR_SETUP_SUCCESS: 'two factor authentication successfully configured',
+    TWO_FACTOR_DISABLE_SUCCESS: 'two factor authentication successfully disabled',
+    TWO_FACTOR_DISABLE_FAILED: 'failed to disable two factor, please try again',
 
 };
 

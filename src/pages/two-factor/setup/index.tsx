@@ -2,7 +2,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import LogoImg from 'components/LogoImg';
 import { CodeBlock, FreeFlowText } from 'components/RecoveryKeyModal';
 import { DeadCenter } from 'pages/gallery';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import { enableTwoFactor, setupTwoFactor, TwoFactorSecret } from 'services/userService';
 import styled from 'styled-components';
@@ -13,6 +13,7 @@ import VerifyTwoFactor from 'components/VerifyTwoFactor';
 import { B64EncryptionResult } from 'services/uploadService';
 import { encryptWithRecoveryKey } from 'utils/crypto';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
+import { AppContext } from 'pages/_app';
 
 
 enum SetupMode {
@@ -21,9 +22,9 @@ enum SetupMode {
 }
 
 const QRCode = styled.img`
-height:200px;
-width:200px;
-margin:1rem;
+    height:200px;
+    width:200px;
+    margin:1rem;
 `;
 
 export default function SetupTwoFactor() {
@@ -31,6 +32,7 @@ export default function SetupTwoFactor() {
     const [twoFactorSecret, setTwoFactorSecret] = useState<TwoFactorSecret>(null);
     const [recoveryEncryptedTwoFactorSecret, setRecoveryEncryptedTwoFactorSecret] = useState<B64EncryptionResult>(null);
     const router = useRouter();
+    const appContext = useContext(AppContext);
     useEffect(() => {
         if (twoFactorSecret) {
             return;
@@ -42,6 +44,7 @@ export default function SetupTwoFactor() {
                 setTwoFactorSecret(twoFactorSecret);
                 setRecoveryEncryptedTwoFactorSecret(recoveryEncryptedTwoFactorSecret);
             } catch (e) {
+                appContext.setFlashMessage({ message: constants.TWO_FACTOR_SETUP_FAILED, severity: 'danger' });
                 router.push('/gallery');
             }
         };
@@ -50,6 +53,7 @@ export default function SetupTwoFactor() {
     const onSubmit = async (otp: string) => {
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
         setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), isTwoFactorEnabled: true });
+        appContext.setFlashMessage({ message: constants.TWO_FACTOR_SETUP_SUCCESS, severity: 'info' });
         router.push('/gallery');
     };
     return (

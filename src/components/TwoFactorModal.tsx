@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { DeadCenter, SetLoading } from 'pages/gallery';
-import React, { useEffect, useState } from 'react';
+import { AppContext } from 'pages/_app';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { disableTwoFactor, getTwoFactorStatus } from 'services/userService';
 import styled from 'styled-components';
@@ -13,7 +14,7 @@ interface Props {
     onHide: () => void;
     setDialogMessage: SetDialogMessage;
     setLoading: SetLoading
-    closeSidebar: () => void
+    closeSidebar: () => void;
 }
 
 const Row = styled.div`
@@ -29,6 +30,7 @@ const Label = styled.div`
 function TwoFactorModal(props: Props) {
     const router = useRouter();
     const [isTwoFactorEnabled, setTwoFactorStatus] = useState(false);
+    const appContext = useContext(AppContext);
 
     useEffect(() => {
         if (!props.show) {
@@ -56,10 +58,15 @@ function TwoFactorModal(props: Props) {
         });
     };
     const twoFactorDisable = async () => {
-        await disableTwoFactor();
-        setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), isTwoFactorEnabled: false });
-        props.onHide();
-        props.closeSidebar();
+        try {
+            await disableTwoFactor();
+            setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), isTwoFactorEnabled: false });
+            props.onHide();
+            props.closeSidebar();
+            appContext.setFlashMessage({ message: constants.TWO_FACTOR_DISABLE_SUCCESS, severity: 'info' });
+        } catch (e) {
+            appContext.setFlashMessage({ message: constants.TWO_FACTOR_DISABLE_FAILED, severity: 'danger' });
+        }
     };
     const warnTwoFactorReconfigure = async () => {
         props.setDialogMessage({

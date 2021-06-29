@@ -372,7 +372,7 @@ type AppContextType = {
     showNavBar: (show: boolean) => void;
     sharedFiles: File[];
     resetSharedFiles: () => void;
-    showFlashMessage: (message: FlashMessage) => void;
+    setFlashMessage: (message: FlashMessage) => void;
 }
 
 export interface FlashMessage {
@@ -472,9 +472,7 @@ export default function App({ Component, err }) {
             window.removeEventListener('offline', setUserOffline);
         };
     }, [redirectName]);
-
     const showNavBar = (show: boolean) => setShowNavBar(show);
-    const showFlashMessage = (flashMessage: FlashMessage) => setFlashMessage(flashMessage);
 
     return (
         <>
@@ -510,7 +508,7 @@ export default function App({ Component, err }) {
                 showNavBar,
                 sharedFiles,
                 resetSharedFiles,
-                showFlashMessage,
+                setFlashMessage,
             }}>
                 {loading ? (
                     <Container>
