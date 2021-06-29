@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { DeadCenter, SetLoading } from 'pages/gallery';
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { disableTwoFactor } from 'services/userService';
+import { disableTwoFactor, getTwoFactorStatus } from 'services/userService';
 import styled from 'styled-components';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
@@ -35,6 +35,11 @@ function TwoFactorModal(props: Props) {
         }
         const isTwoFactorEnabled = getData(LS_KEYS.USER).isTwoFactorEnabled ?? false;
         setTwoFactorStatus(isTwoFactorEnabled);
+        const main = async () => {
+            const isTwoFactorEnabled = await getTwoFactorStatus();
+            setTwoFactorStatus(isTwoFactorEnabled);
+        };
+        main();
     }, [props.show]);
     const warnTwoFactorDisable = async () => {
         props.setDialogMessage({

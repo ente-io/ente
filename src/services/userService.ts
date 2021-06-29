@@ -161,3 +161,10 @@ export const disableTwoFactor = async () => {
         'X-Auth-Token': getToken(),
     });
 };
+
+export const getTwoFactorStatus = async () => {
+    const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/status`, null, {
+        'X-Auth-Token': getToken(),
+    });
+    return resp.data['status'];
+};
