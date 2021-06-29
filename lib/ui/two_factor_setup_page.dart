@@ -279,7 +279,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
           "ok",
           () {},
           title: "⚡ setup complete",
-          text: "please save your recovery key if you haven't already",
+          text: "save your recovery key if you haven't already",
           subText:
               "this can be used to recover your account if you lose your second factor",
         );
