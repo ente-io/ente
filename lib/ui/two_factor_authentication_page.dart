@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/ui/two_factor_recovery_page.dart';
 import 'package:pinput/pin_put/pin_put.dart';
 
 class TwoFactorAuthenticationPage extends StatefulWidget {
