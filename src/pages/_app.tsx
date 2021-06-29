@@ -13,6 +13,7 @@ import { Workbox } from 'workbox-window';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
+import FlashMessageBar from 'components/FlashMessageBar';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -207,11 +208,11 @@ const GlobalStyles = createGlobalStyle`
         text-align: center;
         margin-top: 50px;
     }
-    .alert-success {
+    .alert-primary {
         background-color: rgb(235, 255, 243);
         color: #000000;
     }
-    .alert-primary {
+    .alert-success {
         background-color: #c4ffd6;
     }
     .bm-burger-button {
@@ -332,6 +333,15 @@ const GlobalStyles = createGlobalStyle`
         height: 3em;
         margin: 0 10px;
     }
+    .flash-message{
+        padding:16px;
+        display:flex;
+        align-items:center;
+    }
+    .flash-message > button.close {
+        margin-right:10%;
+        
+    }
 `;
 
 export const LogoImage = styled.img`
@@ -362,8 +372,13 @@ type AppContextType = {
     showNavBar: (show: boolean) => void;
     sharedFiles: File[];
     resetSharedFiles: () => void;
+    showFlashMessage: (message: FlashMessage) => void;
 }
 
+export interface FlashMessage {
+    message: string;
+    severity: string
+}
 export const AppContext = createContext<AppContextType>(null);
 
 const redirectMap = {
@@ -379,6 +394,7 @@ export default function App({ Component, err }) {
     const [showNavbar, setShowNavBar] = useState(false);
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
+    const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
 
     useEffect(() => {
         if (
@@ -458,6 +474,7 @@ export default function App({ Component, err }) {
     }, [redirectName]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
+    const showFlashMessage = (flashMessage: FlashMessage) => setFlashMessage(flashMessage);
 
     return (
         <>
@@ -488,10 +505,12 @@ export default function App({ Component, err }) {
                 (router.pathname === '/gallery' ?
                     <MessageContainer>{constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}</MessageContainer> :
                     <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(sharedFiles.length)}</MessageContainer>)}
+            {flashMessage && <FlashMessageBar flashMessage={flashMessage} onClose={() => setFlashMessage(null)} />}
             <AppContext.Provider value={{
                 showNavBar,
                 sharedFiles,
                 resetSharedFiles,
+                showFlashMessage,
             }}>
                 {loading ? (
                     <Container>
