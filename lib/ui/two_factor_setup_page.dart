@@ -1,10 +1,13 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/lifecycle_event_handler.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:pinput/pin_put/pin_put.dart';
 
@@ -28,6 +31,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
   );
   String _code = "";
   ImageProvider _imageProvider;
+  LifecycleEventHandler _lifecycleEventHandler;
 
   @override
   void initState() {
@@ -37,7 +41,25 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
       height: 180,
       width: 180,
     ).image;
+    _lifecycleEventHandler = LifecycleEventHandler(
+      resumeCallBack: () async {
+        if (mounted) {
+          final data = await Clipboard.getData(Clipboard.kTextPlain);
+          if (data != null && data.text != null && data.text.length == 6) {
+            Logger("TwoFA").info(data.text);
+            _pinController.text = data.text;
+          }
+        }
+      },
+    );
+    WidgetsBinding.instance.addObserver(_lifecycleEventHandler);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(_lifecycleEventHandler);
+    super.dispose();
   }
 
   @override
