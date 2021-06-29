@@ -303,7 +303,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     return Stack(
       children: [
         Container(
-          margin: const EdgeInsets.only(bottom: 50),
+          margin: const EdgeInsets.only(bottom: 80),
           child: gallery,
         ),
         HomePageAppBar(_selectedFiles),
