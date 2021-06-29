@@ -71,8 +71,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   void dispose() {
-    removePendingGetThumbnailRequestIfAny(widget.file);
     super.dispose();
+    Future.delayed(Duration.zero, () {
+      // Cancel request only if the widget has been unmounted
+      if (!mounted && widget.file.localID == null && !_hasLoadedThumbnail) {
+        removePendingGetThumbnailRequestIfAny(widget.file);
+      }
+    });
   }
 
   @override
