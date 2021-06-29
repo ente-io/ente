@@ -23,7 +23,7 @@ Future<void> showToast(String message, {toastLength: Toast.LENGTH_LONG}) {
       ..loadingStyle = EasyLoadingStyle.custom;
     return EasyLoading.showToast(
       message,
-      duration: Duration(seconds: (toastLength == Toast.LENGTH_LONG ? 6 : 3)),
+      duration: Duration(seconds: (toastLength == Toast.LENGTH_LONG ? 5 : 3)),
       toastPosition: EasyLoadingToastPosition.bottom,
     );
   }
