@@ -131,7 +131,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                           if (value) {
                             UserService.instance.setupTwoFactor(context);
                           } else {
-                            UserService.instance.disableTwoFactor(context);
+                            _disableTwoFactor();
                           }
                         },
                       );
@@ -288,5 +288,45 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     }
     final recoveryKey = _config.getRecoveryKey();
     return Sodium.bin2hex(recoveryKey);
+  }
+
+  void _disableTwoFactor() {
+    AlertDialog alert = AlertDialog(
+      title: Text("disable two-factor"),
+      content:
+          Text("are you sure you want to disable two-factor authentication?"),
+      actions: [
+        TextButton(
+          child: Text(
+            "no",
+            style: TextStyle(
+              color: Theme.of(context).buttonColor,
+            ),
+          ),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+          },
+        ),
+        TextButton(
+          child: Text(
+            "yes",
+            style: TextStyle(
+              color: Colors.red,
+            ),
+          ),
+          onPressed: () async {
+            await UserService.instance.disableTwoFactor(context);
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+          },
+        ),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 }
