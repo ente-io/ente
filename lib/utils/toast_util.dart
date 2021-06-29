@@ -19,6 +19,7 @@ Future<void> showToast(String message, {toastLength: Toast.LENGTH_LONG}) {
       ..backgroundColor = Colors.blueGrey[900]
       ..indicatorColor = Colors.blueGrey[900]
       ..textColor = Colors.white
+      ..userInteractions = true
       ..loadingStyle = EasyLoadingStyle.custom;
     return EasyLoading.showToast(
       message,
