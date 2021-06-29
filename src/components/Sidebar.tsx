@@ -223,6 +223,7 @@ export default function Sidebar(props: Props) {
                         show={twoFactorModalView}
                         onHide={() => setTwoFactorModalView(false)}
                         setDialogMessage={props.setDialogMessage}
+                        closeSidebar={() => setIsOpen(false)}
                         setLoading={props.setLoading}
                     />
                     <LinkButton

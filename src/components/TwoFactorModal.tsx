@@ -13,6 +13,7 @@ interface Props {
     onHide: () => void;
     setDialogMessage: SetDialogMessage;
     setLoading: SetLoading
+    closeSidebar: () => void
 }
 
 const Row = styled.div`
@@ -58,6 +59,7 @@ function TwoFactorModal(props: Props) {
         await disableTwoFactor();
         setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), isTwoFactorEnabled: false });
         props.onHide();
+        props.closeSidebar();
     };
     const warnTwoFactorReconfigure = async () => {
         props.setDialogMessage({
