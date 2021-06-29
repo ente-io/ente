@@ -18,6 +18,7 @@ Widget button(
   double fontSize = 14,
   VoidCallback onPressed,
   double lineHeight,
+  EdgeInsets padding,
 }) {
   return InkWell(
     child: OutlinedButton(
@@ -25,7 +26,7 @@ Widget button(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+        padding: padding ?? EdgeInsets.fromLTRB(50, 16, 50, 16),
         side: BorderSide(
           width: onPressed == null ? 1 : 2,
           color: onPressed == null
