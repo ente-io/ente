@@ -107,7 +107,7 @@ class InfoSectionWidget extends StatelessWidget {
                     }
                   },
                   child: SettingsTextItem(
-                      text: "rate us", icon: Icons.navigate_next),
+                      text: "store rating", icon: Icons.navigate_next),
                 ),
         ],
       ),
