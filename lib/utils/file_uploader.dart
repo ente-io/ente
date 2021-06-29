@@ -347,6 +347,11 @@ class FileUploader {
         file.location = Location(latLong.latitude, latLong.longitude);
       }
 
+      if (file.title == null || file.title.isEmpty) {
+        _logger.severe("Title was missing");
+        file.title = await asset.titleAsync;
+      }
+
       final encryptedMetadataData = await CryptoUtil.encryptChaCha(
           utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);
       final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);
