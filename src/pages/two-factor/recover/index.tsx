@@ -103,9 +103,9 @@ export default function Recover() {
                 show={messageDialogView}
                 onHide={() => SetMessageDialogView(false)}
                 attributes={{
-                    title: constants.SORRY,
+                    title: constants.CONTACT_SUPPORT,
                     close: {},
-                    content: constants.NO_RECOVERY_KEY_MESSAGE,
+                    content: constants.NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE(),
                 }}
             />
         </>

@@ -167,6 +167,10 @@ const englishConstants = {
     SORRY: 'sorry',
     NO_RECOVERY_KEY_MESSAGE:
         'due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
+    NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE: () => (<>
+        please drop an email to <a href="mailto:support@ente.io">support@ente.io</a> from your registered email
+    </>),
+    CONTACT_SUPPORT: 'contact support',
     REQUEST_FEATURE: 'request feature',
     SUPPORT: 'support',
     CONFIRM: 'confirm',
