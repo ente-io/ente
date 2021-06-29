@@ -380,6 +380,14 @@ class Configuration {
     return _secretKey == null ? null : Sodium.base642bin(_secretKey);
   }
 
+  Uint8List getRecoveryKey() {
+    final keyAttributes = getKeyAttributes();
+    return CryptoUtil.decryptSync(
+        Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey),
+        getKey(),
+        Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce));
+  }
+
   String getDocumentsDirectory() {
     return _documentsDirectory;
   }
