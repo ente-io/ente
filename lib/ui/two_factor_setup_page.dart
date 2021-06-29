@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
+import 'package:photos/ui/recovery_key_dialog.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:pinput/pin_put/pin_put.dart';
 
@@ -215,7 +217,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
           child: PinPut(
             fieldsCount: 6,
             onSubmit: (String code) {
-              _verifyTwoFactorCode(code);
+              _enableTwoFactor(code);
             },
             onChanged: (String pin) {
               setState(() {
@@ -250,7 +252,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
             padding: EdgeInsets.all(0),
             onPressed: _code.length == 6
                 ? () async {
-                    _verifyTwoFactorCode(_code);
+                    _enableTwoFactor(_code);
                   }
                 : null,
           ),
@@ -260,7 +262,30 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     );
   }
 
-  Future<void> _verifyTwoFactorCode(String code) async {
-    UserService.instance.enableTwoFactor(context, widget.secretCode, code);
+  Future<void> _enableTwoFactor(String code) async {
+    final success = await UserService.instance
+        .enableTwoFactor(context, widget.secretCode, code);
+    if (success) {
+      _showSuccessDialog();
+    }
+  }
+
+  void _showSuccessDialog() {
+    final recoveryKey = Sodium.bin2hex(Configuration.instance.getRecoveryKey());
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return RecoveryKeyDialog(
+          recoveryKey,
+          "ok",
+          () {},
+          title: "⚡ setup complete",
+          text: "please save your recovery key if you haven't already",
+          subText:
+              "this can be used to recover your account if you lose your second factor",
+        );
+      },
+      barrierColor: Colors.black.withOpacity(0.85),
+    );
   }
 }

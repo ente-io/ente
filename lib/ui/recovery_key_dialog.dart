@@ -13,11 +13,17 @@ class RecoveryKeyDialog extends StatefulWidget {
   final String doneText;
   final Function() onDone;
   final bool isDismissible;
+  final String title;
+  final String text;
+  final String subText;
 
   RecoveryKeyDialog(
     this.recoveryKey,
     this.doneText,
     this.onDone, {
+    this.title,
+    this.text,
+    this.subText,
     Key key,
     this.isDismissible = true,
   }) : super(key: key);
@@ -79,14 +85,15 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
     return WillPopScope(
       onWillPop: () async => widget.isDismissible,
       child: AlertDialog(
-        title: Text("recovery key"),
+        title: Text(widget.title ?? "recovery key"),
         content: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "if you forget your password, the only way you can recover your data is with this key",
+                widget.text ??
+                    "if you forget your password, the only way you can recover your data is with this key",
                 style: TextStyle(height: 1.2),
               ),
               Padding(padding: EdgeInsets.all(8)),
@@ -115,7 +122,7 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
               ),
               Padding(padding: EdgeInsets.all(8)),
               Text(
-                "we don't store this key",
+                widget.subText ?? "we don't store this key",
               ),
               Padding(padding: EdgeInsets.all(8)),
               Text(

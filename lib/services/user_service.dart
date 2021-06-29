@@ -394,7 +394,7 @@ class UserService {
     }
   }
 
-  Future<void> enableTwoFactor(
+  Future<bool> enableTwoFactor(
       BuildContext context, String secret, String code) async {
     final dialog = createProgressDialog(context, "verifying...");
     await dialog.show();
@@ -432,9 +432,8 @@ class UserService {
       );
       await dialog.hide();
       Navigator.pop(context);
-      showErrorDialog(context, "⚡ success",
-          "your account is now protected with an additional layer of authentication");
       Bus.instance.fire(TwoFactorStatusChangeEvent(true));
+      return true;
     } catch (e, s) {
       await dialog.hide();
       _logger.severe(e, s);
@@ -442,12 +441,13 @@ class UserService {
         if (e.response != null && e.response.statusCode == 401) {
           showErrorDialog(context, "incorrect code",
               "please verify the code you have entered");
-          return;
+          return false;
         }
       }
       showErrorDialog(context, "something went wrong",
           "please contact support if the problem persists");
     }
+    return false;
   }
 
   Future<void> disableTwoFactor(BuildContext context) async {
