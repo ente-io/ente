@@ -195,6 +195,7 @@ Future<List<String>> _deleteLocalFilesInBatches(
     builder: (context) {
       return dialog;
     },
+    barrierColor: Colors.black.withOpacity(0.85),
   );
   const minimumParts = 10;
   const minimumBatchSize = 1;
