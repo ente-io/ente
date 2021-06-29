@@ -363,8 +363,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             duration: Duration(milliseconds: 400),
             tabMargin: EdgeInsets.only(left: 8, right: 8),
-            tabBackgroundColor:
-                Theme.of(context).appBarTheme.color.withOpacity(0.7),
+            tabBackgroundColor: Color.fromRGBO(15, 25, 25, 0.7),
             haptic: false,
             tabs: [
               GButton(
