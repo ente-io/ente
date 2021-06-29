@@ -155,9 +155,14 @@ Future<io.File> _downloadAndDecrypt(
         Sodium.base642bin(file.fileDecryptionHeader), decryptFileKey(file));
     _logger.info("File decrypted: " + file.uploadedFileID.toString());
     encryptedFile.deleteSync();
-    var fileExtension = extension(file.title).substring(1).toLowerCase();
+    var fileExtension = "unknown";
+    try {
+      fileExtension = extension(file.title).substring(1).toLowerCase();
+    } catch(e) {
+      _logger.warning("Could not capture file extension");
+    }
     var outputFile = decryptedFile;
-    if (io.Platform.isAndroid && fileExtension == "heic") {
+    if (fileExtension=="unknown" || (io.Platform.isAndroid && fileExtension == "heic")) {
       outputFile = await FlutterImageCompress.compressAndGetFile(
         decryptedFilePath,
         decryptedFilePath + ".jpg",
