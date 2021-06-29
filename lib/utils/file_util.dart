@@ -159,10 +159,11 @@ Future<io.File> _downloadAndDecrypt(
     try {
       fileExtension = extension(file.title).substring(1).toLowerCase();
     } catch(e) {
-      _logger.warning("Could not capture file extension");
+      _logger.severe("Could not capture file extension");
     }
     var outputFile = decryptedFile;
-    if (fileExtension=="unknown" || (io.Platform.isAndroid && fileExtension == "heic")) {
+    if ((fileExtension=="unknown" && file.fileType == FileType.image) || 
+        (io.Platform.isAndroid && fileExtension == "heic")) {
       outputFile = await FlutterImageCompress.compressAndGetFile(
         decryptedFilePath,
         decryptedFilePath + ".jpg",
