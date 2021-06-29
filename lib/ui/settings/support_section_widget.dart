@@ -1,13 +1,13 @@
 import 'package:crisp/crisp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/ui/web_page.dart';
-import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -23,14 +23,15 @@ class SupportSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            final Email email = Email(
-              recipients: ['hey@ente.io'],
-              isHTML: false,
-            );
             try {
+              final Email email = Email(
+                recipients: ['hey@ente.io'],
+                isHTML: false,
+              );
               await FlutterEmailSender.send(email);
             } catch (e) {
-              showGenericErrorDialog(context);
+              Logger("SupportSection").severe(e);
+              launch("mailto:hey@ente.io");
             }
           },
           child: SettingsTextItem(text: "email", icon: Icons.navigate_next),
