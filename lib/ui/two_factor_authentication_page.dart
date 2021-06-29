@@ -113,7 +113,7 @@ class _TwoFactorAuthenticationPageState
           width: double.infinity,
           height: 64,
           child: button(
-            "authenticate",
+            "verify",
             fontSize: 18,
             onPressed: _code.length == 6
                 ? () async {
