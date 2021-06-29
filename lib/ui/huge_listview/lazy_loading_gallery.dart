@@ -97,15 +97,15 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       if (event.type == EventType.added_or_updated) {
         final dayStartTime =
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
-        final files = await widget.asyncLoader(
+        final result = await widget.asyncLoader(
             dayStartTime.microsecondsSinceEpoch,
             dayStartTime.microsecondsSinceEpoch + MICRO_SECONDS_IN_DAY - 1);
-        if (files.isEmpty) {
+        if (result.files.isEmpty) {
           // All files on this day were deleted, let gallery trigger the reload
         } else {
           if (mounted) {
             setState(() {
-              _files = files;
+              _files = result.files;
             });
           }
         }

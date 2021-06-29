@@ -7,6 +7,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/huge_listview/huge_listview.dart';
@@ -15,7 +16,7 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-typedef GalleryLoader = Future<List<File>>
+typedef GalleryLoader = Future<FileLoadResult>
     Function(int creationStartTime, int creationEndTime, {int limit, bool asc});
 
 class Gallery extends StatefulWidget {
@@ -64,26 +65,26 @@ class _GalleryState extends State<Gallery> {
     if (widget.reloadEvent != null) {
       _reloadEventSubscription = widget.reloadEvent.listen((event) async {
         _logger.info("Building gallery because reload event fired");
-        _loadFiles().then((files) => _onFilesLoaded(files));
+        final result = await _loadFiles();
+        _onFilesLoaded(result.files);
       });
     }
     if (widget.forceReloadEvent != null) {
       _forceReloadEventSubscription =
           widget.forceReloadEvent.listen((event) async {
         _logger.info("Force reload triggered");
-        final files = await _loadFiles();
-        _setFilesAndReload(files);
+        final result = await _loadFiles();
+        _setFilesAndReload(result.files);
       });
     }
     if (widget.initialFiles != null) {
       _onFilesLoaded(widget.initialFiles);
     }
-    _loadFiles(limit: kInitialLoadLimit).then((files) {
-      _setFilesAndReload(files);
-      if (files.length == kInitialLoadLimit) {
-        _loadFiles().then((files) {
-          _setFilesAndReload(files);
-        });
+    _loadFiles(limit: kInitialLoadLimit).then((result) async {
+      _setFilesAndReload(result.files);
+      if (result.hasMore) {
+        final result = await _loadFiles();
+        _setFilesAndReload(result.files);
       }
     });
     super.initState();
@@ -96,19 +97,19 @@ class _GalleryState extends State<Gallery> {
     }
   }
 
-  Future<List<File>> _loadFiles({int limit}) async {
+  Future<FileLoadResult> _loadFiles({int limit}) async {
     _logger.info("Loading files");
     final startTime = DateTime.now().microsecondsSinceEpoch;
-    final files = await widget
+    final result = await widget
         .asyncLoader(0, DateTime.now().microsecondsSinceEpoch, limit: limit);
     final endTime = DateTime.now().microsecondsSinceEpoch;
     final duration = Duration(microseconds: endTime - startTime);
     _logger.info("Time taken to load " +
-        files.length.toString() +
+        result.files.length.toString() +
         " files :" +
         duration.inMilliseconds.toString() +
         "ms");
-    return files;
+    return result;
   }
 
   // Collates files and returns `true` if it resulted in a gallery reload

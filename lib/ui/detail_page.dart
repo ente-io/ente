@@ -149,36 +149,31 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
-  void _preloadEntries(int index) {
+  void _preloadEntries(int index) async {
     if (index == 0 && !_hasLoadedTillStart) {
-      widget.config
-          .asyncLoader(_files[index].creationTime + 1,
-              DateTime.now().microsecondsSinceEpoch,
-              limit: kLoadLimit, asc: true)
-          .then((reversed) {
-        setState(() {
-          final files = reversed.reversed.toList();
-          if (files.length < kLoadLimit) {
-            _hasLoadedTillStart = true;
-          }
-          final length = files.length;
-          files.addAll(_files);
-          _files = files;
-          _pageController.jumpToPage(length);
-          _selectedIndex = length;
-        });
+      final result = await widget.config.asyncLoader(
+          _files[index].creationTime + 1, DateTime.now().microsecondsSinceEpoch,
+          limit: kLoadLimit, asc: true);
+      setState(() {
+        final files = result.files.reversed.toList();
+        if (!result.hasMore) {
+          _hasLoadedTillStart = true;
+        }
+        final length = files.length;
+        files.addAll(_files);
+        _files = files;
+        _pageController.jumpToPage(length);
+        _selectedIndex = length;
       });
     }
     if (index == _files.length - 1 && !_hasLoadedTillEnd) {
-      widget.config
-          .asyncLoader(0, _files[index].creationTime - 1, limit: kLoadLimit)
-          .then((files) {
-        setState(() {
-          if (files.length < kLoadLimit) {
-            _hasLoadedTillEnd = true;
-          }
-          _files.addAll(files);
-        });
+      final result = await widget.config
+          .asyncLoader(0, _files[index].creationTime - 1, limit: kLoadLimit);
+      setState(() {
+        if (!result.hasMore) {
+          _hasLoadedTillEnd = true;
+        }
+        _files.addAll(result.files);
       });
     }
   }

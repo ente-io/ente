@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:photos/models/backup_status.dart';
+import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/file.dart';
@@ -231,7 +232,7 @@ class FilesDB {
     return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
 
-  Future<List<File>> getAllFiles(int startTime, int endTime,
+  Future<FileLoadResult> getAllFiles(int startTime, int endTime,
       {int limit, bool asc}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -244,10 +245,11 @@ class FilesDB {
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
     );
-    return _convertToFiles(results);
+    final files = _convertToFiles(results);
+    return FileLoadResult(files, files.length == limit);
   }
 
-  Future<List<File>> getFilesInPaths(
+  Future<FileLoadResult> getFilesInPaths(
       int startTime, int endTime, List<String> paths,
       {int limit, bool asc}) async {
     final db = await instance.database;
@@ -277,10 +279,10 @@ class FilesDB {
       uploadedFileIDs.add(id);
       deduplicatedFiles.add(file);
     }
-    return deduplicatedFiles;
+    return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
-  Future<List<File>> getFilesInCollection(
+  Future<FileLoadResult> getFilesInCollection(
       int collectionID, int startTime, int endTime,
       {int limit, bool asc}) async {
     final db = await instance.database;
@@ -296,10 +298,10 @@ class FilesDB {
     );
     final files = _convertToFiles(results);
     _logger.info("Fetched " + files.length.toString() + " files");
-    return files;
+    return FileLoadResult(files, files.length == limit);
   }
 
-  Future<List<File>> getFilesInPath(String path, int startTime, int endTime,
+  Future<FileLoadResult> getFilesInPath(String path, int startTime, int endTime,
       {int limit, bool asc}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -313,7 +315,8 @@ class FilesDB {
       groupBy: '$columnLocalID',
       limit: limit,
     );
-    return _convertToFiles(results);
+    final files = _convertToFiles(results);
+    return FileLoadResult(files, files.length == limit);
   }
 
   Future<List<File>> getAllVideos() async {
