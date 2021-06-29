@@ -151,7 +151,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                   child: Text(
                     widget.secretCode,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontFeatures: [FontFeature.tabularFigures()],
                       color: Colors.white.withOpacity(0.7),
                     ),
