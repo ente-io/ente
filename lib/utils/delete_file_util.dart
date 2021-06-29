@@ -159,8 +159,7 @@ Future<bool> deleteLocalFiles(
     final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
     await FilesDB.instance.deleteLocalFiles(deletedIDs);
     _logger.info(deletedFiles.length.toString() + " files deleted locally");
-    Bus.instance
-        .fire(LocalPhotosUpdatedEvent(deletedFiles, type: EventType.deleted));
+    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
     return true;
   } else {
     showToast("could not free up space");
