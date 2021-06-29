@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/lifecycle_event_handler.dart';
 import 'package:pinput/pin_put/pin_put.dart';
 
 class TwoFactorAuthenticationPage extends StatefulWidget {
@@ -23,6 +25,29 @@ class _TwoFactorAuthenticationPageState
     borderRadius: BorderRadius.circular(15.0),
   );
   String _code = "";
+  LifecycleEventHandler _lifecycleEventHandler;
+
+  @override
+  void initState() {
+    _lifecycleEventHandler = LifecycleEventHandler(
+      resumeCallBack: () async {
+        if (mounted) {
+          final data = await Clipboard.getData(Clipboard.kTextPlain);
+          if (data != null && data.text != null && data.text.length == 6) {
+            _pinController.text = data.text;
+          }
+        }
+      },
+    );
+    WidgetsBinding.instance.addObserver(_lifecycleEventHandler);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(_lifecycleEventHandler);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -48,7 +48,6 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
         if (mounted) {
           final data = await Clipboard.getData(Clipboard.kTextPlain);
           if (data != null && data.text != null && data.text.length == 6) {
-            Logger("TwoFA").info(data.text);
             _pinController.text = data.text;
           }
         }
