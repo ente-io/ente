@@ -128,6 +128,12 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                       return Switch(
                         value: snapshot.data,
                         onChanged: (value) async {
+                          final result = await requestAuthentication();
+                          if (!result) {
+                            showToast(
+                                "please authenticate to configure two-factor authentication");
+                            return;
+                          }
                           if (value) {
                             UserService.instance.setupTwoFactor(context);
                           } else {
