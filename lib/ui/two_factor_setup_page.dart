@@ -27,10 +27,16 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     borderRadius: BorderRadius.circular(15.0),
   );
   String _code = "";
+  ImageProvider _imageProvider;
 
   @override
   void initState() {
     _tabController = new TabController(length: 2, vsync: this);
+    _imageProvider = Image.memory(
+      Sodium.base642bin(widget.qrCode),
+      height: 180,
+      width: 180,
+    ).image;
     super.initState();
   }
 
@@ -158,8 +164,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
               textAlign: TextAlign.center,
             ),
             Padding(padding: EdgeInsets.all(12)),
-            Image.memory(
-              Sodium.base642bin(widget.qrCode),
+            Image(
+              image: _imageProvider,
               height: 180,
               width: 180,
             ),
