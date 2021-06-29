@@ -125,9 +125,9 @@ export const setupTwoFactor = async () => {
     return resp.data as TwoFactorSecret;
 };
 
-export const enableTwoFactor = async (otp: string, recoveryEncryptedTwoFactorSecret: B64EncryptionResult) => {
+export const enableTwoFactor = async (code: string, recoveryEncryptedTwoFactorSecret: B64EncryptionResult) => {
     await HTTPService.post(`${ENDPOINT}/users/two-factor/enable`, {
-        otp,
+        code,
         encryptedTwoFactorSecret: recoveryEncryptedTwoFactorSecret.encryptedData,
         twoFactorSecretDecryptionNonce: recoveryEncryptedTwoFactorSecret.nonce,
     }, null, {
@@ -135,9 +135,9 @@ export const enableTwoFactor = async (otp: string, recoveryEncryptedTwoFactorSec
     });
 };
 
-export const verifyTwoFactor = async (otp: string, sessionID: string) => {
+export const verifyTwoFactor = async (code: string, sessionID: string) => {
     const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/verify`, {
-        otp, sessionID,
+        code, sessionID,
     }, null);
     return resp.data as TwoFactorVerificationResponse;
 };
