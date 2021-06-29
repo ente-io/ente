@@ -411,6 +411,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _loggedOutEvent.cancel();
     _permissionGrantedEvent.cancel();
     _firstImportEvent.cancel();
+    _backupFoldersUpdatedEvent.cancel();
     super.dispose();
   }
 }
