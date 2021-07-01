@@ -37,6 +37,15 @@ class LocalSyncService {
     await _computer.turnOn(workersCount: 1);
   }
 
+  void addChangeCallback(Function() callback) {
+    PhotoManager.addChangeCallback((value) {
+      _logger.info("Something changed on disk");
+      callback();
+
+    });
+    PhotoManager.startChangeNotify();
+  }
+
   Future<void> sync() async {
     if (!_prefs.containsKey(kHasGrantedPermissionsKey)) {
       _logger.info("Skipping local sync since permission has not been granted");

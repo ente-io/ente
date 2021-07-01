@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/services/local_sync_service.dart';
-import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_widget.dart';
 
 class GalleryFooterWidget extends StatelessWidget {
@@ -51,7 +50,6 @@ class GalleryFooterWidget extends StatelessWidget {
             onPressed: () async {
               if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
                 await PhotoManager.presentLimited();
-                SyncService.instance.sync();
               } else {
                 _showBackupFolderSelectionWidget(context);
               }

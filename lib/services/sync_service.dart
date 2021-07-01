@@ -64,6 +64,7 @@ class SyncService {
       await PhotoManager.clearFileCache();
       _logger.info("Cleared file cache");
     }
+    LocalSyncService.instance.addChangeCallback(() => sync());
   }
 
   Future<bool> existingSync() async {
