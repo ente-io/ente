@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -334,7 +335,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                   fontSize: 16,
                   lineHeight: 1.5,
                   onPressed: () async {
-                    routeToPage(context, BackupFolderSelectionPage());
+                    if (LocalSyncService.instance
+                        .hasGrantedLimitedPermissions()) {
+                      PhotoManager.presentLimited();
+                    } else {
+                      routeToPage(context, BackupFolderSelectionPage());
+                    }
                   },
                 ),
               ),
