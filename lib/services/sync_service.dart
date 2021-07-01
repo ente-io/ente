@@ -149,6 +149,7 @@ class SyncService {
   }
 
   Future<void> onPermissionGranted(PermissionState state) async {
+    _logger.info("Permission granted " + state.toString());
     await _localSyncService.onPermissionGranted(state);
     Bus.instance.fire(PermissionGrantedEvent());
     _doSync();
