@@ -44,7 +44,7 @@ export default function SetupTwoFactor() {
                 setTwoFactorSecret(twoFactorSecret);
                 setRecoveryEncryptedTwoFactorSecret(recoveryEncryptedTwoFactorSecret);
             } catch (e) {
-                appContext.setFlashMessage({ message: constants.TWO_FACTOR_SETUP_FAILED, severity: 'danger' });
+                appContext.setDisappearingFlashMessage({ message: constants.TWO_FACTOR_SETUP_FAILED, severity: 'danger' });
                 router.push('/gallery');
             }
         };
@@ -53,7 +53,7 @@ export default function SetupTwoFactor() {
     const onSubmit = async (otp: string) => {
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
         setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), isTwoFactorEnabled: true });
-        appContext.setFlashMessage({ message: constants.TWO_FACTOR_SETUP_SUCCESS, severity: 'info' });
+        appContext.setDisappearingFlashMessage({ message: constants.TWO_FACTOR_SETUP_SUCCESS, severity: 'info' });
         router.push('/gallery');
     };
     return (

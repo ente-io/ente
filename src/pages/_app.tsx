@@ -380,7 +380,7 @@ type AppContextType = {
     showNavBar: (show: boolean) => void;
     sharedFiles: File[];
     resetSharedFiles: () => void;
-    setFlashMessage: (message: FlashMessage) => void;
+    setDisappearingFlashMessage: (message: FlashMessage) => void;
 }
 
 export interface FlashMessage {
@@ -481,7 +481,10 @@ export default function App({ Component, err }) {
         };
     }, [redirectName]);
     const showNavBar = (show: boolean) => setShowNavBar(show);
-
+    const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
+        setFlashMessage(flashMessages);
+        setTimeout(() => setFlashMessage(null), 5000);
+    };
     return (
         <>
             <Head>
@@ -516,7 +519,7 @@ export default function App({ Component, err }) {
                 showNavBar,
                 sharedFiles,
                 resetSharedFiles,
-                setFlashMessage,
+                setDisappearingFlashMessage,
             }}>
                 {loading ? (
                     <Container>

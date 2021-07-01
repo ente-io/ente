@@ -64,9 +64,9 @@ function TwoFactorModal(props: Props) {
             setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), isTwoFactorEnabled: false });
             props.onHide();
             props.closeSidebar();
-            appContext.setFlashMessage({ message: constants.TWO_FACTOR_DISABLE_SUCCESS, severity: 'info' });
+            appContext.setDisappearingFlashMessage({ message: constants.TWO_FACTOR_DISABLE_SUCCESS, severity: 'info' });
         } catch (e) {
-            appContext.setFlashMessage({ message: constants.TWO_FACTOR_DISABLE_FAILED, severity: 'danger' });
+            appContext.setDisappearingFlashMessage({ message: constants.TWO_FACTOR_DISABLE_FAILED, severity: 'danger' });
         }
     };
     const warnTwoFactorReconfigure = async () => {
@@ -95,7 +95,7 @@ function TwoFactorModal(props: Props) {
             }}
 
         >
-            <div {...(!isTwoFactorEnabled ? { style: { padding: '10px 30px 30px 30px' } } : { style: { padding: '10px' } })}>
+            <div {...(!isTwoFactorEnabled ? { style: { padding: '10px 10px 30px 10px' } } : { style: { padding: '10px' } })}>
                 {
                     isTwoFactorEnabled ?
                         <>
