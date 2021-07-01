@@ -214,7 +214,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       children: [
         ExtentsPageView(
           children: [
-            Configuration.instance.getPathsToBackUp().isEmpty
+            (Configuration.instance.getPathsToBackUp().isEmpty &&
+                    !LocalSyncService.instance.hasGrantedLimitedPermissions())
                 ? _getBackupFolderSelectionHook()
                 : _getMainGalleryWidget(),
             _deviceFolderGalleryWidget,
@@ -285,11 +286,11 @@ class _HomeWidgetState extends State<HomeWidget> {
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         if (importantPaths.isNotEmpty) {
-          return FilesDB.instance.getFilesInPaths(
+          return FilesDB.instance.getImportantFiles(
               creationStartTime, creationEndTime, importantPaths.toList(),
               limit: limit, asc: asc);
         } else {
-          return FilesDB.instance.getAllFiles(
+          return FilesDB.instance.getAllUploadedFiles(
               creationStartTime, creationEndTime,
               limit: limit, asc: asc);
         }

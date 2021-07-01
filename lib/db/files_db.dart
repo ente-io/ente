@@ -232,14 +232,14 @@ class FilesDB {
     return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
 
-  Future<FileLoadResult> getAllFiles(int startTime, int endTime,
+  Future<FileLoadResult> getAllUploadedFiles(int startTime, int endTime,
       {int limit, bool asc}) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)',
       whereArgs: [startTime, endTime],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -249,7 +249,7 @@ class FilesDB {
     return FileLoadResult(files, files.length == limit);
   }
 
-  Future<FileLoadResult> getFilesInPaths(
+  Future<FileLoadResult> getImportantFiles(
       int startTime, int endTime, List<String> paths,
       {int limit, bool asc}) async {
     final db = await instance.database;
