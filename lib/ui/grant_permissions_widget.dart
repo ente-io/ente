@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class GrantPermissionsWidget extends StatelessWidget {
   @override
@@ -51,9 +52,13 @@ class GrantPermissionsWidget extends StatelessWidget {
               "grant permission",
               fontSize: 16,
               onPressed: () async {
-                final granted = await PhotoManager.requestPermission();
-                if (granted) {
-                  await SyncService.instance.onPermissionGranted();
+                final state = await PhotoManager.requestPermissionExtend();
+                if (state == PermissionState.authorized ||
+                    state == PermissionState.limited) {
+                  await SyncService.instance.onPermissionGranted(state);
+                } else if (state == PermissionState.denied) {
+                  showToast("please grant permissions to access the gallery");
+                  PhotoManager.openSetting();
                 }
               },
             ),

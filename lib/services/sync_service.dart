@@ -145,8 +145,8 @@ class SyncService {
     return _lastSyncStatusEvent;
   }
 
-  Future<void> onPermissionGranted() async {
-    await _localSyncService.setPermissionGranted();
+  Future<void> onPermissionGranted(PermissionState state) async {
+    await _localSyncService.onPermissionGranted(state);
     Bus.instance.fire(PermissionGrantedEvent());
     _doSync();
   }
