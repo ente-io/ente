@@ -1,8 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class GrantPermissionsWidget extends StatelessWidget {
   @override
@@ -72,7 +73,9 @@ class GrantPermissionsWidget extends StatelessWidget {
                         onPressed: () {
                           Navigator.of(context, rootNavigator: true)
                               .pop('dialog');
-                          PhotoManager.openSetting();
+                          if (Platform.isIOS) {
+                            PhotoManager.openSetting();
+                          }
                         },
                       ),
                     ],
