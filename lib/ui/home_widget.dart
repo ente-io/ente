@@ -290,9 +290,15 @@ class _HomeWidgetState extends State<HomeWidget> {
               creationStartTime, creationEndTime, importantPaths.toList(),
               limit: limit, asc: asc);
         } else {
-          return FilesDB.instance.getAllUploadedFiles(
-              creationStartTime, creationEndTime,
-              limit: limit, asc: asc);
+          if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
+            return FilesDB.instance.getAllLocalAndUploadedFiles(
+                creationStartTime, creationEndTime,
+                limit: limit, asc: asc);
+          } else {
+            return FilesDB.instance.getAllUploadedFiles(
+                creationStartTime, creationEndTime,
+                limit: limit, asc: asc);
+          }
         }
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
