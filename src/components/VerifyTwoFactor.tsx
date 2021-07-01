@@ -62,6 +62,7 @@ export default function VerifyTwoFactor(props: Props) {
                         <Form.Group style={{ marginBottom: '32px' }} controlId="formBasicEmail">
                             <DeadCenter>
                                 <OtpInput
+                                    placeholder="123456"
                                     ref={otpInputRef}
                                     shouldAutoFocus
                                     value={values.otp}

@@ -409,7 +409,7 @@ const englishConstants = {
     SCAN_QR_CODE: 'scan QR code instead',
     CONTINUE: 'continue',
     BACK: 'back',
-    ENABLE_TWO_FACTOR: 'enable two-factor authentication',
+    ENABLE_TWO_FACTOR: 'enable two-factor',
     ENABLE: 'enable',
     LOST_DEVICE: 'lost two-factor device?',
     INCORRECT_CODE: 'incorrect code',
@@ -426,7 +426,7 @@ const englishConstants = {
     DISABLE_TWO_FACTOR_MESSAGE: 'are you sure you want to disable your two-factor authentication',
     TWO_FACTOR_SETUP_FAILED: 'failed to setup two factor, please try again',
     TWO_FACTOR_SETUP_SUCCESS: 'two factor authentication successfully configured',
-    TWO_FACTOR_DISABLE_SUCCESS: 'two factor authentication successfully disabled',
+    TWO_FACTOR_DISABLE_SUCCESS: 'two factor authentication disabled',
     TWO_FACTOR_DISABLE_FAILED: 'failed to disable two factor, please try again',
 
 };

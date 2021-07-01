@@ -329,18 +329,26 @@ const GlobalStyles = createGlobalStyle`
         background-color: #2dc262;
     }
     div.otp-input input {
-        width: 2.4em !important;
-        height: 3em;
+        width: 36px !important;
+        height: 36px;
         margin: 0 10px;
+    }
+
+    div.otp-input input::placeholder {
+        opacity:0;
+    }
+
+    div.otp-input input:not(:placeholder-shown) , div.otp-input input:focus{
+        border: 2px solid #2dc262;
+        border-radius:1px; 
+        -webkit-transition: 0.5s;
+        transition: 0.5s;
+         outline: none;
     }
     .flash-message{
         padding:16px;
         display:flex;
         align-items:center;
-    }
-    .flash-message > button.close {
-        margin-right:10%;
-        
     }
 `;
 
