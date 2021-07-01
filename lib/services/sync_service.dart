@@ -64,6 +64,9 @@ class SyncService {
       await PhotoManager.clearFileCache();
       _logger.info("Cleared file cache");
     }
+    if (LocalSyncService.instance.hasGrantedPermissions()) {
+      LocalSyncService.instance.addChangeCallback(() => sync());
+    }
   }
 
   Future<bool> existingSync() async {
@@ -145,10 +148,12 @@ class SyncService {
     return _lastSyncStatusEvent;
   }
 
-  Future<void> onPermissionGranted() async {
-    await _localSyncService.setPermissionGranted();
+  Future<void> onPermissionGranted(PermissionState state) async {
+    _logger.info("Permission granted " + state.toString());
+    await _localSyncService.onPermissionGranted(state);
     Bus.instance.fire(PermissionGrantedEvent());
     _doSync();
+    LocalSyncService.instance.addChangeCallback(() => sync());
   }
 
   Future<void> onFoldersAdded(List<String> paths) async {

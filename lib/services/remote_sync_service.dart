@@ -13,6 +13,7 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
@@ -79,8 +80,14 @@ class RemoteSyncService {
 
   Future<bool> _uploadDiff() async {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
-    var filesToBeUploaded =
-        await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
+    var filesToBeUploaded;
+    if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&
+        foldersToBackUp.isEmpty) {
+      filesToBeUploaded = await _db.getAllLocalFiles();
+    } else {
+      filesToBeUploaded =
+          await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
+    }
     if (kDebugMode) {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);

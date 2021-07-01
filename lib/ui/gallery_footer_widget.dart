@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_widget.dart';
 
 class GalleryFooterWidget extends StatelessWidget {
@@ -46,22 +48,30 @@ class GalleryFooterWidget extends StatelessWidget {
               ],
             ),
             onPressed: () async {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    content: const BackupFolderSelectionWidget("preserve"),
-                    backgroundColor: Color.fromRGBO(8, 18, 18, 1),
-                    insetPadding: const EdgeInsets.all(24),
-                    contentPadding: const EdgeInsets.all(24),
-                  );
-                },
-                barrierColor: Colors.black.withOpacity(0.85),
-              );
+              if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
+                await PhotoManager.presentLimited();
+              } else {
+                _showBackupFolderSelectionWidget(context);
+              }
             },
           ),
         ),
       ],
+    );
+  }
+
+  void _showBackupFolderSelectionWidget(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: const BackupFolderSelectionWidget("preserve"),
+          backgroundColor: Color.fromRGBO(8, 18, 18, 1),
+          insetPadding: const EdgeInsets.all(24),
+          contentPadding: const EdgeInsets.all(24),
+        );
+      },
+      barrierColor: Colors.black.withOpacity(0.85),
     );
   }
 }

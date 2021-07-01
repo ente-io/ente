@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -213,7 +214,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       children: [
         ExtentsPageView(
           children: [
-            Configuration.instance.getPathsToBackUp().isEmpty
+            (Configuration.instance.getPathsToBackUp().isEmpty &&
+                    !LocalSyncService.instance.hasGrantedLimitedPermissions())
                 ? _getBackupFolderSelectionHook()
                 : _getMainGalleryWidget(),
             _deviceFolderGalleryWidget,
@@ -284,13 +286,19 @@ class _HomeWidgetState extends State<HomeWidget> {
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         if (importantPaths.isNotEmpty) {
-          return FilesDB.instance.getFilesInPaths(
+          return FilesDB.instance.getImportantFiles(
               creationStartTime, creationEndTime, importantPaths.toList(),
               limit: limit, asc: asc);
         } else {
-          return FilesDB.instance.getAllFiles(
-              creationStartTime, creationEndTime,
-              limit: limit, asc: asc);
+          if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
+            return FilesDB.instance.getAllLocalAndUploadedFiles(
+                creationStartTime, creationEndTime,
+                limit: limit, asc: asc);
+          } else {
+            return FilesDB.instance.getAllUploadedFiles(
+                creationStartTime, creationEndTime,
+                limit: limit, asc: asc);
+          }
         }
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
@@ -327,14 +335,20 @@ class _HomeWidgetState extends State<HomeWidget> {
               type: MaterialType.transparency,
               child: Container(
                 width: double.infinity,
-                height: 80,
+                height: 64,
                 padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
                 child: button(
                   "preserve memories",
                   fontSize: 16,
                   lineHeight: 1.5,
+                  padding: EdgeInsets.only(bottom: 4),
                   onPressed: () async {
-                    routeToPage(context, BackupFolderSelectionPage());
+                    if (LocalSyncService.instance
+                        .hasGrantedLimitedPermissions()) {
+                      PhotoManager.presentLimited();
+                    } else {
+                      routeToPage(context, BackupFolderSelectionPage());
+                    }
                   },
                 ),
               ),

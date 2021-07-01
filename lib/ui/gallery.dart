@@ -115,7 +115,8 @@ class _GalleryState extends State<Gallery> {
   // Collates files and returns `true` if it resulted in a gallery reload
   bool _onFilesLoaded(List<File> files) {
     final collatedFiles = _collateFiles(files);
-    if (_collatedFiles.length != collatedFiles.length) {
+    if (_collatedFiles.length != collatedFiles.length ||
+        _collatedFiles.isEmpty) {
       if (mounted) {
         setState(() {
           _hasLoadedFiles = true;
@@ -156,7 +157,18 @@ class _GalleryState extends State<Gallery> {
         return loadWidget;
       },
       emptyResultBuilder: (_) {
-        return nothingToSeeHere;
+        List<Widget> children = [];
+        if (widget.header != null) {
+          children.add(widget.header);
+        }
+        children.add(nothingToSeeHere);
+        if (widget.footer != null) {
+          children.add(widget.footer);
+        }
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: children,
+        );
       },
       itemBuilder: (context, index) {
         var gallery;

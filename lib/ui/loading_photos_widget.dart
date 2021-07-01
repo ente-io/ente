@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animations/loading_animations.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -38,7 +39,11 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (mounted &&
           event.status == SyncStatus.completed_first_gallery_import) {
-        routeToPage(context, BackupFolderSelectionPage());
+        if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
+          // Do nothing, let HomeWidget refresh
+        } else {
+          routeToPage(context, BackupFolderSelectionPage());
+        }
       }
     });
 
