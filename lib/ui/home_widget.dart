@@ -328,12 +328,13 @@ class _HomeWidgetState extends State<HomeWidget> {
               type: MaterialType.transparency,
               child: Container(
                 width: double.infinity,
-                height: 80,
+                height: 64,
                 padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
                 child: button(
                   "preserve memories",
                   fontSize: 16,
                   lineHeight: 1.5,
+                  padding: EdgeInsets.only(bottom: 4),
                   onPressed: () async {
                     if (LocalSyncService.instance
                         .hasGrantedLimitedPermissions()) {
