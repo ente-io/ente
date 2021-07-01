@@ -21,6 +21,7 @@ class LocalSyncService {
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
+  static const kPermissionStateKey = "permission_state";
   static const kEditedFileIDsKey = "edited_file_ids";
   static const kDownloadedFileIDsKey = "downloaded_file_ids";
   static const kInvalidFileIDsKey = "invalid_file_ids";
@@ -47,14 +48,6 @@ class LocalSyncService {
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     if (_isBackground) {
       await PhotoManager.setIgnorePermissionCheck(true);
-    } else {
-      final result = await PhotoManager.requestPermission();
-      if (!result) {
-        _logger.severe("Did not get permission");
-        await _prefs.setInt(kDbUpdationTimeKey, syncStartTime);
-        Bus.instance.fire(LocalPhotosUpdatedEvent(List<File>.empty()));
-        return;
-      }
     }
     final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
     final startTime = DateTime.now().microsecondsSinceEpoch;
@@ -177,8 +170,9 @@ class LocalSyncService {
     return _prefs.getBool(kHasGrantedPermissionsKey) ?? false;
   }
 
-  Future<void> setPermissionGranted() async {
+  Future<void> onPermissionGranted(PermissionState state) async {
     await _prefs.setBool(kHasGrantedPermissionsKey, true);
+    await _prefs.setString(kPermissionStateKey, state.toString());
   }
 
   bool hasCompletedFirstImport() {
