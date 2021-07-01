@@ -57,8 +57,34 @@ class GrantPermissionsWidget extends StatelessWidget {
                     state == PermissionState.limited) {
                   await SyncService.instance.onPermissionGranted(state);
                 } else if (state == PermissionState.denied) {
-                  showToast("please grant permissions to access the gallery");
-                  PhotoManager.openSetting();
+                  AlertDialog alert = AlertDialog(
+                    title: Text("please grant permissions"),
+                    content: Text(
+                        "ente can encrypt and preserve files only if you grant access to them"),
+                    actions: [
+                      TextButton(
+                        child: Text(
+                          "ok",
+                          style: TextStyle(
+                            color: Theme.of(context).buttonColor,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context, rootNavigator: true)
+                              .pop('dialog');
+                          PhotoManager.openSetting();
+                        },
+                      ),
+                    ],
+                  );
+
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return alert;
+                    },
+                    barrierColor: Colors.black87,
+                  );
                 }
               },
             ),
