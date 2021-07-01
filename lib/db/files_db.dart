@@ -402,6 +402,18 @@ class FilesDB {
     return _convertToFiles(results);
   }
 
+  Future<List<File>> getAllLocalFiles() async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where:
+          '($columnUploadedFileID IS NULL OR $columnUploadedFileID IS -1) AND $columnLocalID IS NOT NULL',
+      orderBy: '$columnCreationTime DESC',
+      groupBy: '$columnLocalID',
+    );
+    return _convertToFiles(results);
+  }
+
   Future<List<File>> getEditedRemoteFiles() async {
     final db = await instance.database;
     final results = await db.query(
