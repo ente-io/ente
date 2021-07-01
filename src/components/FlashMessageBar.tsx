@@ -6,7 +6,7 @@ import Alert from 'react-bootstrap/Alert';
 export default function FlashMessageBar({ flashMessage, onClose }: { flashMessage: FlashMessage, onClose: () => void }) {
     return (
         <Alert
-            className="flash-message"
+            className="flash-message text-center    "
             variant={flashMessage.severity}
             dismissible
             onClose={onClose}
