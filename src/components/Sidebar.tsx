@@ -28,11 +28,14 @@ import { LogoImage } from 'pages/_app';
 import { SetDialogMessage } from './MessageDialog';
 import EnteSpinner from './EnteSpinner';
 import RecoveryKeyModal from './RecoveryKeyModal';
+import TwoFactorModal from './TwoFactorModal';
+import { SetLoading } from 'pages/gallery';
 
 interface Props {
     files: File[];
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
+    setLoading: SetLoading,
     showPlanSelectorModal: () => void;
 }
 export default function Sidebar(props: Props) {
@@ -45,6 +48,7 @@ export default function Sidebar(props: Props) {
     }, []);
     const [isOpen, setIsOpen] = useState(false);
     const [recoverModalView, setRecoveryModalView] = useState(false);
+    const [twoFactorModalView, setTwoFactorModalView] = useState(false);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -214,11 +218,26 @@ export default function Sidebar(props: Props) {
                         {constants.DOWNLOAD_RECOVERY_KEY}
                     </LinkButton>
                 </>
+                <>
+                    <TwoFactorModal
+                        show={twoFactorModalView}
+                        onHide={() => setTwoFactorModalView(false)}
+                        setDialogMessage={props.setDialogMessage}
+                        closeSidebar={() => setIsOpen(false)}
+                        setLoading={props.setLoading}
+                    />
+                    <LinkButton
+                        style={{ marginTop: '30px' }}
+                        onClick={() => setTwoFactorModalView(true)}
+                    >
+                        {constants.TWO_FACTOR}
+                    </LinkButton>
+                </>
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={() => {
                         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-                        router.push('changePassword');
+                        router.push('change-password');
                     }}
                 >
                     {constants.CHANGE_PASSWORD}

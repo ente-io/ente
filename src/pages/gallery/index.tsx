@@ -67,7 +67,6 @@ export const DeadCenter = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #fff;
     text-align: center;
     flex-direction: column;
 `;
@@ -426,6 +425,7 @@ export default function Gallery() {
                     files={files}
                     collections={collections}
                     setDialogMessage={setDialogMessage}
+                    setLoading={setLoading}
                     showPlanSelectorModal={() => setPlanModalView(true)}
                 />
                 <UploadButton isFirstFetch={isFirstFetch} openFileUploader={openFileUploader} />

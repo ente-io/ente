@@ -22,7 +22,7 @@ const SubmitButton = ({
             <Spinner
                 as="span"
                 animation="border"
-                style={{ width: '22px', height: '22px', borderWidth: '0.20em' }}
+                style={{ width: '22px', height: '22px', borderWidth: '0.20em', color: '#2dc262' }}
             />
         ) : (
             buttonText

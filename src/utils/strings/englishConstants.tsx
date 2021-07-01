@@ -5,7 +5,7 @@ import styled from 'styled-components';
  * Global English constants.
  */
 
-const dateString = function(date) {
+const dateString = function (date) {
     return new Date(date / 1000).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -24,7 +24,7 @@ const Logo = styled.img`
 `;
 
 const englishConstants = {
-    HERO_HEADER: () => <div>with <Logo src='/icon.svg' /><br/>your <Strong>memories</Strong> are</div>,
+    HERO_HEADER: () => <div>with <Logo src='/icon.svg' /><br />your <Strong>memories</Strong> are</div>,
     HERO_SLIDE_1_TITLE: 'protected',
     HERO_SLIDE_1: 'end-to-end encrypted with your password, visible only to you',
     HERO_SLIDE_2_TITLE: 'synced',
@@ -46,7 +46,7 @@ const englishConstants = {
     VERIFY_EMAIL: 'verify email',
     EMAIL_SENT: ({ email }) => (
         <p>
-        we have sent a mail to <b>{email}</b>
+            we have sent a mail to <b>{email}</b>
         </p>
     ),
     CHECK_INBOX: 'please check your inbox (and spam) to complete verification',
@@ -67,10 +67,10 @@ const englishConstants = {
         'please enter a password that we can use to encrypt your data',
     PASSPHRASE_DISCLAIMER: () => (
         <p>
-        we don't store your password, so if you forget,
+            we don't store your password, so if you forget,
             <strong> we will not be able to help you</strong>
             {' '}
-        recover your data.
+            recover your data.
         </p>
     ),
     PASSPHRASE_HINT: 'password',
@@ -167,6 +167,10 @@ const englishConstants = {
     SORRY: 'sorry',
     NO_RECOVERY_KEY_MESSAGE:
         'due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
+    NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE: () => (<>
+        please drop an email to <a href="mailto:support@ente.io">support@ente.io</a> from your registered email
+    </>),
+    CONTACT_SUPPORT: 'contact support',
     REQUEST_FEATURE: 'request feature',
     SUPPORT: 'support',
     CONFIRM: 'confirm',
@@ -182,26 +186,26 @@ const englishConstants = {
     MESSAGE: 'message',
     INSTALL_MOBILE_APP: () => (
         <>
-        install our{' '}
+            install our{' '}
             <a
                 href="https://play.google.com/store/apps/details?id=io.ente.photos"
                 target="_blank"
                 style={{ color: '#2dc262' }} rel="noreferrer"
             >
-              android
+                android
             </a>
             {' '}
-        or
+            or
             {' '}
             <a
                 href="https://apps.apple.com/in/app/ente-photos/id1542026904"
                 style={{ color: '#2dc262' }}
                 target="_blank" rel="noreferrer"
             >
-              ios app
+                ios app
                 {' '}
             </a>
-        to automatically backup all your photos
+            to automatically backup all your photos
         </>
     ),
     DOWNLOAD_APP_MESSAGE: () => (
@@ -230,41 +234,41 @@ const englishConstants = {
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
-            you are on the <strong>free</strong>
+                you are on the <strong>free</strong>
                 {' '}
-            plan that expires on{' '}
+                plan that expires on{' '}
                 {dateString(expiryTime)}
             </p>
         </>
     ),
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
         <p>
-        your subscription will renew on {dateString(expiryTime)}
+            your subscription will renew on {dateString(expiryTime)}
         </p>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
-            your subscription will be cancelled on {dateString(expiryTime)}
+                your subscription will be cancelled on {dateString(expiryTime)}
             </p>
         </>
     ),
 
     USAGE_INFO: (usage, quota) => (
         <p>
-        you have used {usage}
+            you have used {usage}
             {' '}
-        GB out of your {quota}
+            GB out of your {quota}
             {' '}
-        GB quota
+            GB quota
         </p>
     ),
 
     SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
         <>
             <p>we've received your payment</p>
-        your subscription is valid till{' '}
+            your subscription is valid till{' '}
             <strong>{dateString(expiryTime)}</strong>
         </>
     ),
@@ -287,8 +291,8 @@ const englishConstants = {
     CANCEL_SUBSCRIPTION_MESSAGE: () => (
         <>
             <p>
-            all of your data will be deleted from our servers at the end of
-            this billing period.
+                all of your data will be deleted from our servers at the end of
+                this billing period.
             </p>
             <p>are you sure that you want to unsubscribe?</p>
         </>
@@ -313,8 +317,8 @@ const englishConstants = {
         <>
             <p>are you sure you want to delete this album?</p>
             <p>
-            all files that are present only in this album will be
-            permanently deleted
+                all files that are present only in this album will be
+                permanently deleted
             </p>
         </>
     ),
@@ -324,7 +328,7 @@ const englishConstants = {
     SHAREES: 'shared with',
     ZERO_SHAREES: () => (
         <>
-            <p>currently shared with no one 😔</p>
+            <h6>currently shared with no one 😔</h6>
             <em style={{ color: '#777' }}>"memories are fonder when shared"</em>
         </>
     ),
@@ -336,42 +340,42 @@ const englishConstants = {
     SEARCH_HINT: () => <span>try searching for New York, April 14, Christmas...</span>,
     TERMS_AND_CONDITIONS: () => (
         <p>
-        I agree to the{' '}
+            I agree to the{' '}
             <a href="https://ente.io/terms" target="_blank" rel="noreferrer">
-            terms
+                terms
             </a>
             {' '}
-        and
+            and
             {' '}
             <a href="https://ente.io/privacy" target="_blank" rel="noreferrer">
-            privacy policy
+                privacy policy
             </a>
             {' '}
         </p>
     ),
     CONFIRM_PASSWORD_NOT_SAVED: () => (
         <p>
-        i understand that if i lose my password , i may lose my data since
-        my data is{' '}
+            i understand that if i lose my password , i may lose my data since
+            my data is{' '}
             <a href="https://ente.io/encryption" target="_blank" rel="noreferrer">
-            end-to-end encrypted
+                end-to-end encrypted
             </a>
             {' '}
-        with ente
+            with ente
         </p>
     ),
     SEARCH_STATS: ({ resultCount, timeTaken }) => (
         <span>
-        found <span style={{ color: '#2dc262' }}>{resultCount}</span>
+            found <span style={{ color: '#2dc262' }}>{resultCount}</span>
             {' '}
-        memories (
+            memories (
             {' '}
             <span style={{ color: '#2dc262' }}>
                 {' '}
                 {timeTaken}
             </span>
             {' '}
-        seconds )
+            seconds )
         </span>
     ),
     NOT_FILE_OWNER: 'deleting shared collection files is not allowed',
@@ -397,6 +401,34 @@ const englishConstants = {
     SHOW_ALL: 'show all',
     LOGIN_TO_UPLOAD_FILES: (count: number) => count === 1 ? `1 file received. login to upload` : `${count} files received. login to upload`,
     FILES_TO_BE_UPLOADED: (count: number) => count === 1 ? `1 file received. uploading in a jiffy` : `${count} files received. Uploading in a jiffy`,
+    TWO_FACTOR: 'two-factor',
+    TWO_FACTOR_AUTHENTICATION: 'two-factor authentication',
+    TWO_FACTOR_QR_INSTRUCTION: 'scan the QR code below with your favorite authenticator app',
+    ENTER_CODE_MANUALLY: 'enter the code manually',
+    TWO_FACTOR_MANUAL_CODE_INSTRUCTION: 'please enter this code in your favorite authenticator app',
+    SCAN_QR_CODE: 'scan QR code instead',
+    CONTINUE: 'continue',
+    BACK: 'back',
+    ENABLE_TWO_FACTOR: 'enable two-factor',
+    ENABLE: 'enable',
+    LOST_DEVICE: 'lost two-factor device?',
+    INCORRECT_CODE: 'incorrect code',
+    RECOVER_TWO_FACTOR: 'recover two-factor',
+    TWO_FACTOR_INFO: 'add an additional layer of security by requiring more than your email and password to log in to your account',
+    DISABLE_TWO_FACTOR_HINT: 'disable two-factor authentication',
+    UPDATE_TWO_FACTOR_HINT: 'update your authenticator device',
+    DISABLE: 'disable',
+    RECONFIGURE: 'reconfigure',
+    UPDATE_TWO_FACTOR: 'update two-factor',
+    UPDATE_TWO_FACTOR_MESSAGE: 'continuing forward will void any previously configured authenticators',
+    UPDATE: 'update',
+    DISABLE_TWO_FACTOR: 'disable two-factor',
+    DISABLE_TWO_FACTOR_MESSAGE: 'are you sure you want to disable your two-factor authentication',
+    TWO_FACTOR_SETUP_FAILED: 'failed to setup two factor, please try again',
+    TWO_FACTOR_SETUP_SUCCESS: 'two factor authentication successfully configured',
+    TWO_FACTOR_DISABLE_SUCCESS: 'two factor authentication disabled',
+    TWO_FACTOR_DISABLE_FAILED: 'failed to disable two factor, please try again',
+
 };
 
 export default englishConstants;

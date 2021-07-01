@@ -5125,6 +5125,11 @@ react-lifecycles-compat@^3.0.4:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
+react-otp-input@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/react-otp-input/-/react-otp-input-2.3.1.tgz#85d85c01e5d51b0a43c3dc03927292a54d15ed98"
+  integrity sha512-ka14XemxkVh+nl1ykD9HutTyx5ailf4smOZ9gqciQ7GODbepWcjfh1pqsoEB2Mib/sFf1I6OjaPnct5d27+SFA==
+
 react-overlays@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/react-overlays/-/react-overlays-5.0.1.tgz#7e2c3cd3c0538048b0b7451d203b1289c561b7f2"

@@ -6,6 +6,7 @@ import { clearData } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
+import { B64EncryptionResult } from './uploadService';
 
 export interface UpdatedKey {
     kekSalt: string;
@@ -28,11 +29,29 @@ export interface User {
     name: string;
     email: string;
 }
-export interface VerificationResponse {
+export interface EmailVerificationResponse {
+    id: number;
+    keyAttributes?: KeyAttributes;
+    encryptedToken?: string;
+    token?: string;
+    twoFactorSessionID: string
+}
+
+export interface TwoFactorVerificationResponse {
     id: number;
     keyAttributes: KeyAttributes;
     encryptedToken?: string;
     token?: string;
+}
+
+export interface TwoFactorSecret {
+    secretCode: string
+    qrCode: string
+}
+
+export interface TwoFactorRecoveryResponse {
+    encryptedSecret: string
+    secretDecryptionNonce: string
 }
 
 export const getOtt = (email: string) => HTTPService.get(`${ENDPOINT}/users/ott`, {
@@ -97,4 +116,55 @@ export const isTokenValid = async () => {
     } catch (e) {
         return false;
     }
+};
+
+export const setupTwoFactor = async () => {
+    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/setup`, null, null, {
+        'X-Auth-Token': getToken(),
+    });
+    return resp.data as TwoFactorSecret;
+};
+
+export const enableTwoFactor = async (code: string, recoveryEncryptedTwoFactorSecret: B64EncryptionResult) => {
+    await HTTPService.post(`${ENDPOINT}/users/two-factor/enable`, {
+        code,
+        encryptedTwoFactorSecret: recoveryEncryptedTwoFactorSecret.encryptedData,
+        twoFactorSecretDecryptionNonce: recoveryEncryptedTwoFactorSecret.nonce,
+    }, null, {
+        'X-Auth-Token': getToken(),
+    });
+};
+
+export const verifyTwoFactor = async (code: string, sessionID: string) => {
+    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/verify`, {
+        code, sessionID,
+    }, null);
+    return resp.data as TwoFactorVerificationResponse;
+};
+
+export const recoverTwoFactor = async (sessionID: string) => {
+    const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/recover`, {
+        sessionID,
+    });
+    return resp.data as TwoFactorRecoveryResponse;
+};
+
+export const removeTwoFactor = async (sessionID: string, secret: string) => {
+    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/remove`, {
+        sessionID, secret,
+    });
+    return resp.data as TwoFactorVerificationResponse;
+};
+
+export const disableTwoFactor = async () => {
+    await HTTPService.post(`${ENDPOINT}/users/two-factor/disable`, null, null, {
+        'X-Auth-Token': getToken(),
+    });
+};
+
+export const getTwoFactorStatus = async () => {
+    const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/status`, null, {
+        'X-Auth-Token': getToken(),
+    });
+    return resp.data['status'];
 };

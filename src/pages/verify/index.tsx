@@ -13,7 +13,7 @@ import {
     logoutUser,
     clearFiles,
     isTokenValid,
-    VerificationResponse,
+    EmailVerificationResponse,
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
@@ -34,6 +34,7 @@ export default function Verify() {
 
     useEffect(() => {
         const main = async () => {
+            router.prefetch('/twoFactor/verify');
             router.prefetch('/credentials');
             router.prefetch('/generate');
             const user = getData(LS_KEYS.USER);
@@ -60,7 +61,12 @@ export default function Verify() {
         try {
             setLoading(true);
             const resp = await verifyOtt(email, ott);
-            const { keyAttributes, encryptedToken, token, id } = resp.data as VerificationResponse;
+            const { keyAttributes, encryptedToken, token, id, twoFactorSessionID } = resp.data as EmailVerificationResponse;
+            if (twoFactorSessionID) {
+                setData(LS_KEYS.USER, { email, twoFactorSessionID, isTwoFactorEnabled: true });
+                router.push('/two-factor/verify');
+                return;
+            }
             setData(LS_KEYS.USER, {
                 ...getData(LS_KEYS.USER),
                 email,

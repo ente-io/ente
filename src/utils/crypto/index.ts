@@ -167,4 +167,12 @@ export async function decryptAndStoreToken(masterKey: string) {
         });
     }
 }
+
+export async function encryptWithRecoveryKey(key: string) {
+    const cryptoWorker = await new CryptoWorker();
+    const hexRecoveryKey = await getRecoveryKey();
+    const recoveryKey = await cryptoWorker.fromHex(hexRecoveryKey);
+    const encryptedKey: B64EncryptionResult = await cryptoWorker.encryptToB64(key, recoveryKey);
+    return encryptedKey;
+}
 export default CryptoWorker;

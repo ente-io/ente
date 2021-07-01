@@ -13,6 +13,7 @@ import { Workbox } from 'workbox-window';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
+import FlashMessageBar from 'components/FlashMessageBar';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -46,6 +47,9 @@ const GlobalStyles = createGlobalStyle`
         color: #aaa;
         font-family:Ubuntu, Arial, sans-serif !important;
     }
+    :is(h1, h2, h3, h4, h5, h6) {
+        color: #d7d7d7;
+      }
 
     #__next {
         flex: 1;
@@ -161,11 +165,14 @@ const GlobalStyles = createGlobalStyle`
         background-size: 20px 20px;
         background-position: center;
     }
+    .btn.focus , .btn:focus{
+        box-shadow: none;
+    }
     .btn-success {
         background: #2dc262;
         border-color: #29a354;
     }
-    .btn-success:hover ,.btn-success:focus .btn-success:active{
+    .btn-success:hover .btn-success:focus .btn-success:active {
         background-color: #29a354;
         border-color: #2dc262;
     }
@@ -177,11 +184,18 @@ const GlobalStyles = createGlobalStyle`
         border-color: #2dc262;
         border-width: 2px;
     }
-    .btn-outline-success:hover {
+    .btn-outline-success:hover:enabled {
         background: #2dc262;
+        color: white;
     }
     .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
         border-width: 2px;
+    }
+    .btn-link-danger {
+        color: #dc3545;
+    }
+    .btn-link-danger:hover {
+        color: #ff495a;
     }
     .card {
         background-color: #242424;
@@ -194,11 +208,11 @@ const GlobalStyles = createGlobalStyle`
         text-align: center;
         margin-top: 50px;
     }
-    .alert-success {
+    .alert-primary {
         background-color: rgb(235, 255, 243);
         color: #000000;
     }
-    .alert-primary {
+    .alert-success {
         background-color: #c4ffd6;
     }
     .bm-burger-button {
@@ -314,6 +328,28 @@ const GlobalStyles = createGlobalStyle`
     .carousel-indicators .active {
         background-color: #2dc262;
     }
+    div.otp-input input {
+        width: 36px !important;
+        height: 36px;
+        margin: 0 10px;
+    }
+
+    div.otp-input input::placeholder {
+        opacity:0;
+    }
+
+    div.otp-input input:not(:placeholder-shown) , div.otp-input input:focus{
+        border: 2px solid #2dc262;
+        border-radius:1px; 
+        -webkit-transition: 0.5s;
+        transition: 0.5s;
+         outline: none;
+    }
+    .flash-message{
+        padding:16px;
+        display:flex;
+        align-items:center;
+    }
 `;
 
 export const LogoImage = styled.img`
@@ -344,8 +380,13 @@ type AppContextType = {
     showNavBar: (show: boolean) => void;
     sharedFiles: File[];
     resetSharedFiles: () => void;
+    setDisappearingFlashMessage: (message: FlashMessage) => void;
 }
 
+export interface FlashMessage {
+    message: string;
+    severity: string
+}
 export const AppContext = createContext<AppContextType>(null);
 
 const redirectMap = {
@@ -361,6 +402,7 @@ export default function App({ Component, err }) {
     const [showNavbar, setShowNavBar] = useState(false);
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
+    const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
 
     useEffect(() => {
         if (
@@ -438,9 +480,11 @@ export default function App({ Component, err }) {
             window.removeEventListener('offline', setUserOffline);
         };
     }, [redirectName]);
-
     const showNavBar = (show: boolean) => setShowNavBar(show);
-
+    const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
+        setFlashMessage(flashMessages);
+        setTimeout(() => setFlashMessage(null), 5000);
+    };
     return (
         <>
             <Head>
@@ -470,10 +514,12 @@ export default function App({ Component, err }) {
                 (router.pathname === '/gallery' ?
                     <MessageContainer>{constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}</MessageContainer> :
                     <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(sharedFiles.length)}</MessageContainer>)}
+            {flashMessage && <FlashMessageBar flashMessage={flashMessage} onClose={() => setFlashMessage(null)} />}
             <AppContext.Provider value={{
                 showNavBar,
                 sharedFiles,
                 resetSharedFiles,
+                setDisappearingFlashMessage,
             }}>
                 {loading ? (
                     <Container>

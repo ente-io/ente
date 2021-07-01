@@ -52,7 +52,7 @@ export default function MessageDialog({
             </Modal.Header>
             {(children || attributes?.content) && (
                 <Modal.Body style={{ borderTop: '1px solid #444' }}>
-                    {children || <h5>{attributes.content}</h5>}
+                    {children || <p style={{ fontSize: '1.25rem', marginBottom: 0 }}>{attributes.content}</p>}
                 </Modal.Body>
             )}
             {(attributes.close || attributes.proceed) && (
@@ -67,8 +67,7 @@ export default function MessageDialog({
                             <Button
                                 variant={`outline-${attributes.close?.variant ?? 'secondary'}`}
                                 onClick={() => {
-                                    attributes.close?.action && attributes.close?.action();
-                                    props.onHide();
+                                    attributes.close?.action ? attributes.close?.action() : props.onHide();
                                 }}
                                 style={{
                                     padding: '6px 3em',

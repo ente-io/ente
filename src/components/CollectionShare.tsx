@@ -91,7 +91,7 @@ function CollectionShare(props: Props) {
                     }}
                     onClick={() => collectionUnshare(sharee)}
                 >
-                  -
+                    -
                 </Button>
             </td>
         </tr>
@@ -103,7 +103,8 @@ function CollectionShare(props: Props) {
             attributes={{ title: constants.SHARE_COLLECTION }}
         >
             <DeadCenter style={{ width: '85%', margin: 'auto' }}>
-                <p>{constants.SHARE_WITH_PEOPLE}</p>
+                <h6>{constants.SHARE_WITH_PEOPLE}</h6>
+                <p />
                 <Formik<formValues>
                     initialValues={{ email: '' }}
                     validationSchema={Yup.object().shape({

@@ -62,7 +62,7 @@ const ListItem = styled.div`
     justify-content: center;
 `;
 
-const getTemplateColumns = (columns: number, groups?: number[]):string => {
+const getTemplateColumns = (columns: number, groups?: number[]): string => {
     if (groups) {
         const sum = groups.reduce((acc, item) => acc + item, 0);
         if (sum < columns) {
@@ -82,12 +82,12 @@ const ListContainer = styled.div<{ columns: number, groups?: number[] }>`
     width: 100%;
     color: #fff;
 
-    @media(max-width: ${IMAGE_CONTAINER_MAX_WIDTH*4}px) {
+    @media(max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
         padding: 0 4px;
     }
 `;
 
-const DateContainer = styled.div<{span: number}>`
+const DateContainer = styled.div<{ span: number }>`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -97,7 +97,7 @@ const DateContainer = styled.div<{span: number}>`
     height: ${DATE_CONTAINER_HEIGHT}px;
 `;
 
-const BannerContainer = styled.div<{span: number}>`
+const BannerContainer = styled.div<{ span: number }>`
     color: #979797;
     text-align: center;
     grid-column: span ${(props) => props.span};
@@ -293,7 +293,7 @@ const PhotoFrame = ({
                 try {
                     await new Promise((resolve, reject) => {
                         const video = document.createElement('video');
-                        video.addEventListener('timeupdate', function() {
+                        video.addEventListener('timeupdate', function () {
                             clearTimeout(t);
                             resolve(null);
                         });
@@ -396,8 +396,8 @@ const PhotoFrame = ({
 
     const isSameDay = (first, second) => (
         first.getFullYear() === second.getFullYear() &&
-            first.getMonth() === second.getMonth() &&
-            first.getDate() === second.getDate()
+        first.getMonth() === second.getMonth() &&
+        first.getDate() === second.getDate()
     );
 
     /**
@@ -472,11 +472,11 @@ const PhotoFrame = ({
             {!isFirstLoad && files.length === 0 && !searchMode ? (
                 <EmptyScreen>
                     <img height={150} src='/images/gallery.png' />
-                    <br/>
                     <Button
                         variant="outline-success"
                         onClick={openFileUploader}
                         style={{
+                            marginTop: '32px',
                             paddingLeft: '32px',
                             paddingRight: '32px',
                             paddingTop: '12px',
