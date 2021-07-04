@@ -105,11 +105,11 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                 padding: EdgeInsets.all(28),
                 child: Center(
                   child: Hero(
-                    tag: "sign_in",
+                    tag: "log_in",
                     child: Material(
                       type: MaterialType.transparency,
                       child: Text(
-                        "sign in",
+                        "log in",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -133,8 +133,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 
   Container _getSignUpButton(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 80, right: 80),
-      width: double.infinity,
+      width: 180,
       height: 64,
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(

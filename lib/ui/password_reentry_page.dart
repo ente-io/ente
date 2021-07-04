@@ -92,7 +92,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           width: double.infinity,
           height: 64,
           child: button(
-            "sign in",
+            "log in",
             fontSize: 18,
             onPressed: _passwordController.text.isNotEmpty
                 ? () async {

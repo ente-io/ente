@@ -31,11 +31,11 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: Hero(
-          tag: "sign_in",
+          tag: "log_in",
           child: Material(
             type: MaterialType.transparency,
             child: Text(
-              "sign in",
+              "log in",
               style: TextStyle(
                 fontSize: 16,
                 letterSpacing: 0.6,
@@ -82,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: "by clicking sign in, I agree to the ",
+                  text: "by clicking log in, I agree to the ",
                 ),
                 TextSpan(
                   text: "terms of service",
@@ -137,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
           height: 64,
           padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
           child: button(
-            "sign in",
+            "log in",
             onPressed: _email != null && _email.isNotEmpty
                 ? () {
                     if (!isValidEmail(_email)) {
