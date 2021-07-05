@@ -38,6 +38,7 @@ out_publish
 
 .env
 /.vscode/
+.idea/
 
 # workbox
 public/sw.js
