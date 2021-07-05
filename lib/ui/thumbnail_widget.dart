@@ -42,14 +42,27 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     ),
   );
 
-  static final kUnsyncedIconOverlay = Align(
-    alignment: Alignment.bottomRight,
-    child: Padding(
-      padding: const EdgeInsets.only(right: 8, bottom: 4),
-      child: Icon(
-        Icons.cloud_off_outlined,
-        size: 18,
-        color: Colors.white.withOpacity(0.8),
+  static final kUnsyncedIconOverlay = Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.transparent,
+          Colors.black.withOpacity(0.6),
+        ],
+        stops: [0.75, 1],
+      ),
+    ),
+    child: Align(
+      alignment: Alignment.bottomRight,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 8, bottom: 4),
+        child: Icon(
+          Icons.cloud_off_outlined,
+          size: 18,
+          color: Colors.white.withOpacity(0.9),
+        ),
       ),
     ),
   );

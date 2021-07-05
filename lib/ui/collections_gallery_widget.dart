@@ -220,6 +220,31 @@ class DeviceFolderIcon extends StatelessWidget {
     Key key,
   }) : super(key: key);
 
+  static final kUnsyncedIconOverlay = Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.transparent,
+          Colors.black.withOpacity(0.6),
+        ],
+        stops: [0.7, 1],
+      ),
+    ),
+    child: Align(
+      alignment: Alignment.bottomRight,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 8, bottom: 8),
+        child: Icon(
+          Icons.cloud_off_outlined,
+          size: 18,
+          color: Colors.white.withOpacity(0.9),
+        ),
+      ),
+    ),
+  );
+
   final DeviceFolder folder;
 
   @override
@@ -247,19 +272,7 @@ class DeviceFolderIcon extends StatelessWidget {
                             folder.path +
                             folder.thumbnail.tag()),
                       ),
-                      isBackedUp
-                          ? Container()
-                          : Align(
-                              alignment: Alignment.bottomRight,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.only(right: 8, bottom: 6),
-                                child: Icon(
-                                  Icons.cloud_off_outlined,
-                                  size: 18,
-                                ),
-                              ),
-                            )
+                      isBackedUp ? Container() : kUnsyncedIconOverlay,
                     ],
                   ),
                 ),
