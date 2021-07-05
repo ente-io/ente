@@ -403,7 +403,7 @@ export default function App({ Component, err }) {
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
-
+    const [pageRootURL, setPageRootURL] = useState<URL>(null);
     useEffect(() => {
         if (
             !('serviceWorker' in navigator) ||
@@ -454,6 +454,7 @@ export default function App({ Component, err }) {
                 setRedirectName(redirect);
             }
         }
+        setPageRootURL(new URL(window.location.href));
 
         router.events.on('routeChangeStart', (url: string) => {
             if (window.location.pathname !== url.split('?')[0]) {
@@ -490,30 +491,40 @@ export default function App({ Component, err }) {
             <Head>
                 <title>{constants.TITLE}</title>
                 {/* Cloudflare Web Analytics */}
-                {process.env.NODE_ENV === 'production' &&
+                {pageRootURL?.hostname && (pageRootURL.hostname === 'photos.ente.io' ?
                     <script
                         defer
                         src="https://static.cloudflareinsights.com/beacon.min.js"
                         data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
-                    />
+                    /> : pageRootURL.hostname === 'web.ente.io' ?
+                        < script
+                            defer
+                            src='https://static.cloudflareinsights.com/beacon.min.js'
+                            data-cf-beacon='{"token": "dfde128b7bb34a618ad34a08f1ba7609"}' /> :
+                        console.warn('Web analytics is disabled')
+                )
                 }
                 {/* End Cloudflare Web Analytics  */}
             </Head>
             <GlobalStyles />
-            {showNavbar && <Navbar>
-                <FlexContainer>
-                    <LogoImage
-                        style={{ height: '24px', padding: '3px' }}
-                        alt="logo"
-                        src="/icon.svg"
-                    />
-                </FlexContainer>
-            </Navbar>}
+            {
+                showNavbar && <Navbar>
+                    <FlexContainer>
+                        <LogoImage
+                            style={{ height: '24px', padding: '3px' }}
+                            alt="logo"
+                            src="/icon.svg"
+                        />
+                    </FlexContainer>
+                </Navbar>
+            }
             <MessageContainer>{offline && constants.OFFLINE_MSG}</MessageContainer>
-            {sharedFiles &&
+            {
+                sharedFiles &&
                 (router.pathname === '/gallery' ?
                     <MessageContainer>{constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}</MessageContainer> :
-                    <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(sharedFiles.length)}</MessageContainer>)}
+                    <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(sharedFiles.length)}</MessageContainer>)
+            }
             {flashMessage && <FlashMessageBar flashMessage={flashMessage} onClose={() => setFlashMessage(null)} />}
             <AppContext.Provider value={{
                 showNavBar,
