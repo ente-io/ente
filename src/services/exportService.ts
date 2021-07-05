@@ -8,6 +8,7 @@ enum ExportNotification {
     START = 'export started',
     IN_PROGRESS = 'export already in progress',
     FINISH = 'export finished',
+    FAILED = 'export failed',
     ABORT = 'export aborted',
 }
 class ExportService {
@@ -16,6 +17,7 @@ class ExportService {
     exportInProgress: Promise<void> = null;
 
     abortExport: boolean = false;
+    failedFiles: File[] = [];
 
     async exportFiles(files: File[], collections: Collection[]) {
         if (this.exportInProgress) {
@@ -58,24 +60,40 @@ class ExportService {
                 )}`;
                 const filePath = `${collectionIDMap.get(file.collectionID)}/${uid}`;
                 if (!exportedFiles.has(filePath)) {
-                    await this.downloadAndSave(file, filePath);
-                    this.ElectronAPIs.updateExportRecord(dir, filePath);
+                    try {
+                        await this.downloadAndSave(file, filePath);
+                        this.ElectronAPIs.updateExportRecord(dir, filePath);
+                    } catch (e) {
+                        this.failedFiles.push(file);
+                        logError(e, 'download and save failed for file during export');
+                    }
                 }
-                this.ElectronAPIs.showOnTray(
-                    `exporting file ${index + 1} / ${files.length}`,
-                );
+                this.ElectronAPIs.showOnTray({
+                    export_progress:
+                        `exporting file ${index + 1} / ${files.length}`,
+                });
             }
             this.ElectronAPIs.sendNotification(
                 this.abortExport ?
                     ExportNotification.ABORT :
-                    ExportNotification.FINISH,
+                    this.failedFiles.length > 0 ? ExportNotification.FAILED :
+                        ExportNotification.FINISH,
             );
+            if (this.failedFiles.length > 0) {
+                this.ElectronAPIs.registerRetryFailedExportListener(this.fileExporter.bind(this, this.failedFiles, collections));
+                this.ElectronAPIs.showOnTray({
+                    retry_export:
+                        `export failed - retry export`,
+                });
+            } else {
+                this.ElectronAPIs.showOnTray();
+            }
         } catch (e) {
             logError(e);
         } finally {
             this.exportInProgress = null;
-            this.ElectronAPIs.showOnTray();
             this.abortExport = false;
+            this.failedFiles = [];
         }
     }
 
