@@ -15,6 +15,7 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/local_sync_service.dart';
+import 'package:photos/ui/custom_app_bar.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/image_editor_page.dart';
 import 'package:photos/ui/video_widget.dart';
@@ -81,11 +82,7 @@ class _DetailPageState extends State<DetailPage> {
     _files = widget.config.files;
     _selectedIndex = widget.config.selectedIndex;
     _preloadEntries(_selectedIndex);
-    Future.delayed(Duration(seconds: 3), () {
-      setState(() {
-        _hasFocus = true;
-      });
-    });
+    _scheduleAppBarFocusGain();
     super.initState();
   }
 
@@ -99,7 +96,7 @@ class _DetailPageState extends State<DetailPage> {
         _files.length.toString() +
         " files .");
     return Scaffold(
-      appBar: _hasFocus ? _getHiddenActionBar() : _buildAppBar(),
+      appBar: _getAppBar(),
       extendBodyBehindAppBar: true,
       body: Center(
         child: Container(
@@ -107,6 +104,16 @@ class _DetailPageState extends State<DetailPage> {
         ),
       ),
       backgroundColor: Colors.black,
+    );
+  }
+
+  PreferredSizeWidget _getAppBar() {
+    return CustomAppBar(
+      AnimatedOpacity(
+        child: _buildAppBar(),
+        opacity: _hasFocus ? 0 : 1,
+        duration: Duration(milliseconds: _hasFocus ? 300 : 150),
+      ),
     );
   }
 
@@ -141,6 +148,9 @@ class _DetailPageState extends State<DetailPage> {
           onTap: () {
             setState(() {
               _hasFocus = !_hasFocus;
+              if (!_hasFocus) {
+                _scheduleAppBarFocusGain();
+              }
             });
           },
           child: content,
@@ -325,12 +335,14 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
-  AppBar _getHiddenActionBar() {
-    return AppBar(
-      backgroundColor: Color(0x00000000),
-      elevation: 0,
-      leading: Container(),
-    );
+  void _scheduleAppBarFocusGain() {
+    Future.delayed(Duration(seconds: 3), () {
+      if (mounted && !_hasFocus) {
+        setState(() {
+          _hasFocus = true;
+        });
+      }
+    });
   }
 
   Widget _getFavoriteButton() {
