@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/billing_service.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
@@ -96,13 +97,8 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
                       ),
                     ),
                     onPressed: () async {
-                      Navigator.of(context, rootNavigator: true).pop('dialog');
-                      final dialog =
-                          createProgressDialog(context, "logging out...");
-                      await dialog.show();
-                      await Configuration.instance.logout();
-                      await dialog.hide();
-                      Navigator.of(context).popUntil((route) => route.isFirst);
+                       Navigator.of(context, rootNavigator: true).pop('dialog');
+                       await UserService.instance.logout(context);
                     },
                   ),
                 ],

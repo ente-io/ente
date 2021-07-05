@@ -104,7 +104,6 @@ class Configuration {
     }
     await _preferences.clear();
     await _secureStorage.deleteAll();
-    await UserService.instance.logout();
     _key = null;
     _cachedToken = null;
     _secretKey = null;
