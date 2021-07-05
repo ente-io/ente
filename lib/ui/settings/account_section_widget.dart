@@ -97,8 +97,8 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
                       ),
                     ),
                     onPressed: () async {
-                       Navigator.of(context, rootNavigator: true).pop('dialog');
-                       await UserService.instance.logout(context);
+                      Navigator.of(context, rootNavigator: true).pop('dialog');
+                      await UserService.instance.logout(context);
                     },
                   ),
                 ],
