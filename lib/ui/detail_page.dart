@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -88,6 +89,11 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    Future.delayed(Duration.zero, () {
+      SystemChrome.setEnabledSystemUIOverlays(
+        _shouldHideAppBar ? [] : SystemUiOverlay.values,
+      );
+    });
     _logger.info("Opening " +
         _files[_selectedIndex].toString() +
         ". " +
@@ -110,10 +116,24 @@ class _DetailPageState extends State<DetailPage> {
   PreferredSizeWidget _getAppBar() {
     return CustomAppBar(
       AnimatedOpacity(
-        child: _buildAppBar(),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                Color.fromRGBO(10, 20, 20, 0.5),
+              ],
+              stops: [0, 1],
+            ),
+          ),
+          child: _buildAppBar(),
+        ),
         opacity: _shouldHideAppBar ? 0 : 1,
         duration: Duration(milliseconds: _shouldHideAppBar ? 300 : 150),
       ),
+      height: 80,
     );
   }
 
