@@ -19,12 +19,27 @@ export async function WaitFor2Seconds() {
         setTimeout(() => resolve(null), TwoSecondInMillSeconds);
     });
 }
+
 export function downloadApp() {
     const win = window.open(DESKTOP_APP_DOWNLOAD_URL, '_blank');
     win.focus();
 }
+
 export function reverseString(title: string) {
     return title
         ?.split(' ')
         .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
+}
+
+export async function retryPromise(promise: Promise<any>, retryCount: number = 2) {
+    try {
+        const resp = await promise;
+        return resp;
+    } catch (e) {
+        if (retryCount > 0) {
+            await retryPromise(promise, retryCount - 1);
+        } else {
+            throw e;
+        }
+    }
 }

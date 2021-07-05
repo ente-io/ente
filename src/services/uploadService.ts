@@ -4,7 +4,7 @@ import EXIF from 'exif-js';
 import { File, fileAttribute } from './fileService';
 import { Collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
-import { checkConnectivity, WaitFor2Seconds } from 'utils/common';
+import { checkConnectivity, retryPromise, WaitFor2Seconds } from 'utils/common';
 import {
     ErrorHandler,
     THUMBNAIL_GENERATION_FAILED,
@@ -871,7 +871,7 @@ class UploadService {
         filename: string,
     ): Promise<string> {
         try {
-            await this.retryPromise(
+            await retryPromise(
                 HTTPService.put(
                     fileUploadURL.url,
                     file,
@@ -915,7 +915,7 @@ class UploadService {
                     }
                 }
                 const uploadChunk = Uint8Array.from(combinedChunks);
-                const response = await this.retryPromise(
+                const response = await retryPromise(
                     HTTPService.put(
                         fileUploadURL,
                         uploadChunk,
@@ -934,7 +934,7 @@ class UploadService {
                 { CompleteMultipartUpload: { Part: resParts } },
                 options,
             );
-            await this.retryPromise(
+            await retryPromise(
                 HTTPService.post(multipartUploadURLs.completeURL, body, null, {
                     'content-type': 'text/xml',
                 }),
@@ -1051,18 +1051,6 @@ class UploadService {
         }
 
         return dd;
-    }
-    private async retryPromise(promise: Promise<any>, retryCount: number = 2) {
-        try {
-            const resp = await promise;
-            return resp;
-        } catch (e) {
-            if (retryCount > 0) {
-                await this.retryPromise(promise, retryCount - 1);
-            } else {
-                throw e;
-            }
-        }
     }
 }
 

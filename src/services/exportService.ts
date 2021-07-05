@@ -1,4 +1,4 @@
-import { runningInBrowser } from 'utils/common';
+import { retryPromise, runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
 import { Collection } from './collectionService';
 import downloadManager from './downloadManager';
@@ -80,7 +80,7 @@ class ExportService {
     }
 
     async downloadAndSave(file: File, path) {
-        const fileStream = await downloadManager.downloadFile(file);
+        const fileStream = await retryPromise(downloadManager.downloadFile(file));
         this.ElectronAPIs.saveStreamToDisk(path, fileStream);
         this.ElectronAPIs.saveFileToDisk(
             `${path}.json`,
