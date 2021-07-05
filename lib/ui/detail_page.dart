@@ -77,6 +77,7 @@ class _DetailPageState extends State<DetailPage> {
   bool _hasLoadedTillStart = false;
   bool _hasLoadedTillEnd = false;
   bool _shouldHideAppBar = false;
+  bool _hasTapped = false;
 
   @override
   void initState() {
@@ -171,6 +172,7 @@ class _DetailPageState extends State<DetailPage> {
               if (!_shouldHideAppBar) {
                 _scheduleAppBarHide();
               }
+              _hasTapped = true;
             });
           },
           child: content,
@@ -365,8 +367,8 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   void _scheduleAppBarHide() {
-    Future.delayed(Duration(seconds: 5), () {
-      if (mounted && !_shouldHideAppBar) {
+    Future.delayed(Duration(seconds: 3), () {
+      if (mounted && !_shouldHideAppBar && !_hasTapped) {
         setState(() {
           _shouldHideAppBar = true;
         });
