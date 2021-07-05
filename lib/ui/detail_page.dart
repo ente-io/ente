@@ -107,7 +107,12 @@ class _DetailPageState extends State<DetailPage> {
       extendBodyBehindAppBar: true,
       body: Center(
         child: Container(
-          child: _buildPageView(),
+          child: Stack(
+            children: [
+              _buildPageView(),
+              _getBottomBar(),
+            ],
+          ),
         ),
       ),
       backgroundColor: Colors.black,
@@ -135,6 +140,58 @@ class _DetailPageState extends State<DetailPage> {
         duration: Duration(milliseconds: _shouldHideAppBar ? 300 : 150),
       ),
       height: 80,
+    );
+  }
+
+  Widget _getBottomBar() {
+    if (_shouldHideAppBar) {
+      return Container();
+    }
+    List<Widget> children = [];
+    children.add(
+      Padding(
+        padding: const EdgeInsets.only(top: 12, bottom: 12),
+        child: IconButton(
+          icon: Icon(Icons.info_outline),
+          onPressed: () {
+            _displayInfo(_files[_selectedIndex]);
+          },
+        ),
+      ),
+    );
+    if (_files[_selectedIndex].fileType == FileType.image) {
+      children.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 12, bottom: 12),
+          child: IconButton(
+            icon: Icon(Icons.edit_outlined),
+            onPressed: () {
+              _editFile(_files[_selectedIndex]);
+            },
+          ),
+        ),
+      );
+    }
+    children.add(
+      Padding(
+        padding: const EdgeInsets.only(top: 12, bottom: 12),
+        child: IconButton(
+          icon: Icon(Icons.share_outlined),
+          onPressed: () {
+            share(context, [_files[_selectedIndex]]);
+          },
+        ),
+      ),
+    );
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Container(
+        color: Colors.black.withOpacity(0.2),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: children,
+        ),
+      ),
     );
   }
 
@@ -235,72 +292,9 @@ class _DetailPageState extends State<DetailPage> {
   AppBar _buildAppBar() {
     final List<Widget> actions = [];
     actions.add(_getFavoriteButton());
-    if (_files[_selectedIndex].fileType == FileType.image) {
-      actions.add(
-        Padding(
-          padding: const EdgeInsets.only(left: 8),
-          child: IconButton(
-            onPressed: () async {
-              final dialog = createProgressDialog(context, "please wait...");
-              await dialog.show();
-              final file = _files[_selectedIndex];
-              final imageProvider = ExtendedFileImageProvider(
-                  await getFile(file),
-                  cacheRawData: true);
-              await precacheImage(imageProvider, context);
-              await dialog.hide();
-              replacePage(
-                context,
-                ImageEditorPage(
-                  imageProvider,
-                  file,
-                  widget.config.copyWith(
-                    files: _files,
-                    selectedIndex: _selectedIndex,
-                  ),
-                ),
-              );
-            },
-            icon: Icon(
-              Icons.edit,
-              size: 24,
-            ),
-          ),
-        ),
-      );
-    }
     actions.add(PopupMenuButton(
       itemBuilder: (context) {
-        final items = [
-          PopupMenuItem(
-            value: 1,
-            child: Row(
-              children: [
-                Icon(Platform.isAndroid
-                    ? Icons.share_outlined
-                    : CupertinoIcons.share),
-                Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text("share"),
-              ],
-            ),
-          ),
-          PopupMenuItem(
-            value: 2,
-            child: Row(
-              children: [
-                Icon(Platform.isAndroid
-                    ? Icons.info_outline
-                    : CupertinoIcons.info),
-                Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text("info"),
-              ],
-            ),
-          ),
-        ];
+        final List<PopupMenuItem> items = [];
         if (_files[_selectedIndex].localID == null) {
           items.add(
             PopupMenuItem(
@@ -360,6 +354,26 @@ class _DetailPageState extends State<DetailPage> {
       actions: actions,
       backgroundColor: Color(0x00000000),
       elevation: 0,
+    );
+  }
+
+  Future<void> _editFile(File file) async {
+    final dialog = createProgressDialog(context, "please wait...");
+    await dialog.show();
+    final imageProvider =
+        ExtendedFileImageProvider(await getFile(file), cacheRawData: true);
+    await precacheImage(imageProvider, context);
+    await dialog.hide();
+    replacePage(
+      context,
+      ImageEditorPage(
+        imageProvider,
+        file,
+        widget.config.copyWith(
+          files: _files,
+          selectedIndex: _selectedIndex,
+        ),
+      ),
     );
   }
 
