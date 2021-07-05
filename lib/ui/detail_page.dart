@@ -75,14 +75,14 @@ class _DetailPageState extends State<DetailPage> {
   bool _hasPageChanged = false;
   bool _hasLoadedTillStart = false;
   bool _hasLoadedTillEnd = false;
-  bool _hasFocus = false;
+  bool _shouldHideAppBar = false;
 
   @override
   void initState() {
     _files = widget.config.files;
     _selectedIndex = widget.config.selectedIndex;
     _preloadEntries(_selectedIndex);
-    _scheduleAppBarFocusGain();
+    _scheduleAppBarHide();
     super.initState();
   }
 
@@ -111,8 +111,8 @@ class _DetailPageState extends State<DetailPage> {
     return CustomAppBar(
       AnimatedOpacity(
         child: _buildAppBar(),
-        opacity: _hasFocus ? 0 : 1,
-        duration: Duration(milliseconds: _hasFocus ? 300 : 150),
+        opacity: _shouldHideAppBar ? 0 : 1,
+        duration: Duration(milliseconds: _shouldHideAppBar ? 300 : 150),
       ),
     );
   }
@@ -147,9 +147,9 @@ class _DetailPageState extends State<DetailPage> {
         return GestureDetector(
           onTap: () {
             setState(() {
-              _hasFocus = !_hasFocus;
-              if (!_hasFocus) {
-                _scheduleAppBarFocusGain();
+              _shouldHideAppBar = !_shouldHideAppBar;
+              if (!_shouldHideAppBar) {
+                _scheduleAppBarHide();
               }
             });
           },
@@ -335,11 +335,11 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
-  void _scheduleAppBarFocusGain() {
-    Future.delayed(Duration(seconds: 3), () {
-      if (mounted && !_hasFocus) {
+  void _scheduleAppBarHide() {
+    Future.delayed(Duration(seconds: 5), () {
+      if (mounted && !_shouldHideAppBar) {
         setState(() {
-          _hasFocus = true;
+          _shouldHideAppBar = true;
         });
       }
     });
