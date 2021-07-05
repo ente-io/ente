@@ -1,8 +1,9 @@
 import { retryPromise, runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
-import { Collection } from './collectionService';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { Collection, getLocalCollections } from './collectionService';
 import downloadManager from './downloadManager';
-import { File } from './fileService';
+import { File, getLocalFiles } from './fileService';
 
 enum ExportNotification {
     START = 'export started',
@@ -12,13 +13,24 @@ enum ExportNotification {
     ABORT = 'export aborted',
 }
 class ExportService {
-    ElectronAPIs: any = runningInBrowser() && window['ElectronAPIs'];
+    ElectronAPIs: any;
 
     exportInProgress: Promise<void> = null;
 
     abortExport: boolean = false;
     failedFiles: File[] = [];
-
+    constructor() {
+        const main = async () => {
+            this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
+            if (this.ElectronAPIs) {
+                const autoStartExport = getData(LS_KEYS.EXPORT_IN_PROGRESS);
+                if (autoStartExport?.status) {
+                    this.exportFiles(await getLocalFiles(), await getLocalCollections());
+                }
+            }
+        };
+        main();
+    }
     async exportFiles(files: File[], collections: Collection[]) {
         if (this.exportInProgress) {
             this.ElectronAPIs.sendNotification(ExportNotification.IN_PROGRESS);
@@ -42,6 +54,7 @@ class ExportService {
             this.ElectronAPIs.registerStopExportListener(
                 () => (this.abortExport = true),
             );
+            setData(LS_KEYS.EXPORT_IN_PROGRESS, { status: true });
             const collectionIDMap = new Map<number, string>();
             for (const collection of collections) {
                 const collectionFolderPath = `${dir}/${collection.id}_${this.sanitizeName(collection.name)}`;
@@ -87,6 +100,7 @@ class ExportService {
                 });
             } else {
                 this.ElectronAPIs.showOnTray();
+                setData(LS_KEYS.EXPORT_IN_PROGRESS, { status: false });
             }
         } catch (e) {
             logError(e);
