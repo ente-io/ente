@@ -351,13 +351,10 @@ class _DetailPageState extends State<DetailPage> {
       },
     ));
     return AppBar(
-      title: Padding(
-        padding: const EdgeInsets.only(top: 6),
-        child: Text(
-          getDayTitle(_files[_selectedIndex].creationTime),
-          style: TextStyle(
-            fontSize: 14,
-          ),
+      title: Text(
+        getDayTitle(_files[_selectedIndex].creationTime),
+        style: TextStyle(
+          fontSize: 14,
         ),
       ),
       actions: actions,

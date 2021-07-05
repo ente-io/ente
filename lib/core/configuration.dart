@@ -254,9 +254,9 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
-    if (kDebugMode) {
-      return "http://192.168.1.123:8080";
-    }
+    // if (kDebugMode) {
+    //   return "http://192.168.1.123:8080";
+    // }
     return "https://api.ente.io";
   }
 
