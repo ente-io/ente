@@ -74,12 +74,18 @@ class _DetailPageState extends State<DetailPage> {
   bool _hasPageChanged = false;
   bool _hasLoadedTillStart = false;
   bool _hasLoadedTillEnd = false;
+  bool _hasFocus = false;
 
   @override
   void initState() {
     _files = widget.config.files;
     _selectedIndex = widget.config.selectedIndex;
     _preloadEntries(_selectedIndex);
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        _hasFocus = true;
+      });
+    });
     super.initState();
   }
 
@@ -93,7 +99,7 @@ class _DetailPageState extends State<DetailPage> {
         _files.length.toString() +
         " files .");
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: _hasFocus ? _getHiddenActionBar() : _buildAppBar(),
       extendBodyBehindAppBar: true,
       body: Center(
         child: Container(
@@ -131,7 +137,14 @@ class _DetailPageState extends State<DetailPage> {
           content = Icon(Icons.error);
         }
         _preloadFiles(index);
-        return content;
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _hasFocus = !_hasFocus;
+            });
+          },
+          child: content,
+        );
       },
       onPageChanged: (index) {
         setState(() {
@@ -309,6 +322,14 @@ class _DetailPageState extends State<DetailPage> {
       actions: actions,
       backgroundColor: Color(0x00000000),
       elevation: 0,
+    );
+  }
+
+  AppBar _getHiddenActionBar() {
+    return AppBar(
+      backgroundColor: Color(0x00000000),
+      elevation: 0,
+      leading: Container(),
     );
   }
 
