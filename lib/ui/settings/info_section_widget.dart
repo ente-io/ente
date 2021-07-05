@@ -83,11 +83,13 @@ class InfoSectionWidget extends StatelessWidget {
                     await dialog.hide();
                     if (shouldUpdate) {
                       showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AppUpdateDialog(
-                                UpdateService.instance.getLatestVersionInfo());
-                          });
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AppUpdateDialog(
+                              UpdateService.instance.getLatestVersionInfo());
+                        },
+                        barrierColor: Colors.black.withOpacity(0.85),
+                      );
                     } else {
                       showToast("you are on the latest version");
                     }

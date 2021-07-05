@@ -159,11 +159,13 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (shouldUpdate) {
         Future.delayed(Duration.zero, () {
           showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AppUpdateDialog(
-                    UpdateService.instance.getLatestVersionInfo());
-              });
+            context: context,
+            builder: (BuildContext context) {
+              return AppUpdateDialog(
+                  UpdateService.instance.getLatestVersionInfo());
+            },
+            barrierColor: Colors.black.withOpacity(0.85),
+          );
         });
       }
     });
