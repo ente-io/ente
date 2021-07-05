@@ -90,6 +90,21 @@ class UserService {
     }
   }
 
+  Future<bool> logout() async {
+    try {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/logout",
+        options: Options(headers: {
+          "X-Auth-Token": _config.getToken(),
+        }),
+      );
+      return response != null && response.statusCode == 200;
+    } on DioError catch (e) {
+      _logger.warning(e);
+      return false;
+    }
+  }
+
   Future<void> verifyEmail(BuildContext context, String ott) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
