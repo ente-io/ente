@@ -90,6 +90,31 @@ class UserService {
     }
   }
 
+  Future<void> logout(BuildContext context) async {
+    final dialog = createProgressDialog(context, "logging out...");
+    await dialog.show();
+    try {
+      final response =
+          await _dio.post(_config.getHttpEndpoint() + "/users/logout",
+              options: Options(
+                headers: {
+                  "X-Auth-Token": _config.getToken(),
+                },
+              ));
+      if (response != null && response.statusCode == 200) {
+        await Configuration.instance.logout();
+        await dialog.hide();
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      } else {
+        throw new Exception("log out action failed");
+      }
+    } catch (e) {
+      _logger.severe(e);
+      await dialog.hide();
+      showGenericErrorDialog(context);
+    }
+  }
+
   Future<void> verifyEmail(BuildContext context, String ott) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();

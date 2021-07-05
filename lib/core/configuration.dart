@@ -22,6 +22,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:photos/utils/crypto_util.dart';
 
