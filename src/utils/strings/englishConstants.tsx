@@ -436,6 +436,9 @@ const englishConstants = {
     EXPORT_IN_PROGRESS: 'export in progress...',
     PAUSE: 'pause',
     MINIMIZE: 'minimize',
+    LAST_EXPORT_TIME: 'last export time',
+    SUCCESSFULLY_EXPORTED_FILES: 'successfully exported files',
+    FAILED_EXPORTED_FILES: 'failed file export',
 };
 
 export default englishConstants;

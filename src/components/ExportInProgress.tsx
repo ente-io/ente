@@ -6,8 +6,8 @@ import InProgressIcon from './icons/InProgressIcon';
 import MessageDialog from './MessageDialog';
 import { Label, Row, Value } from './Container';
 
-const ComfySpan = styled.span`
-    margin:0 0.2rem;
+export const ComfySpan = styled.span`
+    word-spacing:1rem;
     color:#ddd;
 `;
 export default function ExportInit(props) {
@@ -33,7 +33,7 @@ export default function ExportInit(props) {
             </div>
             <div style={{ marginBottom: '30px', padding: '0 5%', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
                 <div style={{ marginBottom: '10px' }}>
-                    <ComfySpan> 10 </ComfySpan><ComfySpan> / </ComfySpan><ComfySpan> 24 </ComfySpan> <span style={{ marginLeft: '10px' }}> files exported</span>
+                    <ComfySpan> 10 / 24 </ComfySpan> <span style={{ marginLeft: '10px' }}> files exported</span>
                 </div>
                 <div style={{ width: '100%', marginBottom: '30px' }}>
                     <ProgressBar
