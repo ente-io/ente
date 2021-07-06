@@ -96,6 +96,8 @@ export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) => HTTPS
 );
 
 export const logoutUser = async () => {
+    // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
+    await _logout();
     clearKeys();
     clearData();
     await caches.delete('thumbs');
@@ -167,4 +169,16 @@ export const getTwoFactorStatus = async () => {
         'X-Auth-Token': getToken(),
     });
     return resp.data['status'];
+};
+
+export const _logout = async () => {
+    if (!getToken()) return true;
+    try {
+        await HTTPService.post(`${ENDPOINT}/users/logout`, null, null, {
+            'X-Auth-Token': getToken(),
+        });
+        return true;
+    } catch (e) {
+        return false;
+    }
 };
