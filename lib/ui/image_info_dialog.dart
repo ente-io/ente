@@ -10,7 +10,12 @@ class FileInfoWidget extends StatelessWidget {
   final AssetEntity entity;
   final int fileSize;
 
-  const FileInfoWidget(this.file,  this.entity, this.fileSize, {Key key}) : super(key: key);
+  const FileInfoWidget(
+    this.file,
+    this.entity,
+    this.fileSize, {
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
