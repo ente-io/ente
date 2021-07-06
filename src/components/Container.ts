@@ -43,13 +43,14 @@ export const Row = styled.div`
     flex:1
 `;
 
-export const Label = styled.div`
-    width:70%;
+export const Label = styled.div <{ width?: string }> `
+    width:${(props) => props.width ?? '70%'};
 `;
-export const Value = styled.div`
+export const Value = styled.div <{ width?: string }> `
     display:flex;
     justify-content:center;
-    width:30%;
+    align-items:center;
+    width:${(props) => props.width ?? '30%'};
     text-align: center;
     color: #ddd;
 `;
