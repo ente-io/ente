@@ -95,49 +95,57 @@ class FileInfoWidget extends StatelessWidget {
     items.add(
       Padding(padding: EdgeInsets.all(12)),
     );
+    final List<Widget> actions = [];
+    if (file.fileType == FileType.image) {
+      actions.add(
+        TextButton(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Icon(
+                Icons.camera_outlined,
+                color: Colors.white,
+              ),
+              Padding(padding: EdgeInsets.all(4)),
+              Text(
+                "view exif",
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.8),
+                ),
+              ),
+            ],
+          ),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return ExifInfoDialog(file);
+              },
+              barrierColor: Colors.black87,
+            );
+          },
+        ),
+      );
+    }
+    actions.add(
+      TextButton(
+        child: Text(
+          "close",
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.8),
+          ),
+        ),
+        onPressed: () {
+          Navigator.of(context, rootNavigator: true).pop('dialog');
+        },
+      ),
+    );
     items.add(
       Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          TextButton(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Icon(
-                  Icons.camera_outlined,
-                  color: Colors.white,
-                ),
-                Padding(padding: EdgeInsets.all(4)),
-                Text(
-                  "view exif",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                  ),
-                ),
-              ],
-            ),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return ExifInfoDialog(file);
-                },
-                barrierColor: Colors.black87,
-              );
-            },
-          ),
-          TextButton(
-            child: Text(
-              "close",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-              ),
-            ),
-            onPressed: () {
-              Navigator.of(context, rootNavigator: true).pop('dialog');
-            },
-          ),
-        ],
+        mainAxisAlignment: file.fileType == FileType.image
+            ? MainAxisAlignment.spaceBetween
+            : MainAxisAlignment.end,
+        children: actions,
       ),
     );
     return AlertDialog(
