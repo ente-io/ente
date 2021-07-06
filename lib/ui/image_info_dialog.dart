@@ -1,14 +1,12 @@
-import 'package:exif/exif.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/exif_info_dialog.dart';
 import 'package:photos/utils/date_time_util.dart';
-import 'package:photos/utils/file_util.dart';
 
-class FileInfoWidget extends StatefulWidget {
+class FileInfoWidget extends StatelessWidget {
   final File file;
   final AssetEntity entity;
   final int fileSize;
@@ -21,17 +19,6 @@ class FileInfoWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _FileInfoWidgetState createState() => _FileInfoWidgetState();
-}
-
-class _FileInfoWidgetState extends State<FileInfoWidget> {
-  @override
-  void initState() {
-    _getExif();
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     var items = <Widget>[
       Row(
@@ -39,7 +26,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           Icon(Icons.calendar_today_outlined),
           Padding(padding: EdgeInsets.all(4)),
           Text(getFormattedTime(
-              DateTime.fromMicrosecondsSinceEpoch(widget.file.creationTime))),
+              DateTime.fromMicrosecondsSinceEpoch(file.creationTime))),
         ],
       ),
       Padding(padding: EdgeInsets.all(4)),
@@ -47,36 +34,34 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         children: [
           Icon(Icons.folder_outlined),
           Padding(padding: EdgeInsets.all(4)),
-          Text(widget.file.deviceFolder ??
+          Text(file.deviceFolder ??
               CollectionsService.instance
-                  .getCollectionByID(widget.file.collectionID)
+                  .getCollectionByID(file.collectionID)
                   .name),
         ],
       ),
       Padding(padding: EdgeInsets.all(4)),
     ];
-    if (widget.file.localID != null) {
+    if (file.localID != null) {
       items.add(
         Row(
           children: [
             Icon(Icons.sd_storage_outlined),
             Padding(padding: EdgeInsets.all(4)),
-            Text((widget.fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB"),
+            Text((fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB"),
           ],
         ),
       );
       items.add(
         Padding(padding: EdgeInsets.all(4)),
       );
-      if (widget.file.fileType == FileType.image) {
+      if (file.fileType == FileType.image) {
         items.add(
           Row(
             children: [
               Icon(Icons.photo_size_select_actual_outlined),
               Padding(padding: EdgeInsets.all(4)),
-              Text(widget.entity.width.toString() +
-                  " x " +
-                  widget.entity.height.toString()),
+              Text(entity.width.toString() + " x " + entity.height.toString()),
             ],
           ),
         );
@@ -86,7 +71,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             children: [
               Icon(Icons.timer_outlined),
               Padding(padding: EdgeInsets.all(4)),
-              Text(widget.entity.videoDuration.toString().split(".")[0]),
+              Text(entity.videoDuration.toString().split(".")[0]),
             ],
           ),
         );
@@ -95,14 +80,14 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         Padding(padding: EdgeInsets.all(4)),
       );
     }
-    if (widget.file.uploadedFileID != null) {
+    if (file.uploadedFileID != null) {
       items.add(
         Row(
           children: [
             Icon(Icons.cloud_upload_outlined),
             Padding(padding: EdgeInsets.all(4)),
             Text(getFormattedTime(
-                DateTime.fromMicrosecondsSinceEpoch(widget.file.updationTime))),
+                DateTime.fromMicrosecondsSinceEpoch(file.updationTime))),
           ],
         ),
       );
@@ -133,6 +118,13 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             ),
             onPressed: () {
               Navigator.of(context, rootNavigator: true).pop('dialog');
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return ExifInfoDialog(file);
+                },
+                barrierColor: Colors.black87,
+              );
             },
           ),
           TextButton(
@@ -150,19 +142,12 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       ),
     );
     return AlertDialog(
-      title: Text(widget.file.title),
+      title: Text(file.title),
       content: SingleChildScrollView(
         child: ListBody(
           children: items,
         ),
       ),
     );
-  }
-
-  Future<void> _getExif() async {
-    final exif = await readExifFromFile(await getFile(widget.file));
-    for (String key in exif.keys) {
-      Logger("ImageInfo").info("$key (${exif[key].tagType}): ${exif[key]}");
-    }
   }
 }
