@@ -428,7 +428,14 @@ const englishConstants = {
     TWO_FACTOR_SETUP_SUCCESS: 'two factor authentication successfully configured',
     TWO_FACTOR_DISABLE_SUCCESS: 'two factor authentication disabled',
     TWO_FACTOR_DISABLE_FAILED: 'failed to disable two factor, please try again',
-
+    EXPORT_DATA: 'export data',
+    SELECT_FOLDER: 'select folder',
+    DESTINATION: 'destination',
+    TOTAL_EXPORT_SIZE: 'total export size',
+    START: 'start',
+    EXPORT_IN_PROGRESS: 'export in progress...',
+    PAUSE: 'pause',
+    MINIMIZE: 'minimize',
 };
 
 export default englishConstants;
