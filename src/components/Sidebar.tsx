@@ -29,7 +29,9 @@ import { SetDialogMessage } from './MessageDialog';
 import EnteSpinner from './EnteSpinner';
 import RecoveryKeyModal from './RecoveryKeyModal';
 import TwoFactorModal from './TwoFactorModal';
+import ExportModal from './ExportModal';
 import { SetLoading } from 'pages/gallery';
+import InProgressIcon from './icons/InProgressIcon';
 
 interface Props {
     files: File[];
@@ -49,6 +51,7 @@ export default function Sidebar(props: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
+    const [exportModalView, setExportModalView] = useState(true);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -74,6 +77,7 @@ export default function Sidebar(props: Props) {
         a.rel = 'noreferrer noopener';
         a.click();
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function exportFiles() {
         if (isElectron()) {
             exportService.exportFiles(props.files, props.collections);
@@ -242,9 +246,15 @@ export default function Sidebar(props: Props) {
                 >
                     {constants.CHANGE_PASSWORD}
                 </LinkButton>
-                <LinkButton style={{ marginTop: '30px' }} onClick={exportFiles}>
-                    {constants.EXPORT}
-                </LinkButton>
+                <>
+                    <ExportModal show={exportModalView} onHide={() => setExportModalView(false)} />
+                    <LinkButton style={{ marginTop: '30px' }} onClick={() => setExportModalView(true)}>
+                        <div style={{ display: 'flex' }}>
+                            {constants.EXPORT}<div style={{ width: '20px' }} />
+                            <InProgressIcon />
+                        </div>
+                    </LinkButton>
+                </>
                 <div
                     style={{
                         height: '1px',
@@ -277,6 +287,6 @@ export default function Sidebar(props: Props) {
                     }}
                 />
             </div>
-        </Menu>
+        </Menu >
     );
 }
