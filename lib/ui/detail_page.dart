@@ -126,8 +126,8 @@ class _DetailPageState extends State<DetailPage> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.8),
                 Colors.black.withOpacity(0.64),
+                Colors.black.withOpacity(0.5),
                 Colors.transparent,
               ],
               stops: [0, 0.2, 1],
@@ -189,8 +189,8 @@ class _DetailPageState extends State<DetailPage> {
               end: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
+                Colors.black.withOpacity(0.5),
                 Colors.black.withOpacity(0.64),
-                Colors.black.withOpacity(0.8),
               ],
               stops: [0, 0.8, 1],
             ),
