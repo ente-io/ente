@@ -139,6 +139,10 @@ class _DetailPageState extends State<DetailPage> {
             file,
             autoPlay: !_hasPageChanged, // Autoplay if it was opened directly
             tagPrefix: widget.config.tagPrefix,
+            playbackCallback: (isPlaying) {
+              _shouldHideAppBar = isPlaying;
+              _toggleFullScreen();
+            },
           );
         } else {
           content = Icon(Icons.error);
@@ -147,18 +151,7 @@ class _DetailPageState extends State<DetailPage> {
         return GestureDetector(
           onTap: () {
             _shouldHideAppBar = !_shouldHideAppBar;
-            if (_shouldHideAppBar) {
-              _appBarKey.currentState.hide();
-              _bottomBarKey.currentState.hide();
-            } else {
-              _appBarKey.currentState.show();
-              _bottomBarKey.currentState.show();
-            }
-            Future.delayed(Duration.zero, () {
-              SystemChrome.setEnabledSystemUIOverlays(
-                _shouldHideAppBar ? [] : SystemUiOverlay.values,
-              );
-            });
+            _toggleFullScreen();
           },
           child: content,
         );
@@ -177,6 +170,21 @@ class _DetailPageState extends State<DetailPage> {
       controller: _pageController,
       itemCount: _files.length,
     );
+  }
+
+  void _toggleFullScreen() {
+    if (_shouldHideAppBar) {
+      _appBarKey.currentState.hide();
+      _bottomBarKey.currentState.hide();
+    } else {
+      _appBarKey.currentState.show();
+      _bottomBarKey.currentState.show();
+    }
+    Future.delayed(Duration.zero, () {
+      SystemChrome.setEnabledSystemUIOverlays(
+        _shouldHideAppBar ? [] : SystemUiOverlay.values,
+      );
+    });
   }
 
   void _preloadEntries(int index) async {

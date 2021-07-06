@@ -17,10 +17,13 @@ class VideoWidget extends StatefulWidget {
   final File file;
   final bool autoPlay;
   final String tagPrefix;
+  final Function(bool) playbackCallback;
+
   VideoWidget(
     this.file, {
     this.autoPlay = false,
     this.tagPrefix,
+    this.playbackCallback,
     Key key,
   }) : super(key: key);
 
@@ -33,6 +36,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   VideoPlayerController _videoPlayerController;
   ChewieController _chewieController;
   double _progress;
+  bool _isPlaying;
 
   @override
   void initState() {
@@ -149,6 +153,14 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   Widget _getVideoPlayer() {
+    _videoPlayerController.addListener(() {
+      if (_isPlaying != _videoPlayerController.value.isPlaying) {
+        _isPlaying = _videoPlayerController.value.isPlaying;
+        if (widget.playbackCallback != null) {
+          widget.playbackCallback(_isPlaying);
+        }
+      }
+    });
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController,
       aspectRatio: _videoPlayerController.value.aspectRatio,
