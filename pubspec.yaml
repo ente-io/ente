@@ -93,6 +93,7 @@ dependencies:
   flutter_easyloading: ^3.0.0
   device_info: ^2.0.2
   wallpaper_manager: ^1.0.10
+  exif: ^3.0.0
 
 dev_dependencies:
   flutter_test:
