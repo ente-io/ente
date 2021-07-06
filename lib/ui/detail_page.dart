@@ -13,7 +13,6 @@ import 'package:photos/events/local_photos_updated_event.dart';
 
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/custom_app_bar.dart';
@@ -86,6 +85,12 @@ class _DetailPageState extends State<DetailPage> {
     _selectedIndex = widget.config.selectedIndex;
     _preloadEntries(_selectedIndex);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    super.dispose();
   }
 
   @override
