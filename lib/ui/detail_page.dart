@@ -128,25 +128,23 @@ class _DetailPageState extends State<DetailPage> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
+                Colors.black.withOpacity(0.8),
+                Colors.black.withOpacity(0.64),
                 Colors.transparent,
-                Color.fromRGBO(10, 20, 20, 0.5),
               ],
-              stops: [0, 1],
+              stops: [0, 0.2, 1],
             ),
           ),
           child: _buildAppBar(),
         ),
         opacity: _shouldHideAppBar ? 0 : 1,
-        duration: Duration(milliseconds: _shouldHideAppBar ? 300 : 150),
+        duration: Duration(milliseconds: 150),
       ),
-      height: 80,
+      height: 100,
     );
   }
 
   Widget _getBottomBar() {
-    if (_shouldHideAppBar) {
-      return Container();
-    }
     List<Widget> children = [];
     children.add(
       Padding(
@@ -183,15 +181,33 @@ class _DetailPageState extends State<DetailPage> {
         ),
       ),
     );
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        color: Colors.black.withOpacity(0.2),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: children,
+    return AnimatedOpacity(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                Colors.black.withOpacity(0.64),
+                Colors.black.withOpacity(0.8),
+              ],
+              stops: [0, 0.8, 1],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: children,
+            ),
+          ),
         ),
       ),
+      opacity: _shouldHideAppBar ? 0 : 1,
+      duration: Duration(milliseconds: 150),
     );
   }
 
