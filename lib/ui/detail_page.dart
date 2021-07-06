@@ -77,14 +77,12 @@ class _DetailPageState extends State<DetailPage> {
   bool _hasLoadedTillStart = false;
   bool _hasLoadedTillEnd = false;
   bool _shouldHideAppBar = false;
-  bool _hasTapped = false;
 
   @override
   void initState() {
     _files = widget.config.files;
     _selectedIndex = widget.config.selectedIndex;
     _preloadEntries(_selectedIndex);
-    _scheduleAppBarHide();
     super.initState();
   }
 
@@ -242,10 +240,6 @@ class _DetailPageState extends State<DetailPage> {
           onTap: () {
             setState(() {
               _shouldHideAppBar = !_shouldHideAppBar;
-              if (!_shouldHideAppBar) {
-                _scheduleAppBarHide();
-              }
-              _hasTapped = true;
             });
           },
           child: content,
@@ -391,16 +385,6 @@ class _DetailPageState extends State<DetailPage> {
         ),
       ),
     );
-  }
-
-  void _scheduleAppBarHide() {
-    Future.delayed(Duration(seconds: 3), () {
-      if (mounted && !_shouldHideAppBar && !_hasTapped) {
-        setState(() {
-          _shouldHideAppBar = true;
-        });
-      }
-    });
   }
 
   Widget _getFavoriteButton() {
