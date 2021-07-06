@@ -1,34 +1,19 @@
-import 'dart:io';
-
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
-import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
-
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/services/favorites_service.dart';
-import 'package:photos/services/local_sync_service.dart';
-import 'package:photos/ui/custom_app_bar.dart';
+import 'package:photos/ui/fading_app_bar.dart';
+import 'package:photos/ui/fading_bottom_bar.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/image_editor_page.dart';
-import 'package:photos/ui/image_info_dialog.dart';
-import 'package:photos/ui/set_wallpaper_dialog.dart';
 import 'package:photos/ui/video_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
-import 'package:photos/utils/date_time_util.dart';
-import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/share_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class DetailPageConfiguration {
   final List<File> files;
@@ -78,6 +63,8 @@ class _DetailPageState extends State<DetailPage> {
   bool _hasLoadedTillStart = false;
   bool _hasLoadedTillEnd = false;
   bool _shouldHideAppBar = false;
+  GlobalKey<FadingAppBarState> _appBarKey;
+  GlobalKey<FadingBottomBarState> _bottomBarKey;
 
   @override
   void initState() {
@@ -95,11 +82,6 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration.zero, () {
-      SystemChrome.setEnabledSystemUIOverlays(
-        _shouldHideAppBar ? [] : SystemUiOverlay.values,
-      );
-    });
     _logger.info("Opening " +
         _files[_selectedIndex].toString() +
         ". " +
@@ -107,114 +89,31 @@ class _DetailPageState extends State<DetailPage> {
         " / " +
         _files.length.toString() +
         " files .");
+    _appBarKey = GlobalKey<FadingAppBarState>();
+    _bottomBarKey = GlobalKey<FadingBottomBarState>();
     return Scaffold(
-      appBar: _getAppBar(),
+      appBar: FadingAppBar(
+        _files[_selectedIndex],
+        _onFileDeleted,
+        100,
+        key: _appBarKey,
+      ),
       extendBodyBehindAppBar: true,
       body: Center(
         child: Container(
           child: Stack(
             children: [
               _buildPageView(),
-              _getBottomBar(),
+              FadingBottomBar(
+                _files[_selectedIndex],
+                _onEditFileRequested,
+                key: _bottomBarKey,
+              ),
             ],
           ),
         ),
       ),
       backgroundColor: Colors.black,
-    );
-  }
-
-  PreferredSizeWidget _getAppBar() {
-    return CustomAppBar(
-      AnimatedOpacity(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.64),
-                Colors.black.withOpacity(0.5),
-                Colors.transparent,
-              ],
-              stops: [0, 0.2, 1],
-            ),
-          ),
-          child: _buildAppBar(),
-        ),
-        opacity: _shouldHideAppBar ? 0 : 1,
-        duration: Duration(milliseconds: 150),
-      ),
-      height: 100,
-    );
-  }
-
-  Widget _getBottomBar() {
-    List<Widget> children = [];
-    children.add(
-      Padding(
-        padding: const EdgeInsets.only(top: 12, bottom: 12),
-        child: IconButton(
-          icon: Icon(
-              Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info),
-          onPressed: () {
-            _displayInfo(_files[_selectedIndex]);
-          },
-        ),
-      ),
-    );
-    if (_files[_selectedIndex].fileType == FileType.image) {
-      children.add(
-        Padding(
-          padding: const EdgeInsets.only(top: 12, bottom: 12),
-          child: IconButton(
-            icon: Icon(Icons.tune_outlined),
-            onPressed: () {
-              _editFile(_files[_selectedIndex]);
-            },
-          ),
-        ),
-      );
-    }
-    children.add(
-      Padding(
-        padding: const EdgeInsets.only(top: 12, bottom: 12),
-        child: IconButton(
-          icon: Icon(
-              Platform.isAndroid ? Icons.share_outlined : CupertinoIcons.share),
-          onPressed: () {
-            share(context, [_files[_selectedIndex]]);
-          },
-        ),
-      ),
-    );
-    return AnimatedOpacity(
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.transparent,
-                Colors.black.withOpacity(0.5),
-                Colors.black.withOpacity(0.64),
-              ],
-              stops: [0, 0.8, 1],
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: children,
-            ),
-          ),
-        ),
-      ),
-      opacity: _shouldHideAppBar ? 0 : 1,
-      duration: Duration(milliseconds: 150),
     );
   }
 
@@ -247,8 +146,18 @@ class _DetailPageState extends State<DetailPage> {
         _preloadFiles(index);
         return GestureDetector(
           onTap: () {
-            setState(() {
-              _shouldHideAppBar = !_shouldHideAppBar;
+            _shouldHideAppBar = !_shouldHideAppBar;
+            if (_shouldHideAppBar) {
+              _appBarKey.currentState.hide();
+              _bottomBarKey.currentState.hide();
+            } else {
+              _appBarKey.currentState.show();
+              _bottomBarKey.currentState.show();
+            }
+            Future.delayed(Duration.zero, () {
+              SystemChrome.setEnabledSystemUIOverlays(
+                _shouldHideAppBar ? [] : SystemUiOverlay.values,
+              );
             });
           },
           child: content,
@@ -308,232 +217,7 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
-  AppBar _buildAppBar() {
-    final List<Widget> actions = [];
-    actions.add(_getFavoriteButton());
-    actions.add(PopupMenuButton(
-      itemBuilder: (context) {
-        final List<PopupMenuItem> items = [];
-        if (_files[_selectedIndex].localID == null) {
-          items.add(
-            PopupMenuItem(
-              value: 1,
-              child: Row(
-                children: [
-                  Icon(Platform.isAndroid
-                      ? Icons.download
-                      : CupertinoIcons.cloud_download),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text("download"),
-                ],
-              ),
-            ),
-          );
-        }
-        items.add(
-          PopupMenuItem(
-            value: 2,
-            child: Row(
-              children: [
-                Icon(Platform.isAndroid
-                    ? Icons.delete_outline
-                    : CupertinoIcons.delete),
-                Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text("delete"),
-              ],
-            ),
-          ),
-        );
-        if (Platform.isAndroid) {
-          items.add(
-            PopupMenuItem(
-              value: 3,
-              child: Row(
-                children: [
-                  Icon(Icons.wallpaper_outlined),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text("set wallpaper"),
-                ],
-              ),
-            ),
-          );
-        }
-        return items;
-      },
-      onSelected: (value) {
-        final file = _files[_selectedIndex];
-        if (value == 1) {
-          _download(file);
-        } else if (value == 2) {
-          _showDeleteSheet();
-        } else if (value == 3) {
-          _setWallpaper(file);
-        }
-      },
-    ));
-    return AppBar(
-      title: Text(
-        getDayTitle(_files[_selectedIndex].creationTime),
-        style: TextStyle(
-          fontSize: 14,
-        ),
-      ),
-      actions: actions,
-      backgroundColor: Color(0x00000000),
-      elevation: 0,
-    );
-  }
-
-  Future<void> _editFile(File file) async {
-    final dialog = createProgressDialog(context, "please wait...");
-    await dialog.show();
-    final imageProvider =
-        ExtendedFileImageProvider(await getFile(file), cacheRawData: true);
-    await precacheImage(imageProvider, context);
-    await dialog.hide();
-    replacePage(
-      context,
-      ImageEditorPage(
-        imageProvider,
-        file,
-        widget.config.copyWith(
-          files: _files,
-          selectedIndex: _selectedIndex,
-        ),
-      ),
-    );
-  }
-
-  Widget _getFavoriteButton() {
-    final file = _files[_selectedIndex];
-
-    return FutureBuilder(
-      future: FavoritesService.instance.isFavorite(file),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return _getLikeButton(file, snapshot.data);
-        } else {
-          return _getLikeButton(file, false);
-        }
-      },
-    );
-  }
-
-  Widget _getLikeButton(File file, bool isLiked) {
-    return LikeButton(
-      isLiked: isLiked,
-      onTap: (oldValue) async {
-        final isLiked = !oldValue;
-        bool hasError = false;
-        if (isLiked) {
-          final shouldBlockUser = file.uploadedFileID == null;
-          var dialog;
-          if (shouldBlockUser) {
-            dialog = createProgressDialog(context, "adding to favorites...");
-            await dialog.show();
-          }
-          try {
-            await FavoritesService.instance.addToFavorites(file);
-          } catch (e, s) {
-            _logger.severe(e, s);
-            hasError = true;
-            showToast("sorry, could not add this to favorites!");
-          } finally {
-            if (shouldBlockUser) {
-              await dialog.hide();
-            }
-          }
-        } else {
-          try {
-            await FavoritesService.instance.removeFromFavorites(file);
-          } catch (e, s) {
-            _logger.severe(e, s);
-            hasError = true;
-            showToast("sorry, could not remove this from favorites!");
-          }
-        }
-        return hasError ? oldValue : isLiked;
-      },
-      likeBuilder: (isLiked) {
-        return Icon(
-          Icons.favorite_border,
-          color: isLiked ? Colors.pinkAccent : Colors.white,
-          size: 24,
-        );
-      },
-    );
-  }
-
-  Future<void> _displayInfo(File file) async {
-    AssetEntity asset;
-    int fileSize;
-    final isLocalFile = file.localID != null;
-    if (isLocalFile) {
-      asset = await file.getAsset();
-      fileSize = await (await asset.originFile).length();
-    }
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return FileInfoWidget(file, asset, fileSize);
-      },
-    );
-  }
-
-  void _showDeleteSheet() {
-    final fileToBeDeleted = _files[_selectedIndex];
-    final actions = List<Widget>();
-    if (fileToBeDeleted.uploadedFileID == null) {
-      actions.add(CupertinoActionSheetAction(
-        child: Text("everywhere"),
-        isDestructiveAction: true,
-        onPressed: () async {
-          await deleteFilesFromEverywhere(context, [fileToBeDeleted]);
-          _onFileDeleted();
-        },
-      ));
-    } else {
-      if (fileToBeDeleted.localID != null) {
-        actions.add(CupertinoActionSheetAction(
-          child: Text("on this device"),
-          isDestructiveAction: true,
-          onPressed: () async {
-            await deleteFilesOnDeviceOnly(context, [fileToBeDeleted]);
-            showToast("file deleted from device");
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-        ));
-      }
-      actions.add(CupertinoActionSheetAction(
-        child: Text("everywhere"),
-        isDestructiveAction: true,
-        onPressed: () async {
-          await deleteFilesFromEverywhere(context, [fileToBeDeleted]);
-          _onFileDeleted();
-        },
-      ));
-    }
-    final action = CupertinoActionSheet(
-      title: Text("delete file?"),
-      actions: actions,
-      cancelButton: CupertinoActionSheetAction(
-        child: Text("cancel"),
-        onPressed: () {
-          Navigator.of(context, rootNavigator: true).pop();
-        },
-      ),
-    );
-    showCupertinoModalPopup(context: context, builder: (_) => action);
-  }
-
-  Future _onFileDeleted() async {
-    final file = _files[_selectedIndex];
+  Future<void> _onFileDeleted(File file) async {
     final totalFiles = _files.length;
     if (totalFiles == 1) {
       // Deleted the only file
@@ -559,28 +243,23 @@ class _DetailPageState extends State<DetailPage> {
     Navigator.of(context, rootNavigator: true).pop(); // Close dialog
   }
 
-  Future<void> _download(File file) async {
-    final dialog = createProgressDialog(context, "downloading...");
+  Future<void> _onEditFileRequested(File file) async {
+    final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
-    final savedAsset = await PhotoManager.editor.saveImageWithPath(
-      (await getFile(file)).path,
-      title: file.title,
-    );
-    file.localID = savedAsset.id;
-    await FilesDB.instance.insert(file);
-    await LocalSyncService.instance.trackDownloadedFile(file);
-    Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
+    final imageProvider =
+        ExtendedFileImageProvider(await getFile(file), cacheRawData: true);
+    await precacheImage(imageProvider, context);
     await dialog.hide();
-    showToast("file saved to gallery");
-  }
-
-  Future<void> _setWallpaper(File file) async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SetWallpaperDialog(file);
-      },
-      barrierColor: Colors.black87,
+    replacePage(
+      context,
+      ImageEditorPage(
+        imageProvider,
+        file,
+        widget.config.copyWith(
+          files: _files,
+          selectedIndex: _selectedIndex,
+        ),
+      ),
     );
   }
 }
