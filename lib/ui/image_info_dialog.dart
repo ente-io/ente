@@ -117,7 +117,6 @@ class FileInfoWidget extends StatelessWidget {
               ],
             ),
             onPressed: () {
-              Navigator.of(context, rootNavigator: true).pop('dialog');
               showDialog(
                 context: context,
                 builder: (BuildContext context) {

@@ -19,10 +19,16 @@ class ExifInfoDialog extends StatefulWidget {
 class _ExifInfoDialogState extends State<ExifInfoDialog> {
   @override
   Widget build(BuildContext context) {
+    final scrollController = ScrollController();
     return AlertDialog(
       title: Text(widget.file.title),
-      content: SingleChildScrollView(
-        child: _getInfo(),
+      content: Scrollbar(
+        controller: scrollController,
+        isAlwaysShown: true,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: _getInfo(),
+        ),
       ),
       actions: [
         TextButton(
@@ -54,14 +60,21 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
             data = "no exif data found";
           }
           return Container(
-            padding: EdgeInsets.all(0),
+            padding: EdgeInsets.all(2),
+            color: Colors.white.withOpacity(0.05),
             child: Center(
-              child: Text(
-                data,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontFeatures: [FontFeature.tabularFigures()],
-                  color: Colors.white.withOpacity(0.7),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  data,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFeatures: [
+                      FontFeature.tabularFigures(),
+                    ],
+                    height: 1.4,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
                 ),
               ),
             ),
