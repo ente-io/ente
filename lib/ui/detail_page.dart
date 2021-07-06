@@ -148,7 +148,8 @@ class _DetailPageState extends State<DetailPage> {
       Padding(
         padding: const EdgeInsets.only(top: 12, bottom: 12),
         child: IconButton(
-          icon: Icon(Icons.info_outline),
+          icon: Icon(
+              Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info),
           onPressed: () {
             _displayInfo(_files[_selectedIndex]);
           },
@@ -160,7 +161,7 @@ class _DetailPageState extends State<DetailPage> {
         Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
-            icon: Icon(Icons.edit_outlined),
+            icon: Icon(Icons.tune_outlined),
             onPressed: () {
               _editFile(_files[_selectedIndex]);
             },
@@ -172,7 +173,8 @@ class _DetailPageState extends State<DetailPage> {
       Padding(
         padding: const EdgeInsets.only(top: 12, bottom: 12),
         child: IconButton(
-          icon: Icon(Icons.share_outlined),
+          icon: Icon(
+              Platform.isAndroid ? Icons.share_outlined : CupertinoIcons.share),
           onPressed: () {
             share(context, [_files[_selectedIndex]]);
           },
