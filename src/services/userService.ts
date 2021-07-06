@@ -7,6 +7,7 @@ import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
 import { B64EncryptionResult } from './uploadService';
+import { logError } from 'utils/sentry';
 
 export interface UpdatedKey {
     kekSalt: string;
@@ -179,6 +180,7 @@ export const _logout = async () => {
         });
         return true;
     } catch (e) {
+        logError(e, '/users/logout failed');
         return false;
     }
 };
