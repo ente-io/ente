@@ -56,26 +56,30 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       Padding(padding: EdgeInsets.all(4)),
     ];
     if (widget.file.localID != null) {
-      items.add(Row(
-        children: [
-          Icon(Icons.sd_storage_outlined),
-          Padding(padding: EdgeInsets.all(4)),
-          Text((widget.fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB"),
-        ],
-      ),);
+      items.add(
+        Row(
+          children: [
+            Icon(Icons.sd_storage_outlined),
+            Padding(padding: EdgeInsets.all(4)),
+            Text((widget.fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB"),
+          ],
+        ),
+      );
       items.add(
         Padding(padding: EdgeInsets.all(4)),
       );
       if (widget.file.fileType == FileType.image) {
-        items.add(Row(
-          children: [
-            Icon(Icons.photo_size_select_actual_outlined),
-            Padding(padding: EdgeInsets.all(4)),
-            Text(widget.entity.width.toString() +
-                " x " +
-                widget.entity.height.toString()),
-          ],
-        ),);
+        items.add(
+          Row(
+            children: [
+              Icon(Icons.photo_size_select_actual_outlined),
+              Padding(padding: EdgeInsets.all(4)),
+              Text(widget.entity.width.toString() +
+                  " x " +
+                  widget.entity.height.toString()),
+            ],
+          ),
+        );
       } else {
         items.add(
           Row(
@@ -92,15 +96,59 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       );
     }
     if (widget.file.uploadedFileID != null) {
-      items.add(Row(
-        children: [
-          Icon(Icons.cloud_upload_outlined),
-          Padding(padding: EdgeInsets.all(4)),
-          Text(getFormattedTime(
-              DateTime.fromMicrosecondsSinceEpoch(widget.file.updationTime))),
-        ],
-      ));
+      items.add(
+        Row(
+          children: [
+            Icon(Icons.cloud_upload_outlined),
+            Padding(padding: EdgeInsets.all(4)),
+            Text(getFormattedTime(
+                DateTime.fromMicrosecondsSinceEpoch(widget.file.updationTime))),
+          ],
+        ),
+      );
     }
+    items.add(
+      Padding(padding: EdgeInsets.all(12)),
+    );
+    items.add(
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TextButton(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Icon(
+                  Icons.camera_outlined,
+                  color: Colors.white,
+                ),
+                Padding(padding: EdgeInsets.all(4)),
+                Text(
+                  "view exif",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pop('dialog');
+            },
+          ),
+          TextButton(
+            child: Text(
+              "close",
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pop('dialog');
+            },
+          ),
+        ],
+      ),
+    );
     return AlertDialog(
       title: Text(widget.file.title),
       content: SingleChildScrollView(
@@ -108,14 +156,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           children: items,
         ),
       ),
-      actions: <Widget>[
-        FlatButton(
-          child: Text('ok'),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
     );
   }
 
