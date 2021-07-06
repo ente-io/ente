@@ -19,6 +19,7 @@ import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/custom_app_bar.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/image_editor_page.dart';
+import 'package:photos/ui/set_wallpaper_dialog.dart';
 import 'package:photos/ui/video_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -310,7 +311,7 @@ class _DetailPageState extends State<DetailPage> {
         if (_files[_selectedIndex].localID == null) {
           items.add(
             PopupMenuItem(
-              value: 4,
+              value: 1,
               child: Row(
                 children: [
                   Icon(Platform.isAndroid
@@ -327,7 +328,7 @@ class _DetailPageState extends State<DetailPage> {
         }
         items.add(
           PopupMenuItem(
-            value: 3,
+            value: 2,
             child: Row(
               children: [
                 Icon(Platform.isAndroid
@@ -341,18 +342,32 @@ class _DetailPageState extends State<DetailPage> {
             ),
           ),
         );
+        if (Platform.isAndroid) {
+          items.add(
+            PopupMenuItem(
+              value: 3,
+              child: Row(
+                children: [
+                  Icon(Icons.wallpaper_outlined),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text("set wallpaper"),
+                ],
+              ),
+            ),
+          );
+        }
         return items;
       },
       onSelected: (value) {
         final file = _files[_selectedIndex];
         if (value == 1) {
-          share(context, [file]);
-        } else if (value == 2) {
-          _displayInfo(file);
-        } else if (value == 3) {
-          _showDeleteSheet();
-        } else if (value == 4) {
           _download(file);
+        } else if (value == 2) {
+          _showDeleteSheet();
+        } else if (value == 3) {
+          _setWallpaper(file);
         }
       },
     ));
@@ -630,5 +645,15 @@ class _DetailPageState extends State<DetailPage> {
     Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
     await dialog.hide();
     showToast("file saved to gallery");
+  }
+
+  Future<void> _setWallpaper(File file) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SetWallpaperDialog(file);
+      },
+      barrierColor: Colors.black87,
+    );
   }
 }
