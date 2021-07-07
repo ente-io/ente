@@ -1,7 +1,6 @@
 import 'package:exif/exif.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
@@ -11,11 +10,9 @@ import 'package:photos/utils/file_util.dart';
 
 class FileInfoWidget extends StatelessWidget {
   final File file;
-  final AssetEntity entity;
 
   const FileInfoWidget(
-    this.file,
-    this.entity, {
+    this.file, {
     Key key,
   }) : super(key: key);
 
@@ -86,11 +83,27 @@ class FileInfoWidget extends StatelessWidget {
                 color: Colors.white.withOpacity(0.85),
               ),
               Padding(padding: EdgeInsets.all(4)),
-              Text(
-                entity.videoDuration.toString().split(".")[0],
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.85),
-                ),
+              FutureBuilder(
+                future: file.getAsset(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Text(
+                      snapshot.data.videoDuration.toString().split(".")[0],
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.85),
+                      ),
+                    );
+                  } else {
+                    return Center(
+                      child: SizedBox.fromSize(
+                        size: Size.square(24),
+                        child: CupertinoActivityIndicator(
+                          radius: 8,
+                        ),
+                      ),
+                    );
+                  }
+                },
               ),
             ],
           ),

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/file_info_dialog.dart';
@@ -111,15 +110,10 @@ class FadingBottomBarState extends State<FadingBottomBar> {
   }
 
   Future<void> _displayInfo(File file) async {
-    AssetEntity asset;
-    final isLocalFile = file.localID != null;
-    if (isLocalFile) {
-      asset = await file.getAsset();
-    }
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return FileInfoWidget(file, asset);
+        return FileInfoWidget(file);
       },
     );
   }
