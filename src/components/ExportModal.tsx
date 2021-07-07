@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { Button } from 'react-bootstrap';
 import exportService from 'services/exportService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import constants from 'utils/strings/constants';
+import { Label, Row, Value } from './Container';
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
+import FolderIcon from './icons/FolderIcon';
+import InProgressIcon from './icons/InProgressIcon';
+import MessageDialog from './MessageDialog';
 
 export enum ExportState {
     INIT,
@@ -23,12 +29,12 @@ export interface ExportStats {
     failed: number;
 }
 export default function ExportModal(props: Props) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [exportState, setExportState] = useState(ExportState.INIT);
     const [exportFolder, setExportFolder] = useState(null);
     const [exportSize, setExportSize] = useState(null);
     const [exportStats, setExportStats] = useState<ExportStats>({ current: 0, total: 0, failed: 0 });
     const [lastExportTime, setLastExportTime] = useState(0);
+
     useEffect(() => {
         const exportInfo = getData(LS_KEYS.EXPORT);
         exportInfo?.state && setExportState(exportInfo.state);
@@ -38,11 +44,17 @@ export default function ExportModal(props: Props) {
     }, []);
 
     useEffect(() => {
-        if (exportStats.current === exportStats.total) {
+        if (exportStats.total !== 0 && exportStats.current === exportStats.total) {
             updateExportState(ExportState.FINISHED);
             updateExportTime(Date.now());
         }
     }, [exportStats]);
+
+    useEffect(() => {
+        setExportSize(props.usage);
+        console.log(props.usage);
+    }, [props.usage]);
+
     const updateExportFolder = (newFolder) => {
         setExportFolder(newFolder);
         setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), folder: newFolder });
@@ -61,40 +73,85 @@ export default function ExportModal(props: Props) {
         setExportStats({ current: 0, total: 0, failed: 0 });
         exportService.exportFiles(setExportStats);
     };
-    switch (exportState) {
-        case ExportState.INIT:
-            return (
-                <ExportInit {...props}
-                    exportFolder={exportFolder}
-                    exportSize={exportSize}
-                    updateExportFolder={updateExportFolder}
-                    exportFiles={startExport}
-                    updateExportState={updateExportState}
-                />
-            );
-        case ExportState.INPROGRESS:
-            return (
-                <ExportInProgress {...props}
-                    exportFolder={exportFolder}
-                    exportSize={exportSize}
-                    exportState={exportState}
-                    updateExportState={updateExportState}
-                    exportStats={exportStats}
-                    exportFiles={startExport}
-                    cancelExport={exportService.cancelExport}
-                />
-            );
-        case ExportState.FINISHED:
-            return (
-                <ExportFinished
-                    {...props}
-                    exportFolder={exportFolder}
-                    exportSize={exportSize}
-                    updateExportFolder={updateExportFolder}
-                    lastExportTime={lastExportTime}
-                    exportStats={exportStats}
-                    exportFiles={startExport}
-                />
-            );
-    }
+
+    const selectExportDirectory = async () => {
+        const newFolder = await exportService.selectExportDirectory();
+        newFolder && updateExportFolder(newFolder);
+    };
+
+    const ExportDynamicState = () => {
+        switch (exportState) {
+            case ExportState.INIT:
+                return (
+                    <ExportInit {...props}
+                        exportFolder={exportFolder}
+                        exportSize={exportSize}
+                        updateExportFolder={updateExportFolder}
+                        exportFiles={startExport}
+                        updateExportState={updateExportState}
+                        selectExportDirectory={selectExportDirectory}
+                    />
+                );
+            case ExportState.INPROGRESS:
+            case ExportState.PAUSED:
+                return (
+                    <ExportInProgress {...props}
+                        exportFolder={exportFolder}
+                        exportSize={exportSize}
+                        exportState={exportState}
+                        updateExportState={updateExportState}
+                        exportStats={exportStats}
+                        exportFiles={startExport}
+                        cancelExport={exportService.cancelExport}
+                    />
+                );
+            case ExportState.FINISHED:
+                return (
+                    <ExportFinished
+                        {...props}
+                        exportFolder={exportFolder}
+                        exportSize={exportSize}
+                        updateExportFolder={updateExportFolder}
+                        lastExportTime={lastExportTime}
+                        exportStats={exportStats}
+                        exportFiles={startExport}
+                    />
+                );
+
+            default: return (<></>);
+        }
+    };
+
+    return (
+        <MessageDialog
+            show={props.show}
+            onHide={props.onHide}
+            attributes={{
+                title: constants.EXPORT_DATA,
+            }}
+        >
+            <div style={{ borderBottom: '1px solid #444', marginBottom: '20px', padding: '0 5%' }}>
+                <Row>
+                    <Label width="40%">{constants.DESTINATION}</Label>
+                    <Value width="60%">
+                        {!exportFolder ?
+                            (<Button variant={'outline-success'} onClick={selectExportDirectory}>{constants.SELECT_FOLDER}</Button>) :
+                            (<>
+                                <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}>
+                                    {exportFolder}
+                                </span>
+                                <div onClick={selectExportDirectory} style={{ width: '10%', marginLeft: '5px', cursor: 'pointer' }}>
+                                    <FolderIcon />
+                                </div>
+                            </>)
+                        }
+                    </Value>
+                </Row>
+                <Row>
+                    <Label width="40%">{constants.TOTAL_EXPORT_SIZE} </Label><Value width="60%">{exportSize ? `${exportSize} GB` : <InProgressIcon />}</Value>
+                </Row>
+            </div>
+            <ExportDynamicState />
+        </MessageDialog >
+    );
 }
