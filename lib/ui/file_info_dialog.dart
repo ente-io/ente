@@ -64,66 +64,48 @@ class FileInfoWidget extends StatelessWidget {
       Padding(padding: EdgeInsets.all(6)),
     ];
     if (file.localID != null) {
-      items.add(
-        Row(
-          children: [
-            Icon(
-              Icons.sd_storage_outlined,
-              color: Colors.white.withOpacity(0.85),
-            ),
-            Padding(padding: EdgeInsets.all(4)),
-            Text(
-              (fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB",
-              style: TextStyle(
+      items.addAll(
+        [
+          Row(
+            children: [
+              Icon(
+                Icons.sd_storage_outlined,
                 color: Colors.white.withOpacity(0.85),
               ),
+              Padding(padding: EdgeInsets.all(4)),
+              Text(
+                (fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB",
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.85),
+                ),
+              ),
+            ],
+          ),
+          Padding(padding: EdgeInsets.all(6)),
+        ],
+      );
+      if (!isImage) {
+        items.addAll(
+          [
+            Row(
+              children: [
+                Icon(
+                  Icons.timer_outlined,
+                  color: Colors.white.withOpacity(0.85),
+                ),
+                Padding(padding: EdgeInsets.all(4)),
+                Text(
+                  entity.videoDuration.toString().split(".")[0],
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.85),
+                  ),
+                ),
+              ],
             ),
+            Padding(padding: EdgeInsets.all(6)),
           ],
-        ),
-      );
-      items.add(
-        Padding(padding: EdgeInsets.all(6)),
-      );
-      if (isImage) {
-        items.add(
-          Row(
-            children: [
-              Icon(
-                Icons.photo_size_select_actual_outlined,
-                color: Colors.white.withOpacity(0.85),
-              ),
-              Padding(padding: EdgeInsets.all(4)),
-              Text(
-                entity.width.toString() + " x " + entity.height.toString(),
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.85),
-                ),
-              ),
-            ],
-          ),
-        );
-      } else {
-        items.add(
-          Row(
-            children: [
-              Icon(
-                Icons.timer_outlined,
-                color: Colors.white.withOpacity(0.85),
-              ),
-              Padding(padding: EdgeInsets.all(4)),
-              Text(
-                entity.videoDuration.toString().split(".")[0],
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.85),
-                ),
-              ),
-            ],
-          ),
         );
       }
-      items.add(
-        Padding(padding: EdgeInsets.all(6)),
-      );
     }
     if (isImage) {
       items.add(
@@ -236,6 +218,51 @@ class FileInfoWidget extends StatelessWidget {
             (exif["EXIF FNumber"].values.toList()[0] as Ratio).denominator
         : null;
     final List<Widget> children = [];
+    if (exif["EXIF ExifImageWidth"] != null &&
+        exif["EXIF ExifImageLength"] != null) {
+      children.addAll([
+        Row(
+          children: [
+            Icon(
+              Icons.photo_size_select_actual_outlined,
+              color: Colors.white.withOpacity(0.85),
+            ),
+            Padding(padding: EdgeInsets.all(4)),
+            Text(
+              exif["EXIF ExifImageWidth"].toString() +
+                  " x " +
+                  exif["EXIF ExifImageLength"].toString(),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.85),
+              ),
+            ),
+          ],
+        ),
+        Padding(padding: EdgeInsets.all(6)),
+      ]);
+    } else if (exif["Image ImageWidth"] != null &&
+        exif["Image ImageLength"] != null) {
+      children.addAll([
+        Row(
+          children: [
+            Icon(
+              Icons.photo_size_select_actual_outlined,
+              color: Colors.white.withOpacity(0.85),
+            ),
+            Padding(padding: EdgeInsets.all(4)),
+            Text(
+              exif["Image ImageWidth"].toString() +
+                  " x " +
+                  exif["Image ImageLength"].toString(),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.85),
+              ),
+            ),
+          ],
+        ),
+        Padding(padding: EdgeInsets.all(6)),
+      ]);
+    }
     if (exif["Image Make"] != null && exif["Image Model"] != null) {
       children.addAll(
         [
