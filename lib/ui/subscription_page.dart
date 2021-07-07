@@ -445,10 +445,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         "continue on free plan",
         fontSize: 16,
         onPressed: () async {
-          if (widget.isOnboarding) {
-            showToast("thank you for signing up!");
-            Bus.instance.fire(SubscriptionPurchasedEvent());
-          }
+          showToast("thank you for signing up!");
+          Bus.instance.fire(SubscriptionPurchasedEvent());
           Navigator.of(context).popUntil((route) => route.isFirst);
         },
       ),
