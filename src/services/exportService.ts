@@ -1,3 +1,4 @@
+import { ExportStats } from 'components/ExportModal';
 import { retryPromise, runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
@@ -23,26 +24,34 @@ class ExportService {
         const main = async () => {
             this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
             if (this.ElectronAPIs) {
-                const autoStartExport = getData(LS_KEYS.EXPORT_IN_PROGRESS);
+                const autoStartExport = getData(LS_KEYS.EXPORT);
                 if (autoStartExport?.status) {
-                    this.exportFiles(await getLocalFiles(), await getLocalCollections());
+                    this.exportFiles(null);
                 }
             }
         };
         main();
     }
-    async exportFiles(files: File[], collections: Collection[]) {
+    async selectExportDirectory() {
+        return await this.ElectronAPIs.selectRootDirectory();
+    }
+    cancelExport() {
+        this.abortExport = true;
+    }
+    async exportFiles(updateProgress: (stats: ExportStats) => void) {
+        const files = await getLocalFiles();
+        const collections = await getLocalCollections();
         if (this.exportInProgress) {
             this.ElectronAPIs.sendNotification(ExportNotification.IN_PROGRESS);
             return this.exportInProgress;
         }
-        this.exportInProgress = this.fileExporter(files, collections);
+        this.exportInProgress = this.fileExporter(files, collections, updateProgress);
         return this.exportInProgress;
     }
 
-    async fileExporter(files: File[], collections: Collection[]) {
+    async fileExporter(files: File[], collections: Collection[], updateProgress: (stats: ExportStats) => void) {
         try {
-            const dir = await this.ElectronAPIs.selectRootDirectory();
+            const dir = getData(LS_KEYS.EXPORT).folder;
             if (!dir) {
                 // directory selector closed
                 return;
@@ -51,10 +60,8 @@ class ExportService {
                 dir,
             );
             this.ElectronAPIs.showOnTray('starting export');
-            this.ElectronAPIs.registerStopExportListener(
-                () => (this.abortExport = true),
-            );
-            setData(LS_KEYS.EXPORT_IN_PROGRESS, { status: true });
+            this.ElectronAPIs.registerStopExportListener(() => (this.abortExport = true));
+            setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), status: true });
             const collectionIDMap = new Map<number, string>();
             for (const collection of collections) {
                 const collectionFolderPath = `${dir}/${collection.id}_${this.sanitizeName(collection.name)}`;
@@ -85,6 +92,7 @@ class ExportService {
                     export_progress:
                         `exporting file ${index + 1} / ${files.length}`,
                 });
+                updateProgress({ current: index + 1, total: files.length, failed: this.failedFiles.length });
             }
             this.ElectronAPIs.sendNotification(
                 this.abortExport ?
@@ -100,7 +108,7 @@ class ExportService {
                 });
             } else {
                 this.ElectronAPIs.showOnTray();
-                setData(LS_KEYS.EXPORT_IN_PROGRESS, { status: false });
+                setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), status: false });
             }
         } catch (e) {
             logError(e);
