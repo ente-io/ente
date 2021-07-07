@@ -89,6 +89,8 @@ PODS:
     - Flutter
   - wakelock (0.0.1):
     - Flutter
+  - wallpaper_manager (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
@@ -120,6 +122,7 @@ DEPENDENCIES:
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
   - video_player (from `.symlinks/plugins/video_player/ios`)
   - wakelock (from `.symlinks/plugins/wakelock/ios`)
+  - wallpaper_manager (from `.symlinks/plugins/wallpaper_manager/ios`)
 
 SPEC REPOS:
   trunk:
@@ -191,6 +194,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/video_player/ios"
   wakelock:
     :path: ".symlinks/plugins/wakelock/ios"
+  wallpaper_manager:
+    :path: ".symlinks/plugins/wallpaper_manager/ios"
 
 SPEC CHECKSUMS:
   background_fetch: 79a5891a4742df7cf1b21a55334da74191c2894f
@@ -230,6 +235,7 @@ SPEC CHECKSUMS:
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
   wakelock: b0843b2479edbf6504d8d262c2959446f35373aa
+  wallpaper_manager: 78720eb4e1957ace4397e1738896a7f3add5fd67
 
 PODFILE CHECKSUM: a226c065c368c69fce961535a41a0b30b1ab932d
 
