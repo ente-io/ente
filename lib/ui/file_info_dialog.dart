@@ -1,3 +1,5 @@
+import 'package:exif/exif.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/models/file.dart';
@@ -5,6 +7,7 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/exif_info_dialog.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/file_util.dart';
 
 class FileInfoWidget extends StatelessWidget {
   final File file;
@@ -20,48 +23,82 @@ class FileInfoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isImage = file.fileType == FileType.image;
     var items = <Widget>[
       Row(
         children: [
-          Icon(Icons.calendar_today_outlined),
+          Icon(
+            Icons.calendar_today_outlined,
+            color: Colors.white.withOpacity(0.85),
+          ),
           Padding(padding: EdgeInsets.all(4)),
-          Text(getFormattedTime(
-              DateTime.fromMicrosecondsSinceEpoch(file.creationTime))),
+          Text(
+            getFormattedTime(
+              DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
+            ),
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.85),
+            ),
+          ),
         ],
       ),
-      Padding(padding: EdgeInsets.all(4)),
+      Padding(padding: EdgeInsets.all(6)),
       Row(
         children: [
-          Icon(Icons.folder_outlined),
+          Icon(
+            Icons.folder_outlined,
+            color: Colors.white.withOpacity(0.85),
+          ),
           Padding(padding: EdgeInsets.all(4)),
-          Text(file.deviceFolder ??
-              CollectionsService.instance
-                  .getCollectionByID(file.collectionID)
-                  .name),
+          Text(
+            file.deviceFolder ??
+                CollectionsService.instance
+                    .getCollectionByID(file.collectionID)
+                    .name,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.85),
+            ),
+          ),
         ],
       ),
-      Padding(padding: EdgeInsets.all(4)),
+      Padding(padding: EdgeInsets.all(6)),
     ];
     if (file.localID != null) {
       items.add(
         Row(
           children: [
-            Icon(Icons.sd_storage_outlined),
+            Icon(
+              Icons.sd_storage_outlined,
+              color: Colors.white.withOpacity(0.85),
+            ),
             Padding(padding: EdgeInsets.all(4)),
-            Text((fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB"),
+            Text(
+              (fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB",
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.85),
+              ),
+            ),
           ],
         ),
       );
       items.add(
-        Padding(padding: EdgeInsets.all(4)),
+        Padding(padding: EdgeInsets.all(6)),
       );
-      if (file.fileType == FileType.image) {
+      if (isImage) {
         items.add(
           Row(
             children: [
-              Icon(Icons.photo_size_select_actual_outlined),
+              Icon(
+                Icons.photo_size_select_actual_outlined,
+                color: Colors.white.withOpacity(0.85),
+              ),
               Padding(padding: EdgeInsets.all(4)),
-              Text(entity.width.toString() + " x " + entity.height.toString()),
+              Text(
+                entity.width.toString() + " x " + entity.height.toString(),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.85),
+                ),
+              ),
             ],
           ),
         );
@@ -69,48 +106,80 @@ class FileInfoWidget extends StatelessWidget {
         items.add(
           Row(
             children: [
-              Icon(Icons.timer_outlined),
+              Icon(
+                Icons.timer_outlined,
+                color: Colors.white.withOpacity(0.85),
+              ),
               Padding(padding: EdgeInsets.all(4)),
-              Text(entity.videoDuration.toString().split(".")[0]),
+              Text(
+                entity.videoDuration.toString().split(".")[0],
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.85),
+                ),
+              ),
             ],
           ),
         );
       }
       items.add(
-        Padding(padding: EdgeInsets.all(4)),
+        Padding(padding: EdgeInsets.all(6)),
+      );
+    }
+    if (isImage) {
+      items.add(
+        FutureBuilder(
+          future: _getExif(),
+          builder: (c, snapshot) {
+            if (snapshot.hasData) {
+              return _getExifWidgets(snapshot.data);
+            } else {
+              return Container();
+            }
+          },
+        ),
       );
     }
     if (file.uploadedFileID != null) {
-      items.add(
-        Row(
-          children: [
-            Icon(Icons.cloud_upload_outlined),
-            Padding(padding: EdgeInsets.all(4)),
-            Text(getFormattedTime(
-                DateTime.fromMicrosecondsSinceEpoch(file.updationTime))),
-          ],
-        ),
+      items.addAll(
+        [
+          Row(
+            children: [
+              Icon(
+                Icons.cloud_upload_outlined,
+                color: Colors.white.withOpacity(0.85),
+              ),
+              Padding(padding: EdgeInsets.all(4)),
+              Text(
+                getFormattedTime(
+                    DateTime.fromMicrosecondsSinceEpoch(file.updationTime)),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.85),
+                ),
+              ),
+            ],
+          ),
+        ],
       );
     }
     items.add(
       Padding(padding: EdgeInsets.all(12)),
     );
     final List<Widget> actions = [];
-    if (file.fileType == FileType.image) {
+    if (isImage) {
       actions.add(
         TextButton(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Icon(
-                Icons.camera_outlined,
-                color: Colors.white,
+                Icons.feed_outlined,
+                color: Colors.white.withOpacity(0.85),
               ),
               Padding(padding: EdgeInsets.all(4)),
               Text(
                 "view exif",
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withOpacity(0.85),
                 ),
               ),
             ],
@@ -142,9 +211,8 @@ class FileInfoWidget extends StatelessWidget {
     );
     items.add(
       Row(
-        mainAxisAlignment: file.fileType == FileType.image
-            ? MainAxisAlignment.spaceBetween
-            : MainAxisAlignment.end,
+        mainAxisAlignment:
+            isImage ? MainAxisAlignment.spaceBetween : MainAxisAlignment.end,
         children: actions,
       ),
     );
@@ -156,5 +224,106 @@ class FileInfoWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _getExifWidgets(Map<String, IfdTag> exif) {
+    final focalLength = exif["EXIF FocalLength"] != null
+        ? (exif["EXIF FocalLength"].values.toList()[0] as Ratio).numerator /
+            (exif["EXIF FocalLength"].values.toList()[0] as Ratio).denominator
+        : null;
+    final fNumber = exif["EXIF FNumber"] != null
+        ? (exif["EXIF FNumber"].values.toList()[0] as Ratio).numerator /
+            (exif["EXIF FNumber"].values.toList()[0] as Ratio).denominator
+        : null;
+    final List<Widget> children = [];
+    if (exif["Image Make"] != null && exif["Image Model"] != null) {
+      children.addAll(
+        [
+          Row(
+            children: [
+              Icon(
+                Icons.camera_outlined,
+                color: Colors.white.withOpacity(0.85),
+              ),
+              Padding(padding: EdgeInsets.all(4)),
+              Text(
+                exif["Image Make"].toString() +
+                    " " +
+                    exif["Image Model"].toString(),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.85),
+                ),
+              ),
+            ],
+          ),
+          Padding(padding: EdgeInsets.all(6)),
+        ],
+      );
+    }
+    if (fNumber != null) {
+      children.addAll([
+        Row(
+          children: [
+            Icon(
+              CupertinoIcons.f_cursive,
+              color: Colors.white.withOpacity(0.85),
+            ),
+            Padding(padding: EdgeInsets.all(4)),
+            Text(
+              fNumber.toString(),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.85),
+              ),
+            ),
+          ],
+        ),
+        Padding(padding: EdgeInsets.all(6)),
+      ]);
+    }
+    if (focalLength != null) {
+      children.addAll([
+        Row(
+          children: [
+            Icon(
+              Icons.center_focus_strong_outlined,
+              color: Colors.white.withOpacity(0.85),
+            ),
+            Padding(padding: EdgeInsets.all(4)),
+            Text(focalLength.toString() + " mm",
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.85),
+                )),
+          ],
+        ),
+        Padding(padding: EdgeInsets.all(6)),
+      ]);
+    }
+    if (exif["EXIF ExposureTime"] != null) {
+      children.addAll([
+        Row(
+          children: [
+            Icon(
+              Icons.shutter_speed,
+              color: Colors.white.withOpacity(0.85),
+            ),
+            Padding(padding: EdgeInsets.all(4)),
+            Text(
+              exif["EXIF ExposureTime"].toString(),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.85),
+              ),
+            ),
+          ],
+        ),
+        Padding(padding: EdgeInsets.all(6)),
+      ]);
+    }
+    return Column(
+      children: children,
+    );
+  }
+
+  Future<Map<String, IfdTag>> _getExif() async {
+    return await readExifFromFile(await getFile(file));
   }
 }
