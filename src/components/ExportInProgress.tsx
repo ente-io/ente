@@ -5,47 +5,75 @@ import constants from 'utils/strings/constants';
 import InProgressIcon from './icons/InProgressIcon';
 import MessageDialog from './MessageDialog';
 import { Label, Row, Value } from './Container';
+import { ExportState, ExportStats } from './ExportModal';
 
 export const ComfySpan = styled.span`
     word-spacing:1rem;
     color:#ddd;
 `;
-export default function ExportInit(props) {
+
+interface Props {
+    show: boolean
+    onHide: () => void
+    updateExportState: (newState: ExportState) => void;
+    exportFolder: string
+    exportSize: string
+    exportState: ExportState
+    exportStats: ExportStats
+    exportFiles: () => void;
+    cancelExport: () => void
+}
+export default function ExportInProgress(props: Props) {
+    const pauseExport = () => {
+        props.updateExportState(ExportState.PAUSED);
+        props.cancelExport();
+    };
+    const cancelExport = () => {
+        props.updateExportState(ExportState.FINISHED);
+        props.cancelExport();
+    };
     return (
         <MessageDialog
             show={props.show}
             onHide={props.onHide}
-            size="lg"
             attributes={{
                 title: constants.EXPORT_DATA,
             }}
         >
             <div style={{ borderBottom: '1px solid #444', marginBottom: '20px', padding: '0 5%' }}>
-                <Row>
-                    <Label>{constants.EXPORT_IN_PROGRESS}</Label> <Value> <InProgressIcon /></Value>
+                <Row >
+                    <Label width="40%">{constants.EXPORT_IN_PROGRESS}</Label> <Value width="60%"> <InProgressIcon /></Value>
                 </Row>
                 <Row>
-                    <Label>{constants.DESTINATION}</Label> <Value>Folder Name</Value>
+                    <Label width="40%">{constants.DESTINATION}</Label>
+                    <Value width="60%">
+                        <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}>
+                            {props.exportFolder}
+                        </span>
+                    </Value>
                 </Row>
                 <Row>
-                    <Label>{constants.TOTAL_EXPORT_SIZE} </Label><Value>24GB</Value>
+                    <Label width="40%">{constants.TOTAL_EXPORT_SIZE} </Label><Value width="60%">24GB</Value>
                 </Row>
             </div>
             <div style={{ marginBottom: '30px', padding: '0 5%', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
                 <div style={{ marginBottom: '10px' }}>
-                    <ComfySpan> 10 / 24 </ComfySpan> <span style={{ marginLeft: '10px' }}> files exported</span>
+                    <ComfySpan> {props.exportStats.current} / {props.exportStats.total} </ComfySpan> <span style={{ marginLeft: '10px' }}> files exported</span>
                 </div>
                 <div style={{ width: '100%', marginBottom: '30px' }}>
                     <ProgressBar
-                        now={40}
+                        now={Math.round(props.exportStats.current * 100 / props.exportStats.total)}
                         animated
                         variant="upload-progress-bar"
                     />
                 </div>
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around' }}>
-                    <Button block variant={'outline-secondary'}>{constants.PAUSE}</Button>
+                    {props.exportState === ExportState.PAUSED ?
+                        <Button block variant={'outline-secondary'} onClick={props.exportFiles}>{constants.RESUME}</Button> :
+                        <Button block variant={'outline-secondary'} onClick={pauseExport}>{constants.PAUSE}</Button>
+                    }
                     <div style={{ width: '30px' }} />
-                    <Button block variant={'outline-danger'}>{constants.CANCEL}</Button>
+                    <Button block variant={'outline-danger'} onClick={cancelExport}>{constants.CANCEL}</Button>
                 </div>
             </div>
         </MessageDialog >
