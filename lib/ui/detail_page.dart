@@ -70,7 +70,7 @@ class _DetailPageState extends State<DetailPage> {
   void initState() {
     _files = widget.config.files;
     _selectedIndex = widget.config.selectedIndex;
-    _preloadEntries(_selectedIndex);
+    _preloadEntries();
     super.initState();
   }
 
@@ -161,7 +161,7 @@ class _DetailPageState extends State<DetailPage> {
           _selectedIndex = index;
           _hasPageChanged = true;
         });
-        _preloadEntries(index);
+        _preloadEntries();
         _preloadFiles(index);
       },
       physics: _shouldDisableScroll
@@ -187,11 +187,13 @@ class _DetailPageState extends State<DetailPage> {
     });
   }
 
-  void _preloadEntries(int index) async {
-    if (index == 0 && !_hasLoadedTillStart) {
+  void _preloadEntries() async {
+    if (_selectedIndex == 0 && !_hasLoadedTillStart) {
       final result = await widget.config.asyncLoader(
-          _files[index].creationTime + 1, DateTime.now().microsecondsSinceEpoch,
-          limit: kLoadLimit, asc: true);
+          _files[_selectedIndex].creationTime + 1,
+          DateTime.now().microsecondsSinceEpoch,
+          limit: kLoadLimit,
+          asc: true);
       setState(() {
         final files = result.files.reversed.toList();
         if (!result.hasMore) {
@@ -204,9 +206,10 @@ class _DetailPageState extends State<DetailPage> {
         _selectedIndex = length;
       });
     }
-    if (index == _files.length - 1 && !_hasLoadedTillEnd) {
-      final result = await widget.config
-          .asyncLoader(0, _files[index].creationTime - 1, limit: kLoadLimit);
+    if (_selectedIndex == _files.length - 1 && !_hasLoadedTillEnd) {
+      final result = await widget.config.asyncLoader(
+          0, _files[_selectedIndex].creationTime - 1,
+          limit: kLoadLimit);
       setState(() {
         if (!result.hasMore) {
           _hasLoadedTillEnd = true;
