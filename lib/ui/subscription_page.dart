@@ -7,22 +7,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/ui/common_elements.dart';
-import 'package:photos/ui/expansion_card.dart';
-import 'package:photos/ui/progress_dialog.dart';
-import 'package:photos/utils/date_time_util.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
+import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/expansion_card.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/progress_dialog.dart';
 import 'package:photos/utils/data_util.dart';
+import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SubscriptionPage extends StatefulWidget {
   final bool isOnboarding;
@@ -448,6 +447,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           showToast("thank you for signing up!");
           Bus.instance.fire(SubscriptionPurchasedEvent());
           Navigator.of(context).popUntil((route) => route.isFirst);
+          BillingService.instance
+              .verifySubscription(kFreeProductID, "", paymentProvider: "ente");
         },
       ),
     );

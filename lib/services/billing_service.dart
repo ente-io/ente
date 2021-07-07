@@ -65,12 +65,16 @@ class BillingService {
   }
 
   Future<Subscription> verifySubscription(
-      final productID, final verificationData) async {
+    final productID,
+    final verificationData, {
+    final paymentProvider,
+  }) async {
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/billing/verify-subscription",
         data: {
-          "paymentProvider": Platform.isAndroid ? "playstore" : "appstore",
+          "paymentProvider": paymentProvider ??
+              (Platform.isAndroid ? "playstore" : "appstore"),
           "productID": productID,
           "verificationData": verificationData,
         },
