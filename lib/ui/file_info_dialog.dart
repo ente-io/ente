@@ -12,12 +12,10 @@ import 'package:photos/utils/file_util.dart';
 class FileInfoWidget extends StatelessWidget {
   final File file;
   final AssetEntity entity;
-  final int fileSize;
 
   const FileInfoWidget(
     this.file,
-    this.entity,
-    this.fileSize, {
+    this.entity, {
     Key key,
   }) : super(key: key);
 
@@ -63,18 +61,33 @@ class FileInfoWidget extends StatelessWidget {
       ),
       Padding(padding: EdgeInsets.all(6)),
     ];
-    if (file.localID != null) {
+    items.addAll(
+      [
+        Row(
+          children: [
+            Icon(
+              Icons.sd_storage_outlined,
+              color: Colors.white.withOpacity(0.85),
+            ),
+            Padding(padding: EdgeInsets.all(4)),
+            _getFileSize(),
+          ],
+        ),
+        Padding(padding: EdgeInsets.all(6)),
+      ],
+    );
+    if (file.localID != null && !isImage) {
       items.addAll(
         [
           Row(
             children: [
               Icon(
-                Icons.sd_storage_outlined,
+                Icons.timer_outlined,
                 color: Colors.white.withOpacity(0.85),
               ),
               Padding(padding: EdgeInsets.all(4)),
               Text(
-                (fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB",
+                entity.videoDuration.toString().split(".")[0],
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.85),
                 ),
@@ -84,28 +97,6 @@ class FileInfoWidget extends StatelessWidget {
           Padding(padding: EdgeInsets.all(6)),
         ],
       );
-      if (!isImage) {
-        items.addAll(
-          [
-            Row(
-              children: [
-                Icon(
-                  Icons.timer_outlined,
-                  color: Colors.white.withOpacity(0.85),
-                ),
-                Padding(padding: EdgeInsets.all(4)),
-                Text(
-                  entity.videoDuration.toString().split(".")[0],
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.85),
-                  ),
-                ),
-              ],
-            ),
-            Padding(padding: EdgeInsets.all(6)),
-          ],
-        );
-      }
     }
     if (isImage) {
       items.add(
@@ -347,6 +338,31 @@ class FileInfoWidget extends StatelessWidget {
     }
     return Column(
       children: children,
+    );
+  }
+
+  Widget _getFileSize() {
+    return FutureBuilder(
+      future: getFile(file).then((f) => f.lengthSync()),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Text(
+            (snapshot.data / (1024 * 1024)).toStringAsFixed(2) + " MB",
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.85),
+            ),
+          );
+        } else {
+          return Center(
+            child: SizedBox.fromSize(
+              size: Size.square(24),
+              child: CupertinoActivityIndicator(
+                radius: 8,
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 

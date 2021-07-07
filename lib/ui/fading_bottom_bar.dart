@@ -112,16 +112,14 @@ class FadingBottomBarState extends State<FadingBottomBar> {
 
   Future<void> _displayInfo(File file) async {
     AssetEntity asset;
-    int fileSize;
     final isLocalFile = file.localID != null;
     if (isLocalFile) {
       asset = await file.getAsset();
-      fileSize = await (await asset.originFile).length();
     }
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return FileInfoWidget(file, asset, fileSize);
+        return FileInfoWidget(file, asset);
       },
     );
   }
