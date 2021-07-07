@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:exif/exif.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
@@ -54,7 +53,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
           final exif = snapshot.data;
           String data = "";
           for (String key in exif.keys) {
-            data += "$key (${exif[key].tagType}): ${exif[key]}\n";
+            data += "$key: ${exif[key]}\n";
           }
           if (data.isEmpty) {
             data = "no exif data found";
@@ -87,10 +86,6 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
   }
 
   Future<Map<String, IfdTag>> _getExif() async {
-    final exif = await readExifFromFile(await getFile(widget.file));
-    for (String key in exif.keys) {
-      Logger("ImageInfo").info("$key (${exif[key].tagType}): ${exif[key]}");
-    }
-    return exif;
+    return await readExifFromFile(await getFile(widget.file));
   }
 }
