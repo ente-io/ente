@@ -91,10 +91,10 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                     unselectedLabelColor: Colors.grey,
                     tabs: [
                       Tab(
-                        text: "enter code",
+                        text: "scan code",
                       ),
                       Tab(
-                        text: "scan code",
+                        text: "enter code",
                       )
                     ],
                     controller: _tabController,
@@ -103,8 +103,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                   Expanded(
                     child: TabBarView(
                       children: [
-                        _getSecretCode(),
                         _getBarCode(),
+                        _getSecretCode(),
                       ],
                       controller: _tabController,
                     ),
