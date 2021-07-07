@@ -48,7 +48,7 @@ export const Label = styled.div <{ width?: string }> `
 `;
 export const Value = styled.div <{ width?: string }> `
     display:flex;
-    justify-content:center;
+    justify-content:flex-start;
     align-items:center;
     width:${(props) => props.width ?? '30%'};
     text-align: center;

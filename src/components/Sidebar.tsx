@@ -16,8 +16,6 @@ import {
     isSubscribed,
 } from 'utils/billingUtil';
 
-import exportService from 'services/exportService';
-import { File } from 'services/fileService';
 import isElectron from 'is-electron';
 import { Collection } from 'services/collectionService';
 import { useRouter } from 'next/router';
@@ -51,7 +49,7 @@ export default function Sidebar(props: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
-    const [exportModalView, setExportModalView] = useState(true);
+    const [exportModalView, setExportModalView] = useState(false);
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -80,7 +78,7 @@ export default function Sidebar(props: Props) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function exportFiles() {
         if (isElectron()) {
-            exportService.exportFiles(props.files, props.collections);
+            setExportModalView(true);
         } else {
             props.setDialogMessage({
                 title: constants.DOWNLOAD_APP,
@@ -247,8 +245,8 @@ export default function Sidebar(props: Props) {
                     {constants.CHANGE_PASSWORD}
                 </LinkButton>
                 <>
-                    <ExportModal show={exportModalView} onHide={() => setExportModalView(false)} />
-                    <LinkButton style={{ marginTop: '30px' }} onClick={() => setExportModalView(true)}>
+                    <ExportModal show={exportModalView} onHide={() => setExportModalView(false)} usage={usage} />
+                    <LinkButton style={{ marginTop: '30px' }} onClick={exportFiles}>
                         <div style={{ display: 'flex' }}>
                             {constants.EXPORT}<div style={{ width: '20px' }} />
                             <InProgressIcon />
