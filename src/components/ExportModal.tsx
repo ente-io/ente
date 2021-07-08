@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import exportService from 'services/exportService';
+import styled from 'styled-components';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { Label, Row, Value } from './Container';
@@ -11,6 +12,17 @@ import FolderIcon from './icons/FolderIcon';
 import InProgressIcon from './icons/InProgressIcon';
 import MessageDialog from './MessageDialog';
 
+const FolderIconWrapper = styled.div`
+    width: 15%;
+    margin-left: 10px; 
+    cursor: pointer; 
+    padding: 3px;
+    border: 1px solid #444;
+
+    &:hover{
+        background-color:#444;
+    }
+    `;
 export enum ExportState {
     INIT,
     INPROGRESS,
@@ -140,9 +152,9 @@ export default function ExportModal(props: Props) {
                                 <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}>
                                     {exportFolder}
                                 </span>
-                                <div onClick={selectExportDirectory} style={{ width: '10%', marginLeft: '5px', cursor: 'pointer' }}>
+                                <FolderIconWrapper onClick={selectExportDirectory} >
                                     <FolderIcon />
-                                </div>
+                                </FolderIconWrapper>
                             </>)
                         }
                     </Value>
