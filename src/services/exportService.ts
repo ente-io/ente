@@ -1,7 +1,7 @@
 import { ExportStats } from 'components/ExportModal';
 import { retryPromise, runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Collection, getLocalCollections } from './collectionService';
 import downloadManager from './downloadManager';
 import { File, getLocalFiles } from './fileService';
@@ -12,6 +12,7 @@ enum ExportNotification {
     FINISH = 'export finished',
     FAILED = 'export failed',
     ABORT = 'export aborted',
+    PAUSE = 'export paused',
 }
 class ExportService {
     ElectronAPIs: any;
@@ -19,11 +20,14 @@ class ExportService {
     exportInProgress: Promise<void> = null;
 
     abortExport: boolean = false;
+    pauseExport: boolean = false;
     failedFiles: File[] = [];
     constructor() {
         const main = async () => {
             this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
             if (this.ElectronAPIs) {
+                this.ElectronAPIs.registerStopExportListener(() => (this.abortExport = true));
+                this.ElectronAPIs.registerPauseExportListener(() => (this.pauseExport = true));
                 const autoStartExport = getData(LS_KEYS.EXPORT);
                 if (autoStartExport?.status) {
                     this.exportFiles(null);
@@ -38,6 +42,9 @@ class ExportService {
     cancelExport() {
         this.abortExport = true;
     }
+    stopExport() {
+        this.pauseExport = true;
+    }
     async exportFiles(updateProgress: (stats: ExportStats) => void) {
         const files = await getLocalFiles();
         const collections = await getLocalCollections();
@@ -47,7 +54,6 @@ class ExportService {
         }
         this.exportInProgress = this.fileExporter(files, collections, updateProgress);
         this.ElectronAPIs.showOnTray('starting export');
-        this.ElectronAPIs.registerStopExportListener(() => (this.abortExport = true));
         return this.exportInProgress;
     }
 
@@ -68,7 +74,6 @@ class ExportService {
             updateProgress({ current: 0, total: files.length, failed: this.failedFiles.length });
             this.ElectronAPIs.sendNotification(ExportNotification.START);
 
-            setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), status: true });
             const collectionIDMap = new Map<number, string>();
             for (const collection of collections) {
                 const collectionFolderPath = `${dir}/${collection.id}_${this.sanitizeName(collection.name)}`;
@@ -78,7 +83,14 @@ class ExportService {
                 collectionIDMap.set(collection.id, collectionFolderPath);
             }
             for (const [index, file] of files.entries()) {
-                if (this.abortExport) {
+                if (this.abortExport || this.pauseExport) {
+                    if (this.pauseExport) {
+                        this.ElectronAPIs.showOnTray({
+                            export_progress:
+                                `${index} / ${files.length} files exported (paused)`,
+                            paused: true,
+                        });
+                    }
                     break;
                 }
                 const uid = `${file.id}_${this.sanitizeName(
@@ -100,21 +112,28 @@ class ExportService {
                 });
                 updateProgress({ current: index + 1, total: files.length, failed: this.failedFiles.length });
             }
-            this.ElectronAPIs.sendNotification(
-                this.abortExport ?
-                    ExportNotification.ABORT :
-                    this.failedFiles.length > 0 ? ExportNotification.FAILED :
-                        ExportNotification.FINISH,
-            );
-            if (this.failedFiles.length > 0) {
+            if (this.abortExport) {
+                this.ElectronAPIs.sendNotification(
+                    ExportNotification.ABORT,
+                );
+            } else if (this.pauseExport) {
+                this.ElectronAPIs.sendNotification(
+                    ExportNotification.PAUSE,
+                );
+            } else if (this.failedFiles.length > 0) {
+                this.ElectronAPIs.sendNotification(
+                    ExportNotification.FAILED,
+                );
                 this.ElectronAPIs.registerRetryFailedExportListener(this.fileExporter.bind(this, this.failedFiles, collections));
                 this.ElectronAPIs.showOnTray({
                     retry_export:
                         `export failed - retry export`,
                 });
             } else {
+                this.ElectronAPIs.sendNotification(
+                    ExportNotification.FINISH,
+                );
                 this.ElectronAPIs.showOnTray();
-                setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), status: false });
             }
         } catch (e) {
             logError(e);
