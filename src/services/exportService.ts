@@ -46,6 +46,8 @@ class ExportService {
             return this.exportInProgress;
         }
         this.exportInProgress = this.fileExporter(files, collections, updateProgress);
+        this.ElectronAPIs.showOnTray('starting export');
+        this.ElectronAPIs.registerStopExportListener(() => (this.abortExport = true));
         return this.exportInProgress;
     }
 
@@ -59,8 +61,13 @@ class ExportService {
             const exportedFiles: Set<string> = await this.ElectronAPIs.getExportedFiles(
                 dir,
             );
-            this.ElectronAPIs.showOnTray('starting export');
-            this.ElectronAPIs.registerStopExportListener(() => (this.abortExport = true));
+            this.ElectronAPIs.showOnTray({
+                export_progress:
+                    `0 / ${files.length} files exported`,
+            });
+            updateProgress({ current: 0, total: files.length, failed: this.failedFiles.length });
+            this.ElectronAPIs.sendNotification(ExportNotification.START);
+
             setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), status: true });
             const collectionIDMap = new Map<number, string>();
             for (const collection of collections) {
@@ -70,7 +77,6 @@ class ExportService {
                 );
                 collectionIDMap.set(collection.id, collectionFolderPath);
             }
-            this.ElectronAPIs.sendNotification(ExportNotification.START);
             for (const [index, file] of files.entries()) {
                 if (this.abortExport) {
                     break;
@@ -90,7 +96,7 @@ class ExportService {
                 }
                 this.ElectronAPIs.showOnTray({
                     export_progress:
-                        `exporting file ${index + 1} / ${files.length}`,
+                        `${index + 1} / ${files.length} files exported`,
                 });
                 updateProgress({ current: index + 1, total: files.length, failed: this.failedFiles.length });
             }
