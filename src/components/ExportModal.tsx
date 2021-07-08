@@ -23,7 +23,7 @@ const FolderIconWrapper = styled.div`
         background-color:#444;
     }
     `;
-export enum ExportState {
+export enum ExportStage {
     INIT,
     INPROGRESS,
     PAUSED,
@@ -41,7 +41,7 @@ export interface ExportStats {
     failed: number;
 }
 export default function ExportModal(props: Props) {
-    const [exportState, setExportState] = useState(ExportState.INIT);
+    const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState(null);
     const [exportSize, setExportSize] = useState(null);
     const [exportStats, setExportStats] = useState<ExportStats>({ current: 0, total: 0, failed: 0 });
@@ -49,7 +49,7 @@ export default function ExportModal(props: Props) {
 
     useEffect(() => {
         const exportInfo = getData(LS_KEYS.EXPORT);
-        exportInfo?.state && setExportState(exportInfo.state);
+        exportInfo?.state && setExportStage(exportInfo.state);
         exportInfo?.folder && setExportFolder(exportInfo.folder);
         exportInfo?.time && setLastExportTime(exportInfo.time);
         setExportSize(props.usage);
@@ -57,22 +57,21 @@ export default function ExportModal(props: Props) {
 
     useEffect(() => {
         if (exportStats.total !== 0 && exportStats.current === exportStats.total) {
-            updateExportState(ExportState.FINISHED);
+            updateExportStage(ExportStage.FINISHED);
             updateExportTime(Date.now());
         }
     }, [exportStats]);
 
     useEffect(() => {
         setExportSize(props.usage);
-        console.log(props.usage);
     }, [props.usage]);
 
     const updateExportFolder = (newFolder) => {
         setExportFolder(newFolder);
         setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), folder: newFolder });
     };
-    const updateExportState = (newState) => {
-        setExportState(newState);
+    const updateExportStage = (newState) => {
+        setExportStage(newState);
         setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), state: newState });
     };
     const updateExportTime = (newTime) => {
@@ -81,7 +80,7 @@ export default function ExportModal(props: Props) {
     };
 
     const startExport = () => {
-        updateExportState(ExportState.INPROGRESS);
+        updateExportStage(ExportStage.INPROGRESS);
         setExportStats({ current: 0, total: 0, failed: 0 });
         exportService.exportFiles(setExportStats);
     };
@@ -91,33 +90,46 @@ export default function ExportModal(props: Props) {
         newFolder && updateExportFolder(newFolder);
     };
 
+    const cancelExport = () => {
+        exportService.cancelExport();
+        if (!lastExportTime) {
+            updateExportStage(ExportStage.INIT);
+        } else {
+            updateExportStage(ExportStage.FINISHED);
+        }
+    };
+    const pauseExport = () => {
+        updateExportStage(ExportStage.PAUSED);
+        exportService.stopExport();
+    };
+
     const ExportDynamicState = () => {
-        switch (exportState) {
-            case ExportState.INIT:
+        switch (exportStage) {
+            case ExportStage.INIT:
                 return (
                     <ExportInit {...props}
                         exportFolder={exportFolder}
                         exportSize={exportSize}
                         updateExportFolder={updateExportFolder}
                         exportFiles={startExport}
-                        updateExportState={updateExportState}
+                        updateExportStage={updateExportStage}
                         selectExportDirectory={selectExportDirectory}
                     />
                 );
-            case ExportState.INPROGRESS:
-            case ExportState.PAUSED:
+            case ExportStage.INPROGRESS:
+            case ExportStage.PAUSED:
                 return (
                     <ExportInProgress {...props}
                         exportFolder={exportFolder}
                         exportSize={exportSize}
-                        exportState={exportState}
-                        updateExportState={updateExportState}
+                        exportStage={exportStage}
                         exportStats={exportStats}
                         exportFiles={startExport}
-                        cancelExport={exportService.cancelExport}
+                        cancelExport={cancelExport}
+                        pauseExport={pauseExport}
                     />
                 );
-            case ExportState.FINISHED:
+            case ExportStage.FINISHED:
                 return (
                     <ExportFinished
                         {...props}

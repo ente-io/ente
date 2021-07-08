@@ -2,13 +2,13 @@ import { DeadCenter } from 'pages/gallery';
 import React from 'react';
 import { Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
-import { ExportState } from './ExportModal';
+import { ExportStage } from './ExportModal';
 
 interface Props {
     show: boolean
     onHide: () => void
     updateExportFolder: (newFolder: string) => void;
-    updateExportState: (newState: ExportState) => void;
+    updateExportStage: (newState: ExportStage) => void;
     exportFolder: string
     exportFiles: () => void
     exportSize: string;
@@ -20,7 +20,7 @@ export default function ExportInit(props: Props) {
             await props.selectExportDirectory();
         }
         props.exportFiles();
-        props.updateExportState(ExportState.INPROGRESS);
+        props.updateExportStage(ExportStage.INPROGRESS);
     };
     return (
         <>
