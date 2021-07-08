@@ -79,7 +79,14 @@ export default function ExportModal(props: Props) {
         setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), time: newTime });
     };
 
-    const startExport = () => {
+    const startExport = async () => {
+        if (!exportFolder) {
+            const folderSelected = await selectExportDirectory();
+            if (!folderSelected) {
+                // no-op as select folder aborted
+                return;
+            }
+        }
         updateExportStage(ExportStage.INPROGRESS);
         setExportStats({ current: 0, total: 0, failed: 0 });
         exportService.exportFiles(setExportStats);
@@ -87,7 +94,12 @@ export default function ExportModal(props: Props) {
 
     const selectExportDirectory = async () => {
         const newFolder = await exportService.selectExportDirectory();
-        newFolder && updateExportFolder(newFolder);
+        if (newFolder) {
+            updateExportFolder(newFolder);
+            return true;
+        } else {
+            return false;
+        }
     };
 
     const cancelExport = () => {
@@ -111,8 +123,7 @@ export default function ExportModal(props: Props) {
                         exportFolder={exportFolder}
                         exportSize={exportSize}
                         updateExportFolder={updateExportFolder}
-                        exportFiles={startExport}
-                        updateExportStage={updateExportStage}
+                        startExport={startExport}
                         selectExportDirectory={selectExportDirectory}
                     />
                 );

@@ -61,7 +61,7 @@ class ExportService {
         try {
             const dir = getData(LS_KEYS.EXPORT).folder;
             if (!dir) {
-                // directory selector closed
+                // no-export folder set
                 return;
             }
             const exportedFiles: Set<string> = await this.ElectronAPIs.getExportedFiles(
