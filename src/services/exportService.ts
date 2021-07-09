@@ -19,15 +19,13 @@ class ExportService {
 
     exportInProgress: Promise<void> = null;
 
-    abortExport: boolean = false;
+    stopExport: boolean = false;
     pauseExport: boolean = false;
     failedFiles: File[] = [];
     constructor() {
         const main = async () => {
             this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
             if (this.ElectronAPIs) {
-                this.ElectronAPIs.registerStopExportListener(() => (this.abortExport = true));
-                this.ElectronAPIs.registerPauseExportListener(() => (this.pauseExport = true));
                 const autoStartExport = getData(LS_KEYS.EXPORT);
                 if (autoStartExport?.status) {
                     this.exportFiles(null);
@@ -39,10 +37,10 @@ class ExportService {
     async selectExportDirectory() {
         return await this.ElectronAPIs.selectRootDirectory();
     }
-    cancelExport() {
-        this.abortExport = true;
+    stopRunningExport() {
+        this.stopExport = true;
     }
-    stopExport() {
+    pauseRunningExport() {
         this.pauseExport = true;
     }
     async exportFiles(updateProgress: (stats: ExportStats) => void) {
@@ -52,8 +50,8 @@ class ExportService {
             this.ElectronAPIs.sendNotification(ExportNotification.IN_PROGRESS);
             return this.exportInProgress;
         }
-        this.exportInProgress = this.fileExporter(files, collections, updateProgress);
         this.ElectronAPIs.showOnTray('starting export');
+        this.exportInProgress = this.fileExporter(files, collections, updateProgress);
         return this.exportInProgress;
     }
 
@@ -83,7 +81,7 @@ class ExportService {
                 collectionIDMap.set(collection.id, collectionFolderPath);
             }
             for (const [index, file] of files.entries()) {
-                if (this.abortExport || this.pauseExport) {
+                if (this.stopExport || this.pauseExport) {
                     if (this.pauseExport) {
                         this.ElectronAPIs.showOnTray({
                             export_progress:
@@ -112,10 +110,11 @@ class ExportService {
                 });
                 updateProgress({ current: index + 1, total: files.length, failed: this.failedFiles.length });
             }
-            if (this.abortExport) {
+            if (this.stopExport) {
                 this.ElectronAPIs.sendNotification(
                     ExportNotification.ABORT,
                 );
+                this.ElectronAPIs.showOnTray();
             } else if (this.pauseExport) {
                 this.ElectronAPIs.sendNotification(
                     ExportNotification.PAUSE,
@@ -139,7 +138,8 @@ class ExportService {
             logError(e);
         } finally {
             this.exportInProgress = null;
-            this.abortExport = false;
+            this.stopExport = false;
+            this.pauseExport = false;
             this.failedFiles = [];
         }
     }

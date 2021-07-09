@@ -53,6 +53,9 @@ export default function ExportModal(props: Props) {
         exportInfo?.folder && setExportFolder(exportInfo.folder);
         exportInfo?.time && setLastExportTime(exportInfo.time);
         setExportSize(props.usage);
+        exportService.ElectronAPIs.registerStopExportListener(stopExport);
+        exportService.ElectronAPIs.registerPauseExportListener(pauseExport);
+        exportService.ElectronAPIs.registerStartExportListener(startExport);
     }, []);
 
     useEffect(() => {
@@ -80,6 +83,7 @@ export default function ExportModal(props: Props) {
     };
 
     const startExport = async () => {
+        const exportFolder = getData(LS_KEYS.EXPORT)?.folder;
         if (!exportFolder) {
             const folderSelected = await selectExportDirectory();
             if (!folderSelected) {
@@ -102,8 +106,9 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const cancelExport = () => {
-        exportService.cancelExport();
+    const stopExport = () => {
+        exportService.stopRunningExport();
+        const lastExportTime = getData(LS_KEYS.EXPORT)?.time;
         if (!lastExportTime) {
             updateExportStage(ExportStage.INIT);
         } else {
@@ -112,7 +117,7 @@ export default function ExportModal(props: Props) {
     };
     const pauseExport = () => {
         updateExportStage(ExportStage.PAUSED);
-        exportService.stopExport();
+        exportService.pauseRunningExport();
     };
 
     const ExportDynamicState = () => {
@@ -136,7 +141,7 @@ export default function ExportModal(props: Props) {
                         exportStage={exportStage}
                         exportStats={exportStats}
                         exportFiles={startExport}
-                        cancelExport={cancelExport}
+                        cancelExport={stopExport}
                         pauseExport={pauseExport}
                     />
                 );

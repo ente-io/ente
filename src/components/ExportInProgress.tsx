@@ -25,12 +25,12 @@ export default function ExportInProgress(props: Props) {
         <>
             <div style={{ marginBottom: '30px', padding: '0 5%', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
                 <div style={{ marginBottom: '10px' }}>
-                    <ComfySpan> {props.exportStats.current} / {props.exportStats.total} </ComfySpan> <span style={{ marginLeft: '10px' }}> files exported</span>
+                    <ComfySpan> {props.exportStats.current} / {props.exportStats.total} </ComfySpan> <span style={{ marginLeft: '10px' }}> files exported {props.exportStage === ExportStage.PAUSED && `(paused)`}</span>
                 </div>
                 <div style={{ width: '100%', marginBottom: '30px' }}>
                     <ProgressBar
                         now={Math.round(props.exportStats.current * 100 / props.exportStats.total)}
-                        animated
+                        animated={!(props.exportStage === ExportStage.PAUSED)}
                         variant="upload-progress-bar"
                     />
                 </div>
