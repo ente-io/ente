@@ -40,7 +40,6 @@ function createWindow() {
         icon: appIcon,
         show: false, // don't show the main window
     });
-    mainWindow.setMenu(buildMenuBar());
     const splash = new BrowserWindow({
         frame: false,
         alwaysOnTop: true,
@@ -90,6 +89,7 @@ app.on('ready', () => {
     if (!isDev) {
         autoUpdater.checkForUpdatesAndNotify();
     }
+    Menu.setApplicationMenu(buildMenuBar())
     mainWindow = createWindow();
 
     app.on('activate', function () {
@@ -200,6 +200,7 @@ function buildContextMenu(args: any = {}) {
 }
 
 function buildMenuBar() {
+    const name = app.getName();
     return Menu.buildFromTemplate([
         {
             label: '  ',
@@ -208,6 +209,20 @@ function buildMenuBar() {
                 mainWindow.reload();
             },
         },
+        ...(process.platform === 'darwin' && [{
+            label: name,
+            submenu: Menu.buildFromTemplate([
+                {
+                    label: 'About ' + name,
+                    role: 'about'
+                },
+                {
+                    label: 'Quit',
+                    accelerator: 'Command+Q',
+                    click() { app.quit(); }
+                },
+            ])
+        }]),
         {
             label: 'help',
             submenu: Menu.buildFromTemplate([
