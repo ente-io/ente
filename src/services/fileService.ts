@@ -10,7 +10,7 @@ import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 
 const ENDPOINT = getEndpoint();
-const DIFF_LIMIT: number = 250;
+const DIFF_LIMIT: number = 1000;
 
 const FILES = 'files';
 
