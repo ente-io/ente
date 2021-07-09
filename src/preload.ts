@@ -6,6 +6,10 @@ const { ipcRenderer } = electron;
 
 const EXPORT_FILE_NAME = 'export.txt';
 
+enum RecordType {
+    SUCCESS = "success",
+    FAILED = "failed"
+}
 const responseToReadable = (fileStream: any) => {
     const reader = fileStream.getReader();
     const rs = new Readable();
@@ -46,7 +50,7 @@ const selectRootDirectory = async () => {
     }
 };
 
-const updateExportRecord = async (dir: string, dataToAppend: string) => {
+const updateExportRecord = async (dir: string, dataToAppend: string, type = RecordType.SUCCESS) => {
     const filepath = `${dir}/${EXPORT_FILE_NAME}`;
     let file = null;
     try {
@@ -54,17 +58,23 @@ const updateExportRecord = async (dir: string, dataToAppend: string) => {
     } catch (e) {
         file = '';
     }
-    file = file + `${dataToAppend}\n`;
+    file = file + `${type}@${dataToAppend}\n`;
     await fs.writeFile(filepath, file);
 };
 
-const getExportedFiles = async (dir: string) => {
+const getExportedFiles = async (dir: string, type = RecordType.SUCCESS) => {
     try {
         const filepath = `${dir}/${EXPORT_FILE_NAME}`;
 
-        let fileList = (await fs.readFile(filepath, 'utf-8')).split('\n');
-
-        return new Set<string>(fileList);
+        const fileList = (await fs.readFile(filepath, 'utf-8')).split('\n');
+        const resp = new Set();
+        fileList.forEach((file) => {
+            const splits = file.split("@");
+            if (splits[0] === type) {
+                resp.add(splits[1])
+            }
+        })
+        return resp;
     } catch (e) {
         return new Set<string>();
     }
@@ -77,15 +87,30 @@ const showOnTray = (content: string) => {
     ipcRenderer.send('update-tray', content);
 };
 
-const registerStopExportListener = (abortExport: Function) => {
+const registerStartExportListener = (startExport: () => void) => {
+    ipcRenderer.removeAllListeners("start-export");
+    ipcRenderer.on('start-export', () => startExport());
+};
+const registerStopExportListener = (abortExport: () => void) => {
+    ipcRenderer.removeAllListeners("stop-export");
     ipcRenderer.on('stop-export', () => abortExport());
+};
+
+const registerPauseExportListener = (pauseExport: () => void) => {
+    ipcRenderer.removeAllListeners("pause-export");
+    ipcRenderer.on('pause-export', () => pauseExport());
+};
+
+const registerRetryFailedExportListener = (retryFailedExport: () => void) => {
+    ipcRenderer.removeAllListeners("retry-export");
+    ipcRenderer.on('retry-export', () => retryFailedExport());
 };
 
 const reloadWindow = () => {
     ipcRenderer.send('reload-window');
 };
 
-var windowObject: any = window;
+const windowObject: any = window;
 windowObject['ElectronAPIs'] = {
     checkExistsAndCreateCollectionDir,
     saveStreamToDisk,
@@ -95,6 +120,9 @@ windowObject['ElectronAPIs'] = {
     getExportedFiles,
     sendNotification,
     showOnTray,
-    registerStopExportListener,
     reloadWindow,
+    registerStartExportListener,
+    registerStopExportListener,
+    registerPauseExportListener,
+    registerRetryFailedExportListener,
 };
