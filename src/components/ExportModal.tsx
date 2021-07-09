@@ -49,9 +49,10 @@ export default function ExportModal(props: Props) {
 
     useEffect(() => {
         const exportInfo = getData(LS_KEYS.EXPORT);
-        exportInfo?.state && setExportStage(exportInfo.state);
+        exportInfo?.stage && setExportStage(exportInfo.stage);
         exportInfo?.folder && setExportFolder(exportInfo.folder);
         exportInfo?.time && setLastExportTime(exportInfo.time);
+        exportInfo?.stats && setExportStats(exportInfo.stats);
         setExportSize(props.usage);
         exportService.ElectronAPIs.registerStopExportListener(stopExport);
         exportService.ElectronAPIs.registerPauseExportListener(pauseExport);
@@ -73,13 +74,18 @@ export default function ExportModal(props: Props) {
         setExportFolder(newFolder);
         setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), folder: newFolder });
     };
-    const updateExportStage = (newState) => {
-        setExportStage(newState);
-        setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), state: newState });
+    const updateExportStage = (newStage) => {
+        setExportStage(newStage);
+        setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), stage: newStage });
     };
     const updateExportTime = (newTime) => {
         setLastExportTime(newTime);
         setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), time: newTime });
+    };
+
+    const updateExportStats = (newStats) => {
+        setExportStats(newStats);
+        setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), stats: newStats });
     };
 
     const startExport = async () => {
@@ -92,8 +98,8 @@ export default function ExportModal(props: Props) {
             }
         }
         updateExportStage(ExportStage.INPROGRESS);
-        setExportStats({ current: 0, total: 0, failed: 0 });
-        exportService.exportFiles(setExportStats);
+        updateExportStats({ current: 0, total: 0, failed: 0 });
+        exportService.exportFiles(updateExportStats);
     };
 
     const selectExportDirectory = async () => {

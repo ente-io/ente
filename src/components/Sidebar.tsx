@@ -27,7 +27,7 @@ import { SetDialogMessage } from './MessageDialog';
 import EnteSpinner from './EnteSpinner';
 import RecoveryKeyModal from './RecoveryKeyModal';
 import TwoFactorModal from './TwoFactorModal';
-import ExportModal from './ExportModal';
+import ExportModal, { ExportStage } from './ExportModal';
 import { SetLoading } from 'pages/gallery';
 import InProgressIcon from './icons/InProgressIcon';
 
@@ -249,7 +249,9 @@ export default function Sidebar(props: Props) {
                     <LinkButton style={{ marginTop: '30px' }} onClick={exportFiles}>
                         <div style={{ display: 'flex' }}>
                             {constants.EXPORT}<div style={{ width: '20px' }} />
-                            <InProgressIcon />
+                            {getData(LS_KEYS.EXPORT)?.stage === ExportStage.INPROGRESS &&
+                                <InProgressIcon />
+                            }
                         </div>
                     </LinkButton>
                 </>
