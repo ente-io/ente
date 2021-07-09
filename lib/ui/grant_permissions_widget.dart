@@ -102,7 +102,7 @@ class GrantPermissionsWidget extends StatelessWidget {
             ),
             Padding(padding: const EdgeInsets.all(12)),
             Text(
-              "all the files you choose to back up",
+              "the files you choose to back up",
               style: TextStyle(
                 color: Colors.white30,
               ),
