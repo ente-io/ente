@@ -23,14 +23,14 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   @override
   void initState() {
     _backedupFolders = Configuration.instance.getPathsToBackUp();
+    if (_backedupFolders.isNotEmpty) {
+      _shouldSelectAll = false;
+    }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_backedupFolders.isNotEmpty) {
-      _shouldSelectAll = false;
-    }
     return Scaffold(
       appBar: AppBar(title: Text("select folders to backup")),
       body: Column(
@@ -54,6 +54,26 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           Padding(
             padding: EdgeInsets.all(12),
           ),
+          GestureDetector(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 64, bottom: 6),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    _shouldSelectAll ? "unselect all" : "select all",
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                  ),
+                ),
+              ),
+              onTap: () {
+                setState(() {
+                  _shouldSelectAll = !_shouldSelectAll;
+                });
+              }),
           Expanded(child: _getFolderList()),
           Padding(
             padding: EdgeInsets.all(20),
@@ -141,6 +161,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                               _backedupFolders.add(file.deviceFolder);
                             } else {
                               _backedupFolders.remove(file.deviceFolder);
+                              _shouldSelectAll = false;
                             }
                             setState(() {});
                           },
