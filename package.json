@@ -19,14 +19,10 @@
       "category": "Photography"
     },
     "mac": {
-      "target": "dmg",
       "category": "public.app-category.photography",
       "hardenedRuntime": true
     },
     "afterSign": "electron-builder-notarize",
-    "win": {
-      "target": "nsis"
-    },
     "extraFiles": [
       {
         "from": "build",
