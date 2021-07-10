@@ -48,7 +48,6 @@ class GrantPermissionsWidget extends StatelessWidget {
             Padding(padding: const EdgeInsets.all(24)),
             Container(
               width: double.infinity,
-              height: 64,
               padding: const EdgeInsets.fromLTRB(64, 0, 64, 0),
               child: button(
                 "grant permission",
