@@ -129,7 +129,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                   color: _backedupFolders.contains(file.deviceFolder)
                       ? Color.fromRGBO(16, 32, 32, 1)
                       : Color.fromRGBO(8, 18, 18, 0.4),
-                  padding: EdgeInsets.fromLTRB(24, 20, 24, 20),
+                  padding: EdgeInsets.fromLTRB(20, 16, 20, 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
