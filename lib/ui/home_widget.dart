@@ -340,7 +340,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 height: 64,
                 padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
                 child: button(
-                  "preserve memories",
+                  "start backup",
                   fontSize: 16,
                   lineHeight: 1.5,
                   padding: EdgeInsets.only(bottom: 4),

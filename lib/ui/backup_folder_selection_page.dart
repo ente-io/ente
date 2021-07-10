@@ -56,14 +56,14 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           ),
           Expanded(child: _getFolderList()),
           Padding(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(20),
           ),
           Hero(
             tag: "select_folders",
             child: Container(
               padding: EdgeInsets.only(left: 60, right: 60, bottom: 32),
               child: button(
-                "preserve memories",
+                "start backup",
                 fontSize: 18,
                 onPressed: _backedupFolders.length == 0
                     ? null
@@ -73,7 +73,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         Bus.instance.fire(BackupFoldersUpdatedEvent());
                         Navigator.of(context).pop();
                       },
-                padding: EdgeInsets.fromLTRB(40, 20, 40, 20),
+                padding: EdgeInsets.fromLTRB(60, 20, 60, 20),
               ),
             ),
           ),
