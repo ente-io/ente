@@ -134,7 +134,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 
   Container _getSignUpButton(BuildContext context) {
     return Container(
-      width: 180,
+      width: 200,
       height: 64,
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
