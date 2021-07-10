@@ -1059,13 +1059,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.0+1"
-  wallpaper_manager:
+  wallpaper_manager_flutter:
     dependency: "direct main"
     description:
-      name: wallpaper_manager
+      name: wallpaper_manager_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.10"
+    version: "0.0.2"
   win32:
     dependency: transitive
     description:

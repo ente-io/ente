@@ -4,7 +4,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:wallpaper_manager/wallpaper_manager.dart';
+import 'package:wallpaper_manager_flutter/wallpaper_manager_flutter.dart';
 
 class SetWallpaperDialog extends StatefulWidget {
   final File file;
@@ -16,7 +16,7 @@ class SetWallpaperDialog extends StatefulWidget {
 }
 
 class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
-  int _lockscreenValue = WallpaperManager.HOME_SCREEN;
+  int _lockscreenValue = WallpaperManagerFlutter.HOME_SCREEN;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
           children: [
             RadioListTile(
               title: const Text("homescreen"),
-              value: WallpaperManager.HOME_SCREEN,
+              value: WallpaperManagerFlutter.HOME_SCREEN,
               groupValue: _lockscreenValue,
               onChanged: (v) {
                 setState(() {
@@ -38,7 +38,7 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
             ),
             RadioListTile(
               title: const Text("lockscreen"),
-              value: WallpaperManager.LOCK_SCREEN,
+              value: WallpaperManagerFlutter.LOCK_SCREEN,
               groupValue: _lockscreenValue,
               onChanged: (v) {
                 setState(() {
@@ -48,7 +48,7 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
             ),
             RadioListTile(
               title: const Text("both"),
-              value: WallpaperManager.BOTH_SCREENS,
+              value: WallpaperManagerFlutter.BOTH_SCREENS,
               groupValue: _lockscreenValue,
               onChanged: (v) {
                 setState(() {
@@ -71,12 +71,9 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             final dialog = createProgressDialog(context, "setting wallpaper");
             await dialog.show();
-            final path = (await getFile(widget.file)).path;
             try {
-              await WallpaperManager.setWallpaperFromFile(
-                path,
-                _lockscreenValue,
-              );
+              await WallpaperManagerFlutter().setwallpaperfromFile(
+                  await getFile(widget.file), _lockscreenValue);
               await dialog.hide();
               showToast("wallpaper set successfully");
             } catch (e, s) {
