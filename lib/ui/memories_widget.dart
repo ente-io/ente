@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/services/memories_service.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/memory.dart';
+import 'package:photos/services/memories_service.dart';
 import 'package:photos/ui/blurred_file_backdrop.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -145,6 +145,7 @@ class MemoryWidget extends StatelessWidget {
                       fontSize: 12,
                       color: Colors.white60,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
