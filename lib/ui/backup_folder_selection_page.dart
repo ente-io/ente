@@ -6,7 +6,6 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
@@ -38,23 +37,23 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text("select folders")),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
             padding: EdgeInsets.all(12),
           ),
-          Center(
-            child: Hero(
-              tag: "select_folders",
-              child: Material(
-                type: MaterialType.transparency,
-                child: SectionTitle(
-                  "preserve memories",
-                  alignment: Alignment.center,
-                  opacity: 0.9,
-                ),
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20),
+            child: Text(
+              "the folders you select will be end-to-end encrypted and backed up",
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.36),
+                fontSize: 14,
+                height: 1.3,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
           Padding(
@@ -64,33 +63,23 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           Padding(
             padding: EdgeInsets.all(12),
           ),
-          Container(
-            padding: EdgeInsets.only(left: 60, right: 60),
-            width: double.infinity,
-            height: 64,
-            child: button(
-              "preserve",
-              fontSize: 18,
-              onPressed: _backedupFolders.length == 0
-                  ? null
-                  : () async {
-                      await Configuration.instance
-                          .setPathsToBackUp(_backedupFolders);
-                      Bus.instance.fire(BackupFoldersUpdatedEvent());
-                      Navigator.of(context).pop();
-                    },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(
-              "the files within the folders you select will be encrypted and backed up in the background",
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.36),
-                fontSize: 14,
-                height: 1.3,
+          Hero(
+            tag: "select_folders",
+            child: Container(
+              padding: EdgeInsets.only(left: 60, right: 60),
+              child: button(
+                "preserve memories",
+                fontSize: 18,
+                onPressed: _backedupFolders.length == 0
+                    ? null
+                    : () async {
+                        await Configuration.instance
+                            .setPathsToBackUp(_backedupFolders);
+                        Bus.instance.fire(BackupFoldersUpdatedEvent());
+                        Navigator.of(context).pop();
+                      },
+                padding: EdgeInsets.fromLTRB(40, 20, 40, 20),
               ),
-              textAlign: TextAlign.center,
             ),
           ),
           GestureDetector(
@@ -99,7 +88,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               Navigator.of(context).pop();
             },
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(40, 8, 40, 20),
+              padding: const EdgeInsets.fromLTRB(40, 32, 40, 32),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
