@@ -7,8 +7,9 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/exif_info_dialog.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
-class FileInfoWidget extends StatelessWidget {
+class FileInfoWidget extends StatefulWidget {
   final File file;
 
   const FileInfoWidget(
@@ -17,8 +18,25 @@ class FileInfoWidget extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _FileInfoWidgetState createState() => _FileInfoWidgetState();
+}
+
+class _FileInfoWidgetState extends State<FileInfoWidget> {
+  Map<String, IfdTag> _exif;
+
+  @override
+  void initState() {
+    _getExif().then((exif) {
+      setState(() {
+        _exif = exif;
+      });
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    bool isImage = file.fileType == FileType.image;
+    bool isImage = widget.file.fileType == FileType.image;
     var items = <Widget>[
       Row(
         children: [
@@ -29,7 +47,7 @@ class FileInfoWidget extends StatelessWidget {
           Padding(padding: EdgeInsets.all(4)),
           Text(
             getFormattedTime(
-              DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
+              DateTime.fromMicrosecondsSinceEpoch(widget.file.creationTime),
             ),
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
@@ -46,9 +64,9 @@ class FileInfoWidget extends StatelessWidget {
           ),
           Padding(padding: EdgeInsets.all(4)),
           Text(
-            file.deviceFolder ??
+            widget.file.deviceFolder ??
                 CollectionsService.instance
-                    .getCollectionByID(file.collectionID)
+                    .getCollectionByID(widget.file.collectionID)
                     .name,
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
@@ -73,7 +91,7 @@ class FileInfoWidget extends StatelessWidget {
         Padding(padding: EdgeInsets.all(6)),
       ],
     );
-    if (file.localID != null && !isImage) {
+    if (widget.file.localID != null && !isImage) {
       items.addAll(
         [
           Row(
@@ -84,7 +102,7 @@ class FileInfoWidget extends StatelessWidget {
               ),
               Padding(padding: EdgeInsets.all(4)),
               FutureBuilder(
-                future: file.getAsset(),
+                future: widget.file.getAsset(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Text(
@@ -111,21 +129,10 @@ class FileInfoWidget extends StatelessWidget {
         ],
       );
     }
-    if (isImage) {
-      items.add(
-        FutureBuilder(
-          future: _getExif(),
-          builder: (c, snapshot) {
-            if (snapshot.hasData) {
-              return _getExifWidgets(snapshot.data);
-            } else {
-              return Container();
-            }
-          },
-        ),
-      );
+    if (isImage && _exif != null) {
+      items.add(_getExifWidgets(_exif));
     }
-    if (file.uploadedFileID != null) {
+    if (widget.file.uploadedFileID != null) {
       items.addAll(
         [
           Row(
@@ -136,8 +143,8 @@ class FileInfoWidget extends StatelessWidget {
               ),
               Padding(padding: EdgeInsets.all(4)),
               Text(
-                getFormattedTime(
-                    DateTime.fromMicrosecondsSinceEpoch(file.updationTime)),
+                getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(
+                    widget.file.updationTime)),
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.85),
                 ),
@@ -150,37 +157,115 @@ class FileInfoWidget extends StatelessWidget {
     items.add(
       Padding(padding: EdgeInsets.all(12)),
     );
+    items.add(
+      Row(
+        mainAxisAlignment:
+            isImage ? MainAxisAlignment.spaceBetween : MainAxisAlignment.end,
+        children: _getActions(isImage),
+      ),
+    );
+    return AlertDialog(
+      title: Text(widget.file.title),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: items,
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _getActions(bool isImage) {
     final List<Widget> actions = [];
     if (isImage) {
-      actions.add(
-        TextButton(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Icon(
-                Icons.feed_outlined,
-                color: Colors.white.withOpacity(0.85),
-              ),
-              Padding(padding: EdgeInsets.all(4)),
-              Text(
-                "view exif",
-                style: TextStyle(
+      if (_exif == null) {
+        actions.add(
+          TextButton(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Center(
+                  child: SizedBox.fromSize(
+                    size: Size.square(24),
+                    child: CupertinoActivityIndicator(
+                      radius: 8,
+                    ),
+                  ),
+                ),
+                Padding(padding: EdgeInsets.all(4)),
+                Text(
+                  "exif",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.85),
+                  ),
+                ),
+              ],
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return ExifInfoDialog(widget.file);
+                },
+                barrierColor: Colors.black87,
+              );
+            },
+          ),
+        );
+      } else if (_exif.isNotEmpty) {
+        actions.add(
+          TextButton(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Icon(
+                  Icons.feed_outlined,
                   color: Colors.white.withOpacity(0.85),
                 ),
-              ),
-            ],
+                Padding(padding: EdgeInsets.all(4)),
+                Text(
+                  "view exif",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.85),
+                  ),
+                ),
+              ],
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return ExifInfoDialog(widget.file);
+                },
+                barrierColor: Colors.black87,
+              );
+            },
           ),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return ExifInfoDialog(file);
-              },
-              barrierColor: Colors.black87,
-            );
-          },
-        ),
-      );
+        );
+      } else {
+        actions.add(
+          TextButton(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Icon(
+                  Icons.feed_outlined,
+                  color: Colors.white.withOpacity(0.5),
+                ),
+                Padding(padding: EdgeInsets.all(4)),
+                Text(
+                  "no exif",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                  ),
+                ),
+              ],
+            ),
+            onPressed: () {
+              showToast("this image has no exif data");
+            },
+          ),
+        );
+      }
     }
     actions.add(
       TextButton(
@@ -195,21 +280,7 @@ class FileInfoWidget extends StatelessWidget {
         },
       ),
     );
-    items.add(
-      Row(
-        mainAxisAlignment:
-            isImage ? MainAxisAlignment.spaceBetween : MainAxisAlignment.end,
-        children: actions,
-      ),
-    );
-    return AlertDialog(
-      title: Text(file.title),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: items,
-        ),
-      ),
-    );
+    return actions;
   }
 
   Widget _getExifWidgets(Map<String, IfdTag> exif) {
@@ -356,7 +427,7 @@ class FileInfoWidget extends StatelessWidget {
 
   Widget _getFileSize() {
     return FutureBuilder(
-      future: getFile(file).then((f) => f.lengthSync()),
+      future: getFile(widget.file).then((f) => f.lengthSync()),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Text(
@@ -380,6 +451,6 @@ class FileInfoWidget extends StatelessWidget {
   }
 
   Future<Map<String, IfdTag>> _getExif() async {
-    return await readExifFromFile(await getFile(file));
+    return await readExifFromFile(await getFile(widget.file));
   }
 }
