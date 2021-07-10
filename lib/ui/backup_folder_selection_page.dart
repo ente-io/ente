@@ -32,7 +32,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       _shouldSelectAll = false;
     }
     return Scaffold(
-      appBar: AppBar(title: Text("select folders")),
+      appBar: AppBar(title: Text("select folders to backup")),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
