@@ -72,7 +72,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget>
 
   Widget _buildMemories(List<Memory> memories) {
     final collatedMemories = _collateMemories(memories);
-    final memoryWidgets = List<Widget>();
+    final List<Widget> memoryWidgets = [];
     for (final memories in collatedMemories) {
       memoryWidgets.add(MemoryWidget(memories: memories));
     }
@@ -83,12 +83,12 @@ class _MemoriesWidgetState extends State<MemoriesWidget>
   }
 
   List<List<Memory>> _collateMemories(List<Memory> memories) {
-    final yearlyMemories = List<Memory>();
-    final collatedMemories = List<List<Memory>>();
+    final List<Memory> yearlyMemories = [];
+    final List<List<Memory>> collatedMemories = [];
     for (int index = 0; index < memories.length; index++) {
       if (index > 0 &&
           !_areMemoriesFromSameYear(memories[index - 1], memories[index])) {
-        final collatedYearlyMemories = List<Memory>();
+        final List<Memory> collatedYearlyMemories = [];
         collatedYearlyMemories.addAll(yearlyMemories);
         collatedMemories.add(collatedYearlyMemories);
         yearlyMemories.clear();
