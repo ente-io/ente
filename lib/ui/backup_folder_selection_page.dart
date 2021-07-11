@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -101,6 +102,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 } else {
                   _selectedFolders.addAll(_allFolders);
                 }
+                _latestFiles.sort((first, second) {
+                  return first.deviceFolder.compareTo(second.deviceFolder);
+                });
                 setState(() {});
               }),
           Expanded(child: _getFolders()),
@@ -283,6 +287,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       }
       return first.deviceFolder.compareTo(second.deviceFolder);
     });
+    Logger("Test").info(
+        "Post sort: " + _latestFiles.map((e) => e.deviceFolder).toString());
   }
 
   Widget _getThumbnail(File file) {
