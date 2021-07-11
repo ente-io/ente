@@ -12,7 +12,8 @@ class FadingBottomBar extends StatefulWidget {
   final Function(File) onEditRequested;
 
   FadingBottomBar(
-    this.file, this.onEditRequested, {
+    this.file,
+    this.onEditRequested, {
     Key key,
   }) : super(key: key);
 
