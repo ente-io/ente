@@ -171,40 +171,43 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       child: Scrollbar(
         controller: scrollController,
         isAlwaysShown: true,
-        child: ImplicitlyAnimatedReorderableList<File>(
-          controller: scrollController,
-          items: _latestFiles,
-          areItemsTheSame: (oldItem, newItem) =>
-              oldItem.deviceFolder == newItem.deviceFolder,
-          onReorderFinished: (item, from, to, newItems) {
-            setState(() {
-              _latestFiles
-                ..clear()
-                ..addAll(newItems);
-            });
-          },
-          itemBuilder: (context, itemAnimation, file, index) {
-            return Reorderable(
-              key: ValueKey(file),
-              builder: (context, dragAnimation, inDrag) {
-                final t = dragAnimation.value;
-                final elevation = lerpDouble(0, 8, t);
-                final color =
-                    Color.lerp(Colors.white, Colors.white.withOpacity(0.8), t);
-                return SizeFadeTransition(
-                  sizeFraction: 0.7,
-                  curve: Curves.easeInOut,
-                  animation: itemAnimation,
-                  child: Material(
-                    color: color,
-                    elevation: elevation,
-                    type: MaterialType.transparency,
-                    child: _getFileItem(file),
-                  ),
-                );
-              },
-            );
-          },
+        child: Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: ImplicitlyAnimatedReorderableList<File>(
+            controller: scrollController,
+            items: _latestFiles,
+            areItemsTheSame: (oldItem, newItem) =>
+                oldItem.deviceFolder == newItem.deviceFolder,
+            onReorderFinished: (item, from, to, newItems) {
+              setState(() {
+                _latestFiles
+                  ..clear()
+                  ..addAll(newItems);
+              });
+            },
+            itemBuilder: (context, itemAnimation, file, index) {
+              return Reorderable(
+                key: ValueKey(file),
+                builder: (context, dragAnimation, inDrag) {
+                  final t = dragAnimation.value;
+                  final elevation = lerpDouble(0, 8, t);
+                  final color = Color.lerp(
+                      Colors.white, Colors.white.withOpacity(0.8), t);
+                  return SizeFadeTransition(
+                    sizeFraction: 0.7,
+                    curve: Curves.easeInOut,
+                    animation: itemAnimation,
+                    child: Material(
+                      color: color,
+                      elevation: elevation,
+                      type: MaterialType.transparency,
+                      child: _getFileItem(file),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );
