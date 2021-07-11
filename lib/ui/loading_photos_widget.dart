@@ -42,7 +42,12 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
           // Do nothing, let HomeWidget refresh
         } else {
-          routeToPage(context, BackupFolderSelectionPage(true));
+          routeToPage(
+              context,
+              BackupFolderSelectionPage(
+                shouldSelectAll: true,
+                buttonText: "start backup",
+              ));
         }
       }
     });

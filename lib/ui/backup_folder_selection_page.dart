@@ -10,9 +10,11 @@ import 'package:photos/ui/thumbnail_widget.dart';
 
 class BackupFolderSelectionPage extends StatefulWidget {
   final bool shouldSelectAll;
+  final String buttonText;
 
-  const BackupFolderSelectionPage(
-    this.shouldSelectAll, {
+  const BackupFolderSelectionPage({
+    @required this.shouldSelectAll,
+    @required this.buttonText,
     Key key,
   }) : super(key: key);
 
@@ -106,7 +108,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             child: Container(
               padding: EdgeInsets.only(left: 60, right: 60, bottom: 32),
               child: button(
-                "start backup",
+                widget.buttonText,
                 fontSize: 18,
                 onPressed: _backedupFolders.length == 0
                     ? null
