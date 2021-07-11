@@ -349,7 +349,13 @@ class _HomeWidgetState extends State<HomeWidget> {
                         .hasGrantedLimitedPermissions()) {
                       PhotoManager.presentLimited();
                     } else {
-                      routeToPage(context, BackupFolderSelectionPage());
+                      routeToPage(
+                        context,
+                        BackupFolderSelectionPage(
+                          shouldSelectAll: true,
+                          buttonText: "start backup",
+                        ),
+                      );
                     }
                   },
                 ),

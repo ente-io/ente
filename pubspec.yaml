@@ -94,6 +94,7 @@ dependencies:
   device_info: ^2.0.2
   exif: ^3.0.0
   wallpaper_manager_flutter: ^0.0.2
+  implicitly_animated_reorderable_list: ^0.4.0
 
 dev_dependencies:
   flutter_test:

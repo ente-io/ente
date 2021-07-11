@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
@@ -22,9 +21,8 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/services/user_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Configuration {
   Configuration._privateConstructor();

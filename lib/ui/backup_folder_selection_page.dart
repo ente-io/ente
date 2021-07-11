@@ -1,4 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
+import 'package:implicitly_animated_reorderable_list/transitions.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -9,7 +13,14 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
 class BackupFolderSelectionPage extends StatefulWidget {
-  const BackupFolderSelectionPage({Key key}) : super(key: key);
+  final bool shouldSelectAll;
+  final String buttonText;
+
+  const BackupFolderSelectionPage({
+    @required this.buttonText,
+    this.shouldSelectAll = false,
+    Key key,
+  }) : super(key: key);
 
   @override
   _BackupFolderSelectionPageState createState() =>
@@ -17,20 +28,29 @@ class BackupFolderSelectionPage extends StatefulWidget {
 }
 
 class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
-  Set<String> _backedupFolders = Set<String>();
-  bool _shouldSelectAll = true;
+  final Set<String> _allFolders = Set<String>();
+  Set<String> _selectedFolders = Set<String>();
+  List<File> _latestFiles;
 
   @override
   void initState() {
-    _backedupFolders = Configuration.instance.getPathsToBackUp();
+    _selectedFolders = Configuration.instance.getPathsToBackUp();
+    FilesDB.instance.getLatestLocalFiles().then((files) {
+      setState(() {
+        _latestFiles = files;
+        for (final file in _latestFiles) {
+          _allFolders.add(file.deviceFolder);
+        }
+        if (widget.shouldSelectAll) {
+          _selectedFolders.addAll(_allFolders);
+        }
+      });
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_backedupFolders.isNotEmpty) {
-      _shouldSelectAll = false;
-    }
     return Scaffold(
       appBar: AppBar(title: Text("select folders to backup")),
       body: Column(
@@ -52,9 +72,43 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(6),
           ),
-          Expanded(child: _getFolderList()),
+          _latestFiles == null
+              ? Container()
+              : GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 6, 64, 6),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        _selectedFolders.length == _allFolders.length
+                            ? "unselect all"
+                            : "select all",
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  onTap: () {
+                    final hasSelectedAll =
+                        _selectedFolders.length == _allFolders.length;
+                    // Flip selection
+                    if (hasSelectedAll) {
+                      _selectedFolders.clear();
+                    } else {
+                      _selectedFolders.addAll(_allFolders);
+                    }
+                    _latestFiles.sort((first, second) {
+                      return first.deviceFolder.compareTo(second.deviceFolder);
+                    });
+                    setState(() {});
+                  }),
+          Expanded(child: _getFolders()),
           Padding(
             padding: EdgeInsets.all(20),
           ),
@@ -63,13 +117,13 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             child: Container(
               padding: EdgeInsets.only(left: 60, right: 60, bottom: 32),
               child: button(
-                "start backup",
+                widget.buttonText,
                 fontSize: 18,
-                onPressed: _backedupFolders.length == 0
+                onPressed: _selectedFolders.length == 0
                     ? null
                     : () async {
                         await Configuration.instance
-                            .setPathsToBackUp(_backedupFolders);
+                            .setPathsToBackUp(_selectedFolders);
                         Bus.instance.fire(BackupFoldersUpdatedEvent());
                         Navigator.of(context).pop();
                       },
@@ -83,110 +137,160 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   }
 
   Widget _getFolderList() {
-    return FutureBuilder<List<File>>(
-      future: FilesDB.instance.getLatestLocalFiles(),
-      builder: (context, snapshot) {
-        Widget child;
-        if (snapshot.hasData) {
-          snapshot.data.sort((first, second) {
-            return first.deviceFolder
-                .toLowerCase()
-                .compareTo(second.deviceFolder.toLowerCase());
-          });
-          final List<Widget> foldersWidget = [];
-          for (final file in snapshot.data) {
-            final isSelected = _shouldSelectAll ||
-                _backedupFolders.contains(file.deviceFolder);
-            foldersWidget.add(
-              Padding(
-                padding: const EdgeInsets.only(bottom: 1, right: 4),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black,
-                    ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10),
-                    ),
-                    color: isSelected
-                        ? Color.fromRGBO(16, 32, 32, 1)
-                        : Color.fromRGBO(8, 18, 18, 0.4),
-                  ),
-                  padding: EdgeInsets.fromLTRB(20, 16, 20, 16),
-                  child: InkWell(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          child: Expanded(
-                            child: Row(
-                              children: [
-                                _getThumbnail(file),
-                                Padding(padding: EdgeInsets.all(10)),
-                                Expanded(
-                                  child: Text(
-                                    file.deviceFolder,
-                                    style: TextStyle(fontSize: 16, height: 1.5),
-                                    overflow: TextOverflow.clip,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Checkbox(
-                          value: isSelected,
-                          onChanged: (value) {
-                            if (value) {
-                              _backedupFolders.add(file.deviceFolder);
-                            } else {
-                              _backedupFolders.remove(file.deviceFolder);
-                            }
-                            setState(() {});
-                          },
-                        ),
-                      ],
-                    ),
-                    onTap: () {
-                      final value =
-                          !_backedupFolders.contains(file.deviceFolder);
-                      if (value) {
-                        _backedupFolders.add(file.deviceFolder);
-                      } else {
-                        _backedupFolders.remove(file.deviceFolder);
-                      }
-                      setState(() {});
-                    },
-                  ),
-                ),
-              ),
-            );
-          }
-
-          final scrollController = ScrollController();
-          child = Scrollbar(
-            isAlwaysShown: true,
-            controller: scrollController,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: Container(
-                padding: EdgeInsets.only(right: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: foldersWidget,
-                ),
-              ),
-            ),
-          );
-        } else {
-          child = loadWidget;
-        }
-        return Container(
-          padding: EdgeInsets.only(left: 40, right: 40),
-          child: child,
-        );
-      },
+    Widget child;
+    if (_latestFiles != null) {
+      final foldersWidget = _getFolders();
+      final scrollController = ScrollController();
+      child = Scrollbar(
+        isAlwaysShown: true,
+        controller: scrollController,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: Container(
+            padding: EdgeInsets.only(right: 4),
+            child: foldersWidget,
+          ),
+        ),
+      );
+    } else {
+      child = loadWidget;
+    }
+    return Container(
+      padding: EdgeInsets.only(left: 40, right: 40),
+      child: child,
     );
+  }
+
+  Widget _getFolders() {
+    if (_latestFiles == null) {
+      return loadWidget;
+    }
+    _sortFiles();
+    final scrollController = ScrollController();
+    return Container(
+      padding: EdgeInsets.only(left: 40, right: 40),
+      child: Scrollbar(
+        controller: scrollController,
+        isAlwaysShown: true,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: ImplicitlyAnimatedReorderableList<File>(
+            controller: scrollController,
+            items: _latestFiles,
+            areItemsTheSame: (oldItem, newItem) =>
+                oldItem.deviceFolder == newItem.deviceFolder,
+            onReorderFinished: (item, from, to, newItems) {
+              setState(() {
+                _latestFiles
+                  ..clear()
+                  ..addAll(newItems);
+              });
+            },
+            itemBuilder: (context, itemAnimation, file, index) {
+              return Reorderable(
+                key: ValueKey(file),
+                builder: (context, dragAnimation, inDrag) {
+                  final t = dragAnimation.value;
+                  final elevation = lerpDouble(0, 8, t);
+                  final color = Color.lerp(
+                      Colors.white, Colors.white.withOpacity(0.8), t);
+                  return SizeFadeTransition(
+                    sizeFraction: 0.7,
+                    curve: Curves.easeInOut,
+                    animation: itemAnimation,
+                    child: Material(
+                      color: color,
+                      elevation: elevation,
+                      type: MaterialType.transparency,
+                      child: _getFileItem(file),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Padding _getFileItem(File file) {
+    final isSelected = _selectedFolders.contains(file.deviceFolder);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 1, right: 4),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.black,
+          ),
+          borderRadius: BorderRadius.all(
+            Radius.circular(10),
+          ),
+          color: isSelected
+              ? Color.fromRGBO(16, 32, 32, 1)
+              : Color.fromRGBO(8, 18, 18, 0.4),
+        ),
+        padding: EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: InkWell(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                child: Expanded(
+                  child: Row(
+                    children: [
+                      _getThumbnail(file),
+                      Padding(padding: EdgeInsets.all(10)),
+                      Expanded(
+                        child: Text(
+                          file.deviceFolder,
+                          style: TextStyle(fontSize: 16, height: 1.5),
+                          overflow: TextOverflow.clip,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Checkbox(
+                value: isSelected,
+                onChanged: (value) {
+                  if (value) {
+                    _selectedFolders.add(file.deviceFolder);
+                  } else {
+                    _selectedFolders.remove(file.deviceFolder);
+                  }
+                  setState(() {});
+                },
+              ),
+            ],
+          ),
+          onTap: () {
+            final value = !_selectedFolders.contains(file.deviceFolder);
+            if (value) {
+              _selectedFolders.add(file.deviceFolder);
+            } else {
+              _selectedFolders.remove(file.deviceFolder);
+            }
+            setState(() {});
+          },
+        ),
+      ),
+    );
+  }
+
+  void _sortFiles() {
+    _latestFiles.sort((first, second) {
+      if (_selectedFolders.contains(first) &&
+          _selectedFolders.contains(second)) {
+        return first.deviceFolder.compareTo(second.deviceFolder);
+      } else if (_selectedFolders.contains(first.deviceFolder)) {
+        return -1;
+      } else if (_selectedFolders.contains(second.deviceFolder)) {
+        return 1;
+      }
+      return first.deviceFolder.compareTo(second.deviceFolder);
+    });
   }
 
   Widget _getThumbnail(File file) {
