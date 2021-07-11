@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/ui/backup_folder_selection_widget.dart';
+import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/free_space_page.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
@@ -34,17 +34,11 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () async {
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    content: const BackupFolderSelectionWidget("backup"),
-                    backgroundColor: Color.fromRGBO(8, 18, 18, 1),
-                    insetPadding: const EdgeInsets.all(24),
-                    contentPadding: const EdgeInsets.all(24),
-                  );
-                },
-                barrierColor: Colors.black.withOpacity(0.85),
+              routeToPage(
+                context,
+                BackupFolderSelectionPage(
+                  buttonText: "backup",
+                ),
               );
             },
             child: SettingsTextItem(

@@ -350,11 +350,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                       PhotoManager.presentLimited();
                     } else {
                       routeToPage(
-                          context,
-                          BackupFolderSelectionPage(
-                            shouldSelectAll: true,
-                            buttonText: "start backup",
-                          ));
+                        context,
+                        BackupFolderSelectionPage(
+                          shouldSelectAll: true,
+                          buttonText: "start backup",
+                        ),
+                      );
                     }
                   },
                 ),

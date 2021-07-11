@@ -13,8 +13,8 @@ class BackupFolderSelectionPage extends StatefulWidget {
   final String buttonText;
 
   const BackupFolderSelectionPage({
-    @required this.shouldSelectAll,
     @required this.buttonText,
+    this.shouldSelectAll = false,
     Key key,
   }) : super(key: key);
 
@@ -24,15 +24,14 @@ class BackupFolderSelectionPage extends StatefulWidget {
 }
 
 class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
+  final Set<String> _allFolders = Set<String>();
   Set<String> _backedupFolders = Set<String>();
   List<File> _latestFiles;
-  final _allFolders = Set<String>();
   bool _isSelectAll = false;
 
   @override
   void initState() {
     _backedupFolders = Configuration.instance.getPathsToBackUp();
-    _isSelectAll = widget.shouldSelectAll;
     FilesDB.instance.getLatestLocalFiles().then((files) {
       setState(() {
         _latestFiles = files;
@@ -74,14 +73,13 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             padding: EdgeInsets.all(6),
           ),
           GestureDetector(
+              behavior: HitTestBehavior.translucent,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(6, 6, 64, 6),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Text(
-                    _backedupFolders.length == _allFolders.length
-                        ? "unselect all"
-                        : "select all",
+                    _isSelectAll ? "unselect all" : "select all",
                     textAlign: TextAlign.right,
                     style: TextStyle(
                       fontSize: 12,
