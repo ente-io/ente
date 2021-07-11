@@ -74,38 +74,40 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           Padding(
             padding: EdgeInsets.all(6),
           ),
-          GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(6, 6, 64, 6),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    _selectedFolders.length == _allFolders.length
-                        ? "unselect all"
-                        : "select all",
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white.withOpacity(0.8),
+          _latestFiles == null
+              ? Container()
+              : GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 6, 64, 6),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        _selectedFolders.length == _allFolders.length
+                            ? "unselect all"
+                            : "select all",
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              onTap: () {
-                final hasSelectedAll =
-                    _selectedFolders.length == _allFolders.length;
-                // Flip selection
-                if (hasSelectedAll) {
-                  _selectedFolders.clear();
-                } else {
-                  _selectedFolders.addAll(_allFolders);
-                }
-                _latestFiles.sort((first, second) {
-                  return first.deviceFolder.compareTo(second.deviceFolder);
-                });
-                setState(() {});
-              }),
+                  onTap: () {
+                    final hasSelectedAll =
+                        _selectedFolders.length == _allFolders.length;
+                    // Flip selection
+                    if (hasSelectedAll) {
+                      _selectedFolders.clear();
+                    } else {
+                      _selectedFolders.addAll(_allFolders);
+                    }
+                    _latestFiles.sort((first, second) {
+                      return first.deviceFolder.compareTo(second.deviceFolder);
+                    });
+                    setState(() {});
+                  }),
           Expanded(child: _getFolders()),
           Padding(
             padding: EdgeInsets.all(20),
@@ -161,7 +163,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   Widget _getFolders() {
     if (_latestFiles == null) {
-      return Container();
+      return loadWidget;
     }
     _sortFiles();
     final scrollController = ScrollController();
