@@ -82,28 +82,25 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     );
     return AnimatedOpacity(
       child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.transparent,
-                Colors.black.withOpacity(0.5),
-                Colors.black.withOpacity(0.64),
-              ],
-              stops: [0, 0.8, 1],
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.5),
+                  Colors.black.withOpacity(0.64),
+                ],
+                stops: [0, 0.8, 1],
+              ),
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 24),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: children,
             ),
           ),
-        ),
       ),
       opacity: _shouldHide ? 0 : 1,
       duration: Duration(milliseconds: 150),

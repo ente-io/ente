@@ -55,19 +55,24 @@ class _VideoControlsState extends State<VideoControls> {
         onTap: () => _cancelAndRestartTimer(),
         child: AbsorbPointer(
           absorbing: _hideStuff,
-          child: Column(
+          child: Stack(
             children: <Widget>[
-              _latestValue != null &&
-                          !_latestValue.isPlaying &&
-                          _latestValue.duration == null ||
-                      _latestValue.isBuffering
-                  ? const Expanded(
-                      child: const Center(
-                        child: const CircularProgressIndicator(),
-                      ),
-                    )
-                  : _buildHitArea(),
-              _buildBottomBar(context),
+              Column(
+                children: [
+                  _latestValue != null &&
+                              !_latestValue.isPlaying &&
+                              _latestValue.duration == null ||
+                          _latestValue.isBuffering
+                      ? const Center(
+                          child: const CircularProgressIndicator(),
+                        )
+                      : _buildHitArea(),
+                ],
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: _buildBottomBar(context),
+              ),
             ],
           ),
         ),
@@ -102,23 +107,26 @@ class _VideoControlsState extends State<VideoControls> {
     super.didChangeDependencies();
   }
 
-  AnimatedOpacity _buildBottomBar(
+  Widget _buildBottomBar(
     BuildContext context,
   ) {
     final iconColor = Theme.of(context).textTheme.button.color;
 
-    return AnimatedOpacity(
-      opacity: _hideStuff ? 0.0 : 1.0,
-      duration: Duration(milliseconds: 300),
-      child: Container(
-        height: barHeight,
-        color: Colors.transparent,
-        child: Row(
-          children: <Widget>[
-            _buildCurrentPosition(iconColor),
-            chewieController.isLive ? const SizedBox() : _buildProgressBar(),
-            _buildTotalDuration(iconColor),
-          ],
+    return Container(
+      padding: EdgeInsets.only(bottom: 60),
+      child: AnimatedOpacity(
+        opacity: _hideStuff ? 0.0 : 1.0,
+        duration: Duration(milliseconds: 300),
+        child: Container(
+          height: barHeight,
+          color: Colors.transparent,
+          child: Row(
+            children: <Widget>[
+              _buildCurrentPosition(iconColor),
+              chewieController.isLive ? const SizedBox() : _buildProgressBar(),
+              _buildTotalDuration(iconColor),
+            ],
+          ),
         ),
       ),
     );
