@@ -12,7 +12,6 @@ import 'package:photos/models/file.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/custom_app_bar.dart';
-import 'package:photos/ui/set_wallpaper_dialog.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -120,22 +119,6 @@ class FadingAppBarState extends State<FadingAppBar> {
             ),
           ),
         );
-        if (Platform.isAndroid) {
-          items.add(
-            PopupMenuItem(
-              value: 3,
-              child: Row(
-                children: [
-                  Icon(Icons.wallpaper_outlined),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text("set wallpaper"),
-                ],
-              ),
-            ),
-          );
-        }
         return items;
       },
       onSelected: (value) {
@@ -143,8 +126,6 @@ class FadingAppBarState extends State<FadingAppBar> {
           _download(widget.file);
         } else if (value == 2) {
           _showDeleteSheet(widget.file);
-        } else if (value == 3) {
-          _setWallpaper(widget.file);
         }
       },
     ));
@@ -220,7 +201,7 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   void _showDeleteSheet(File file) {
-    final actions = List<Widget>();
+    final List<Widget> actions = [];
     if (file.uploadedFileID == null) {
       actions.add(CupertinoActionSheetAction(
         child: Text("everywhere"),
@@ -277,15 +258,5 @@ class FadingAppBarState extends State<FadingAppBar> {
     Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
     await dialog.hide();
     showToast("file saved to gallery");
-  }
-
-  Future<void> _setWallpaper(File file) async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SetWallpaperDialog(file);
-      },
-      barrierColor: Colors.black87,
-    );
   }
 }
