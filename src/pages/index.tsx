@@ -9,6 +9,8 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import EnteSpinner from 'components/EnteSpinner';
 import SignUp from 'components/SignUp';
 import constants from 'utils/strings/constants';
+import localForage from 'utils/storage/localForage';
+import IncognitoWarning from 'components/IncognitoWarning';
 
 const Container = styled.div`
     display: flex;
@@ -98,12 +100,17 @@ export default function LandingPage() {
     const appContext = useContext(AppContext);
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
-
+    const [blockUsage, setBlockUsage] = useState(false);
     useEffect(() => {
-        const main = async () =>{
+        const main = async () => {
             const user = getData(LS_KEYS.USER);
             if (user?.email) {
                 await router.push('/verify');
+            }
+            try {
+                await localForage.ready();
+            } catch (e) {
+                setBlockUsage(true);
             }
             setLoading(false);
         };
@@ -148,7 +155,7 @@ export default function LandingPage() {
                     >
                         {constants.SIGN_UP}
                     </Button>
-                    <br/>
+                    <br />
                     <Button
                         variant="link"
                         size="lg"
@@ -160,9 +167,10 @@ export default function LandingPage() {
                 </MobileBox>
                 <DesktopBox>
                     <SideBox>
-                        { showLogin ? <Login signUp={signUp} /> : <SignUp login={login} />}
+                        {showLogin ? <Login signUp={signUp} /> : <SignUp login={login} />}
                     </SideBox>
                 </DesktopBox>
+                {blockUsage && <IncognitoWarning />}
             </>)}
     </Container>;
 }

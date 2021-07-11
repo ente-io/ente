@@ -428,7 +428,8 @@ const englishConstants = {
     TWO_FACTOR_SETUP_SUCCESS: 'two factor authentication successfully configured',
     TWO_FACTOR_DISABLE_SUCCESS: 'two factor authentication disabled',
     TWO_FACTOR_DISABLE_FAILED: 'failed to disable two factor, please try again',
-
+    LOCAL_STORAGE_NOT_ACCESSIBLE: 'local storage not accessible',
+    LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE: 'your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
 };
 
 export default englishConstants;
