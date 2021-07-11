@@ -9,7 +9,12 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 
 class BackupFolderSelectionPage extends StatefulWidget {
-  const BackupFolderSelectionPage({Key key}) : super(key: key);
+  final bool shouldSelectAll;
+
+  const BackupFolderSelectionPage(
+    this.shouldSelectAll, {
+    Key key,
+  }) : super(key: key);
 
   @override
   _BackupFolderSelectionPageState createState() =>
@@ -18,14 +23,26 @@ class BackupFolderSelectionPage extends StatefulWidget {
 
 class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   Set<String> _backedupFolders = Set<String>();
-  bool _shouldSelectAll = true;
+  List<File> _latestFiles;
+  final _allFolders = Set<String>();
+  bool _isSelectAll = false;
 
   @override
   void initState() {
     _backedupFolders = Configuration.instance.getPathsToBackUp();
-    if (_backedupFolders.isNotEmpty) {
-      _shouldSelectAll = false;
-    }
+    _isSelectAll = widget.shouldSelectAll;
+    FilesDB.instance.getLatestLocalFiles().then((files) {
+      setState(() {
+        _latestFiles = files;
+        for (final file in _latestFiles) {
+          _allFolders.add(file.deviceFolder);
+        }
+        if (widget.shouldSelectAll) {
+          _backedupFolders.addAll(_allFolders);
+        }
+        _isSelectAll = _backedupFolders.length == _allFolders.length;
+      });
+    });
     super.initState();
   }
 
@@ -52,15 +69,17 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(6),
           ),
           GestureDetector(
               child: Padding(
-                padding: const EdgeInsets.only(right: 64, bottom: 6),
+                padding: const EdgeInsets.fromLTRB(6, 6, 64, 6),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Text(
-                    _shouldSelectAll ? "unselect all" : "select all",
+                    _backedupFolders.length == _allFolders.length
+                        ? "unselect all"
+                        : "select all",
                     textAlign: TextAlign.right,
                     style: TextStyle(
                       fontSize: 12,
@@ -70,9 +89,13 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 ),
               ),
               onTap: () {
-                setState(() {
-                  _shouldSelectAll = !_shouldSelectAll;
-                });
+                _isSelectAll = !_isSelectAll;
+                if (_isSelectAll) {
+                  _backedupFolders.addAll(_allFolders);
+                } else {
+                  _backedupFolders.clear();
+                }
+                setState(() {});
               }),
           Expanded(child: _getFolderList()),
           Padding(
@@ -103,110 +126,102 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   }
 
   Widget _getFolderList() {
-    return FutureBuilder<List<File>>(
-      future: FilesDB.instance.getLatestLocalFiles(),
-      builder: (context, snapshot) {
-        Widget child;
-        if (snapshot.hasData) {
-          snapshot.data.sort((first, second) {
-            return first.deviceFolder
-                .toLowerCase()
-                .compareTo(second.deviceFolder.toLowerCase());
-          });
-          final List<Widget> foldersWidget = [];
-          for (final file in snapshot.data) {
-            final isSelected = _shouldSelectAll ||
-                _backedupFolders.contains(file.deviceFolder);
-            foldersWidget.add(
-              Padding(
-                padding: const EdgeInsets.only(bottom: 1, right: 4),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black,
-                    ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10),
-                    ),
-                    color: isSelected
-                        ? Color.fromRGBO(16, 32, 32, 1)
-                        : Color.fromRGBO(8, 18, 18, 0.4),
-                  ),
-                  padding: EdgeInsets.fromLTRB(20, 16, 20, 16),
-                  child: InkWell(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          child: Expanded(
-                            child: Row(
-                              children: [
-                                _getThumbnail(file),
-                                Padding(padding: EdgeInsets.all(10)),
-                                Expanded(
-                                  child: Text(
-                                    file.deviceFolder,
-                                    style: TextStyle(fontSize: 16, height: 1.5),
-                                    overflow: TextOverflow.clip,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Checkbox(
-                          value: isSelected,
-                          onChanged: (value) {
-                            if (value) {
-                              _backedupFolders.add(file.deviceFolder);
-                            } else {
-                              _backedupFolders.remove(file.deviceFolder);
-                              _shouldSelectAll = false;
-                            }
-                            setState(() {});
-                          },
-                        ),
-                      ],
-                    ),
-                    onTap: () {
-                      final value =
-                          !_backedupFolders.contains(file.deviceFolder);
-                      if (value) {
-                        _backedupFolders.add(file.deviceFolder);
-                      } else {
-                        _backedupFolders.remove(file.deviceFolder);
-                      }
-                      setState(() {});
-                    },
-                  ),
+    Widget child;
+    if (_latestFiles != null) {
+      _latestFiles.sort((first, second) {
+        return first.deviceFolder
+            .toLowerCase()
+            .compareTo(second.deviceFolder.toLowerCase());
+      });
+      final List<Widget> foldersWidget = [];
+      for (final file in _latestFiles) {
+        final isSelected = _backedupFolders.contains(file.deviceFolder);
+        foldersWidget.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 1, right: 4),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.black,
                 ),
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10),
+                ),
+                color: isSelected
+                    ? Color.fromRGBO(16, 32, 32, 1)
+                    : Color.fromRGBO(8, 18, 18, 0.4),
               ),
-            );
-          }
-
-          final scrollController = ScrollController();
-          child = Scrollbar(
-            isAlwaysShown: true,
-            controller: scrollController,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: Container(
-                padding: EdgeInsets.only(right: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: foldersWidget,
+              padding: EdgeInsets.fromLTRB(20, 16, 20, 16),
+              child: InkWell(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      child: Expanded(
+                        child: Row(
+                          children: [
+                            _getThumbnail(file),
+                            Padding(padding: EdgeInsets.all(10)),
+                            Expanded(
+                              child: Text(
+                                file.deviceFolder,
+                                style: TextStyle(fontSize: 16, height: 1.5),
+                                overflow: TextOverflow.clip,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Checkbox(
+                      value: isSelected,
+                      onChanged: (value) {
+                        if (value) {
+                          _backedupFolders.add(file.deviceFolder);
+                        } else {
+                          _backedupFolders.remove(file.deviceFolder);
+                        }
+                        setState(() {});
+                      },
+                    ),
+                  ],
                 ),
+                onTap: () {
+                  final value = !_backedupFolders.contains(file.deviceFolder);
+                  if (value) {
+                    _backedupFolders.add(file.deviceFolder);
+                  } else {
+                    _backedupFolders.remove(file.deviceFolder);
+                  }
+                  setState(() {});
+                },
               ),
             ),
-          );
-        } else {
-          child = loadWidget;
-        }
-        return Container(
-          padding: EdgeInsets.only(left: 40, right: 40),
-          child: child,
+          ),
         );
-      },
+      }
+
+      final scrollController = ScrollController();
+      child = Scrollbar(
+        isAlwaysShown: true,
+        controller: scrollController,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: Container(
+            padding: EdgeInsets.only(right: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: foldersWidget,
+            ),
+          ),
+        ),
+      );
+    } else {
+      child = loadWidget;
+    }
+    return Container(
+      padding: EdgeInsets.only(left: 40, right: 40),
+      child: child,
     );
   }
 
