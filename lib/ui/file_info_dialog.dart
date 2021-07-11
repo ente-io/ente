@@ -23,20 +23,23 @@ class FileInfoWidget extends StatefulWidget {
 
 class _FileInfoWidgetState extends State<FileInfoWidget> {
   Map<String, IfdTag> _exif;
+  bool _isImage = false;
 
   @override
   void initState() {
-    _getExif().then((exif) {
-      setState(() {
-        _exif = exif;
+    _isImage = widget.file.fileType == FileType.image;
+    if (_isImage) {
+      _getExif().then((exif) {
+        setState(() {
+          _exif = exif;
+        });
       });
-    });
+    }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isImage = widget.file.fileType == FileType.image;
     var items = <Widget>[
       Row(
         children: [
@@ -91,7 +94,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         Padding(padding: EdgeInsets.all(6)),
       ],
     );
-    if (widget.file.localID != null && !isImage) {
+    if (widget.file.localID != null && !_isImage) {
       items.addAll(
         [
           Row(
@@ -129,7 +132,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         ],
       );
     }
-    if (isImage && _exif != null) {
+    if (_isImage && _exif != null) {
       items.add(_getExifWidgets(_exif));
     }
     if (widget.file.uploadedFileID != null) {
@@ -160,8 +163,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     items.add(
       Row(
         mainAxisAlignment:
-            isImage ? MainAxisAlignment.spaceBetween : MainAxisAlignment.end,
-        children: _getActions(isImage),
+            _isImage ? MainAxisAlignment.spaceBetween : MainAxisAlignment.end,
+        children: _getActions(),
       ),
     );
     return AlertDialog(
@@ -174,9 +177,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     );
   }
 
-  List<Widget> _getActions(bool isImage) {
+  List<Widget> _getActions() {
     final List<Widget> actions = [];
-    if (isImage) {
+    if (_isImage) {
       if (_exif == null) {
         actions.add(
           TextButton(
