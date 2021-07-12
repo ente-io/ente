@@ -18,12 +18,8 @@ class Network {
   }
 
   Network._privateConstructor();
+
   static Network instance = Network._privateConstructor();
 
   Dio getDio() => _dio;
-
-  Future<String> _getAppVersion() async {
-    final pkgInfo = await PackageInfo.fromPlatform();
-    return pkgInfo.version;
-  }
 }
