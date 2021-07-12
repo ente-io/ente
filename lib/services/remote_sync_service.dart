@@ -113,8 +113,8 @@ class RemoteSyncService {
     for (final uploadedFileID in updatedFileIDs) {
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
       final future = _uploader.upload(file, file.collectionID).then(
-          (uploadedFile) async => await _onFileUploaded(
-              uploadedFile, alreadyUploaded, toBeUploaded));
+          (uploadedFile) async =>
+              await _onFileUploaded(uploadedFile, alreadyUploaded));
       futures.add(future);
     }
 
@@ -123,15 +123,15 @@ class RemoteSyncService {
               .getOrCreateForPath(file.deviceFolder))
           .id;
       final future = _uploader.upload(file, collectionID).then(
-          (uploadedFile) async => await _onFileUploaded(
-              uploadedFile, alreadyUploaded, toBeUploaded));
+          (uploadedFile) async =>
+              await _onFileUploaded(uploadedFile, alreadyUploaded));
       futures.add(future);
     }
 
     for (final file in editedFiles) {
       final future = _uploader.upload(file, file.collectionID).then(
-          (uploadedFile) async => await _onFileUploaded(
-              uploadedFile, alreadyUploaded, toBeUploaded));
+          (uploadedFile) async =>
+              await _onFileUploaded(uploadedFile, alreadyUploaded));
       futures.add(future);
     }
 
@@ -155,17 +155,16 @@ class RemoteSyncService {
     return _completedUploads > 0;
   }
 
-  Future<void> _onFileUploaded(
-      File file, int alreadyUploaded, int toBeUploadedInThisSession) async {
+  Future<void> _onFileUploaded(File file, int alreadyUploaded) async {
     Bus.instance.fire(CollectionUpdatedEvent(file.collectionID, [file]));
     _completedUploads++;
-    final completed =
-        await FilesDB.instance.getNumberOfUploadedFiles() - alreadyUploaded;
-    if (completed == toBeUploadedInThisSession) {
+    final toBeUploadedInThisSession =
+        FileUploader.instance.getCurrentSessionUploadCount();
+    if (toBeUploadedInThisSession == 0) {
       return;
     }
     Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
-        completed: completed, total: toBeUploadedInThisSession));
+        completed: _completedUploads, total: toBeUploadedInThisSession));
   }
 
   Future _storeDiff(List<File> diff, int collectionID) async {

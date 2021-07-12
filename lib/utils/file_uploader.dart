@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:math';
+
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -42,6 +43,9 @@ class FileUploader {
   final kBGTaskDeathTimeout = Duration(seconds: 5).inMicroseconds;
   final _uploadURLs = Queue<UploadURL>();
 
+  // Maintains the count of files in the current upload session.
+  // Upload session is the period between the first entry into the _queue and last entry out of the _queue
+  int _totalCountInUploadSession = 0;
   int _currentlyUploading = 0;
   ProcessType _processType;
   bool _isBackground;
@@ -79,6 +83,7 @@ class FileUploader {
 
   Future<File> upload(File file, int collectionID) {
     // If the file hasn't been queued yet, queue it
+    _totalCountInUploadSession++;
     if (!_queue.containsKey(file.localID)) {
       final completer = Completer<File>();
       _queue[file.localID] = FileUploadItem(file, collectionID, completer);
@@ -90,6 +95,7 @@ class FileUploader {
     // return the existing future
     final item = _queue[file.localID];
     if (item.collectionID == collectionID) {
+      _totalCountInUploadSession--;
       return item.completer.future;
     }
 
@@ -108,6 +114,7 @@ class FileUploader {
         file.toString() +
         " into collection " +
         collectionID.toString());
+    _totalCountInUploadSession++;
     // If the file hasn't been queued yet, ez.
     if (!_queue.containsKey(file.localID)) {
       final completer = Completer<File>();
@@ -124,6 +131,7 @@ class FileUploader {
     // If the file is being uploaded right now, wait and proceed
     if (item.status == UploadStatus.in_progress ||
         item.status == UploadStatus.in_background) {
+      _totalCountInUploadSession--;
       final uploadedFile = await item.completer.future;
       if (uploadedFile.collectionID == collectionID) {
         // Do nothing
@@ -152,12 +160,12 @@ class FileUploader {
     }
   }
 
-  int queueSize() {
-    return _queue.length;
+  int getCurrentSessionUploadCount() {
+    return _totalCountInUploadSession;
   }
 
   void clearQueue(final Error reason) {
-    final uploadsToBeRemoved = List<String>();
+    final List<String> uploadsToBeRemoved = [];
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.not_started)
         .forEach((pendingUpload) {
@@ -166,6 +174,7 @@ class FileUploader {
     for (final id in uploadsToBeRemoved) {
       _queue.remove(id).completer.completeError(reason);
     }
+    _totalCountInUploadSession = 0;
   }
 
   void removeFromQueueWhere(final bool Function(File) fn, final Error reason) {
@@ -180,13 +189,19 @@ class FileUploader {
     for (final id in uploadsToBeRemoved) {
       _queue.remove(id).completer.completeError(reason);
     }
+    _totalCountInUploadSession -= uploadsToBeRemoved.length;
   }
 
   void _pollQueue() {
     if (SyncService.instance.shouldStopSync()) {
       clearQueue(SyncStopRequestedError());
     }
-    if (_queue.length > 0 && _currentlyUploading < kMaximumConcurrentUploads) {
+    if (_queue.length == 0) {
+      // Upload session completed
+      _totalCountInUploadSession = 0;
+      return;
+    }
+    if (_currentlyUploading < kMaximumConcurrentUploads) {
       final firstPendingEntry = _queue.entries
           .firstWhere((entry) => entry.value.status == UploadStatus.not_started,
               orElse: () => null)
