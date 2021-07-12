@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
@@ -88,7 +87,7 @@ class RemoteSyncService {
       filesToBeUploaded =
           await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
     }
-    if (kDebugMode) {
+    if (!Configuration.instance.shouldBackupVideos()) {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
     }

@@ -34,6 +34,7 @@ class Configuration {
   static const keyAttributesKey = "key_attributes";
   static const keyKey = "key";
   static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
+  static const keyShouldBackupVideos = "should_backup_videos";
   static const keyShouldHideFromRecents = "should_hide_from_recents";
   static const keyShouldShowLockScreen = "should_show_lock_screen";
   static const keyHasSkippedBackupFolderSelection =
@@ -416,6 +417,23 @@ class Configuration {
     await _preferences.setBool(keyShouldBackupOverMobileData, value);
     if (value) {
       SyncService.instance.sync();
+    }
+  }
+
+  bool shouldBackupVideos() {
+    if (_preferences.containsKey(keyShouldBackupVideos)) {
+      return _preferences.getBool(keyShouldBackupVideos);
+    } else {
+      return true;
+    }
+  }
+
+  Future<void> setShouldBackupVideos(bool value) async {
+    await _preferences.setBool(keyShouldBackupVideos, value);
+    if (value) {
+      SyncService.instance.sync();
+    } else {
+      SyncService.instance.onVideoBackupPaused();
     }
   }
 

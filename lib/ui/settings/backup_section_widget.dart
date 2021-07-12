@@ -46,6 +46,35 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ),
           Platform.isIOS
               ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(0)),
+          Divider(height: 4),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
+              : Padding(padding: EdgeInsets.all(2)),
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () async {
+              final dialog = createProgressDialog(context, "calculating...");
+              await dialog.show();
+              final status = await SyncService.instance.getBackupStatus();
+              await dialog.hide();
+              if (status.localIDs.isEmpty) {
+                showErrorDialog(context, "✨ all clear",
+                    "you've no files on this device that can be deleted");
+              } else {
+                bool result = await routeToPage(context, FreeSpacePage(status));
+                if (result == true) {
+                  _showSpaceFreedDialog(status);
+                }
+              }
+            },
+            child: SettingsTextItem(
+              text: "free up space",
+              icon: Icons.navigate_next,
+            ),
+          ),
+          Platform.isIOS
+              ? Padding(padding: EdgeInsets.all(2))
               : Padding(padding: EdgeInsets.all(2)),
           Divider(height: 4),
           Platform.isIOS
@@ -73,27 +102,21 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           Divider(height: 4),
           Platform.isIOS
               ? Padding(padding: EdgeInsets.all(2))
-              : Padding(padding: EdgeInsets.all(2)),
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () async {
-              final dialog = createProgressDialog(context, "calculating...");
-              await dialog.show();
-              final status = await SyncService.instance.getBackupStatus();
-              await dialog.hide();
-              if (status.localIDs.isEmpty) {
-                showErrorDialog(context, "✨ all clear",
-                    "you've no files on this device that can be deleted");
-              } else {
-                bool result = await routeToPage(context, FreeSpacePage(status));
-                if (result == true) {
-                  _showSpaceFreedDialog(status);
-                }
-              }
-            },
-            child: SettingsTextItem(
-              text: "free up space",
-              icon: Icons.navigate_next,
+              : Padding(padding: EdgeInsets.all(4)),
+          Container(
+            height: 36,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("backup videos"),
+                Switch(
+                  value: Configuration.instance.shouldBackupVideos(),
+                  onChanged: (value) async {
+                    Configuration.instance.setShouldBackupVideos(value);
+                    setState(() {});
+                  },
+                ),
+              ],
             ),
           ),
         ],
