@@ -42,6 +42,11 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       Logger("BackupFolderSelectionPage").info(_itemCount);
       setState(() {
         _latestFiles = files;
+        _latestFiles.sort((first, second) {
+          return first.deviceFolder
+              .toLowerCase()
+              .compareTo(second.deviceFolder.toLowerCase());
+        });
         for (final file in _latestFiles) {
           _allFolders.add(file.deviceFolder);
         }
@@ -108,7 +113,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       _selectedFolders.addAll(_allFolders);
                     }
                     _latestFiles.sort((first, second) {
-                      return first.deviceFolder.compareTo(second.deviceFolder);
+                      return first.deviceFolder
+                          .toLowerCase()
+                          .compareTo(second.deviceFolder.toLowerCase());
                     });
                     setState(() {});
                   }),
@@ -281,13 +288,17 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     _latestFiles.sort((first, second) {
       if (_selectedFolders.contains(first) &&
           _selectedFolders.contains(second)) {
-        return first.deviceFolder.compareTo(second.deviceFolder);
+        return first.deviceFolder
+            .toLowerCase()
+            .compareTo(second.deviceFolder.toLowerCase());
       } else if (_selectedFolders.contains(first.deviceFolder)) {
         return -1;
       } else if (_selectedFolders.contains(second.deviceFolder)) {
         return 1;
       }
-      return first.deviceFolder.compareTo(second.deviceFolder);
+      return first.deviceFolder
+          .toLowerCase()
+          .compareTo(second.deviceFolder.toLowerCase());
     });
   }
 
