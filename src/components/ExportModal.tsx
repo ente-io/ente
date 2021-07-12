@@ -18,7 +18,7 @@ const FolderIconWrapper = styled.div`
     cursor: pointer; 
     padding: 3px;
     border: 1px solid #444;
-
+    border-radius:15%;
     &:hover{
         background-color:#444;
     }
@@ -38,7 +38,7 @@ interface Props {
 export interface ExportStats {
     current: number;
     total: number;
-    failed: number;
+    failed?: number;
 }
 export default function ExportModal(props: Props) {
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
