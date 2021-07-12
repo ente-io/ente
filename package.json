@@ -39,7 +39,7 @@
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
     "start": "yarn build && electron ./app/main.js",
-    "test-release": "electron-builder",
+    "test-release": "yarn build && electron-builder",
     "release": "electron-builder -mwl --publish always"
   },
   "author": "ente <code@ente.io>",
