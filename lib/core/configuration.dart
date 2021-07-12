@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
@@ -254,9 +255,9 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
-    // if (kDebugMode) {
-    //   return "http://192.168.1.123:8080";
-    // }
+    if (kDebugMode) {
+      return "http://192.168.1.123:8080";
+    }
     return "https://api.ente.io";
   }
 
