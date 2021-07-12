@@ -222,15 +222,16 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          width: 140,
+                        Container(
+                          constraints: BoxConstraints(maxWidth: 140),
                           child: Text(
                             file.deviceFolder,
                             style: TextStyle(
                               fontSize: 14,
                               height: 1.5,
                             ),
-                            overflow: TextOverflow.fade,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
                           ),
                         ),
                         Padding(padding: EdgeInsets.all(2)),
