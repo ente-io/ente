@@ -1,14 +1,14 @@
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/backup_status.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
-import 'package:photos/models/file.dart';
-import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
 class FilesDB {
@@ -721,6 +721,21 @@ class FilesDB {
     } else {
       return null;
     }
+  }
+
+  Future<Map<String, int>> getFileCountInDeviceFolders() async {
+    final db = await instance.database;
+    final rows = await db.rawQuery('''
+      SELECT COUNT($columnGeneratedID) as count, $columnDeviceFolder
+      FROM $table
+      WHERE $columnLocalID IS NOT NULL
+      GROUP BY $columnDeviceFolder
+    ''');
+    final result = Map<String, int>();
+    for (final row in rows) {
+      result[row[columnDeviceFolder]] = row["count"];
+    }
+    return result;
   }
 
   Future<bool> doesFileExistInCollection(
