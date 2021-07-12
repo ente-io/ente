@@ -136,31 +136,6 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     );
   }
 
-  Widget _getFolderList() {
-    Widget child;
-    if (_latestFiles != null) {
-      final foldersWidget = _getFolders();
-      final scrollController = ScrollController();
-      child = Scrollbar(
-        isAlwaysShown: true,
-        controller: scrollController,
-        child: SingleChildScrollView(
-          controller: scrollController,
-          child: Container(
-            padding: EdgeInsets.only(right: 4),
-            child: foldersWidget,
-          ),
-        ),
-      );
-    } else {
-      child = loadWidget;
-    }
-    return Container(
-      padding: EdgeInsets.only(left: 40, right: 40),
-      child: child,
-    );
-  }
-
   Widget _getFolders() {
     if (_latestFiles == null) {
       return loadWidget;
