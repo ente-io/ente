@@ -37,6 +37,7 @@ export async function retryPromise(promise: Promise<any>, retryCount: number = 2
         return resp;
     } catch (e) {
         if (retryCount > 0) {
+            await WaitFor2Seconds();
             await retryPromise(promise, retryCount - 1);
         } else {
             throw e;

@@ -38,7 +38,7 @@ interface Props {
 export interface ExportStats {
     current: number;
     total: number;
-    failed?: number;
+    failed: number;
 }
 export default function ExportModal(props: Props) {
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
@@ -125,6 +125,11 @@ export default function ExportModal(props: Props) {
         updateExportStage(ExportStage.PAUSED);
         exportService.pauseRunningExport();
     };
+    const retryFailed = async () => {
+        updateExportStage(ExportStage.INPROGRESS);
+        updateExportStats({ current: 0, total: 0, failed: 0 });
+        exportService.retryFailedFiles(updateExportStats);
+    };
 
     const ExportDynamicState = () => {
         switch (exportStage) {
@@ -161,6 +166,7 @@ export default function ExportModal(props: Props) {
                         lastExportTime={lastExportTime}
                         exportStats={exportStats}
                         exportFiles={startExport}
+                        retryFailed={retryFailed}
                     />
                 );
 

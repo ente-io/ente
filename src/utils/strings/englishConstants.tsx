@@ -440,6 +440,7 @@ const englishConstants = {
     LAST_EXPORT_TIME: 'last export time',
     SUCCESSFULLY_EXPORTED_FILES: 'successfully exported files',
     FAILED_EXPORTED_FILES: 'failed file export',
+    EXPORT_AGAIN: 'export new data ',
 };
 
 export default englishConstants;

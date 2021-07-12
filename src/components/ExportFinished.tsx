@@ -16,7 +16,8 @@ interface Props {
     lastExportTime: number
     exportStats: ExportStats
     updateExportFolder: (newFolder: string) => void;
-    exportFiles: () => void
+    exportFiles: () => void;
+    retryFailed: () => void;
 }
 
 export default function ExportFinished(props: Props) {
@@ -38,7 +39,11 @@ export default function ExportFinished(props: Props) {
                     </Value>
                     {props.exportStats.failed !== 0 &&
                         <Value width="5%">
-                            <InProgressIcon disabled />
+                            <InProgressIcon disabled onClick={() => {
+                                console.log('df');
+                                props.retryFailed();
+                            }}
+                            />
                         </Value>
                     }
                 </Row>
@@ -46,7 +51,7 @@ export default function ExportFinished(props: Props) {
             <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around' }}>
                 <Button block variant={'outline-secondary'} onClick={props.onHide}>{constants.CLOSE}</Button>
                 <div style={{ width: '30px' }} />
-                <Button block variant={'outline-success'} onClick={props.exportFiles}>{constants.EXPORT}</Button>
+                <Button block variant={'outline-success'} onClick={props.exportFiles}>{constants.EXPORT_AGAIN}</Button>
             </div>
         </>
     );

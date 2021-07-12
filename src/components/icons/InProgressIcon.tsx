@@ -17,7 +17,7 @@ const Rotate = styled.div<{ disabled }>`
 `;
 export default function InProgressIcon(props) {
     return (
-        <Rotate disabled={props.disabled} >
+        <Rotate {...props}>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 height={props.height}
