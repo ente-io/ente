@@ -39,11 +39,7 @@ export default function ExportFinished(props: Props) {
                     </Value>
                     {props.exportStats.failed !== 0 &&
                         <Value width="5%">
-                            <InProgressIcon disabled onClick={() => {
-                                console.log('df');
-                                props.retryFailed();
-                            }}
-                            />
+                            <InProgressIcon disabled onClick={props.retryFailed} />
                         </Value>
                     }
                 </Row>
