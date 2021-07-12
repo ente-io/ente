@@ -91,6 +91,8 @@ class ExportService {
 
     async fileExporter(files: File[], collections: Collection[], updateProgress: (stats: ExportStats,) => void, dir: string) {
         try {
+            this.stopExport = false;
+            this.pauseExport = false;
             let failedFileCount = 0;
 
             this.ElectronAPIs.showOnTray({
@@ -125,10 +127,10 @@ class ExportService {
                 const filePath = `${collectionIDMap.get(file.collectionID)}/${uid}`;
                 try {
                     await this.downloadAndSave(file, filePath);
-                    this.ElectronAPIs.updateExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.SUCCESS);
+                    await this.ElectronAPIs.updateExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.SUCCESS);
                 } catch (e) {
                     failedFileCount++;
-                    this.ElectronAPIs.updateExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.FAILED);
+                    await this.ElectronAPIs.updateExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.FAILED);
                     logError(e, 'download and save failed for file during export');
                 }
                 this.ElectronAPIs.showOnTray({
@@ -165,8 +167,6 @@ class ExportService {
             logError(e);
         } finally {
             this.exportInProgress = null;
-            this.stopExport = false;
-            this.pauseExport = false;
         }
     }
 
