@@ -50,35 +50,7 @@ const selectRootDirectory = async () => {
     }
 };
 
-const updateExportRecord = async (dir: string, dataToAppend: string, type = RecordType.SUCCESS) => {
-    const filepath = `${dir}/${EXPORT_FILE_NAME}`;
-    let file = null;
-    try {
-        file = await fs.readFile(filepath, 'utf-8');
-    } catch (e) {
-        file = '';
-    }
-    file = file + `${type}@${dataToAppend}\n`;
-    await fs.writeFile(filepath, file);
-};
 
-const getExportedFiles = async (dir: string, type = RecordType.SUCCESS) => {
-    try {
-        const filepath = `${dir}/${EXPORT_FILE_NAME}`;
-
-        const fileList = (await fs.readFile(filepath, 'utf-8')).split('\n');
-        const resp = new Set();
-        fileList.forEach((file) => {
-            const splits = file.split("@");
-            if (splits[0] === type) {
-                resp.add(splits[1])
-            }
-        })
-        return resp;
-    } catch (e) {
-        return new Set<string>();
-    }
-};
 
 const sendNotification = (content: string) => {
     ipcRenderer.send('send-notification', content);
@@ -110,14 +82,29 @@ const reloadWindow = () => {
     ipcRenderer.send('reload-window');
 };
 
+const getExportRecord = async (dir: string) => {
+    try {
+        const filepath = `${dir}/${EXPORT_FILE_NAME}`;
+        const recordFile = await fs.readFile(filepath, 'utf-8');
+        return recordFile;
+    } catch (e) {
+        // ignore exportFile missing
+        console.log(e);
+    }
+};
+
+const setExportRecord = async (dir: string, data: string) => {
+
+    const filepath = `${dir}/${EXPORT_FILE_NAME}`;
+    await fs.writeFile(filepath, data);
+};
+
 const windowObject: any = window;
 windowObject['ElectronAPIs'] = {
     checkExistsAndCreateCollectionDir,
     saveStreamToDisk,
     saveFileToDisk,
     selectRootDirectory,
-    updateExportRecord,
-    getExportedFiles,
     sendNotification,
     showOnTray,
     reloadWindow,
@@ -125,4 +112,6 @@ windowObject['ElectronAPIs'] = {
     registerStopExportListener,
     registerPauseExportListener,
     registerRetryFailedExportListener,
+    getExportRecord,
+    setExportRecord
 };
