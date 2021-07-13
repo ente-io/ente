@@ -1,10 +1,30 @@
-import { ExportStats } from 'components/ExportModal';
-import { retryPromise, runningInBrowser } from 'utils/common';
+import { retryPromise, runningInBrowser, sleep } from 'utils/common';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Collection, getLocalCollections } from './collectionService';
 import downloadManager from './downloadManager';
 import { File, getLocalFiles } from './fileService';
+
+export interface ExportStats {
+    current: number;
+    total: number;
+    failed: number;
+    success?: number;
+}
+
+export interface ExportRecord {
+    stage: ExportStage
+    time: number;
+    stats: ExportStats;
+    exportedFiles: string[];
+    failedFiles: string[];
+}
+export enum ExportStage {
+    INIT,
+    INPROGRESS,
+    PAUSED,
+    FINISHED
+}
 
 enum ExportNotification {
     START = 'export started',
@@ -23,7 +43,7 @@ class ExportService {
     ElectronAPIs: any;
 
     exportInProgress: Promise<void> = null;
-
+    recordUpdateInProgress: Promise<void> = null;
     stopExport: boolean = false;
     pauseExport: boolean = false;
 
@@ -47,14 +67,14 @@ class ExportService {
             return this.exportInProgress;
         }
         this.ElectronAPIs.showOnTray('starting export');
-        const dir = getData(LS_KEYS.EXPORT).folder;
+        const dir = getData(LS_KEYS.EXPORT_FOLDER);
         if (!dir) {
             // no-export folder set
             return;
         }
-        const exportedFiles: Set<string> = await this.ElectronAPIs.getExportedFiles(
-            dir,
-        );
+        const exportRecord = await this.getExportRecord(dir);
+        const exportedFiles = new Set(exportRecord?.exportedFiles);
+        console.log(dir, exportedFiles);
         const unExportedFiles = files.filter((file) => {
             if (!exportedFiles.has(`${file.id}_${file.collectionID}`)) {
                 return files;
@@ -72,14 +92,14 @@ class ExportService {
             return this.exportInProgress;
         }
         this.ElectronAPIs.showOnTray('starting export');
-        const dir = getData(LS_KEYS.EXPORT).folder;
+        const dir = getData(LS_KEYS.EXPORT_FOLDER);
+        console.log(dir);
         if (!dir) {
             // no-export folder set
             return;
         }
-        const failedFilesIds: Set<string> = await this.ElectronAPIs.getExportedFiles(
-            dir, RecordType.FAILED,
-        );
+
+        const failedFilesIds = new Set((await this.getExportRecord()).failedFiles ?? []);
         const failedFiles = files.filter((file) => {
             if (failedFilesIds.has(`${file.id}_${file.collectionID}`)) {
                 return files;
@@ -127,10 +147,10 @@ class ExportService {
                 const filePath = `${collectionIDMap.get(file.collectionID)}/${uid}`;
                 try {
                     await this.downloadAndSave(file, filePath);
-                    await this.ElectronAPIs.updateExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.SUCCESS);
+                    await this.addFileExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.SUCCESS);
                 } catch (e) {
                     failedFileCount++;
-                    await this.ElectronAPIs.updateExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.FAILED);
+                    await this.addFileExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.FAILED);
                     logError(e, 'download and save failed for file during export');
                 }
                 this.ElectronAPIs.showOnTray({
@@ -152,7 +172,6 @@ class ExportService {
                 this.ElectronAPIs.sendNotification(
                     ExportNotification.FAILED,
                 );
-                this.ElectronAPIs.registerRetryFailedExportListener(this.retryFailedFiles.bind(this, updateProgress));
                 this.ElectronAPIs.showOnTray({
                     retry_export:
                         `export failed - retry export`,
@@ -168,6 +187,48 @@ class ExportService {
         } finally {
             this.exportInProgress = null;
         }
+    }
+
+    async addFileExportRecord(folder: string, fileUID: string, type: RecordType) {
+        const exportRecord = await this.ElectronAPIs.getExportRecord(folder);
+        if (type === RecordType.SUCCESS) {
+            if (!exportRecord.exportedFiles) {
+                exportRecord.exportedFiles = [];
+            }
+            exportRecord.exportedFiles.push(fileUID);
+        } else {
+            if (!exportRecord.failedFiles) {
+                exportRecord.failedFiles = [];
+            }
+            exportRecord.failedFiles.push(fileUID);
+        }
+        await this.ElectronAPIs.setExportRecord(folder, exportRecord);
+    }
+
+    async updateExportRecord(newData) {
+        await sleep(100);
+        if (this.recordUpdateInProgress) {
+            await this.recordUpdateInProgress;
+            this.recordUpdateInProgress = null;
+        }
+        this.recordUpdateInProgress = (async () => {
+            const folder = getData(LS_KEYS.EXPORT_FOLDER);
+            const exportRecord = await this.getExportRecord(folder);
+            const newRecord = { ...exportRecord, ...newData };
+            console.log(newRecord, JSON.stringify(newRecord, null, 2));
+            this.ElectronAPIs.setExportRecord(folder, JSON.stringify(newRecord, null, 2));
+        })();
+        await this.recordUpdateInProgress;
+    }
+
+    async getExportRecord(folder?: string): Promise<ExportRecord> {
+        console.log(folder);
+        if (!folder) {
+            folder = getData(LS_KEYS.EXPORT_FOLDER);
+        }
+        const recordFile = await this.ElectronAPIs.getExportRecord(folder);
+        console.log(recordFile, JSON.parse(recordFile));
+        return JSON.parse(recordFile);
     }
 
     async downloadAndSave(file: File, path) {

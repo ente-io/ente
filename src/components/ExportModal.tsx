@@ -1,6 +1,7 @@
+import isElectron from 'is-electron';
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import exportService from 'services/exportService';
+import exportService, { ExportRecord, ExportStage, ExportStats } from 'services/exportService';
 import styled from 'styled-components';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
@@ -23,48 +24,43 @@ const FolderIconWrapper = styled.div`
         background-color:#444;
     }
     `;
-export enum ExportStage {
-    INIT,
-    INPROGRESS,
-    PAUSED,
-    FINISHED
-}
 
 interface Props {
     show: boolean
     onHide: () => void
     usage: string
 }
-export interface ExportStats {
-    current: number;
-    total: number;
-    failed: number;
-}
 export default function ExportModal(props: Props) {
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
-    const [exportFolder, setExportFolder] = useState(null);
-    const [exportSize, setExportSize] = useState(null);
+    const [exportFolder, setExportFolder] = useState('');
+    const [exportSize, setExportSize] = useState('');
     const [exportStats, setExportStats] = useState<ExportStats>({ current: 0, total: 0, failed: 0 });
     const [lastExportTime, setLastExportTime] = useState(0);
 
     useEffect(() => {
-        const exportInfo = getData(LS_KEYS.EXPORT);
-        exportInfo?.stage && setExportStage(exportInfo.stage);
-        exportInfo?.folder && setExportFolder(exportInfo.folder);
-        exportInfo?.time && setLastExportTime(exportInfo.time);
-        exportInfo?.stats && setExportStats(exportInfo.stats);
-        setExportSize(props.usage);
+        if (!isElectron()) {
+            return;
+        }
+        setExportFolder(getData(LS_KEYS.EXPORT_FOLDER));
+
         exportService.ElectronAPIs.registerStopExportListener(stopExport);
         exportService.ElectronAPIs.registerPauseExportListener(pauseExport);
         exportService.ElectronAPIs.registerStartExportListener(startExport);
+        exportService.ElectronAPIs.registerRetryFailedExportListener(exportService.retryFailedFiles.bind(this, setExportStats));
     }, []);
-
     useEffect(() => {
-        if (exportStats.total !== 0 && exportStats.current === exportStats.total) {
-            updateExportStage(ExportStage.FINISHED);
-            updateExportTime(Date.now());
-        }
-    }, [exportStats]);
+        const main = async () => {
+            const exportInfo = await exportService.getExportRecord();
+            setExportStage(exportInfo?.stage ?? ExportStage.INIT);
+            setLastExportTime(exportInfo?.time);
+            setExportStats(exportInfo?.stats ?? { current: 0, total: 0, failed: 0 });
+            if (exportInfo?.stage === ExportStage.INPROGRESS) {
+                startExport();
+            }
+        };
+        main();
+    }, [exportFolder]);
+
 
     useEffect(() => {
         setExportSize(props.usage);
@@ -72,24 +68,24 @@ export default function ExportModal(props: Props) {
 
     const updateExportFolder = (newFolder) => {
         setExportFolder(newFolder);
-        setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), folder: newFolder });
+        setData(LS_KEYS.EXPORT_FOLDER, newFolder);
     };
     const updateExportStage = (newStage) => {
         setExportStage(newStage);
-        setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), stage: newStage });
+        exportService.updateExportRecord({ stage: newStage });
     };
     const updateExportTime = (newTime) => {
         setLastExportTime(newTime);
-        setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), time: newTime });
+        exportService.updateExportRecord({ time: newTime });
     };
 
     const updateExportStats = (newStats) => {
         setExportStats(newStats);
-        setData(LS_KEYS.EXPORT, { ...getData(LS_KEYS.EXPORT), stats: newStats });
+        exportService.updateExportRecord({ stats: newStats });
     };
 
     const startExport = async () => {
-        const exportFolder = getData(LS_KEYS.EXPORT)?.folder;
+        const exportFolder = getData(LS_KEYS.EXPORT_FOLDER);
         if (!exportFolder) {
             const folderSelected = await selectExportDirectory();
             if (!folderSelected) {
@@ -99,7 +95,9 @@ export default function ExportModal(props: Props) {
         }
         updateExportStage(ExportStage.INPROGRESS);
         updateExportStats({ current: 0, total: 0, failed: 0 });
-        exportService.exportFiles(updateExportStats);
+        await exportService.exportFiles(updateExportStats);
+        updateExportStage(ExportStage.FINISHED);
+        updateExportTime(Date.now());
     };
 
     const selectExportDirectory = async () => {
@@ -112,10 +110,18 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const stopExport = () => {
+    const revertExportStatsToLastExport = async (exportRecord: ExportRecord) => {
+        const failed = exportRecord?.failedFiles?.length ?? 0;
+        const success = exportRecord?.exportedFiles?.length ?? 0;
+        const total = failed + success;
+        setExportStats({ current: 0, total, failed, success });
+    };
+
+    const stopExport = async () => {
         exportService.stopRunningExport();
-        const lastExportTime = getData(LS_KEYS.EXPORT)?.time;
-        if (!lastExportTime) {
+        const exportRecord = await exportService.getExportRecord();
+        await revertExportStatsToLastExport(exportRecord);
+        if (!exportRecord.time) {
             updateExportStage(ExportStage.INIT);
         } else {
             updateExportStage(ExportStage.FINISHED);
@@ -127,7 +133,7 @@ export default function ExportModal(props: Props) {
     };
     const retryFailed = async () => {
         updateExportStage(ExportStage.INPROGRESS);
-        updateExportStats({ current: 0, total: 0, failed: 0 });
+        updateExportStats({ current: 0, total: exportStats.failed, failed: 0 });
         exportService.retryFailedFiles(updateExportStats);
     };
 
@@ -192,9 +198,11 @@ export default function ExportModal(props: Props) {
                                 <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}>
                                     {exportFolder}
                                 </span>
-                                <FolderIconWrapper onClick={selectExportDirectory} >
-                                    <FolderIcon />
-                                </FolderIconWrapper>
+                                {(exportStage === ExportStage.FINISHED || exportStage === ExportStage.INIT) && (
+                                    <FolderIconWrapper onClick={selectExportDirectory} >
+                                        <FolderIcon />
+                                    </FolderIconWrapper>
+                                )}
                             </>)
                         }
                     </Value>
