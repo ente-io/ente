@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button, ProgressBar } from 'react-bootstrap';
+import { ExportStage, ExportStats } from 'services/exportService';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
-import { ExportStage, ExportStats } from './ExportModal';
 
 export const ComfySpan = styled.span`
     word-spacing:1rem;

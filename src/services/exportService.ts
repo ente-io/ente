@@ -190,7 +190,7 @@ class ExportService {
     }
 
     async addFileExportRecord(folder: string, fileUID: string, type: RecordType) {
-        const exportRecord = await this.ElectronAPIs.getExportRecord(folder);
+        const exportRecord = await this.getExportRecord(folder);
         if (type === RecordType.SUCCESS) {
             if (!exportRecord.exportedFiles) {
                 exportRecord.exportedFiles = [];
@@ -202,21 +202,23 @@ class ExportService {
             }
             exportRecord.failedFiles.push(fileUID);
         }
-        await this.ElectronAPIs.setExportRecord(folder, exportRecord);
+        await this.updateExportRecord(exportRecord, folder);
     }
 
-    async updateExportRecord(newData) {
+    async updateExportRecord(newData: Record<string, any>, folder?: string) {
         await sleep(100);
         if (this.recordUpdateInProgress) {
             await this.recordUpdateInProgress;
             this.recordUpdateInProgress = null;
         }
         this.recordUpdateInProgress = (async () => {
-            const folder = getData(LS_KEYS.EXPORT_FOLDER);
+            if (!folder) {
+                folder = getData(LS_KEYS.EXPORT_FOLDER);
+            }
             const exportRecord = await this.getExportRecord(folder);
             const newRecord = { ...exportRecord, ...newData };
             console.log(newRecord, JSON.stringify(newRecord, null, 2));
-            this.ElectronAPIs.setExportRecord(folder, JSON.stringify(newRecord, null, 2));
+            await this.ElectronAPIs.setExportRecord(folder, JSON.stringify(newRecord, null, 2));
         })();
         await this.recordUpdateInProgress;
     }
@@ -227,8 +229,9 @@ class ExportService {
             folder = getData(LS_KEYS.EXPORT_FOLDER);
         }
         const recordFile = await this.ElectronAPIs.getExportRecord(folder);
-        console.log(recordFile && JSON.parse(recordFile));
-        return recordFile && JSON.parse(recordFile);
+        if (recordFile) {
+            return JSON.parse(recordFile);
+        }
     }
 
     async downloadAndSave(file: File, path) {
