@@ -227,8 +227,8 @@ class ExportService {
             folder = getData(LS_KEYS.EXPORT_FOLDER);
         }
         const recordFile = await this.ElectronAPIs.getExportRecord(folder);
-        console.log(recordFile, JSON.parse(recordFile));
-        return JSON.parse(recordFile);
+        console.log(recordFile && JSON.parse(recordFile));
+        return recordFile && JSON.parse(recordFile);
     }
 
     async downloadAndSave(file: File, path) {
