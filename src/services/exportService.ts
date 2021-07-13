@@ -42,10 +42,10 @@ enum RecordType {
 class ExportService {
     ElectronAPIs: any;
 
-    exportInProgress: Promise<void> = null;
-    recordUpdateInProgress: Promise<void> = null;
-    stopExport: boolean = false;
-    pauseExport: boolean = false;
+    private exportInProgress: Promise<void> = null;
+    private recordUpdateInProgress: Promise<void> = null;
+    private stopExport: boolean = false;
+    private pauseExport: boolean = false;
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -242,6 +242,10 @@ class ExportService {
 
     private sanitizeName(name) {
         return name.replaceAll('/', '_').replaceAll(' ', '_');
+    }
+
+    isExportInProgress = () => {
+        return this.exportInProgress !== null;
     }
 }
 export default new ExportService();
