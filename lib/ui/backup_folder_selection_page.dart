@@ -73,7 +73,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             child: Text(
               "the selected folders will be end-to-end encrypted and backed up",
               style: TextStyle(
-                color: Colors.white.withOpacity(0.36),
+                color: Colors.white.withOpacity(0.4),
                 fontSize: 14,
                 height: 1.3,
               ),
@@ -81,7 +81,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(6),
+            padding: EdgeInsets.all(10),
           ),
           _latestFiles == null
               ? Container()
@@ -236,6 +236,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                             style: TextStyle(
                               fontSize: 14,
                               height: 1.5,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.7),
                             ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 2,
@@ -249,7 +252,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           textAlign: TextAlign.left,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.white.withOpacity(0.65),
+                            color: isSelected
+                                ? Colors.white.withOpacity(0.65)
+                                : Colors.white.withOpacity(0.4),
                           ),
                         ),
                       ],
