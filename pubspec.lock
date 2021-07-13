@@ -35,7 +35,7 @@ packages:
       name: background_fetch
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.2"
+    version: "1.0.1"
   boolean_selector:
     dependency: transitive
     description:
