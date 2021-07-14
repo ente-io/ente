@@ -12,6 +12,7 @@ import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import { SetLoading } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
+import { sortFilesIntoCollections } from 'utils/file';
 
 interface Props {
     syncWithRemote: () => Promise<void>;
@@ -199,7 +200,7 @@ export default function Upload(props: Props) {
             props.closeCollectionSelector();
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
-                props.existingFiles,
+                sortFilesIntoCollections(props.existingFiles),
                 {
                     setPercentComplete,
                     setFileCounter,

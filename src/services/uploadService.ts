@@ -16,7 +16,6 @@ import { getToken } from 'utils/common/key';
 import {
     fileIsHEIC,
     convertHEIC2JPEG,
-    sortFilesIntoCollections,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 const ENDPOINT = getEndpoint();
@@ -137,11 +136,11 @@ class UploadService {
     private metadataMap: Map<string, Object>;
     private filesToBeUploaded: FileWithCollection[];
     private progressBarProps;
-    private uploadErrors: Error[];
+    private failedFiles: FileWithCollection[];
     private existingFilesCollectionWise: Map<number, File[]>;
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
-        existingFiles: File[],
+        existingFilesCollectionWise: Map<number, File[]>,
         progressBarProps,
     ) {
         try {
@@ -150,11 +149,10 @@ class UploadService {
 
             this.filesCompleted = 0;
             this.fileProgress = new Map<string, number>();
-            this.uploadErrors = [];
+            this.failedFiles = [];
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-            this.existingFilesCollectionWise =
-                sortFilesIntoCollections(existingFiles);
+            this.existingFilesCollectionWise = existingFilesCollectionWise;
             this.updateProgressBarUI();
 
             const metadataFiles: globalThis.File[] = [];
@@ -268,11 +266,8 @@ class UploadService {
             uploadFile = null;
             this.fileProgress.delete(rawFile.name);
         } catch (e) {
-            logError(e, 'file upload failed with error');
-            const error = new Error(
-                `Uploading Failed for File - ${rawFile.name}`,
-            );
-            this.uploadErrors.push(error);
+            logError(e, 'file upload failed');
+            this.failedFiles.push(fileWithCollection);
             // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
             this.fileProgress.set(rawFile.name, FILE_UPLOAD_FAILED);
             ErrorHandler(e);
@@ -287,6 +282,9 @@ class UploadService {
                 this.filesToBeUploaded.pop(),
             );
         }
+    }
+    retryFailedFiles() {
+        this.uploadFiles(this.failedFiles, this.existingFilesCollectionWise, this.progressBarProps);
     }
 
     private updateProgressBarUI() {
