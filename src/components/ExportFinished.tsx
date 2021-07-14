@@ -5,7 +5,6 @@ import { formatDateTime } from 'utils/file';
 import constants from 'utils/strings/constants';
 import { Label, Row, Value } from './Container';
 import { ComfySpan } from './ExportInProgress';
-import InProgressIcon from './icons/InProgressIcon';
 
 
 interface Props {
@@ -38,17 +37,15 @@ export default function ExportFinished(props: Props) {
                     <Value width="35%">
                         <ComfySpan>{props.exportStats.failed} / {totalFiles}</ComfySpan>
                     </Value>
-                    {props.exportStats.failed !== 0 &&
-                        <Value width="5%">
-                            <InProgressIcon disabled onClick={props.retryFailed} />
-                        </Value>
-                    }
                 </Row>
             </div>
             <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around' }}>
                 <Button block variant={'outline-secondary'} onClick={props.onHide}>{constants.CLOSE}</Button>
                 <div style={{ width: '30px' }} />
-                <Button block variant={'outline-success'} onClick={props.exportFiles}>{constants.EXPORT_AGAIN}</Button>
+                {props.exportStats.failed !== 0 ?
+                    <Button block variant={'outline-danger'} onClick={props.retryFailed}>{constants.RETRY_EXPORT_}</Button> :
+                    <Button block variant={'outline-success'} onClick={props.exportFiles}>{constants.EXPORT_AGAIN}</Button>
+                }
             </div>
         </>
     );

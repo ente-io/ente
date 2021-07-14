@@ -1,4 +1,5 @@
 import { retryPromise, runningInBrowser } from 'utils/common';
+import { getExportPendingFiles, getExportFailedFiles } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Collection, getLocalCollections } from './collectionService';
@@ -42,6 +43,10 @@ enum RecordType {
     SUCCESS = 'success',
     FAILED = 'failed'
 }
+export enum ExportType {
+    PENDING,
+    FAILED
+}
 class ExportService {
     ElectronAPIs: any;
 
@@ -62,60 +67,32 @@ class ExportService {
     pauseRunningExport() {
         this.pauseExport = true;
     }
-    async exportFiles(updateProgress: (progress: ExportProgress) => void) {
-        const files = await getLocalFiles();
-        const collections = await getLocalCollections();
+    async exportFiles(updateProgress: (progress: ExportProgress) => void, exportType: ExportType) {
         if (this.exportInProgress) {
             this.ElectronAPIs.sendNotification(ExportNotification.IN_PROGRESS);
             return this.exportInProgress;
         }
         this.ElectronAPIs.showOnTray('starting export');
-        const dir = getData(LS_KEYS.EXPORT)?.folder;
-        if (!dir) {
+        const exportDir = getData(LS_KEYS.EXPORT)?.folder;
+        if (!exportDir) {
             // no-export folder set
             return;
         }
-        const exportRecord = await this.getExportRecord(dir);
-        const exportedFiles = new Set(exportRecord?.exportedFiles);
-        const failedFiles = new Set(exportRecord?.failedFiles);
-        console.log(dir, exportedFiles);
-        const unExportedFiles = files.filter((file) => {
-            const fileUID = `${file.id}_${file.collectionID}`;
-            if (!exportedFiles.has(fileUID) && !failedFiles.has(fileUID)) {
-                return files;
-            }
-        });
-        if (!unExportedFiles?.length) {
+        let filesToExport: File[];
+        const allFiles = await getLocalFiles();
+        const collections = await getLocalCollections();
+        const exportRecord = await this.getExportRecord(exportDir);
+
+        if (exportType === ExportType.PENDING) {
+            filesToExport = await getExportPendingFiles(allFiles, exportRecord);
+        } else {
+            filesToExport = await getExportFailedFiles(allFiles, exportRecord);
+        }
+        if (!filesToExport?.length) {
             this.ElectronAPIs.sendNotification(ExportNotification.UP_TO_DATE);
-            return;
+            return { paused: false };
         }
-        this.exportInProgress = this.fileExporter(unExportedFiles, collections, updateProgress, dir);
-        return this.exportInProgress;
-    }
-
-    async retryFailedFiles(updateProgress: (progress: ExportProgress) => void) {
-        const files = await getLocalFiles();
-        const collections = await getLocalCollections();
-        if (this.exportInProgress) {
-            this.ElectronAPIs.sendNotification(ExportNotification.IN_PROGRESS);
-            return this.exportInProgress;
-        }
-        this.ElectronAPIs.showOnTray('starting export');
-        const dir = getData(LS_KEYS.EXPORT)?.folder;
-        console.log(dir);
-        if (!dir) {
-            // no-export folder set
-            return;
-        }
-        const exportRecord = await this.getExportRecord(dir);
-        const failedFiles = new Set(exportRecord?.failedFiles);
-
-        const filesToExport = files.filter((file) => {
-            if (failedFiles.has(`${file.id}_${file.collectionID}`)) {
-                return files;
-            }
-        });
-        this.exportInProgress = this.fileExporter(filesToExport, collections, updateProgress, dir);
+        this.exportInProgress = this.fileExporter(filesToExport, collections, updateProgress, exportDir);
         return this.exportInProgress;
     }
 
@@ -129,7 +106,9 @@ class ExportService {
                 export_progress:
                     `0 / ${files.length} files exported`,
             });
-            updateProgress({ current: 0, total: files.length });
+            updateProgress({
+                current: 0, total: files.length,
+            });
             this.ElectronAPIs.sendNotification(ExportNotification.START);
 
             const collectionIDMap = new Map<number, string>();

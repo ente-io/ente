@@ -441,6 +441,7 @@ const englishConstants = {
     SUCCESSFULLY_EXPORTED_FILES: 'successfully exported files',
     FAILED_EXPORTED_FILES: 'failed file export',
     EXPORT_AGAIN: 'export new data ',
+    RETRY_EXPORT_: 'retry failed files ',
 };
 
 export default englishConstants;
