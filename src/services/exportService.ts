@@ -225,7 +225,6 @@ class ExportService {
                 }
                 const exportRecord = await this.getExportRecord(folder);
                 const newRecord = { ...exportRecord, ...newData };
-                console.log(newRecord, JSON.stringify(newRecord, null, 2));
                 await this.ElectronAPIs.setExportRecord(folder, JSON.stringify(newRecord, null, 2));
             } catch (e) {
                 logError(e, 'error updating Export Record');
@@ -235,7 +234,6 @@ class ExportService {
 
     async getExportRecord(folder?: string): Promise<ExportRecord> {
         try {
-            console.log(folder);
             if (!folder) {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
             }
