@@ -140,10 +140,6 @@ export default function ExportModal(props: Props) {
 
     const resumeExport = async () => {
         const exportRecord = await exportService.getExportRecord();
-        if (exportRecord.stage !== ExportStage.PAUSED) {
-            // export not paused
-            return;
-        }
         await preExportRun();
 
         const pausedStageProgress = exportRecord.progress;
