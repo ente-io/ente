@@ -1,10 +1,10 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
+import { ExportStats } from 'services/exportService';
 import { formatDateTime } from 'utils/file';
 import constants from 'utils/strings/constants';
 import { Label, Row, Value } from './Container';
 import { ComfySpan } from './ExportInProgress';
-import { ExportStats } from './ExportModal';
 import InProgressIcon from './icons/InProgressIcon';
 
 
@@ -21,6 +21,7 @@ interface Props {
 }
 
 export default function ExportFinished(props: Props) {
+    const totalFiles = props.exportStats.failed + props.exportStats.success;
     return (
         <>
             <div style={{ borderBottom: '1px solid #444', marginBottom: '20px', padding: '0 5%' }}>
@@ -30,12 +31,12 @@ export default function ExportFinished(props: Props) {
                 </Row>
                 <Row>
                     <Label width="60%">{constants.SUCCESSFULLY_EXPORTED_FILES}</Label>
-                    <Value width="35%"><ComfySpan>{props.exportStats.total - props.exportStats.failed} / {props.exportStats.total}</ComfySpan></Value>
+                    <Value width="35%"><ComfySpan>{props.exportStats.success} / {totalFiles}</ComfySpan></Value>
                 </Row>
                 <Row>
                     <Label width="60%">{constants.FAILED_EXPORTED_FILES}</Label>
                     <Value width="35%">
-                        <ComfySpan>{props.exportStats.failed} / {props.exportStats.total}</ComfySpan>
+                        <ComfySpan>{props.exportStats.failed} / {totalFiles}</ComfySpan>
                     </Value>
                     {props.exportStats.failed !== 0 &&
                         <Value width="5%">

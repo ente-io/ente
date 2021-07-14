@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, ProgressBar } from 'react-bootstrap';
-import { ExportStage, ExportStats } from 'services/exportService';
+import { ExportProgress, ExportStage } from 'services/exportService';
 import styled from 'styled-components';
 import constants from 'utils/strings/constants';
 
@@ -15,7 +15,7 @@ interface Props {
     exportFolder: string
     exportSize: string
     exportStage: ExportStage
-    exportStats: ExportStats
+    exportProgress: ExportProgress
     resumeExport: () => void;
     cancelExport: () => void
     pauseExport: () => void;
@@ -25,11 +25,11 @@ export default function ExportInProgress(props: Props) {
         <>
             <div style={{ marginBottom: '30px', padding: '0 5%', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
                 <div style={{ marginBottom: '10px' }}>
-                    <ComfySpan> {props.exportStats.current} / {props.exportStats.total} </ComfySpan> <span style={{ marginLeft: '10px' }}> files exported {props.exportStage === ExportStage.PAUSED && `(paused)`}</span>
+                    <ComfySpan> {props.exportProgress.current} / {props.exportProgress.total} </ComfySpan> <span style={{ marginLeft: '10px' }}> files exported {props.exportStage === ExportStage.PAUSED && `(paused)`}</span>
                 </div>
                 <div style={{ width: '100%', marginBottom: '30px' }}>
                     <ProgressBar
-                        now={Math.round(props.exportStats.current * 100 / props.exportStats.total)}
+                        now={Math.round(props.exportProgress.current * 100 / props.exportProgress.total)}
                         animated={!(props.exportStage === ExportStage.PAUSED)}
                         variant="upload-progress-bar"
                     />

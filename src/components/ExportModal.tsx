@@ -1,7 +1,7 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import exportService, { ExportRecord, ExportStage, ExportStats } from 'services/exportService';
+import exportService, { ExportProgress, ExportRecord, ExportStage, ExportStats } from 'services/exportService';
 import styled from 'styled-components';
 import { sleep } from 'utils/common';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
@@ -35,7 +35,8 @@ export default function ExportModal(props: Props) {
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState('');
     const [exportSize, setExportSize] = useState('');
-    const [exportStats, setExportStats] = useState<ExportStats>({ current: 0, total: 0, failed: 0 });
+    const [exportProgress, setExportProgress] = useState<ExportProgress>({ current: 0, total: 0 });
+    const [exportStats, setExportStats] = useState<ExportStats>({ failed: 0, success: 0 });
     const [lastExportTime, setLastExportTime] = useState(0);
 
     useEffect(() => {
@@ -53,8 +54,10 @@ export default function ExportModal(props: Props) {
         const main = async () => {
             const exportInfo = await exportService.getExportRecord();
             setExportStage(exportInfo?.stage ?? ExportStage.INIT);
-            setLastExportTime(exportInfo?.time);
-            setExportStats(exportInfo?.stats ?? { current: 0, total: 0, failed: 0 });
+            setLastExportTime(exportInfo?.lastAttemptTimestamp);
+            setExportProgress(exportInfo?.progress ?? { current: 0, total: 0 });
+            console.log({ success: exportInfo?.exportedFiles?.length ?? 0, failed: exportInfo?.failedFiles?.length ?? 0 });
+            setExportStats({ success: exportInfo?.exportedFiles?.length ?? 0, failed: exportInfo?.failedFiles?.length ?? 0 });
             if (exportInfo?.stage === ExportStage.INPROGRESS) {
                 startExport();
             }
@@ -80,9 +83,9 @@ export default function ExportModal(props: Props) {
         exportService.updateExportRecord({ time: newTime });
     };
 
-    const updateExportStats = (newStats: ExportStats) => {
-        setExportStats(newStats);
-        exportService.updateExportRecord({ stats: newStats });
+    const updateExportProgress = (newProgress: ExportProgress) => {
+        setExportProgress(newProgress);
+        exportService.updateExportRecord({ progress: newProgress });
     };
 
     const startExport = async () => {
@@ -95,9 +98,9 @@ export default function ExportModal(props: Props) {
             }
         }
         updateExportStage(ExportStage.INPROGRESS);
-        updateExportStats({ current: 0, total: 0, failed: 0 });
+        updateExportProgress({ current: 0, total: 0 });
 
-        const { paused } = await exportService.exportFiles(updateExportStats);
+        const { paused } = await exportService.exportFiles(updateExportProgress);
 
         if (!paused) {
             updateExportStage(ExportStage.FINISHED);
@@ -115,8 +118,8 @@ export default function ExportModal(props: Props) {
             }
         }
         updateExportStage(ExportStage.INPROGRESS);
-        updateExportStats({ current: 0, total: 0, failed: 0 });
-        const finished = await exportService.retryFailedFiles(updateExportStats);
+        updateExportProgress({ current: 0, total: 0 });
+        const finished = await exportService.retryFailedFiles(updateExportProgress);
         if (finished) {
             updateExportStage(ExportStage.FINISHED);
             await sleep(100);
@@ -138,14 +141,13 @@ export default function ExportModal(props: Props) {
             // export not paused
             return;
         }
-        const pausedStageStats = exportRecord.stats;
+        const pausedStageProgress = exportRecord.progress;
         updateExportStage(ExportStage.INPROGRESS);
-        updateExportStats(pausedStageStats);
-        const updateExportStatsWithOffset = ((stats: ExportStats) => updateExportStats(
+        updateExportProgress(pausedStageProgress);
+        const updateExportStatsWithOffset = ((progress: ExportProgress) => updateExportProgress(
             {
-                current: pausedStageStats.current + stats.current,
-                total: pausedStageStats.current + stats.total,
-                failed: pausedStageStats.failed + stats.failed,
+                current: pausedStageProgress.current + progress.current,
+                total: pausedStageProgress.current + progress.total,
             },
         ));
         const finished = await exportService.exportFiles(updateExportStatsWithOffset);
@@ -170,15 +172,14 @@ export default function ExportModal(props: Props) {
     const revertExportStatsToLastExport = async (exportRecord: ExportRecord) => {
         const failed = exportRecord?.failedFiles?.length ?? 0;
         const success = exportRecord?.exportedFiles?.length ?? 0;
-        const total = failed + success;
-        setExportStats({ current: 0, total, failed, success });
+        setExportStats({ failed, success });
     };
 
     const stopExport = async () => {
         exportService.stopRunningExport();
         const exportRecord = await exportService.getExportRecord();
         await revertExportStatsToLastExport(exportRecord);
-        if (!exportRecord.time) {
+        if (!exportRecord.lastAttemptTimestamp) {
             updateExportStage(ExportStage.INIT);
         } else {
             updateExportStage(ExportStage.FINISHED);
@@ -191,8 +192,8 @@ export default function ExportModal(props: Props) {
     const retryFailed = async () => {
         updateExportStage(ExportStage.INPROGRESS);
         await sleep(100);
-        updateExportStats({ current: 0, total: exportStats.failed, failed: 0 });
-        await exportService.retryFailedFiles(updateExportStats);
+        updateExportProgress({ current: 0, total: exportStats.failed });
+        await exportService.retryFailedFiles(updateExportProgress);
         updateExportStage(ExportStage.FINISHED);
         await sleep(100);
         updateExportTime(Date.now());
@@ -217,7 +218,7 @@ export default function ExportModal(props: Props) {
                         exportFolder={exportFolder}
                         exportSize={exportSize}
                         exportStage={exportStage}
-                        exportStats={exportStats}
+                        exportProgress={exportProgress}
                         resumeExport={resumeExport}
                         cancelExport={stopExport}
                         pauseExport={pauseExport}

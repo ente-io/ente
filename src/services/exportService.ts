@@ -5,17 +5,19 @@ import { Collection, getLocalCollections } from './collectionService';
 import downloadManager from './downloadManager';
 import { File, getLocalFiles } from './fileService';
 
-export interface ExportStats {
+export interface ExportProgress {
     current: number;
     total: number;
+}
+export interface ExportStats {
     failed: number;
-    success?: number;
+    success: number;
 }
 
 export interface ExportRecord {
     stage: ExportStage
-    time: number;
-    stats: ExportStats;
+    lastAttemptTimestamp: number;
+    progress: ExportProgress;
     exportedFiles: string[];
     failedFiles: string[];
 }
@@ -60,7 +62,7 @@ class ExportService {
     pauseRunningExport() {
         this.pauseExport = true;
     }
-    async exportFiles(updateProgress: (stats: ExportStats) => void) {
+    async exportFiles(updateProgress: (progress: ExportProgress) => void) {
         const files = await getLocalFiles();
         const collections = await getLocalCollections();
         if (this.exportInProgress) {
@@ -91,7 +93,7 @@ class ExportService {
         return this.exportInProgress;
     }
 
-    async retryFailedFiles(updateProgress: (stats: ExportStats) => void) {
+    async retryFailedFiles(updateProgress: (progress: ExportProgress) => void) {
         const files = await getLocalFiles();
         const collections = await getLocalCollections();
         if (this.exportInProgress) {
@@ -117,17 +119,17 @@ class ExportService {
         return this.exportInProgress;
     }
 
-    async fileExporter(files: File[], collections: Collection[], updateProgress: (stats: ExportStats,) => void, dir: string): Promise<{ paused: boolean }> {
+    async fileExporter(files: File[], collections: Collection[], updateProgress: (progress: ExportProgress,) => void, dir: string): Promise<{ paused: boolean }> {
         try {
             this.stopExport = false;
             this.pauseExport = false;
-            let failedFileCount = 0;
+            const failedFileCount = 0;
 
             this.ElectronAPIs.showOnTray({
                 export_progress:
                     `0 / ${files.length} files exported`,
             });
-            updateProgress({ current: 0, total: files.length, failed: 0 });
+            updateProgress({ current: 0, total: files.length });
             this.ElectronAPIs.sendNotification(ExportNotification.START);
 
             const collectionIDMap = new Map<number, string>();
@@ -157,7 +159,6 @@ class ExportService {
                     await this.downloadAndSave(file, filePath);
                     await this.addFileExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.SUCCESS);
                 } catch (e) {
-                    failedFileCount++;
                     await this.addFileExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.FAILED);
                     logError(e, 'download and save failed for file during export');
                 }
@@ -165,7 +166,7 @@ class ExportService {
                     export_progress:
                         `${index + 1} / ${files.length} files exported`,
                 });
-                updateProgress({ current: index + 1, total: files.length, failed: failedFileCount });
+                updateProgress({ current: index + 1, total: files.length });
             }
             if (this.stopExport) {
                 this.ElectronAPIs.sendNotification(
