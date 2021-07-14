@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import exportService, { ExportRecord, ExportStage, ExportStats } from 'services/exportService';
 import styled from 'styled-components';
+import { sleep } from 'utils/common';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { Label, Row, Value } from './Container';
@@ -97,6 +98,7 @@ export default function ExportModal(props: Props) {
         updateExportStats({ current: 0, total: 0, failed: 0 });
         await exportService.exportFiles(updateExportStats);
         updateExportStage(ExportStage.FINISHED);
+        await sleep(100);
         updateExportTime(Date.now());
     };
 
@@ -133,8 +135,12 @@ export default function ExportModal(props: Props) {
     };
     const retryFailed = async () => {
         updateExportStage(ExportStage.INPROGRESS);
+        await sleep(100);
         updateExportStats({ current: 0, total: exportStats.failed, failed: 0 });
-        exportService.retryFailedFiles(updateExportStats);
+        await exportService.retryFailedFiles(updateExportStats);
+        updateExportStage(ExportStage.FINISHED);
+        await sleep(100);
+        updateExportTime(Date.now());
     };
 
     const ExportDynamicState = () => {

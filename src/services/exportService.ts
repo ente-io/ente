@@ -1,4 +1,4 @@
-import { retryPromise, runningInBrowser, sleep } from 'utils/common';
+import { retryPromise, runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Collection, getLocalCollections } from './collectionService';
@@ -43,7 +43,7 @@ class ExportService {
     ElectronAPIs: any;
 
     private exportInProgress: Promise<void> = null;
-    private recordUpdateInProgress: Promise<void> = null;
+    private recordUpdateInProgress: Promise<void> = Promise.resolve();
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
 
@@ -196,22 +196,24 @@ class ExportService {
                 exportRecord.exportedFiles = [];
             }
             exportRecord.exportedFiles.push(fileUID);
+            exportRecord.failedFiles = exportRecord.failedFiles.filter((FailedFileUID) => FailedFileUID !== fileUID);
         } else {
             if (!exportRecord.failedFiles) {
                 exportRecord.failedFiles = [];
             }
-            exportRecord.failedFiles.push(fileUID);
+            if (!exportRecord.failedFiles.find((x) => x === fileUID)) {
+                exportRecord.failedFiles.push(fileUID);
+            }
         }
         await this.updateExportRecord(exportRecord, folder);
     }
 
+    async updateExportRecordSync(newData: Record<string, any>, folder?: string) {
+        this.recordUpdateInProgress = this.updateExportRecord(newData, folder);
+    }
     async updateExportRecord(newData: Record<string, any>, folder?: string) {
-        await sleep(100);
-        if (this.recordUpdateInProgress) {
-            await this.recordUpdateInProgress;
-            this.recordUpdateInProgress = null;
-        }
-        this.recordUpdateInProgress = (async () => {
+        await this.recordUpdateInProgress;
+        try {
             if (!folder) {
                 folder = getData(LS_KEYS.EXPORT_FOLDER);
             }
@@ -219,18 +221,23 @@ class ExportService {
             const newRecord = { ...exportRecord, ...newData };
             console.log(newRecord, JSON.stringify(newRecord, null, 2));
             await this.ElectronAPIs.setExportRecord(folder, JSON.stringify(newRecord, null, 2));
-        })();
-        await this.recordUpdateInProgress;
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     async getExportRecord(folder?: string): Promise<ExportRecord> {
-        console.log(folder);
-        if (!folder) {
-            folder = getData(LS_KEYS.EXPORT_FOLDER);
-        }
-        const recordFile = await this.ElectronAPIs.getExportRecord(folder);
-        if (recordFile) {
-            return JSON.parse(recordFile);
+        try {
+            console.log(folder);
+            if (!folder) {
+                folder = getData(LS_KEYS.EXPORT_FOLDER);
+            }
+            const recordFile = await this.ElectronAPIs.getExportRecord(folder);
+            if (recordFile) {
+                return JSON.parse(recordFile);
+            }
+        } catch (e) {
+            console.log(e);
         }
     }
 
