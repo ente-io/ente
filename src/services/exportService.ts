@@ -201,7 +201,7 @@ class ExportService {
                 exportRecord.exportedFiles = [];
             }
             exportRecord.exportedFiles.push(fileUID);
-            exportRecord.failedFiles = exportRecord.failedFiles.filter((FailedFileUID) => FailedFileUID !== fileUID);
+            exportRecord.failedFiles && (exportRecord.failedFiles = exportRecord.failedFiles.filter((FailedFileUID) => FailedFileUID !== fileUID));
         } else {
             if (!exportRecord.failedFiles) {
                 exportRecord.failedFiles = [];
@@ -228,7 +228,7 @@ class ExportService {
                 console.log(newRecord, JSON.stringify(newRecord, null, 2));
                 await this.ElectronAPIs.setExportRecord(folder, JSON.stringify(newRecord, null, 2));
             } catch (e) {
-                console.log(e);
+                logError(e, 'error updating Export Record');
             }
         })();
     }
@@ -242,9 +242,11 @@ class ExportService {
             const recordFile = await this.ElectronAPIs.getExportRecord(folder);
             if (recordFile) {
                 return JSON.parse(recordFile);
+            } else {
+                return {} as ExportRecord;
             }
         } catch (e) {
-            console.log(e);
+            logError(e, 'export Record JSON parsing failed ');
         }
     }
 
