@@ -33,7 +33,6 @@ import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
 
 interface Props {
-    files: File[];
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
     setLoading: SetLoading,
