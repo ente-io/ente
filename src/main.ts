@@ -155,7 +155,7 @@ function buildContextMenu(args: any = {}) {
                 ...(paused ?
                     [{
                         label: 'resume export',
-                        click: () => mainWindow.webContents.send('start-export'),
+                        click: () => mainWindow.webContents.send('resume-export'),
                     }] :
                     [{
                         label: 'pause export',

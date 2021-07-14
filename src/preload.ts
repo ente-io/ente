@@ -59,9 +59,9 @@ const showOnTray = (content: string) => {
     ipcRenderer.send('update-tray', content);
 };
 
-const registerStartExportListener = (startExport: () => void) => {
-    ipcRenderer.removeAllListeners("start-export");
-    ipcRenderer.on('start-export', () => startExport());
+const registerResumeExportListener = (resumeExport: () => void) => {
+    ipcRenderer.removeAllListeners("resume-export");
+    ipcRenderer.on('resume-export', () => resumeExport());
 };
 const registerStopExportListener = (abortExport: () => void) => {
     ipcRenderer.removeAllListeners("stop-export");
@@ -108,7 +108,7 @@ windowObject['ElectronAPIs'] = {
     sendNotification,
     showOnTray,
     reloadWindow,
-    registerStartExportListener,
+    registerResumeExportListener,
     registerStopExportListener,
     registerPauseExportListener,
     registerRetryFailedExportListener,
