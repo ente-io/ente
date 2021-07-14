@@ -547,14 +547,14 @@ class UploadService {
             if (!token) {
                 return;
             }
-            const response = await HTTPService.post(
+            const response = await this.retryPromise(HTTPService.post(
                 `${ENDPOINT}/files`,
                 uploadFile,
                 null,
                 {
                     'X-Auth-Token': token,
                 },
-            );
+            ));
             return response.data;
         } catch (e) {
             logError(e, 'upload Files Failed');
