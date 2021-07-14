@@ -43,8 +43,8 @@ enum RecordType {
 class ExportService {
     ElectronAPIs: any;
 
-    private exportInProgress: Promise<boolean> = null;
-    private recordUpdateInProgress: Promise<void> = Promise.resolve();
+    private exportInProgress = null;
+    private recordUpdateInProgress = Promise.resolve();
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
 
@@ -117,7 +117,7 @@ class ExportService {
         return this.exportInProgress;
     }
 
-    async fileExporter(files: File[], collections: Collection[], updateProgress: (stats: ExportStats,) => void, dir: string) {
+    async fileExporter(files: File[], collections: Collection[], updateProgress: (stats: ExportStats,) => void, dir: string): Promise<{ paused: boolean }> {
         try {
             this.stopExport = false;
             this.pauseExport = false;
@@ -176,6 +176,7 @@ class ExportService {
                 this.ElectronAPIs.sendNotification(
                     ExportNotification.PAUSE,
                 );
+                return { paused: true };
             } else if (failedFileCount > 0) {
                 this.ElectronAPIs.sendNotification(
                     ExportNotification.FAILED,
@@ -189,8 +190,8 @@ class ExportService {
                     ExportNotification.FINISH,
                 );
                 this.ElectronAPIs.showOnTray();
-                return true;
             }
+            return { paused: false };
         } catch (e) {
             logError(e);
         } finally {

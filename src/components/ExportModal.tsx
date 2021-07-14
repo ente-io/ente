@@ -97,9 +97,9 @@ export default function ExportModal(props: Props) {
         updateExportStage(ExportStage.INPROGRESS);
         updateExportStats({ current: 0, total: 0, failed: 0 });
 
-        const finished = await exportService.exportFiles(updateExportStats);
+        const { paused } = await exportService.exportFiles(updateExportStats);
 
-        if (finished) {
+        if (!paused) {
             updateExportStage(ExportStage.FINISHED);
             await sleep(100);
             updateExportTime(Date.now());
