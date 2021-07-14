@@ -208,22 +208,21 @@ class ExportService {
         await this.updateExportRecord(exportRecord, folder);
     }
 
-    async updateExportRecordSync(newData: Record<string, any>, folder?: string) {
-        this.recordUpdateInProgress = this.updateExportRecord(newData, folder);
-    }
     async updateExportRecord(newData: Record<string, any>, folder?: string) {
         await this.recordUpdateInProgress;
-        try {
-            if (!folder) {
-                folder = getData(LS_KEYS.EXPORT_FOLDER);
+        this.recordUpdateInProgress = (async () => {
+            try {
+                if (!folder) {
+                    folder = getData(LS_KEYS.EXPORT_FOLDER);
+                }
+                const exportRecord = await this.getExportRecord(folder);
+                const newRecord = { ...exportRecord, ...newData };
+                console.log(newRecord, JSON.stringify(newRecord, null, 2));
+                await this.ElectronAPIs.setExportRecord(folder, JSON.stringify(newRecord, null, 2));
+            } catch (e) {
+                console.log(e);
             }
-            const exportRecord = await this.getExportRecord(folder);
-            const newRecord = { ...exportRecord, ...newData };
-            console.log(newRecord, JSON.stringify(newRecord, null, 2));
-            await this.ElectronAPIs.setExportRecord(folder, JSON.stringify(newRecord, null, 2));
-        } catch (e) {
-            console.log(e);
-        }
+        })();
     }
 
     async getExportRecord(folder?: string): Promise<ExportRecord> {
