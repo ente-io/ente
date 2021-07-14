@@ -62,7 +62,7 @@ export default function ExportModal(props: Props) {
             setExportProgress(exportInfo?.progress ?? { current: 0, total: 0 });
             setExportStats({ success: exportInfo?.exportedFiles?.length ?? 0, failed: exportInfo?.failedFiles?.length ?? 0 });
             if (exportInfo?.stage === ExportStage.INPROGRESS) {
-                startExport();
+                resumeExport();
             }
         };
         main();
@@ -128,16 +128,14 @@ export default function ExportModal(props: Props) {
     };
 
     const stopExport = async () => {
-        if (exportStage === ExportStage.PAUSED) {
-            postExportRun(false);
-        } else {
-            exportService.stopRunningExport();
-        }
+        exportService.stopRunningExport();
+        postExportRun(false);
     };
 
     const pauseExport = () => {
         updateExportStage(ExportStage.PAUSED);
         exportService.pauseRunningExport();
+        postExportRun(true);
     };
 
     const resumeExport = async () => {
