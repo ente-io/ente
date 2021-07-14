@@ -6,11 +6,21 @@ export const getFileUID = (file: File) => `${file.id}_${file.collectionID}`;
 
 
 export const getExportPendingFiles = async (allFiles: File[], exportRecord: ExportRecord) => {
-    const exportedFiles = new Set(exportRecord?.exportedFiles);
-    const failedFiles = new Set(exportRecord?.failedFiles);
+    const queuedFiles = new Set(exportRecord?.queuedFiles);
     const unExportedFiles = allFiles.filter((file) => {
         const fileUID = `${file.id}_${file.collectionID}`;
-        if (!exportedFiles.has(fileUID) && !failedFiles.has(fileUID)) {
+        if (queuedFiles.has(fileUID)) {
+            return file;
+        }
+    });
+    return unExportedFiles;
+};
+
+export const getFilesUploadedAfterLastExport = async (allFiles: File[], exportRecord: ExportRecord) => {
+    const exportedFiles = new Set(exportRecord?.exportedFiles);
+    const unExportedFiles = allFiles.filter((file) => {
+        const fileUID = `${file.id}_${file.collectionID}`;
+        if (!exportedFiles.has(fileUID)) {
             return file;
         }
     });

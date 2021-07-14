@@ -123,7 +123,7 @@ export default function ExportModal(props: Props) {
     const startExport = async () => {
         await preExportRun();
         updateExportProgress({ current: 0, total: 0 });
-        const { paused } = await exportService.exportFiles(updateExportProgress, ExportType.PENDING);
+        const { paused } = await exportService.exportFiles(updateExportProgress, ExportType.NEW);
         await postExportRun(paused);
     };
 
@@ -166,7 +166,7 @@ export default function ExportModal(props: Props) {
         await preExportRun();
         updateExportProgress({ current: 0, total: exportStats.failed });
 
-        const { paused } = await exportService.exportFiles(updateExportProgress, ExportType.FAILED);
+        const { paused } = await exportService.exportFiles(updateExportProgress, ExportType.RETRY_FAILED);
         await postExportRun(paused);
     };
 

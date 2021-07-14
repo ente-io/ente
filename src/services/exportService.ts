@@ -1,5 +1,5 @@
 import { retryPromise, runningInBrowser } from 'utils/common';
-import { getExportPendingFiles, getExportFailedFiles } from 'utils/export';
+import { getExportPendingFiles, getExportFailedFiles, getFilesUploadedAfterLastExport, getFileUID } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Collection, getLocalCollections } from './collectionService';
@@ -19,6 +19,7 @@ export interface ExportRecord {
     stage: ExportStage
     lastAttemptTimestamp: number;
     progress: ExportProgress;
+    queuedFiles: string[];
     exportedFiles: string[];
     failedFiles: string[];
 }
@@ -44,8 +45,9 @@ enum RecordType {
     FAILED = 'failed'
 }
 export enum ExportType {
+    NEW,
     PENDING,
-    FAILED
+    RETRY_FAILED
 }
 class ExportService {
     ElectronAPIs: any;
@@ -83,14 +85,12 @@ class ExportService {
         const collections = await getLocalCollections();
         const exportRecord = await this.getExportRecord(exportDir);
 
-        if (exportType === ExportType.PENDING) {
-            filesToExport = await getExportPendingFiles(allFiles, exportRecord);
-        } else {
+        if (exportType === ExportType.NEW) {
+            filesToExport = await getFilesUploadedAfterLastExport(allFiles, exportRecord);
+        } else if (exportType === ExportType.RETRY_FAILED) {
             filesToExport = await getExportFailedFiles(allFiles, exportRecord);
-        }
-        if (!filesToExport?.length) {
-            this.ElectronAPIs.sendNotification(ExportNotification.UP_TO_DATE);
-            return { paused: false };
+        } else {
+            filesToExport = await getExportPendingFiles(allFiles, exportRecord);
         }
         this.exportInProgress = this.fileExporter(filesToExport, collections, updateProgress, exportDir);
         return this.exportInProgress;
@@ -98,8 +98,13 @@ class ExportService {
 
     async fileExporter(files: File[], collections: Collection[], updateProgress: (progress: ExportProgress,) => void, dir: string): Promise<{ paused: boolean }> {
         try {
+            if (!files?.length) {
+                this.ElectronAPIs.sendNotification(ExportNotification.UP_TO_DATE);
+                return { paused: false };
+            }
             this.stopExport = false;
             this.pauseExport = false;
+            this.addFilesQueuedRecord(dir, files);
             const failedFileCount = 0;
 
             this.ElectronAPIs.showOnTray({
@@ -136,9 +141,9 @@ class ExportService {
                 const filePath = `${collectionIDMap.get(file.collectionID)}/${uid}`;
                 try {
                     await this.downloadAndSave(file, filePath);
-                    await this.addFileExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.SUCCESS);
+                    await this.addFileExportRecord(dir, file, RecordType.SUCCESS);
                 } catch (e) {
-                    await this.addFileExportRecord(dir, `${file.id}_${file.collectionID}`, RecordType.FAILED);
+                    await this.addFileExportRecord(dir, file, RecordType.FAILED);
                     logError(e, 'download and save failed for file during export');
                 }
                 this.ElectronAPIs.showOnTray({
@@ -178,9 +183,19 @@ class ExportService {
             this.exportInProgress = null;
         }
     }
-
-    async addFileExportRecord(folder: string, fileUID: string, type: RecordType) {
+    async addFilesQueuedRecord(folder: string, files: File[]) {
         const exportRecord = await this.getExportRecord(folder);
+        if (!exportRecord.queuedFiles) {
+            exportRecord.queuedFiles = [];
+        }
+        exportRecord.queuedFiles.push(...files.map(getFileUID));
+        await this.updateExportRecord(exportRecord, folder);
+    }
+
+    async addFileExportRecord(folder: string, file: File, type: RecordType) {
+        const fileUID = getFileUID(file);
+        const exportRecord = await this.getExportRecord(folder);
+        exportRecord.queuedFiles = exportRecord.queuedFiles.filter((queuedFilesUID) => queuedFilesUID !== fileUID);
         if (type === RecordType.SUCCESS) {
             if (!exportRecord.exportedFiles) {
                 exportRecord.exportedFiles = [];
