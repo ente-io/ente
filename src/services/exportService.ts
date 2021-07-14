@@ -68,16 +68,18 @@ class ExportService {
             return this.exportInProgress;
         }
         this.ElectronAPIs.showOnTray('starting export');
-        const dir = getData(LS_KEYS.EXPORT_FOLDER);
+        const dir = getData(LS_KEYS.EXPORT)?.folder;
         if (!dir) {
             // no-export folder set
             return;
         }
         const exportRecord = await this.getExportRecord(dir);
         const exportedFiles = new Set(exportRecord?.exportedFiles);
+        const failedFiles = new Set(exportRecord?.failedFiles);
         console.log(dir, exportedFiles);
         const unExportedFiles = files.filter((file) => {
-            if (!exportedFiles.has(`${file.id}_${file.collectionID}`)) {
+            const fileUID = `${file.id}_${file.collectionID}`;
+            if (!exportedFiles.has(fileUID) && !failedFiles.has(fileUID)) {
                 return files;
             }
         });
@@ -97,20 +99,21 @@ class ExportService {
             return this.exportInProgress;
         }
         this.ElectronAPIs.showOnTray('starting export');
-        const dir = getData(LS_KEYS.EXPORT_FOLDER);
+        const dir = getData(LS_KEYS.EXPORT)?.folder;
         console.log(dir);
         if (!dir) {
             // no-export folder set
             return;
         }
+        const exportRecord = await this.getExportRecord(dir);
+        const failedFiles = new Set(exportRecord?.failedFiles);
 
-        const failedFilesIds = new Set((await this.getExportRecord()).failedFiles ?? []);
-        const failedFiles = files.filter((file) => {
-            if (failedFilesIds.has(`${file.id}_${file.collectionID}`)) {
+        const filesToExport = files.filter((file) => {
+            if (failedFiles.has(`${file.id}_${file.collectionID}`)) {
                 return files;
             }
         });
-        this.exportInProgress = this.fileExporter(failedFiles, collections, updateProgress, dir);
+        this.exportInProgress = this.fileExporter(filesToExport, collections, updateProgress, dir);
         return this.exportInProgress;
     }
 
@@ -219,7 +222,7 @@ class ExportService {
         this.recordUpdateInProgress = (async () => {
             try {
                 if (!folder) {
-                    folder = getData(LS_KEYS.EXPORT_FOLDER);
+                    folder = getData(LS_KEYS.EXPORT)?.folder;
                 }
                 const exportRecord = await this.getExportRecord(folder);
                 const newRecord = { ...exportRecord, ...newData };
@@ -235,7 +238,7 @@ class ExportService {
         try {
             console.log(folder);
             if (!folder) {
-                folder = getData(LS_KEYS.EXPORT_FOLDER);
+                folder = getData(LS_KEYS.EXPORT)?.folder;
             }
             const recordFile = await this.ElectronAPIs.getExportRecord(folder);
             if (recordFile) {
