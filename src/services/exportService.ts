@@ -1,5 +1,5 @@
 import { retryPromise, runningInBrowser } from 'utils/common';
-import { getExportPendingFiles, getExportFailedFiles, getFilesUploadedAfterLastExport, getFileUID } from 'utils/export';
+import { getExportPendingFiles, getExportFailedFiles, getFilesUploadedAfterLastExport, getFileUID, dedupe } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Collection, getLocalCollections } from './collectionService';
@@ -210,6 +210,9 @@ class ExportService {
                 exportRecord.failedFiles.push(fileUID);
             }
         }
+        exportRecord.exportedFiles = dedupe(exportRecord.exportedFiles);
+        exportRecord.queuedFiles = dedupe(exportRecord.queuedFiles);
+        exportRecord.failedFiles = dedupe(exportRecord.failedFiles);
         await this.updateExportRecord(exportRecord, folder);
     }
 

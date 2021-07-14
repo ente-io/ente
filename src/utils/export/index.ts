@@ -36,3 +36,9 @@ export const getExportFailedFiles = async (allFiles: File[], exportRecord: Expor
     });
     return filesToExport;
 };
+
+export const dedupe = (files: any[]) => {
+    const fileSet = new Set(files);
+    const dedupedArray = new Array(...fileSet);
+    return dedupedArray;
+};
