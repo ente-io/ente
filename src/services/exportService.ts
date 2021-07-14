@@ -52,7 +52,7 @@ export enum ExportType {
 class ExportService {
     ElectronAPIs: any;
 
-    private exportInProgress = null;
+    private exportInProgress: Promise<{ paused: boolean; }> = null;
     private recordUpdateInProgress = Promise.resolve();
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
@@ -93,7 +93,9 @@ class ExportService {
             filesToExport = await getExportPendingFiles(allFiles, exportRecord);
         }
         this.exportInProgress = this.fileExporter(filesToExport, collections, updateProgress, exportDir);
-        return this.exportInProgress;
+        const resp = await this.exportInProgress;
+        this.exportInProgress = null;
+        return resp;
     }
 
     async fileExporter(files: File[], collections: Collection[], updateProgress: (progress: ExportProgress,) => void, dir: string): Promise<{ paused: boolean }> {
@@ -179,8 +181,6 @@ class ExportService {
             return { paused: false };
         } catch (e) {
             logError(e);
-        } finally {
-            this.exportInProgress = null;
         }
     }
     async addFilesQueuedRecord(folder: string, files: File[]) {
