@@ -4,7 +4,7 @@ import EXIF from 'exif-js';
 import { File, fileAttribute } from './fileService';
 import { Collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
-import { checkConnectivity, WaitFor2Seconds } from 'utils/common';
+import { checkConnectivity, sleep } from 'utils/common';
 import {
     ErrorHandler,
     THUMBNAIL_GENERATION_FAILED,
@@ -41,6 +41,8 @@ const FILE_UPLOAD_FAILED = -1;
 const FILE_UPLOAD_SKIPPED = -2;
 const FILE_UPLOAD_COMPLETED = 100;
 const EDITED_FILE_SUFFIX = '-edited';
+const TwoSecondInMillSeconds = 2000;
+const retrySleepTime = [2000, 5000, 10000];
 
 interface Location {
     latitude: number;
@@ -244,7 +246,7 @@ class UploadService {
                 // set progress to -2 indicating that file upload was skipped
                 this.fileProgress.set(rawFile.name, FILE_UPLOAD_SKIPPED);
                 this.updateProgressBarUI();
-                await WaitFor2Seconds();
+                await sleep(TwoSecondInMillSeconds);
                 // remove completed files for file progress list
                 this.fileProgress.delete(rawFile.name);
                 return;
@@ -1052,12 +1054,13 @@ class UploadService {
 
         return dd;
     }
-    private async retryPromise(promise: Promise<any>, retryCount: number = 2) {
+    private async retryPromise(promise: Promise<any>, retryCount: number = 3) {
         try {
             const resp = await promise;
             return resp;
         } catch (e) {
             if (retryCount > 0) {
+                await sleep(retrySleepTime[3 - retryCount]);
                 await this.retryPromise(promise, retryCount - 1);
             } else {
                 throw e;
