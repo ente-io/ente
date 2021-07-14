@@ -33,6 +33,7 @@ enum ExportNotification {
     FAILED = 'export failed',
     ABORT = 'export aborted',
     PAUSE = 'export paused',
+    UP_TO_DATE = `no new files to export`
 }
 
 enum RecordType {
@@ -42,7 +43,7 @@ enum RecordType {
 class ExportService {
     ElectronAPIs: any;
 
-    private exportInProgress: Promise<void> = null;
+    private exportInProgress: Promise<boolean> = null;
     private recordUpdateInProgress: Promise<void> = Promise.resolve();
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
@@ -80,6 +81,10 @@ class ExportService {
                 return files;
             }
         });
+        if (!unExportedFiles?.length) {
+            this.ElectronAPIs.sendNotification(ExportNotification.UP_TO_DATE);
+            return;
+        }
         this.exportInProgress = this.fileExporter(unExportedFiles, collections, updateProgress, dir);
         return this.exportInProgress;
     }
@@ -181,6 +186,7 @@ class ExportService {
                     ExportNotification.FINISH,
                 );
                 this.ElectronAPIs.showOnTray();
+                return true;
             }
         } catch (e) {
             logError(e);
