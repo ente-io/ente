@@ -101,6 +101,7 @@ dev_dependencies:
     sdk: flutter
   flutter_launcher_icons: "0.9.0"
   flutter_native_splash: ^1.1.8+4
+  lints: ^1.0.1
 
 flutter_icons:
   android: true
