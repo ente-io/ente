@@ -218,6 +218,21 @@ export default function Upload(props: Props) {
             props.syncWithRemote();
         }
     };
+    const retryFailed = async (
+    ) => {
+        try {
+            props.setUploadInProgress(true);
+            await UploadService.retryFailedFiles();
+            props.setUploadInProgress(false);
+        } catch (err) {
+            props.setBannerMessage(err.message);
+            setProgressView(false);
+            throw err;
+        } finally {
+            props.syncWithRemote();
+        }
+    };
+
 
     return (
         <>
@@ -234,7 +249,7 @@ export default function Upload(props: Props) {
                 fileProgress={fileProgress}
                 show={progressView}
                 closeModal={() => setProgressView(false)}
-                retryFailed={() => UploadService.retryFailedFiles()}
+                retryFailed={retryFailed}
             />
         </>
     );

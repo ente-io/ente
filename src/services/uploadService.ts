@@ -285,8 +285,8 @@ class UploadService {
             );
         }
     }
-    retryFailedFiles() {
-        this.uploadFiles(this.failedFiles, this.existingFilesCollectionWise, this.progressBarProps);
+    async retryFailedFiles() {
+        await this.uploadFiles(this.failedFiles, this.existingFilesCollectionWise, this.progressBarProps);
     }
 
     private updateProgressBarUI() {
