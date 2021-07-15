@@ -249,24 +249,24 @@ class UploadService {
                 await sleep(TwoSecondInMillSeconds);
                 // remove completed files for file progress list
                 this.fileProgress.delete(rawFile.name);
-                return;
+            } else {
+                let encryptedFile: EncryptedFile =
+                    await this.encryptFile(worker, file, collection.key);
+                let backupedFile: BackupedFile = await this.uploadToBucket(
+                    encryptedFile.file,
+                );
+                file = null;
+                let uploadFile: uploadFile = this.getUploadFile(
+                    collection,
+                    backupedFile,
+                    encryptedFile.fileKey,
+                );
+                encryptedFile = null;
+                backupedFile = null;
+                await this.uploadFile(uploadFile);
+                uploadFile = null;
+                this.fileProgress.delete(rawFile.name);
             }
-            let encryptedFile: EncryptedFile =
-                await this.encryptFile(worker, file, collection.key);
-            let backupedFile: BackupedFile = await this.uploadToBucket(
-                encryptedFile.file,
-            );
-            file = null;
-            let uploadFile: uploadFile = this.getUploadFile(
-                collection,
-                backupedFile,
-                encryptedFile.fileKey,
-            );
-            encryptedFile = null;
-            backupedFile = null;
-            await this.uploadFile(uploadFile);
-            uploadFile = null;
-            this.fileProgress.delete(rawFile.name);
         } catch (e) {
             logError(e, 'file upload failed with error');
             const error = new Error(
