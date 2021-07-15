@@ -2,8 +2,10 @@ import isElectron from 'is-electron';
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import exportService, { ExportProgress, ExportStage, ExportStats, ExportType } from 'services/exportService';
+import { getLocalFiles } from 'services/fileService';
 import styled from 'styled-components';
 import { sleep } from 'utils/common';
+import { getFileUID } from 'utils/export';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { Label, Row, Value } from './Container';
@@ -55,6 +57,9 @@ export default function ExportModal(props: Props) {
     }, []);
 
     useEffect(() => {
+        if (!exportFolder) {
+            return;
+        }
         const main = async () => {
             const exportInfo = await exportService.getExportRecord();
             setExportStage(exportInfo?.stage ?? ExportStage.INIT);
@@ -67,6 +72,30 @@ export default function ExportModal(props: Props) {
         };
         main();
     }, [exportFolder]);
+
+    useEffect(() => {
+        if (!props.show) {
+            return;
+        }
+        const main = async () => {
+            if (exportStage === ExportStage.FINISHED) {
+                const localFiles = await getLocalFiles();
+                const exportRecord = await exportService.getExportRecord();
+                const exportedFileCnt = exportRecord.exportedFiles.length;
+                const failedFilesCnt = exportRecord.failedFiles.length;
+                const syncedFilesCnt = localFiles.length;
+                if (syncedFilesCnt > exportedFileCnt + failedFilesCnt) {
+                    updateExportProgress({ current: exportedFileCnt + failedFilesCnt, total: syncedFilesCnt });
+                    const exportFileUIDs = new Set([...exportRecord.exportedFiles, ...exportRecord.failedFiles]);
+                    const unExportedFiles = localFiles.filter((file) => !exportFileUIDs.has(getFileUID(file)));
+                    console.log(exportedFileCnt + failedFilesCnt + unExportedFiles.length, syncedFilesCnt);
+                    exportService.addFilesQueuedRecord(exportFolder, unExportedFiles);
+                    updateExportStage(ExportStage.PAUSED);
+                }
+            }
+        };
+        main();
+    }, [props.show]);
 
 
     useEffect(() => {
@@ -143,7 +172,7 @@ export default function ExportModal(props: Props) {
         await preExportRun();
 
         const pausedStageProgress = exportRecord.progress;
-        updateExportProgress(pausedStageProgress);
+        setExportProgress(pausedStageProgress);
 
         const updateExportStatsWithOffset = ((progress: ExportProgress) => updateExportProgress(
             {

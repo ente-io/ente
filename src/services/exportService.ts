@@ -185,10 +185,7 @@ class ExportService {
     }
     async addFilesQueuedRecord(folder: string, files: File[]) {
         const exportRecord = await this.getExportRecord(folder);
-        if (!exportRecord.queuedFiles) {
-            exportRecord.queuedFiles = [];
-        }
-        exportRecord.queuedFiles.push(...files.map(getFileUID));
+        exportRecord.queuedFiles = files.map(getFileUID);
         await this.updateExportRecord(exportRecord, folder);
     }
 
@@ -234,6 +231,7 @@ class ExportService {
 
     async getExportRecord(folder?: string): Promise<ExportRecord> {
         try {
+            await this.recordUpdateInProgress;
             if (!folder) {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
             }
