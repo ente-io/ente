@@ -1,4 +1,5 @@
 # For more linters, we can check https://dart-lang.github.io/linter/lints/index.html
+# or https://pub.dev/packages/lint (Effective dart)
 # use "flutter analyze ." or "dart  analyze ." for running lint checks
 
 include: package:lints/recommended.yaml
