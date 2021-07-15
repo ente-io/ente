@@ -86,25 +86,25 @@ export default function UploadProgress(props: Props) {
                         ))}
                     </ul>
                 )}
-
-                <Modal.Footer style={{ border: 'none' }}>
-                    {props.now === 100 && (fileProgressStatuses?.length === 0 ? (
-                        <Button
-                            variant="outline-secondary"
-                            style={{ width: '100%' }}
-                            onClick={props.closeModal}
-                        >
-                            {constants.CLOSE}
-                        </Button>) : (
-                        <Button
-                            variant="outline-success"
-                            style={{ width: '100%' }}
-                            onClick={props.retryFailed}
-                        >
-                            {constants.RETRY}
-                        </Button>))}
-                </Modal.Footer>
-
+                {props.uploadStage === UPLOAD_STAGES.FINISH && (
+                    <Modal.Footer style={{ border: 'none' }}>
+                        {props.now === 100 && (fileProgressStatuses?.length === 0 ? (
+                            <Button
+                                variant="outline-secondary"
+                                style={{ width: '100%' }}
+                                onClick={props.closeModal}
+                            >
+                                {constants.CLOSE}
+                            </Button>) : (
+                            <Button
+                                variant="outline-success"
+                                style={{ width: '100%' }}
+                                onClick={props.retryFailed}
+                            >
+                                {constants.RETRY}
+                            </Button>))}
+                    </Modal.Footer>
+                )}
             </Modal.Body>
         </Modal>
     );
