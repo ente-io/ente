@@ -208,13 +208,13 @@ export default function Upload(props: Props) {
                     setFileProgress,
                 },
             );
-            appContext.resetSharedFiles();
-            props.setUploadInProgress(false);
         } catch (err) {
             props.setBannerMessage(err.message);
             setProgressView(false);
             throw err;
         } finally {
+            appContext.resetSharedFiles();
+            props.setUploadInProgress(false);
             props.syncWithRemote();
         }
     };
@@ -223,12 +223,12 @@ export default function Upload(props: Props) {
         try {
             props.setUploadInProgress(true);
             await UploadService.retryFailedFiles();
-            props.setUploadInProgress(false);
         } catch (err) {
             props.setBannerMessage(err.message);
             setProgressView(false);
             throw err;
         } finally {
+            props.setUploadInProgress(false);
             props.syncWithRemote();
         }
     };
