@@ -3,7 +3,6 @@ import localForage from 'utils/storage/localForage';
 
 import CryptoWorker from 'utils/crypto';
 import { getToken } from 'utils/common/key';
-import { ErrorHandler } from 'utils/common/errorUtil';
 import { DataStream, MetadataObject } from './uploadService';
 import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
@@ -175,7 +174,6 @@ export const getFiles = async (
         return decryptedFiles;
     } catch (e) {
         logError(e, 'Get files failed');
-        ErrorHandler(e);
     }
 };
 

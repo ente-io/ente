@@ -9,14 +9,13 @@ export const errorCodes = {
     ERR_FORBIDDEN: '403',
 };
 
-const AXIOS_NETWORK_ERROR = 'Network Error';
 
 export const SUBSCRIPTION_VERIFICATION_ERROR = 'Subscription verification failed';
 
 export const THUMBNAIL_GENERATION_FAILED = 'thumbnail generation failed';
 export const VIDEO_PLAYBACK_FAILED = 'video playback failed';
 
-export function ErrorHandler(error) {
+export function parseError(error) {
     let errorMessage = null;
     if (error?.status) {
         const errorCode = error.status.toString();
@@ -34,10 +33,21 @@ export function ErrorHandler(error) {
                 errorMessage = constants.SESSION_EXPIRED_MESSAGE;
                 break;
         }
-    } else if (error.message === AXIOS_NETWORK_ERROR) {
-        errorMessage = constants.SYNC_FAILED;
     }
     if (errorMessage) {
-        throw new Error(errorMessage);
+        return { parsedError: new Error(errorMessage), parsed: true };
+    } else {
+        return ({
+            parsedError: new Error(`${constants.UNKNOWN_ERROR} ${error}`), parsed: false,
+        });
+    }
+}
+
+export function handleError(error) {
+    const { parsedError, parsed } = parseError(error);
+    if (parsed) {
+        throw parsedError;
+    } else {
+        // shallow error don't break the caller flow
     }
 }

@@ -6,7 +6,8 @@ import { Collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity, sleep } from 'utils/common';
 import {
-    ErrorHandler,
+    handleError,
+    parseError,
     THUMBNAIL_GENERATION_FAILED,
 } from 'utils/common/errorUtil';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
@@ -198,7 +199,8 @@ class UploadService {
                 await this.fetchUploadURLs();
             } catch (e) {
                 logError(e, 'error fetching uploadURLs');
-                ErrorHandler(e);
+                const { parsedError } = parseError(e);
+                throw parsedError;
             }
             const uploadProcesses = [];
             for (
@@ -270,7 +272,7 @@ class UploadService {
             this.failedFiles.push(fileWithCollection);
             // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
             this.fileProgress.set(rawFile.name, FILE_UPLOAD_FAILED);
-            ErrorHandler(e);
+            handleError(e);
         }
         this.filesCompleted++;
         this.updateProgressBarUI();
