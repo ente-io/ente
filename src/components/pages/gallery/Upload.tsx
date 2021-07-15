@@ -12,6 +12,7 @@ import { SetCollectionSelectorAttributes } from './CollectionSelector';
 import { SetLoading } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
+import { sortFilesIntoCollections } from 'utils/file';
 
 interface Props {
     syncWithRemote: () => Promise<void>;
@@ -199,7 +200,7 @@ export default function Upload(props: Props) {
             props.closeCollectionSelector();
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
-                props.existingFiles,
+                sortFilesIntoCollections(props.existingFiles),
                 {
                     setPercentComplete,
                     setFileCounter,
@@ -207,16 +208,31 @@ export default function Upload(props: Props) {
                     setFileProgress,
                 },
             );
-            appContext.resetSharedFiles();
-            props.setUploadInProgress(false);
         } catch (err) {
             props.setBannerMessage(err.message);
             setProgressView(false);
             throw err;
         } finally {
+            appContext.resetSharedFiles();
+            props.setUploadInProgress(false);
             props.syncWithRemote();
         }
     };
+    const retryFailed = async (
+    ) => {
+        try {
+            props.setUploadInProgress(true);
+            await UploadService.retryFailedFiles();
+        } catch (err) {
+            props.setBannerMessage(err.message);
+            setProgressView(false);
+            throw err;
+        } finally {
+            props.setUploadInProgress(false);
+            props.syncWithRemote();
+        }
+    };
+
 
     return (
         <>
@@ -233,6 +249,7 @@ export default function Upload(props: Props) {
                 fileProgress={fileProgress}
                 show={progressView}
                 closeModal={() => setProgressView(false)}
+                retryFailed={retryFailed}
             />
         </>
     );

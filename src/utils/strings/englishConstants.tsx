@@ -442,6 +442,9 @@ const englishConstants = {
     FAILED_EXPORTED_FILES: 'failed file export',
     EXPORT_AGAIN: 'export new data ',
     RETRY_EXPORT_: 'retry failed files ',
+    LOCAL_STORAGE_NOT_ACCESSIBLE: 'local storage not accessible',
+    LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE: 'your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
+    RETRY: 'retry',
 };
 
 export default englishConstants;

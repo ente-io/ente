@@ -2,6 +2,8 @@ import { errorCodes } from './errorUtil';
 
 const DESKTOP_APP_DOWNLOAD_URL = 'https://github.com/ente-io/bhari-frame/releases/';
 
+const retrySleepTime = [2000, 5000, 10000];
+
 export function checkConnectivity() {
     if (navigator.onLine) {
         return true;
@@ -30,14 +32,14 @@ export function reverseString(title: string) {
         .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
 }
 
-export async function retryPromise(promise: Promise<any>, retryCount: number = 2) {
+export async function retryPromise(promise: Promise<any>, retryCount: number = 3) {
     try {
         const resp = await promise;
         return resp;
     } catch (e) {
         if (retryCount > 0) {
-            await sleep(200);
-            await retryPromise(promise, retryCount - 1);
+            await sleep(retrySleepTime[3 - retryCount]);
+            await this.retryPromise(promise, retryCount - 1);
         } else {
             throw e;
         }

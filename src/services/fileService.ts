@@ -3,14 +3,13 @@ import localForage from 'utils/storage/localForage';
 
 import CryptoWorker from 'utils/crypto';
 import { getToken } from 'utils/common/key';
-import { ErrorHandler } from 'utils/common/errorUtil';
 import { DataStream, MetadataObject } from './uploadService';
 import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 
 const ENDPOINT = getEndpoint();
-const DIFF_LIMIT: number = 250;
+const DIFF_LIMIT: number = 1000;
 
 const FILES = 'files';
 
@@ -175,7 +174,6 @@ export const getFiles = async (
         return decryptedFiles;
     } catch (e) {
         logError(e, 'Get files failed');
-        ErrorHandler(e);
     }
 };
 

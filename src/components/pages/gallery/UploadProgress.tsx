@@ -10,6 +10,7 @@ interface Props {
     uploadStage;
     now;
     closeModal;
+    retryFailed;
     fileProgress: Map<string, number>;
     show;
 }
@@ -34,26 +35,24 @@ export default function UploadProgress(props: Props) {
             aria-labelledby="contained-modal-title-vcenter"
             centered
             backdrop={
-                props.uploadStage !== UPLOAD_STAGES.FINISH ? 'static' : 'true'
+                fileProgressStatuses?.length !== 0 ? 'static' : 'true'
             }
         >
+            <Modal.Header
+                style={{ display: 'flex', justifyContent: 'center', textAlign: 'center', borderBottom: 'none', paddingTop: '30px', paddingBottom: '0px' }}
+                closeButton={props.uploadStage === UPLOAD_STAGES.FINISH}
+            >
+
+                <h4 style={{ width: '100%' }}>
+                    {props.uploadStage === UPLOAD_STAGES.UPLOADING ?
+                        props.fileCounter.total > 1 &&
+                        constants.UPLOAD[props.uploadStage](
+                            props.fileCounter,
+                        ) :
+                        constants.UPLOAD[props.uploadStage]}
+                </h4>
+            </Modal.Header>
             <Modal.Body>
-                <div
-                    style={{
-                        textAlign: 'center',
-                        marginBottom: '20px',
-                        marginTop: '12px',
-                    }}
-                >
-                    <h4>
-                        {props.uploadStage === UPLOAD_STAGES.UPLOADING ?
-                            props.fileCounter.total > 1 &&
-                              constants.UPLOAD[props.uploadStage](
-                                  props.fileCounter,
-                              ) :
-                            constants.UPLOAD[props.uploadStage]}
-                    </h4>
-                </div>
                 {props.now === 100 ? (
                     fileProgressStatuses.length !== 0 && (
                         <Alert variant="warning">
@@ -87,15 +86,23 @@ export default function UploadProgress(props: Props) {
                         ))}
                     </ul>
                 )}
-                {props.now === 100 && (
+                {props.uploadStage === UPLOAD_STAGES.FINISH && (
                     <Modal.Footer style={{ border: 'none' }}>
-                        <Button
-                            variant="outline-secondary"
-                            style={{ width: '100%' }}
-                            onClick={props.closeModal}
-                        >
-                            {constants.CLOSE}
-                        </Button>
+                        {props.now === 100 && (fileProgressStatuses?.length === 0 ? (
+                            <Button
+                                variant="outline-secondary"
+                                style={{ width: '100%' }}
+                                onClick={props.closeModal}
+                            >
+                                {constants.CLOSE}
+                            </Button>) : (
+                            <Button
+                                variant="outline-success"
+                                style={{ width: '100%' }}
+                                onClick={props.retryFailed}
+                            >
+                                {constants.RETRY}
+                            </Button>))}
                     </Modal.Footer>
                 )}
             </Modal.Body>

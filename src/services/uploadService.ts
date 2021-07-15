@@ -6,7 +6,8 @@ import { Collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { checkConnectivity, retryPromise, sleep } from 'utils/common';
 import {
-    ErrorHandler,
+    handleError,
+    parseError,
     THUMBNAIL_GENERATION_FAILED,
 } from 'utils/common/errorUtil';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
@@ -16,7 +17,6 @@ import { getToken } from 'utils/common/key';
 import {
     fileIsHEIC,
     convertHEIC2JPEG,
-    sortFilesIntoCollections,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 const ENDPOINT = getEndpoint();
@@ -42,7 +42,6 @@ const FILE_UPLOAD_SKIPPED = -2;
 const FILE_UPLOAD_COMPLETED = 100;
 const EDITED_FILE_SUFFIX = '-edited';
 const TwoSecondInMillSeconds = 2000;
-
 
 interface Location {
     latitude: number;
@@ -137,11 +136,11 @@ class UploadService {
     private metadataMap: Map<string, Object>;
     private filesToBeUploaded: FileWithCollection[];
     private progressBarProps;
-    private uploadErrors: Error[];
+    private failedFiles: FileWithCollection[];
     private existingFilesCollectionWise: Map<number, File[]>;
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
-        existingFiles: File[],
+        existingFilesCollectionWise: Map<number, File[]>,
         progressBarProps,
     ) {
         try {
@@ -150,11 +149,10 @@ class UploadService {
 
             this.filesCompleted = 0;
             this.fileProgress = new Map<string, number>();
-            this.uploadErrors = [];
+            this.failedFiles = [];
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-            this.existingFilesCollectionWise =
-                sortFilesIntoCollections(existingFiles);
+            this.existingFilesCollectionWise = existingFilesCollectionWise;
             this.updateProgressBarUI();
 
             const metadataFiles: globalThis.File[] = [];
@@ -200,7 +198,8 @@ class UploadService {
                 await this.fetchUploadURLs();
             } catch (e) {
                 logError(e, 'error fetching uploadURLs');
-                ErrorHandler(e);
+                const { parsedError } = parseError(e);
+                throw parsedError;
             }
             const uploadProcesses = [];
             for (
@@ -249,33 +248,30 @@ class UploadService {
                 await sleep(TwoSecondInMillSeconds);
                 // remove completed files for file progress list
                 this.fileProgress.delete(rawFile.name);
-                return;
+            } else {
+                let encryptedFile: EncryptedFile =
+                    await this.encryptFile(worker, file, collection.key);
+                let backupedFile: BackupedFile = await this.uploadToBucket(
+                    encryptedFile.file,
+                );
+                file = null;
+                let uploadFile: uploadFile = this.getUploadFile(
+                    collection,
+                    backupedFile,
+                    encryptedFile.fileKey,
+                );
+                encryptedFile = null;
+                backupedFile = null;
+                await this.uploadFile(uploadFile);
+                uploadFile = null;
+                this.fileProgress.delete(rawFile.name);
             }
-            let encryptedFile: EncryptedFile =
-                await this.encryptFile(worker, file, collection.key);
-            let backupedFile: BackupedFile = await this.uploadToBucket(
-                encryptedFile.file,
-            );
-            file = null;
-            let uploadFile: uploadFile = this.getUploadFile(
-                collection,
-                backupedFile,
-                encryptedFile.fileKey,
-            );
-            encryptedFile = null;
-            backupedFile = null;
-            await this.uploadFile(uploadFile);
-            uploadFile = null;
-            this.fileProgress.delete(rawFile.name);
         } catch (e) {
-            logError(e, 'file upload failed with error');
-            const error = new Error(
-                `Uploading Failed for File - ${rawFile.name}`,
-            );
-            this.uploadErrors.push(error);
+            logError(e, 'file upload failed');
+            this.failedFiles.push(fileWithCollection);
             // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
             this.fileProgress.set(rawFile.name, FILE_UPLOAD_FAILED);
-            ErrorHandler(e);
+            handleError(e);
         }
         this.filesCompleted++;
         this.updateProgressBarUI();
@@ -287,6 +283,9 @@ class UploadService {
                 this.filesToBeUploaded.pop(),
             );
         }
+    }
+    async retryFailedFiles() {
+        await this.uploadFiles(this.failedFiles, this.existingFilesCollectionWise, this.progressBarProps);
     }
 
     private updateProgressBarUI() {
@@ -547,14 +546,14 @@ class UploadService {
             if (!token) {
                 return;
             }
-            const response = await HTTPService.post(
+            const response = await retryPromise(HTTPService.post(
                 `${ENDPOINT}/files`,
                 uploadFile,
                 null,
                 {
                     'X-Auth-Token': token,
                 },
-            );
+            ));
             return response.data;
         } catch (e) {
             logError(e, 'upload Files Failed');
