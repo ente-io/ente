@@ -1,3 +1,9 @@
+linter:
+  rules:
+    - sort_pub_dependencies
+
 analyzer:
+  errors:
+    sort_pub_dependencies: error
   exclude:
     - thirdparty/**

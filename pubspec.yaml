@@ -17,90 +17,86 @@ environment:
   sdk: ">=2.10.0 <3.0.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.0
-  photo_manager: ^1.2.4
-  provider: ^3.1.0
-  sqflite: ^2.0.0+3
-  sqflite_migration: ^0.3.0
-  path_provider: ^2.0.1
-  shared_preferences: ^2.0.5
-  dio: ^4.0.0
-  image: ^3.0.2
-  share: ^2.0.1
-  photo_view: ^0.11.1
-  visibility_detector: ^0.2.0
-  event_bus: ^2.0.0
-  sentry: ^5.0.0
-  super_logging:
-    path: thirdparty/super_logging
-  archive: ^3.1.2
-  flutter_email_sender: ^5.0.0
-  like_button: ^2.0.2
-  logging: ^1.0.1
-  flutter_image_compress:
-    path: thirdparty/flutter_image_compress
-  flutter_typeahead: ^1.8.1
-  fluttertoast: ^8.0.6
-  video_player: ^2.0.0
-  chewie: ^1.0.0
-  cached_network_image: ^3.0.0
   animate_do: ^1.7.2
-  flutter_cache_manager: ^3.0.1
-  computer: ^1.0.2
-  flutter_secure_storage: ^4.2.0
-  uni_links: ^0.5.1
-  crisp:
-    git: https://github.com/kcrebound/flutter-crisp.git
-  flutter_sodium: ^0.2.0
-  pedantic: ^1.9.2
-  page_transition: "^1.1.7+2"
-  scrollable_positioned_list: ^0.1.10
-  connectivity: ^3.0.3
-  url_launcher: ^6.0.3
-  fluttercontactpicker: ^4.4.0
-  in_app_purchase:
-    path: thirdparty/in_app_purchase
-  expansion_card: ^0.1.0
-  flutter_password_strength: ^0.1.6
-  flutter_inappwebview: ^5.3.2
+  archive: ^3.1.2
   background_fetch: ^1.0.1
-  # flutter_inapp_purchase: ^3.0.1
-  google_nav_bar: ^5.0.5
-  package_info_plus: ^1.0.1
-  local_auth: ^1.1.5
-  flutter_windowmanager: ^0.0.2
-  flutter_user_agent: ^1.2.2
-  quiver: ^3.0.1
-  move_to_background: ^1.0.2
-  loading_animations: ^2.1.0
+  cached_network_image: ^3.0.0
+  chewie: ^1.0.0
+  computer: ^1.0.2
+  confetti: ^0.5.5
+  connectivity: ^3.0.3
+  crisp:
+    git: "https://github.com/kcrebound/flutter-crisp.git"
+  cupertino_icons: ^1.0.0
+  device_info: ^2.0.2
+  dio: ^4.0.0
   dots_indicator: ^2.0.0
-  flutter_local_notifications: ^5.0.0+4
-  open_file: ^3.2.1
-  email_validator: '^1.0.6'
+  email_validator: ^1.0.6
+  event_bus: ^2.0.0
+  exif: ^3.0.0
+  expansion_card: ^0.1.0
   extended_image:
     path: thirdparty/extended_image
-  image_editor: ^1.0.0
-  syncfusion_flutter_sliders: ^19.1.67-beta
-  syncfusion_flutter_core: ^19.1.67
-  pinput: ^1.2.0
-  intl: ^0.17.0
-  confetti: ^0.5.5
+  flutter:
+    sdk: flutter
+  flutter_cache_manager: ^3.0.1
   flutter_easyloading: ^3.0.0
-  device_info: ^2.0.2
-  exif: ^3.0.0
-  wallpaper_manager_flutter: ^0.0.2
+  flutter_email_sender: ^5.0.0
+  flutter_image_compress:
+    path: thirdparty/flutter_image_compress
+  flutter_inappwebview: ^5.3.2
+  flutter_local_notifications: ^5.0.0+4
+  flutter_password_strength: ^0.1.6
+  flutter_secure_storage: ^4.2.0
+  flutter_sodium: ^0.2.0
+  flutter_typeahead: ^1.8.1
+  flutter_user_agent: ^1.2.2
+  flutter_windowmanager: ^0.0.2
+  fluttercontactpicker: ^4.4.0
+  fluttertoast: ^8.0.6
+  google_nav_bar: ^5.0.5
+  image: ^3.0.2
+  image_editor: ^1.0.0
   implicitly_animated_reorderable_list: ^0.4.0
+  in_app_purchase:
+    path: thirdparty/in_app_purchase
+  intl: ^0.17.0
+  like_button: ^2.0.2
+  loading_animations: ^2.1.0
+  local_auth: ^1.1.5
+  logging: ^1.0.1
+  move_to_background: ^1.0.2
+  open_file: ^3.2.1
+  package_info_plus: ^1.0.1
+  page_transition: ^1.1.7+2
+  path_provider: ^2.0.1
+  pedantic: ^1.9.2
+  photo_manager: ^1.2.4
+  photo_view: ^0.11.1
+  pinput: ^1.2.0
+  provider: ^3.1.0
+  quiver: ^3.0.1
+  scrollable_positioned_list: ^0.1.10
+  sentry: ^5.0.0
+  share: ^2.0.1
+  shared_preferences: ^2.0.5
+  sqflite: ^2.0.0+3
+  sqflite_migration: ^0.3.0
+  super_logging:
+    path: thirdparty/super_logging
+  syncfusion_flutter_core: ^19.1.67
+  syncfusion_flutter_sliders: ^19.1.67-beta
+  uni_links: ^0.5.1
+  url_launcher: ^6.0.3
+  video_player: ^2.0.0
+  visibility_detector: ^0.2.0
+  wallpaper_manager_flutter: ^0.0.2
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
   flutter_launcher_icons: "0.9.0"
   flutter_native_splash: ^1.1.8+4
+  flutter_test:
+    sdk: flutter
   lints: ^1.0.1
 
 flutter_icons:
