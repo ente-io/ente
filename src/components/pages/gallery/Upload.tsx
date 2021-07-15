@@ -234,6 +234,7 @@ export default function Upload(props: Props) {
                 fileProgress={fileProgress}
                 show={progressView}
                 closeModal={() => setProgressView(false)}
+                retryFailed={() => UploadService.retryFailedFiles()}
             />
         </>
     );
