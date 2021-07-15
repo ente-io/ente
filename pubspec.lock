@@ -508,6 +508,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.2"
+  lints:
+    dependency: "direct dev"
+    description:
+      name: lints
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   loading_animations:
     dependency: "direct main"
     description:
