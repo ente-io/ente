@@ -143,7 +143,8 @@ ipcMain.on('reload-window', (event, args) => {
     mainWindow = secondWindow;
 });
 
-function buildContextMenu(export_progress: any = null) {
+function buildContextMenu(args: any = {}) {
+    const { export_progress, retry_export, paused } = args
     const contextMenu = Menu.buildFromTemplate([
         ...(export_progress
             ? [
@@ -151,12 +152,35 @@ function buildContextMenu(export_progress: any = null) {
                     label: export_progress,
                     click: () => mainWindow.show(),
                 },
-                {
-                    label: 'stop export',
-                    click: () => mainWindow.webContents.send('stop-export'),
-                },
+                ...(paused ?
+                    [{
+                        label: 'resume export',
+                        click: () => mainWindow.webContents.send('resume-export'),
+                    }] :
+                    [{
+                        label: 'pause export',
+                        click: () => mainWindow.webContents.send('pause-export'),
+                    },
+                    {
+                        label: 'stop export',
+                        click: () => mainWindow.webContents.send('stop-export'),
+                    }]
+                )
             ]
             : []),
+        ...(retry_export
+            ? [
+                {
+                    label: 'export failed',
+                    click: null,
+                },
+                {
+                    label: 'retry export',
+                    click: () => mainWindow.webContents.send('retry-export'),
+                },
+            ]
+            : []
+        ),
         { type: 'separator' },
         {
             label: 'open ente',
