@@ -1,9 +1,40 @@
+# For more linters, we can check https://dart-lang.github.io/linter/lints/index.html
+# use "flutter analyze ." or "dart  analyze ." for running lint checks
+
+include: package:lints/recommended.yaml
 linter:
   rules:
+    # Ref https://github.com/flutter/packages/blob/master/packages/flutter_lints/lib/flutter.yaml
+    - avoid_print
+    - avoid_unnecessary_containers
+    - avoid_web_libraries_in_flutter
+    - no_logic_in_create_state
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - sized_box_for_whitespace
+    - use_full_hex_values_for_flutter_colors
+    - use_key_in_widget_constructors
+
+    - avoid_empty_else
+    - exhaustive_cases
+
+    # just style suggestions
     - sort_pub_dependencies
+    - use_rethrow_when_possible
+    - prefer_double_quotes
 
 analyzer:
   errors:
-    sort_pub_dependencies: error
+    avoid_empty_else: error
+    exhaustive_cases: error
+    use_rethrow_when_possible: info
+
+    prefer_const_constructors: ignore # too many warnings
+    prefer_const_declarations: ignore # too many warnings
+    prefer_const_constructors_in_immutables: ignore # too many warnings
+    prefer_double_quotes: ignore # too many warnings
+
   exclude:
     - thirdparty/**
