@@ -35,3 +35,22 @@ export const IconButton = styled.button`
         background-color: rgba(255, 255, 255, 0.2);
     }
 `;
+
+export const Row = styled.div`
+    display:flex;
+    align-items:center;
+    margin-bottom:20px;
+    flex:1
+`;
+
+export const Label = styled.div <{ width?: string }> `
+    width:${(props) => props.width ?? '70%'};
+`;
+export const Value = styled.div <{ width?: string }> `
+    display:flex;
+    justify-content:flex-start;
+    align-items:center;
+    width:${(props) => props.width ?? '30%'};
+    text-align: center;
+    color: #ddd;
+`;

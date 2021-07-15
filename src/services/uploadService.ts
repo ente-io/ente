@@ -4,7 +4,7 @@ import EXIF from 'exif-js';
 import { File, fileAttribute } from './fileService';
 import { Collection } from './collectionService';
 import { FILE_TYPE } from 'pages/gallery';
-import { checkConnectivity, sleep } from 'utils/common';
+import { checkConnectivity, retryPromise, sleep } from 'utils/common';
 import {
     handleError,
     parseError,
@@ -42,7 +42,6 @@ const FILE_UPLOAD_SKIPPED = -2;
 const FILE_UPLOAD_COMPLETED = 100;
 const EDITED_FILE_SUFFIX = '-edited';
 const TwoSecondInMillSeconds = 2000;
-const retrySleepTime = [2000, 5000, 10000];
 
 interface Location {
     latitude: number;
@@ -547,7 +546,7 @@ class UploadService {
             if (!token) {
                 return;
             }
-            const response = await this.retryPromise(HTTPService.post(
+            const response = await retryPromise(HTTPService.post(
                 `${ENDPOINT}/files`,
                 uploadFile,
                 null,
@@ -873,7 +872,7 @@ class UploadService {
         filename: string,
     ): Promise<string> {
         try {
-            await this.retryPromise(
+            await retryPromise(
                 HTTPService.put(
                     fileUploadURL.url,
                     file,
@@ -917,7 +916,7 @@ class UploadService {
                     }
                 }
                 const uploadChunk = Uint8Array.from(combinedChunks);
-                const response = await this.retryPromise(
+                const response = await retryPromise(
                     HTTPService.put(
                         fileUploadURL,
                         uploadChunk,
@@ -936,7 +935,7 @@ class UploadService {
                 { CompleteMultipartUpload: { Part: resParts } },
                 options,
             );
-            await this.retryPromise(
+            await retryPromise(
                 HTTPService.post(multipartUploadURLs.completeURL, body, null, {
                     'content-type': 'text/xml',
                 }),
@@ -1053,19 +1052,6 @@ class UploadService {
         }
 
         return dd;
-    }
-    private async retryPromise(promise: Promise<any>, retryCount: number = 3) {
-        try {
-            const resp = await promise;
-            return resp;
-        } catch (e) {
-            if (retryCount > 0) {
-                await sleep(retrySleepTime[3 - retryCount]);
-                await this.retryPromise(promise, retryCount - 1);
-            } else {
-                throw e;
-            }
-        }
     }
 }
 

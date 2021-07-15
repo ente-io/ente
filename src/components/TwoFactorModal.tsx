@@ -2,11 +2,11 @@ import { useRouter } from 'next/router';
 import { DeadCenter, SetLoading } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, Row } from 'react-bootstrap';
 import { disableTwoFactor, getTwoFactorStatus } from 'services/userService';
-import styled from 'styled-components';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
+import { Label, Value } from './Container';
 import MessageDialog, { SetDialogMessage } from './MessageDialog';
 
 interface Props {
@@ -17,16 +17,6 @@ interface Props {
     closeSidebar: () => void;
 }
 
-const Row = styled.div`
-    display:flex;
-    align-items:center;
-    margin-bottom:20px;
-    flex:1
-`;
-
-const Label = styled.div`
-    width:70%;
-`;
 function TwoFactorModal(props: Props) {
     const router = useRouter();
     const [isTwoFactorEnabled, setTwoFactorStatus] = useState(false);
@@ -100,10 +90,16 @@ function TwoFactorModal(props: Props) {
                     isTwoFactorEnabled ?
                         <>
                             <Row>
-                                <Label>{constants.UPDATE_TWO_FACTOR_HINT}</Label> <Button variant={'outline-success'} style={{ width: '30%' }} onClick={warnTwoFactorReconfigure}>{constants.RECONFIGURE}</Button>
+                                <Label>{constants.UPDATE_TWO_FACTOR_HINT}</Label>
+                                <Value>
+                                    <Button variant={'outline-success'} onClick={warnTwoFactorReconfigure}>{constants.RECONFIGURE}</Button>
+                                </Value>
                             </Row>
                             <Row>
-                                <Label>{constants.DISABLE_TWO_FACTOR_HINT} </Label><Button variant={'outline-danger'} style={{ width: '30%' }} onClick={warnTwoFactorDisable}>{constants.DISABLE}</Button>
+                                <Label>{constants.DISABLE_TWO_FACTOR_HINT} </Label>
+                                <Value>
+                                    <Button variant={'outline-danger'} onClick={warnTwoFactorDisable}>{constants.DISABLE}</Button>
+                                </Value>
                             </Row>
 
                         </> : (

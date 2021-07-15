@@ -350,6 +350,15 @@ const GlobalStyles = createGlobalStyle`
         display:flex;
         align-items:center;
     }
+    @-webkit-keyframes rotation 
+    {
+        from {
+            -webkit-transform: rotate(0deg);
+        }
+        to {
+            -webkit-transform: rotate(359deg);
+        }
+}
 `;
 
 export const LogoImage = styled.img`

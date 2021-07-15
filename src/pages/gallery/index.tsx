@@ -422,7 +422,6 @@ export default function Gallery() {
                     setUploadInProgress={setUploadInProgress}
                 />
                 <Sidebar
-                    files={files}
                     collections={collections}
                     setDialogMessage={setDialogMessage}
                     setLoading={setLoading}
