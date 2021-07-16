@@ -67,28 +67,6 @@ void preloadThumbnail(ente.File file) {
   }
 }
 
-Future<Uint8List> getBytes(ente.File file, {int quality = 100}) async {
-  if (file.localID == null) {
-    return getFileFromServer(file).then((file) => file.readAsBytesSync());
-  } else {
-    return await getBytesFromDisk(file, quality: quality);
-  }
-}
-
-Future<Uint8List> getBytesFromDisk(ente.File file, {int quality = 100}) async {
-  final originalBytes = (await file.getAsset()).originBytes;
-  if (extension(file.title) == ".HEIC" || quality != 100) {
-    return originalBytes.then((bytes) {
-      return FlutterImageCompress.compressWithList(bytes, quality: quality)
-          .then((converted) {
-        return Uint8List.fromList(converted);
-      });
-    });
-  } else {
-    return originalBytes;
-  }
-}
-
 final Map<int, Future<io.File>> fileDownloadsInProgress =
     Map<int, Future<io.File>>();
 
