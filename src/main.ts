@@ -11,7 +11,7 @@ import {
 } from 'electron';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
-import { autoUpdater } from 'electron-updater';
+import AppUpdater from './appUpdater';
 
 let appIsQuitting = false;
 let tray: Tray;
@@ -87,7 +87,7 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
     if (!isDev) {
-        autoUpdater.checkForUpdatesAndNotify();
+       AppUpdater.checkForUpdate();
     }
     Menu.setApplicationMenu(buildMenuBar())
     mainWindow = createWindow();

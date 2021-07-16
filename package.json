@@ -56,6 +56,7 @@
     "@types/node": "^14.14.37",
     "@types/promise-fs": "^2.1.1",
     "electron-is-dev": "^2.0.0",
+    "electron-log": "^4.3.5",
     "electron-updater": "^4.3.8",
     "promise-fs": "^2.1.1"
   }
