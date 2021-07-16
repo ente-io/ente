@@ -8,10 +8,10 @@ import {
 } from 'electron';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
-import AppUpdater from './appUpdater';
-import { createWindow } from './util';
-import { buildContextMenu, buildMenuBar } from './menuUtil';
-import setupIpcComs from './ipcComms';
+import AppUpdater from './utils/appUpdater';
+import { createWindow } from './utils/createWindow';
+import setupIpcComs from './utils/ipcComms';
+import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 
 let tray: Tray;
 let mainWindow: BrowserWindow;
@@ -37,7 +37,7 @@ if (!gotTheLock) {
 }
 else {
 
-    app.on('second-instance', (event, commandLine, workingDirectory) => {
+    app.on('second-instance', () => {
         // Someone tried to run a second instance, we should focus our window.
         if (mainWindow) {
             mainWindow.show();

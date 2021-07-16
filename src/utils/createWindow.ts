@@ -1,7 +1,7 @@
 import { BrowserWindow, nativeImage } from 'electron';
 import * as isDev from 'electron-is-dev';
 import * as path from 'path';
-import { isAppQuitting } from './main';
+import { isAppQuitting } from '../main';
 
 export function createWindow(): BrowserWindow {
     const appImgPath = isDev
@@ -14,7 +14,7 @@ export function createWindow(): BrowserWindow {
         width: 800,
         backgroundColor: '#111111',
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: path.join(__dirname, '../preload.js'),
         },
         icon: appIcon,
         show: false, // don't show the main window

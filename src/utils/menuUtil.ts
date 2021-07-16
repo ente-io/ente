@@ -1,5 +1,5 @@
 import { Menu, app, shell, BrowserWindow } from "electron";
-import { setIsAppQuitting } from "./main";
+import { setIsAppQuitting } from "../main";
 
 export function buildContextMenu(mainWindow: BrowserWindow, args: any = {}): Menu {
     const { export_progress, retry_export, paused } = args

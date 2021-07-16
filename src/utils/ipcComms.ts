@@ -1,6 +1,6 @@
 import { BrowserWindow, dialog, ipcMain, Tray, Notification } from "electron";
+import { createWindow } from "./createWindow";
 import { buildContextMenu } from "./menuUtil";
-import { createWindow } from "./util";
 
 export default function setupIpcComs(tray: Tray, mainWindow: BrowserWindow): void {
     ipcMain.on('select-dir', async (event) => {
