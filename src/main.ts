@@ -3,17 +3,16 @@ import {
     BrowserWindow,
     Menu,
     Tray,
-    Notification,
-    shell,
     dialog,
-    ipcMain,
     nativeImage,
 } from 'electron';
 import * as path from 'path';
 import * as isDev from 'electron-is-dev';
 import AppUpdater from './appUpdater';
+import { createWindow } from './util';
+import { buildContextMenu, buildMenuBar } from './menuUtil';
+import setupIpcComs from './ipcComms';
 
-let appIsQuitting = false;
 let tray: Tray;
 let mainWindow: BrowserWindow;
 
@@ -24,72 +23,15 @@ dialog.showErrorBox = function (title, content) {
     console.log(`${title}\n${content}`);
 };
 
-function createWindow() {
-    const appImgPath = isDev
-        ? 'build/window-icon.png'
-        : path.join(process.resourcesPath, 'window-icon.png');
-    const appIcon = nativeImage.createFromPath(appImgPath);
-    // Create the browser window.
-    const mainWindow = new BrowserWindow({
-        height: 600,
-        width: 800,
-        backgroundColor: '#111111',
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-        },
-        icon: appIcon,
-        show: false, // don't show the main window
-    });
-    const splash = new BrowserWindow({
-        frame: false,
-        alwaysOnTop: true,
-        height: 600,
-        width: 800,
-        transparent: true,
-    });
-
-    if (isDev) {
-        splash.loadFile(`../build/splash.html`);
-        mainWindow.loadURL('http://localhost:3000');
-        // Open the DevTools.
-        mainWindow.webContents.openDevTools();
-    } else {
-        splash.loadURL(
-            `file://${path.join(process.resourcesPath, 'splash.html')}`
-        );
-        mainWindow.loadURL('http://web.ente.io');
-    }
-    mainWindow.webContents.on('did-fail-load', () => {
-        splash.close();
-        mainWindow.show();
-        isDev
-            ? mainWindow.loadFile(`../build/error.html`)
-            : splash.loadURL(
-                `file://${path.join(process.resourcesPath, 'error.html')}`
-            );
-    });
-    mainWindow.once('ready-to-show', () => {
-        mainWindow.show();
-        splash.destroy();
-    });
-    mainWindow.on('close', function (event) {
-        if (!appIsQuitting) {
-            event.preventDefault();
-            mainWindow.hide();
-        }
-        return false;
-    });
-    return mainWindow;
-}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
     if (!isDev) {
-       AppUpdater.checkForUpdate();
+        AppUpdater.checkForUpdate();
     }
-    Menu.setApplicationMenu(buildMenuBar())
+    Menu.setApplicationMenu(buildMenuBar(mainWindow))
     mainWindow = createWindow();
 
     app.on('activate', function () {
@@ -103,139 +45,10 @@ app.on('ready', () => {
     const trayIcon = nativeImage.createFromPath(trayImgPath);
     tray = new Tray(trayIcon);
     tray.setToolTip('ente');
-    tray.setContextMenu(buildContextMenu());
+    tray.setContextMenu(buildContextMenu(mainWindow));
+    setupIpcComs(tray, mainWindow);
 });
 
-ipcMain.on('select-dir', async (event) => {
-    const dialogWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        webPreferences: {
-            nodeIntegration: false,
-            enableRemoteModule: false,
-            contextIsolation: true,
-            sandbox: true,
-        },
-    });
-    const result = await dialog.showOpenDialog(dialogWindow, {
-        properties: ['openDirectory'],
-    });
-    const dir =
-        result.filePaths && result.filePaths.length > 0 && result.filePaths[0];
-    dialogWindow.close();
-    event.returnValue = dir;
-});
 
-ipcMain.on('update-tray', (event, args) => {
-    tray.setContextMenu(buildContextMenu(args));
-});
 
-ipcMain.on('send-notification', (event, args) => {
-    const notification = {
-        title: 'ente',
-        body: args,
-    };
-    new Notification(notification).show();
-});
-ipcMain.on('reload-window', (event, args) => {
-    const secondWindow = createWindow();
-    mainWindow.destroy();
-    mainWindow = secondWindow;
-});
 
-function buildContextMenu(args: any = {}) {
-    const { export_progress, retry_export, paused } = args
-    const contextMenu = Menu.buildFromTemplate([
-        ...(export_progress
-            ? [
-                {
-                    label: export_progress,
-                    click: () => mainWindow.show(),
-                },
-                ...(paused ?
-                    [{
-                        label: 'resume export',
-                        click: () => mainWindow.webContents.send('resume-export'),
-                    }] :
-                    [{
-                        label: 'pause export',
-                        click: () => mainWindow.webContents.send('pause-export'),
-                    },
-                    {
-                        label: 'stop export',
-                        click: () => mainWindow.webContents.send('stop-export'),
-                    }]
-                )
-            ]
-            : []),
-        ...(retry_export
-            ? [
-                {
-                    label: 'export failed',
-                    click: null,
-                },
-                {
-                    label: 'retry export',
-                    click: () => mainWindow.webContents.send('retry-export'),
-                },
-            ]
-            : []
-        ),
-        { type: 'separator' },
-        {
-            label: 'open ente',
-            click: function () {
-                mainWindow.show();
-            },
-        },
-        {
-            label: 'quit ente',
-            click: function () {
-                appIsQuitting = true;
-                app.quit();
-            },
-        },
-    ]);
-    return contextMenu;
-}
-
-function buildMenuBar() {
-    const name = app.getName();
-    return Menu.buildFromTemplate([
-        {
-            label: '  ',
-            accelerator: 'CmdOrCtrl+R',
-            click() {
-                mainWindow.reload();
-            },
-        },
-        ...(process.platform === 'darwin' && [{
-            label: name,
-            submenu: Menu.buildFromTemplate([
-                {
-                    label: 'About ' + name,
-                    role: 'about'
-                },
-                {
-                    label: 'Quit',
-                    accelerator: 'Command+Q',
-                    click() { app.quit(); }
-                },
-            ])
-        }]),
-        {
-            label: 'help',
-            submenu: Menu.buildFromTemplate([
-                {
-                    label: 'faq',
-                    click: () => shell.openExternal('https://ente.io/faq/'),
-                },
-                {
-                    label: 'support',
-                    toolTip: 'ente.io web client ',
-                    click: () => shell.openExternal('mailto:contact@ente.io'),
-                },
-            ]),
-        },
-    ]);
-}
