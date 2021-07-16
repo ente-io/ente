@@ -31,31 +31,50 @@ dialog.showErrorBox = function (title, content) {
 };
 
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', () => {
-    if (!isDev) {
-        AppUpdater.checkForUpdate();
-    }
-    Menu.setApplicationMenu(buildMenuBar(mainWindow))
-    mainWindow = createWindow();
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+    app.quit();
+}
+else {
 
-    app.on('activate', function () {
-        // On macOS it's common to re-create a window in the app when the
-        // dock icon is clicked and there are no other windows open.
-        if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+        // Someone tried to run a second instance, we should focus our window.
+        if (mainWindow) {
+            mainWindow.show();
+            if (mainWindow.isMinimized()) {
+                mainWindow.restore()
+            }
+            mainWindow.focus()
+        }
+    })
+
+    // This method will be called when Electron has finished
+    // initialization and is ready to create browser windows.
+    // Some APIs can only be used after this event occurs.
+    app.on('ready', () => {
+
+        if (!isDev) {
+            AppUpdater.checkForUpdate();
+        }
+        Menu.setApplicationMenu(buildMenuBar(mainWindow))
+        mainWindow = createWindow();
+
+        app.on('activate', function () {
+            // On macOS it's common to re-create a window in the app when the
+            // dock icon is clicked and there are no other windows open.
+            if (BrowserWindow.getAllWindows().length === 0) createWindow();
+        });
+        const trayImgPath = isDev
+            ? 'build/taskbar-icon.png'
+            : path.join(process.resourcesPath, 'taskbar-icon.png');
+        const trayIcon = nativeImage.createFromPath(trayImgPath);
+        tray = new Tray(trayIcon);
+        tray.setToolTip('ente');
+        tray.setContextMenu(buildContextMenu(mainWindow));
+        setupIpcComs(tray, mainWindow);
     });
-    const trayImgPath = isDev
-        ? 'build/taskbar-icon.png'
-        : path.join(process.resourcesPath, 'taskbar-icon.png');
-    const trayIcon = nativeImage.createFromPath(trayImgPath);
-    tray = new Tray(trayIcon);
-    tray.setToolTip('ente');
-    tray.setContextMenu(buildContextMenu(mainWindow));
-    setupIpcComs(tray, mainWindow);
-});
 
+}
 
 
 
