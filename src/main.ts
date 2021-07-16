@@ -56,8 +56,8 @@ else {
         if (!isDev) {
             AppUpdater.checkForUpdate();
         }
-        Menu.setApplicationMenu(buildMenuBar(mainWindow))
         mainWindow = createWindow();
+        Menu.setApplicationMenu(buildMenuBar(mainWindow))
 
         app.on('activate', function () {
             // On macOS it's common to re-create a window in the app when the
