@@ -37,7 +37,7 @@ import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
-import { getSelectedFileIds } from 'utils/file';
+import { getSelectedFileIds, sortFilesIntoCollections } from 'utils/file';
 import { addFilesToCollection } from 'utils/collection';
 import { errorCodes } from 'utils/common/errorUtil';
 import SearchBar, { DateValue } from 'components/SearchBar';
@@ -149,6 +149,7 @@ export default function Gallery() {
     const [resync, setResync] = useState(false);
     const [deleted, setDeleted] = useState<number[]>([]);
     const appContext = useContext(AppContext);
+    const [collectionFilesCount, setCollectionFilesCount] = useState<Map<number, number>>();
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -173,9 +174,15 @@ export default function Gallery() {
                 nonEmptyCollections,
                 files,
             );
+            const collectionWiseFiles = sortFilesIntoCollections(files);
+            const collectionFilesCount = new Map<number, number>();
+            for (const [id, files] of collectionWiseFiles) {
+                collectionFilesCount.set(id, files.length);
+            }
             setFiles(files);
             setCollections(nonEmptyCollections);
             setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
+            setCollectionFilesCount(collectionFilesCount);
             const favItemIds = await getFavItemIds(files);
             setFavItemIds(favItemIds);
             await checkSubscriptionPurchase(setDialogMessage, router);
@@ -390,6 +397,7 @@ export default function Gallery() {
                     setDialogMessage={setDialogMessage}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     startLoadingBar={loadingBar.current?.continuousStart}
+                    collectionFilesCount={collectionFilesCount}
                 />
                 <CollectionNamer
                     show={collectionNamerView}

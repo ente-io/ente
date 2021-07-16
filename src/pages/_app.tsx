@@ -316,6 +316,9 @@ const GlobalStyles = createGlobalStyle`
     .arrow::after{
         border-bottom-color:#282828 !important;
     }
+    .arrow::before{
+        border-top-color:#282828 !important;
+    }
     .carousel-inner {
         padding-bottom: 50px !important;
     }
@@ -358,7 +361,10 @@ const GlobalStyles = createGlobalStyle`
         to {
             -webkit-transform: rotate(359deg);
         }
-}
+    }
+    .tooltip-inner{
+        padding:0px;
+    }
 `;
 
 export const LogoImage = styled.img`
