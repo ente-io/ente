@@ -1,6 +1,7 @@
 import { BrowserWindow, nativeImage } from 'electron';
 import * as isDev from 'electron-is-dev';
 import * as path from 'path';
+import { isAppQuitting } from './main';
 
 export function createWindow(): BrowserWindow {
     const appImgPath = isDev
@@ -51,8 +52,12 @@ export function createWindow(): BrowserWindow {
         splash.destroy();
     });
     mainWindow.on('close', function (event) {
-        event.preventDefault();
-        mainWindow.hide();
+        if (!isAppQuitting()) {
+            event.preventDefault();
+            mainWindow.hide();
+
+        }
+        return false;
     });
     return mainWindow;
 }

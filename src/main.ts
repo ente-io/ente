@@ -16,7 +16,14 @@ import setupIpcComs from './ipcComms';
 let tray: Tray;
 let mainWindow: BrowserWindow;
 
+let appIsQuitting = false;
 
+export const isAppQuitting = (): boolean => {
+    return appIsQuitting;
+}
+export const setIsAppQuitting = (value: boolean): void => {
+    appIsQuitting = value;
+}
 
 // Disable error dialogs by overriding
 dialog.showErrorBox = function (title, content) {

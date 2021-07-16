@@ -1,4 +1,5 @@
 import { Menu, app, shell, BrowserWindow } from "electron";
+import { setIsAppQuitting } from "./main";
 
 export function buildContextMenu(mainWindow: BrowserWindow, args: any = {}): Menu {
     const { export_progress, retry_export, paused } = args
@@ -48,6 +49,7 @@ export function buildContextMenu(mainWindow: BrowserWindow, args: any = {}): Men
         {
             label: 'quit ente',
             click: function () {
+                setIsAppQuitting(true)
                 app.quit();
             },
         },
@@ -69,13 +71,8 @@ export function buildMenuBar(mainWindow: BrowserWindow): Menu {
             label: name,
             submenu: Menu.buildFromTemplate([
                 {
-                    label: 'About ' + name,
+                    label: 'about ' + name,
                     role: 'about'
-                },
-                {
-                    label: 'Quit',
-                    accelerator: 'Command+Q',
-                    click() { app.quit(); }
                 },
             ])
         }]),
@@ -92,6 +89,11 @@ export function buildMenuBar(mainWindow: BrowserWindow): Menu {
                     click: () => shell.openExternal('mailto:contact@ente.io'),
                 },
             ]),
+        },
+        {
+            label: 'quit',
+            accelerator: 'CommandOrControl+Q',
+            click() { app.quit(); }
         },
     ]);
 }
