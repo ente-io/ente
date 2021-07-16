@@ -182,8 +182,6 @@ export default function Collections(props: CollectionProps) {
                                 placement="top"
                                 delay={{ show: 250, hide: 400 }}
                                 overlay={renderTooltip(item.id)}
-                                trigger="click"
-
                             >
                                 <Chip
 
