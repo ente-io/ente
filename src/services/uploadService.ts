@@ -123,6 +123,7 @@ export enum UPLOAD_STAGES {
     READING_GOOGLE_METADATA_FILES,
     UPLOADING,
     FINISH,
+    WAIT,
 }
 
 class UploadService {

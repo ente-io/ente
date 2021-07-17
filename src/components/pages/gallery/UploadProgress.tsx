@@ -45,7 +45,6 @@ export default function UploadProgress(props: Props) {
 
                 <h4 style={{ width: '100%' }}>
                     {props.uploadStage === UPLOAD_STAGES.UPLOADING ?
-                        props.fileCounter.total > 1 &&
                         constants.UPLOAD[props.uploadStage](
                             props.fileCounter,
                         ) :
@@ -59,13 +58,16 @@ export default function UploadProgress(props: Props) {
                             {constants.FAILED_UPLOAD_FILE_LIST}
                         </Alert>
                     )
-                ) : (
-                    <ProgressBar
-                        now={props.now}
-                        animated
-                        variant="upload-progress-bar"
-                    />
-                )}
+                ) :
+                    (props.uploadStage === UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES ||
+                        props.uploadStage === UPLOAD_STAGES.UPLOADING) &&
+                    (
+                        < ProgressBar
+                            now={props.now}
+                            animated
+                            variant="upload-progress-bar"
+                        />
+                    )}
                 {fileProgressStatuses?.length > 0 && (
                     <ul
                         style={{

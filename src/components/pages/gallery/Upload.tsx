@@ -15,7 +15,7 @@ import { logError } from 'utils/sentry';
 import { sortFilesIntoCollections } from 'utils/file';
 
 interface Props {
-    syncWithRemote: () => Promise<void>;
+    syncWithRemote: (force?: boolean) => Promise<void>;
     setBannerMessage;
     acceptedFiles: globalThis.File[];
     existingFiles: File[];
@@ -198,6 +198,8 @@ export default function Upload(props: Props) {
         try {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
+            setUploadStage(UPLOAD_STAGES.WAIT);
+            await props.syncWithRemote(true);
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
                 sortFilesIntoCollections(props.existingFiles),
@@ -222,6 +224,9 @@ export default function Upload(props: Props) {
     ) => {
         try {
             props.setUploadInProgress(true);
+            setFileProgress(null);
+            setUploadStage(UPLOAD_STAGES.WAIT);
+            await props.syncWithRemote(true);
             await UploadService.retryFailedFiles();
         } catch (err) {
             props.setBannerMessage(err.message);
