@@ -1,4 +1,4 @@
-import { BrowserWindow, nativeImage } from 'electron';
+import { app, BrowserWindow, nativeImage } from 'electron';
 import * as isDev from 'electron-is-dev';
 import * as path from 'path';
 import { isAppQuitting } from '../main';
@@ -55,7 +55,8 @@ export function createWindow(): BrowserWindow {
         if (!isAppQuitting()) {
             event.preventDefault();
             mainWindow.hide();
-
+            const isMac = process.platform === 'darwin'
+            isMac && app.dock.hide();
         }
         return false;
     });

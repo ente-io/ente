@@ -50,6 +50,8 @@ export function buildContextMenu(mainWindow: BrowserWindow, args: any = {}): Men
             label: 'open ente',
             click: function () {
                 mainWindow.show();
+                const isMac = process.platform === 'darwin'
+                isMac && app.dock.show();
             },
         },
         {
