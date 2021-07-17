@@ -1,4 +1,4 @@
-import { Menu, app, shell, BrowserWindow } from "electron";
+import { Menu, app, shell, BrowserWindow, globalShortcut } from "electron";
 import { setIsAppQuitting } from "../main";
 
 export function buildContextMenu(mainWindow: BrowserWindow, args: any = {}): Menu {
@@ -96,4 +96,10 @@ export function buildMenuBar(mainWindow: BrowserWindow): Menu {
             click() { app.quit(); }
         },
     ]);
+}
+
+export function configureGlobalShortcuts(mainWindow: BrowserWindow): void {
+    globalShortcut.register('CommandOrControl+R', mainWindow.reload)
+    globalShortcut.register('Shift+CommandOrControl+R', mainWindow.webContents.reloadIgnoringCache)
+    globalShortcut.register("Shift+CommandOrControl+I", mainWindow.webContents.openDevTools)
 }

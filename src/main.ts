@@ -11,7 +11,7 @@ import * as isDev from 'electron-is-dev';
 import AppUpdater from './utils/appUpdater';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
-import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
+import { buildContextMenu, buildMenuBar, configureGlobalShortcuts } from './utils/menuUtil';
 
 let tray: Tray;
 let mainWindow: BrowserWindow;
@@ -52,18 +52,21 @@ else {
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
     app.on('ready', () => {
-
         if (!isDev) {
             AppUpdater.checkForUpdate();
         }
         mainWindow = createWindow();
+
         Menu.setApplicationMenu(buildMenuBar(mainWindow))
+
+        configureGlobalShortcuts(mainWindow);
 
         app.on('activate', function () {
             // On macOS it's common to re-create a window in the app when the
             // dock icon is clicked and there are no other windows open.
             if (BrowserWindow.getAllWindows().length === 0) createWindow();
         });
+
         const trayImgPath = isDev
             ? 'build/taskbar-icon.png'
             : path.join(process.resourcesPath, 'taskbar-icon.png');
@@ -71,6 +74,7 @@ else {
         tray = new Tray(trayIcon);
         tray.setToolTip('ente');
         tray.setContextMenu(buildContextMenu(mainWindow));
+
         setupIpcComs(tray, mainWindow);
     });
 
