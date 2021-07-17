@@ -74,8 +74,7 @@ export function buildMenuBar(): Menu {
     },
     {
         label: 'support',
-        toolTip: 'ente.io web client ',
-        click: () => shell.openExternal('mailto:contact@ente.io'),
+        click: () => shell.openExternal('mailto:support@ente.io'),
     },
     {
         label: 'quit',
@@ -87,7 +86,7 @@ export function buildMenuBar(): Menu {
         {
             label: app.name,
             submenu: [
-                { role: 'about' }
+                { label: "about", role: 'about' }
                 , ...commonMenuItem]
         },
     ]) : Menu.buildFromTemplate([{
