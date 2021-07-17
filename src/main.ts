@@ -18,11 +18,20 @@ let mainWindow: BrowserWindow;
 
 let appIsQuitting = false;
 
+let updateIsAvailable = false;
+
 export const isAppQuitting = (): boolean => {
     return appIsQuitting;
 }
 export const setIsAppQuitting = (value: boolean): void => {
     appIsQuitting = value;
+}
+
+export const isUpdateAvailable = (): boolean => {
+    return updateIsAvailable;
+}
+export const setIsUpdateAvailable = (value: boolean): void => {
+    updateIsAvailable = value;
 }
 
 // Disable error dialogs by overriding
@@ -52,9 +61,7 @@ else {
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
     app.on('ready', () => {
-        if (!isDev) {
-            AppUpdater.checkForUpdate();
-        }
+        setIsUpdateAvailable(false)
         mainWindow = createWindow();
 
         Menu.setApplicationMenu(buildMenuBar())
@@ -76,6 +83,9 @@ else {
         tray.setContextMenu(buildContextMenu(mainWindow));
 
         setupIpcComs(tray, mainWindow);
+        if (!isDev) {
+            AppUpdater.checkForUpdate(tray, mainWindow);
+        }
     });
 
 }

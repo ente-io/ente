@@ -1,9 +1,15 @@
 import { Menu, app, shell, BrowserWindow, globalShortcut } from "electron";
-import { setIsAppQuitting } from "../main";
+import { isUpdateAvailable, setIsAppQuitting } from "../main";
+import { showUpdateDialog } from "./appUpdater";
 
 export function buildContextMenu(mainWindow: BrowserWindow, args: any = {}): Menu {
     const { export_progress, retry_export, paused } = args
     const contextMenu = Menu.buildFromTemplate([
+        ...(isUpdateAvailable() && [{
+            label: 'update available',
+            click: () => showUpdateDialog()
+        }]),
+        { type: 'separator' },
         ...(export_progress
             ? [
                 {
