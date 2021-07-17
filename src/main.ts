@@ -57,7 +57,7 @@ else {
         }
         mainWindow = createWindow();
 
-        Menu.setApplicationMenu(buildMenuBar(mainWindow))
+        Menu.setApplicationMenu(buildMenuBar())
 
         configureGlobalShortcuts(mainWindow);
 
