@@ -166,25 +166,9 @@ export default function Gallery() {
             setIsFirstLogin(false);
             const files = await getLocalFiles();
             const collections = await getLocalCollections();
-            const nonEmptyCollections = getNonEmptyCollections(
-                collections,
-                files,
-            );
-            const collectionsAndTheirLatestFile = await getCollectionsAndTheirLatestFile(
-                nonEmptyCollections,
-                files,
-            );
-            const collectionWiseFiles = sortFilesIntoCollections(files);
-            const collectionFilesCount = new Map<number, number>();
-            for (const [id, files] of collectionWiseFiles) {
-                collectionFilesCount.set(id, files.length);
-            }
             setFiles(files);
-            setCollections(nonEmptyCollections);
-            setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
-            setCollectionFilesCount(collectionFilesCount);
-            const favItemIds = await getFavItemIds(files);
-            setFavItemIds(favItemIds);
+            setCollections(collections);
+            await initDerivativeState(collections, files);
             await checkSubscriptionPurchase(setDialogMessage, router);
             await syncWithRemote(true);
             setIsFirstLoad(false);
@@ -223,18 +207,7 @@ export default function Gallery() {
             const collections = await syncCollections();
             setCollections(collections);
             const { files } = await syncFiles(collections, setFiles);
-            const nonEmptyCollections = getNonEmptyCollections(
-                collections,
-                files,
-            );
-            const collectionAndItsLatestFile = await getCollectionsAndTheirLatestFile(
-                nonEmptyCollections,
-                files,
-            );
-            const favItemIds = await getFavItemIds(files);
-            setCollections(nonEmptyCollections);
-            setCollectionsAndTheirLatestFile(collectionAndItsLatestFile);
-            setFavItemIds(favItemIds);
+            await initDerivativeState(collections, files);
         } catch (e) {
             switch (e.message) {
                 case errorCodes.ERR_SESSION_EXPIRED:
@@ -264,6 +237,27 @@ export default function Gallery() {
             setResync(false);
             syncWithRemote();
         }
+    };
+
+    const initDerivativeState = async (collections, files) => {
+        const nonEmptyCollections = getNonEmptyCollections(
+            collections,
+            files,
+        );
+        const collectionsAndTheirLatestFile = await getCollectionsAndTheirLatestFile(
+            nonEmptyCollections,
+            files,
+        );
+        const collectionWiseFiles = sortFilesIntoCollections(files);
+        const collectionFilesCount = new Map<number, number>();
+        for (const [id, files] of collectionWiseFiles) {
+            collectionFilesCount.set(id, files.length);
+        }
+        setCollections(nonEmptyCollections);
+        setCollectionsAndTheirLatestFile(collectionsAndTheirLatestFile);
+        setCollectionFilesCount(collectionFilesCount);
+        const favItemIds = await getFavItemIds(files);
+        setFavItemIds(favItemIds);
     };
 
     const clearSelection = function () {
