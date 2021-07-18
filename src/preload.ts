@@ -4,12 +4,8 @@ import * as electron from 'electron';
 
 const { ipcRenderer } = electron;
 
-const EXPORT_FILE_NAME = 'export.txt';
+const EXPORT_FILE_NAME = 'export_status.json';
 
-enum RecordType {
-    SUCCESS = "success",
-    FAILED = "failed"
-}
 const responseToReadable = (fileStream: any) => {
     const reader = fileStream.getReader();
     const rs = new Readable();
@@ -94,7 +90,7 @@ const getExportRecord = async (dir: string) => {
 };
 
 const setExportRecord = async (dir: string, data: string) => {
-
+    
     const filepath = `${dir}/${EXPORT_FILE_NAME}`;
     await fs.writeFile(filepath, data);
 };
