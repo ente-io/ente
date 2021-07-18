@@ -1,6 +1,9 @@
-import { Menu, app, shell, BrowserWindow, globalShortcut } from "electron";
+import { Menu, app, shell, BrowserWindow, MenuItemConstructorOptions } from "electron";
 import { isUpdateAvailable, setIsAppQuitting } from "../main";
 import { showUpdateDialog } from "./appUpdater";
+
+
+const isMac = process.platform === 'darwin'
 
 export function buildContextMenu(mainWindow: BrowserWindow, args: any = {}): Menu {
     const { export_progress, retry_export, paused } = args
@@ -66,36 +69,87 @@ export function buildContextMenu(mainWindow: BrowserWindow, args: any = {}): Men
 }
 
 export function buildMenuBar(): Menu {
-    const isMac = process.platform === 'darwin'
-
-    const commonMenuItem = [{
-        label: 'faq',
-        click: () => shell.openExternal('https://ente.io/faq/'),
-    },
-    {
-        label: 'support',
-        click: () => shell.openExternal('mailto:support@ente.io'),
-    },
-    {
-        label: 'quit',
-        accelerator: 'CommandOrControl+Q',
-        click() { setIsAppQuitting(true); app.quit(); }
-    }]
-
-    return isMac ? Menu.buildFromTemplate([
+    const template: MenuItemConstructorOptions[]=[
         {
-            label: app.name,
-            submenu: [
-                { label: "about", role: 'about' }
-                , ...commonMenuItem]
+            label:app.name,
+            submenu:[...(isMac &&[
+                { 
+                 label: "about" ,
+                 role: 'about'
+                }]) as MenuItemConstructorOptions[],
+                {
+                    label: 'faq',
+                    click: () => shell.openExternal('https://ente.io/faq/'),
+                },
+                {
+                    label: 'support',
+                    click: () => shell.openExternal('mailto:support@ente.io'),
+                },
+                {
+                    label: 'quit',
+                    accelerator: 'CommandOrControl+Q',
+                    click() { setIsAppQuitting(true); app.quit(); }
+                }
+            ]
         },
-    ]) : Menu.buildFromTemplate([{
-        label: app.getName(),
-        submenu: commonMenuItem,
-    }]);
-}
+        {
+            label: 'edit',
+            submenu: [
+              { role: 'undo',label:"undo" },
+              { role: 'redo' ,label:"redo"},
+              { type: 'separator'},
+              { role: 'cut' ,label:"cut"},
+              { role: 'copy' ,label:"copy"},
+              { role: 'paste' ,label:"paste"},
+              ...(isMac ?[
+                { role: 'pasteAndMatchStyle' ,label:"paste and match style"},
+                { role: 'delete' ,label:"delete"},
+                { role: 'selectAll' ,label:"select all"},
+                { type: 'separator'},
+                {
+                  label: 'speech',
+                  submenu: [
+                    { role: 'startSpeaking' ,label:"start speaking"},
+                    { role: 'stopSpeaking' ,label:"stop speaking"}
+                  ]
+                }
+              ] : [
+                { type: 'separator' },
+                { role: 'selectAll',label:"select all" }
+              ])as MenuItemConstructorOptions[]
+            ]
+        },
+          // { role: 'viewMenu' }
+          {
+            label: 'view',
+            submenu: [
+              { role: 'reload',label:"reload" },
+              { role: 'forceReload',label:"force reload" },
+              { role: 'toggleDevTools' ,label:"toggle devTools"},
+              { type: 'separator' },
+              { role: 'resetZoom',label:"reset zoom" },
+              { role: 'zoomIn',label:"zoom in" },
+              { role: 'zoomOut' ,label:"zoom out"},
+              { type: 'separator' },
+              { role: 'togglefullscreen' ,label:"toggle fullscreen"}
+            ]
+          },
+          // { role: 'windowMenu' }
+          {
+            label: 'window',
+            submenu: [
+              { role: 'minimize' ,label:"minimize"},
+              ...(isMac ? [
+                { type: 'separator'},
+                { role: 'front',label:"front" },
+                { type: 'separator' },
+                { role: 'window' ,label:"window"}
+              ] : [
+                { role: 'close' ,label:"close"}
+              ])as MenuItemConstructorOptions[]
+            ]
+          },
 
-export function configureGlobalShortcuts(mainWindow: BrowserWindow): void {
-    globalShortcut.register('CommandOrControl+R', () => { mainWindow.reload() })
-    globalShortcut.register('Shift+CommandOrControl+R', () => { mainWindow.webContents.reloadIgnoringCache() })
+    ]
+    return Menu.buildFromTemplate(template)
 }

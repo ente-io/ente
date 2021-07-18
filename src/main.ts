@@ -11,7 +11,7 @@ import * as isDev from 'electron-is-dev';
 import AppUpdater from './utils/appUpdater';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
-import { buildContextMenu, buildMenuBar, configureGlobalShortcuts } from './utils/menuUtil';
+import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 
 let tray: Tray;
 let mainWindow: BrowserWindow;
@@ -66,7 +66,6 @@ else {
 
         Menu.setApplicationMenu(buildMenuBar())
 
-        configureGlobalShortcuts(mainWindow);
 
         app.on('activate', function () {
             // On macOS it's common to re-create a window in the app when the
