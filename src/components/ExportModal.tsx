@@ -26,7 +26,18 @@ const FolderIconWrapper = styled.div`
     &:hover{
         background-color:#444;
     }
-    `;
+`;
+
+const ExportFolderPathContainer =styled.span`
+    white-space: nowrap;                   
+    overflow: hidden;
+    text-overflow: ellipsis;  
+    width: 200px;
+    
+    /* Beginning of string */
+    direction: rtl;
+    text-align: left;
+`;
 
 interface Props {
     show: boolean
@@ -267,9 +278,11 @@ export default function ExportModal(props: Props) {
                         {!exportFolder ?
                             (<Button variant={'outline-success'} size={'sm'} onClick={selectExportDirectory}>{constants.SELECT_FOLDER}</Button>) :
                             (<>
-                                <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}>
+                                {/* <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}> */}
+                                <ExportFolderPathContainer>
                                     {exportFolder}
-                                </span>
+                                </ExportFolderPathContainer>
+                                {/* </span> */}
                                 {(exportStage === ExportStage.FINISHED || exportStage === ExportStage.INIT) && (
                                     <FolderIconWrapper onClick={selectExportDirectory} >
                                         <FolderIcon />
