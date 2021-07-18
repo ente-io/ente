@@ -13,6 +13,7 @@ class AppUpdater {
   async checkForUpdate(tray: Tray, mainWindow: BrowserWindow) {
     await autoUpdater.checkForUpdatesAndNotify()
     autoUpdater.on('update-downloaded', () => {
+      showUpdateDialog();
       setIsUpdateAvailable(true);
       tray.setContextMenu(buildContextMenu(mainWindow));
     })
@@ -22,12 +23,12 @@ class AppUpdater {
 export default new AppUpdater();
 
 
-export const showUpdateDialog = () => {
+export const showUpdateDialog = ():void => {
   dialog.showMessageBox({
     type: 'info',
-    title: 'Install Updates',
-    message: 'an update has been downloaded, ente will now restart',
-    buttons: ['No', 'Sure']
+    title: 'install updates',
+    message: 'restart to update to the latest version of ente',
+    buttons: ['later', 'restart now']
   }).then((buttonIndex) => {
     if (buttonIndex.response === 1) {
       setIsAppQuitting(true); autoUpdater.quitAndInstall()
