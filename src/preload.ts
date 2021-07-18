@@ -4,7 +4,6 @@ import * as electron from 'electron';
 
 const { ipcRenderer } = electron;
 
-const EXPORT_FILE_NAME = 'export_status.json';
 
 const responseToReadable = (fileStream: any) => {
     const reader = fileStream.getReader();
@@ -78,9 +77,9 @@ const reloadWindow = () => {
     ipcRenderer.send('reload-window');
 };
 
-const getExportRecord = async (dir: string) => {
+const getExportRecord = async (filePath: string) => {
     try {
-        const filepath = `${dir}/${EXPORT_FILE_NAME}`;
+        const filepath = `${filePath}`;
         const recordFile = await fs.readFile(filepath, 'utf-8');
         return recordFile;
     } catch (e) {
@@ -89,9 +88,9 @@ const getExportRecord = async (dir: string) => {
     }
 };
 
-const setExportRecord = async (dir: string, data: string) => {
+const setExportRecord = async (filePath: string, data: string) => {
     
-    const filepath = `${dir}/${EXPORT_FILE_NAME}`;
+    const filepath = `${filePath}`;
     await fs.writeFile(filepath, data);
 };
 
