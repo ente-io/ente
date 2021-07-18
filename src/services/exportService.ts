@@ -51,6 +51,7 @@ export enum ExportType {
 }
 
 const ExportRecordFileName='export_status.json';
+const MetadataFolderName='metadata';
 
 class ExportService {
     ElectronAPIs: any;
@@ -127,6 +128,9 @@ class ExportService {
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
                     collectionFolderPath,
                 );
+                await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
+                    `${collectionFolderPath}/${MetadataFolderName}`,
+                );
                 collectionIDMap.set(collection.id, collectionFolderPath);
             }
             for (const [index, file] of files.entries()) {
@@ -140,12 +144,9 @@ class ExportService {
                     }
                     break;
                 }
-                const uid = `${file.id}_${this.sanitizeName(
-                    file.metadata.title,
-                )}`;
-                const filePath = `${collectionIDMap.get(file.collectionID)}/${uid}`;
+                const collectionPath = collectionIDMap.get(file.collectionID);
                 try {
-                    await this.downloadAndSave(file, filePath);
+                    await this.downloadAndSave(file, collectionPath);
                     await this.addFileExportRecord(dir, file, RecordType.SUCCESS);
                 } catch (e) {
                     await this.addFileExportRecord(dir, file, RecordType.FAILED);
@@ -249,11 +250,14 @@ class ExportService {
         }
     }
 
-    async downloadAndSave(file: File, path) {
+    async downloadAndSave(file: File, collectionPath:string) {
+        const uid = `${file.id}_${this.sanitizeName(
+            file.metadata.title,
+        )}`;
         const fileStream = await retryPromise(downloadManager.downloadFile(file));
-        this.ElectronAPIs.saveStreamToDisk(path, fileStream);
+        this.ElectronAPIs.saveStreamToDisk(`${collectionPath}/${uid}`, fileStream);
         this.ElectronAPIs.saveFileToDisk(
-            `${path}.json`,
+            `${collectionPath}/${MetadataFolderName}/${uid}.json`,
             JSON.stringify(file.metadata, null, 2),
         );
     }

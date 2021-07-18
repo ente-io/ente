@@ -88,7 +88,6 @@ export default function ExportModal(props: Props) {
                     updateExportProgress({ current: exportedFileCnt + failedFilesCnt, total: syncedFilesCnt });
                     const exportFileUIDs = new Set([...exportRecord.exportedFiles, ...exportRecord.failedFiles]);
                     const unExportedFiles = localFiles.filter((file) => !exportFileUIDs.has(getFileUID(file)));
-                    console.log(exportedFileCnt + failedFilesCnt + unExportedFiles.length, syncedFilesCnt);
                     exportService.addFilesQueuedRecord(exportFolder, unExportedFiles);
                     updateExportStage(ExportStage.PAUSED);
                 }
