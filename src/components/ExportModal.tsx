@@ -266,7 +266,7 @@ export default function ExportModal(props: Props) {
                     <Label width="40%">{constants.DESTINATION}</Label>
                     <Value width="60%">
                         {!exportFolder ?
-                            (<Button variant={'outline-success'} onClick={selectExportDirectory}>{constants.SELECT_FOLDER}</Button>) :
+                            (<Button variant={'outline-success'} size={'sm'} onClick={selectExportDirectory}>{constants.SELECT_FOLDER}</Button>) :
                             (<>
                                 <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}>
                                     {exportFolder}
