@@ -260,7 +260,7 @@ const englishConstants = {
         <p>
             you have used {usage}
             {' '}
-            GB out of your {quota}
+            out of your {quota}
             {' '}
             GB quota
         </p>

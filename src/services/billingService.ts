@@ -2,7 +2,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { getStripePublishableKey, getToken } from 'utils/common/key';
 import { checkConnectivity, runningInBrowser } from 'utils/common/';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
-import { convertBytesToGBs } from 'utils/billingUtil';
+import { convertToHumanReadable } from 'utils/billingUtil';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
 import HTTPService from './HTTPService';
@@ -242,7 +242,7 @@ class billingService {
                     'X-Auth-Token': getToken(),
                 },
             );
-            return convertBytesToGBs(response.data.usage);
+            return convertToHumanReadable(response.data.usage);
         } catch (e) {
             logError(e, 'error getting usage');
         }
