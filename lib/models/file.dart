@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:path/path.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
@@ -68,7 +68,7 @@ class File {
     localID = metadata["localID"];
     title = metadata["title"];
     deviceFolder = metadata["deviceFolder"];
-    creationTime = metadata["creationTime"];
+    creationTime = metadata["creationTime"] ?? 0;
     modificationTime = metadata["modificationTime"] ?? creationTime;
     final latitude = double.tryParse(metadata["latitude"].toString());
     final longitude = double.tryParse(metadata["longitude"].toString());
