@@ -26,7 +26,7 @@ export default new AppUpdater();
 export const showUpdateDialog = ():void => {
   dialog.showMessageBox({
     type: 'info',
-    title: 'install updates',
+    title: 'install update',
     message: 'restart to update to the latest version of ente',
     buttons: ['later', 'restart now']
   }).then((buttonIndex) => {
