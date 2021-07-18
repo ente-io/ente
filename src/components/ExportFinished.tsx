@@ -32,12 +32,13 @@ export default function ExportFinished(props: Props) {
                     <Label width="60%">{constants.SUCCESSFULLY_EXPORTED_FILES}</Label>
                     <Value width="35%"><ComfySpan>{props.exportStats.success} / {totalFiles}</ComfySpan></Value>
                 </Row>
+                {props.exportStats.failed>0 &&
                 <Row>
                     <Label width="60%">{constants.FAILED_EXPORTED_FILES}</Label>
                     <Value width="35%">
                         <ComfySpan>{props.exportStats.failed} / {totalFiles}</ComfySpan>
                     </Value>
-                </Row>
+                </Row>}
             </div>
             <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around' }}>
                 <Button block variant={'outline-secondary'} onClick={props.onHide}>{constants.CLOSE}</Button>

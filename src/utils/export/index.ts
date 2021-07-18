@@ -2,7 +2,7 @@ import { ExportRecord } from 'services/exportService';
 import { File } from 'services/fileService';
 
 
-export const getFileUID = (file: File) => `${file.id}_${file.collectionID}`;
+export const getFileUID = (file: File) => `${file.id}_${file.collectionID}_${file.updationTime}`;
 
 
 export const getExportPendingFiles = async (allFiles: File[], exportRecord: ExportRecord) => {

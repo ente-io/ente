@@ -26,7 +26,18 @@ const FolderIconWrapper = styled.div`
     &:hover{
         background-color:#444;
     }
-    `;
+`;
+
+const ExportFolderPathContainer =styled.span`
+    white-space: nowrap;                   
+    overflow: hidden;
+    text-overflow: ellipsis;  
+    width: 200px;
+    
+    /* Beginning of string */
+    direction: rtl;
+    text-align: left;
+`;
 
 interface Props {
     show: boolean
@@ -88,7 +99,6 @@ export default function ExportModal(props: Props) {
                     updateExportProgress({ current: exportedFileCnt + failedFilesCnt, total: syncedFilesCnt });
                     const exportFileUIDs = new Set([...exportRecord.exportedFiles, ...exportRecord.failedFiles]);
                     const unExportedFiles = localFiles.filter((file) => !exportFileUIDs.has(getFileUID(file)));
-                    console.log(exportedFileCnt + failedFilesCnt + unExportedFiles.length, syncedFilesCnt);
                     exportService.addFilesQueuedRecord(exportFolder, unExportedFiles);
                     updateExportStage(ExportStage.PAUSED);
                 }
@@ -266,11 +276,13 @@ export default function ExportModal(props: Props) {
                     <Label width="40%">{constants.DESTINATION}</Label>
                     <Value width="60%">
                         {!exportFolder ?
-                            (<Button variant={'outline-success'} onClick={selectExportDirectory}>{constants.SELECT_FOLDER}</Button>) :
+                            (<Button variant={'outline-success'} size={'sm'} onClick={selectExportDirectory}>{constants.SELECT_FOLDER}</Button>) :
                             (<>
-                                <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}>
+                                {/* <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}> */}
+                                <ExportFolderPathContainer>
                                     {exportFolder}
-                                </span>
+                                </ExportFolderPathContainer>
+                                {/* </span> */}
                                 {(exportStage === ExportStage.FINISHED || exportStage === ExportStage.INIT) && (
                                     <FolderIconWrapper onClick={selectExportDirectory} >
                                         <FolderIcon />

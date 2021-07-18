@@ -260,7 +260,7 @@ const englishConstants = {
         <p>
             you have used {usage}
             {' '}
-            GB out of your {quota}
+            out of your {quota}
             {' '}
             GB quota
         </p>
@@ -439,10 +439,10 @@ const englishConstants = {
     RESUME: 'resume',
     MINIMIZE: 'minimize',
     LAST_EXPORT_TIME: 'last export time',
-    SUCCESSFULLY_EXPORTED_FILES: 'successfully exported files',
-    FAILED_EXPORTED_FILES: 'failed file export',
-    EXPORT_AGAIN: 'export new data ',
-    RETRY_EXPORT_: 'retry failed files ',
+    SUCCESSFULLY_EXPORTED_FILES: 'successful exports',
+    FAILED_EXPORTED_FILES: 'failed exports',
+    EXPORT_AGAIN: 'resync',
+    RETRY_EXPORT_: 'retry failed exports',
     LOCAL_STORAGE_NOT_ACCESSIBLE: 'local storage not accessible',
     LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE: 'your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
     RETRY: 'retry',

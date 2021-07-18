@@ -16,6 +16,14 @@ const STRIPE = 'stripe';
 export function convertBytesToGBs(bytes, precision?): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
 }
+
+export function convertToHumanReadable(bytes:number, precision=2): string {
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    return (bytes / Math.pow(1024, i)).toFixed(precision)+ ' ' + sizes[i];
+}
+
 export function hasPaidSubscription(subscription?: Subscription) {
     subscription = subscription ?? getUserSubscription();
     return (
