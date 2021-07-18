@@ -49,6 +49,9 @@ export enum ExportType {
     PENDING,
     RETRY_FAILED
 }
+
+const ExportRecordFileName='export_status.json';
+
 class ExportService {
     ElectronAPIs: any;
 
@@ -222,7 +225,7 @@ class ExportService {
                 }
                 const exportRecord = await this.getExportRecord(folder);
                 const newRecord = { ...exportRecord, ...newData };
-                await this.ElectronAPIs.setExportRecord(folder, JSON.stringify(newRecord, null, 2));
+                await this.ElectronAPIs.setExportRecord(`${folder}/${ExportRecordFileName}`, JSON.stringify(newRecord, null, 2));
             } catch (e) {
                 logError(e, 'error updating Export Record');
             }
@@ -235,7 +238,7 @@ class ExportService {
             if (!folder) {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
             }
-            const recordFile = await this.ElectronAPIs.getExportRecord(folder);
+            const recordFile = await this.ElectronAPIs.getExportRecord(`${folder}/${ExportRecordFileName}`);
             if (recordFile) {
                 return JSON.parse(recordFile);
             } else {
