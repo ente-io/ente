@@ -87,7 +87,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     super.dispose();
     Future.delayed(Duration(milliseconds: 10), () {
       // Cancel request only if the widget has been unmounted
-      if (!mounted && widget.file.localID == null && !_hasLoadedThumbnail) {
+      if (!mounted && widget.file.isRemoteFile() && !_hasLoadedThumbnail) {
         removePendingGetThumbnailRequestIfAny(widget.file);
       }
     });
@@ -103,7 +103,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.file.localID == null) {
+    if (widget.file.isRemoteFile()) {
       _loadNetworkImage();
     } else {
       _loadLocalImage(context);

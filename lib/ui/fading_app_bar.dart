@@ -85,7 +85,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     actions.add(PopupMenuButton(
       itemBuilder: (context) {
         final List<PopupMenuItem> items = [];
-        if (widget.file.localID == null) {
+        if (widget.file.isRemoteFile()) {
           items.add(
             PopupMenuItem(
               value: 1,

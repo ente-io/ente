@@ -31,7 +31,7 @@ void preloadFile(ente.File file) {
 }
 
 Future<io.File> getFile(ente.File file) async {
-  if (file.localID == null) {
+  if (file.isRemoteFile()) {
     return getFileFromServer(file);
   } else {
     final cachedFile = FileLruCache.get(file);
@@ -45,7 +45,7 @@ Future<io.File> getFile(ente.File file) async {
 }
 
 void preloadThumbnail(ente.File file) {
-  if (file.localID == null) {
+  if (file.isRemoteFile()) {
     getThumbnailFromServer(file);
   } else {
     if (ThumbnailLruCache.get(file, THUMBNAIL_SMALL_SIZE) != null) {

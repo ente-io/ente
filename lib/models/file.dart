@@ -129,6 +129,10 @@ class File {
     }
   }
 
+  bool isRemoteFile() {
+    return localID == null && uploadedFileID != null;
+  }
+
   @override
   String toString() {
     return '''File(generatedId: $generatedID, uploadedFileId: $uploadedFileID, 

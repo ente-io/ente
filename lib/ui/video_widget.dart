@@ -41,7 +41,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.file.localID == null) {
+    if (widget.file.isRemoteFile()) {
       _loadNetworkVideo();
     } else {
       widget.file.getAsset().then((asset) async {
