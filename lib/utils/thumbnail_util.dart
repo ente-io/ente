@@ -20,14 +20,15 @@ import 'dart:io' as io;
 final _logger = Logger("ThumbnailUtil");
 final _map = LinkedHashMap<int, FileDownloadItem>();
 final _queue = Queue<int>();
-const int kMaximumConcurrentDownloads = 2500;
+const int kMaximumConcurrentDownloads = 500;
 
 class FileDownloadItem {
   final File file;
   final Completer<Uint8List> completer;
   final CancelToken cancelToken;
+  int counter = 0; // number of times file download was requested
 
-  FileDownloadItem(this.file, this.completer, this.cancelToken);
+  FileDownloadItem(this.file, this.completer, this.cancelToken, this.counter);
 }
 
 Future<Uint8List> getThumbnailFromServer(File file) async {
@@ -38,27 +39,33 @@ Future<Uint8List> getThumbnailFromServer(File file) async {
     return data;
   }
   if (!_map.containsKey(file.uploadedFileID)) {
-    if (_queue.length == kMaximumConcurrentDownloads) {
+    if (_queue.length > kMaximumConcurrentDownloads) {
       final id = _queue.removeFirst();
       final item = _map.remove(id);
       item.cancelToken.cancel();
       item.completer.completeError(RequestCancelledError());
     }
-    final item = FileDownloadItem(file, Completer<Uint8List>(), CancelToken());
+    final item =
+        FileDownloadItem(file, Completer<Uint8List>(), CancelToken(), 1);
     _map[file.uploadedFileID] = item;
     _queue.add(file.uploadedFileID);
     _downloadItem(item);
     return item.completer.future;
   } else {
+    _map[file.uploadedFileID].counter++;
     return _map[file.uploadedFileID].completer.future;
   }
 }
 
 void removePendingGetThumbnailRequestIfAny(File file) {
   if (_map.containsKey(file.uploadedFileID)) {
-    final item = _map.remove(file.uploadedFileID);
-    item.cancelToken.cancel();
-    _queue.removeWhere((element) => element == file.uploadedFileID);
+    final item = _map[file.uploadedFileID];
+    item.counter--;
+    if (item.counter <= 0) {
+      _map.remove(file.uploadedFileID);
+      item.cancelToken.cancel();
+      _queue.removeWhere((element) => element == file.uploadedFileID);
+    }
   }
 }
 
