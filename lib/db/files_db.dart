@@ -46,28 +46,35 @@ class FilesDB {
   static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static final columnMetadataDecryptionHeader = 'metadata_decryption_header';
 
-  static final intitialScript = [...createTable(table), ...addIndex()];
-  static final migrationScripts = [...alterDeviceFolderToAllowNULL()];
+  static final initializationScript = [...createTable(table), ...addIndex()];
+  static final migrationScripts = [
+    ...alterDeviceFolderToAllowNULL(),
+    ...alterTimestampColumnTypes(),
+  ];
 
   final dbConfig = MigrationConfig(
-      initializationScript: intitialScript, migrationScripts: migrationScripts);
+      initializationScript: initializationScript,
+      migrationScripts: migrationScripts);
   // make this a singleton class
   FilesDB._privateConstructor();
   static final FilesDB instance = FilesDB._privateConstructor();
 
   // only have a single app-wide reference to the database
   static Database _database;
+  static Future<Database> _dbFuture;
+
   Future<Database> get database async {
     if (_database != null) return _database;
     // lazily instantiate the db the first time it is accessed
-    _database = await _initDatabase();
-    return _database;
+    _dbFuture ??= _initDatabase();
+    return _dbFuture;
   }
 
   // this opens the database (and creates it if it doesn't exist)
-  _initDatabase() async {
+  Future<Database> _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
+    _logger.info("DB path " + path);
     return await openDatabaseWithMigration(path, dbConfig);
   }
 
@@ -105,8 +112,14 @@ class FilesDB {
     return [
       '''
         CREATE INDEX collection_id_index ON $table($columnCollectionID);
+      ''',
+      '''
         CREATE INDEX device_folder_index ON $table($columnDeviceFolder);
+      ''',
+      '''
         CREATE INDEX creation_time_index ON $table($columnCreationTime);
+      ''',
+      '''
         CREATE INDEX updation_time_index ON $table($columnUpdationTime);
       '''
     ];
@@ -125,6 +138,67 @@ class FilesDB {
         ALTER TABLE $tempTable 
         RENAME TO $table;
     '''
+    ];
+  }
+
+  static List<String> alterTimestampColumnTypes() {
+    return [
+      '''
+        DROP TABLE IF EXISTS $tempTable;
+      ''',
+      '''
+        CREATE TABLE $tempTable (
+          $columnGeneratedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          $columnLocalID TEXT,
+          $columnUploadedFileID INTEGER DEFAULT -1,
+          $columnOwnerID INTEGER,
+          $columnCollectionID INTEGER DEFAULT -1,
+          $columnTitle TEXT NOT NULL,
+          $columnDeviceFolder TEXT,
+          $columnLatitude REAL,
+          $columnLongitude REAL,
+          $columnFileType INTEGER,
+          $columnModificationTime INTEGER NOT NULL,
+          $columnEncryptedKey TEXT,
+          $columnKeyDecryptionNonce TEXT,
+          $columnFileDecryptionHeader TEXT,
+          $columnThumbnailDecryptionHeader TEXT,
+          $columnMetadataDecryptionHeader TEXT,
+          $columnCreationTime INTEGER NOT NULL,
+          $columnUpdationTime INTEGER,
+          UNIQUE($columnLocalID, $columnUploadedFileID, $columnCollectionID)
+        );
+      ''',
+      '''
+        INSERT INTO $tempTable
+        SELECT 
+          $columnGeneratedID,
+          $columnLocalID,
+          $columnUploadedFileID,
+          $columnOwnerID,
+          $columnCollectionID,
+          $columnTitle,
+          $columnDeviceFolder,
+          $columnLatitude,
+          $columnLongitude,
+          $columnFileType,
+          CAST($columnModificationTime AS INTEGER),
+          $columnEncryptedKey,
+          $columnKeyDecryptionNonce,
+          $columnFileDecryptionHeader,
+          $columnThumbnailDecryptionHeader,
+          $columnMetadataDecryptionHeader,
+          CAST($columnCreationTime AS INTEGER),
+          CAST($columnUpdationTime AS INTEGER)
+        FROM $table;
+      ''',
+      '''
+        DROP TABLE $table;
+      ''',
+      '''
+        ALTER TABLE $tempTable 
+        RENAME TO $table;
+      ''',
     ];
   }
 
@@ -208,7 +282,7 @@ class FilesDB {
         collectionID,
       ],
     );
-    final ids = Set<int>();
+    final ids = <int>{};
     for (final result in results) {
       ids.add(result[columnUploadedFileID]);
     }
@@ -223,8 +297,8 @@ class FilesDB {
       where:
           '$columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
     );
-    final localIDs = Set<String>();
-    final uploadedIDs = Set<int>();
+    final localIDs = <String>{};
+    final uploadedIDs = <int>{};
     for (final result in results) {
       localIDs.add(result[columnLocalID]);
       uploadedIDs.add(result[columnUploadedFileID]);
@@ -239,7 +313,7 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)',
       whereArgs: [startTime, endTime],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -256,7 +330,7 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
       whereArgs: [startTime, endTime],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -279,13 +353,13 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0 AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
       whereArgs: [startTime, endTime],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
     );
-    final uploadedFileIDs = Set<int>();
+    final uploadedFileIDs = <int>{};
     final files = _convertToFiles(results);
     final List<File> deduplicatedFiles = [];
     for (final file in files) {
@@ -307,7 +381,7 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnIsDeleted = 0',
+          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?',
       whereArgs: [collectionID, startTime, endTime],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -325,11 +399,11 @@ class FilesDB {
     final results = await db.query(
       table,
       where:
-          '$columnDeviceFolder = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnLocalID IS NOT NULL AND $columnIsDeleted = 0',
+          '$columnDeviceFolder = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnLocalID IS NOT NULL',
       whereArgs: [path, startTime, endTime],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      groupBy: '$columnLocalID',
+      groupBy: columnLocalID,
       limit: limit,
     );
     final files = _convertToFiles(results);
@@ -340,8 +414,7 @@ class FilesDB {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where:
-          '$columnLocalID IS NOT NULL AND $columnFileType = 1 AND $columnIsDeleted = 0',
+      where: '$columnLocalID IS NOT NULL AND $columnFileType = 1',
       orderBy: '$columnCreationTime DESC',
     );
     return _convertToFiles(results);
@@ -351,11 +424,10 @@ class FilesDB {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where:
-          '$columnLocalID IS NOT NULL AND $columnDeviceFolder = ? AND $columnIsDeleted = 0',
+      where: '$columnLocalID IS NOT NULL AND $columnDeviceFolder = ?',
       whereArgs: [path],
       orderBy: '$columnCreationTime DESC',
-      groupBy: '$columnLocalID',
+      groupBy: columnLocalID,
     );
     return _convertToFiles(results);
   }
@@ -376,26 +448,10 @@ class FilesDB {
     }
     final results = await db.query(
       table,
-      where: whereClause + " AND $columnIsDeleted = 0",
+      where: whereClause,
       orderBy: '$columnCreationTime ASC',
     );
     return _convertToFiles(results);
-  }
-
-  Future<List<int>> getDeletedFileIDs() async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      columns: [columnUploadedFileID],
-      distinct: true,
-      where: '$columnIsDeleted = 1',
-      orderBy: '$columnCreationTime DESC',
-    );
-    final result = List<int>();
-    for (final row in rows) {
-      result.add(row[columnUploadedFileID]);
-    }
-    return result;
   }
 
   Future<List<File>> getFilesToBeUploadedWithinFolders(
@@ -414,7 +470,7 @@ class FilesDB {
       where:
           '($columnUploadedFileID IS NULL OR $columnUploadedFileID IS -1) AND $columnDeviceFolder IN ($inParam)',
       orderBy: '$columnCreationTime DESC',
-      groupBy: '$columnLocalID',
+      groupBy: columnLocalID,
     );
     return _convertToFiles(results);
   }
@@ -426,7 +482,7 @@ class FilesDB {
       where:
           '($columnUploadedFileID IS NULL OR $columnUploadedFileID IS -1) AND $columnLocalID IS NOT NULL',
       orderBy: '$columnCreationTime DESC',
-      groupBy: '$columnLocalID',
+      groupBy: columnLocalID,
     );
     return _convertToFiles(results);
   }
@@ -438,7 +494,7 @@ class FilesDB {
       where:
           '($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1) AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID IS -1)',
       orderBy: '$columnCreationTime DESC',
-      groupBy: '$columnLocalID',
+      groupBy: columnLocalID,
     );
     return _convertToFiles(results);
   }
@@ -449,11 +505,11 @@ class FilesDB {
       table,
       columns: [columnUploadedFileID],
       where:
-          '($columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) AND $columnUpdationTime IS NULL AND $columnIsDeleted = 0)',
+          '($columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) AND $columnUpdationTime IS NULL)',
       orderBy: '$columnCreationTime DESC',
       distinct: true,
     );
-    final uploadedFileIDs = List<int>();
+    final uploadedFileIDs = <int>[];
     for (final row in rows) {
       uploadedFileIDs.add(row[columnUploadedFileID]);
     }
@@ -484,7 +540,7 @@ class FilesDB {
       distinct: true,
       where: '$columnLocalID IS NOT NULL',
     );
-    final result = Set<String>();
+    final result = <String>{};
     for (final row in rows) {
       result.add(row[columnLocalID]);
     }
@@ -497,7 +553,7 @@ class FilesDB {
       table,
       columns: [columnUploadedFileID],
       where:
-          '($columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) AND $columnUpdationTime IS NOT NULL AND $columnIsDeleted = 0)',
+          '($columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) AND $columnUpdationTime IS NOT NULL)',
       distinct: true,
     );
     return rows.length;
@@ -666,7 +722,7 @@ class FilesDB {
     ''');
     final files = _convertToFiles(rows);
     // TODO: Do this de-duplication within the SQL Query
-    final folderMap = Map<String, File>();
+    final folderMap = <String, File>{};
     for (final file in files) {
       if (folderMap.containsKey(file.deviceFolder)) {
         if (folderMap[file.deviceFolder].updationTime < file.updationTime) {
@@ -695,7 +751,7 @@ class FilesDB {
     ''');
     final files = _convertToFiles(rows);
     // TODO: Do this de-duplication within the SQL Query
-    final collectionMap = Map<int, File>();
+    final collectionMap = <int, File>{};
     for (final file in files) {
       if (collectionMap.containsKey(file.collectionID)) {
         if (collectionMap[file.collectionID].updationTime < file.updationTime) {
@@ -711,7 +767,7 @@ class FilesDB {
     final db = await instance.database;
     final rows = await db.query(
       table,
-      where: '$columnCollectionID = ? AND $columnIsDeleted = 0',
+      where: '$columnCollectionID = ?',
       whereArgs: [collectionID],
       orderBy: '$columnUpdationTime DESC',
       limit: 1,
@@ -731,7 +787,7 @@ class FilesDB {
       WHERE $columnLocalID IS NOT NULL
       GROUP BY $columnDeviceFolder
     ''');
-    final result = Map<String, int>();
+    final result = <String, int>{};
     for (final row in rows) {
       result[row[columnDeviceFolder]] = row["count"];
     }
@@ -759,7 +815,7 @@ class FilesDB {
   }
 
   Map<String, dynamic> _getRowForFile(File file) {
-    final row = new Map<String, dynamic>();
+    final row = <String, dynamic>{};
     if (file.generatedID != null) {
       row[columnGeneratedID] = file.generatedID;
     }
@@ -795,7 +851,7 @@ class FilesDB {
   }
 
   Map<String, dynamic> _getRowForFileWithoutCollection(File file) {
-    final row = new Map<String, dynamic>();
+    final row = <String, dynamic>{};
     row[columnLocalID] = file.localID;
     row[columnUploadedFileID] = file.uploadedFileID ?? -1;
     row[columnOwnerID] = file.ownerID;
@@ -839,11 +895,9 @@ class FilesDB {
       file.location = Location(row[columnLatitude], row[columnLongitude]);
     }
     file.fileType = getFileType(row[columnFileType]);
-    file.creationTime = int.parse(row[columnCreationTime]);
-    file.modificationTime = int.parse(row[columnModificationTime]);
-    file.updationTime = row[columnUpdationTime] == null
-        ? -1
-        : int.parse(row[columnUpdationTime]);
+    file.creationTime = row[columnCreationTime];
+    file.modificationTime = row[columnModificationTime];
+    file.updationTime = row[columnUpdationTime] ?? -1;
     file.encryptedKey = row[columnEncryptedKey];
     file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
     file.fileDecryptionHeader = row[columnFileDecryptionHeader];
