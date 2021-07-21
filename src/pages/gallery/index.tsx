@@ -145,8 +145,8 @@ export default function Gallery() {
     const loadingBar = useRef(null);
     const [searchMode, setSearchMode] = useState(false);
     const [searchStats, setSearchStats] = useState(null);
-    const [syncInProgress, setSyncInProgress] = useState(true);
-    const [resync, setResync] = useState(false);
+    const syncInProgress = useRef(true);
+    const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
     const appContext = useContext(AppContext);
     const [collectionFilesCount, setCollectionFilesCount] = useState<Map<number, number>>();
@@ -191,11 +191,11 @@ export default function Gallery() {
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
 
     const syncWithRemote = async (force = false) => {
-        if (syncInProgress && !force) {
-            setResync(true);
+        if (syncInProgress.current && !force) {
+            resync.current= true;
             return;
         }
-        setSyncInProgress(true);
+        syncInProgress.current=true;
         try {
             checkConnectivity();
             if (!(await isTokenValid())) {
@@ -205,7 +205,6 @@ export default function Gallery() {
             await billingService.updatePlans();
             await billingService.syncSubscription();
             const collections = await syncCollections();
-            setCollections(collections);
             const { files } = await syncFiles(collections, setFiles);
             await initDerivativeState(collections, files);
         } catch (e) {
@@ -232,9 +231,9 @@ export default function Gallery() {
         } finally {
             loadingBar.current?.complete();
         }
-        setSyncInProgress(false);
-        if (resync) {
-            setResync(false);
+        syncInProgress.current=false;
+        if (resync.current) {
+            resync.current=false;
             syncWithRemote();
         }
     };
