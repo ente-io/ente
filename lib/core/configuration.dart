@@ -65,7 +65,7 @@ class Configuration {
     _secureStorage = FlutterSecureStorage();
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
     _tempDirectory = _documentsDirectory + "/temp/";
-    final tempDirectory = new io.Directory(_tempDirectory);
+    final tempDirectory = io.Directory(_tempDirectory);
     try {
       final currentTime = DateTime.now().microsecondsSinceEpoch;
       if (tempDirectory.existsSync() &&
@@ -196,7 +196,7 @@ class Configuration {
       attributes.memLimit,
       attributes.opsLimit,
     );
-    var key;
+    Uint8List key;
     try {
       key = CryptoUtil.decryptSync(Sodium.base642bin(attributes.encryptedKey),
           kek, Sodium.base642bin(attributes.keyDecryptionNonce));
@@ -240,7 +240,7 @@ class Configuration {
 
   Future<void> recover(String recoveryKey) async {
     final keyAttributes = getKeyAttributes();
-    var masterKey;
+    Uint8List masterKey;
     try {
       masterKey = await CryptoUtil.decrypt(
           Sodium.base642bin(keyAttributes.masterKeyEncryptedWithRecoveryKey),
@@ -248,7 +248,7 @@ class Configuration {
           Sodium.base642bin(keyAttributes.masterKeyDecryptionNonce));
     } catch (e) {
       _logger.severe(e);
-      throw e;
+      rethrow;
     }
     await setKey(Sodium.bin2base64(masterKey));
   }
@@ -261,9 +261,7 @@ class Configuration {
   }
 
   String getToken() {
-    if (_cachedToken == null) {
-      _cachedToken = _preferences.getString(tokenKey);
-    }
+    _cachedToken ??= _preferences.getString(tokenKey);
     return _cachedToken;
   }
 
@@ -308,7 +306,7 @@ class Configuration {
     if (_preferences.containsKey(foldersToBackUpKey)) {
       return _preferences.getStringList(foldersToBackUpKey).toSet();
     } else {
-      return Set<String>();
+      return <String>{};
     }
   }
 
@@ -341,8 +339,7 @@ class Configuration {
   }
 
   Future<void> setKeyAttributes(KeyAttributes attributes) async {
-    await _preferences.setString(
-        keyAttributesKey, attributes == null ? null : attributes.toJson());
+    await _preferences.setString(keyAttributesKey, attributes?.toJson());
   }
 
   KeyAttributes getKeyAttributes() {
