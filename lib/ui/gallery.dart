@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -100,8 +101,9 @@ class _GalleryState extends State<Gallery> {
   Future<FileLoadResult> _loadFiles({int limit}) async {
     _logger.info("Loading files");
     final startTime = DateTime.now().microsecondsSinceEpoch;
-    final result = await widget
-        .asyncLoader(0, DateTime.now().microsecondsSinceEpoch, limit: limit);
+    final result = await widget.asyncLoader(
+        kGalleryLoadStartTime, DateTime.now().microsecondsSinceEpoch,
+        limit: limit);
     final endTime = DateTime.now().microsecondsSinceEpoch;
     final duration = Duration(microseconds: endTime - startTime);
     _logger.info("Time taken to load " +
