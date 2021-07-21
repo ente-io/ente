@@ -61,11 +61,9 @@ class FilesDB {
   static final FilesDB instance = FilesDB._privateConstructor();
 
   // only have a single app-wide reference to the database
-  static Database _database;
   static Future<Database> _dbFuture;
 
   Future<Database> get database async {
-    if (_database != null) return _database;
     // lazily instantiate the db the first time it is accessed
     _dbFuture ??= _initDatabase();
     return _dbFuture;
