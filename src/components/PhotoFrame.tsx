@@ -285,7 +285,7 @@ const PhotoFrame = ({
             if (galleryContext.files.has(item.id)) {
                 url = galleryContext.files.get(item.id);
             } else {
-                url = await DownloadManager.getFile(item);
+                url = await DownloadManager.getFile(item, true);
                 galleryContext.files.set(item.id, url);
             }
             updateSrcUrl(item.dataIndex, url);

@@ -7,7 +7,7 @@ import { File } from './fileService';
 import { logError } from 'utils/sentry';
 
 class DownloadManager {
-    private fileDownloads = new Map<number, string>();
+    private fileDownloads = new Map<string, string>();
 
     private thumbnailDownloads = new Map<number, string>();
 
@@ -55,14 +55,19 @@ class DownloadManager {
         return URL.createObjectURL(new Blob([decrypted]));
     }
 
-    getFile = async (file: File) => {
+    getFile = async (file: File, forPreview=false) => {
         try {
-            if (!this.fileDownloads.get(file.id)) {
+            if (!this.fileDownloads.get(`${file.id}_${forPreview}`)) {
                 const fileStream = await this.downloadFile(file);
-                const download = URL.createObjectURL(await new Response(fileStream).blob());
-                this.fileDownloads.set(file.id, download);
+                let fileBlob= await new Response(fileStream).blob();
+                if (forPreview) {
+                    if (fileIsHEIC(file.metadata.title)) {
+                        fileBlob = await convertHEIC2JPEG(fileBlob);
+                    }
+                }
+                this.fileDownloads.set(`${file.id}_${forPreview}`, URL.createObjectURL(fileBlob));
             }
-            return await this.fileDownloads.get(file.id);
+            return this.fileDownloads.get(`${file.id}_${forPreview}`);
         } catch (e) {
             logError(e, 'Failed to get File');
         }
@@ -86,16 +91,10 @@ class DownloadManager {
                 await worker.fromB64(file.file.decryptionHeader),
                 file.key,
             );
-            let decryptedBlob = new Blob([decrypted]);
 
-            if (fileIsHEIC(file.metadata.title)) {
-                decryptedBlob = await convertHEIC2JPEG(decryptedBlob);
-            }
             return new ReadableStream({
                 async start(controller: ReadableStreamDefaultController) {
-                    controller.enqueue(
-                        new Uint8Array(await decryptedBlob.arrayBuffer()),
-                    );
+                    controller.enqueue(decrypted);
                     controller.close();
                 },
             });
