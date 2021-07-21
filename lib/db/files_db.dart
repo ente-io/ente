@@ -46,10 +46,11 @@ class FilesDB {
   static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static final columnMetadataDecryptionHeader = 'metadata_decryption_header';
 
-  static final initializationScript = [...createTable(table), ...addIndex()];
+  static final initializationScript = [...createTable(table)];
   static final migrationScripts = [
     ...alterDeviceFolderToAllowNULL(),
     ...alterTimestampColumnTypes(),
+    ...addIndices(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -108,19 +109,19 @@ class FilesDB {
     ];
   }
 
-  static List<String> addIndex() {
+  static List<String> addIndices() {
     return [
       '''
-        CREATE INDEX collection_id_index ON $table($columnCollectionID);
+        CREATE INDEX IF NOT EXISTS collection_id_index ON $table($columnCollectionID);
       ''',
       '''
-        CREATE INDEX device_folder_index ON $table($columnDeviceFolder);
+        CREATE INDEX IF NOT EXISTS device_folder_index ON $table($columnDeviceFolder);
       ''',
       '''
-        CREATE INDEX creation_time_index ON $table($columnCreationTime);
+        CREATE INDEX IF NOT EXISTS creation_time_index ON $table($columnCreationTime);
       ''',
       '''
-        CREATE INDEX updation_time_index ON $table($columnUpdationTime);
+        CREATE INDEX IF NOT EXISTS updation_time_index ON $table($columnUpdationTime);
       '''
     ];
   }
