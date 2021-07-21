@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
-
+import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -14,8 +14,6 @@ import 'package:photos/core/network.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
-
-import 'dart:io' as io;
 
 final _logger = Logger("ThumbnailUtil");
 final _map = LinkedHashMap<int, FileDownloadItem>();
@@ -110,7 +108,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     Sodium.base642bin(file.thumbnailDecryptionHeader),
   );
   final thumbnailSize = data.length;
-  if (thumbnailSize > THUMBNAIL_DATA_LIMIT) {
+  if (thumbnailSize > kThumbnailDataLimit) {
     data = await compressThumbnail(data);
   }
   ThumbnailLruCache.put(item.file, data);
@@ -132,5 +130,6 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
 io.File getCachedThumbnail(File file) {
   final thumbnailCacheDirectory =
       Configuration.instance.getThumbnailCacheDirectory();
-  return io.File(thumbnailCacheDirectory + "/" + file.uploadedFileID.toString());
+  return io.File(
+      thumbnailCacheDirectory + "/" + file.uploadedFileID.toString());
 }

@@ -72,7 +72,7 @@ class SupportSectionWidget extends StatelessWidget {
                   final isLoggedIn = Configuration.instance.getToken() != null;
                   final url = isLoggedIn
                       ? endpoint + "?token=" + Configuration.instance.getToken()
-                      : ROADMAP_URL;
+                      : kRoadmapURL;
                   return WebPage("roadmap", url);
                 },
               ),

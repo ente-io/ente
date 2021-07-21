@@ -147,7 +147,7 @@ Future<bool> deleteLocalFiles(
   final List<String> deletedIDs = [];
   if (Platform.isAndroid) {
     final androidInfo = await DeviceInfoPlugin().androidInfo;
-    if (androidInfo.version.sdkInt < ANDROID_11_SDK_INT) {
+    if (androidInfo.version.sdkInt < kAndroid11SDKINT) {
       deletedIDs.addAll(await _deleteLocalFilesInBatches(context, localIDs));
     } else {
       deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localIDs));

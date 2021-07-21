@@ -10,7 +10,7 @@ class ThumbnailLruCache {
   static Uint8List get(File photo, [int size]) {
     return _map.get(photo.generatedID.toString() +
         "_" +
-        (size != null ? size.toString() : THUMBNAIL_LARGE_SIZE.toString()));
+        (size != null ? size.toString() : kThumbnailLargeSize.toString()));
   }
 
   static void put(
@@ -21,7 +21,7 @@ class ThumbnailLruCache {
     _map.put(
         photo.generatedID.toString() +
             "_" +
-            (size != null ? size.toString() : THUMBNAIL_LARGE_SIZE.toString()),
+            (size != null ? size.toString() : kThumbnailLargeSize.toString()),
         imageData);
   }
 }

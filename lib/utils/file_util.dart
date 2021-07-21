@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
-import 'package:flutter_sodium/flutter_sodium.dart';
-import 'package:logging/logging.dart';
-import 'package:path/path.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:logging/logging.dart';
+import 'package:path/path.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
@@ -48,19 +48,19 @@ void preloadThumbnail(ente.File file) {
   if (file.isRemoteFile()) {
     getThumbnailFromServer(file);
   } else {
-    if (ThumbnailLruCache.get(file, THUMBNAIL_SMALL_SIZE) != null) {
+    if (ThumbnailLruCache.get(file, kThumbnailSmallSize) != null) {
       return;
     }
     file.getAsset().then((asset) {
       if (asset != null) {
         asset
             .thumbDataWithSize(
-          THUMBNAIL_SMALL_SIZE,
-          THUMBNAIL_SMALL_SIZE,
-          quality: THUMBNAIL_QUALITY,
+          kThumbnailSmallSize,
+          kThumbnailSmallSize,
+          quality: kThumbnailQuality,
         )
             .then((data) {
-          ThumbnailLruCache.put(file, data, THUMBNAIL_SMALL_SIZE);
+          ThumbnailLruCache.put(file, data, kThumbnailSmallSize);
         });
       }
     });
@@ -136,11 +136,11 @@ Future<io.File> _downloadAndDecrypt(
     var fileExtension = "unknown";
     try {
       fileExtension = extension(file.title).substring(1).toLowerCase();
-    } catch(e) {
+    } catch (e) {
       _logger.severe("Could not capture file extension");
     }
     var outputFile = decryptedFile;
-    if ((fileExtension=="unknown" && file.fileType == FileType.image) || 
+    if ((fileExtension == "unknown" && file.fileType == FileType.image) ||
         (io.Platform.isAndroid && fileExtension == "heic")) {
       outputFile = await FlutterImageCompress.compressAndGetFile(
         decryptedFilePath,
@@ -175,8 +175,8 @@ Uint8List decryptFileKey(ente.File file) {
 Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
   return FlutterImageCompress.compressWithList(
     thumbnail,
-    minHeight: COMPRESSED_THUMBNAIL_RESOLUTION,
-    minWidth: COMPRESSED_THUMBNAIL_RESOLUTION,
+    minHeight: kCompressedThumbnailResolution,
+    minWidth: kCompressedThumbnailResolution,
     quality: 25,
   );
 }

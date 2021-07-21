@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:io' as io;
-
 import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
-import 'package:photos/models/location.dart';
 import 'package:photos/models/file.dart' as ente;
+import 'package:photos/models/location.dart';
 
 import 'file_util.dart';
 
@@ -60,12 +59,12 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     throw InvalidFileError();
   }
   thumbnailData = await asset.thumbDataWithSize(
-    THUMBNAIL_SMALL_SIZE,
-    THUMBNAIL_SMALL_SIZE,
-    quality: THUMBNAIL_QUALITY,
+    kThumbnailSmallSize,
+    kThumbnailSmallSize,
+    quality: kThumbnailQuality,
   );
   int compressionAttempts = 0;
-  while (thumbnailData.length > THUMBNAIL_DATA_LIMIT &&
+  while (thumbnailData.length > kThumbnailDataLimit &&
       compressionAttempts < kMaximumThumbnailCompressionAttempts) {
     _logger.info("Thumbnail size " + thumbnailData.length.toString());
     thumbnailData = await compressThumbnail(thumbnailData);
