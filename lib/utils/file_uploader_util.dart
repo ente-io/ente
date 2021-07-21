@@ -1,0 +1,95 @@
+import 'dart:async';
+import 'dart:io' as io;
+
+import 'dart:typed_data';
+
+import 'package:logging/logging.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/core/constants.dart';
+import 'package:photos/core/errors.dart';
+import 'package:photos/models/location.dart';
+import 'package:photos/models/file.dart' as ente;
+
+import 'file_util.dart';
+
+final _logger = Logger("FileUtil");
+const kMaximumThumbnailCompressionAttempts = 2;
+
+class MediaUploadData {
+  final io.File sourceFile;
+  final Uint8List thumbnail;
+  final bool isDeleted;
+
+  MediaUploadData(this.sourceFile, this.thumbnail, this.isDeleted);
+}
+
+Future<MediaUploadData> getUploadDataFromEnteFile(ente.File file) async {
+  // todo: add local to get data from either Asset/photoManager or app cache
+  return await _getMediaUploadDataFromAssetFile(file);
+}
+
+Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
+  io.File sourceFile;
+  Uint8List thumbnailData;
+  bool isDeleted;
+
+  // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
+  final asset =
+      await file.getAsset().timeout(Duration(seconds: 3)).catchError((e) async {
+    if (e is TimeoutException) {
+      _logger.info("Asset fetch timed out for " + file.toString());
+      return await file.getAsset();
+    } else {
+      throw e;
+    }
+  });
+  if (asset == null) {
+    throw InvalidFileError();
+  }
+  sourceFile = await asset.originFile
+      .timeout(Duration(seconds: 3))
+      .catchError((e) async {
+    if (e is TimeoutException) {
+      _logger.info("Origin file fetch timed out for " + file.toString());
+      return await asset.originFile;
+    } else {
+      throw e;
+    }
+  });
+  if (!sourceFile.existsSync()) {
+    throw InvalidFileError();
+  }
+  thumbnailData = await asset.thumbDataWithSize(
+    THUMBNAIL_SMALL_SIZE,
+    THUMBNAIL_SMALL_SIZE,
+    quality: THUMBNAIL_QUALITY,
+  );
+  int compressionAttempts = 0;
+  while (thumbnailData.length > THUMBNAIL_DATA_LIMIT &&
+      compressionAttempts < kMaximumThumbnailCompressionAttempts) {
+    _logger.info("Thumbnail size " + thumbnailData.length.toString());
+    thumbnailData = await compressThumbnail(thumbnailData);
+    _logger
+        .info("Compressed thumbnail size " + thumbnailData.length.toString());
+    compressionAttempts++;
+  }
+
+  isDeleted = asset == null || !(await asset.exists);
+  // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
+  await _decorateEnteFileData(file, asset);
+  return MediaUploadData(sourceFile, thumbnailData, isDeleted);
+}
+
+Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
+  // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
+  if (file.location == null ||
+      (file.location.latitude == 0 && file.location.longitude == 0)) {
+    final latLong = await asset.latlngAsync();
+    file.location = Location(latLong.latitude, latLong.longitude);
+  }
+
+  if (file.title == null || file.title.isEmpty) {
+    _logger.severe("Title was missing");
+    file.title = await asset.titleAsync;
+  }
+}

@@ -20,11 +20,11 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/main.dart';
 import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/models/location.dart';
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -267,41 +267,20 @@ class FileUploader {
         "_thumbnail" +
         (_isBackground ? "_bg" : "") +
         ".encrypted";
-    io.File sourceFile;
+    MediaUploadData mediaUploadData;
 
     try {
       _logger.info("Trying to upload " +
           file.toString() +
           ", isForced: " +
           forcedUpload.toString());
-      // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
-      final asset = await file
-          .getAsset()
-          .timeout(Duration(seconds: 3))
-          .catchError((e) async {
-        if (e is TimeoutException) {
-          _logger.info("Asset fetch timed out for " + file.toString());
-          return await file.getAsset();
+      mediaUploadData = await getUploadDataFromEnteFile(file).catchError((e) async {
+        if (e is InvalidFileError) {
+          _onInvalidFileError(file);
         } else {
           throw e;
         }
       });
-      if (asset == null) {
-        await _onInvalidFileError(file);
-      }
-      sourceFile = await asset.originFile
-          .timeout(Duration(seconds: 3))
-          .catchError((e) async {
-        if (e is TimeoutException) {
-          _logger.info("Origin file fetch timed out for " + file.toString());
-          return await asset.originFile;
-        } else {
-          throw e;
-        }
-      });
-      if (!sourceFile.existsSync()) {
-        await _onInvalidFileError(file);
-      }
       var key;
       var isAlreadyUploadedFile = file.uploadedFileID != null;
       if (isAlreadyUploadedFile) {
@@ -314,30 +293,12 @@ class FileUploader {
         io.File(encryptedFilePath).deleteSync();
       }
       final encryptedFile = io.File(encryptedFilePath);
-
       final fileAttributes = await CryptoUtil.encryptFile(
-        sourceFile.path,
+        mediaUploadData.sourceFile.path,
         encryptedFilePath,
         key: key,
       );
-
-      var thumbnailData = await asset.thumbDataWithSize(
-        THUMBNAIL_LARGE_SIZE,
-        THUMBNAIL_LARGE_SIZE,
-        quality: 50,
-      );
-      if (thumbnailData == null) {
-        await _onInvalidFileError(file);
-      }
-      int compressionAttempts = 0;
-      while (thumbnailData.length > THUMBNAIL_DATA_LIMIT &&
-          compressionAttempts < kMaximumThumbnailCompressionAttempts) {
-        _logger.info("Thumbnail size " + thumbnailData.length.toString());
-        thumbnailData = await compressThumbnail(thumbnailData);
-        _logger.info(
-            "Compressed thumbnail size " + thumbnailData.length.toString());
-        compressionAttempts++;
-      }
+      var thumbnailData = mediaUploadData.thumbnail;
 
       final encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key);
@@ -354,18 +315,6 @@ class FileUploader {
 
       final fileUploadURL = await _getUploadURL();
       String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
-
-      // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
-      if (file.location == null ||
-          (file.location.latitude == 0 && file.location.longitude == 0)) {
-        final latLong = await asset.latlngAsync();
-        file.location = Location(latLong.latitude, latLong.longitude);
-      }
-
-      if (file.title == null || file.title.isEmpty) {
-        _logger.severe("Title was missing");
-        file.title = await asset.titleAsync;
-      }
 
       final encryptedMetadataData = await CryptoUtil.encryptChaCha(
           utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);
@@ -404,7 +353,7 @@ class FileUploader {
           encryptedMetadata,
           metadataDecryptionHeader,
         );
-        if (asset == null || !(await asset.exists)) {
+        if (mediaUploadData.isDeleted) {
           _logger.info("File found to be deleted");
           remoteFile.localID = null;
         }
@@ -421,8 +370,8 @@ class FileUploader {
       }
       throw e;
     } finally {
-      if (io.Platform.isIOS && sourceFile != null) {
-        sourceFile.deleteSync();
+      if (io.Platform.isIOS && mediaUploadData != null && mediaUploadData.sourceFile != null) {
+        mediaUploadData.sourceFile.deleteSync();
       }
       if (io.File(encryptedFilePath).existsSync()) {
         io.File(encryptedFilePath).deleteSync();
