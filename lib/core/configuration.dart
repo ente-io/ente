@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
@@ -24,12 +23,13 @@ import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:super_logging/super_logging.dart';
 
 class Configuration {
   Configuration._privateConstructor();
 
   static final Configuration instance = Configuration._privateConstructor();
-
+  static const endpoint = String.fromEnvironment("endpoint", defaultValue: "https://api.ente.io");
   static const emailKey = "email";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyAttributesKey = "key_attributes";
@@ -102,6 +102,7 @@ class Configuration {
         iOptions: _secureStorageOptionsIOS,
       );
       await _migrateSecurityStorageToFirstUnlock();
+      SuperLogging.setUserID(getUserID());
     }
   }
 
@@ -267,10 +268,7 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
-    if (kDebugMode) {
-      return "http://192.168.1.123:8080";
-    }
-    return "https://api.ente.io";
+    return endpoint;
   }
 
   String getToken() {
