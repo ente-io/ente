@@ -171,31 +171,25 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   Future _getThumbnailFromDisk() async {
-    widget.file.getAsset().then((asset) async {
-      if (asset == null || !(await asset.exists)) {
+    getThumbnailFromLocal(widget.file).then((thumbData) async {
+      if (thumbData == null) {
         if (widget.file.uploadedFileID != null) {
+          _logger.fine("Removing localID reference for " + widget.file.tag());
           widget.file.localID = null;
           FilesDB.instance.update(widget.file);
           _loadNetworkImage();
         } else {
+          _logger.info("Deleting file " + widget.file.tag());
           FilesDB.instance.deleteLocalFile(widget.file.localID);
           Bus.instance.fire(LocalPhotosUpdatedEvent([widget.file]));
         }
         return;
       }
-      asset
-          .thumbDataWithSize(
-        THUMBNAIL_SMALL_SIZE,
-        THUMBNAIL_SMALL_SIZE,
-        quality: THUMBNAIL_QUALITY,
-      )
-          .then((data) {
-        if (data != null && mounted) {
-          final imageProvider = Image.memory(data).image;
-          _cacheAndRender(imageProvider);
-        }
-        ThumbnailLruCache.put(widget.file, data, THUMBNAIL_SMALL_SIZE);
-      });
+      if (thumbData != null && mounted) {
+        final imageProvider = Image.memory(thumbData).image;
+        _cacheAndRender(imageProvider);
+      }
+      ThumbnailLruCache.put(widget.file, thumbData, THUMBNAIL_SMALL_SIZE);
     }).catchError((e) {
       _logger.warning("Could not load image: ", e);
       _encounteredErrorLoadingThumbnail = true;
