@@ -16,7 +16,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 
 final _logger = Logger("ThumbnailUtil");
-final _map = LinkedHashMap<int, FileDownloadItem>();
+final _map = <int, FileDownloadItem>{};
 final _queue = Queue<int>();
 const int kMaximumConcurrentDownloads = 500;
 
@@ -81,7 +81,7 @@ void _downloadItem(FileDownloadItem item) async {
 
 Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   final file = item.file;
-  var encryptedThumbnail;
+  Uint8List encryptedThumbnail;
   try {
     encryptedThumbnail = (await Network.instance.getDio().get(
               file.getThumbnailUrl(),
@@ -96,7 +96,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     if (e is DioError && CancelToken.isCancel(e)) {
       return;
     }
-    throw e;
+    rethrow;
   }
   if (!_map.containsKey(file.uploadedFileID)) {
     return;
