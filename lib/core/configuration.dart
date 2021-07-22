@@ -29,7 +29,7 @@ class Configuration {
   Configuration._privateConstructor();
 
   static final Configuration instance = Configuration._privateConstructor();
-
+  static const endpoint = String.fromEnvironment("endpoint", defaultValue: "https://api.ente.io");
   static const emailKey = "email";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyAttributesKey = "key_attributes";
@@ -268,10 +268,7 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
-    // if (kDebugMode) {
-    //   return "http://192.168.1.123:8080";
-    // }
-    return "https://api.ente.io";
+    return endpoint;
   }
 
   String getToken() {
