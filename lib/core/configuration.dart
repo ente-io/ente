@@ -45,6 +45,8 @@ class Configuration {
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
   static const userIDKey = "user_id";
+  static const hasMigratedSecureStorageToFirstUnlockKey =
+      "has_migrated_secure_storage_to_first_unlock";
 
   final kTempFolderDeletionTimeBuffer = Duration(days: 1).inMicroseconds;
 
@@ -59,6 +61,9 @@ class Configuration {
   String _tempDirectory;
   String _thumbnailCacheDirectory;
   String _volatilePassword;
+
+  final _secureStorageOptionsIOS =
+      IOSOptions(accessibility: IOSAccessibility.first_unlock);
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
@@ -85,10 +90,17 @@ class Configuration {
         (await getTemporaryDirectory()).path + "/thumbnail-cache";
     io.Directory(_thumbnailCacheDirectory).createSync(recursive: true);
     if (!_preferences.containsKey(tokenKey)) {
-      await _secureStorage.deleteAll();
+      await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
     } else {
-      _key = await _secureStorage.read(key: keyKey);
-      _secretKey = await _secureStorage.read(key: secretKeyKey);
+      _key = await _secureStorage.read(
+        key: keyKey,
+        iOptions: _secureStorageOptionsIOS,
+      );
+      _secretKey = await _secureStorage.read(
+        key: secretKeyKey,
+        iOptions: _secureStorageOptionsIOS,
+      );
+      await _migrateSecurityStorageToFirstUnlock();
     }
   }
 
@@ -102,7 +114,7 @@ class Configuration {
       }
     }
     await _preferences.clear();
-    await _secureStorage.deleteAll();
+    await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
     _key = null;
     _cachedToken = null;
     _secretKey = null;
@@ -354,18 +366,32 @@ class Configuration {
   Future<void> setKey(String key) async {
     _key = key;
     if (key == null) {
-      await _secureStorage.delete(key: keyKey);
+      await _secureStorage.delete(
+        key: keyKey,
+        iOptions: _secureStorageOptionsIOS,
+      );
     } else {
-      await _secureStorage.write(key: keyKey, value: key);
+      await _secureStorage.write(
+        key: keyKey,
+        value: key,
+        iOptions: _secureStorageOptionsIOS,
+      );
     }
   }
 
   Future<void> setSecretKey(String secretKey) async {
     _secretKey = secretKey;
     if (secretKey == null) {
-      await _secureStorage.delete(key: secretKeyKey);
+      await _secureStorage.delete(
+        key: secretKeyKey,
+        iOptions: _secureStorageOptionsIOS,
+      );
     } else {
-      await _secureStorage.write(key: secretKeyKey, value: secretKey);
+      await _secureStorage.write(
+        key: secretKeyKey,
+        value: secretKey,
+        iOptions: _secureStorageOptionsIOS,
+      );
     }
   }
 
@@ -472,5 +498,26 @@ class Configuration {
 
   bool hasSkippedBackupFolderSelection() {
     return _preferences.getBool(keyHasSkippedBackupFolderSelection) ?? false;
+  }
+
+  Future<void> _migrateSecurityStorageToFirstUnlock() async {
+    final hasMigratedSecureStorageToFirstUnlock =
+        _preferences.getBool(hasMigratedSecureStorageToFirstUnlockKey) ?? false;
+    if (!hasMigratedSecureStorageToFirstUnlock &&
+        _key != null &&
+        _secretKey != null) {
+      await _secureStorage.write(
+        key: keyKey,
+        value: _key,
+        iOptions: _secureStorageOptionsIOS,
+      );
+      await _secureStorage.write(
+        key: secretKeyKey,
+        value: _secretKey,
+        iOptions: _secureStorageOptionsIOS,
+      );
+      await _preferences.setBool(
+          hasMigratedSecureStorageToFirstUnlockKey, true);
+    }
   }
 }
