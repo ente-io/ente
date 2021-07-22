@@ -22,9 +22,9 @@ class BlurredFileBackdrop extends StatelessWidget {
           key: Key("memory_backdrop" + file.tag()),
         ),
         BackdropFilter(
-          filter: new ImageFilter.blur(sigmaX: 64.0, sigmaY: 64.0),
-          child: new Container(
-            decoration: new BoxDecoration(color: Colors.white.withOpacity(0.0)),
+          filter: ImageFilter.blur(sigmaX: 64.0, sigmaY: 64.0),
+          child: Container(
+            decoration: BoxDecoration(color: Colors.white.withOpacity(0.0)),
           ),
         ),
       ]),

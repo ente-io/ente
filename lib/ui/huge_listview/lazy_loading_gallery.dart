@@ -99,7 +99,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
         final result = await widget.asyncLoader(
             dayStartTime.microsecondsSinceEpoch,
-            dayStartTime.microsecondsSinceEpoch + MICRO_SECONDS_IN_DAY - 1);
+            dayStartTime.microsecondsSinceEpoch + kMicroSecondsInDay - 1);
         if (result.files.isEmpty) {
           // All files on this day were deleted, let gallery trigger the reload
         } else {

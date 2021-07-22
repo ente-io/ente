@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
-import 'package:logging/logging.dart';
-import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/thumbnail_util.dart';
@@ -152,7 +152,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_isLoadingThumbnail) {
       _isLoadingThumbnail = true;
       final cachedSmallThumbnail =
-          ThumbnailLruCache.get(widget.file, THUMBNAIL_SMALL_SIZE);
+          ThumbnailLruCache.get(widget.file, kThumbnailSmallSize);
       if (cachedSmallThumbnail != null) {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
@@ -185,11 +185,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         }
         return;
       }
+
       if (thumbData != null && mounted) {
         final imageProvider = Image.memory(thumbData).image;
         _cacheAndRender(imageProvider);
       }
-      ThumbnailLruCache.put(widget.file, thumbData, THUMBNAIL_SMALL_SIZE);
+      ThumbnailLruCache.put(widget.file, thumbData, kThumbnailSmallSize);
     }).catchError((e) {
       _logger.warning("Could not load image: ", e);
       _encounteredErrorLoadingThumbnail = true;

@@ -27,7 +27,7 @@ class MemoriesService extends ChangeNotifier {
       _cachedMemories = null;
     });
     await _memoriesDB.clearMemoriesSeenBeforeTime(
-        DateTime.now().microsecondsSinceEpoch - (7 * MICRO_SECONDS_IN_DAY));
+        DateTime.now().microsecondsSinceEpoch - (7 * kMicroSecondsInDay));
   }
 
   void clearCache() {

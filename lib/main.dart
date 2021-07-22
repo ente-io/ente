@@ -5,9 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:photos/core/constants.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/services/billing_service.dart';
@@ -25,7 +26,6 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_logging/super_logging.dart';
-import 'package:logging/logging.dart';
 
 final _logger = Logger("main");
 
@@ -166,7 +166,7 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
     body: function,
     logDirPath: (await getTemporaryDirectory()).path + "/logs",
     maxLogFiles: 5,
-    sentryDsn: kDebugMode ? SENTRY_DEBUG_DSN : SENTRY_DSN,
+    sentryDsn: kDebugMode ? kSentryDebugDSN : kSentryDSN,
     enableInDebugMode: true,
     prefix: prefix,
   ));

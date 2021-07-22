@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/fading_app_bar.dart';
@@ -208,7 +209,7 @@ class _DetailPageState extends State<DetailPage> {
     }
     if (_selectedIndex == _files.length - 1 && !_hasLoadedTillEnd) {
       final result = await widget.config.asyncLoader(
-          0, _files[_selectedIndex].creationTime - 1,
+          kGalleryLoadStartTime, _files[_selectedIndex].creationTime - 1,
           limit: kLoadLimit);
       setState(() {
         if (!result.hasMore) {

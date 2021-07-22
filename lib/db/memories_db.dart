@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/memory.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
 
 class MemoriesDB {
   static final _databaseName = "ente.memories.db";
@@ -18,14 +18,13 @@ class MemoriesDB {
   MemoriesDB._privateConstructor();
   static final MemoriesDB instance = MemoriesDB._privateConstructor();
 
-  static Database _database;
+  static Future<Database> _dbFuture;
   Future<Database> get database async {
-    if (_database != null) return _database;
-    _database = await _initDatabase();
-    return _database;
+    _dbFuture ??= _initDatabase();
+    return _dbFuture;
   }
 
-  _initDatabase() async {
+  Future<Database> _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
     return await openDatabase(

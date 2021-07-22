@@ -35,9 +35,9 @@ class CollectionsService {
   SharedPreferences _prefs;
   Future<List<File>> _cachedLatestFiles;
   final _dio = Network.instance.getDio();
-  final _localCollections = Map<String, Collection>();
-  final _collectionIDToCollections = Map<int, Collection>();
-  final _cachedKeys = Map<int, Uint8List>();
+  final _localCollections = <String, Collection>{};
+  final _collectionIDToCollections = <int, Collection>{};
+  final _cachedKeys = <int, Uint8List>{};
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
@@ -72,7 +72,7 @@ class CollectionsService {
     // Might not have synced the collection fully
     final fetchedCollections =
         await _fetchCollections(lastCollectionUpdationTime ?? 0);
-    final updatedCollections = List<Collection>();
+    final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {
@@ -100,7 +100,7 @@ class CollectionsService {
     return collections;
   }
 
-  Future<void> clearCache() {
+  void clearCache() {
     _localCollections.clear();
     _collectionIDToCollections.clear();
     _cachedKeys.clear();
@@ -108,7 +108,7 @@ class CollectionsService {
 
   Future<List<Collection>> getCollectionsToBeSynced() async {
     final collections = await _db.getAllCollections();
-    final updatedCollections = List<Collection>();
+    final updatedCollections = <Collection>[];
     for (final c in collections) {
       if (c.updationTime > getCollectionSyncTime(c.id)) {
         updatedCollections.add(c);
@@ -118,18 +118,13 @@ class CollectionsService {
   }
 
   int getCollectionSyncTime(int collectionID) {
-    var syncTime =
-        _prefs.getInt(_collectionSyncTimeKeyPrefix + collectionID.toString());
-    if (syncTime == null) {
-      syncTime = 0;
-    }
-    return syncTime;
+    return _prefs
+            .getInt(_collectionSyncTimeKeyPrefix + collectionID.toString()) ??
+        0;
   }
 
   Future<List<File>> getLatestCollectionFiles() {
-    if (_cachedLatestFiles == null) {
-      _cachedLatestFiles = _filesDB.getLatestCollectionFiles();
-    }
+    _cachedLatestFiles ??= _filesDB.getLatestCollectionFiles();
     return _cachedLatestFiles;
   }
 
@@ -161,7 +156,7 @@ class CollectionsService {
     )
         .then((response) {
       _logger.info(response.toString());
-      final sharees = List<User>();
+      final sharees = <User>[];
       for (final user in response.data["sharees"]) {
         sharees.add(User.fromMap(user));
       }
@@ -187,7 +182,7 @@ class CollectionsService {
       if (e.response.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
-      throw e;
+      rethrow;
     }
     RemoteSyncService.instance.sync(silently: true);
   }
@@ -209,7 +204,7 @@ class CollectionsService {
       _db.insert([_collectionIDToCollections[collectionID]]);
     } catch (e) {
       _logger.severe(e);
-      throw e;
+      rethrow;
     }
     RemoteSyncService.instance.sync(silently: true);
   }
@@ -257,7 +252,7 @@ class CollectionsService {
       if (e is DioError && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
-      throw e;
+      rethrow;
     }
   }
 
@@ -313,7 +308,7 @@ class CollectionsService {
   }
 
   Future<void> addToCollection(int collectionID, List<File> files) {
-    final params = Map<String, dynamic>();
+    final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
     for (final file in files) {
       final key = decryptFileKey(file);
@@ -344,11 +339,11 @@ class CollectionsService {
   }
 
   Future<void> removeFromCollection(int collectionID, List<File> files) async {
-    final params = Map<String, dynamic>();
+    final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
     for (final file in files) {
       if (params["fileIDs"] == null) {
-        params["fileIDs"] = List<int>();
+        params["fileIDs"] = <int>[];
       }
       params["fileIDs"].add(file.uploadedFileID);
     }
@@ -401,7 +396,7 @@ class CollectionsService {
   Collection _getCollectionWithDecryptedName(Collection collection) {
     if (collection.encryptedName != null &&
         collection.encryptedName.isNotEmpty) {
-      var name;
+      String name;
       try {
         final result = CryptoUtil.decryptSync(
             Sodium.base642bin(collection.encryptedName),
@@ -429,7 +424,7 @@ class CollectionsService {
       if (attempt < kMaximumWriteAttempts) {
         return _updateDB(collections, attempt: attempt++);
       } else {
-        throw e;
+        rethrow;
       }
     }
   }

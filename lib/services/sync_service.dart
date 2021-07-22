@@ -231,7 +231,7 @@ class SyncService {
     final lastNotificationShownTime =
         _prefs.getInt(kLastStorageLimitExceededNotificationPushTime) ?? 0;
     final now = DateTime.now().microsecondsSinceEpoch;
-    if ((now - lastNotificationShownTime) > MICRO_SECONDS_IN_DAY) {
+    if ((now - lastNotificationShownTime) > kMicroSecondsInDay) {
       await _prefs.setInt(kLastStorageLimitExceededNotificationPushTime, now);
       NotificationService.instance.showNotification(
           "storage limit exceeded", "sorry, we had to pause your backups");

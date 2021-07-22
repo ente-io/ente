@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
-import 'package:flutter_sodium/flutter_sodium.dart';
-import 'package:logging/logging.dart';
-import 'package:path/path.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:logging/logging.dart';
+import 'package:path/path.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
@@ -175,8 +175,8 @@ Uint8List decryptFileKey(ente.File file) {
 Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
   return FlutterImageCompress.compressWithList(
     thumbnail,
-    minHeight: COMPRESSED_THUMBNAIL_RESOLUTION,
-    minWidth: COMPRESSED_THUMBNAIL_RESOLUTION,
+    minHeight: kCompressedThumbnailResolution,
+    minWidth: kCompressedThumbnailResolution,
     quality: 25,
   );
 }

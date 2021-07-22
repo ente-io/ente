@@ -79,7 +79,7 @@ class RemoteSyncService {
 
   Future<bool> _uploadDiff() async {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
-    var filesToBeUploaded;
+    List<File> filesToBeUploaded;
     if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&
         foldersToBackUp.isEmpty) {
       filesToBeUploaded = await _db.getAllLocalFiles();
@@ -149,7 +149,7 @@ class RemoteSyncService {
     } on UserCancelledUploadError {
       // Do nothing
     } catch (e) {
-      throw e;
+      rethrow;
     }
     return _completedUploads > 0;
   }
@@ -223,7 +223,7 @@ class RemoteSyncService {
       }
     }
     await _db.insertMultiple(toBeInserted);
-    if (toBeInserted.length > 0) {
+    if (toBeInserted.isNotEmpty) {
       await _collectionsService.setCollectionSyncTime(
           collectionID, toBeInserted[toBeInserted.length - 1].updationTime);
     }

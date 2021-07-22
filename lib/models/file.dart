@@ -134,8 +134,14 @@ class File {
     return localID == null && uploadedFileID != null;
   }
 
+
   bool isCachedInAppSandbox() {
     return localID != null && localID.startsWith("ente-upload-cache");
+  }
+
+  bool hasLocation() {
+    return location != null &&
+        (location.longitude != 0 || location.latitude != 0);
   }
 
   @override

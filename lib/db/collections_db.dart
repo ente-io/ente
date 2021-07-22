@@ -39,14 +39,14 @@ class CollectionsDB {
   CollectionsDB._privateConstructor();
   static final CollectionsDB instance = CollectionsDB._privateConstructor();
 
-  static Database _database;
+  static Future<Database> _dbFuture;
+
   Future<Database> get database async {
-    if (_database != null) return _database;
-    _database = await _initDatabase();
-    return _database;
+    _dbFuture ??= _initDatabase();
+    return _dbFuture;
   }
 
-  _initDatabase() async {
+  Future<Database> _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
     return await openDatabaseWithMigration(path, dbConfig);
