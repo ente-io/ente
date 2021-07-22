@@ -133,6 +133,11 @@ class File {
     return localID == null && uploadedFileID != null;
   }
 
+  bool hasLocation() {
+    return location != null &&
+        (location.longitude != 0 || location.latitude != 0);
+  }
+
   @override
   String toString() {
     return '''File(generatedId: $generatedID, uploadedFileId: $uploadedFileID, 

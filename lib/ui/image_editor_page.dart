@@ -319,8 +319,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       newFile.creationTime = widget.originalFile.creationTime;
       newFile.collectionID = widget.originalFile.collectionID;
       newFile.location = widget.originalFile.location;
-      if (newFile.location == null ||
-          (newFile.location.latitude == 0 && newFile.location.longitude == 0)) {
+      if (!newFile.hasLocation() && widget.originalFile.localID != null) {
         final latLong =
             await (await widget.originalFile.getAsset()).latlngAsync();
         newFile.location = Location(latLong.latitude, latLong.longitude);
