@@ -63,7 +63,7 @@ class Configuration {
   String _volatilePassword;
 
   final _secureStorageOptionsIOS =
-      IOSOptions(accessibility: IOSAccessibility.first_unlock);
+      IOSOptions(accessibility: IOSAccessibility.first_unlock_this_device);
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
