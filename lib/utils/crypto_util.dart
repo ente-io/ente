@@ -1,6 +1,6 @@
+import 'dart:io' as io;
 import 'dart:typed_data';
 
-import 'dart:io' as io;
 import 'package:computer/computer.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
@@ -109,15 +109,15 @@ void chachaDecryptFile(Map<String, dynamic> args) {
 }
 
 Uint8List chachaDecryptData(Map<String, dynamic> args) {
-  final pullState =
-      Sodium.cryptoSecretstreamXchacha20poly1305InitPull(args["header"], args["key"]);
-  final pullResult =
-      Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, args["source"], null);
+  final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
+      args["header"], args["key"]);
+  final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
+      pullState, args["source"], null);
   return pullResult.m;
 }
 
 class CryptoUtil {
-  static Computer _computer = Computer();
+  static final Computer _computer = Computer();
 
   static init() {
     _computer.turnOn(workersCount: 4);
@@ -127,7 +127,7 @@ class CryptoUtil {
   static EncryptionResult encryptSync(Uint8List source, Uint8List key) {
     final nonce = Sodium.randombytesBuf(Sodium.cryptoSecretboxNoncebytes);
 
-    final args = Map<String, dynamic>();
+    final args = <String, dynamic>{};
     args["source"] = source;
     args["nonce"] = nonce;
     args["key"] = key;
@@ -141,7 +141,7 @@ class CryptoUtil {
     Uint8List key,
     Uint8List nonce,
   ) async {
-    final args = Map<String, dynamic>();
+    final args = <String, dynamic>{};
     args["cipher"] = cipher;
     args["nonce"] = nonce;
     args["key"] = key;
@@ -153,7 +153,7 @@ class CryptoUtil {
     Uint8List key,
     Uint8List nonce,
   ) {
-    final args = Map<String, dynamic>();
+    final args = <String, dynamic>{};
     args["cipher"] = cipher;
     args["nonce"] = nonce;
     args["key"] = key;
@@ -162,7 +162,7 @@ class CryptoUtil {
 
   static Future<EncryptionResult> encryptChaCha(
       Uint8List source, Uint8List key) async {
-    final args = Map<String, dynamic>();
+    final args = <String, dynamic>{};
     args["source"] = source;
     args["key"] = key;
     return _computer.compute(chachaEncryptData, param: args);
@@ -170,7 +170,7 @@ class CryptoUtil {
 
   static Future<Uint8List> decryptChaCha(
       Uint8List source, Uint8List key, Uint8List header) async {
-    final args = Map<String, dynamic>();
+    final args = <String, dynamic>{};
     args["source"] = source;
     args["key"] = key;
     args["header"] = header;
@@ -182,7 +182,7 @@ class CryptoUtil {
     String destinationFilePath, {
     Uint8List key,
   }) {
-    final args = Map<String, dynamic>();
+    final args = <String, dynamic>{};
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
     args["key"] = key;
@@ -195,7 +195,7 @@ class CryptoUtil {
     Uint8List header,
     Uint8List key,
   ) {
-    final args = Map<String, dynamic>();
+    final args = <String, dynamic>{};
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
     args["header"] = header;
