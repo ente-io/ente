@@ -24,8 +24,11 @@ class MediaUploadData {
 }
 
 Future<MediaUploadData> getUploadDataFromEnteFile(ente.File file) async {
-  // todo: add local to get data from either Asset/photoManager or app cache
-  return await _getMediaUploadDataFromAssetFile(file);
+  if (file.isCachedInAppSandbox()) {
+    return await _getMediaUploadDataFromAppCache(file);
+  } else {
+    return await _getMediaUploadDataFromAssetFile(file);
+  }
 }
 
 Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
@@ -92,4 +95,33 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
     _logger.severe("Title was missing");
     file.title = await asset.titleAsync;
   }
+}
+
+Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
+  io.File sourceFile;
+  Uint8List thumbnailData;
+  bool isDeleted = false;
+  var localPath = file.localID.replaceAll(RegExp(r'ente-upload-cache:'), '');
+  sourceFile = io.File(localPath);
+  if (!sourceFile.existsSync()) {
+    _logger.warning("File doesn't exist in app sandbox");
+    throw InvalidFileError();
+  }
+  thumbnailData = await getThumbnailFromInAppCacheFile(file);
+  return MediaUploadData(sourceFile, thumbnailData, isDeleted);
+}
+
+Future<Uint8List> getThumbnailFromInAppCacheFile(ente.File file) async {
+  var localPath = file.localID.replaceAll(RegExp(r'ente-upload-cache:'), '');
+  var thumbnailData = io.File(localPath).readAsBytesSync();
+  int compressionAttempts = 0;
+  while (thumbnailData.length > THUMBNAIL_DATA_LIMIT &&
+      compressionAttempts < kMaximumThumbnailCompressionAttempts) {
+    _logger.info("Thumbnail size " + thumbnailData.length.toString());
+    thumbnailData = await compressThumbnail(thumbnailData);
+    _logger
+        .info("Compressed thumbnail size " + thumbnailData.length.toString());
+    compressionAttempts++;
+  }
+  return thumbnailData;
 }

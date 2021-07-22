@@ -82,7 +82,7 @@ class File {
 
   Map<String, dynamic> getMetadata() {
     final metadata = Map<String, dynamic>();
-    metadata["localID"] = localID;
+    metadata["localID"] = isCachedInAppSandbox() ? null : localID;
     metadata["title"] = title;
     metadata["deviceFolder"] = deviceFolder;
     metadata["creationTime"] = creationTime;
@@ -129,8 +129,13 @@ class File {
     }
   }
 
+  // returns true if the file isn't available in the user's gallery
   bool isRemoteFile() {
     return localID == null && uploadedFileID != null;
+  }
+
+  bool isCachedInAppSandbox() {
+    return localID != null && localID.startsWith("ente-upload-cache");
   }
 
   @override

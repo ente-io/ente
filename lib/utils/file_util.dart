@@ -20,6 +20,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 import 'crypto_util.dart';
+import 'file_uploader_util.dart';
 
 final _logger = Logger("FileUtil");
 
@@ -36,7 +37,7 @@ Future<io.File> getFile(ente.File file) async {
   } else {
     final cachedFile = FileLruCache.get(file);
     if (cachedFile == null) {
-      final diskFile = await (await file.getAsset()).file;
+      final diskFile = await _getLocalDiskFile(file);
       FileLruCache.put(file, diskFile);
       return diskFile;
     }
@@ -44,26 +45,20 @@ Future<io.File> getFile(ente.File file) async {
   }
 }
 
+Future<io.File> _getLocalDiskFile(ente.File file) async {
+  if (file.isCachedInAppSandbox()) {
+    var localPath = file.localID.replaceAll(RegExp(r'ente-upload-cache:'), '');
+    return io.File(localPath);
+  } else {
+    return await (await file.getAsset()).file;
+  }
+}
+
 void preloadThumbnail(ente.File file) {
   if (file.isRemoteFile()) {
     getThumbnailFromServer(file);
   } else {
-    if (ThumbnailLruCache.get(file, THUMBNAIL_SMALL_SIZE) != null) {
-      return;
-    }
-    file.getAsset().then((asset) {
-      if (asset != null) {
-        asset
-            .thumbDataWithSize(
-          THUMBNAIL_SMALL_SIZE,
-          THUMBNAIL_SMALL_SIZE,
-          quality: THUMBNAIL_QUALITY,
-        )
-            .then((data) {
-          ThumbnailLruCache.put(file, data, THUMBNAIL_SMALL_SIZE);
-        });
-      }
-    });
+    getThumbnailFromLocal(file);
   }
 }
 
@@ -136,11 +131,11 @@ Future<io.File> _downloadAndDecrypt(
     var fileExtension = "unknown";
     try {
       fileExtension = extension(file.title).substring(1).toLowerCase();
-    } catch(e) {
+    } catch (e) {
       _logger.severe("Could not capture file extension");
     }
     var outputFile = decryptedFile;
-    if ((fileExtension=="unknown" && file.fileType == FileType.image) || 
+    if ((fileExtension == "unknown" && file.fileType == FileType.image) ||
         (io.Platform.isAndroid && fileExtension == "heic")) {
       outputFile = await FlutterImageCompress.compressAndGetFile(
         decryptedFilePath,
@@ -156,6 +151,11 @@ Future<io.File> _downloadAndDecrypt(
       maxAge: Duration(days: 365),
       fileExtension: fileExtension,
     );
+    _logger.info("File Put in cacheManager " +
+        file.uploadedFileID.toString() +
+        "  " +
+        cachedFile.uri.toString());
+
     outputFile.deleteSync();
     fileDownloadsInProgress.remove(file.uploadedFileID);
     return cachedFile;

@@ -17,6 +17,8 @@ import 'package:photos/utils/file_util.dart';
 
 import 'dart:io' as io;
 
+import 'file_uploader_util.dart';
+
 final _logger = Logger("ThumbnailUtil");
 final _map = LinkedHashMap<int, FileDownloadItem>();
 final _queue = Queue<int>();
@@ -54,6 +56,40 @@ Future<Uint8List> getThumbnailFromServer(File file) async {
   } else {
     _map[file.uploadedFileID].counter++;
     return _map[file.uploadedFileID].completer.future;
+  }
+}
+
+Future<Uint8List> getThumbnailFromLocal(File file) async {
+  if (ThumbnailLruCache.get(file, THUMBNAIL_SMALL_SIZE) != null) {
+    return ThumbnailLruCache.get(file);
+  }
+  final cachedThumbnail = getCachedThumbnail(file);
+  if (cachedThumbnail.existsSync()) {
+    final data = cachedThumbnail.readAsBytesSync();
+    ThumbnailLruCache.put(file, data);
+    return data;
+  }
+  if (file.isCachedInAppSandbox()) {
+    return getThumbnailFromInAppCacheFile(file)
+        .then((data) {
+      if (data != null) {
+        ThumbnailLruCache.put(file, data, THUMBNAIL_SMALL_SIZE);
+      }
+      return data;
+    });
+  } else {
+    return file.getAsset().then((asset) async {
+      if (asset == null || !(await asset.exists)) {
+        return null;
+      }
+      return asset
+          .thumbDataWithSize(THUMBNAIL_SMALL_SIZE, THUMBNAIL_SMALL_SIZE,
+              quality: THUMBNAIL_QUALITY)
+          .then((data) {
+        ThumbnailLruCache.put(file, data, THUMBNAIL_SMALL_SIZE);
+        return data;
+      });
+    });
   }
 }
 
@@ -132,5 +168,6 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
 io.File getCachedThumbnail(File file) {
   final thumbnailCacheDirectory =
       Configuration.instance.getThumbnailCacheDirectory();
-  return io.File(thumbnailCacheDirectory + "/" + file.uploadedFileID.toString());
+  return io.File(
+      thumbnailCacheDirectory + "/" + file.uploadedFileID.toString());
 }
