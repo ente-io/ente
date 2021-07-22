@@ -4,9 +4,9 @@ const int kThumbnailLargeSize = 512;
 const int kCompressedThumbnailResolution = 1080;
 const int kThumbnailDataLimit = 100 * 1024;
 const String kSentryDSN =
-    "https://93b8ea6f54f442dc8408ebccdff6fe7a@errors.ente.io/2";
+    "https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.io/4";
 const String kSentryDebugDSN =
-    "https://b31c8af8384a4ce980509b8f592a67eb@errors.ente.io/3";
+    "https://ca5e686dd7f149d9bf94e620564cceba@sentry.ente.io/3";
 const String kRoadmapURL = "https://roadmap.ente.io";
 const int kMicroSecondsInDay = 86400000000;
 const int kAndroid11SDKINT = 30;

@@ -23,6 +23,7 @@ import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:super_logging/super_logging.dart';
 
 class Configuration {
   Configuration._privateConstructor();
@@ -101,6 +102,7 @@ class Configuration {
         iOptions: _secureStorageOptionsIOS,
       );
       await _migrateSecurityStorageToFirstUnlock();
+      SuperLogging.setUserID(getUserID());
     }
   }
 

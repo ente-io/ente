@@ -217,7 +217,7 @@ Future<void> _killBGTask(String taskId) async {
 }
 
 class EnteApp extends StatelessWidget with WidgetsBindingObserver {
-  static const _homeWidget = const HomeWidget();
+  static const _homeWidget = HomeWidget();
 
   @override
   Widget build(BuildContext context) {

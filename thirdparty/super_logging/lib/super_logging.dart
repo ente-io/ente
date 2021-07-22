@@ -1,8 +1,8 @@
 library super_logging;
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -11,7 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sentry/sentry.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 typedef FutureOr<void> FutureOrVoidCallback();
 
@@ -136,8 +136,6 @@ class SuperLogging {
   /// The current super logging configuration
   static LogConfig config;
 
-  static SentryClient sentryClient;
-
   static Future<void> main([LogConfig config]) async {
     config ??= LogConfig();
     SuperLogging.config = config;
@@ -153,7 +151,7 @@ class SuperLogging {
     if (fileIsEnabled) {
       await setupLogDir();
     }
-    if (sentryIsEnabled && sentryClient == null) {
+    if (sentryIsEnabled) {
       setupSentry();
     }
 
@@ -173,26 +171,25 @@ class SuperLogging {
     if (config.body == null) return;
 
     if (enable) {
-      FlutterError.onError = (details) {
-        $.fine(
-          "uncaught error from FlutterError.onError()",
-          details.exception,
-          details.stack,
-        );
-        FlutterError.dumpErrorToConsole(details, forceReport: true);
-        _sendErrorToSentry(details.exception, details.stack);
-      };
-      await runZonedGuarded(config.body, (e, trace) {
-        $.fine("uncaught error from runZoned()", e, trace);
-      });
+      await SentryFlutter.init(
+        (options) {
+          options.dsn = config.sentryDsn;
+        },
+        appRunner: () => config.body(),
+      );
     } else {
       await config.body();
     }
   }
 
-  static void _sendErrorToSentry(Object error, StackTrace stack) {
+  static void setUserID(int userID) {
+    Sentry.configureScope(
+        (scope) => scope.user = SentryUser(id: userID.toString()));
+  }
+
+  static Future<void> _sendErrorToSentry(Object error, StackTrace stack) async {
     try {
-      sentryClient.captureException(
+      await Sentry.captureException(
         error,
         stackTrace: stack,
       );
@@ -263,10 +260,9 @@ class SuperLogging {
   static bool sentryIsEnabled;
 
   static Future<void> setupSentry() async {
-    sentryClient = SentryClient(SentryOptions(dsn: config.sentryDsn));
     await for (final error in sentryQueueControl.stream) {
       try {
-        sentryClient.captureException(
+        Sentry.captureException(
           error,
         );
       } catch (e) {
