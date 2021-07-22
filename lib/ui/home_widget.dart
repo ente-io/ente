@@ -27,6 +27,7 @@ import 'package:photos/ui/app_update_dialog.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/gallery_app_bar_widget.dart';
@@ -41,6 +42,7 @@ import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:photos/ui/sync_indicator.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
@@ -61,6 +63,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
   Widget _headerWidgetWithSettingsButton;
+
+  // for receiving media files
+  StreamSubscription _intentDataStreamSubscription;
+  List<SharedMediaFile> _sharedFiles;
 
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
@@ -169,7 +175,27 @@ class _HomeWidgetState extends State<HomeWidget> {
         });
       }
     });
+    // For sharing images coming from outside the app while the app is in the memory
+    _initMediaShareSubscription();
     super.initState();
+  }
+
+  void _initMediaShareSubscription() {
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
+          setState(() {
+            print("shared");
+            _sharedFiles = value;
+          });
+        }, onError: (err) {
+          _logger.severe("getIntentDataStream error: $err");
+        });
+    // For sharing images coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
+      setState(() {
+        _sharedFiles = value;
+      });
+    });
   }
 
   @override
@@ -210,6 +236,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {
       return LoadingPhotosWidget();
+    }
+    if (_sharedFiles != null && _sharedFiles.isNotEmpty) {
+      ReceiveSharingIntent.reset();
+      return CreateCollectionPage(null, _sharedFiles);
     }
 
     return Stack(
