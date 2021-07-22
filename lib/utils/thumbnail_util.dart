@@ -58,8 +58,9 @@ Future<Uint8List> getThumbnailFromServer(File file) async {
   }
 }
 
-Future<Uint8List> getThumbnailFromLocal(File file) async {
-  if (ThumbnailLruCache.get(file, kThumbnailSmallSize) != null) {
+Future<Uint8List> getThumbnailFromLocal(File file,
+    {int size = kThumbnailSmallSize, int quality = kThumbnailQuality}) async {
+  if (ThumbnailLruCache.get(file, size) != null) {
     return ThumbnailLruCache.get(file);
   }
   final cachedThumbnail = getCachedThumbnail(file);
@@ -69,10 +70,10 @@ Future<Uint8List> getThumbnailFromLocal(File file) async {
     return data;
   }
   if (file.isCachedInAppSandbox()) {
-    return getThumbnailFromInAppCacheFile(file)
-        .then((data) {
+    //todo:neeraj support specifying size/quality
+    return getThumbnailFromInAppCacheFile(file).then((data) {
       if (data != null) {
-        ThumbnailLruCache.put(file, data, kThumbnailSmallSize);
+        ThumbnailLruCache.put(file, data, size);
       }
       return data;
     });
@@ -82,10 +83,9 @@ Future<Uint8List> getThumbnailFromLocal(File file) async {
         return null;
       }
       return asset
-          .thumbDataWithSize(kThumbnailSmallSize, kThumbnailSmallSize,
-              quality: kThumbnailQuality)
+          .thumbDataWithSize(size, size, quality: quality)
           .then((data) {
-        ThumbnailLruCache.put(file, data, kThumbnailSmallSize);
+        ThumbnailLruCache.put(file, data, size);
         return data;
       });
     });
