@@ -50,7 +50,12 @@ Future<io.File> _getLocalDiskFile(ente.File file) async {
     var localPath = file.localID.replaceAll(RegExp(r'ente-upload-cache:'), '');
     return io.File(localPath);
   } else {
-    return await (await file.getAsset()).file;
+    return file.getAsset().then((asset) async {
+      if (asset == null || !(await asset.exists)) {
+        return null;
+      }
+      return asset.file;
+    });
   }
 }
 
