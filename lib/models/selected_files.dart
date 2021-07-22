@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:photos/models/file.dart';
 
 class SelectedFiles extends ChangeNotifier {
-  final files = Set<File>();
-  final lastSelections = Set<File>();
+  final files = <File>{};
+  final lastSelections = <File>{};
 
   void toggleSelection(File file) {
     if (files.contains(file)) {
@@ -12,7 +12,7 @@ class SelectedFiles extends ChangeNotifier {
       files.add(file);
     }
     lastSelections.clear();
-     lastSelections.add(file);
+    lastSelections.add(file);
     notifyListeners();
   }
 

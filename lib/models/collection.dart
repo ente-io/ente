@@ -102,7 +102,7 @@ class Collection {
   factory Collection.fromMap(Map<String, dynamic> map) {
     if (map == null) return null;
     final sharees = (map['sharees'] == null || map['sharees'].length == 0)
-        ? List<User>()
+        ? <User>[]
         : List<User>.from(map['sharees'].map((x) => User.fromMap(x)));
     return Collection(
       map['id'],
@@ -196,7 +196,7 @@ class CollectionAttributes {
   }
 
   Map<String, dynamic> toMap() {
-    final map = Map<String, dynamic>();
+    final map = <String, dynamic>{};
     if (encryptedPath != null) {
       map['encryptedPath'] = encryptedPath;
     }

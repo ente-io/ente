@@ -81,7 +81,7 @@ class File {
   }
 
   Map<String, dynamic> getMetadata() {
-    final metadata = Map<String, dynamic>();
+    final metadata = <String, dynamic>{};
     metadata["localID"] = localID;
     metadata["title"] = title;
     metadata["deviceFolder"] = deviceFolder;

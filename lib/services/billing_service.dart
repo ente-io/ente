@@ -54,13 +54,10 @@ class BillingService {
   }
 
   Future<BillingPlans> getBillingPlans() {
-    if (_future == null) {
-      _future = _dio
-          .get(_config.getHttpEndpoint() + "/billing/plans")
-          .then((response) {
-        return BillingPlans.fromMap(response.data);
-      });
-    }
+    _future ??=
+        _dio.get(_config.getHttpEndpoint() + "/billing/plans").then((response) {
+      return BillingPlans.fromMap(response.data);
+    });
     return _future;
   }
 
@@ -86,7 +83,7 @@ class BillingService {
       );
       return Subscription.fromMap(response.data["subscription"]);
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
@@ -104,7 +101,7 @@ class BillingService {
       return subscription;
     } on DioError catch (e) {
       _logger.severe(e);
-      throw e;
+      rethrow;
     }
   }
 
@@ -124,7 +121,7 @@ class BillingService {
       );
       return response.data["usage"];
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 

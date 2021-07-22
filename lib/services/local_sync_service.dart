@@ -26,7 +26,7 @@ class LocalSyncService {
   static const kDownloadedFileIDsKey = "downloaded_file_ids";
   static const kInvalidFileIDsKey = "invalid_file_ids";
 
-  LocalSyncService._privateConstructor() {}
+  LocalSyncService._privateConstructor();
 
   static final LocalSyncService instance =
       LocalSyncService._privateConstructor();
@@ -41,7 +41,6 @@ class LocalSyncService {
     PhotoManager.addChangeCallback((value) {
       _logger.info("Something changed on disk");
       callback();
-
     });
     PhotoManager.startChangeNotify();
   }

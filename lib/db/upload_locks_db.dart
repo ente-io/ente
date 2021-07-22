@@ -50,7 +50,7 @@ class UploadLocksDB {
 
   Future<void> acquireLock(String id, String owner, int time) async {
     final db = await instance.database;
-    final row = new Map<String, dynamic>();
+    final row = <String, dynamic>{};
     row[_columnID] = id;
     row[_columnOwner] = owner;
     row[_columnTime] = time;

@@ -1,9 +1,9 @@
 import 'dart:collection';
 
-typedef EvictionHandler<K, V>(K key, V value);
+typedef EvictionHandler<K, V> = Function(K key, V value);
 
 class LRUMap<K, V> {
-  final LinkedHashMap<K, V> _map = new LinkedHashMap<K, V>();
+  final LinkedHashMap<K, V> _map = LinkedHashMap<K, V>();
   final int _maxSize;
   final EvictionHandler<K, V> _handler;
 

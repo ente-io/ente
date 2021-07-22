@@ -17,7 +17,7 @@ class SyncStatusUpdate extends Event {
     this.reason = "",
     this.error,
   }) {
-    this.timestamp = DateTime.now().microsecondsSinceEpoch;
+    timestamp = DateTime.now().microsecondsSinceEpoch;
   }
 
   @override
