@@ -18,6 +18,9 @@ export function convertBytesToGBs(bytes, precision?): string {
 }
 
 export function convertToHumanReadable(bytes:number, precision=2): string {
+    if (bytes===0) {
+        return '0 MB';
+    }
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
