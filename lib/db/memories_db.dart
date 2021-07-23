@@ -69,14 +69,14 @@ class MemoriesDB {
   }
 
   Map<String, dynamic> _getRowForSeenMemory(Memory memory, int timestamp) {
-    var row = new Map<String, dynamic>();
+    var row = <String, dynamic>{};
     row[columnFileID] = memory.file.generatedID;
     row[columnSeenTime] = timestamp;
     return row;
   }
 
   Map<int, int> _convertToSeenTimes(List<Map<String, dynamic>> rows) {
-    final seenTimes = Map<int, int>();
+    final seenTimes = <int, int>{};
     for (final row in rows) {
       seenTimes[row[columnFileID]] = int.parse(row[columnSeenTime]);
     }

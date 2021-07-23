@@ -65,14 +65,14 @@ class PublicKeysDB {
   }
 
   Map<String, dynamic> _getRow(PublicKey key) {
-    var row = new Map<String, dynamic>();
+    var row = <String, dynamic>{};
     row[columnEmail] = key.email;
     row[columnPublicKey] = key.publicKey;
     return row;
   }
 
   List<PublicKey> _convertRows(List<Map<String, dynamic>> rows) {
-    final keys = List<PublicKey>();
+    final keys = <PublicKey>[];
     for (final row in rows) {
       keys.add(PublicKey(row[columnEmail], row[columnPublicKey]));
     }

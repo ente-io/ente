@@ -29,8 +29,8 @@ class BackupFolderSelectionPage extends StatefulWidget {
 }
 
 class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
-  final Set<String> _allFolders = Set<String>();
-  Set<String> _selectedFolders = Set<String>();
+  final Set<String> _allFolders = <String>{};
+  Set<String> _selectedFolders = <String>{};
   List<File> _latestFiles;
   Map<String, int> _itemCount;
 
@@ -130,7 +130,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               child: button(
                 widget.buttonText,
                 fontSize: 18,
-                onPressed: _selectedFolders.length == 0
+                onPressed: _selectedFolders.isEmpty
                     ? null
                     : () async {
                         await Configuration.instance
@@ -225,40 +225,38 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 children: [
                   _getThumbnail(file),
                   Padding(padding: EdgeInsets.all(10)),
-                  Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          constraints: BoxConstraints(maxWidth: 140),
-                          child: Text(
-                            file.deviceFolder,
-                            style: TextStyle(
-                              fontSize: 14,
-                              height: 1.5,
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.white.withOpacity(0.7),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
-                          ),
-                        ),
-                        Padding(padding: EdgeInsets.all(2)),
-                        Text(
-                          _itemCount[file.deviceFolder].toString() +
-                              " item" +
-                              (_itemCount[file.deviceFolder] == 1 ? "" : "s"),
-                          textAlign: TextAlign.left,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        constraints: BoxConstraints(maxWidth: 140),
+                        child: Text(
+                          file.deviceFolder,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 14,
+                            height: 1.5,
                             color: isSelected
-                                ? Colors.white.withOpacity(0.65)
-                                : Colors.white.withOpacity(0.4),
+                                ? Colors.white
+                                : Colors.white.withOpacity(0.7),
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
                         ),
-                      ],
-                    ),
+                      ),
+                      Padding(padding: EdgeInsets.all(2)),
+                      Text(
+                        _itemCount[file.deviceFolder].toString() +
+                            " item" +
+                            (_itemCount[file.deviceFolder] == 1 ? "" : "s"),
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSelected
+                              ? Colors.white.withOpacity(0.65)
+                              : Colors.white.withOpacity(0.4),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -291,8 +289,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   void _sortFiles() {
     _latestFiles.sort((first, second) {
-      if (_selectedFolders.contains(first) &&
-          _selectedFolders.contains(second)) {
+      if (_selectedFolders.contains(first.deviceFolder) &&
+          _selectedFolders.contains(second.deviceFolder)) {
         return first.deviceFolder
             .toLowerCase()
             .compareTo(second.deviceFolder.toLowerCase());
@@ -310,7 +308,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   Widget _getThumbnail(File file) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(4.0),
-      child: Container(
+      child: SizedBox(
         child: ThumbnailWidget(
           file,
           shouldShowSyncStatus: false,

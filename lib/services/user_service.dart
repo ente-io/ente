@@ -106,7 +106,7 @@ class UserService {
         await dialog.hide();
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
-        throw new Exception("log out action failed");
+        throw Exception("log out action failed");
       }
     } catch (e) {
       _logger.severe(e);
@@ -129,7 +129,7 @@ class UserService {
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
         showToast("email verification successful!");
-        var page;
+        Widget page;
         final String twoFASessionID = response.data["twoFactorSessionID"];
         if (twoFASessionID != null && twoFASessionID.isNotEmpty) {
           page = TwoFactorAuthenticationPage(twoFASessionID);
@@ -180,7 +180,7 @@ class UserService {
       await _config.setKeyAttributes(result.keyAttributes);
     } catch (e) {
       _logger.severe(e);
-      throw e;
+      rethrow;
     }
   }
 
@@ -205,7 +205,7 @@ class UserService {
       await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
       _logger.severe(e);
-      throw e;
+      rethrow;
     }
   }
 
@@ -229,7 +229,7 @@ class UserService {
       await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
       _logger.severe(e);
-      throw e;
+      rethrow;
     }
   }
 
@@ -417,13 +417,13 @@ class UserService {
     } catch (e, s) {
       await dialog.hide();
       _logger.severe(e, s);
-      throw e;
+      rethrow;
     }
   }
 
   Future<bool> enableTwoFactor(
       BuildContext context, String secret, String code) async {
-    var recoveryKey;
+    Uint8List recoveryKey;
     try {
       recoveryKey = await getOrCreateRecoveryKey(context);
     } catch (e) {
@@ -507,7 +507,7 @@ class UserService {
       return response.data["status"];
     } catch (e, s) {
       _logger.severe(e, s);
-      throw e;
+      rethrow;
     }
   }
 
@@ -524,7 +524,7 @@ class UserService {
       } catch (e, s) {
         await dialog.hide();
         _logger.severe(e, s);
-        throw e;
+        rethrow;
       }
     }
     final recoveryKey = _config.getRecoveryKey();

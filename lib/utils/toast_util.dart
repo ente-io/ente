@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-Future<void> showToast(String message, {toastLength: Toast.LENGTH_LONG}) {
+Future<void> showToast(String message, {toastLength = Toast.LENGTH_LONG}) {
   if (Platform.isAndroid) {
     return Fluttertoast.showToast(
         msg: message,

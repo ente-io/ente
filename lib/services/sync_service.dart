@@ -122,7 +122,7 @@ class SyncService {
       }
       _logger.severe("backup failed", e, s);
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
-      throw e;
+      rethrow;
     } finally {
       _existingSync.complete(successful);
       _existingSync = null;
@@ -212,7 +212,7 @@ class SyncService {
       return response.data["size"];
     } catch (e) {
       _logger.severe(e);
-      throw e;
+      rethrow;
     }
   }
 

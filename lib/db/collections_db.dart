@@ -126,7 +126,7 @@ class CollectionsDB {
   Future<List<Collection>> getAllCollections() async {
     final db = await instance.database;
     final rows = await db.query(table);
-    final collections = List<Collection>();
+    final collections = <Collection>[];
     for (final row in rows) {
       collections.add(_convertToCollection(row));
     }
@@ -157,7 +157,7 @@ class CollectionsDB {
   }
 
   Map<String, dynamic> _getRowForCollection(Collection collection) {
-    var row = new Map<String, dynamic>();
+    var row = <String, dynamic>{};
     row[columnID] = collection.id;
     row[columnOwner] = collection.owner.toJson();
     row[columnEncryptedKey] = collection.encryptedKey;
