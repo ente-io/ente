@@ -351,12 +351,15 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 color: Colors.white.withOpacity(0.85),
               ),
               Padding(padding: EdgeInsets.all(4)),
-              Text(
-                exif["Image Make"].toString() +
-                    " " +
-                    exif["Image Model"].toString(),
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.85),
+              Flexible(
+                child: Text(
+                  exif["Image Make"].toString() +
+                      " " +
+                      exif["Image Model"].toString(),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.85),
+                  ),
+                  overflow: TextOverflow.clip,
                 ),
               ),
             ],

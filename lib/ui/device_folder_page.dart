@@ -74,7 +74,8 @@ class _BackupConfigurationHeaderWidgetState
   @override
   Widget build(BuildContext context) {
     final isBackedUp =
-        Configuration.instance.getPathsToBackUp().contains(widget.path);
+        Configuration.instance.getPathsToBackUp().contains(widget.path) ||
+            Configuration.instance.hasSelectedAllFoldersForBackup();
     return Container(
       padding: EdgeInsets.only(left: 12, right: 12),
       margin: EdgeInsets.only(bottom: 12),

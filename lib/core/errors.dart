@@ -16,4 +16,8 @@ class LockAlreadyAcquiredError extends Error {}
 
 class UnauthorizedError extends Error {}
 
-class RequestCancelledError extends Error{}
+class RequestCancelledError extends Error {}
+
+class InvalidSyncStatusError extends AssertionError {
+  InvalidSyncStatusError(String message) : super(message);
+}

@@ -316,6 +316,13 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
+        final hasSelectedAllFoldersForBackup =
+            Configuration.instance.hasSelectedAllFoldersForBackup();
+        if (hasSelectedAllFoldersForBackup) {
+          return FilesDB.instance.getAllLocalAndUploadedFiles(
+              creationStartTime, creationEndTime,
+              limit: limit, asc: asc);
+        }
         final importantPaths = Configuration.instance.getPathsToBackUp();
         if (importantPaths.isNotEmpty) {
           return FilesDB.instance.getImportantFiles(

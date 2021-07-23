@@ -68,7 +68,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
                   data,
                   style: TextStyle(
                     fontSize: 14,
-                    fontFeatures: [
+                    fontFeatures: const [
                       FontFeature.tabularFigures(),
                     ],
                     height: 1.4,

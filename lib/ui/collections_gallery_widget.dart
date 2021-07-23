@@ -13,8 +13,8 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/services/collections_service.dart';
 import 'package:photos/models/device_folder.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/collection_page.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/device_folder_page.dart';
@@ -250,7 +250,8 @@ class DeviceFolderIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isBackedUp =
-        Configuration.instance.getPathsToBackUp().contains(folder.path);
+        Configuration.instance.getPathsToBackUp().contains(folder.path) ||
+            Configuration.instance.hasSelectedAllFoldersForBackup();
     return GestureDetector(
       child: Container(
         height: 140,
