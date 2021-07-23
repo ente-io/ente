@@ -69,8 +69,6 @@ PODS:
     - Flutter
     - FlutterMacOS
   - Reachability (3.2)
-  - receive_sharing_intent (0.0.1):
-    - Flutter
   - SDWebImage/Core (5.7.3)
   - SDWebImageWebPCoder (0.6.1):
     - libwebp (~> 1.0)
@@ -122,7 +120,6 @@ DEPENDENCIES:
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
-  - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share (from `.symlinks/plugins/share/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
@@ -189,8 +186,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider/ios"
   photo_manager:
     :path: ".symlinks/plugins/photo_manager/ios"
-  receive_sharing_intent:
-    :path: ".symlinks/plugins/receive_sharing_intent/ios"
   sentry_flutter:
     :path: ".symlinks/plugins/sentry_flutter/ios"
   share:
@@ -236,7 +231,6 @@ SPEC CHECKSUMS:
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   photo_manager: 61cdd6835af271b9ad1bb533fccf71d5db02fff3
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
   SDWebImage: 97351f6582ceca541ea294ba66a1fcb342a331c2
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21
   Sentry: 6d963d64804dd06d96e778be729613f481394312
