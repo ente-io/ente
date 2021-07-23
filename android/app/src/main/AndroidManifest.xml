@@ -20,13 +20,13 @@
             </intent-filter>
 
             <!--Filter to support sharing images into our app-->
-            <intent-filter android:label="Upload to Ente">
+            <intent-filter android:label="backup">
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
             </intent-filter>
 
-            <intent-filter android:label="Upload to Ente">
+            <intent-filter android:label="backup">
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
