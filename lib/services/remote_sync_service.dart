@@ -161,6 +161,17 @@ class RemoteSyncService {
     if (toBeUploadedInThisSession == 0) {
       return;
     }
+    if (_completedUploads > toBeUploadedInThisSession ||
+        _completedUploads < 0 ||
+        toBeUploadedInThisSession < 0) {
+      _logger.severe(
+          "Incorrect sync status",
+          InvalidSyncStatusError("Tried to report " +
+              _completedUploads.toString() +
+              " as uploaded out of " +
+              toBeUploadedInThisSession.toString()));
+      return;
+    }
     Bus.instance.fire(SyncStatusUpdate(SyncStatus.in_progress,
         completed: _completedUploads, total: toBeUploadedInThisSession));
   }
