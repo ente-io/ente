@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 
@@ -136,7 +137,7 @@ class File {
 
 
   bool isCachedInAppSandbox() {
-    return localID != null && localID.startsWith("ente-upload-cache");
+    return localID != null && localID.startsWith(kAppCacheIdentifier);
   }
 
   bool hasLocation() {

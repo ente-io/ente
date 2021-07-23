@@ -47,7 +47,7 @@ Future<io.File> getFile(ente.File file) async {
 
 Future<io.File> _getLocalDiskFile(ente.File file) async {
   if (file.isCachedInAppSandbox()) {
-    var localPath = file.localID.replaceAll(RegExp(r'ente-upload-cache:'), '');
+    var localPath = file.localID.replaceAll(kAppCacheIdentifier, '');
     return io.File(localPath);
   } else {
     return file.getAsset().then((asset) async {

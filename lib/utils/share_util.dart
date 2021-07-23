@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'dart:io' as dartio;
 import 'package:exif/exif.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:share/share.dart';
@@ -37,7 +38,7 @@ Future<List<File>> convertIncomingSharedMediaToFile(
   List<File> localFiles = [];
   for (var media in sharedMedia) {
     var enteFile = File();
-    enteFile.localID = "ente-upload-cache:" + media.path;
+    enteFile.localID = kAppCacheIdentifier + media.path;
     enteFile.collectionID = collectionID;
     enteFile.fileType = FileType.image;
     enteFile.title = basename(media.path);

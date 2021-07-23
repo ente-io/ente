@@ -100,7 +100,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   io.File sourceFile;
   Uint8List thumbnailData;
   bool isDeleted = false;
-  var localPath = file.localID.replaceAll(RegExp(r'ente-upload-cache:'), '');
+  var localPath = file.localID.replaceAll(kAppCacheIdentifier, '');
   sourceFile = io.File(localPath);
   if (!sourceFile.existsSync()) {
     _logger.warning("File doesn't exist in app sandbox");
@@ -111,7 +111,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
 }
 
 Future<Uint8List> getThumbnailFromInAppCacheFile(ente.File file) async {
-  var localPath = file.localID.replaceAll(RegExp(r'ente-upload-cache:'), '');
+  var localPath = file.localID.replaceAll(kAppCacheIdentifier, '');
   var thumbnailData = io.File(localPath).readAsBytesSync();
   int compressionAttempts = 0;
   while (thumbnailData.length > kThumbnailDataLimit &&
