@@ -107,13 +107,12 @@ class RemoteSyncService {
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
     }
-    final alreadyUploaded = await FilesDB.instance.getNumberOfUploadedFiles();
     final List<Future> futures = [];
     for (final uploadedFileID in updatedFileIDs) {
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
-      final future = _uploader.upload(file, file.collectionID).then(
-          (uploadedFile) async =>
-              await _onFileUploaded(uploadedFile, alreadyUploaded));
+      final future = _uploader
+          .upload(file, file.collectionID)
+          .then((uploadedFile) => _onFileUploaded(uploadedFile));
       futures.add(future);
     }
 
@@ -121,16 +120,16 @@ class RemoteSyncService {
       final collectionID = (await CollectionsService.instance
               .getOrCreateForPath(file.deviceFolder))
           .id;
-      final future = _uploader.upload(file, collectionID).then(
-          (uploadedFile) async =>
-              await _onFileUploaded(uploadedFile, alreadyUploaded));
+      final future = _uploader
+          .upload(file, collectionID)
+          .then((uploadedFile) => _onFileUploaded(uploadedFile));
       futures.add(future);
     }
 
     for (final file in editedFiles) {
-      final future = _uploader.upload(file, file.collectionID).then(
-          (uploadedFile) async =>
-              await _onFileUploaded(uploadedFile, alreadyUploaded));
+      final future = _uploader
+          .upload(file, file.collectionID)
+          .then((uploadedFile) => _onFileUploaded(uploadedFile));
       futures.add(future);
     }
 
@@ -154,7 +153,7 @@ class RemoteSyncService {
     return _completedUploads > 0;
   }
 
-  Future<void> _onFileUploaded(File file, int alreadyUploaded) async {
+  Future<void> _onFileUploaded(File file) async {
     Bus.instance.fire(CollectionUpdatedEvent(file.collectionID, [file]));
     _completedUploads++;
     final toBeUploadedInThisSession =
