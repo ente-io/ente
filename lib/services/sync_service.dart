@@ -157,16 +157,9 @@ class SyncService {
     LocalSyncService.instance.addChangeCallback(() => sync());
   }
 
-  Future<void> onFoldersAdded(List<String> paths) async {
-    if (_existingSync != null) {
-      await _existingSync.future;
-    }
-    return sync();
-  }
-
-  void onFoldersRemoved(List<String> paths) {
+  void onFoldersSet(Set<String> paths) {
     _uploader.removeFromQueueWhere((file) {
-      return paths.contains(file.deviceFolder);
+      return !paths.contains(file.deviceFolder);
     }, UserCancelledUploadError());
   }
 

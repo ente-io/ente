@@ -29,7 +29,8 @@ class Configuration {
   Configuration._privateConstructor();
 
   static final Configuration instance = Configuration._privateConstructor();
-  static const endpoint = String.fromEnvironment("endpoint", defaultValue: "https://api.ente.io");
+  static const endpoint =
+      String.fromEnvironment("endpoint", defaultValue: "https://api.ente.io");
   static const emailKey = "email";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyAttributesKey = "key_attributes";
@@ -48,6 +49,8 @@ class Configuration {
   static const userIDKey = "user_id";
   static const hasMigratedSecureStorageToFirstUnlockKey =
       "has_migrated_secure_storage_to_first_unlock";
+  static const hasSelectedAllFoldersForBackupKey =
+      "has_selected_all_folders_for_backup";
 
   final kTempFolderDeletionTimeBuffer = Duration(days: 1).inMicroseconds;
 
@@ -322,25 +325,9 @@ class Configuration {
   }
 
   Future<void> setPathsToBackUp(Set<String> newPaths) async {
-    final currentPaths = getPathsToBackUp();
-    List<String> added = [], removed = [];
-    for (final path in newPaths) {
-      if (!currentPaths.contains(path)) {
-        added.add(path);
-      }
-    }
-    for (final path in currentPaths) {
-      if (!newPaths.contains(path)) {
-        removed.add(path);
-      }
-    }
     await _preferences.setStringList(foldersToBackUpKey, newPaths.toList());
-    if (added.isNotEmpty) {
-      SyncService.instance.onFoldersAdded(added);
-    }
-    if (removed.isNotEmpty) {
-      SyncService.instance.onFoldersRemoved(removed);
-    }
+    SyncService.instance.onFoldersSet(newPaths);
+    SyncService.instance.sync();
   }
 
   Future<void> addPathToFoldersToBeBackedUp(String path) async {
@@ -497,6 +484,14 @@ class Configuration {
 
   bool hasSkippedBackupFolderSelection() {
     return _preferences.getBool(keyHasSkippedBackupFolderSelection) ?? false;
+  }
+
+  bool hasSelectedAllFoldersForBackup() {
+    return _preferences.getBool(hasSelectedAllFoldersForBackupKey) ?? false;
+  }
+
+  Future<void> setSelectAllFoldersForBackup(bool value) async {
+    await _preferences.setBool(hasSelectedAllFoldersForBackupKey, value);
   }
 
   Future<void> _migrateSecurityStorageToFirstUnlock() async {

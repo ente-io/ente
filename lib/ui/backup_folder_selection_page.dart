@@ -50,7 +50,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         for (final file in _latestFiles) {
           _allFolders.add(file.deviceFolder);
         }
-        if (widget.shouldSelectAll) {
+        if (widget.shouldSelectAll ||
+            Configuration.instance.hasSelectedAllFoldersForBackup()) {
           _selectedFolders.addAll(_allFolders);
         }
       });
@@ -135,6 +136,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     : () async {
                         await Configuration.instance
                             .setPathsToBackUp(_selectedFolders);
+                        Configuration.instance.setSelectAllFoldersForBackup(
+                            _selectedFolders.length == _allFolders.length);
                         Bus.instance.fire(BackupFoldersUpdatedEvent());
                         Navigator.of(context).pop();
                       },
