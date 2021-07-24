@@ -1,4 +1,4 @@
-import { errorCodes } from './errorUtil';
+import constants from 'utils/strings/constants';
 
 const DESKTOP_APP_DOWNLOAD_URL = 'https://github.com/ente-io/bhari-frame/releases/';
 
@@ -8,7 +8,7 @@ export function checkConnectivity() {
     if (navigator.onLine) {
         return true;
     }
-    throw new Error(errorCodes.ERR_NO_INTERNET_CONNECTION);
+    throw new Error(constants.NO_INTERNET_CONNECTION);
 }
 
 export function runningInBrowser() {
