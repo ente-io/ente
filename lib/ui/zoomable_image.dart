@@ -150,7 +150,7 @@ class _ZoomableImageState extends State<ZoomableImage>
             FilesDB.instance.update(_photo);
             _loadNetworkImage();
           } else {
-            FilesDB.instance.deleteLocalFile(_photo.localID);
+            FilesDB.instance.deleteLocalFile(_photo);
             Bus.instance.fire(LocalPhotosUpdatedEvent([_photo]));
           }
         }

@@ -320,9 +320,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       newFile.collectionID = widget.originalFile.collectionID;
       newFile.location = widget.originalFile.location;
       if (!newFile.hasLocation() && widget.originalFile.localID != null) {
-        final latLong =
-            await (await widget.originalFile.getAsset()).latlngAsync();
-        newFile.location = Location(latLong.latitude, latLong.longitude);
+        var assetEntity = await widget.originalFile.getAsset();
+        if (assetEntity != null) {
+          final latLong = await assetEntity.latlngAsync();
+          newFile.location = Location(latLong.latitude, latLong.longitude);
+        }
       }
       newFile.generatedID = await FilesDB.instance.insert(newFile);
       await LocalSyncService.instance.trackEditedFile(newFile);

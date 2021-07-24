@@ -180,7 +180,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           _loadNetworkImage();
         } else {
           _logger.info("Deleting file " + widget.file.tag());
-          FilesDB.instance.deleteLocalFile(widget.file.localID);
+          FilesDB.instance.deleteLocalFile(widget.file);
           Bus.instance.fire(LocalPhotosUpdatedEvent([widget.file]));
         }
         return;

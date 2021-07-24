@@ -639,13 +639,22 @@ class FilesDB {
     );
   }
 
-  Future<int> deleteLocalFile(String localID) async {
+  Future<int> deleteLocalFile(File file) async {
     final db = await instance.database;
-    return db.delete(
-      table,
-      where: '$columnLocalID =?',
-      whereArgs: [localID],
-    );
+    if (file.localID != null) {
+      // delete all files with same local ID
+      return db.delete(
+        table,
+        where: '$columnLocalID =?',
+        whereArgs: [file.localID],
+      );
+    } else {
+      return db.delete(
+        table,
+        where: '$columnGeneratedID =?',
+        whereArgs: [file.generatedID],
+      );
+    }
   }
 
   Future<void> deleteLocalFiles(List<String> localIDs) async {

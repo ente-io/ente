@@ -66,7 +66,7 @@ Future<void> deleteFilesFromEverywhere(
           uploadedFileIDsToBeDeleted.add(file.uploadedFileID);
           updatedCollectionIDs.add(file.collectionID);
         } else {
-          await FilesDB.instance.deleteLocalFile(file.localID);
+          await FilesDB.instance.deleteLocalFile(file);
         }
       }
     } else {

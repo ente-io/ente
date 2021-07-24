@@ -62,6 +62,9 @@ class File {
   }
 
   Future<AssetEntity> getAsset() {
+    if (localID == null) {
+      return Future.value(null);
+    }
     return AssetEntity.fromId(localID);
   }
 
