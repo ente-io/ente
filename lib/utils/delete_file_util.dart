@@ -30,7 +30,7 @@ Future<void> deleteFilesFromEverywhere(
   final List<String> localIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
   for (final file in files) {
-    if (file.localID != null) {
+    if (file.localID != null)  {
       final asset = await file.getAsset();
       if (asset == null || !(await asset.exists)) {
         _logger.warning("Already deleted " + file.toString());

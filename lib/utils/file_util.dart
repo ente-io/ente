@@ -156,11 +156,6 @@ Future<io.File> _downloadAndDecrypt(
       maxAge: Duration(days: 365),
       fileExtension: fileExtension,
     );
-    _logger.info("File Put in cacheManager " +
-        file.uploadedFileID.toString() +
-        "  " +
-        cachedFile.uri.toString());
-
     outputFile.deleteSync();
     fileDownloadsInProgress.remove(file.uploadedFileID);
     return cachedFile;
