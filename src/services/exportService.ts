@@ -1,5 +1,5 @@
 import { retryPromise, runningInBrowser } from 'utils/common';
-import { getExportPendingFiles, getExportFailedFiles, getFilesUploadedAfterLastExport, getFileUID, dedupe } from 'utils/export';
+import { getExportPendingFiles, getExportFailedFiles, getFilesUploadedAfterLastExport, getFileUID, dedupe, getGoogleLikeMetadataFile } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Collection, getLocalCollections } from './collectionService';
@@ -258,7 +258,7 @@ class ExportService {
         this.ElectronAPIs.saveStreamToDisk(`${collectionPath}/${uid}`, fileStream);
         this.ElectronAPIs.saveFileToDisk(
             `${collectionPath}/${MetadataFolderName}/${uid}.json`,
-            JSON.stringify(file.metadata, null, 2),
+            getGoogleLikeMetadataFile(uid, file.metadata),
         );
     }
 
