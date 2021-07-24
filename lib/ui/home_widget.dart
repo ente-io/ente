@@ -184,7 +184,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
           setState(() {
-            print("shared");
             _sharedFiles = value;
           });
         }, onError: (err) {
