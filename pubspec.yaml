@@ -88,6 +88,7 @@ dependencies:
   syncfusion_flutter_sliders: ^19.1.67-beta
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
+  uuid: ^3.0.4
   video_player: ^2.0.0
   visibility_detector: ^0.2.0
   wallpaper_manager_flutter: ^0.0.2

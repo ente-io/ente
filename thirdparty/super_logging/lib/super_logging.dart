@@ -182,9 +182,8 @@ class SuperLogging {
     }
   }
 
-  static void setUserID(int userID) {
-    Sentry.configureScope(
-        (scope) => scope.user = SentryUser(id: userID.toString()));
+  static void setUserID(String userID) {
+    Sentry.configureScope((scope) => scope.user = SentryUser(id: userID));
   }
 
   static Future<void> _sendErrorToSentry(Object error, StackTrace stack) async {

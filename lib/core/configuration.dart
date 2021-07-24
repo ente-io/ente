@@ -24,6 +24,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_logging/super_logging.dart';
+import 'package:uuid/uuid.dart';
 
 class Configuration {
   Configuration._privateConstructor();
@@ -51,6 +52,7 @@ class Configuration {
       "has_migrated_secure_storage_to_first_unlock";
   static const hasSelectedAllFoldersForBackupKey =
       "has_selected_all_folders_for_backup";
+  static const anonymousUserIDKey = "anonymous_user_id";
 
   final kTempFolderDeletionTimeBuffer = Duration(days: 1).inMicroseconds;
 
@@ -105,8 +107,8 @@ class Configuration {
         iOptions: _secureStorageOptionsIOS,
       );
       await _migrateSecurityStorageToFirstUnlock();
-      SuperLogging.setUserID(getUserID());
     }
+    SuperLogging.setUserID(await _getOrCreateAnonymousUserID());
   }
 
   Future<void> logout() async {
@@ -513,5 +515,12 @@ class Configuration {
       await _preferences.setBool(
           hasMigratedSecureStorageToFirstUnlockKey, true);
     }
+  }
+
+  Future<String> _getOrCreateAnonymousUserID() async {
+    if (!_preferences.containsKey(anonymousUserIDKey)) {
+      await _preferences.setString(anonymousUserIDKey, Uuid().v4());
+    }
+    return _preferences.getString(anonymousUserIDKey);
   }
 }
