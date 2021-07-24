@@ -13,6 +13,7 @@ import { SetLoading } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { sortFilesIntoCollections } from 'utils/file';
+import { FileRejection } from 'react-dropzone';
 
 interface Props {
     syncWithRemote: (force?: boolean) => Promise<void>;
@@ -27,6 +28,7 @@ interface Props {
     setDialogMessage: SetDialogMessage;
     setUploadInProgress: any;
     showCollectionSelector: () => void;
+    fileRejections:FileRejection[]
 }
 
 export enum UPLOAD_STRATEGY {
@@ -254,6 +256,7 @@ export default function Upload(props: Props) {
                 show={progressView}
                 closeModal={() => setProgressView(false)}
                 retryFailed={retryFailed}
+                fileRejections={props.fileRejections}
             />
         </>
     );

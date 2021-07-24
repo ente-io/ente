@@ -2,7 +2,8 @@ import React from 'react';
 import {
     Alert, Button, Modal, ProgressBar,
 } from 'react-bootstrap';
-import { UPLOAD_STAGES } from 'services/uploadService';
+import { FileRejection } from 'react-dropzone';
+import { UPLOAD_STAGES, FileUploadErrorCode } from 'services/uploadService';
 import constants from 'utils/strings/constants';
 
 interface Props {
@@ -13,12 +14,20 @@ interface Props {
     retryFailed;
     fileProgress: Map<string, number>;
     show;
+    fileRejections:FileRejection[]
+}
+interface FileProgressStatuses{
+    fileName:string;
+    progress:number;
 }
 export default function UploadProgress(props: Props) {
-    const fileProgressStatuses = [];
+    const fileProgressStatuses = [] as FileProgressStatuses[];
     if (props.fileProgress) {
         for (const [fileName, progress] of props.fileProgress) {
             fileProgressStatuses.push({ fileName, progress });
+        }
+        for (const { file } of props.fileRejections) {
+            fileProgressStatuses.push({ fileName: file.name, progress: FileUploadErrorCode.UNSUPPORTED });
         }
         fileProgressStatuses.sort((a, b) => {
             if (b.progress !== -1 && a.progress === -1) return 1;

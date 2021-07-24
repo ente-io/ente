@@ -93,6 +93,7 @@ const englishConstants = {
     },
     UPLOADING_FILES: 'file upload',
     FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
+    UNSUPPORTED_FILE_LIST: 'unsupported files',
     FILE_UPLOAD_PROGRESS: (name, progress) => (
         <div id={name}>
             <strong>{name}</strong>
@@ -103,6 +104,8 @@ const englishConstants = {
                         return 'failed';
                     case -2:
                         return 'already uploaded, skipping...';
+                    case -3:
+                        return 'unsupported file format, ignored';
                     default:
                         return `${progress}%`;
                 }

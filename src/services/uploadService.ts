@@ -37,11 +37,15 @@ const CHUNKS_COMBINED_FOR_UPLOAD = 5;
 const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 const NULL_LOCATION: Location = { latitude: null, longitude: null };
 const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
-const FILE_UPLOAD_FAILED = -1;
-const FILE_UPLOAD_SKIPPED = -2;
 const FILE_UPLOAD_COMPLETED = 100;
 const EDITED_FILE_SUFFIX = '-edited';
 const TwoSecondInMillSeconds = 2000;
+
+export enum FileUploadErrorCode {
+    FAILED = -1,
+    SKIPPED = -2,
+    UNSUPPORTED = -3,
+}
 
 interface Location {
     latitude: number;
@@ -243,7 +247,7 @@ class UploadService {
             let file: FileInMemory = await this.readFile(reader, rawFile);
             if (this.fileAlreadyInCollection(file, collection)) {
                 // set progress to -2 indicating that file upload was skipped
-                this.fileProgress.set(rawFile.name, FILE_UPLOAD_SKIPPED);
+                this.fileProgress.set(rawFile.name, FileUploadErrorCode.SKIPPED);
                 this.updateProgressBarUI();
                 await sleep(TwoSecondInMillSeconds);
                 // remove completed files for file progress list
@@ -271,7 +275,7 @@ class UploadService {
             logError(e, 'file upload failed');
             this.failedFiles.push(fileWithCollection);
             // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
-            this.fileProgress.set(rawFile.name, FILE_UPLOAD_FAILED);
+            this.fileProgress.set(rawFile.name, FileUploadErrorCode.FAILED);
             handleError(e);
         }
         this.updateProgressBarUI();

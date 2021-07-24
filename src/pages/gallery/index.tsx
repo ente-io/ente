@@ -135,10 +135,11 @@ export default function Gallery() {
         getInputProps,
         open: openFileUploader,
         acceptedFiles,
+        fileRejections,
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
-        accept: 'image/*, video/*, application/json, ',
+        accept: ['image/*', 'video/*', 'application/json'],
         disabled: uploadInProgress,
     });
 
@@ -424,6 +425,7 @@ export default function Gallery() {
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setDialogMessage={setDialogMessage}
                     setUploadInProgress={setUploadInProgress}
+                    fileRejections={fileRejections}
                 />
                 <Sidebar
                     collections={collections}
