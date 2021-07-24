@@ -145,7 +145,7 @@ export default function Gallery() {
     const loadingBar = useRef(null);
     const [searchMode, setSearchMode] = useState(false);
     const [searchStats, setSearchStats] = useState(null);
-    const syncInProgress = useRef(true);
+    const syncInProgress = useRef<Promise<void>>(null);
     const resync = useRef(false);
     const [deleted, setDeleted] = useState<number[]>([]);
     const appContext = useContext(AppContext);
@@ -195,47 +195,49 @@ export default function Gallery() {
             resync.current= true;
             return;
         }
-        syncInProgress.current=true;
-        try {
-            checkConnectivity();
-            if (!(await isTokenValid())) {
-                throw new Error(errorCodes.ERR_SESSION_EXPIRED);
+        syncInProgress.current=(async ()=>{
+            try {
+                checkConnectivity();
+                if (!(await isTokenValid())) {
+                    throw new Error(errorCodes.ERR_SESSION_EXPIRED);
+                }
+                loadingBar.current?.continuousStart();
+                await billingService.updatePlans();
+                await billingService.syncSubscription();
+                const collections = await syncCollections();
+                const { files } = await syncFiles(collections, setFiles);
+                await initDerivativeState(collections, files);
+            } catch (e) {
+                switch (e.message) {
+                    case errorCodes.ERR_SESSION_EXPIRED:
+                        setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
+                        setDialogMessage({
+                            title: constants.SESSION_EXPIRED,
+                            content: constants.SESSION_EXPIRED_MESSAGE,
+                            staticBackdrop: true,
+                            proceed: {
+                                text: constants.LOGIN,
+                                action: logoutUser,
+                                variant: 'success',
+                            },
+                            nonClosable: true,
+                        });
+                        break;
+                    case errorCodes.ERR_KEY_MISSING:
+                        clearKeys();
+                        router.push('/credentials');
+                        break;
+                }
+            } finally {
+                loadingBar.current?.complete();
             }
-            loadingBar.current?.continuousStart();
-            await billingService.updatePlans();
-            await billingService.syncSubscription();
-            const collections = await syncCollections();
-            const { files } = await syncFiles(collections, setFiles);
-            await initDerivativeState(collections, files);
-        } catch (e) {
-            switch (e.message) {
-                case errorCodes.ERR_SESSION_EXPIRED:
-                    setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
-                    setDialogMessage({
-                        title: constants.SESSION_EXPIRED,
-                        content: constants.SESSION_EXPIRED_MESSAGE,
-                        staticBackdrop: true,
-                        proceed: {
-                            text: constants.LOGIN,
-                            action: logoutUser,
-                            variant: 'success',
-                        },
-                        nonClosable: true,
-                    });
-                    break;
-                case errorCodes.ERR_KEY_MISSING:
-                    clearKeys();
-                    router.push('/credentials');
-                    break;
+            syncInProgress.current=null;
+            if (resync.current) {
+                resync.current=false;
+                syncWithRemote();
             }
-        } finally {
-            loadingBar.current?.complete();
-        }
-        syncInProgress.current=false;
-        if (resync.current) {
-            resync.current=false;
-            syncWithRemote();
-        }
+        })();
+        await syncInProgress.current;
     };
 
     const initDerivativeState = async (collections, files) => {
@@ -408,6 +410,7 @@ export default function Gallery() {
                 />
                 <Upload
                     syncWithRemote={syncWithRemote}
+                    syncInProgress={syncInProgress.current}
                     setBannerMessage={setBannerMessage}
                     acceptedFiles={acceptedFiles}
                     existingFiles={files}
