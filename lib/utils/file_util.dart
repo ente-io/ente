@@ -9,7 +9,6 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/cache/image_cache.dart';
-import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -20,6 +19,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 import 'crypto_util.dart';
+import 'file_uploader_util.dart';
 
 final _logger = Logger("FileUtil");
 
@@ -36,7 +36,7 @@ Future<io.File> getFile(ente.File file) async {
   } else {
     final cachedFile = FileLruCache.get(file);
     if (cachedFile == null) {
-      final diskFile = await (await file.getAsset()).file;
+      final diskFile = await _getLocalDiskFile(file);
       FileLruCache.put(file, diskFile);
       return diskFile;
     }
@@ -44,26 +44,32 @@ Future<io.File> getFile(ente.File file) async {
   }
 }
 
+Future<io.File> _getLocalDiskFile(ente.File file) async {
+  if (file.isSharedMediaToAppSandbox()) {
+    var localFile = io.File(getSharedMediaFilePath(file));
+    return localFile.exists().then((exist) {
+      return exist ? localFile : null;
+    });
+  } else {
+    return file.getAsset().then((asset) async {
+      if (asset == null || !(await asset.exists)) {
+        return null;
+      }
+      return asset.file;
+    });
+  }
+}
+
+String getSharedMediaFilePath(ente.File file) {
+  return Configuration.instance.getSharedMediaCacheDirectory()
+      + "/" + file.localID.replaceAll(kSharedMediaIdentifier, '');
+}
+
 void preloadThumbnail(ente.File file) {
   if (file.isRemoteFile()) {
     getThumbnailFromServer(file);
   } else {
-    if (ThumbnailLruCache.get(file, kThumbnailSmallSize) != null) {
-      return;
-    }
-    file.getAsset().then((asset) {
-      if (asset != null) {
-        asset
-            .thumbDataWithSize(
-          kThumbnailSmallSize,
-          kThumbnailSmallSize,
-          quality: kThumbnailQuality,
-        )
-            .then((data) {
-          ThumbnailLruCache.put(file, data, kThumbnailSmallSize);
-        });
-      }
-    });
+    getThumbnailFromLocal(file);
   }
 }
 

@@ -15,6 +15,9 @@ import 'package:photos/models/file.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 
+import 'dart:io' as io;
+import 'file_uploader_util.dart';
+
 final _logger = Logger("ThumbnailUtil");
 final _map = <int, FileDownloadItem>{};
 final _queue = Queue<int>();
@@ -52,6 +55,40 @@ Future<Uint8List> getThumbnailFromServer(File file) async {
   } else {
     _map[file.uploadedFileID].counter++;
     return _map[file.uploadedFileID].completer.future;
+  }
+}
+
+Future<Uint8List> getThumbnailFromLocal(File file,
+    {int size = kThumbnailSmallSize, int quality = kThumbnailQuality}) async {
+  if (ThumbnailLruCache.get(file, size) != null) {
+    return ThumbnailLruCache.get(file);
+  }
+  final cachedThumbnail = getCachedThumbnail(file);
+  if (cachedThumbnail.existsSync()) {
+    final data = cachedThumbnail.readAsBytesSync();
+    ThumbnailLruCache.put(file, data);
+    return data;
+  }
+  if (file.isSharedMediaToAppSandbox()) {
+    //todo:neeraj support specifying size/quality
+    return getThumbnailFromInAppCacheFile(file).then((data) {
+      if (data != null) {
+        ThumbnailLruCache.put(file, data, size);
+      }
+      return data;
+    });
+  } else {
+    return file.getAsset().then((asset) async {
+      if (asset == null || !(await asset.exists)) {
+        return null;
+      }
+      return asset
+          .thumbDataWithSize(size, size, quality: quality)
+          .then((data) {
+        ThumbnailLruCache.put(file, data, size);
+        return data;
+      });
+    });
   }
 }
 

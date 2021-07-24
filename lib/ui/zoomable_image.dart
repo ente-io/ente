@@ -130,57 +130,31 @@ class _ZoomableImageState extends State<ZoomableImage>
         !_loadedLargeThumbnail &&
         !_loadedFinalImage) {
       _loadingLargeThumbnail = true;
-      final cachedThumbnail =
-          ThumbnailLruCache.get(_photo, kThumbnailLargeSize);
-      if (cachedThumbnail != null) {
-        _onLargeThumbnailLoaded(Image.memory(cachedThumbnail).image, context);
-      } else {
-        _photo.getAsset().then((asset) {
-          if (asset == null) {
-            // Deleted file
-            return;
-          }
-          asset
-              .thumbDataWithSize(kThumbnailLargeSize, kThumbnailLargeSize)
-              .then((data) {
-            if (data == null) {
-              // Deleted file
-              return;
-            }
-            _onLargeThumbnailLoaded(Image.memory(data).image, context);
-            ThumbnailLruCache.put(_photo, data, kThumbnailLargeSize);
-          });
-        });
-      }
+      getThumbnailFromLocal(_photo, size: kThumbnailLargeSize, quality: 100)
+          .then((cachedThumbnail) {
+        if(cachedThumbnail != null) {
+          _onLargeThumbnailLoaded(Image.memory(cachedThumbnail).image, context);
+        }
+      });
     }
 
     if (!_loadingFinalImage && !_loadedFinalImage) {
       _loadingFinalImage = true;
-      final cachedFile = FileLruCache.get(_photo);
-      if (cachedFile != null && cachedFile.existsSync()) {
-        _onFinalImageLoaded(Image.file(cachedFile).image);
-      } else {
-        _photo.getAsset().then((asset) async {
-          if (asset == null || !(await asset.exists)) {
-            _logger.info("File was deleted " + _photo.toString());
-            if (_photo.uploadedFileID != null) {
-              _photo.localID = null;
-              FilesDB.instance.update(_photo);
-              _loadNetworkImage();
-            } else {
-              FilesDB.instance.deleteLocalFile(_photo.localID);
-              Bus.instance.fire(LocalPhotosUpdatedEvent([_photo]));
-            }
-            return;
+      getFile(_photo).then((file) {
+        if (file != null && file.existsSync()) {
+          _onFinalImageLoaded(Image.file(file).image);
+        } else {
+          _logger.info("File was deleted " + _photo.toString());
+          if (_photo.uploadedFileID != null) {
+            _photo.localID = null;
+            FilesDB.instance.update(_photo);
+            _loadNetworkImage();
+          } else {
+            FilesDB.instance.deleteLocalFile(_photo);
+            Bus.instance.fire(LocalPhotosUpdatedEvent([_photo]));
           }
-          asset.file.then((file) {
-            if (mounted) {
-              _onFinalImageLoaded(Image.file(file).image);
-              FileLruCache.put(_photo, file);
-            }
-          });
-        });
-      }
+        }
+      });
     }
   }
 

@@ -66,6 +66,7 @@ class Configuration {
   FlutterSecureStorage _secureStorage;
   String _tempDirectory;
   String _thumbnailCacheDirectory;
+  String _sharedMediaDirectory;
   String _volatilePassword;
 
   final _secureStorageOptionsIOS =
@@ -92,9 +93,11 @@ class Configuration {
       _logger.warning(e);
     }
     tempDirectory.createSync(recursive: true);
-    _thumbnailCacheDirectory =
-        (await getTemporaryDirectory()).path + "/thumbnail-cache";
+    var tempDirectoryPath = (await getTemporaryDirectory()).path;
+    _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
     io.Directory(_thumbnailCacheDirectory).createSync(recursive: true);
+    _sharedMediaDirectory = tempDirectoryPath + "/ente-shared-media";
+    io.Directory(_sharedMediaDirectory).createSync(recursive: true);
     if (!_preferences.containsKey(tokenKey)) {
       await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
     } else {
@@ -410,6 +413,10 @@ class Configuration {
 
   String getThumbnailCacheDirectory() {
     return _thumbnailCacheDirectory;
+  }
+
+  String getSharedMediaCacheDirectory() {
+    return _sharedMediaDirectory;
   }
 
   bool hasConfiguredAccount() {

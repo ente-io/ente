@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 
@@ -61,6 +62,9 @@ class File {
   }
 
   Future<AssetEntity> getAsset() {
+    if (localID == null) {
+      return Future.value(null);
+    }
     return AssetEntity.fromId(localID);
   }
 
@@ -82,7 +86,7 @@ class File {
 
   Map<String, dynamic> getMetadata() {
     final metadata = <String, dynamic>{};
-    metadata["localID"] = localID;
+    metadata["localID"] = isSharedMediaToAppSandbox() ? null : localID;
     metadata["title"] = title;
     metadata["deviceFolder"] = deviceFolder;
     metadata["creationTime"] = creationTime;
@@ -129,8 +133,14 @@ class File {
     }
   }
 
+  // returns true if the file isn't available in the user's gallery
   bool isRemoteFile() {
     return localID == null && uploadedFileID != null;
+  }
+
+
+  bool isSharedMediaToAppSandbox() {
+    return localID != null && localID.startsWith(kSharedMediaIdentifier);
   }
 
   bool hasLocation() {

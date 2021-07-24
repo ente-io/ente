@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' as io;
 import 'dart:io';
 import 'dart:math';
 
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -20,6 +22,8 @@ import 'package:photos/ui/linear_progress_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
+import 'file_util.dart';
+
 final _logger = Logger("DeleteFileUtil");
 
 Future<void> deleteFilesFromEverywhere(
@@ -27,25 +31,28 @@ Future<void> deleteFilesFromEverywhere(
   final dialog = createProgressDialog(context, "deleting...");
   await dialog.show();
   _logger.info("Trying to delete files " + files.toString());
-  final List<String> localIDs = [];
+  final List<String> localAssetIDs = [];
+  final List<String> localSharedMediaIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
   for (final file in files) {
-    if (file.localID != null) {
-      final asset = await file.getAsset();
-      if (asset == null || !(await asset.exists)) {
+    if (file.localID != null)  {
+      if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID);
+      } else if(file.isSharedMediaToAppSandbox()) {
+        localSharedMediaIDs.add(file.localID);
       } else {
-        localIDs.add(file.localID);
+        localAssetIDs.add(file.localID);
       }
     }
   }
   Set<String> deletedIDs = Set<String>();
   try {
-    deletedIDs = (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
+    deletedIDs = (await PhotoManager.editor.deleteWithIds(localAssetIDs)).toSet();
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
+  deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
   final updatedCollectionIDs = Set<int>();
   final List<int> uploadedFileIDsToBeDeleted = [];
   final List<File> deletedFiles = [];
@@ -59,7 +66,7 @@ Future<void> deleteFilesFromEverywhere(
           uploadedFileIDsToBeDeleted.add(file.uploadedFileID);
           updatedCollectionIDs.add(file.collectionID);
         } else {
-          await FilesDB.instance.deleteLocalFile(file.localID);
+          await FilesDB.instance.deleteLocalFile(file);
         }
       }
     } else {
@@ -106,25 +113,28 @@ Future<void> deleteFilesOnDeviceOnly(
   final dialog = createProgressDialog(context, "deleting...");
   await dialog.show();
   _logger.info("Trying to delete files " + files.toString());
-  final List<String> localIDs = [];
+  final List<String> localAssetIDs = [];
+  final List<String> localSharedMediaIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
   for (final file in files) {
     if (file.localID != null) {
-      final asset = await file.getAsset();
-      if (asset == null || !(await asset.exists)) {
+      if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID);
+      } else if(file.isSharedMediaToAppSandbox()) {
+        localSharedMediaIDs.add(file.localID);
       } else {
-        localIDs.add(file.localID);
+        localAssetIDs.add(file.localID);
       }
     }
   }
   Set<String> deletedIDs = Set<String>();
   try {
-    deletedIDs = (await PhotoManager.editor.deleteWithIds(localIDs)).toSet();
+    deletedIDs = (await PhotoManager.editor.deleteWithIds(localAssetIDs)).toSet();
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
+  deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
   final List<File> deletedFiles = [];
   for (final file in files) {
     // Remove only those files that have been removed from disk
@@ -145,15 +155,26 @@ Future<void> deleteFilesOnDeviceOnly(
 Future<bool> deleteLocalFiles(
     BuildContext context, List<String> localIDs) async {
   final List<String> deletedIDs = [];
+  final List<String> localAssetIDs = [];
+  final List<String> localSharedMediaIDs = [];
+  for (String id in localIDs) {
+    if (id.startsWith(kSharedMediaIdentifier)) {
+      localSharedMediaIDs.add(id);
+    } else {
+      localAssetIDs.add(id);
+    }
+  }
+  deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+
   if (Platform.isAndroid) {
     final androidInfo = await DeviceInfoPlugin().androidInfo;
     if (androidInfo.version.sdkInt < kAndroid11SDKINT) {
-      deletedIDs.addAll(await _deleteLocalFilesInBatches(context, localIDs));
+      deletedIDs.addAll(await _deleteLocalFilesInBatches(context, localAssetIDs));
     } else {
-      deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localIDs));
+      deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
     }
   } else {
-    deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localIDs));
+    deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
   }
   if (deletedIDs.isNotEmpty) {
     final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
@@ -228,4 +249,43 @@ Future<List<String>> _deleteLocalFilesInBatches(
   }
   Navigator.of(dialogKey.currentContext, rootNavigator: true).pop('dialog');
   return deletedIDs;
+}
+
+
+Future<bool> _localFileExist(File file) {
+  if (file.isSharedMediaToAppSandbox()) {
+    var localFile = io.File(getSharedMediaFilePath(file));
+    return localFile.exists();
+  } else {
+    return file.getAsset().then((asset) {
+      if (asset == null) {
+        return false;
+      }
+      return asset.exists;
+    });
+  }
+}
+
+Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
+  final List<String> actuallyDeletedIDs = [];
+  try {
+    return Future.forEach(localIDs, (id) async {
+      String localPath = Configuration.instance.getSharedMediaCacheDirectory() +
+          "/" +
+          id.replaceAll(kSharedMediaIdentifier, '');
+      try {
+        await io.File(localPath).delete();
+        actuallyDeletedIDs.add(id);
+      } catch (e, s) {
+        _logger.warning("Could not delete file " + id, e, s);
+        // server log shouldn't contain localId
+        _logger.severe("Could not delete file ", e, s);
+      }
+    }).then((ignore) {
+      return actuallyDeletedIDs;
+    });
+  } catch (e, s) {
+    _logger.severe("Unexpected error while deleting share media files", e, s);
+    return Future.value(actuallyDeletedIDs);
+  }
 }

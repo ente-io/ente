@@ -15,11 +15,14 @@ import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_uploader.dart';
+import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 class CreateCollectionPage extends StatefulWidget {
   final SelectedFiles selectedFiles;
-  const CreateCollectionPage(this.selectedFiles, {Key key}) : super(key: key);
+  final List<SharedMediaFile> sharedFiles;
+  const CreateCollectionPage(this.selectedFiles,this.sharedFiles, {Key key}) : super(key: key);
 
   @override
   _CreateCollectionPageState createState() => _CreateCollectionPageState();
@@ -220,21 +223,29 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     final dialog = createProgressDialog(context, "uploading files to album...");
     await dialog.show();
     try {
-      final files = List<File>();
-      for (final file in widget.selectedFiles.files) {
-        final currentFile = await FilesDB.instance.getFile(file.generatedID);
-        if (currentFile.uploadedFileID == null) {
-          final uploadedFile = (await FileUploader.instance
-              .forceUpload(currentFile, collectionID));
-          files.add(uploadedFile);
-        } else {
-          files.add(currentFile);
+      final List<File> files = [];
+      if (widget.sharedFiles != null) {
+        var localFiles = await convertIncomingSharedMediaToFile(
+            widget.sharedFiles,
+          collectionID);
+        FilesDB.instance.insertMultiple(localFiles);
+      } else {
+        for (final file in widget.selectedFiles.files) {
+          await FilesDB.instance.insert(file);
+          final currentFile = await FilesDB.instance.getFile(file.generatedID);
+          if (currentFile.uploadedFileID == null) {
+            final uploadedFile = (await FileUploader.instance
+                .forceUpload(currentFile, collectionID));
+            files.add(uploadedFile);
+          } else {
+            files.add(currentFile);
+          }
         }
+        await CollectionsService.instance.addToCollection(collectionID, files);
       }
-      await CollectionsService.instance.addToCollection(collectionID, files);
       RemoteSyncService.instance.sync(silently: true);
       await dialog.hide();
-      widget.selectedFiles.clearAll();
+      widget.selectedFiles?.clearAll();
       return true;
     } catch (e, s) {
       _logger.severe("Could not add to album", e, s);
