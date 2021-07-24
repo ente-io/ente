@@ -111,8 +111,11 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
 }
 
 Future<Uint8List> getThumbnailFromInAppCacheFile(ente.File file) async {
-  var localPath = getSharedMediaFilePath(file);
-  var thumbnailData = io.File(localPath).readAsBytesSync();
+  var localFile = io.File(getSharedMediaFilePath(file));
+  if (!localFile.existsSync()) {
+    return null;
+  }
+  var thumbnailData = localFile.readAsBytesSync();
   int compressionAttempts = 0;
   while (thumbnailData.length > kThumbnailDataLimit &&
       compressionAttempts < kMaximumThumbnailCompressionAttempts) {
