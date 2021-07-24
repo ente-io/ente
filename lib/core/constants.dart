@@ -13,4 +13,4 @@ const int kAndroid11SDKINT = 30;
 const int kGalleryLoadStartTime = -8000000000000000; // Wednesday, March 6, 1748
 
 // used to identify which ente file are available in app cache
-const String kAppCacheIdentifier = 'ente-cache://';
+const String kSharedMediaIdentifier = 'ente-shared://';

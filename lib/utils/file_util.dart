@@ -9,7 +9,6 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/cache/image_cache.dart';
-import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -47,8 +46,7 @@ Future<io.File> getFile(ente.File file) async {
 
 Future<io.File> _getLocalDiskFile(ente.File file) async {
   if (file.isCachedInAppSandbox()) {
-    var localPath = file.localID.replaceAll(kAppCacheIdentifier, '');
-    return io.File(localPath);
+    return io.File(getSharedMediaFilePath(file));
   } else {
     return file.getAsset().then((asset) async {
       if (asset == null || !(await asset.exists)) {
@@ -57,6 +55,11 @@ Future<io.File> _getLocalDiskFile(ente.File file) async {
       return asset.file;
     });
   }
+}
+
+String getSharedMediaFilePath(ente.File file) {
+  return Configuration.instance.getSharedMediaCacheDirectory()
+      + "/" + file.localID.replaceAll(kSharedMediaIdentifier, '');
 }
 
 void preloadThumbnail(ente.File file) {

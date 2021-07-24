@@ -137,7 +137,7 @@ class File {
 
 
   bool isCachedInAppSandbox() {
-    return localID != null && localID.startsWith(kAppCacheIdentifier);
+    return localID != null && localID.startsWith(kSharedMediaIdentifier);
   }
 
   bool hasLocation() {

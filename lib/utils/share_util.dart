@@ -9,6 +9,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:share/share.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -38,12 +39,18 @@ Future<List<File>> convertIncomingSharedMediaToFile(
   List<File> localFiles = [];
   for (var media in sharedMedia) {
     var enteFile = File();
-    enteFile.localID = kAppCacheIdentifier + media.path;
-    enteFile.collectionID = collectionID;
-    enteFile.fileType = FileType.image;
+    // fileName: img_x.jpg
     enteFile.title = basename(media.path);
 
-    var exifMap = await readExifFromFile(dartio.File(media.path));
+    var ioFile = dartio.File(media.path);
+    ioFile = ioFile.renameSync(Configuration.instance.getSharedMediaCacheDirectory() +
+        "/" +
+        enteFile.title);
+    enteFile.localID = kSharedMediaIdentifier + enteFile.title;
+    enteFile.collectionID = collectionID;
+    enteFile.fileType = FileType.image;
+
+    var exifMap = await readExifFromFile(ioFile);
     if (exifMap != null &&
         exifMap["Image DateTime"] != null &&
         '0000:00:00 00:00:00' != exifMap["Image DateTime"].toString()) {
