@@ -86,7 +86,7 @@ class File {
 
   Map<String, dynamic> getMetadata() {
     final metadata = <String, dynamic>{};
-    metadata["localID"] = isCachedInAppSandbox() ? null : localID;
+    metadata["localID"] = isSharedMediaToAppSandbox() ? null : localID;
     metadata["title"] = title;
     metadata["deviceFolder"] = deviceFolder;
     metadata["creationTime"] = creationTime;
@@ -139,7 +139,7 @@ class File {
   }
 
 
-  bool isCachedInAppSandbox() {
+  bool isSharedMediaToAppSandbox() {
     return localID != null && localID.startsWith(kSharedMediaIdentifier);
   }
 

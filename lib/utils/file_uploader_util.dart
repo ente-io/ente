@@ -23,7 +23,7 @@ class MediaUploadData {
 }
 
 Future<MediaUploadData> getUploadDataFromEnteFile(ente.File file) async {
-  if (file.isCachedInAppSandbox()) {
+  if (file.isSharedMediaToAppSandbox()) {
     return await _getMediaUploadDataFromAppCache(file);
   } else {
     return await _getMediaUploadDataFromAssetFile(file);

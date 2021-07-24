@@ -45,7 +45,7 @@ Future<io.File> getFile(ente.File file) async {
 }
 
 Future<io.File> _getLocalDiskFile(ente.File file) async {
-  if (file.isCachedInAppSandbox()) {
+  if (file.isSharedMediaToAppSandbox()) {
     var localFile = io.File(getSharedMediaFilePath(file));
     return localFile.exists().then((exist) {
       return exist ? localFile : null;

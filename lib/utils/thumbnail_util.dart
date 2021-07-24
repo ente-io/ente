@@ -69,7 +69,7 @@ Future<Uint8List> getThumbnailFromLocal(File file,
     ThumbnailLruCache.put(file, data);
     return data;
   }
-  if (file.isCachedInAppSandbox()) {
+  if (file.isSharedMediaToAppSandbox()) {
     //todo:neeraj support specifying size/quality
     return getThumbnailFromInAppCacheFile(file).then((data) {
       if (data != null) {
