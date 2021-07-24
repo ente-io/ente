@@ -52,7 +52,7 @@ export default function UploadProgress(props: Props) {
                 </h4>
             </Modal.Header>
             <Modal.Body>
-                {props.now === 100 ? (
+                {props.uploadStage===UPLOAD_STAGES.FINISH ? (
                     fileProgressStatuses.length !== 0 && (
                         <Alert variant="warning">
                             {constants.FAILED_UPLOAD_FILE_LIST}
@@ -78,7 +78,7 @@ export default function UploadProgress(props: Props) {
                     >
                         {fileProgressStatuses.map(({ fileName, progress }) => (
                             <li key={fileName} style={{ marginTop: '12px' }}>
-                                {props.now === 100 ?
+                                {props.uploadStage===UPLOAD_STAGES.FINISH ?
                                     fileName :
                                     constants.FILE_UPLOAD_PROGRESS(
                                         fileName,
@@ -90,7 +90,7 @@ export default function UploadProgress(props: Props) {
                 )}
                 {props.uploadStage === UPLOAD_STAGES.FINISH && (
                     <Modal.Footer style={{ border: 'none' }}>
-                        {props.now === 100 && (fileProgressStatuses?.length === 0 ? (
+                        {props.uploadStage===UPLOAD_STAGES.FINISH && (fileProgressStatuses?.length === 0 ? (
                             <Button
                                 variant="outline-secondary"
                                 style={{ width: '100%' }}
