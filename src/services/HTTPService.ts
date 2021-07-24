@@ -31,6 +31,7 @@ class HTTPService {
     private headers: IHTTPHeaders = {
         'content-type': 'application/json',
     };
+    private timeout :number = 10000;
 
     /**
      * Sets the headers to the given object.
@@ -76,6 +77,7 @@ class HTTPService {
             ...this.headers,
             ...config.headers,
         };
+        config.timeout=this.timeout;
         return await axios({ ...config, ...customConfig });
     }
 
