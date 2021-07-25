@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import UploadService, { FileWithCollection, UPLOAD_STAGES } from 'services/uploadService';
 import { createAlbum } from 'services/collectionService';
-import { File } from 'services/fileService';
+import { File, getLocalFiles } from 'services/fileService';
 import constants from 'utils/strings/constants';
 import { SetDialogMessage } from 'components/MessageDialog';
 import UploadProgress from './UploadProgress';
@@ -9,10 +9,9 @@ import UploadProgress from './UploadProgress';
 import ChoiceModal from './ChoiceModal';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
-import { SetLoading } from 'pages/gallery';
+import { SetFiles, SetLoading } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
-import { sortFilesIntoCollections } from 'utils/file';
 import { FileRejection } from 'react-dropzone';
 
 interface Props {
@@ -28,7 +27,8 @@ interface Props {
     setDialogMessage: SetDialogMessage;
     setUploadInProgress: any;
     showCollectionSelector: () => void;
-    fileRejections:FileRejection[]
+    fileRejections:FileRejection[];
+    setFiles:SetFiles;
 }
 
 export enum UPLOAD_STRATEGY {
@@ -204,13 +204,14 @@ export default function Upload(props: Props) {
             await props.syncInProgress;
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
-                sortFilesIntoCollections(props.existingFiles),
+                props.existingFiles,
                 {
                     setPercentComplete,
                     setFileCounter,
                     setUploadStage,
                     setFileProgress,
                 },
+                props.setFiles,
             );
         } catch (err) {
             props.setBannerMessage(err.message);
@@ -228,7 +229,8 @@ export default function Upload(props: Props) {
             props.setUploadInProgress(true);
             setFileProgress(null);
             await props.syncInProgress;
-            await UploadService.retryFailedFiles();
+            const localFiles= await getLocalFiles();
+            await UploadService.retryFailedFiles(localFiles);
         } catch (err) {
             props.setBannerMessage(err.message);
             setProgressView(false);

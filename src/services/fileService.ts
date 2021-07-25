@@ -1,12 +1,12 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
 
-import CryptoWorker from 'utils/crypto';
 import { getToken } from 'utils/common/key';
 import { DataStream, MetadataObject } from './uploadService';
 import { Collection } from './collectionService';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
+import { decryptFile, sortFiles } from 'utils/file';
 
 const ENDPOINT = getEndpoint();
 const DIFF_LIMIT: number = 1000;
@@ -77,26 +77,7 @@ export const syncFiles = async (collections: Collection[], setFiles: (files: Fil
             }
             files.push(file);
         }
-        // sort according to modification time first
-        files = files.sort((a, b) => {
-            if (!b.metadata?.modificationTime) {
-                return -1;
-            }
-            if (!a.metadata?.modificationTime) {
-                return 1;
-            } else {
-                return b.metadata.modificationTime - a.metadata.modificationTime;
-            }
-        });
-
-        // then sort according to creation time, maintaining ordering according to modification time for files with creation time
-        files = files.map((file, index) => ({ index, file })).sort((a, b) => {
-            let diff = b.file.metadata.creationTime - a.file.metadata.creationTime;
-            if (diff === 0) {
-                diff = a.index - b.index;
-            }
-            return diff;
-        }).map((file) => file.file);
+        files=sortFiles(files);
         await localForage.setItem('files', files);
         await localForage.setItem(
             `${collection.id}-time`,
@@ -125,7 +106,6 @@ export const getFiles = async (
     setFiles: (files: File[]) => void,
 ): Promise<File[]> => {
     try {
-        const worker = await new CryptoWorker();
         const decryptedFiles: File[] = [];
         let time = sinceTime ||
             (await localForage.getItem<number>(`${collection.id}-time`)) ||
@@ -152,12 +132,7 @@ export const getFiles = async (
                 ...(await Promise.all(
                     resp.data.diff.map(async (file: File) => {
                         if (!file.isDeleted) {
-                            file.key = await worker.decryptB64(
-                                file.encryptedKey,
-                                file.keyDecryptionNonce,
-                                collection.key,
-                            );
-                            file.metadata = await worker.decryptMetadata(file);
+                            file = await decryptFile(file, collection);
                         }
                         return file;
                     }) as Promise<File>[],

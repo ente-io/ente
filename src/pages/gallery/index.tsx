@@ -426,6 +426,7 @@ export default function Gallery() {
                     setDialogMessage={setDialogMessage}
                     setUploadInProgress={setUploadInProgress}
                     fileRejections={fileRejections}
+                    setFiles={setFiles}
                 />
                 <Sidebar
                     collections={collections}

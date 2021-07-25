@@ -3,7 +3,7 @@ import HTTPService from './HTTPService';
 import EXIF from 'exif-js';
 import { File, fileAttribute } from './fileService';
 import { Collection } from './collectionService';
-import { FILE_TYPE } from 'pages/gallery';
+import { FILE_TYPE, SetFiles } from 'pages/gallery';
 import { checkConnectivity, retryPromise, sleep } from 'utils/common';
 import {
     handleError,
@@ -17,8 +17,12 @@ import { getToken } from 'utils/common/key';
 import {
     fileIsHEIC,
     convertHEIC2JPEG,
+    sortFilesIntoCollections,
+    sortFiles,
+    decryptFile,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
+import localForage from 'utils/storage/localForage';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;
@@ -142,10 +146,13 @@ class UploadService {
     private progressBarProps;
     private failedFiles: FileWithCollection[];
     private existingFilesCollectionWise: Map<number, File[]>;
+    private existingFiles: File[];
+    private setFiles:SetFiles;
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
-        existingFilesCollectionWise: Map<number, File[]>,
+        existingFiles: File[],
         progressBarProps,
+        setFiles:SetFiles,
     ) {
         try {
             checkConnectivity();
@@ -156,9 +163,10 @@ class UploadService {
             this.failedFiles = [];
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-            this.existingFilesCollectionWise = existingFilesCollectionWise;
+            this.existingFiles=existingFiles;
+            this.existingFilesCollectionWise = sortFilesIntoCollections(existingFiles);
             this.updateProgressBarUI();
-
+            this.setFiles=setFiles;
             const metadataFiles: globalThis.File[] = [];
             const actualFiles: FileWithCollection[] = [];
             filesWithCollectionToUpload.forEach((fileWithCollection) => {
@@ -255,19 +263,31 @@ class UploadService {
             } else {
                 let encryptedFile: EncryptedFile =
                     await this.encryptFile(worker, file, collection.key);
+
                 let backupedFile: BackupedFile = await this.uploadToBucket(
                     encryptedFile.file,
                 );
-                file = null;
+
                 let uploadFile: uploadFile = this.getUploadFile(
                     collection,
                     backupedFile,
                     encryptedFile.fileKey,
                 );
+
                 encryptedFile = null;
                 backupedFile = null;
-                await this.uploadFile(uploadFile);
+
+                const uploadedFile =await this.uploadFile(uploadFile);
+                const decryptedFile=await decryptFile(uploadedFile, collection);
+
+                this.existingFiles.push(decryptedFile);
+                this.existingFiles=sortFiles(this.existingFiles);
+                await localForage.setItem('files', this.existingFiles);
+                this.setFiles(this.existingFiles);
+
+                file = null;
                 uploadFile = null;
+
                 this.fileProgress.delete(rawFile.name);
                 this.filesCompleted++;
             }
@@ -288,8 +308,8 @@ class UploadService {
             );
         }
     }
-    async retryFailedFiles() {
-        await this.uploadFiles(this.failedFiles, this.existingFilesCollectionWise, this.progressBarProps);
+    async retryFailedFiles(localFiles:File[]) {
+        await this.uploadFiles(this.failedFiles, localFiles, this.progressBarProps, this.setFiles);
     }
 
     private updateProgressBarUI() {
@@ -544,7 +564,7 @@ class UploadService {
         return uploadFile;
     }
 
-    private async uploadFile(uploadFile: uploadFile) {
+    private async uploadFile(uploadFile: uploadFile):Promise<File> {
         try {
             const token = getToken();
             if (!token) {
