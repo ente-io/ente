@@ -138,6 +138,10 @@ export function removeUnneccessaryFileProps(files:File[]):File[] {
         delete file.msrc;
         delete file.file.objectKey;
         delete file.thumbnail.objectKey;
+        delete file.h;
+        delete file.html;
+        delete file.w;
+
         return file;
     });
     return stripedFiles;

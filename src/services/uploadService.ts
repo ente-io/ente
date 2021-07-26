@@ -4,7 +4,7 @@ import EXIF from 'exif-js';
 import { File, fileAttribute } from './fileService';
 import { Collection } from './collectionService';
 import { FILE_TYPE, SetFiles } from 'pages/gallery';
-import { checkConnectivity, retryAsyncFunction, sleep } from 'utils/common';
+import { retryAsyncFunction, sleep } from 'utils/common';
 import {
     handleError,
     parseError,
@@ -156,7 +156,6 @@ class UploadService {
         setFiles:SetFiles,
     ) {
         try {
-            checkConnectivity();
             progressBarProps.setUploadStage(UPLOAD_STAGES.START);
 
             this.filesCompleted = 0;
@@ -164,7 +163,7 @@ class UploadService {
             this.failedFiles = [];
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-            this.existingFiles=removeUnneccessaryFileProps(existingFiles);
+            this.existingFiles=existingFiles;
             this.existingFilesCollectionWise = sortFilesIntoCollections(existingFiles);
             this.updateProgressBarUI();
             this.setFiles=setFiles;
@@ -176,15 +175,10 @@ class UploadService {
                     // ignore files with name starting with . (hidden files)
                     return;
                 }
-                if (
-                    file.type.substr(0, 5) === TYPE_IMAGE ||
-                    file.type.substr(0, 5) === TYPE_VIDEO ||
-                    (file.type.length === 0 && file.name.endsWith(TYPE_HEIC))
-                ) {
-                    actualFiles.push(fileWithCollection);
-                }
                 if (file.name.slice(-4) === TYPE_JSON) {
                     metadataFiles.push(fileWithCollection.file);
+                } else {
+                    actualFiles.push(fileWithCollection);
                 }
             });
             this.filesToBeUploaded = actualFiles;
@@ -283,7 +277,7 @@ class UploadService {
 
                 this.existingFiles.push(decryptedFile);
                 this.existingFiles=sortFiles(this.existingFiles);
-                await localForage.setItem('files', this.existingFiles);
+                await localForage.setItem('files', removeUnneccessaryFileProps(this.existingFiles));
                 this.setFiles(this.existingFiles);
 
                 file = null;
