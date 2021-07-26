@@ -1001,7 +1001,7 @@ class UploadService {
     }
     private getUNIXTime(exifData: any) {
         const dateString: string = exifData.DateTimeOriginal || exifData.DateTime;
-        if (!dateString) {
+        if (!dateString || dateString==='0000:00:00 00:00:00') {
             return null;
         }
         const parts = dateString.split(' ')[0].split(':');
