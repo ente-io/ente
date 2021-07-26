@@ -8,7 +8,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/recovery_key_dialog.dart';
@@ -43,8 +42,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   String _password;
   bool _password1Visible = false;
   bool _password2Visible = false;
-  FocusNode _password1FocusNode = FocusNode();
-  FocusNode _password2FocusNode = FocusNode();
+  final _password1FocusNode = FocusNode();
+  final _password2FocusNode = FocusNode();
   bool _password1InFocus = false;
   bool _password2InFocus = false;
 
@@ -295,7 +294,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       final result = await Configuration.instance.generateKey(password);
       Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
-      final onDone = () async {
+      onDone() async {
         final dialog = createProgressDialog(context, "please wait...");
         await dialog.show();
         try {
@@ -314,7 +313,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           await dialog.hide();
           showGenericErrorDialog(context);
         }
-      };
+      }
+
       showDialog(
         context: context,
         builder: (BuildContext context) {
