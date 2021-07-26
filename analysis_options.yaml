@@ -36,6 +36,7 @@ analyzer:
     prefer_const_declarations: ignore # too many warnings
     prefer_const_constructors_in_immutables: ignore # too many warnings
     prefer_double_quotes: ignore # too many warnings
+    avoid_renaming_method_parameters: ignore # incorrect warnings for `equals` overrides
 
   exclude:
     - thirdparty/**
