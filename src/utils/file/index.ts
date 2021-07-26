@@ -131,3 +131,14 @@ export async function decryptFile(file:File, collection:Collection) {
     file.metadata = await worker.decryptMetadata(file);
     return file;
 }
+
+export function removeUnneccessaryFileProps(files:File[]):File[] {
+    const stripedFiles=files.map((file)=>{
+        delete file.src;
+        delete file.msrc;
+        delete file.file.objectKey;
+        delete file.thumbnail.objectKey;
+        return file;
+    });
+    return stripedFiles;
+}

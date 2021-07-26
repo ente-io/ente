@@ -20,6 +20,7 @@ import {
     sortFilesIntoCollections,
     sortFiles,
     decryptFile,
+    removeUnneccessaryFileProps,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
@@ -163,7 +164,7 @@ class UploadService {
             this.failedFiles = [];
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-            this.existingFiles=existingFiles;
+            this.existingFiles=removeUnneccessaryFileProps(existingFiles);
             this.existingFilesCollectionWise = sortFilesIntoCollections(existingFiles);
             this.updateProgressBarUI();
             this.setFiles=setFiles;
