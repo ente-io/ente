@@ -4,7 +4,7 @@ import EXIF from 'exif-js';
 import { File, fileAttribute } from './fileService';
 import { Collection } from './collectionService';
 import { FILE_TYPE, SetFiles } from 'pages/gallery';
-import { checkConnectivity, retryPromise, sleep } from 'utils/common';
+import { checkConnectivity, retryAsyncFunction, sleep } from 'utils/common';
 import {
     handleError,
     parseError,
@@ -570,7 +570,7 @@ class UploadService {
             if (!token) {
                 return;
             }
-            const response = await retryPromise(HTTPService.post(
+            const response = await retryAsyncFunction(()=>HTTPService.post(
                 `${ENDPOINT}/files`,
                 uploadFile,
                 null,
@@ -896,7 +896,7 @@ class UploadService {
         filename: string,
     ): Promise<string> {
         try {
-            await retryPromise(
+            await retryAsyncFunction(()=>
                 HTTPService.put(
                     fileUploadURL.url,
                     file,
@@ -940,7 +940,7 @@ class UploadService {
                     }
                 }
                 const uploadChunk = Uint8Array.from(combinedChunks);
-                const response = await retryPromise(
+                const response = await retryAsyncFunction(()=>
                     HTTPService.put(
                         fileUploadURL,
                         uploadChunk,
@@ -959,7 +959,7 @@ class UploadService {
                 { CompleteMultipartUpload: { Part: resParts } },
                 options,
             );
-            await retryPromise(
+            await retryAsyncFunction(()=>
                 HTTPService.post(multipartUploadURLs.completeURL, body, null, {
                     'content-type': 'text/xml',
                 }),

@@ -1,4 +1,4 @@
-import { retryPromise, runningInBrowser } from 'utils/common';
+import { retryAsyncFunction, runningInBrowser } from 'utils/common';
 import { getExportPendingFiles, getExportFailedFiles, getFilesUploadedAfterLastExport, getFileUID, dedupe, getGoogleLikeMetadataFile } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -254,7 +254,7 @@ class ExportService {
         const uid = `${file.id}_${this.sanitizeName(
             file.metadata.title,
         )}`;
-        const fileStream = await retryPromise(downloadManager.downloadFile(file));
+        const fileStream = await retryAsyncFunction(()=>downloadManager.downloadFile(file));
         this.ElectronAPIs.saveStreamToDisk(`${collectionPath}/${uid}`, fileStream);
         this.ElectronAPIs.saveFileToDisk(
             `${collectionPath}/${MetadataFolderName}/${uid}.json`,
