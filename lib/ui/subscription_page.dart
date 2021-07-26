@@ -146,7 +146,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   Widget _buildPlans() {
-    final widgets = List<Widget>();
+    final widgets = <Widget>[];
     if (widget.isOnboarding) {
       widgets.add(Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
@@ -159,27 +159,29 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       ));
     } else {
-      widgets.add(Container(
-        height: 50,
-        child: FutureBuilder(
-          future: _usageFuture,
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.hasData) {
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text("current usage is " + formatBytes(snapshot.data)),
-              );
-            } else if (snapshot.hasError) {
-              return Container();
-            } else {
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: loadWidget,
-              );
-            }
-          },
+      widgets.add(
+        SizedBox(
+          height: 50,
+          child: FutureBuilder(
+            future: _usageFuture,
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.hasData) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text("current usage is " + formatBytes(snapshot.data)),
+                );
+              } else if (snapshot.hasError) {
+                return Container();
+              } else {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: loadWidget,
+                );
+              }
+            },
+          ),
         ),
-      ));
+      );
     }
     final isActiveStripeSubscriber =
         _currentSubscription.paymentProvider == kStripe &&
@@ -290,11 +292,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       ]);
     }
     return SingleChildScrollView(
-      child: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: widgets,
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: widgets,
       ),
     );
   }
@@ -376,7 +376,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
               final ProductDetailsResponse response =
                   await InAppPurchaseConnection.instance
-                      .queryProductDetails([productID].toSet());
+                      .queryProductDetails({productID});
               if (response.notFoundIDs.isNotEmpty) {
                 _logger.severe("Could not find products: " +
                     response.notFoundIDs.toString());
@@ -390,8 +390,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   _currentSubscription.productID != plan.androidID;
               if (isCrossGradingOnAndroid) {
                 final existingProductDetailsResponse =
-                    await InAppPurchaseConnection.instance.queryProductDetails(
-                        [_currentSubscription.productID].toSet());
+                    await InAppPurchaseConnection.instance
+                        .queryProductDetails({_currentSubscription.productID});
                 if (existingProductDetailsResponse.notFoundIDs.isNotEmpty) {
                   _logger.severe("Could not find existing products: " +
                       response.notFoundIDs.toString());
@@ -456,6 +456,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 }
 
 class BillingQuestionsWidget extends StatelessWidget {
+  const BillingQuestionsWidget({
+    Key key,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -463,7 +467,7 @@ class BillingQuestionsWidget extends StatelessWidget {
           .getDio()
           .get("https://static.ente.io/faq.json")
           .then((response) {
-        final faqItems = List<FaqItem>();
+        final faqItems = <FaqItem>[];
         for (final item in response.data as List) {
           faqItems.add(FaqItem.fromMap(item));
         }
@@ -471,7 +475,7 @@ class BillingQuestionsWidget extends StatelessWidget {
       }),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
-          final faqs = List<Widget>();
+          final faqs = <Widget>[];
           faqs.add(Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
@@ -488,11 +492,9 @@ class BillingQuestionsWidget extends StatelessWidget {
           faqs.add(Padding(
             padding: EdgeInsets.all(16),
           ));
-          return Container(
-            child: SingleChildScrollView(
-              child: Column(
-                children: faqs,
-              ),
+          return SingleChildScrollView(
+            child: Column(
+              children: faqs,
             ),
           );
         } else {
@@ -509,7 +511,7 @@ class FaqWidget extends StatelessWidget {
     @required this.faq,
   }) : super(key: key);
 
-  final faq;
+  final FaqItem faq;
 
   @override
   Widget build(BuildContext context) {
