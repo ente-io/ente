@@ -24,14 +24,14 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   Widget _getBody() {
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.fromLTRB(8, 40, 8, 8),
+    return Center(
+      child: SingleChildScrollView(
         child: Column(
           children: [
+            Padding(padding: const EdgeInsets.all(12)),
             Text.rich(
               TextSpan(
-                children: <TextSpan>[
+                children: const <TextSpan>[
                   TextSpan(
                     text: "with ",
                     style: TextStyle(
@@ -55,7 +55,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
             ),
             Text.rich(
               TextSpan(
-                children: <TextSpan>[
+                children: const <TextSpan>[
                   TextSpan(
                     text: "your ",
                     style: TextStyle(
@@ -83,7 +83,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               padding: EdgeInsets.all(24),
             ),
             _getFeatureSlider(),
-            new DotsIndicator(
+            DotsIndicator(
               dotsCount: 3,
               position: _featureIndex,
               decorator: DotsDecorator(
@@ -124,7 +124,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               onTap: _navigateToSignInPage,
             ),
             Padding(
-              padding: EdgeInsets.all(4),
+              padding: EdgeInsets.all(20),
             ),
           ],
         ),
@@ -132,8 +132,8 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     );
   }
 
-  Container _getSignUpButton(BuildContext context) {
-    return Container(
+  Widget _getSignUpButton(BuildContext context) {
+    return SizedBox(
       width: 200,
       height: 64,
       child: OutlinedButton(
@@ -170,7 +170,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: 320),
       child: PageView(
-        children: [
+        children: const [
           FeatureItemWidget(
               "assets/protected.png",
               "protected",
@@ -194,7 +194,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   void _navigateToSignUpPage() {
-    var page;
+    Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
       page = EmailEntryPage();
     } else {
@@ -220,7 +220,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   void _navigateToSignInPage() {
-    var page;
+    Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
       page = LoginPage();
     } else {
@@ -258,53 +258,45 @@ class FeatureItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Image.asset(
-            assetPath,
-            height: 160,
-          ),
-          Padding(padding: EdgeInsets.all(16)),
-          Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  featureTitle,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).buttonColor,
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(12)),
-                Container(
-                  child: Text(
-                    firstLine,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(2)),
-                Container(
-                  child: Text(
-                    secondLine,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                ),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Image.asset(
+          assetPath,
+          height: 160,
+        ),
+        Padding(padding: EdgeInsets.all(16)),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              featureTitle,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).buttonColor,
+              ),
             ),
-          ),
-        ],
-      ),
+            Padding(padding: EdgeInsets.all(12)),
+            Text(
+              firstLine,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+              ),
+            ),
+            Padding(padding: EdgeInsets.all(2)),
+            Text(
+              secondLine,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
