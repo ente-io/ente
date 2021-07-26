@@ -10,6 +10,8 @@ class Subscription {
   final String originalTransactionID;
   final String paymentProvider;
   final int expiryTime;
+  final String price;
+  final String period;
 
   Subscription({
     this.id,
@@ -18,6 +20,8 @@ class Subscription {
     this.originalTransactionID,
     this.paymentProvider,
     this.expiryTime,
+    this.price,
+    this.period,
   });
 
   bool isValid() {
@@ -31,6 +35,8 @@ class Subscription {
     String originalTransactionID,
     String paymentProvider,
     int expiryTime,
+    String price,
+    String period,
   }) {
     return Subscription(
       id: id ?? this.id,
@@ -40,6 +46,8 @@ class Subscription {
           originalTransactionID ?? this.originalTransactionID,
       paymentProvider: paymentProvider ?? this.paymentProvider,
       expiryTime: expiryTime ?? this.expiryTime,
+      price: price ?? this.price,
+      period: period ?? this.period,
     );
   }
 
@@ -51,6 +59,8 @@ class Subscription {
       'originalTransactionID': originalTransactionID,
       'paymentProvider': paymentProvider,
       'expiryTime': expiryTime,
+      'price': price,
+      'period': period,
     };
   }
 
@@ -64,6 +74,8 @@ class Subscription {
       originalTransactionID: map['originalTransactionID'],
       paymentProvider: map['paymentProvider'],
       expiryTime: map['expiryTime'],
+      price: map['price'],
+      period: map['period'],
     );
   }
 
@@ -74,7 +86,7 @@ class Subscription {
 
   @override
   String toString() {
-    return 'Subscription(id: $id, productID: $productID, storage: $storage, originalTransactionID: $originalTransactionID, paymentProvider: $paymentProvider, expiryTime: $expiryTime)';
+    return 'Subscription(id: $id, productID: $productID, storage: $storage, originalTransactionID: $originalTransactionID, paymentProvider: $paymentProvider, expiryTime: $expiryTime, price: $price, period: $period)';
   }
 
   @override
@@ -87,7 +99,9 @@ class Subscription {
         o.storage == storage &&
         o.originalTransactionID == originalTransactionID &&
         o.paymentProvider == paymentProvider &&
-        o.expiryTime == expiryTime;
+        o.expiryTime == expiryTime &&
+        o.price == price &&
+        o.period == period;
   }
 
   @override
@@ -97,6 +111,8 @@ class Subscription {
         storage.hashCode ^
         originalTransactionID.hashCode ^
         paymentProvider.hashCode ^
-        expiryTime.hashCode;
+        expiryTime.hashCode ^
+        price.hashCode ^
+        period.hashCode;
   }
 }
