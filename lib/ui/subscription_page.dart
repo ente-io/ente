@@ -299,19 +299,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   List<Widget> _getStripePlanWidgets() {
     final List<Widget> planWidgets = [];
-    BillingPlan currentPlan = _plans.plans
-        .where((plan) => plan.stripeID == _currentSubscription.productID)
-        .toList()[0];
-
+    bool foundActivePlan = false;
     for (final plan in _plans.plans) {
       final productID = plan.stripeID;
-      if (productID == null ||
-          productID.isEmpty ||
-          currentPlan.period != plan.period) {
+      if (productID == null || productID.isEmpty) {
         continue;
       }
       final isActive =
           _hasActiveSubscription && _currentSubscription.productID == productID;
+      if (isActive) {
+        foundActivePlan = true;
+      }
       planWidgets.add(
         Material(
           child: InkWell(
@@ -332,13 +330,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       );
     }
+    if (!foundActivePlan) {
+      _addCurrentPlanWidget(planWidgets);
+    }
     return planWidgets;
   }
 
   List<Widget> _getMobilePlanWidgets() {
+    bool foundActivePlan = false;
     final List<Widget> planWidgets = [];
     if (_hasActiveSubscription &&
         _currentSubscription.productID == kFreeProductID) {
+      foundActivePlan = true;
       planWidgets.add(
         SubscriptionPlanWidget(
           storage: _plans.freePlan.storage,
@@ -355,6 +358,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       }
       final isActive =
           _hasActiveSubscription && _currentSubscription.productID == productID;
+      if (isActive) {
+        foundActivePlan = true;
+      }
       planWidgets.add(
         Material(
           child: InkWell(
@@ -429,7 +435,34 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       );
     }
+    if (!foundActivePlan) {
+      _addCurrentPlanWidget(planWidgets);
+    }
     return planWidgets;
+  }
+
+  void _addCurrentPlanWidget(List<Widget> planWidgets) {
+    int activePlanIndex = 0;
+    for (; activePlanIndex < _plans.plans.length; activePlanIndex++) {
+      if (_plans.plans[activePlanIndex].storage >
+          _currentSubscription.storage) {
+        break;
+      }
+    }
+    planWidgets.insert(
+      activePlanIndex,
+      Material(
+        child: InkWell(
+          onTap: () {},
+          child: SubscriptionPlanWidget(
+            storage: _currentSubscription.storage,
+            price: _currentSubscription.price,
+            period: _currentSubscription.period,
+            isActive: true,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _getSkipButton(FreePlan plan) {
