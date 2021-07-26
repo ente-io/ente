@@ -16,7 +16,6 @@ import { FileRejection } from 'react-dropzone';
 
 interface Props {
     syncWithRemote: (force?: boolean) => Promise<void>;
-    syncInProgress:Promise<void>;
     setBannerMessage;
     acceptedFiles: globalThis.File[];
     existingFiles: File[];
@@ -201,7 +200,7 @@ export default function Upload(props: Props) {
         try {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
-            await props.syncInProgress;
+            await props.syncWithRemote(true);
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
                 props.existingFiles,
@@ -228,7 +227,7 @@ export default function Upload(props: Props) {
         try {
             props.setUploadInProgress(true);
             setFileProgress(null);
-            await props.syncInProgress;
+            await props.syncWithRemote(true);
             const localFiles= await getLocalFiles();
             await UploadService.retryFailedFiles(localFiles);
         } catch (err) {
