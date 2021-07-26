@@ -5,7 +5,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
@@ -27,8 +26,6 @@ class EmailEntryPage extends StatefulWidget {
 class _EmailEntryPageState extends State<EmailEntryPage> {
   static const kPasswordStrengthThreshold = 0.4;
 
-  static final _logger = Logger("EmailEntry");
-
   final _config = Configuration.instance;
   final _passwordController1 = TextEditingController(),
       _passwordController2 = TextEditingController();
@@ -39,8 +36,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   bool _hasAgreedToE2E = false;
   bool _password1Visible = false;
   bool _password2Visible = false;
-  FocusNode _password1FocusNode = FocusNode();
-  FocusNode _password2FocusNode = FocusNode();
+  final _password1FocusNode = FocusNode();
+  final _password2FocusNode = FocusNode();
   bool _password1InFocus = false;
   bool _password2InFocus = false;
 
@@ -414,7 +411,7 @@ class PricingWidget extends StatelessWidget {
   }
 
   Container _buildPlans(BuildContext context, BillingPlans plans) {
-    final planWidgets = List<BillingPlanWidget>();
+    final planWidgets = <BillingPlanWidget>[];
     for (final plan in plans.plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
       if (productID != null && productID.isNotEmpty) {
@@ -452,7 +449,7 @@ class PricingWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+              children: const [
                 Icon(
                   Icons.close,
                   size: 12,
