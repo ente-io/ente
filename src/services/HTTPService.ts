@@ -31,7 +31,7 @@ class HTTPService {
     private headers: IHTTPHeaders = {
         'content-type': 'application/json',
     };
-    private timeout :number = 10000;
+    private timeout :number = 2*60*1000;
 
     /**
      * Sets the headers to the given object.
