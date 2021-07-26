@@ -977,7 +977,16 @@ class UploadService {
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
         index = 0,
     ) {
+        const cancel={ exec: null };
+        let timeout=null;
+        const resetTimeout=()=>{
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+            timeout=setTimeout(()=>cancel.exec(), 30*1000);
+        };
         return {
+            cancel,
             onUploadProgress: (event) => {
                 filename &&
                     this.fileProgress.set(
@@ -992,6 +1001,11 @@ class UploadService {
                         ),
                     );
                 this.updateProgressBarUI();
+                if (event.loaded===event.total) {
+                    clearTimeout(timeout);
+                } else {
+                    resetTimeout();
+                }
             },
         };
     }
