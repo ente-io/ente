@@ -54,8 +54,9 @@ class BillingService {
   }
 
   Future<BillingPlans> getBillingPlans() {
-    _future ??=
-        _dio.get(_config.getHttpEndpoint() + "/billing/plans").then((response) {
+    _future ??= _dio
+        .get(_config.getHttpEndpoint() + "/billing/plans/v2")
+        .then((response) {
       return BillingPlans.fromMap(response.data);
     });
     return _future;
