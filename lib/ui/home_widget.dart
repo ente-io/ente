@@ -11,6 +11,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
@@ -53,8 +54,8 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
-  static const _deviceFolderGalleryWidget = const CollectionsGalleryWidget();
-  static const _sharedCollectionGallery = const SharedCollectionGallery();
+  static const _deviceFolderGalleryWidget = CollectionsGalleryWidget();
+  static const _sharedCollectionGallery = SharedCollectionGallery();
   static const _headerWidget = HeaderWidget();
 
   final _logger = Logger("HomeWidgetState");
@@ -75,6 +76,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   StreamSubscription<PermissionGrantedEvent> _permissionGrantedEvent;
   StreamSubscription<SyncStatusUpdate> _firstImportEvent;
   StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
+  StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
 
   @override
   void initState() {
@@ -105,6 +107,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
     _subscriptionPurchaseEvent =
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
+      setState(() {});
+    });
+    _accountConfiguredEvent =
+        Bus.instance.on<AccountConfiguredEvent>().listen((event) {
       setState(() {});
     });
     _triggerLogoutEvent =
@@ -180,15 +186,28 @@ class _HomeWidgetState extends State<HomeWidget> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _tabChangedEventSubscription.cancel();
+    _subscriptionPurchaseEvent.cancel();
+    _triggerLogoutEvent.cancel();
+    _loggedOutEvent.cancel();
+    _permissionGrantedEvent.cancel();
+    _firstImportEvent.cancel();
+    _backupFoldersUpdatedEvent.cancel();
+    _accountConfiguredEvent.cancel();
+    super.dispose();
+  }
+
   void _initMediaShareSubscription() {
-    _intentDataStreamSubscription =
-        ReceiveSharingIntent.getMediaStream().listen((List<SharedMediaFile> value) {
-          setState(() {
-            _sharedFiles = value;
-          });
-        }, onError: (err) {
-          _logger.severe("getIntentDataStream error: $err");
-        });
+    _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
+        .listen((List<SharedMediaFile> value) {
+      setState(() {
+        _sharedFiles = value;
+      });
+    }, onError: (err) {
+      _logger.severe("getIntentDataStream error: $err");
+    });
     // For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
       setState(() {
@@ -289,7 +308,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     // Attach a listener to the stream
-    getLinksStream().listen((String link) {
+    linkStream.listen((String link) {
       _logger.info("Link received: " + link);
       _getCredentials(context, link);
     }, onError: (err) {
@@ -307,7 +326,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getMainGalleryWidget() {
-    var header;
+    Widget header;
     if (_selectedFiles.files.isEmpty) {
       header = _headerWidgetWithSettingsButton;
     } else {
@@ -460,18 +479,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       TabChangedEventSource.tab_bar,
     ));
   }
-
-  @override
-  void dispose() {
-    _tabChangedEventSubscription.cancel();
-    _subscriptionPurchaseEvent.cancel();
-    _triggerLogoutEvent.cancel();
-    _loggedOutEvent.cancel();
-    _permissionGrantedEvent.cancel();
-    _firstImportEvent.cancel();
-    _backupFoldersUpdatedEvent.cancel();
-    super.dispose();
-  }
 }
 
 class HomePageAppBar extends StatefulWidget {
@@ -497,7 +504,7 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final appBar = Container(
+    final appBar = SizedBox(
       height: 60,
       child: GalleryAppBarWidget(
         GalleryAppBarType.homepage,
@@ -514,8 +521,8 @@ class _HomePageAppBarState extends State<HomePageAppBar> {
 }
 
 class HeaderWidget extends StatelessWidget {
-  static const _memoriesWidget = const MemoriesWidget();
-  static const _syncIndicator = const SyncIndicator();
+  static const _memoriesWidget = MemoriesWidget();
+  static const _syncIndicator = SyncIndicator();
 
   const HeaderWidget({
     Key key,
