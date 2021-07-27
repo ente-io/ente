@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -127,7 +128,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           Hero(
             tag: "select_folders",
             child: Container(
-              padding: EdgeInsets.only(left: 60, right: 60, bottom: 32),
+              padding: EdgeInsets.only(
+                  left: 60, right: 60, bottom: Platform.isIOS ? 60 : 32),
               child: button(
                 widget.buttonText,
                 fontSize: 18,
