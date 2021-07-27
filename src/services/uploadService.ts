@@ -245,6 +245,9 @@ class UploadService {
         reader: FileReader,
         fileWithCollection: FileWithCollection,
     ) {
+        if (!fileWithCollection) {
+            return;
+        }
         const { file: rawFile, collection } = fileWithCollection;
         this.fileProgress.set(rawFile.name, 0);
         this.updateProgressBarUI();

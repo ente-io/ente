@@ -226,7 +226,7 @@ export default function Upload(props: Props) {
     ) => {
         try {
             props.setUploadInProgress(true);
-            setFileProgress(null);
+            uploadInit();
             await props.syncWithRemote(true, true);
             const localFiles= await getLocalFiles();
             await UploadService.retryFailedFiles(localFiles);
