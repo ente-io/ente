@@ -2,12 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/backup_section_widget.dart';
+import 'package:photos/ui/settings/danger_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
 import 'package:photos/ui/settings/info_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -41,13 +42,19 @@ class SettingsPage extends StatelessWidget {
       Padding(padding: EdgeInsets.all(12)),
       InfoSectionWidget(),
     ]);
+    if (hasLoggedIn) {
+      contents.addAll([
+        Padding(padding: EdgeInsets.all(12)),
+        DangerSectionWidget(),
+      ]);
+    }
     contents.add(
       FutureBuilder(
         future: _getAppVersion(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(20),
               child: Text(
                 "app version: " + snapshot.data,
                 style: TextStyle(
