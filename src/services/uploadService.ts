@@ -841,24 +841,26 @@ class UploadService {
     private async fetchUploadURLs(): Promise<void> {
         try {
             if (!this.uploadURLFetchInProgress) {
-                const token = getToken();
-                if (!token) {
-                    return;
+                try {
+                    const token = getToken();
+                    if (!token) {
+                        return;
+                    }
+                    this.uploadURLFetchInProgress = HTTPService.get(
+                        `${ENDPOINT}/files/upload-urls`,
+                        {
+                            count: Math.min(
+                                MAX_URL_REQUESTS,
+                                (this.totalFileCount - this.filesCompleted) * 2,
+                            ),
+                        },
+                        { 'X-Auth-Token': token },
+                    );
+                    const response = await this.uploadURLFetchInProgress;
+                    this.uploadURLs.push(...response.data['urls']);
+                } finally {
+                    this.uploadURLFetchInProgress = null;
                 }
-                this.uploadURLFetchInProgress = HTTPService.get(
-                    `${ENDPOINT}/files/upload-urls`,
-                    {
-                        count: Math.min(
-                            MAX_URL_REQUESTS,
-                            (this.totalFileCount - this.filesCompleted) * 2,
-                        ),
-                    },
-                    { 'X-Auth-Token': token },
-                );
-                const response = await this.uploadURLFetchInProgress;
-
-                this.uploadURLFetchInProgress = null;
-                this.uploadURLs.push(...response.data['urls']);
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
