@@ -136,8 +136,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     : () async {
                         await Configuration.instance
                             .setPathsToBackUp(_selectedFolders);
-                        Configuration.instance.setSelectAllFoldersForBackup(
-                            _selectedFolders.length == _allFolders.length);
+                        await Configuration.instance
+                            .setSelectAllFoldersForBackup(
+                                _selectedFolders.length == _allFolders.length);
                         Bus.instance.fire(BackupFoldersUpdatedEvent());
                         Navigator.of(context).pop();
                       },
