@@ -1,4 +1,4 @@
-import { errorCodes } from './errorUtil';
+import constants from 'utils/strings/constants';
 
 const DESKTOP_APP_DOWNLOAD_URL = 'https://github.com/ente-io/bhari-frame/releases/';
 
@@ -8,7 +8,7 @@ export function checkConnectivity() {
     if (navigator.onLine) {
         return true;
     }
-    throw new Error(errorCodes.ERR_NO_INTERNET_CONNECTION);
+    throw new Error(constants.NO_INTERNET_CONNECTION);
 }
 
 export function runningInBrowser() {
@@ -32,14 +32,14 @@ export function reverseString(title: string) {
         .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
 }
 
-export async function retryPromise(promise: Promise<any>, retryCount: number = 3) {
+export async function retryAsyncFunction(func: ()=>Promise<any>, retryCount: number = 3) {
     try {
-        const resp = await promise;
+        const resp = await func();
         return resp;
     } catch (e) {
         if (retryCount > 0) {
             await sleep(retrySleepTime[3 - retryCount]);
-            await retryPromise(promise, retryCount - 1);
+            await retryAsyncFunction(func, retryCount - 1);
         } else {
             throw e;
         }

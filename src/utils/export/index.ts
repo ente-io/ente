@@ -1,5 +1,7 @@
 import { ExportRecord } from 'services/exportService';
 import { File } from 'services/fileService';
+import { MetadataObject } from 'services/uploadService';
+import { formatDate } from 'utils/file';
 
 
 export const getFileUID = (file: File) => `${file.id}_${file.collectionID}_${file.updationTime}`;
@@ -41,4 +43,22 @@ export const dedupe = (files: any[]) => {
     const fileSet = new Set(files);
     const dedupedArray = new Array(...fileSet);
     return dedupedArray;
+};
+
+export const getGoogleLikeMetadataFile=(uid :string, metadata:MetadataObject)=>{
+    return JSON.stringify({
+        title: uid,
+        creationTime: {
+            timestamp: metadata.creationTime,
+            formatted: formatDate(metadata.creationTime),
+        },
+        modificationTime: {
+            timestamp: metadata.modificationTime,
+            formatted: formatDate(metadata.modificationTime),
+        },
+        geoData: {
+            latitude: metadata.latitude,
+            longitude: metadata.longitude,
+        },
+    }, null, 2);
 };

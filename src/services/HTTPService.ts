@@ -76,6 +76,9 @@ class HTTPService {
             ...this.headers,
             ...config.headers,
         };
+        if (customConfig?.cancel) {
+            config.cancelToken=new axios.CancelToken((c)=> (customConfig.cancel.exec=c));
+        }
         return await axios({ ...config, ...customConfig });
     }
 

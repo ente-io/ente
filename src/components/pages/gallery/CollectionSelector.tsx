@@ -37,6 +37,7 @@ interface Props {
     directlyShowNextModal: boolean;
     collectionsAndTheirLatestFile: CollectionAndItsLatestFile[];
     attributes: CollectionSelectorAttributes;
+    syncWithRemote:(force?: boolean, silent?:boolean)=>Promise<void>;
 }
 function CollectionSelector({
     attributes,

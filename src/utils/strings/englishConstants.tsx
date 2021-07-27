@@ -90,10 +90,10 @@ const englishConstants = {
         1: 'reading google metadata files',
         2: (fileCounter) => `${fileCounter.finished} / ${fileCounter.total} files backed up`,
         3: 'backup complete!',
-        4: 'waiting for sync to complete',
     },
     UPLOADING_FILES: 'file upload',
     FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
+    UNSUPPORTED_FILE_LIST: 'unsupported files',
     FILE_UPLOAD_PROGRESS: (name, progress) => (
         <div id={name}>
             <strong>{name}</strong>
@@ -104,6 +104,8 @@ const englishConstants = {
                         return 'failed';
                     case -2:
                         return 'already uploaded, skipping...';
+                    case -3:
+                        return 'unsupported file format, ignored';
                     default:
                         return `${progress}%`;
                 }

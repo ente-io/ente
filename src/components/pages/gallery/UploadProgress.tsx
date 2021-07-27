@@ -2,7 +2,8 @@ import React from 'react';
 import {
     Alert, Button, Modal, ProgressBar,
 } from 'react-bootstrap';
-import { UPLOAD_STAGES } from 'services/uploadService';
+import { FileRejection } from 'react-dropzone';
+import { UPLOAD_STAGES, FileUploadErrorCode } from 'services/uploadService';
 import constants from 'utils/strings/constants';
 
 interface Props {
@@ -13,12 +14,20 @@ interface Props {
     retryFailed;
     fileProgress: Map<string, number>;
     show;
+    fileRejections:FileRejection[]
+}
+interface FileProgressStatuses{
+    fileName:string;
+    progress:number;
 }
 export default function UploadProgress(props: Props) {
-    const fileProgressStatuses = [];
+    const fileProgressStatuses = [] as FileProgressStatuses[];
     if (props.fileProgress) {
         for (const [fileName, progress] of props.fileProgress) {
             fileProgressStatuses.push({ fileName, progress });
+        }
+        for (const { file } of props.fileRejections) {
+            fileProgressStatuses.push({ fileName: file.name, progress: FileUploadErrorCode.UNSUPPORTED });
         }
         fileProgressStatuses.sort((a, b) => {
             if (b.progress !== -1 && a.progress === -1) return 1;
@@ -52,7 +61,7 @@ export default function UploadProgress(props: Props) {
                 </h4>
             </Modal.Header>
             <Modal.Body>
-                {props.now === 100 ? (
+                {props.uploadStage===UPLOAD_STAGES.FINISH ? (
                     fileProgressStatuses.length !== 0 && (
                         <Alert variant="warning">
                             {constants.FAILED_UPLOAD_FILE_LIST}
@@ -78,7 +87,7 @@ export default function UploadProgress(props: Props) {
                     >
                         {fileProgressStatuses.map(({ fileName, progress }) => (
                             <li key={fileName} style={{ marginTop: '12px' }}>
-                                {props.now === 100 ?
+                                {props.uploadStage===UPLOAD_STAGES.FINISH ?
                                     fileName :
                                     constants.FILE_UPLOAD_PROGRESS(
                                         fileName,
@@ -90,7 +99,7 @@ export default function UploadProgress(props: Props) {
                 )}
                 {props.uploadStage === UPLOAD_STAGES.FINISH && (
                     <Modal.Footer style={{ border: 'none' }}>
-                        {props.now === 100 && (fileProgressStatuses?.length === 0 ? (
+                        {props.uploadStage===UPLOAD_STAGES.FINISH && (fileProgressStatuses?.length === 0 ? (
                             <Button
                                 variant="outline-secondary"
                                 style={{ width: '100%' }}

@@ -3,8 +3,8 @@ import HTTPService from './HTTPService';
 import EXIF from 'exif-js';
 import { File, fileAttribute } from './fileService';
 import { Collection } from './collectionService';
-import { FILE_TYPE } from 'pages/gallery';
-import { checkConnectivity, retryPromise, sleep } from 'utils/common';
+import { FILE_TYPE, SetFiles } from 'pages/gallery';
+import { retryAsyncFunction, sleep } from 'utils/common';
 import {
     handleError,
     parseError,
@@ -17,8 +17,13 @@ import { getToken } from 'utils/common/key';
 import {
     fileIsHEIC,
     convertHEIC2JPEG,
+    sortFilesIntoCollections,
+    sortFiles,
+    decryptFile,
+    removeUnneccessaryFileProps,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
+import localForage from 'utils/storage/localForage';
 const ENDPOINT = getEndpoint();
 
 const THUMBNAIL_HEIGHT = 720;
@@ -37,11 +42,15 @@ const CHUNKS_COMBINED_FOR_UPLOAD = 5;
 const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 const NULL_LOCATION: Location = { latitude: null, longitude: null };
 const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
-const FILE_UPLOAD_FAILED = -1;
-const FILE_UPLOAD_SKIPPED = -2;
 const FILE_UPLOAD_COMPLETED = 100;
 const EDITED_FILE_SUFFIX = '-edited';
 const TwoSecondInMillSeconds = 2000;
+
+export enum FileUploadErrorCode {
+    FAILED = -1,
+    SKIPPED = -2,
+    UNSUPPORTED = -3,
+}
 
 interface Location {
     latitude: number;
@@ -123,7 +132,6 @@ export enum UPLOAD_STAGES {
     READING_GOOGLE_METADATA_FILES,
     UPLOADING,
     FINISH,
-    WAIT,
 }
 
 class UploadService {
@@ -139,13 +147,15 @@ class UploadService {
     private progressBarProps;
     private failedFiles: FileWithCollection[];
     private existingFilesCollectionWise: Map<number, File[]>;
+    private existingFiles: File[];
+    private setFiles:SetFiles;
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
-        existingFilesCollectionWise: Map<number, File[]>,
+        existingFiles: File[],
         progressBarProps,
+        setFiles:SetFiles,
     ) {
         try {
-            checkConnectivity();
             progressBarProps.setUploadStage(UPLOAD_STAGES.START);
 
             this.filesCompleted = 0;
@@ -153,9 +163,10 @@ class UploadService {
             this.failedFiles = [];
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-            this.existingFilesCollectionWise = existingFilesCollectionWise;
+            this.existingFiles=existingFiles;
+            this.existingFilesCollectionWise = sortFilesIntoCollections(existingFiles);
             this.updateProgressBarUI();
-
+            this.setFiles=setFiles;
             const metadataFiles: globalThis.File[] = [];
             const actualFiles: FileWithCollection[] = [];
             filesWithCollectionToUpload.forEach((fileWithCollection) => {
@@ -164,15 +175,10 @@ class UploadService {
                     // ignore files with name starting with . (hidden files)
                     return;
                 }
-                if (
-                    file.type.substr(0, 5) === TYPE_IMAGE ||
-                    file.type.substr(0, 5) === TYPE_VIDEO ||
-                    (file.type.length === 0 && file.name.endsWith(TYPE_HEIC))
-                ) {
-                    actualFiles.push(fileWithCollection);
-                }
                 if (file.name.slice(-4) === TYPE_JSON) {
                     metadataFiles.push(fileWithCollection.file);
+                } else {
+                    actualFiles.push(fileWithCollection);
                 }
             });
             this.filesToBeUploaded = actualFiles;
@@ -244,7 +250,7 @@ class UploadService {
             let file: FileInMemory = await this.readFile(reader, rawFile);
             if (this.fileAlreadyInCollection(file, collection)) {
                 // set progress to -2 indicating that file upload was skipped
-                this.fileProgress.set(rawFile.name, FILE_UPLOAD_SKIPPED);
+                this.fileProgress.set(rawFile.name, FileUploadErrorCode.SKIPPED);
                 this.updateProgressBarUI();
                 await sleep(TwoSecondInMillSeconds);
                 // remove completed files for file progress list
@@ -252,29 +258,41 @@ class UploadService {
             } else {
                 let encryptedFile: EncryptedFile =
                     await this.encryptFile(worker, file, collection.key);
+
                 let backupedFile: BackupedFile = await this.uploadToBucket(
                     encryptedFile.file,
                 );
-                file = null;
+
                 let uploadFile: uploadFile = this.getUploadFile(
                     collection,
                     backupedFile,
                     encryptedFile.fileKey,
                 );
+
                 encryptedFile = null;
                 backupedFile = null;
-                await this.uploadFile(uploadFile);
+
+                const uploadedFile =await this.uploadFile(uploadFile);
+                const decryptedFile=await decryptFile(uploadedFile, collection);
+
+                this.existingFiles.push(decryptedFile);
+                this.existingFiles=sortFiles(this.existingFiles);
+                await localForage.setItem('files', removeUnneccessaryFileProps(this.existingFiles));
+                this.setFiles(this.existingFiles);
+
+                file = null;
                 uploadFile = null;
+
                 this.fileProgress.delete(rawFile.name);
+                this.filesCompleted++;
             }
         } catch (e) {
             logError(e, 'file upload failed');
             this.failedFiles.push(fileWithCollection);
             // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
-            this.fileProgress.set(rawFile.name, FILE_UPLOAD_FAILED);
+            this.fileProgress.set(rawFile.name, FileUploadErrorCode.FAILED);
             handleError(e);
         }
-        this.filesCompleted++;
         this.updateProgressBarUI();
 
         if (this.filesToBeUploaded.length > 0) {
@@ -285,8 +303,8 @@ class UploadService {
             );
         }
     }
-    async retryFailedFiles() {
-        await this.uploadFiles(this.failedFiles, this.existingFilesCollectionWise, this.progressBarProps);
+    async retryFailedFiles(localFiles:File[]) {
+        await this.uploadFiles(this.failedFiles, localFiles, this.progressBarProps, this.setFiles);
     }
 
     private updateProgressBarUI() {
@@ -541,13 +559,13 @@ class UploadService {
         return uploadFile;
     }
 
-    private async uploadFile(uploadFile: uploadFile) {
+    private async uploadFile(uploadFile: uploadFile):Promise<File> {
         try {
             const token = getToken();
             if (!token) {
                 return;
             }
-            const response = await retryPromise(HTTPService.post(
+            const response = await retryAsyncFunction(()=>HTTPService.post(
                 `${ENDPOINT}/files`,
                 uploadFile,
                 null,
@@ -873,7 +891,7 @@ class UploadService {
         filename: string,
     ): Promise<string> {
         try {
-            await retryPromise(
+            await retryAsyncFunction(()=>
                 HTTPService.put(
                     fileUploadURL.url,
                     file,
@@ -917,7 +935,7 @@ class UploadService {
                     }
                 }
                 const uploadChunk = Uint8Array.from(combinedChunks);
-                const response = await retryPromise(
+                const response = await retryAsyncFunction(()=>
                     HTTPService.put(
                         fileUploadURL,
                         uploadChunk,
@@ -936,7 +954,7 @@ class UploadService {
                 { CompleteMultipartUpload: { Part: resParts } },
                 options,
             );
-            await retryPromise(
+            await retryAsyncFunction(()=>
                 HTTPService.post(multipartUploadURLs.completeURL, body, null, {
                     'content-type': 'text/xml',
                 }),
@@ -953,7 +971,16 @@ class UploadService {
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
         index = 0,
     ) {
+        const cancel={ exec: null };
+        let timeout=null;
+        const resetTimeout=()=>{
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+            timeout=setTimeout(()=>cancel.exec(), 30*1000);
+        };
         return {
+            cancel,
             onUploadProgress: (event) => {
                 filename &&
                     this.fileProgress.set(
@@ -968,6 +995,11 @@ class UploadService {
                         ),
                     );
                 this.updateProgressBarUI();
+                if (event.loaded===event.total) {
+                    clearTimeout(timeout);
+                } else {
+                    resetTimeout();
+                }
             },
         };
     }

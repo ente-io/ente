@@ -1,5 +1,7 @@
+import { Collection } from 'services/collectionService';
 import { File } from 'services/fileService';
 import { runningInBrowser } from 'utils/common';
+import CryptoWorker from 'utils/crypto';
 
 const TYPE_HEIC = 'heic';
 const UNSUPPORTED_FORMATS = ['flv', 'mkv', '3gp', 'avi', 'wmv'];
@@ -93,4 +95,54 @@ export function formatDateTime(date: number | Date) {
         timeStyle: 'medium',
     });
     return `${dateTimeFormat.format(date)} ${timeFormat.format(date)}`;
+}
+
+export function sortFiles(files:File[]) {
+    // sort according to modification time first
+    files = files.sort((a, b) => {
+        if (!b.metadata?.modificationTime) {
+            return -1;
+        }
+        if (!a.metadata?.modificationTime) {
+            return 1;
+        } else {
+            return b.metadata.modificationTime - a.metadata.modificationTime;
+        }
+    });
+
+    // then sort according to creation time, maintaining ordering according to modification time for files with creation time
+    files = files.map((file, index) => ({ index, file })).sort((a, b) => {
+        let diff = b.file.metadata.creationTime - a.file.metadata.creationTime;
+        if (diff === 0) {
+            diff = a.index - b.index;
+        }
+        return diff;
+    }).map((file) => file.file);
+    return files;
+}
+
+export async function decryptFile(file:File, collection:Collection) {
+    const worker = await new CryptoWorker();
+    file.key = await worker.decryptB64(
+        file.encryptedKey,
+        file.keyDecryptionNonce,
+        collection.key,
+    );
+    file.metadata = await worker.decryptMetadata(file);
+    return file;
+}
+
+export function removeUnneccessaryFileProps(files:File[]):File[] {
+    const stripedFiles=files.map((file)=>{
+        delete file.src;
+        delete file.msrc;
+        delete file.file.objectKey;
+        delete file.thumbnail.objectKey;
+        delete file.h;
+        delete file.html;
+        delete file.w;
+
+        return file;
+    });
+    return stripedFiles;
 }
