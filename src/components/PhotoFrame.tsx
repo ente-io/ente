@@ -574,7 +574,6 @@ const PhotoFrame = ({
                                 }
                                 return sum;
                             })();
-                            console.log(height, photoFrameHeight);
                             files.length < 30 && !searchMode &&
                                 timeStampList.push({
                                     itemType: ITEM_TYPE.BANNER,
