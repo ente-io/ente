@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:computer/computer.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -123,6 +124,7 @@ class LocalSyncService {
       await _db.insertMultiple(unsyncedFiles);
       _logger.info(
           "Inserted " + unsyncedFiles.length.toString() + " unsynced files.");
+      _updatePathsToBackup(unsyncedFiles);
       Bus.instance.fire(LocalPhotosUpdatedEvent(unsyncedFiles));
       return true;
     }
@@ -228,8 +230,18 @@ class LocalSyncService {
       files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
       await _db.insertMultiple(files);
       _logger.info("Inserted " + files.length.toString() + " files.");
+      _updatePathsToBackup(files);
       Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
+  }
+
+  void _updatePathsToBackup(List<File> files) {
+    if (Configuration.instance.hasSelectedAllFoldersForBackup()) {
+      final pathsToBackup = Configuration.instance.getPathsToBackUp();
+      final newFilePaths = files.map((file) => file.deviceFolder).toList();
+      pathsToBackup.addAll(newFilePaths);
+      Configuration.instance.setPathsToBackUp(pathsToBackup);
+    }
   }
 }

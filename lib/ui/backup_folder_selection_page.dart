@@ -50,10 +50,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         for (final file in _latestFiles) {
           _allFolders.add(file.deviceFolder);
         }
-        if (widget.shouldSelectAll ||
-            Configuration.instance.hasSelectedAllFoldersForBackup()) {
+        if (widget.shouldSelectAll) {
           _selectedFolders.addAll(_allFolders);
         }
+        _selectedFolders.removeWhere((folder) => !_allFolders.contains(folder));
       });
     });
     super.initState();

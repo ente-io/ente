@@ -250,8 +250,7 @@ class DeviceFolderIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isBackedUp =
-        Configuration.instance.getPathsToBackUp().contains(folder.path) ||
-            Configuration.instance.hasSelectedAllFoldersForBackup();
+        Configuration.instance.getPathsToBackUp().contains(folder.path);
     return GestureDetector(
       child: Container(
         height: 140,

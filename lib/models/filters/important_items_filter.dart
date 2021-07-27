@@ -7,14 +7,9 @@ import 'package:photos/models/filters/gallery_items_filter.dart';
 
 class ImportantItemsFilter implements GalleryItemsFilter {
   final _importantPaths = Configuration.instance.getPathsToBackUp();
-  final _hasSelectedAllFoldersForBackup =
-      Configuration.instance.hasSelectedAllFoldersForBackup();
 
   @override
   bool shouldInclude(File file) {
-    if (_hasSelectedAllFoldersForBackup) {
-      return true;
-    }
     if (_importantPaths.isEmpty) {
       if (Platform.isAndroid) {
         if (file.uploadedFileID != null) {

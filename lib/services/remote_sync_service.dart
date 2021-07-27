@@ -79,12 +79,9 @@ class RemoteSyncService {
 
   Future<bool> _uploadDiff() async {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
-    final hasSelectedAllFoldersForBackup =
-        Configuration.instance.hasSelectedAllFoldersForBackup();
     List<File> filesToBeUploaded;
-    if (hasSelectedAllFoldersForBackup ||
-        (LocalSyncService.instance.hasGrantedLimitedPermissions() &&
-            foldersToBackUp.isEmpty)) {
+    if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&
+        foldersToBackUp.isEmpty) {
       filesToBeUploaded = await _db.getAllLocalFiles();
     } else {
       filesToBeUploaded =
