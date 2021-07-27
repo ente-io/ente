@@ -37,6 +37,7 @@ interface Props {
     directlyShowNextModal: boolean;
     collectionsAndTheirLatestFile: CollectionAndItsLatestFile[];
     attributes: CollectionSelectorAttributes;
+    syncWithRemote:(force?: boolean, silent?:boolean)=>Promise<void>;
 }
 function CollectionSelector({
     attributes,
@@ -45,10 +46,14 @@ function CollectionSelector({
     ...props
 }: Props) {
     useEffect(() => {
-        if (directlyShowNextModal && attributes) {
-            props.onHide();
-            attributes.showNextModal();
-        }
+        const main=async ()=>{
+            await props.syncWithRemote(true, true);
+            if (directlyShowNextModal && attributes) {
+                props.onHide();
+                attributes.showNextModal();
+            }
+        };
+        main();
     }, [attributes]);
 
     if (!attributes) {

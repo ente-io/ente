@@ -191,7 +191,7 @@ export default function Gallery() {
     );
     useEffect(() => setCollectionNamerView(true), [collectionNamerAttributes]);
 
-    const syncWithRemote = async (force = false) => {
+    const syncWithRemote = async (force = false, silent=false) => {
         if (syncInProgress.current && !force) {
             resync.current= true;
             return;
@@ -202,7 +202,7 @@ export default function Gallery() {
             if (!(await isTokenValid())) {
                 throw new Error(errorCodes.ERR_SESSION_EXPIRED);
             }
-            loadingBar.current?.continuousStart();
+            !silent && loadingBar.current?.continuousStart();
             await billingService.updatePlans();
             await billingService.syncSubscription();
             const collections = await syncCollections();
@@ -230,7 +230,7 @@ export default function Gallery() {
                     break;
             }
         } finally {
-            loadingBar.current?.complete();
+            !silent && loadingBar.current?.complete();
         }
         syncInProgress.current=false;
         if (resync.current) {
@@ -406,6 +406,7 @@ export default function Gallery() {
                         collectionsAndTheirLatestFile?.length === 0
                     }
                     attributes={collectionSelectorAttributes}
+                    syncWithRemote={syncWithRemote}
                 />
                 <Upload
                     syncWithRemote={syncWithRemote}
