@@ -412,7 +412,6 @@ export default function Gallery() {
                     syncWithRemote={syncWithRemote}
                     setBannerMessage={setBannerMessage}
                     acceptedFiles={acceptedFiles}
-                    existingFiles={files}
                     showCollectionSelector={setCollectionSelectorView.bind(null, true)}
                     setCollectionSelectorAttributes={setCollectionSelectorAttributes}
                     closeCollectionSelector={setCollectionSelectorView.bind(

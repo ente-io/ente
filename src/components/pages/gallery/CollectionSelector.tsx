@@ -46,14 +46,10 @@ function CollectionSelector({
     ...props
 }: Props) {
     useEffect(() => {
-        const main=async ()=>{
-            await props.syncWithRemote(true, true);
-            if (directlyShowNextModal && attributes) {
-                props.onHide();
-                attributes.showNextModal();
-            }
-        };
-        main();
+        if (directlyShowNextModal && attributes) {
+            props.onHide();
+            attributes.showNextModal();
+        }
     }, [attributes]);
 
     if (!attributes) {

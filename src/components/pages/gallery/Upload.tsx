@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import UploadService, { FileWithCollection, UPLOAD_STAGES } from 'services/uploadService';
 import { createAlbum } from 'services/collectionService';
-import { File, getLocalFiles } from 'services/fileService';
+import { getLocalFiles } from 'services/fileService';
 import constants from 'utils/strings/constants';
 import { SetDialogMessage } from 'components/MessageDialog';
 import UploadProgress from './UploadProgress';
@@ -18,7 +18,6 @@ interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBannerMessage;
     acceptedFiles: globalThis.File[];
-    existingFiles: File[];
     closeCollectionSelector: () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -201,9 +200,10 @@ export default function Upload(props: Props) {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await props.syncWithRemote(true, true);
+            const localFiles= await getLocalFiles();
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
-                props.existingFiles,
+                localFiles,
                 {
                     setPercentComplete,
                     setFileCounter,
