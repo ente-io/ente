@@ -3,13 +3,13 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
@@ -24,8 +24,8 @@ import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -196,7 +196,7 @@ class FileUploader {
     if (SyncService.instance.shouldStopSync()) {
       clearQueue(SyncStopRequestedError());
     }
-    if (_queue.length == 0) {
+    if (_queue.isEmpty) {
       // Upload session completed
       _totalCountInUploadSession = 0;
       return;
@@ -274,14 +274,15 @@ class FileUploader {
           file.toString() +
           ", isForced: " +
           forcedUpload.toString());
-      mediaUploadData = await getUploadDataFromEnteFile(file).catchError((e) async {
+      mediaUploadData =
+          await getUploadDataFromEnteFile(file).catchError((e) async {
         if (e is InvalidFileError) {
           _onInvalidFileError(file);
         } else {
           throw e;
         }
       });
-      var key;
+      Uint8List key;
       var isAlreadyUploadedFile = file.uploadedFileID != null;
       if (isAlreadyUploadedFile) {
         key = decryptFileKey(file);
@@ -368,9 +369,11 @@ class FileUploader {
       if (!(e is NoActiveSubscriptionError || e is StorageLimitExceededError)) {
         _logger.severe("File upload failed for " + file.toString(), e, s);
       }
-      throw e;
+      rethrow;
     } finally {
-      if (io.Platform.isIOS && mediaUploadData != null && mediaUploadData.sourceFile != null) {
+      if (io.Platform.isIOS &&
+          mediaUploadData != null &&
+          mediaUploadData.sourceFile != null) {
         mediaUploadData.sourceFile.deleteSync();
       }
       if (io.File(encryptedFilePath).existsSync()) {
@@ -446,7 +449,7 @@ class FileUploader {
       if (e.response?.statusCode == 426) {
         _onStorageLimitExceeded();
       }
-      throw e;
+      rethrow;
     }
   }
 
@@ -492,7 +495,7 @@ class FileUploader {
       if (e.response?.statusCode == 426) {
         _onStorageLimitExceeded();
       }
-      throw e;
+      rethrow;
     }
   }
 
@@ -506,39 +509,37 @@ class FileUploader {
   Future<void> _uploadURLFetchInProgress;
 
   Future<void> _fetchUploadURLs() async {
-    if (_uploadURLFetchInProgress == null) {
-      _uploadURLFetchInProgress = Future<void>(() async {
-        try {
-          final response = await _dio.get(
-            Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
-            queryParameters: {
-              "count": min(42, 2 * _queue.length), // m4gic number
-            },
-            options: Options(
-                headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-          );
-          final urls = (response.data["urls"] as List)
-              .map((e) => UploadURL.fromMap(e))
-              .toList();
-          _uploadURLs.addAll(urls);
-          _uploadURLFetchInProgress = null;
-        } on DioError catch (e) {
-          _uploadURLFetchInProgress = null;
-          if (e.response != null) {
-            if (e.response.statusCode == 402) {
-              final error = NoActiveSubscriptionError();
-              clearQueue(error);
-              throw error;
-            } else if (e.response.statusCode == 426) {
-              final error = StorageLimitExceededError();
-              clearQueue(error);
-              throw error;
-            }
+    _uploadURLFetchInProgress ??= Future<void>(() async {
+      try {
+        final response = await _dio.get(
+          Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
+          queryParameters: {
+            "count": min(42, 2 * _queue.length), // m4gic number
+          },
+          options: Options(
+              headers: {"X-Auth-Token": Configuration.instance.getToken()}),
+        );
+        final urls = (response.data["urls"] as List)
+            .map((e) => UploadURL.fromMap(e))
+            .toList();
+        _uploadURLs.addAll(urls);
+        _uploadURLFetchInProgress = null;
+      } on DioError catch (e) {
+        _uploadURLFetchInProgress = null;
+        if (e.response != null) {
+          if (e.response.statusCode == 402) {
+            final error = NoActiveSubscriptionError();
+            clearQueue(error);
+            throw error;
+          } else if (e.response.statusCode == 426) {
+            final error = StorageLimitExceededError();
+            clearQueue(error);
+            throw error;
           }
-          throw e;
         }
-      });
-    }
+        rethrow;
+      }
+    });
     return _uploadURLFetchInProgress;
   }
 
@@ -585,7 +586,7 @@ class FileUploader {
       } else {
         _logger.info(
             "Upload failed for file with size " + fileSize.toString(), e);
-        throw e;
+        rethrow;
       }
     }
   }
