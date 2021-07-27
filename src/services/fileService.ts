@@ -48,6 +48,7 @@ export const syncFiles = async (collections: Collection[], setFiles: (files: Fil
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
         await localForage.setItem('files', files);
+        setFiles(files);
     }
     for (const collection of collections) {
         if (!getToken()) {
