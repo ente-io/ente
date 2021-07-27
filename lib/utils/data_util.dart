@@ -5,11 +5,11 @@ double convertBytesToGBs(final int bytes, {int precision = 2}) {
       (bytes / (1024 * 1024 * 1024)).toStringAsFixed(precision));
 }
 
-final kStorageUnits = ["bytes", "KB", "MB", "GB", "TB"];
+final kStorageUnits = ["bytes", "KB", "MB", "GB"];
 
 String convertBytesToReadableFormat(int bytes) {
   int storageUnitIndex = 0;
-  while (bytes >= 1024) {
+  while (bytes >= 1024 && storageUnitIndex < kStorageUnits.length - 1) {
     storageUnitIndex++;
     bytes = (bytes / 1024).round();
   }
@@ -17,9 +17,9 @@ String convertBytesToReadableFormat(int bytes) {
 }
 
 String formatBytes(int bytes, [int decimals = 2]) {
-    if (bytes == 0) return '0 bytes';
-    const k = 1024;
-    int dm = decimals < 0 ? 0 : decimals;
-    int i = (log(bytes) / log(k)).floor();
-    return ((bytes / pow(k, i)).toStringAsFixed(dm)) + ' ' + kStorageUnits[i];
+  if (bytes == 0) return '0 bytes';
+  const k = 1024;
+  int dm = decimals < 0 ? 0 : decimals;
+  int i = (log(bytes) / log(k)).floor();
+  return ((bytes / pow(k, i)).toStringAsFixed(dm)) + ' ' + kStorageUnits[i];
 }
