@@ -402,8 +402,9 @@ class FileUploader {
     String thumbnailObjectKey,
     String thumbnailDecryptionHeader,
     String encryptedMetadata,
-    String metadataDecryptionHeader,
-  ) async {
+    String metadataDecryptionHeader, {
+    int attempt = 1,
+  }) async {
     final encryptedFileKeyData = CryptoUtil.encryptSync(
       fileAttributes.key,
       CollectionsService.instance.getCollectionKey(collectionID),
@@ -448,6 +449,21 @@ class FileUploader {
     } on DioError catch (e) {
       if (e.response?.statusCode == 426) {
         _onStorageLimitExceeded();
+      } else if (attempt < kMaximumUploadAttempts) {
+        _logger.info("Upload file failed, will retry in 3 seconds");
+        await Future.delayed(Duration(seconds: 3));
+        return _uploadFile(
+          file,
+          collectionID,
+          fileAttributes,
+          fileObjectKey,
+          fileDecryptionHeader,
+          thumbnailObjectKey,
+          thumbnailDecryptionHeader,
+          encryptedMetadata,
+          metadataDecryptionHeader,
+          attempt: attempt++,
+        );
       }
       rethrow;
     }
@@ -460,8 +476,9 @@ class FileUploader {
     String thumbnailObjectKey,
     String thumbnailDecryptionHeader,
     String encryptedMetadata,
-    String metadataDecryptionHeader,
-  ) async {
+    String metadataDecryptionHeader, {
+    int attempt = 1,
+  }) async {
     final request = {
       "id": file.uploadedFileID,
       "file": {
@@ -494,6 +511,19 @@ class FileUploader {
     } on DioError catch (e) {
       if (e.response?.statusCode == 426) {
         _onStorageLimitExceeded();
+      } else if (attempt < kMaximumUploadAttempts) {
+        _logger.info("Update file failed, will retry in 3 seconds");
+        await Future.delayed(Duration(seconds: 3));
+        return _updateFile(
+          file,
+          fileObjectKey,
+          fileDecryptionHeader,
+          thumbnailObjectKey,
+          thumbnailDecryptionHeader,
+          encryptedMetadata,
+          metadataDecryptionHeader,
+          attempt: attempt++,
+        );
       }
       rethrow;
     }
