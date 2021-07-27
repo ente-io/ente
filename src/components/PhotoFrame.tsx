@@ -101,6 +101,9 @@ const BannerContainer = styled.div<{ span: number }>`
     color: #979797;
     text-align: center;
     grid-column: span ${(props) => props.span};
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
 `;
 
 const EmptyScreen = styled.div`
@@ -553,16 +556,35 @@ const PhotoFrame = ({
                                 timeStampList = mergeTimeStampList(timeStampList, columns);
                             }
 
+                            const getItemSize = (index) => {
+                                switch (timeStampList[index].itemType) {
+                                    case ITEM_TYPE.TIME:
+                                        return DATE_CONTAINER_HEIGHT;
+                                    case ITEM_TYPE.TILE:
+                                        return listItemHeight;
+                                    default:
+                                        return timeStampList[index].height;
+                                }
+                            };
+
+                            const photoFrameHeight=(()=>{
+                                let sum=0;
+                                for (let i=0; i<timeStampList.length; i++) {
+                                    sum+=getItemSize(i);
+                                }
+                                return sum;
+                            })();
+                            console.log(height, photoFrameHeight);
                             files.length < 30 && !searchMode &&
                                 timeStampList.push({
                                     itemType: ITEM_TYPE.BANNER,
                                     banner: (
                                         <BannerContainer span={columns}>
-                                            {constants.INSTALL_MOBILE_APP()}
+                                            <p>{constants.INSTALL_MOBILE_APP()}</p>
                                         </BannerContainer>
                                     ),
                                     id: 'install-banner',
-                                    height: 48,
+                                    height: Math.max(48, height-photoFrameHeight),
                                 });
                             const extraRowsToRender = Math.ceil(
                                 (NO_OF_PAGES * height) / IMAGE_CONTAINER_MAX_HEIGHT,
@@ -577,16 +599,6 @@ const PhotoFrame = ({
                                 }
                             };
 
-                            const getItemSize = (index) => {
-                                switch (timeStampList[index].itemType) {
-                                    case ITEM_TYPE.TIME:
-                                        return DATE_CONTAINER_HEIGHT;
-                                    case ITEM_TYPE.TILE:
-                                        return listItemHeight;
-                                    default:
-                                        return timeStampList[index].height;
-                                }
-                            };
 
                             const renderListItem = (listItem: TimeStampListItem) => {
                                 switch (listItem.itemType) {
