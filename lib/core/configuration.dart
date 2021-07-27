@@ -331,6 +331,10 @@ class Configuration {
 
   Future<void> setPathsToBackUp(Set<String> newPaths) async {
     await _preferences.setStringList(foldersToBackUpKey, newPaths.toList());
+    final allFolders = (await FilesDB.instance.getLatestLocalFiles())
+        .map((file) => file.deviceFolder)
+        .toList();
+    await setSelectAllFoldersForBackup(newPaths.length == allFolders.length);
     SyncService.instance.onFoldersSet(newPaths);
     SyncService.instance.sync();
   }
