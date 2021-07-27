@@ -40,7 +40,7 @@ class DeviceFolderPage extends StatelessWidget {
             padding: EdgeInsets.only(top: Platform.isAndroid ? 80 : 100),
             child: gallery,
           ),
-          Container(
+          SizedBox(
             height: Platform.isAndroid ? 80 : 100,
             child: GalleryAppBarWidget(
               GalleryAppBarType.local_folder,
@@ -76,7 +76,7 @@ class _BackupConfigurationHeaderWidgetState
     final isBackedUp =
         Configuration.instance.getPathsToBackUp().contains(widget.path);
     return Container(
-      padding: EdgeInsets.only(left: 12, right: 12),
+      padding: EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 4),
       margin: EdgeInsets.only(bottom: 12),
       color: Color.fromRGBO(10, 40, 40, 0.3),
       child: Row(
