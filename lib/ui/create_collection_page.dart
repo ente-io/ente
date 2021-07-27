@@ -22,7 +22,8 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 class CreateCollectionPage extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final List<SharedMediaFile> sharedFiles;
-  const CreateCollectionPage(this.selectedFiles,this.sharedFiles, {Key key}) : super(key: key);
+  const CreateCollectionPage(this.selectedFiles, this.sharedFiles, {Key key})
+      : super(key: key);
 
   @override
   _CreateCollectionPageState createState() => _CreateCollectionPageState();
@@ -120,7 +121,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
           children: <Widget>[
             ClipRRect(
               borderRadius: BorderRadius.circular(2.0),
-              child: Container(
+              child: SizedBox(
                 child: ThumbnailWidget(item.thumbnail),
                 height: 64,
                 width: 64,
@@ -225,10 +226,9 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     try {
       final List<File> files = [];
       if (widget.sharedFiles != null) {
-        var localFiles = await convertIncomingSharedMediaToFile(
-            widget.sharedFiles,
-          collectionID);
-        FilesDB.instance.insertMultiple(localFiles);
+        final localFiles = await convertIncomingSharedMediaToFile(
+            widget.sharedFiles, collectionID);
+        await FilesDB.instance.insertMultiple(localFiles);
       } else {
         for (final file in widget.selectedFiles.files) {
           await FilesDB.instance.insert(file);
@@ -256,7 +256,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<Collection> _createAlbum(String albumName) async {
-    var collection;
+    Collection collection;
     final dialog = createProgressDialog(context, "creating album...");
     await dialog.show();
     try {
