@@ -224,7 +224,7 @@ export const createCollection = async (
     type: CollectionType,
 ): Promise<Collection> => {
     try {
-        const existingCollections = await getLocalCollections();
+        const existingCollections = await syncCollections();
         for (const collection of existingCollections) {
             if (collection.name === collectionName) {
                 return collection;
