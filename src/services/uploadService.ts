@@ -213,17 +213,20 @@ class UploadService {
             const uploadProcesses = [];
             for (
                 let i = 0;
-                i < Math.min(MAX_CONCURRENT_UPLOADS, this.totalFileCount);
+                i < MAX_CONCURRENT_UPLOADS;
                 i++
             ) {
-                this.cryptoWorkers[i] = getDedicatedCryptoWorker();
-                uploadProcesses.push(
-                    this.uploader(
-                        await new this.cryptoWorkers[i].comlink(),
-                        new FileReader(),
-                        this.filesToBeUploaded.pop(),
-                    ),
-                );
+                if (this.filesToBeUploaded.length>0) {
+                    const fileWithCollection= this.filesToBeUploaded.pop();
+                    this.cryptoWorkers[i] = getDedicatedCryptoWorker();
+                    uploadProcesses.push(
+                        this.uploader(
+                            await new this.cryptoWorkers[i].comlink(),
+                            new FileReader(),
+                            fileWithCollection,
+                        ),
+                    );
+                }
             }
             progressBarProps.setUploadStage(UPLOAD_STAGES.UPLOADING);
             await Promise.all(uploadProcesses);
@@ -245,9 +248,6 @@ class UploadService {
         reader: FileReader,
         fileWithCollection: FileWithCollection,
     ) {
-        if (!fileWithCollection) {
-            return;
-        }
         const { file: rawFile, collection } = fileWithCollection;
         this.fileProgress.set(rawFile.name, 0);
         this.updateProgressBarUI();
