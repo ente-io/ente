@@ -205,8 +205,10 @@ class UploadService {
                 await this.fetchUploadURLs();
             } catch (e) {
                 logError(e, 'error fetching uploadURLs');
-                const { parsedError } = parseError(e);
-                throw parsedError;
+                const { parsedError, parsed } = parseError(e);
+                if (parsed) {
+                    throw parsedError;
+                }
             }
             const uploadProcesses = [];
             for (
