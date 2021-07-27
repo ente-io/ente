@@ -138,7 +138,6 @@ class File {
     return localID == null && uploadedFileID != null;
   }
 
-
   bool isSharedMediaToAppSandbox() {
     return localID != null && localID.startsWith(kSharedMediaIdentifier);
   }
@@ -150,10 +149,8 @@ class File {
 
   @override
   String toString() {
-    return '''File(generatedId: $generatedID, uploadedFileId: $uploadedFileID, 
-      localID: $localID, ownerID: $ownerID, collectionID: $collectionID,
-      fileType: $fileType, creationTime: $creationTime, 
-      modificationTime: $modificationTime, updationTime: $updationTime)''';
+    return '''File(uploadedFileId: $uploadedFileID, ownerID: $ownerID, 
+      collectionID: $collectionID, updationTime: $updationTime)''';
   }
 
   @override
