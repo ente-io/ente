@@ -47,10 +47,10 @@ class _SharingDialogState extends State<SharingDialog> {
       children.add(_getEmailField());
     }
     children.add(Padding(
-      padding: EdgeInsets.all(8),
+      padding: EdgeInsets.all(16),
     ));
     if (!_showEntryField) {
-      children.add(Container(
+      children.add(SizedBox(
         width: 220,
         child: OutlineButton(
           child: Icon(
@@ -64,16 +64,18 @@ class _SharingDialogState extends State<SharingDialog> {
         ),
       ));
     } else {
-      children.add(Container(
-        width: 220,
-        height: 50,
-        child: button(
-          "add",
-          onPressed: () {
-            _addEmailToCollection(_email.trim());
-          },
+      children.add(
+        SizedBox(
+          width: 240,
+          height: 50,
+          child: button(
+            "add",
+            onPressed: () {
+              _addEmailToCollection(_email.trim());
+            },
+          ),
         ),
-      ));
+      );
     }
 
     return AlertDialog(
@@ -93,58 +95,54 @@ class _SharingDialogState extends State<SharingDialog> {
   }
 
   Widget _getEmailField() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TypeAheadField(
-              textFieldConfiguration: TextFieldConfiguration(
-                keyboardType: TextInputType.emailAddress,
-                autofocus: true,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "email@your-friend.com",
-                ),
+    return Row(
+      children: [
+        Expanded(
+          child: TypeAheadField(
+            textFieldConfiguration: TextFieldConfiguration(
+              keyboardType: TextInputType.emailAddress,
+              autofocus: true,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "email@your-friend.com",
               ),
-              hideOnEmpty: true,
-              loadingBuilder: (context) {
-                return loadWidget;
-              },
-              suggestionsCallback: (pattern) async {
-                _email = pattern;
-                return PublicKeysDB.instance.searchByEmail(_email);
-              },
-              itemBuilder: (context, suggestion) {
-                return Container(
-                  padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
-                  child: Container(
-                    child: Text(
-                      suggestion.email,
-                      overflow: TextOverflow.clip,
-                    ),
-                  ),
-                );
-              },
-              onSuggestionSelected: (PublicKey suggestion) {
-                _addEmailToCollection(suggestion.email,
-                    publicKey: suggestion.publicKey);
-              },
             ),
+            hideOnEmpty: true,
+            loadingBuilder: (context) {
+              return loadWidget;
+            },
+            suggestionsCallback: (pattern) async {
+              _email = pattern;
+              return PublicKeysDB.instance.searchByEmail(_email);
+            },
+            itemBuilder: (context, suggestion) {
+              return Container(
+                padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+                child: Text(
+                  suggestion.email,
+                  overflow: TextOverflow.clip,
+                ),
+              );
+            },
+            onSuggestionSelected: (PublicKey suggestion) {
+              _addEmailToCollection(suggestion.email,
+                  publicKey: suggestion.publicKey);
+            },
           ),
-          IconButton(
-              icon: Icon(
-                Icons.contact_mail_outlined,
-                color: Theme.of(context).buttonColor,
-              ),
-              onPressed: () async {
-                final emailContact =
-                    await FlutterContactPicker.pickEmailContact(
-                        askForPermission: true);
-                _addEmailToCollection(emailContact.email.email);
-              }),
-        ],
-      ),
+        ),
+        Padding(padding: EdgeInsets.all(8)),
+        IconButton(
+          icon: Icon(
+            Icons.contact_mail_outlined,
+            color: Theme.of(context).buttonColor.withOpacity(0.8),
+          ),
+          onPressed: () async {
+            final emailContact = await FlutterContactPicker.pickEmailContact(
+                askForPermission: true);
+            _addEmailToCollection(emailContact.email.email);
+          },
+        ),
+      ],
     );
   }
 
@@ -175,12 +173,22 @@ class _SharingDialogState extends State<SharingDialog> {
       Navigator.of(context, rootNavigator: true).pop('dialog');
       final dialog = AlertDialog(
         title: Text("invite to ente?"),
-        content: Text("looks like " +
-            email +
-            " hasn't signed up for ente yet. would you like to invite them?"),
+        content: Text(
+          "looks like " +
+              email +
+              " hasn't signed up for ente yet. would you like to invite them?",
+          style: TextStyle(
+            height: 1.4,
+          ),
+        ),
         actions: [
-          FlatButton(
-            child: Text("invite"),
+          TextButton(
+            child: Text(
+              "invite",
+              style: TextStyle(
+                color: Theme.of(context).buttonColor,
+              ),
+            ),
             onPressed: () {
               shareText(
                   "Hey, I have some photos to share. Please install https://ente.io so that I can share them privately.");
