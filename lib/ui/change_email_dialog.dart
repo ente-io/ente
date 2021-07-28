@@ -58,7 +58,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
         ),
         TextButton(
           child: Text(
-            "verify email",
+            "verify",
             style: TextStyle(
               color: Colors.white,
             ),
