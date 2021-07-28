@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/models/user_details.dart';
@@ -59,8 +61,10 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
             child: PieChart(
               dataMap: {
                 "used": _userDetails.usage.toDouble(),
-                "free": _userDetails.subscription.storage.toDouble() -
-                    _userDetails.usage.toDouble(),
+                "free": max(
+                    _userDetails.subscription.storage.toDouble() -
+                        _userDetails.usage.toDouble(),
+                    0),
               },
               colorList: const [
                 Colors.redAccent,
