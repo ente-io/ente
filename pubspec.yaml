@@ -74,7 +74,7 @@ dependencies:
   photo_manager: ^1.2.4
   photo_view: ^0.11.1
   pie_chart:
-    path: thirdparty/pie_chart
+    git: "https://github.com/apgapg/pie_chart.git"
   pinput: ^1.2.0
   provider: ^3.1.0
   quiver: ^3.0.1

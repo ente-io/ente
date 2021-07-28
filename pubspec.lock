@@ -700,9 +700,11 @@ packages:
   pie_chart:
     dependency: "direct main"
     description:
-      path: "thirdparty/pie_chart"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: b4711f50a9e6143f44274184e5a088274fb0e5ce
+      url: "https://github.com/apgapg/pie_chart.git"
+    source: git
     version: "5.0.0"
   pinput:
     dependency: "direct main"
