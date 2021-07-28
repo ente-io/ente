@@ -1,3 +1,4 @@
+import 'dart:io' as io;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -6,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share/share.dart';
-import 'dart:io' as io;
 
 class RecoveryKeyDialog extends StatefulWidget {
   final String recoveryKey;
@@ -99,7 +99,7 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
               Padding(padding: EdgeInsets.all(8)),
               GestureDetector(
                 onTap: () async {
-                  await Clipboard.setData(new ClipboardData(text: recoveryKey));
+                  await Clipboard.setData(ClipboardData(text: recoveryKey));
                   showToast("recovery key copied to clipboard");
                   setState(() {
                     _hasTriedToSave = true;
@@ -112,7 +112,7 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
                       recoveryKey,
                       style: TextStyle(
                         fontSize: 16,
-                        fontFeatures: [FontFeature.tabularFigures()],
+                        fontFeatures: const [FontFeature.tabularFigures()],
                         color: Colors.white.withOpacity(0.7),
                       ),
                     ),
