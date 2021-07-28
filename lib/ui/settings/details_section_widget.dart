@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/email_changed_event.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/loading_widget.dart';
@@ -18,15 +21,29 @@ class DetailsSectionWidget extends StatefulWidget {
 
 class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   UserDetails _userDetails;
+  StreamSubscription<EmailChangedEvent> _emailChangedEvent;
 
   @override
   void initState() {
     super.initState();
+    _fetchUserDetails();
+    _emailChangedEvent = Bus.instance.on<EmailChangedEvent>().listen((event) {
+      _fetchUserDetails();
+    });
+  }
+
+  void _fetchUserDetails() {
     UserService.instance.getUserDetails().then((details) {
       setState(() {
         _userDetails = details;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _emailChangedEvent.cancel();
+    super.dispose();
   }
 
   @override

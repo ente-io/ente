@@ -2,12 +2,18 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:photos/core/configuration.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common_elements.dart';
 
 class OTTVerificationPage extends StatefulWidget {
-  OTTVerificationPage({Key key}) : super(key: key);
+  final String email;
+  final bool isChangeEmail;
+
+  OTTVerificationPage(
+    this.email, {
+    this.isChangeEmail = false,
+    Key key,
+  }) : super(key: key);
 
   @override
   _OTTVerificationPageState createState() => _OTTVerificationPageState();
@@ -42,7 +48,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               ),
               Padding(padding: EdgeInsets.all(2)),
               Text(
-                Configuration.instance.getEmail(),
+                widget.email,
                 style: TextStyle(
                   color: Theme.of(context).buttonColor,
                   fontSize: 18,
@@ -86,14 +92,19 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                           _verificationCodeController.text.isEmpty
                       ? null
                       : () {
-                          UserService.instance.verifyEmail(
-                              context, _verificationCodeController.text);
+                          if (widget.isChangeEmail) {
+                            UserService.instance.changeEmail(context,
+                                widget.email, _verificationCodeController.text);
+                          } else {
+                            UserService.instance.verifyEmail(
+                                context, _verificationCodeController.text);
+                          }
                         },
                   fontSize: 18,
                 ),
               ),
               Padding(padding: EdgeInsets.all(8)),
-              FlatButton(
+              TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -102,6 +113,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                     style: TextStyle(
                       decoration: TextDecoration.underline,
                       fontSize: 12,
+                      color: Colors.white.withOpacity(0.7),
                     ),
                   )),
             ],

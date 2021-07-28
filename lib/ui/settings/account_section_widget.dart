@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/change_email_dialog.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/recovery_key_dialog.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
@@ -84,24 +85,31 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         Platform.isIOS
             ? Padding(padding: EdgeInsets.all(2))
             : Padding(padding: EdgeInsets.all(2)),
-        // GestureDetector(
-        //   behavior: HitTestBehavior.translucent,
-        //   onTap: () async {
-        //     final result = await requestAuthentication();
-        //     if (!result) {
-        //       showToast("please authenticate to change your email");
-        //       return;
-        //     }
-        //     // showDialog
-        //   },
-        //   child:
-        //       SettingsTextItem(text: "change email", icon: Icons.navigate_next),
-        // ),
-        // Padding(padding: EdgeInsets.all(2)),
-        // Divider(height: 4),
-        // Platform.isIOS
-        //     ? Padding(padding: EdgeInsets.all(2))
-        //     : Padding(padding: EdgeInsets.all(4)),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            // final result = await requestAuthentication();
+            // if (!result) {
+            //   showToast("please authenticate to change your email");
+            //   return;
+            // }
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return ChangeEmailDialog();
+              },
+              barrierColor: Colors.black.withOpacity(0.85),
+              barrierDismissible: false,
+            );
+          },
+          child:
+              SettingsTextItem(text: "change email", icon: Icons.navigate_next),
+        ),
+        Padding(padding: EdgeInsets.all(2)),
+        Divider(height: 4),
+        Platform.isIOS
+            ? Padding(padding: EdgeInsets.all(2))
+            : Padding(padding: EdgeInsets.all(4)),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {

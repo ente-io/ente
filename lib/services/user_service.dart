@@ -9,6 +9,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/public_keys_db.dart';
+import 'package:photos/events/email_changed_event.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
@@ -37,34 +38,34 @@ class UserService {
 
   static final UserService instance = UserService._privateConstructor();
 
-  Future<void> getOtt(BuildContext context, String email) async {
+  Future<void> getOtt(
+    BuildContext context,
+    String email, {
+    bool isChangeEmail = false,
+  }) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     await _dio.get(
       _config.getHttpEndpoint() + "/users/ott",
       queryParameters: {
         "email": email,
+        "purpose": isChangeEmail ? "change" : ""
       },
     ).catchError((e) async {
       _logger.severe(e);
     }).then((response) async {
       await dialog.hide();
-      if (response != null) {
-        if (response.statusCode == 200) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return OTTVerificationPage();
-              },
-            ),
-          );
-        } else if (response.statusCode == 403) {
-          showErrorDialog(
-            context,
-            "please wait...",
-            "we are currently not accepting new registrations. you have been added to the waitlist and we will let you know once we are ready for you.",
-          );
-        }
+      if (response != null && response.statusCode == 200) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return OTTVerificationPage(
+                email,
+                isChangeEmail: isChangeEmail,
+              );
+            },
+          ),
+        );
       } else {
         showGenericErrorDialog(context);
       }
@@ -170,6 +171,50 @@ class UserService {
       } else {
         showErrorDialog(
             context, "oops", "verification failed, please try again");
+      }
+    } catch (e) {
+      await dialog.hide();
+      _logger.severe(e);
+      showErrorDialog(context, "oops", "verification failed, please try again");
+    }
+  }
+
+  Future<void> changeEmail(
+    BuildContext context,
+    String email,
+    String ott,
+  ) async {
+    final dialog = createProgressDialog(context, "please wait...");
+    await dialog.show();
+    try {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/change-email",
+        data: {
+          "email": email,
+          "ott": ott,
+        },
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      await dialog.hide();
+      if (response != null && response.statusCode == 200) {
+        showToast("email changed to " + email);
+        _config.setEmail(email);
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        Bus.instance.fire(EmailChangedEvent());
+        return;
+      }
+      showErrorDialog(context, "oops", "verification failed, please try again");
+    } on DioError catch (e) {
+      await dialog.hide();
+      if (e.response != null && e.response.statusCode == 403) {
+        showErrorDialog(context, "oops", "this email is already in use");
+      } else {
+        showErrorDialog(context, "incorrect code",
+            "authentication failed, please try again");
       }
     } catch (e) {
       await dialog.hide();
