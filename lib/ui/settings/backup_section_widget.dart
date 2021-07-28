@@ -24,103 +24,101 @@ class BackupSectionWidget extends StatefulWidget {
 class BackupSectionWidgetState extends State<BackupSectionWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          SettingsSectionTitle("backup"),
-          Padding(
-            padding: EdgeInsets.all(4),
+    return Column(
+      children: [
+        SettingsSectionTitle("backup"),
+        Padding(
+          padding: EdgeInsets.all(4),
+        ),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            routeToPage(
+              context,
+              BackupFolderSelectionPage(
+                buttonText: "backup",
+              ),
+            );
+          },
+          child: SettingsTextItem(
+              text: "backed up folders", icon: Icons.navigate_next),
+        ),
+        Platform.isIOS
+            ? Padding(padding: EdgeInsets.all(2))
+            : Padding(padding: EdgeInsets.all(0)),
+        Divider(height: 4),
+        Platform.isIOS
+            ? Padding(padding: EdgeInsets.all(2))
+            : Padding(padding: EdgeInsets.all(4)),
+        SizedBox(
+          height: 36,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("backup over mobile data"),
+              Switch(
+                value: Configuration.instance.shouldBackupOverMobileData(),
+                onChanged: (value) async {
+                  Configuration.instance.setBackupOverMobileData(value);
+                  setState(() {});
+                },
+              ),
+            ],
           ),
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () async {
-              routeToPage(
-                context,
-                BackupFolderSelectionPage(
-                  buttonText: "backup",
-                ),
-              );
-            },
-            child: SettingsTextItem(
-                text: "backed up folders", icon: Icons.navigate_next),
+        ),
+        Platform.isIOS
+            ? Padding(padding: EdgeInsets.all(2))
+            : Padding(padding: EdgeInsets.all(4)),
+        Divider(height: 4),
+        Platform.isIOS
+            ? Padding(padding: EdgeInsets.all(2))
+            : Padding(padding: EdgeInsets.all(4)),
+        SizedBox(
+          height: 36,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("backup videos"),
+              Switch(
+                value: Configuration.instance.shouldBackupVideos(),
+                onChanged: (value) async {
+                  Configuration.instance.setShouldBackupVideos(value);
+                  setState(() {});
+                },
+              ),
+            ],
           ),
-          Platform.isIOS
-              ? Padding(padding: EdgeInsets.all(2))
-              : Padding(padding: EdgeInsets.all(0)),
-          Divider(height: 4),
-          Platform.isIOS
-              ? Padding(padding: EdgeInsets.all(2))
-              : Padding(padding: EdgeInsets.all(2)),
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () async {
-              final dialog = createProgressDialog(context, "calculating...");
-              await dialog.show();
-              final status = await SyncService.instance.getBackupStatus();
-              await dialog.hide();
-              if (status.localIDs.isEmpty) {
-                showErrorDialog(context, "✨ all clear",
-                    "you've no files on this device that can be deleted");
-              } else {
-                bool result = await routeToPage(context, FreeSpacePage(status));
-                if (result == true) {
-                  _showSpaceFreedDialog(status);
-                }
+        ),
+        Platform.isIOS
+            ? Padding(padding: EdgeInsets.all(4))
+            : Padding(padding: EdgeInsets.all(2)),
+        Divider(height: 4),
+        Platform.isIOS
+            ? Padding(padding: EdgeInsets.all(2))
+            : Padding(padding: EdgeInsets.all(2)),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            final dialog = createProgressDialog(context, "calculating...");
+            await dialog.show();
+            final status = await SyncService.instance.getBackupStatus();
+            await dialog.hide();
+            if (status.localIDs.isEmpty) {
+              showErrorDialog(context, "✨ all clear",
+                  "you've no files on this device that can be deleted");
+            } else {
+              bool result = await routeToPage(context, FreeSpacePage(status));
+              if (result == true) {
+                _showSpaceFreedDialog(status);
               }
-            },
-            child: SettingsTextItem(
-              text: "free up space",
-              icon: Icons.navigate_next,
-            ),
+            }
+          },
+          child: SettingsTextItem(
+            text: "free up space",
+            icon: Icons.navigate_next,
           ),
-          Platform.isIOS
-              ? Padding(padding: EdgeInsets.all(2))
-              : Padding(padding: EdgeInsets.all(2)),
-          Divider(height: 4),
-          Platform.isIOS
-              ? Padding(padding: EdgeInsets.all(2))
-              : Padding(padding: EdgeInsets.all(4)),
-          Container(
-            height: 36,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("backup over mobile data"),
-                Switch(
-                  value: Configuration.instance.shouldBackupOverMobileData(),
-                  onChanged: (value) async {
-                    Configuration.instance.setBackupOverMobileData(value);
-                    setState(() {});
-                  },
-                ),
-              ],
-            ),
-          ),
-          Platform.isIOS
-              ? Padding(padding: EdgeInsets.all(2))
-              : Padding(padding: EdgeInsets.all(4)),
-          Divider(height: 4),
-          Platform.isIOS
-              ? Padding(padding: EdgeInsets.all(2))
-              : Padding(padding: EdgeInsets.all(4)),
-          Container(
-            height: 36,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("backup videos"),
-                Switch(
-                  value: Configuration.instance.shouldBackupVideos(),
-                  onChanged: (value) async {
-                    Configuration.instance.setShouldBackupVideos(value);
-                    setState(() {});
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
