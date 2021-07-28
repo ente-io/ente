@@ -73,6 +73,8 @@ dependencies:
   pedantic: ^1.9.2
   photo_manager: ^1.2.4
   photo_view: ^0.11.1
+  pie_chart:
+    path: thirdparty/pie_chart
   pinput: ^1.2.0
   provider: ^3.1.0
   quiver: ^3.0.1
@@ -85,8 +87,8 @@ dependencies:
   sqflite_migration: ^0.3.0
   super_logging:
     path: thirdparty/super_logging
-  syncfusion_flutter_core: ^19.1.67
-  syncfusion_flutter_sliders: ^19.1.67-beta
+  syncfusion_flutter_core: ^19.2.49
+  syncfusion_flutter_sliders: ^19.2.49
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
   uuid: ^3.0.4

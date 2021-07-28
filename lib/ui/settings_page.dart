@@ -7,6 +7,7 @@ import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/backup_section_widget.dart';
 import 'package:photos/ui/settings/danger_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
+import 'package:photos/ui/settings/details_section_widget.dart';
 import 'package:photos/ui/settings/info_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
@@ -29,6 +30,8 @@ class SettingsPage extends StatelessWidget {
     final List<Widget> contents = [];
     if (hasLoggedIn) {
       contents.addAll([
+        DetailsSectionWidget(),
+        Padding(padding: EdgeInsets.all(12)),
         BackupSectionWidget(),
         Padding(padding: EdgeInsets.all(12)),
         AccountSectionWidget(),

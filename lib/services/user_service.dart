@@ -15,6 +15,7 @@ import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/set_recovery_key_request.dart';
+import 'package:photos/models/user_details.dart';
 import 'package:photos/ui/login_page.dart';
 import 'package:photos/ui/ott_verification_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
@@ -87,6 +88,23 @@ class UserService {
     } on DioError catch (e) {
       _logger.info(e);
       return null;
+    }
+  }
+
+  Future<UserDetails> getUserDetails() async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/details",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      return UserDetails.fromMap(response.data["details"]);
+    } on DioError catch (e) {
+      _logger.info(e);
+      rethrow;
     }
   }
 

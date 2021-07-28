@@ -697,6 +697,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.11.1"
+  pie_chart:
+    dependency: "direct main"
+    description:
+      path: "thirdparty/pie_chart"
+      relative: true
+    source: path
+    version: "5.0.0"
   pinput:
     dependency: "direct main"
     description:
@@ -904,14 +911,14 @@ packages:
       name: syncfusion_flutter_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "19.1.67"
+    version: "19.2.49"
   syncfusion_flutter_sliders:
     dependency: "direct main"
     description:
       name: syncfusion_flutter_sliders
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "19.1.67-beta"
+    version: "19.2.49"
   synchronized:
     dependency: transitive
     description:
