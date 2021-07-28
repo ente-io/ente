@@ -2,7 +2,13 @@ Web application for [ente](https://ente.io) built with lots of ❤️ and a litt
 
 ## Getting Started
 
-First, run the development server:
+First, pull and install dependencies 
+```bash
+git submodule update --init --recursive
+yarn install
+```
+
+Then run the development server:
 
 ```bash
 npm run dev
