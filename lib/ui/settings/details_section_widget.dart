@@ -29,9 +29,13 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (_userDetails == null) {
-      return loadWidget;
-    }
+    return SizedBox(
+      height: 140,
+      child: _userDetails == null ? loadWidget : getContainer(),
+    );
+  }
+
+  Container getContainer() {
     return Container(
       decoration: BoxDecoration(
         color: Color.fromRGBO(30, 80, 80, 0.20),
