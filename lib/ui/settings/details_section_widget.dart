@@ -40,7 +40,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   Container getContainer() {
     return Container(
       decoration: BoxDecoration(
-        color: Color.fromRGBO(30, 80, 80, 0.20),
+        color: Colors.grey.withBlue(210).withOpacity(0.1),
         borderRadius: BorderRadius.circular(10),
       ),
       width: double.infinity,
