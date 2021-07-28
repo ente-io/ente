@@ -45,15 +45,14 @@ class UserService {
   }) async {
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
-    await _dio.get(
-      _config.getHttpEndpoint() + "/users/ott",
-      queryParameters: {
-        "email": email,
-        "purpose": isChangeEmail ? "change" : ""
-      },
-    ).catchError((e) async {
-      _logger.severe(e);
-    }).then((response) async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/ott",
+        queryParameters: {
+          "email": email,
+          "purpose": isChangeEmail ? "change" : ""
+        },
+      );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
         Navigator.of(context).push(
@@ -66,10 +65,21 @@ class UserService {
             },
           ),
         );
+        return;
+      }
+      showGenericErrorDialog(context);
+    } on DioError catch (e) {
+      await dialog.hide();
+      if (e.response != null && e.response.statusCode == 403) {
+        showErrorDialog(context, "oops", "this email is already in use");
       } else {
         showGenericErrorDialog(context);
       }
-    });
+    } catch (e) {
+      await dialog.hide();
+      _logger.severe(e);
+      showGenericErrorDialog(context);
+    }
   }
 
   Future<String> getPublicKey(String email) async {
