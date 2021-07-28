@@ -17,9 +17,10 @@ class SupportSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(children: [
+    return Column(
+      children: [
         SettingsSectionTitle("support"),
+        Padding(padding: EdgeInsets.all(4)),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
@@ -88,7 +89,7 @@ class SupportSectionWidget extends StatelessWidget {
           },
           child: SettingsTextItem(text: "community", icon: Icons.navigate_next),
         ),
-      ]),
+      ],
     );
   }
 }
