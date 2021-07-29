@@ -335,8 +335,10 @@ class FileUploader {
           file,
           fileObjectKey,
           fileDecryptionHeader,
+          encryptedFile.lengthSync(),
           thumbnailObjectKey,
           thumbnailDecryptionHeader,
+          encryptedThumbnailFile.lengthSync(),
           encryptedMetadata,
           metadataDecryptionHeader,
         );
@@ -349,8 +351,10 @@ class FileUploader {
           fileAttributes,
           fileObjectKey,
           fileDecryptionHeader,
+          encryptedFile.lengthSync(),
           thumbnailObjectKey,
           thumbnailDecryptionHeader,
+          encryptedThumbnailFile.lengthSync(),
           encryptedMetadata,
           metadataDecryptionHeader,
         );
@@ -399,8 +403,10 @@ class FileUploader {
     EncryptionResult fileAttributes,
     String fileObjectKey,
     String fileDecryptionHeader,
+    int fileSize,
     String thumbnailObjectKey,
     String thumbnailDecryptionHeader,
+    int thumbnailSize,
     String encryptedMetadata,
     String metadataDecryptionHeader, {
     int attempt = 1,
@@ -418,10 +424,12 @@ class FileUploader {
       "file": {
         "objectKey": fileObjectKey,
         "decryptionHeader": fileDecryptionHeader,
+        "size": fileSize,
       },
       "thumbnail": {
         "objectKey": thumbnailObjectKey,
         "decryptionHeader": thumbnailDecryptionHeader,
+        "size": thumbnailSize,
       },
       "metadata": {
         "encryptedData": encryptedMetadata,
@@ -458,8 +466,10 @@ class FileUploader {
           fileAttributes,
           fileObjectKey,
           fileDecryptionHeader,
+          fileSize,
           thumbnailObjectKey,
           thumbnailDecryptionHeader,
+          thumbnailSize,
           encryptedMetadata,
           metadataDecryptionHeader,
           attempt: attempt++,
@@ -473,8 +483,10 @@ class FileUploader {
     File file,
     String fileObjectKey,
     String fileDecryptionHeader,
+    int fileSize,
     String thumbnailObjectKey,
     String thumbnailDecryptionHeader,
+    int thumbnailSize,
     String encryptedMetadata,
     String metadataDecryptionHeader, {
     int attempt = 1,
@@ -484,10 +496,12 @@ class FileUploader {
       "file": {
         "objectKey": fileObjectKey,
         "decryptionHeader": fileDecryptionHeader,
+        "size": fileSize,
       },
       "thumbnail": {
         "objectKey": thumbnailObjectKey,
         "decryptionHeader": thumbnailDecryptionHeader,
+        "size": thumbnailSize,
       },
       "metadata": {
         "encryptedData": encryptedMetadata,
@@ -518,8 +532,10 @@ class FileUploader {
           file,
           fileObjectKey,
           fileDecryptionHeader,
+          fileSize,
           thumbnailObjectKey,
           thumbnailDecryptionHeader,
+          thumbnailSize,
           encryptedMetadata,
           metadataDecryptionHeader,
           attempt: attempt++,
