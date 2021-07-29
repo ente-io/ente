@@ -3,7 +3,7 @@ import {
     Alert, Button, Modal, ProgressBar,
 } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
-import { UPLOAD_STAGES, FileUploadErrorCode } from 'services/uploadService';
+import { UPLOAD_STAGES } from 'services/uploadService';
 import constants from 'utils/strings/constants';
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
     fileProgress: Map<string, number>;
     show;
     fileRejections:FileRejection[]
+    uploadResult:Map<string, number>;
 }
 interface FileProgressStatuses{
     fileName:string;
@@ -22,16 +23,18 @@ interface FileProgressStatuses{
 }
 export default function UploadProgress(props: Props) {
     const fileProgressStatuses = [] as FileProgressStatuses[];
+    const fileResultStatuses = [] as FileProgressStatuses[];
     if (props.fileProgress) {
         for (const [fileName, progress] of props.fileProgress) {
             fileProgressStatuses.push({ fileName, progress });
         }
-        for (const { file } of props.fileRejections) {
-            fileProgressStatuses.push({ fileName: file.name, progress: FileUploadErrorCode.UNSUPPORTED });
+    }
+    if (props.uploadResult) {
+        for (const [fileName, progress] of props.uploadResult) {
+            if (progress<0) {
+                fileResultStatuses.push({ fileName, progress });
+            }
         }
-        fileProgressStatuses.sort((a, b) => {
-            if (b.progress !== -1 && a.progress === -1) return 1;
-        });
     }
     return (
         <Modal
@@ -62,7 +65,7 @@ export default function UploadProgress(props: Props) {
             </Modal.Header>
             <Modal.Body>
                 {props.uploadStage===UPLOAD_STAGES.FINISH ? (
-                    fileProgressStatuses.length !== 0 && (
+                    fileResultStatuses.length !== 0 && (
                         <Alert variant="warning">
                             {constants.FAILED_UPLOAD_FILE_LIST}
                         </Alert>
@@ -77,7 +80,7 @@ export default function UploadProgress(props: Props) {
                             variant="upload-progress-bar"
                         />
                     )}
-                {fileProgressStatuses?.length > 0 && (
+                {(fileProgressStatuses?.length > 0 || fileResultStatuses?.length>0) && (
                     <ul
                         style={{
                             marginTop: '10px',
@@ -92,14 +95,25 @@ export default function UploadProgress(props: Props) {
                                     constants.FILE_UPLOAD_PROGRESS(
                                         fileName,
                                         progress,
-                                    )}
+                                    )
+                                }
+                            </li>
+                        ))}
+                        {fileResultStatuses.map(({ fileName, progress }) => (
+                            <li key={fileName} style={{ marginTop: '12px' }}>
+                                {
+                                    constants.FILE_UPLOAD_RESULT(
+                                        fileName,
+                                        progress,
+                                    )
+                                }
                             </li>
                         ))}
                     </ul>
                 )}
                 {props.uploadStage === UPLOAD_STAGES.FINISH && (
                     <Modal.Footer style={{ border: 'none' }}>
-                        {props.uploadStage===UPLOAD_STAGES.FINISH && (fileProgressStatuses?.length === 0 ? (
+                        {props.uploadStage===UPLOAD_STAGES.FINISH && (props.retryFailed.length===0 ? (
                             <Button
                                 variant="outline-secondary"
                                 style={{ width: '100%' }}
@@ -112,7 +126,7 @@ export default function UploadProgress(props: Props) {
                                 style={{ width: '100%' }}
                                 onClick={props.retryFailed}
                             >
-                                {constants.RETRY}
+                                {constants.RETRY_FAILED}
                             </Button>))}
                     </Modal.Footer>
                 )}

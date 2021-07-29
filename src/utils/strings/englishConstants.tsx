@@ -94,7 +94,7 @@ const englishConstants = {
     UPLOADING_FILES: 'file upload',
     FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
     UNSUPPORTED_FILE_LIST: 'unsupported files',
-    FILE_UPLOAD_PROGRESS: (name, progress) => (
+    FILE_UPLOAD_PROGRESS: (name:string, progress:number) => (
         <div id={name}>
             <strong>{name}</strong>
             {' - '}
@@ -105,9 +105,27 @@ const englishConstants = {
                     case -2:
                         return 'already uploaded, skipping...';
                     case -3:
-                        return 'unsupported file format, ignored';
+                        return ',unsupported file format, skipping....';
                     default:
                         return `${progress}%`;
+                }
+            })()}
+        </div>
+    ),
+    FILE_UPLOAD_RESULT: (name:string, progress:number) => (
+        <div id={name}>
+            <strong>{name}</strong>
+            {' - '}
+            {(() => {
+                switch (progress) {
+                    case -1:
+                        return 'failed';
+                    case -2:
+                        return 'skipped duplicate';
+                    case -3:
+                        return 'skipped unsupported format';
+                    default:
+                        return `uploaded`;
                 }
             })()}
         </div>
@@ -466,6 +484,7 @@ const englishConstants = {
                     for a more reliable import experience.</p>
     </>),
 
+    RETRY_FAILED: 'retry failed files',
 };
 
 export default englishConstants;
