@@ -837,16 +837,7 @@ class FilesDB {
       row[columnLatitude] = file.location.latitude;
       row[columnLongitude] = file.location.longitude;
     }
-    switch (file.fileType) {
-      case FileType.image:
-        row[columnFileType] = 0;
-        break;
-      case FileType.video:
-        row[columnFileType] = 1;
-        break;
-      default:
-        row[columnFileType] = -1;
-    }
+    row[columnFileType] = getInt(file.fileType);
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
@@ -869,16 +860,7 @@ class FilesDB {
       row[columnLatitude] = file.location.latitude;
       row[columnLongitude] = file.location.longitude;
     }
-    switch (file.fileType) {
-      case FileType.image:
-        row[columnFileType] = 0;
-        break;
-      case FileType.video:
-        row[columnFileType] = 1;
-        break;
-      default:
-        row[columnFileType] = -1;
-    }
+    row[columnFileType] = getInt(file.fileType);
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
