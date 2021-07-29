@@ -3,7 +3,7 @@ import {
     Alert, Button, Modal, ProgressBar,
 } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
-import { UPLOAD_STAGES } from 'services/uploadService';
+import { FileUploadErrorCode, UPLOAD_STAGES } from 'services/uploadService';
 import constants from 'utils/strings/constants';
 
 interface Props {
@@ -24,6 +24,7 @@ interface FileProgressStatuses{
 export default function UploadProgress(props: Props) {
     const fileProgressStatuses = [] as FileProgressStatuses[];
     const fileResultStatuses = [] as FileProgressStatuses[];
+    let filesHaveFailed=false;
     if (props.fileProgress) {
         for (const [fileName, progress] of props.fileProgress) {
             fileProgressStatuses.push({ fileName, progress });
@@ -33,6 +34,9 @@ export default function UploadProgress(props: Props) {
         for (const [fileName, progress] of props.uploadResult) {
             if (progress<0) {
                 fileResultStatuses.push({ fileName, progress });
+            }
+            if (progress===FileUploadErrorCode.FAILED) {
+                filesHaveFailed=true;
             }
         }
     }
@@ -113,7 +117,7 @@ export default function UploadProgress(props: Props) {
                 )}
                 {props.uploadStage === UPLOAD_STAGES.FINISH && (
                     <Modal.Footer style={{ border: 'none' }}>
-                        {props.uploadStage===UPLOAD_STAGES.FINISH && (props.retryFailed.length===0 ? (
+                        {props.uploadStage===UPLOAD_STAGES.FINISH && (!filesHaveFailed? (
                             <Button
                                 variant="outline-secondary"
                                 style={{ width: '100%' }}
