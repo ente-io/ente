@@ -472,7 +472,7 @@ class FileUploader {
           thumbnailSize,
           encryptedMetadata,
           metadataDecryptionHeader,
-          attempt: attempt++,
+          attempt: attempt + 1,
         );
       }
       rethrow;
@@ -538,7 +538,7 @@ class FileUploader {
           thumbnailSize,
           encryptedMetadata,
           metadataDecryptionHeader,
-          attempt: attempt++,
+          attempt: attempt + 1,
         );
       }
       rethrow;
@@ -628,7 +628,7 @@ class FileUploader {
       } else if (attempt < kMaximumUploadAttempts) {
         final newUploadURL = await _getUploadURL();
         return _putFile(newUploadURL, file,
-            contentLength: file.readAsBytesSync().length, attempt: attempt++);
+            contentLength: file.readAsBytesSync().length, attempt: attempt + 1);
       } else {
         _logger.info(
             "Upload failed for file with size " + fileSize.toString(), e);
