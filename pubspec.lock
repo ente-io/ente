@@ -557,6 +557,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  motionphoto:
+    dependency: "direct main"
+    description:
+      path: "../motionphoto"
+      relative: true
+    source: path
+    version: "0.0.1"
   move_to_background:
     dependency: "direct main"
     description:

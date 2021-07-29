@@ -65,6 +65,8 @@ dependencies:
   loading_animations: ^2.1.0
   local_auth: ^1.1.5
   logging: ^1.0.1
+  motionphoto:
+    path: ../motionphoto
   move_to_background: ^1.0.2
   open_file: ^3.2.1
   package_info_plus: ^1.0.1
