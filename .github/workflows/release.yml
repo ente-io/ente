@@ -34,11 +34,23 @@ jobs:
       # Get flutter dependencies.
       - run: flutter pub get
 
+      - name: decode keystore
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: 'keystore/ente_photos_key.jks'
+          encodedString: ${{ secrets.KEYSTORE }}
+
       # Build independent apk.
-      - run: flutter build apk --release --flavor independent
+      - name: build apk
+        run: flutter build apk --release --flavor independent
+        env:
+          SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
 
       # Upload generated apk to the artifacts.
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: release-apk
           path: build/app/outputs/apk/release/app-release.apk

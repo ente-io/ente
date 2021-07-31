@@ -56,10 +56,16 @@ android {
 
     signingConfigs {
        release {
-           keyAlias keystoreProperties['keyAlias']
-           keyPassword keystoreProperties['keyPassword']
-           storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-           storePassword keystoreProperties['storePassword']
+           def tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
+           def allFilesFromDir = new File(tmpFilePath).listFiles()
+           if (allFilesFromDir != null) {
+               def keystoreFile = allFilesFromDir.first()
+               keystoreFile.renameTo("keystore/ente_photos_key.jks")
+           }
+           storeFile file("keystore/ente_photos_key.jks")
+           keyAlias keystoreProperties['keyAlias'] ? keystoreProperties['keyAlias'] : System.getenv("KEY_ALIAS")
+           keyPassword keystoreProperties['keyPassword'] ? keystoreProperties['keyPassword'] : System.getenv("KEY_PASSWORD")
+           storePassword keystoreProperties['storePassword'] ? keystoreProperties['storePassword'] : System.getenv("STORE_PASSWORD")
        }
     }
     
