@@ -63,9 +63,9 @@ android {
 //               keystoreFile.renameTo("keystore/ente_photos_key.jks")
 //           }
            storeFile file("/home/runner/work/_temp/keystore/ente_photos_key.jks")
-           keyAlias keystoreProperties['keyAlias'] ? keystoreProperties['keyAlias'] : System.getenv("KEY_ALIAS")
-           keyPassword keystoreProperties['keyPassword'] ? keystoreProperties['keyPassword'] : System.getenv("KEY_PASSWORD")
-           storePassword keystoreProperties['storePassword'] ? keystoreProperties['storePassword'] : System.getenv("STORE_PASSWORD")
+           keyAlias keystoreProperties['keyAlias'] ? keystoreProperties['keyAlias'] : System.getenv("SIGNING_KEY_ALIAS")
+           keyPassword keystoreProperties['keyPassword'] ? keystoreProperties['keyPassword'] : System.getenv("SIGNING_KEY_PASSWORD")
+           storePassword keystoreProperties['storePassword'] ? keystoreProperties['storePassword'] : System.getenv("SIGNING_STORE_PASSWORD")
        }
     }
     
