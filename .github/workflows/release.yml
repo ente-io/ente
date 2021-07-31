@@ -38,14 +38,14 @@ jobs:
         id: decode_keystore
         uses: timheuer/base64-to-file@v1
         with:
-          fileName: 'keystore/ente_photos_key.jks'
+          fileName: ${{ secrets.SIGNING_KEY_PATH }}
           encodedString: ${{ secrets.SIGNING_KEY }}
 
       # Build independent apk.
       - name: build apk
         run: flutter build apk --release --flavor independent
         env:
-          SIGNING_KEY_PATH: ${{ secrets.SIGNING_KEY_PATH }}'
+          SIGNING_KEY_PATH: ${{ secrets.SIGNING_KEY_PATH }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
