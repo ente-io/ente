@@ -56,7 +56,7 @@ android {
 
     signingConfigs {
        release {
-           storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : System.getenv("SIGNING_KEY_PATH")
+           storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : file(System.getenv("SIGNING_KEY_PATH"))
            keyAlias keystoreProperties['keyAlias'] ? keystoreProperties['keyAlias'] : System.getenv("SIGNING_KEY_ALIAS")
            keyPassword keystoreProperties['keyPassword'] ? keystoreProperties['keyPassword'] : System.getenv("SIGNING_KEY_PASSWORD")
            storePassword keystoreProperties['storePassword'] ? keystoreProperties['storePassword'] : System.getenv("SIGNING_STORE_PASSWORD")
