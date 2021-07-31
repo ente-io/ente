@@ -55,3 +55,9 @@ jobs:
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-independent-release.apk
+
+      # Create a Github release
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/flutter-apk/app-independent-release.apk"
+          token: ${{ secrets.GITHUB_TOKEN }}
