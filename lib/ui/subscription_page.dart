@@ -41,8 +41,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   ProgressDialog _dialog;
   Future<int> _usageFuture;
   bool _hasActiveSubscription;
-  BillingPlans _plans;
+  FreePlan _freePlan;
+  List<BillingPlan> _plans;
   bool _hasLoadedData = false;
+  bool _isActiveStripeSubscriber;
 
   @override
   void initState() {
@@ -50,7 +52,20 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     _billingService.fetchSubscription().then((subscription) async {
       _currentSubscription = subscription;
       _hasActiveSubscription = _currentSubscription.isValid();
-      _plans = await _billingService.getBillingPlans();
+      final billingPlans = await _billingService.getBillingPlans();
+      _isActiveStripeSubscriber =
+          _currentSubscription.paymentProvider == kStripe &&
+              _currentSubscription.isValid();
+      _plans = billingPlans.plans.where((plan) {
+        final productID = _isActiveStripeSubscriber
+            ? plan.stripeID
+            : Platform.isAndroid
+                ? plan.androidID
+                : plan.iosID;
+        return productID != null && productID.isNotEmpty;
+      }).toList();
+      _freePlan = billingPlans.freePlan;
+
       _usageFuture = _billingService.fetchUsage();
       _hasLoadedData = true;
       setState(() {});
@@ -181,13 +196,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       );
     }
-    final isActiveStripeSubscriber =
-        _currentSubscription.paymentProvider == kStripe &&
-            _currentSubscription.isValid();
     widgets.addAll([
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: isActiveStripeSubscriber
+        children: _isActiveStripeSubscriber
             ? _getStripePlanWidgets()
             : _getMobilePlanWidgets(),
       ),
@@ -215,7 +227,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           alignment: Alignment.center,
           child: GestureDetector(
             onTap: () {
-              if (isActiveStripeSubscriber) {
+              if (_isActiveStripeSubscriber) {
                 return;
               }
               if (Platform.isAndroid) {
@@ -233,11 +245,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: isActiveStripeSubscriber
+                      text: _isActiveStripeSubscriber
                           ? "visit web.ente.io to manage your subscription"
                           : "payment details",
                       style: TextStyle(
-                        color: isActiveStripeSubscriber
+                        color: _isActiveStripeSubscriber
                             ? Colors.white
                             : Colors.blue,
                         fontFamily: 'Ubuntu',
@@ -255,7 +267,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
     if (widget.isOnboarding &&
         _currentSubscription.productID == kFreeProductID) {
-      widgets.addAll([_getSkipButton(_plans.freePlan)]);
+      widgets.addAll([_getSkipButton(_freePlan)]);
     }
     if (_currentSubscription.productID == kFreeProductID) {
       widgets.addAll([
@@ -300,7 +312,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   List<Widget> _getStripePlanWidgets() {
     final List<Widget> planWidgets = [];
     bool foundActivePlan = false;
-    for (final plan in _plans.plans) {
+    for (final plan in _plans) {
       final productID = plan.stripeID;
       if (productID == null || productID.isEmpty) {
         continue;
@@ -344,18 +356,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       foundActivePlan = true;
       planWidgets.add(
         SubscriptionPlanWidget(
-          storage: _plans.freePlan.storage,
+          storage: _freePlan.storage,
           price: "free",
           period: "",
           isActive: true,
         ),
       );
     }
-    for (final plan in _plans.plans) {
+    for (final plan in _plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      if (productID == null || productID.isEmpty) {
-        continue;
-      }
       final isActive =
           _hasActiveSubscription && _currentSubscription.productID == productID;
       if (isActive) {
@@ -443,9 +452,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   void _addCurrentPlanWidget(List<Widget> planWidgets) {
     int activePlanIndex = 0;
-    for (; activePlanIndex < _plans.plans.length; activePlanIndex++) {
-      if (_plans.plans[activePlanIndex].storage >
-          _currentSubscription.storage) {
+    for (; activePlanIndex < _plans.length; activePlanIndex++) {
+      if (_plans[activePlanIndex].storage > _currentSubscription.storage) {
         break;
       }
     }
