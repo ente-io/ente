@@ -38,7 +38,7 @@ jobs:
         id: decode_keystore
         uses: timheuer/base64-to-file@v1
         with:
-          fileName: ${{ secrets.SIGNING_KEY_PATH }}
+          fileName: 'keystore/ente_photos_key.jks'
           encodedString: ${{ secrets.SIGNING_KEY }}
 
       # Build independent apk.
