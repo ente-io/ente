@@ -33,9 +33,6 @@ jobs:
       # Get flutter dependencies.
       - run: flutter pub get
 
-      # Run widget tests for our flutter project.
-      - run: flutter test
-
       # Build apk.
       - run: flutter build apk
 
