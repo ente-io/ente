@@ -45,6 +45,7 @@ jobs:
       - name: build apk
         run: flutter build apk --release --flavor independent
         env:
+          SIGNING_KEY_PATH: ${{ secrets.SIGNING_KEY_PATH }}'
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
@@ -53,4 +54,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: release-apk
-          path: build/app/outputs/apk/release/app-release.apk
+          path: build/app/outputs/flutter-apk/app-independent-release.apk
