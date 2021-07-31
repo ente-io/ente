@@ -25,6 +25,9 @@ jobs:
           channel: 'stable'
           flutter-version: '2.2.3'
 
+      # Fetch sub modules
+      - run: git submodule update --init --recursive
+
       # Get flutter dependencies.
       - run: flutter pub get
 
