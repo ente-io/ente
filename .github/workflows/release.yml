@@ -39,7 +39,7 @@ jobs:
         uses: timheuer/base64-to-file@v1
         with:
           fileName: 'keystore/ente_photos_key.jks'
-          encodedString: ${{ secrets.KEYSTORE }}
+          encodedString: ${{ secrets.SIGNING_KEY }}
 
       # Build independent apk.
       - name: build apk
