@@ -34,7 +34,7 @@ jobs:
       - run: flutter pub get
 
       # Build apk.
-      - run: flutter build apk
+      - run: flutter build apk --release --flavor independent
 
       # Upload generated apk to the artifacts.
       - uses: actions/upload-artifact@v1
