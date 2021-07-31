@@ -34,9 +34,6 @@ jobs:
       # Get flutter dependencies.
       - run: flutter pub get
 
-      # Build playstore apk.
-      - run: flutter build apk --release --flavor playstore
-
       # Build independent apk.
       - run: flutter build apk --release --flavor independent
 
