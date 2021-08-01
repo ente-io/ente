@@ -135,7 +135,7 @@ const GlobalStyles = createGlobalStyle`
         width:90%;
     }
     .modal-xl{
-        max-width:960px!important;
+        max-width:1000px!important;
     }
     .pswp-custom {
         opacity: 0.75;
