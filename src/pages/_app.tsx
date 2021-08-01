@@ -129,13 +129,15 @@ const GlobalStyles = createGlobalStyle`
         border-radius:15px;
         background-color:#202020 !important;
         color:#aaa;
+        width:auto;
+        margin:auto;
     }
     .modal-dialog{
         margin:5% auto;
         width:90%;
     }
     .modal-xl{
-        max-width:960px!important;
+        max-width:80% !important;
     }
     .pswp-custom {
         opacity: 0.75;

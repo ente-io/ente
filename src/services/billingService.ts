@@ -26,6 +26,8 @@ export interface Subscription {
     attributes: {
         isCancelled: boolean;
     };
+    price:string;
+    period:string;
 }
 export interface Plan {
     id: string;
@@ -64,7 +66,7 @@ class billingService {
 
     public async updatePlans() {
         try {
-            const response = await HTTPService.get(`${ENDPOINT}/billing/plans`);
+            const response = await HTTPService.get(`${ENDPOINT}/billing/plans/v2`);
             const { plans } = response.data;
             setData(LS_KEYS.PLANS, plans);
         } catch (e) {

@@ -16,6 +16,7 @@ import {
     hasStripeSubscription,
     hasPaidSubscription,
     isOnFreePlan,
+    planForSubscription,
 } from 'utils/billingUtil';
 import { reverseString } from 'utils/common';
 import { SetDialogMessage } from 'components/MessageDialog';
@@ -25,7 +26,7 @@ import { DeadCenter, SetLoading } from 'pages/gallery';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     border-radius: 20px;
-    width: 250px;
+    width: 220px;
     border: 2px solid #333;
     padding: 30px;
     margin: 10px;
@@ -55,7 +56,7 @@ export const PlanIcon = styled.div<{ selected: boolean }>`
     }
 
     &:hover {
-        transform: scale(1.2);
+        transform: scale(1.1);
         background-color: #ffffff11;
     }
 
@@ -76,7 +77,7 @@ enum PLAN_PERIOD {
 }
 function PlanSelector(props: Props) {
     const subscription: Subscription = getUserSubscription();
-    const plans = getPlans();
+    const [plans, setPlans] = useState(getPlans());
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
     const togglePeriod = () => {
         setPlanPeriod((prevPeriod) => (prevPeriod === PLAN_PERIOD.MONTH ?
@@ -84,13 +85,19 @@ function PlanSelector(props: Props) {
             PLAN_PERIOD.MONTH));
     };
     useEffect(() => {
-        if (!plans && props.modalView) {
-            const main = async () => {
-                props.setLoading(true);
-                await billingService.updatePlans();
-                props.setLoading(false);
-            };
-            main();
+        if ( props.modalView) {
+            if (!plans) {
+                const main = async () => {
+                    props.setLoading(true);
+                    await billingService.updatePlans();
+                    props.setLoading(false);
+                };
+                main();
+            }
+            const planNotListed= plans.filter((plan)=>isUserSubscribedPlan(plan, subscription)).length===0;
+            if (!isOnFreePlan(subscription) && planNotListed) {
+                setPlans([...plans, planForSubscription(subscription)]);
+            }
         }
     }, [props.modalView]);
 
@@ -148,14 +155,15 @@ function PlanSelector(props: Props) {
                 key={plan.stripeID}
                 className="subscription-plan-selector"
                 selected={isUserSubscribedPlan(plan, subscription)}
+                onClick={async () => (await onPlanSelect(plan))}
             >
                 <div>
                     <span
                         style={{
                             color: '#ECECEC',
                             fontWeight: 900,
-                            fontSize: '72px',
-                            lineHeight: '72px',
+                            fontSize: '40px',
+                            lineHeight: '40px',
                         }}
                     >
                         {convertBytesToGBs(plan.storage, 0)}
@@ -180,12 +188,11 @@ function PlanSelector(props: Props) {
                 <Button
                     variant="outline-success"
                     block
-                    style={{ marginTop: '30px' }}
+                    style={{ marginTop: '20px', fontSize: '14px', display: 'flex', justifyContent: 'center' }}
                     disabled={isUserSubscribedPlan(plan, subscription)}
-                    onClick={async () => (await onPlanSelect(plan))}
                 >
                     {constants.CHOOSE_PLAN_BTN}
-                    <ArrowEast style={{ marginLeft: '10px' }} />
+                    <ArrowEast style={{ marginLeft: '5px' }} />
                 </Button>
             </PlanIcon>
         ));
@@ -217,7 +224,7 @@ function PlanSelector(props: Props) {
                     <div style={{ display: 'flex' }}>
                         <span
                             className="bold-text"
-                            style={{ fontSize: '20px' }}
+                            style={{ fontSize: '16px' }}
                         >
                             {constants.MONTHLY}
                         </span>
@@ -225,13 +232,13 @@ function PlanSelector(props: Props) {
                         <Form.Switch
                             checked={planPeriod === PLAN_PERIOD.YEAR}
                             id="plan-period-toggler"
-                            style={{ margin: '-4px 0 20px 15px' }}
+                            style={{ margin: '-4px 0 20px 15px', fontSize: '10px' }}
                             className="custom-switch-md"
                             onChange={togglePeriod}
                         />
                         <span
                             className="bold-text"
-                            style={{ fontSize: '20px' }}
+                            style={{ fontSize: '16px' }}
                         >
                             {constants.YEARLY}
                         </span>
@@ -243,7 +250,7 @@ function PlanSelector(props: Props) {
                         justifyContent: 'space-around',
                         flexWrap: 'wrap',
                         minHeight: '212px',
-                        margin: '24px 0',
+                        margin: '5px 0',
                     }}
                 >
                     {plans && PlanIcons}
