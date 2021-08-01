@@ -119,7 +119,7 @@ export default function Gallery() {
     const [selected, setSelected] = useState<selectedState>({ count: 0 });
     const [dialogMessage, setDialogMessage] = useState<MessageAttributes>();
     const [dialogView, setDialogView] = useState(false);
-    const [planModalView, setPlanModalView] = useState(false);
+    const [planModalView, setPlanModalView] = useState(true);
     const [loading, setLoading] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] = useState<CollectionSelectorAttributes>(null);
     const [collectionSelectorView, setCollectionSelectorView] = useState(false);
