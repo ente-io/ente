@@ -250,3 +250,14 @@ export async function checkSubscriptionPurchase(
         router.push('gallery', undefined, { shallow: true });
     }
 }
+
+export function planForSubscription(subscription:Subscription) {
+    return { id: subscription.productID,
+        storage: subscription.storage,
+        price: subscription.price,
+        period: subscription.period,
+        stripeID: subscription.productID,
+        iosID: subscription.productID,
+        androidID: subscription.productID,
+    };
+}

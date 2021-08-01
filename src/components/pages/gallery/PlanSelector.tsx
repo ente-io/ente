@@ -16,6 +16,7 @@ import {
     hasStripeSubscription,
     hasPaidSubscription,
     isOnFreePlan,
+    planForSubscription,
 } from 'utils/billingUtil';
 import { reverseString } from 'utils/common';
 import { SetDialogMessage } from 'components/MessageDialog';
@@ -76,7 +77,7 @@ enum PLAN_PERIOD {
 }
 function PlanSelector(props: Props) {
     const subscription: Subscription = getUserSubscription();
-    const plans = getPlans();
+    const [plans, setPlans] = useState(getPlans());
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
     const togglePeriod = () => {
         setPlanPeriod((prevPeriod) => (prevPeriod === PLAN_PERIOD.MONTH ?
@@ -84,13 +85,20 @@ function PlanSelector(props: Props) {
             PLAN_PERIOD.MONTH));
     };
     useEffect(() => {
-        if (!plans && props.modalView) {
-            const main = async () => {
-                props.setLoading(true);
-                await billingService.updatePlans();
-                props.setLoading(false);
-            };
-            main();
+        if ( props.modalView) {
+            if (!plans) {
+                const main = async () => {
+                    props.setLoading(true);
+                    await billingService.updatePlans();
+                    props.setLoading(false);
+                };
+                main();
+            }
+            const planNotListed= plans.filter((plan)=>isUserSubscribedPlan(plan, subscription)).length===0;
+            if (!isOnFreePlan(subscription) && planNotListed) {
+                plans.unshift(planForSubscription(subscription));
+            }
+            setPlans(plans);
         }
     }, [props.modalView]);
 

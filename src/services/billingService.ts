@@ -26,6 +26,8 @@ export interface Subscription {
     attributes: {
         isCancelled: boolean;
     };
+    price:string;
+    period:string;
 }
 export interface Plan {
     id: string;
