@@ -64,11 +64,11 @@ class billingService {
         }
     }
 
-    public async updatePlans() {
+    public async getPlans():Promise<Plan[]> {
         try {
             const response = await HTTPService.get(`${ENDPOINT}/billing/plans/v2`);
             const { plans } = response.data;
-            setData(LS_KEYS.PLANS, plans);
+            return plans;
         } catch (e) {
             logError(e, 'failed to get plans');
         }

@@ -203,7 +203,6 @@ export default function Gallery() {
                 throw new Error(errorCodes.ERR_SESSION_EXPIRED);
             }
             !silent && loadingBar.current?.continuousStart();
-            await billingService.updatePlans();
             await billingService.syncSubscription();
             const collections = await syncCollections();
             const { files } = await syncFiles(collections, setFiles);

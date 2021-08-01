@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import billingService, { Plan, Subscription } from 'services/billingService';
 import {
     convertBytesToGBs,
-    getPlans,
     getUserSubscription,
     isUserSubscribedPlan,
     isSubscriptionCancelled,
@@ -77,7 +76,7 @@ enum PLAN_PERIOD {
 }
 function PlanSelector(props: Props) {
     const subscription: Subscription = getUserSubscription();
-    const [plans, setPlans] = useState(getPlans());
+    const [plans, setPlans] = useState(null);
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
     const togglePeriod = () => {
         setPlanPeriod((prevPeriod) => (prevPeriod === PLAN_PERIOD.MONTH ?
@@ -86,18 +85,18 @@ function PlanSelector(props: Props) {
     };
     useEffect(() => {
         if ( props.modalView) {
-            if (!plans) {
-                const main = async () => {
-                    props.setLoading(true);
-                    await billingService.updatePlans();
-                    props.setLoading(false);
-                };
-                main();
-            }
-            const planNotListed= plans.filter((plan)=>isUserSubscribedPlan(plan, subscription)).length===0;
-            if (!isOnFreePlan(subscription) && planNotListed) {
-                setPlans([...plans, planForSubscription(subscription)]);
-            }
+            const main = async () => {
+                props.setLoading(true);
+                let plans=await billingService.getPlans();
+
+                const planNotListed= plans.filter((plan)=>isUserSubscribedPlan(plan, subscription)).length===0;
+                if (!isOnFreePlan(subscription) && planNotListed) {
+                    plans=[planForSubscription(subscription), ...plans];
+                }
+                setPlans(plans);
+                props.setLoading(false);
+            };
+            main();
         }
     }, [props.modalView]);
 
