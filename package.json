@@ -8,9 +8,7 @@
     "build": "next build",
     "build-analyze": "ANALYZE=true next build",
     "postbuild": "next export",
-    "start": "next start",
-    "lint-staged": "lint-staged",
-    "postinstall": "husky install"
+    "start": "next start"
   },
   "dependencies": {
     "@ente-io/next-with-workbox": "^1.0.3",
@@ -81,13 +79,5 @@
   },
   "standard": {
     "parser": "babel-eslint"
-  },
-  "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx}": "eslint"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn run lint-staged"
-    }
   }
 }
