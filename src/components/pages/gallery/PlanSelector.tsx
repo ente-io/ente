@@ -96,9 +96,8 @@ function PlanSelector(props: Props) {
             }
             const planNotListed= plans.filter((plan)=>isUserSubscribedPlan(plan, subscription)).length===0;
             if (!isOnFreePlan(subscription) && planNotListed) {
-                plans.unshift(planForSubscription(subscription));
+                setPlans([...plans, planForSubscription(subscription)]);
             }
-            setPlans(plans);
         }
     }, [props.modalView]);
 
