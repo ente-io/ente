@@ -5,21 +5,17 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:motionphoto/motionphoto.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/cache/image_cache.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/core/network.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/file_type.dart';
-import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/thumbnail_util.dart';
-
-import 'crypto_util.dart';
-import 'file_uploader_util.dart';
+import 'package:photos/utils/file_download_util.dart';
 
 final _logger = Logger("FileUtil");
 
@@ -44,6 +40,10 @@ Future<io.File> getFile(ente.File file) async {
   }
 }
 
+Future<io.File> getLiveVideo(ente.File file) async {
+  Motionphoto.getLivePhotoFile(file.localID);
+}
+
 Future<io.File> _getLocalDiskFile(ente.File file) async {
   if (file.isSharedMediaToAppSandbox()) {
     var localFile = io.File(getSharedMediaFilePath(file));
@@ -61,8 +61,9 @@ Future<io.File> _getLocalDiskFile(ente.File file) async {
 }
 
 String getSharedMediaFilePath(ente.File file) {
-  return Configuration.instance.getSharedMediaCacheDirectory()
-      + "/" + file.localID.replaceAll(kSharedMediaIdentifier, '');
+  return Configuration.instance.getSharedMediaCacheDirectory() +
+      "/" +
+      file.localID.replaceAll(kSharedMediaIdentifier, '');
 }
 
 void preloadThumbnail(ente.File file) {
@@ -84,7 +85,7 @@ Future<io.File> getFileFromServer(ente.File file,
   return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
     if (info == null) {
       if (!fileDownloadsInProgress.containsKey(file.uploadedFileID)) {
-        fileDownloadsInProgress[file.uploadedFileID] = _downloadAndDecrypt(
+        fileDownloadsInProgress[file.uploadedFileID] = _downloadAndCache(
           file,
           cacheManager,
           progressCallback: progressCallback,
@@ -97,48 +98,15 @@ Future<io.File> getFileFromServer(ente.File file,
   });
 }
 
-Future<io.File> _downloadAndDecrypt(
+Future<io.File> _downloadAndCache(
     ente.File file, BaseCacheManager cacheManager,
     {ProgressCallback progressCallback}) async {
-  _logger.info("Downloading file " + file.uploadedFileID.toString());
-  final encryptedFilePath = Configuration.instance.getTempDirectory() +
-      file.generatedID.toString() +
-      ".encrypted";
-  final decryptedFilePath = Configuration.instance.getTempDirectory() +
-      file.generatedID.toString() +
-      ".decrypted";
-
-  final encryptedFile = io.File(encryptedFilePath);
-  final decryptedFile = io.File(decryptedFilePath);
-  final startTime = DateTime.now().millisecondsSinceEpoch;
-  return Network.instance
-      .getDio()
-      .download(
-        file.getDownloadUrl(),
-        encryptedFilePath,
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
-        onReceiveProgress: progressCallback,
-      )
-      .then((response) async {
-    if (response.statusCode != 200) {
-      _logger.warning("Could not download file: ", response.toString());
-      return null;
-    } else if (!encryptedFile.existsSync()) {
-      _logger.warning("File was not downloaded correctly.");
+  return downloadAndDecrypt(file, progressCallback: progressCallback)
+      .then((decryptedFile) async {
+    if (decryptedFile == null) {
       return null;
     }
-    _logger.info("File downloaded: " + file.uploadedFileID.toString());
-    _logger.info("Download speed: " +
-        (io.File(encryptedFilePath).lengthSync() /
-                (DateTime.now().millisecondsSinceEpoch - startTime))
-            .toString() +
-        "kBps");
-    await CryptoUtil.decryptFile(encryptedFilePath, decryptedFilePath,
-        Sodium.base642bin(file.fileDecryptionHeader), decryptFileKey(file));
-    _logger.info("File decrypted: " + file.uploadedFileID.toString());
-    encryptedFile.deleteSync();
+    var decryptedFilePath = decryptedFile.path;
     var fileExtension = "unknown";
     try {
       fileExtension = extension(file.title).substring(1).toLowerCase();
@@ -168,14 +136,6 @@ Future<io.File> _downloadAndDecrypt(
   }).catchError((e) {
     fileDownloadsInProgress.remove(file.uploadedFileID);
   });
-}
-
-Uint8List decryptFileKey(ente.File file) {
-  final encryptedKey = Sodium.base642bin(file.encryptedKey);
-  final nonce = Sodium.base642bin(file.keyDecryptionNonce);
-  final collectionKey =
-      CollectionsService.instance.getCollectionKey(file.collectionID);
-  return CryptoUtil.decryptSync(encryptedKey, collectionKey, nonce);
 }
 
 Future<Uint8List> compressThumbnail(Uint8List thumbnail) {

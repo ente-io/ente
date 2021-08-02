@@ -12,7 +12,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/remote_sync_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/crypto_util.dart';
-import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/file_download_util.dart';
 
 class DiffFetcher {
   final _logger = Logger("DiffFetcher");
