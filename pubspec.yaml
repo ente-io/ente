@@ -73,7 +73,8 @@ dependencies:
   page_transition: ^1.1.7+2
   path_provider: ^2.0.1
   pedantic: ^1.9.2
-  photo_manager: ^1.2.4
+  photo_manager:
+    path: ../flutter_photo_manager
   photo_view: ^0.11.1
   pie_chart:
     git: "https://github.com/apgapg/pie_chart.git"
