@@ -2,11 +2,15 @@ import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:archive/archive_io.dart';
 import 'package:logging/logging.dart';
+import 'package:motionphoto/motionphoto.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/models/file.dart' as ente;
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 
 import 'file_util.dart';
@@ -61,6 +65,23 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   if (!sourceFile.existsSync()) {
     throw InvalidFileError();
   }
+
+  if (file.fileType == FileType.livePhoto && io.Platform.isIOS) {
+    final io.File videoUrl = await Motionphoto.getLivePhotoFile(file.localID);
+    final tempPath = (await getTemporaryDirectory()).path;
+    final zipFilePath = tempPath + "/" + file.title + ".zip";
+    var encoder = ZipFileEncoder();
+    encoder.create(zipFilePath);
+    encoder.addFile(videoUrl);
+    encoder.addFile(sourceFile);
+    encoder.close();
+    // delete the temporary video and image copy
+    sourceFile.deleteSync();
+    videoUrl.deleteSync();
+    sourceFile = io.File(zipFilePath);
+    _logger.fine("Uploading zipped live photo from " + sourceFile.path);
+  }
+
   thumbnailData = await asset.thumbDataWithSize(
     kThumbnailSmallSize,
     kThumbnailSmallSize,
