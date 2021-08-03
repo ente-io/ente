@@ -27,7 +27,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
 
   @override
   void initState() {
-    _isImage = widget.file.fileType == FileType.image;
+    _isImage = widget.file.fileType == FileType.image || widget.file.fileType == FileType.livePhoto ;
     if (_isImage) {
       _getExif().then((exif) {
         setState(() {
