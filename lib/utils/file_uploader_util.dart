@@ -5,8 +5,9 @@ import 'dart:typed_data';
 import 'package:archive/archive_io.dart';
 import 'package:logging/logging.dart';
 import 'package:motionphoto/motionphoto.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/models/file.dart' as ente;
@@ -66,20 +67,25 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     throw InvalidFileError();
   }
 
+  // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
+  await _decorateEnteFileData(file, asset);
+
   if (file.fileType == FileType.livePhoto && io.Platform.isIOS) {
     final io.File videoUrl = await Motionphoto.getLivePhotoFile(file.localID);
-    final tempPath = (await getTemporaryDirectory()).path;
-    final zipFilePath = tempPath + "/" + file.title + ".zip";
+    final tempPath =  Configuration.instance.getTempDirectory();
+    final zipFilePath = tempPath + file.generatedID.toString() + ".zip";
+    _logger.fine("Uploading zipped live photo from " + zipFilePath);
     var encoder = ZipFileEncoder();
     encoder.create(zipFilePath);
-    encoder.addFile(videoUrl);
-    encoder.addFile(sourceFile);
+    encoder.addFile(videoUrl, "video" + extension(videoUrl.path));
+    encoder.addFile(sourceFile, "image" + extension(sourceFile.path));
     encoder.close();
-    // delete the temporary video and image copy
-    sourceFile.deleteSync();
-    videoUrl.deleteSync();
+    // delete the temporary video and image copy (only in IOS)
+    if(io.Platform.isIOS) {
+      sourceFile.deleteSync();
+    }
+    // new sourceFile which needs to be uploaded
     sourceFile = io.File(zipFilePath);
-    _logger.fine("Uploading zipped live photo from " + sourceFile.path);
   }
 
   thumbnailData = await asset.thumbDataWithSize(
@@ -98,8 +104,6 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   }
 
   isDeleted = asset == null || !(await asset.exists);
-  // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
-  await _decorateEnteFileData(file, asset);
   return MediaUploadData(sourceFile, thumbnailData, isDeleted);
 }
 

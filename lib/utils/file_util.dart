@@ -7,8 +7,8 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:logging/logging.dart';
 import 'package:motionphoto/motionphoto.dart';
-import 'package:path/path.dart';
 import 'package:photos/core/cache/image_cache.dart';
+import 'package:path/path.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -41,7 +41,7 @@ Future<io.File> getFile(ente.File file) async {
 }
 
 Future<io.File> getLiveVideo(ente.File file) async {
-  Motionphoto.getLivePhotoFile(file.localID);
+  return Motionphoto.getLivePhotoFile(file.localID);
 }
 
 Future<io.File> _getLocalDiskFile(ente.File file) async {
@@ -98,8 +98,7 @@ Future<io.File> getFileFromServer(ente.File file,
   });
 }
 
-Future<io.File> _downloadAndCache(
-    ente.File file, BaseCacheManager cacheManager,
+Future<io.File> _downloadAndCache(ente.File file, BaseCacheManager cacheManager,
     {ProgressCallback progressCallback}) async {
   return downloadAndDecrypt(file, progressCallback: progressCallback)
       .then((decryptedFile) async {
