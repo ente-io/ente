@@ -9,6 +9,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/custom_app_bar.dart';
@@ -248,11 +249,17 @@ class FadingAppBarState extends State<FadingAppBar> {
   Future<void> _download(File file) async {
     final dialog = createProgressDialog(context, "downloading...");
     await dialog.show();
-    final savedAsset = await PhotoManager.editor.saveImageWithPath(
-      (await getFile(file)).path,
-      title: file.title,
-    );
-    file.localID = savedAsset.id;
+    if (file.fileType == FileType.image) {
+      file.localID = (await PhotoManager.editor.saveImageWithPath(
+        (await getFile(file)).path,
+        title: file.title,
+      )).id;
+    } else {
+      file.localID = (await PhotoManager.editor.saveVideo(
+        (await getFile(file)),
+        title: file.title,
+      )).id;
+    }
     await FilesDB.instance.insert(file);
     await LocalSyncService.instance.trackDownloadedFile(file);
     Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
