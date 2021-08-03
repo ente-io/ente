@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -77,24 +78,98 @@ void preloadThumbnail(ente.File file) {
 final Map<int, Future<io.File>> fileDownloadsInProgress =
     Map<int, Future<io.File>>();
 
-Future<io.File> getFileFromServer(ente.File file,
-    {ProgressCallback progressCallback}) async {
-  final cacheManager = file.fileType == FileType.video
+Future<io.File> getFileFromServer(
+  ente.File file, {
+  ProgressCallback progressCallback,
+  bool liveVideo = false, // only needed in case of live photos
+}) async {
+  final cacheManager = (file.fileType == FileType.video || liveVideo)
       ? VideoCacheManager.instance
       : DefaultCacheManager();
   return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
     if (info == null) {
       if (!fileDownloadsInProgress.containsKey(file.uploadedFileID)) {
-        fileDownloadsInProgress[file.uploadedFileID] = _downloadAndCache(
-          file,
-          cacheManager,
-          progressCallback: progressCallback,
-        );
+        if (file.fileType == FileType.livePhoto) {
+          fileDownloadsInProgress[file.uploadedFileID] = _downloadLivePhoto(
+              file,
+              progressCallback: progressCallback,
+              liveVideo: liveVideo);
+        } else {
+          fileDownloadsInProgress[file.uploadedFileID] = _downloadAndCache(
+            file,
+            cacheManager,
+            progressCallback: progressCallback,
+          );
+        }
       }
       return fileDownloadsInProgress[file.uploadedFileID];
     } else {
       return info.file;
     }
+  });
+}
+
+Future<io.File> _downloadLivePhoto(ente.File file,
+    {ProgressCallback progressCallback, bool liveVideo=false}) async {
+  return downloadAndDecrypt(file, progressCallback: progressCallback)
+      .then((decryptedFile) async {
+    if (decryptedFile == null) {
+      return null;
+    }
+    _logger.fine("Decoded zipped live photo from " + decryptedFile.path);
+    io.File imageFileCache, videoFileCache;
+    List<int> bytes = decryptedFile.readAsBytesSync();
+    Archive archive = ZipDecoder().decodeBytes(bytes);
+    final tempPath = Configuration.instance.getTempDirectory();
+    // Extract the contents of Zip compressed archive to disk
+    for (ArchiveFile archiveFile in archive) {
+      if (archiveFile.isFile) {
+        String filename = archiveFile.name;
+        String fileExtension = getExtension(archiveFile.name);
+        String decodePath =
+            tempPath + file.uploadedFileID.toString() + filename;
+        List<int> data = archiveFile.content;
+        if (filename.startsWith("image")) {
+          io.File imageFile = io.File(decodePath)
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(data);
+          io.File imageConvertedFile = imageFile;
+          if ((fileExtension == "unknown") ||
+              (io.Platform.isAndroid && fileExtension == "heic")) {
+            imageConvertedFile = await FlutterImageCompress.compressAndGetFile(
+              decodePath,
+              decodePath + ".jpg",
+              keepExif: true,
+            );
+            imageFile.deleteSync();
+          }
+          imageFileCache = await DefaultCacheManager().putFile(
+            file.getDownloadUrl(),
+            imageConvertedFile.readAsBytesSync(),
+            eTag: file.getDownloadUrl(),
+            maxAge: Duration(days: 365),
+            fileExtension: fileExtension,
+          );
+          imageConvertedFile.deleteSync();
+        } else if (filename.startsWith("video")) {
+          io.File videoFile = io.File(decodePath)
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(data);
+          videoFileCache = await VideoCacheManager.instance.putFile(
+            file.getDownloadUrl(),
+            videoFile.readAsBytesSync(),
+            eTag: file.getDownloadUrl(),
+            maxAge: Duration(days: 365),
+            fileExtension: fileExtension,
+          );
+          videoFile.deleteSync();
+        }
+      }
+    }
+    fileDownloadsInProgress.remove(file.uploadedFileID);
+    return liveVideo ? videoFileCache : imageFileCache;
+  }).catchError((e) {
+    fileDownloadsInProgress.remove(file.uploadedFileID);
   });
 }
 
@@ -106,12 +181,7 @@ Future<io.File> _downloadAndCache(ente.File file, BaseCacheManager cacheManager,
       return null;
     }
     var decryptedFilePath = decryptedFile.path;
-    var fileExtension = "unknown";
-    try {
-      fileExtension = extension(file.title).substring(1).toLowerCase();
-    } catch (e) {
-      _logger.severe("Could not capture file extension");
-    }
+    String fileExtension = getExtension(file.title);
     var outputFile = decryptedFile;
     if ((fileExtension == "unknown" && file.fileType == FileType.image) ||
         (io.Platform.isAndroid && fileExtension == "heic")) {
@@ -135,6 +205,16 @@ Future<io.File> _downloadAndCache(ente.File file, BaseCacheManager cacheManager,
   }).catchError((e) {
     fileDownloadsInProgress.remove(file.uploadedFileID);
   });
+}
+
+String getExtension(String nameOrPath) {
+   var fileExtension = "unknown";
+  try {
+    fileExtension = extension(nameOrPath).substring(1).toLowerCase();
+  } catch (e) {
+    _logger.severe("Could not capture file extension");
+  }
+  return fileExtension;
 }
 
 Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
