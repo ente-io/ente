@@ -271,7 +271,7 @@ export default function ExportModal(props: Props) {
                 title: constants.EXPORT_DATA,
             }}
         >
-            <div style={{ borderBottom: '1px solid #444', marginBottom: '20px', padding: '0 5%', width: '450px' }}>
+            <div style={{ borderBottom: '1px solid #444', marginBottom: '20px', padding: '0 5%' }}>
                 <Row>
                     <Label width="40%">{constants.DESTINATION}</Label>
                     <Value width="60%">

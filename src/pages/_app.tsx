@@ -128,17 +128,17 @@ const GlobalStyles = createGlobalStyle`
     .modal-content {
         border-radius:15px;
         background-color:#202020 !important;
-        color:#aaa;
-        width:auto;
-        max-width:100%;
-        margin:auto;
     }
     .modal-dialog{
         margin:5% auto;
         width:90%;
     }
     .modal-xl{
-        max-width:80% !important;
+        max-width:90% !important;
+    }
+    .plan-selector-modal-content {
+        width:auto;
+        margin:auto;
     }
     .pswp-custom {
         opacity: 0.75;
