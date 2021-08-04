@@ -19,6 +19,7 @@ export function createWindow(): BrowserWindow {
         icon: appIcon,
         show: false, // don't show the main window
     });
+    mainWindow.maximize();
     const splash = new BrowserWindow({
         frame: false,
         alwaysOnTop: true,
@@ -26,6 +27,7 @@ export function createWindow(): BrowserWindow {
         width: 800,
         transparent: true,
     });
+    splash.maximize();
 
     if (isDev) {
         splash.loadFile(`../build/splash.html`);
