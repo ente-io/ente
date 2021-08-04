@@ -244,6 +244,15 @@ export default function Sidebar(props: Props) {
                 >
                     {constants.CHANGE_PASSWORD}
                 </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
+                        router.push('change-email');
+                    }}
+                >
+                    {constants.UPDATE_EMAIL}
+                </LinkButton>
                 <>
                     <ExportModal show={exportModalView} onHide={() => setExportModalView(false)} usage={usage} />
                     <LinkButton style={{ marginTop: '30px' }} onClick={exportFiles}>
