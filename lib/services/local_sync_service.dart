@@ -52,6 +52,8 @@ class LocalSyncService {
       return;
     }
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
+    _logger.info(
+        existingLocalFileIDs.length.toString() + " localIDs were discovered");
     final editedFileIDs = getEditedFileIDs().toSet();
     final downloadedFileIDs = getDownloadedFileIDs().toSet();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
