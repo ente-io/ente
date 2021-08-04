@@ -9,6 +9,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -179,9 +180,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           FilesDB.instance.update(widget.file);
           _loadNetworkImage();
         } else {
-          _logger.info("Deleting file " + widget.file.tag());
-          FilesDB.instance.deleteLocalFile(widget.file);
-          Bus.instance.fire(LocalPhotosUpdatedEvent([widget.file]));
+          if (await doesLocalFileExist(widget.file) == false) {
+            _logger.info("Deleting file " + widget.file.tag());
+            FilesDB.instance.deleteLocalFile(widget.file);
+            Bus.instance.fire(LocalPhotosUpdatedEvent([widget.file]));
+          }
         }
         return;
       }
