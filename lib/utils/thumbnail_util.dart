@@ -61,7 +61,7 @@ Future<Uint8List> getThumbnailFromServer(File file) async {
 Future<Uint8List> getThumbnailFromLocal(File file,
     {int size = kThumbnailSmallSize, int quality = kThumbnailQuality}) async {
   if (ThumbnailLruCache.get(file, size) != null) {
-    return ThumbnailLruCache.get(file);
+    return ThumbnailLruCache.get(file, size);
   }
   final cachedThumbnail = getCachedThumbnail(file);
   if (cachedThumbnail.existsSync()) {
