@@ -249,21 +249,28 @@ class FadingAppBarState extends State<FadingAppBar> {
   Future<void> _download(File file) async {
     final dialog = createProgressDialog(context, "downloading...");
     await dialog.show();
-    if (file.fileType == FileType.image) {
+    if (file.fileType == FileType.image ||
+        file.fileType == FileType.livePhoto) {
       file.localID = (await PhotoManager.editor.saveImageWithPath(
         (await getFile(file)).path,
         title: file.title,
-      )).id;
-    } else {
+      ))
+          .id;
+    } else if (file.fileType == FileType.video) {
       file.localID = (await PhotoManager.editor.saveVideo(
         (await getFile(file)),
         title: file.title,
-      )).id;
+      ))
+          .id;
     }
     await FilesDB.instance.insert(file);
     await LocalSyncService.instance.trackDownloadedFile(file);
     Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
     await dialog.hide();
-    showToast("file saved to gallery");
+    if (file.fileType != FileType.livePhoto) {
+      showToast("file saved to gallery");
+    } else {
+      showToast("only image saved, live photo support coming soon");
+    }
   }
 }
