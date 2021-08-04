@@ -1,3 +1,4 @@
+
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -33,17 +34,7 @@ class File {
     file.title = asset.title;
     file.deviceFolder = pathName;
     file.location = Location(asset.latitude, asset.longitude);
-    switch (asset.type) {
-      case AssetType.image:
-        file.fileType = FileType.image;
-        break;
-      case AssetType.video:
-        file.fileType = FileType.video;
-        break;
-      default:
-        file.fileType = FileType.other;
-        break;
-    }
+    file.fileType = _fileTypeFromAsset(asset);
     file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
     if (file.creationTime == 0) {
       try {
@@ -59,6 +50,29 @@ class File {
     }
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     return file;
+  }
+
+  static FileType _fileTypeFromAsset(AssetEntity asset) {
+    FileType type = FileType.image;
+    switch (asset.type) {
+      case AssetType.image:
+        type = FileType.image;
+        // PHAssetMediaSubtype.photoLive.rawValue is 8
+        // This hack should go away once photos_manager support livePhotos
+        if (asset.subTypes != null &&
+            asset.subTypes > -1 &&
+            (asset.subTypes & 8) != 0) {
+          type = FileType.livePhoto;
+        }
+        break;
+      case AssetType.video:
+        type = FileType.video;
+        break;
+      default:
+        type = FileType.other;
+        break;
+    }
+    return type;
   }
 
   Future<AssetEntity> getAsset() {
@@ -149,7 +163,7 @@ class File {
 
   @override
   String toString() {
-    return '''File(uploadedFileId: $uploadedFileID, ownerID: $ownerID, 
+    return '''File(uploadedFileId: $uploadedFileID, ownerID: $ownerID,
       collectionID: $collectionID, updationTime: $updationTime)''';
   }
 
