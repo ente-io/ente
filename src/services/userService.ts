@@ -193,7 +193,18 @@ export const getOTTForEmailChange=async (email:string)=>{
         email,
         client: 'web',
         purpose: 'change',
-    }, {
+    });
+};
+
+
+export const changeEmail=async (email:string, ott:string)=>{
+    if (!getToken()) {
+        return null;
+    }
+    await HTTPService.post(`${ENDPOINT}/users/change-email`, {
+        email,
+        ott,
+    }, null, {
         'X-Auth-Token': getToken(),
     });
 };
