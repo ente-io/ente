@@ -21,7 +21,6 @@ export function createWindow(): BrowserWindow {
     });
     mainWindow.maximize();
     const splash = new BrowserWindow({
-        frame: false,
         alwaysOnTop: true,
         height: 600,
         width: 800,
