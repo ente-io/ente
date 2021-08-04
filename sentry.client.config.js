@@ -1,13 +1,12 @@
 import * as Sentry from '@sentry/nextjs';
 import { getSentryTunnelUrl } from 'utils/common/apiUtil';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getUserAnonymizedID } from 'utils/user';
 
 
 const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN ?? 'https://860186db60c54c7fbacfe255124958e8@errors.ente.io/4';
 const SENTRY_ENV = process.env.NEXT_PUBLIC_SENTRY_ENV ?? 'development';
-const userID = getData(LS_KEYS.USER)?.id;
 
-Sentry.setUser({ id: userID });
+Sentry.setUser({ id: getUserAnonymizedID() });
 Sentry.init({
     dsn: SENTRY_DSN,
     enabled: SENTRY_ENV !== 'development',

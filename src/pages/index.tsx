@@ -11,6 +11,7 @@ import SignUp from 'components/SignUp';
 import constants from 'utils/strings/constants';
 import localForage from 'utils/storage/localForage';
 import IncognitoWarning from 'components/IncognitoWarning';
+import { logError } from 'utils/sentry';
 
 const Container = styled.div`
     display: flex;
@@ -110,6 +111,7 @@ export default function LandingPage() {
             try {
                 await localForage.ready();
             } catch (e) {
+                logError(e, 'usage in incognito mode tried');
                 setBlockUsage(true);
             }
             setLoading(false);
