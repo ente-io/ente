@@ -216,17 +216,27 @@ Future<void> _killBGTask(String taskId) async {
   BackgroundFetch.finish(taskId);
 }
 
-class EnteApp extends StatelessWidget with WidgetsBindingObserver {
+class EnteApp extends StatefulWidget {
   static const _homeWidget = HomeWidget();
 
   @override
-  Widget build(BuildContext context) {
+  _EnteAppState createState() => _EnteAppState();
+}
+
+class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
     WidgetsBinding.instance.addObserver(this);
     _configureBackgroundFetch();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp(
       title: "ente",
       theme: themeData,
-      home: _homeWidget,
+      home: EnteApp._homeWidget,
       debugShowCheckedModeBanner: false,
       builder: EasyLoading.init(),
     );
