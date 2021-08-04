@@ -42,6 +42,18 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     ),
   );
 
+  static final kLiveVideoIconOverlay = Align(
+    alignment: Alignment.bottomRight,
+    child: Padding(
+      padding: const EdgeInsets.only(right: 4, bottom: 4),
+      child: Icon(
+        Icons.wb_sunny_outlined,
+        size: 14,
+        color: Colors.white70,
+      ),
+    ),
+  );
+
   static final kUnsyncedIconOverlay = Container(
     decoration: BoxDecoration(
       gradient: LinearGradient(
@@ -123,6 +135,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           children: [
             image,
             kVideoIconOverlay,
+          ],
+          fit: StackFit.expand,
+        );
+      } else if (widget.file.fileType == FileType.livePhoto) {
+        content = Stack(
+          children: [
+            image,
+            kLiveVideoIconOverlay,
           ],
           fit: StackFit.expand,
         );
