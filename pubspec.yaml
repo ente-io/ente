@@ -66,7 +66,7 @@ dependencies:
   local_auth: ^1.1.5
   logging: ^1.0.1
   motionphoto:
-    path: ../motionphoto
+    git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
   open_file: ^3.2.1
   package_info_plus: ^1.0.1
@@ -74,7 +74,7 @@ dependencies:
   path_provider: ^2.0.1
   pedantic: ^1.9.2
   photo_manager:
-    path: ../flutter_photo_manager
+    git: "https://github.com/ente-io/flutter_photo_manager.git"
   photo_view: ^0.11.1
   pie_chart:
     git: "https://github.com/apgapg/pie_chart.git"

@@ -234,7 +234,7 @@ SPEC CHECKSUMS:
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
   local_auth: 25938960984c3a7f6e3253e3f8d962fdd16852bd
   Mantle: 35238ae6f2e2b2d474fa7b67fee82a59fea71915
-  motionphoto: 22f67612e92893a0a4cf02760b842856301fa286
+  motionphoto: d4a432b8c8f22fb3ad966258597c0103c9c5ff16
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c

@@ -15,6 +15,7 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		DA6BE5E826B3BC8600656280 /* ios in Resources */ = {isa = PBXBuildFile; fileRef = DA6BE5E726B3BC8600656280 /* ios */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -48,6 +49,7 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A78E51A260432466D4C456A9 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		BB097BB5EB0EEB41344338D2 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
+		DA6BE5E726B3BC8600656280 /* ios */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ios; path = ../../motionphoto/ios; sourceTree = "<group>"; };
 		F82DAEEB9A7D9FD00E0FFA1E /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -132,6 +134,7 @@
 			children = (
 				274DC65025920DD100F526A4 /* StoreKit.framework */,
 				F82DAEEB9A7D9FD00E0FFA1E /* Pods_Runner.framework */,
+				DA6BE5E726B3BC8600656280 /* ios */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -205,6 +208,7 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+				DA6BE5E826B3BC8600656280 /* ios in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -560,9 +560,11 @@ packages:
   motionphoto:
     dependency: "direct main"
     description:
-      path: "../motionphoto"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "669388e102cfc832c06e2f3085a5b15d8620dde3"
+      url: "https://github.com/ente-io/motionphoto.git"
+    source: git
     version: "0.0.1"
   move_to_background:
     dependency: "direct main"
@@ -693,9 +695,11 @@ packages:
   photo_manager:
     dependency: "direct main"
     description:
-      path: "../flutter_photo_manager"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "8e2989e4ad3336ffea20cd92762c1642de08840f"
+      url: "https://github.com/ente-io/flutter_photo_manager.git"
+    source: git
     version: "1.2.8"
   photo_view:
     dependency: "direct main"
