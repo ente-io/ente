@@ -11,6 +11,7 @@ import 'package:photos/ui/fading_bottom_bar.dart';
 import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/image_editor_page.dart';
 import 'package:photos/ui/video_widget.dart';
+import 'package:photos/ui/zoomable_live_image.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -135,7 +136,18 @@ class _DetailPageState extends State<DetailPage> {
             },
             tagPrefix: widget.config.tagPrefix,
           );
-        } else if (file.fileType == FileType.video) {
+        } else if(file.fileType == FileType.livePhoto) {
+          content = ZoomableLiveImage(
+            file,
+            shouldDisableScroll: (value) {
+              setState(() {
+                _shouldDisableScroll = value;
+              });
+            },
+            tagPrefix: widget.config.tagPrefix,
+          );
+        }
+        else if (file.fileType == FileType.video) {
           content = VideoWidget(
             file,
             autoPlay: !_hasPageChanged, // Autoplay if it was opened directly
