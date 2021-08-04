@@ -77,7 +77,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     } else {
       _loadLocalImage(context);
     }
-    _loadLiveVide();
+    _loadLiveVideo();
     if (_imageProvider != null) {
       Widget content;
       if (_loadLivePhotoVideo && _videoPlayerController != null
@@ -146,15 +146,15 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     return Chewie(controller: _chewieController);
   }
 
-  void _loadLiveVide() {
+  void _loadLiveVideo() {
     if (_videoPlayerController != null) {
       return ;
     }
-    getLiveVideo(widget.photo).then((file) {
+    getFile(widget.photo, liveVideo: true).then((file) {
       if (file != null && file.existsSync()) {
         _logger.fine("loading live from local");
         _setVideoPlayerController(file: file);
-      } else {
+      } else if (widget.photo.uploadedFileID != null) {
         _logger.fine("loading live from remote");
         getFileFromServer(widget.photo, liveVideo: true).then((file) {
           if (file != null && file.existsSync()) {

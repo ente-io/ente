@@ -27,31 +27,33 @@ void preloadFile(ente.File file) {
   getFile(file);
 }
 
-Future<io.File> getFile(ente.File file) async {
+Future<io.File> getFile(ente.File file,
+    {bool liveVideo = false} // only relevant for live photos
+    ) async {
   if (file.isRemoteFile()) {
-    return getFileFromServer(file);
+    return getFileFromServer(file, liveVideo: liveVideo);
   } else {
-    final cachedFile = FileLruCache.get(file);
+    String key = file.tag() + liveVideo.toString();
+    final cachedFile = FileLruCache.get(key);
     if (cachedFile == null) {
-      final diskFile = await _getLocalDiskFile(file);
-      FileLruCache.put(file, diskFile);
+      final diskFile = await _getLocalDiskFile(file, liveVideo: liveVideo);
+      FileLruCache.put(key, diskFile);
       return diskFile;
     }
     return cachedFile;
   }
 }
 
-Future<io.File> getLiveVideo(ente.File file) async {
-  return Motionphoto.getLivePhotoFile(file.localID);
-}
-
-Future<io.File> _getLocalDiskFile(ente.File file) async {
+Future<io.File> _getLocalDiskFile(ente.File file, {bool liveVideo = false}) async {
   if (file.isSharedMediaToAppSandbox()) {
     var localFile = io.File(getSharedMediaFilePath(file));
     return localFile.exists().then((exist) {
       return exist ? localFile : null;
     });
-  } else {
+  } else if (file.fileType == FileType.livePhoto && liveVideo) {
+    return Motionphoto.getLivePhotoFile(file.localID);
+  }
+  else {
     return file.getAsset().then((asset) async {
       if (asset == null || !(await asset.exists)) {
         return null;
