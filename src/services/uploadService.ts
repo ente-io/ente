@@ -942,15 +942,21 @@ class UploadService {
                     }
                 }
                 const uploadChunk = Uint8Array.from(combinedChunks);
-                const response = await retryAsyncFunction(()=>
-                    HTTPService.put(
+                const response=await retryAsyncFunction(async ()=>{
+                    const resp =await HTTPService.put(
                         fileUploadURL,
                         uploadChunk,
                         null,
                         null,
                         this.trackUploadProgress(filename, percentPerPart, index),
-                    ),
-                );
+                    );
+                    if (!resp?.headers?.etag) {
+                        const err=Error('no header/etag present in response body');
+                        logError(err);
+                        throw err;
+                    }
+                    return resp;
+                });
                 resParts.push({
                     PartNumber: index + 1,
                     ETag: response.headers.etag,
