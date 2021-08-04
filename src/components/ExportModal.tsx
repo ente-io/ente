@@ -271,7 +271,7 @@ export default function ExportModal(props: Props) {
                 title: constants.EXPORT_DATA,
             }}
         >
-            <div style={{ borderBottom: '1px solid #444', marginBottom: '20px', padding: '0 5%' }}>
+            <div style={{ borderBottom: '1px solid #444', marginBottom: '20px', padding: '0 5%', width: '450px' }}>
                 <Row>
                     <Label width="40%">{constants.DESTINATION}</Label>
                     <Value width="60%">
@@ -293,7 +293,7 @@ export default function ExportModal(props: Props) {
                     </Value>
                 </Row>
                 <Row>
-                    <Label width="40%">{constants.TOTAL_EXPORT_SIZE} </Label><Value width="60%">{exportSize ? `${exportSize} GB` : <InProgressIcon />}</Value>
+                    <Label width="40%">{constants.TOTAL_EXPORT_SIZE} </Label><Value width="60%">{exportSize ? `${exportSize}` : <InProgressIcon />}</Value>
                 </Row>
             </div>
             <ExportDynamicState />

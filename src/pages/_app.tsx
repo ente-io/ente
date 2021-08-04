@@ -130,6 +130,7 @@ const GlobalStyles = createGlobalStyle`
         background-color:#202020 !important;
         color:#aaa;
         width:auto;
+        max-width:100%;
         margin:auto;
     }
     .modal-dialog{
