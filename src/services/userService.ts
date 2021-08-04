@@ -184,3 +184,16 @@ export const _logout = async () => {
         return false;
     }
 };
+
+export const getOTTForEmailChange=async (email:string)=>{
+    if (!getToken()) {
+        return null;
+    }
+    await HTTPService.get(`${ENDPOINT}/users/ott`, {
+        email,
+        client: 'web',
+        purpose: 'change',
+    }, {
+        'X-Auth-Token': getToken(),
+    });
+};

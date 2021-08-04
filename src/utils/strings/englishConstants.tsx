@@ -450,6 +450,7 @@ const englishConstants = {
     RETRY: 'retry',
     UPDATE_EMAIL: 'change email',
     SEND_OTT: 'send otp',
+    EMAIl_ALREADY_OWNED: 'email already owned by a user',
 };
 
 export default englishConstants;

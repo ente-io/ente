@@ -1,12 +1,13 @@
 import Container from 'components/Container';
 import LogoImg from 'components/LogoImg';
-import { Formik } from 'formik';
+import { Formik, FormikHelpers } from 'formik';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Card, Form, FormControl } from 'react-bootstrap';
 import * as Yup from 'yup';
 import constants from 'utils/strings/constants';
 import SubmitButton from 'components/SubmitButton';
 import router from 'next/router';
+import { getOTTForEmailChange } from 'services/userService';
 
 interface formValues {
     email: string;
@@ -15,8 +16,15 @@ interface formValues {
 function ChangeEmail() {
     const [loading, setLoading]=useState(false);
 
-    const requestOTT=()=>{
-        setLoading(true);
+    const requestOTT= async( { email }: formValues,
+        { setFieldError }: FormikHelpers<formValues>)=>{
+        try {
+            setLoading(true);
+            await getOTTForEmailChange(email);
+        } catch (e) {
+            setFieldError('email', `${constants.EMAIl_ALREADY_OWNED}`);
+        }
+        setLoading(false);
     };
 
     const inputElement = useRef(null);
