@@ -62,6 +62,10 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   }
 
   void _onLongPressEvent(bool isPressed) {
+    if (_videoPlayerController != null && isPressed == false) {
+      // stop playing video
+      _videoPlayerController.pause();
+    }
     if (isPressed != _loadLivePhotoVideo) {
       _loadLivePhotoVideo = isPressed;
       if (mounted) {
