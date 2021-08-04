@@ -281,7 +281,8 @@ class CollectionsService {
   }
 
   Future<Collection> getOrCreateForPath(String path) async {
-    if (_localCollections.containsKey(path)) {
+    if (_localCollections.containsKey(path) &&
+        _localCollections[path].owner.id == _config.getUserID()) {
       return _localCollections[path];
     }
     final key = CryptoUtil.generateKey();
