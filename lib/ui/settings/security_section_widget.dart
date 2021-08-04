@@ -65,7 +65,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                       return Switch(
                         value: snapshot.data,
                         onChanged: (value) async {
+                          AppLock.of(context).setEnabled(false);
                           final result = await requestAuthentication();
+                          AppLock.of(context).setEnabled(
+                              Configuration.instance.shouldShowLockScreen());
                           if (!result) {
                             showToast(
                                 "please authenticate to configure two-factor authentication");
