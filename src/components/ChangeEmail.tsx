@@ -32,7 +32,7 @@ setEmail:(email:string)=>void;
 }
 function ChangeEmailForm(props:Props) {
     const [loading, setLoading]=useState(false);
-    const [OttInputVisible, setShowOttInputVisibility]=useState(false);
+    const [ottInputVisible, setShowOttInputVisibility]=useState(false);
     const emailInputElement = useRef(null);
     const ottInputRef=useRef(null);
     const appContext = useContext(AppContext);
@@ -44,10 +44,10 @@ function ChangeEmailForm(props:Props) {
     }, []);
 
     useEffect(()=>{
-        if (!OttInputVisible) {
+        if (!ottInputVisible) {
             props.showMessage(false);
         }
-    }, [OttInputVisible]);
+    }, [ottInputVisible]);
 
     const requestOTT= async( { email }: formValues,
         { setFieldError }: FormikHelpers<formValues>)=>{
@@ -90,7 +90,7 @@ function ChangeEmailForm(props:Props) {
             })}
             validateOnChange={false}
             validateOnBlur={false}
-            onSubmit={!OttInputVisible?requestOTT:requestEmailChange}
+            onSubmit={!ottInputVisible?requestOTT:requestEmailChange}
         >
             {({
                 values,
@@ -100,7 +100,7 @@ function ChangeEmailForm(props:Props) {
                 handleSubmit,
             }) => (
                 <Form noValidate onSubmit={handleSubmit}>
-                    {!OttInputVisible ?
+                    {!ottInputVisible ?
                         <Form.Group controlId="formBasicEmail">
                             <Form.Control
                                 ref={emailInputElement}
@@ -148,7 +148,7 @@ function ChangeEmailForm(props:Props) {
                         </>}
 
                     <SubmitButton
-                        buttonText={!OttInputVisible?constants.SEND_OTT:constants.VERIFY}
+                        buttonText={!ottInputVisible?constants.SEND_OTT:constants.VERIFY}
                         loading={loading}
                     />
                     <br />
