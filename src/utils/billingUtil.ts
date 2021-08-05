@@ -252,6 +252,9 @@ export async function checkSubscriptionPurchase(
 }
 
 export function planForSubscription(subscription:Subscription) {
+    if (!subscription) {
+        return null;
+    }
     return { id: subscription.productID,
         storage: subscription.storage,
         price: subscription.price,
