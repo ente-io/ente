@@ -56,9 +56,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget>
     return FutureBuilder<List<Memory>>(
       future: MemoriesService.instance.getMemories(),
       builder: (context, snapshot) {
-        if (snapshot.hasError ||
-            !snapshot.hasData ||
-            snapshot.data.length == 0) {
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data.isEmpty) {
           return Container();
         } else {
           return Padding(
@@ -126,7 +124,7 @@ class MemoryWidget extends StatelessWidget {
       onTap: () {
         routeToPage(context, FullScreenMemory(title, memories, index));
       },
-      child: Container(
+      child: SizedBox(
         width: 100,
         height: 120,
         child: Padding(
@@ -169,7 +167,7 @@ class MemoryWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(40),
       ),
       child: ClipOval(
-        child: Container(
+        child: SizedBox(
           width: isSeen ? 76 : 72,
           height: isSeen ? 76 : 72,
           child: Hero(
@@ -330,7 +328,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         setState(() {
           _index = index;
         });
-        return index;
       },
     );
   }

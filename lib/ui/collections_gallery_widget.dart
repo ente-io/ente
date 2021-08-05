@@ -120,7 +120,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     padding: const EdgeInsets.all(22),
                     child: nothingToSeeHere,
                   )
-                : Container(
+                : SizedBox(
                     height: 170,
                     child: Align(
                       alignment: Alignment.centerLeft,
@@ -229,7 +229,7 @@ class DeviceFolderIcon extends StatelessWidget {
           Colors.transparent,
           Colors.black.withOpacity(0.6),
         ],
-        stops: [0.7, 1],
+        stops: const [0.7, 1],
       ),
     ),
     child: Align(
@@ -260,7 +260,7 @@ class DeviceFolderIcon extends StatelessWidget {
           children: <Widget>[
             ClipRRect(
               borderRadius: BorderRadius.circular(18.0),
-              child: Container(
+              child: SizedBox(
                 child: Hero(
                   tag: "device_folder:" + folder.path + folder.thumbnail.tag(),
                   child: Stack(
@@ -315,7 +315,7 @@ class CollectionItem extends StatelessWidget {
         children: <Widget>[
           ClipRRect(
             borderRadius: BorderRadius.circular(18.0),
-            child: Container(
+            child: SizedBox(
               child: Hero(
                   tag: "collection" + c.thumbnail.tag(),
                   child: ThumbnailWidget(
@@ -352,7 +352,7 @@ class SectionTitle extends StatelessWidget {
 
   const SectionTitle(
     this.title, {
-    this.opacity: 0.8,
+    this.opacity = 0.8,
     Key key,
     this.alignment = Alignment.centerLeft,
   }) : super(key: key);
@@ -360,20 +360,23 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: EdgeInsets.fromLTRB(24, 12, 0, 0),
-        child: Column(children: [
+      margin: EdgeInsets.fromLTRB(24, 12, 0, 0),
+      child: Column(
+        children: [
           Align(
             alignment: alignment,
             child: Text(
               title,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).buttonColor.withOpacity(this.opacity),
+                color: Theme.of(context).buttonColor.withOpacity(opacity),
                 fontSize: 20,
                 letterSpacing: 1,
               ),
             ),
           ),
-        ]));
+        ],
+      ),
+    );
   }
 }
