@@ -10,6 +10,8 @@ import router from 'next/router';
 import { changeEmail, getOTTForEmailChange } from 'services/userService';
 import styled from 'styled-components';
 import { AppContext } from 'pages/_app';
+import { getToken } from 'utils/common/key';
+import EnteSpinner from 'components/EnteSpinner';
 
 interface formValues {
     email: string;
@@ -29,6 +31,7 @@ const EmailRow =styled.div`
 function ChangeEmailForm() {
     const [email, setEmail]=useState('');
     const [loading, setLoading]=useState(false);
+    const [waiting, setWaiting]=useState(true);
     const [OttInputVisible, setShowOttInputVisibility]=useState(false);
     const [showMessage, setShwoMessage]=useState(false);
     const emailInputElement = useRef(null);
@@ -38,6 +41,12 @@ function ChangeEmailForm() {
         setTimeout(() => {
             emailInputElement.current?.focus();
         }, 250);
+        const token=getToken();
+        if (!token) {
+            router.push('/');
+            return;
+        }
+        setWaiting(false);
     }, []);
 
     const requestOTT= async( { email }: formValues,
@@ -71,7 +80,10 @@ function ChangeEmailForm() {
         setLoading(false);
     };
     return (
-        <Container>
+        <Container>{waiting ?
+            <EnteSpinner>
+                <span className="sr-only">Loading...</span>
+            </EnteSpinner>:
             <Card style={{ minWidth: '420px', padding: '10px' }} className="text-center">
                 <Card.Body style={{ padding: '40px 30px' }}>
                     <Card.Title style={{ marginBottom: '32px' }}>
@@ -167,6 +179,7 @@ function ChangeEmailForm() {
                     </Formik>
                 </Card.Body>
             </Card>
+        }
         </Container>);
 }
 
