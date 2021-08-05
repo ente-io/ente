@@ -34,7 +34,7 @@ class ThumbnailWidget extends StatefulWidget {
 class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   static final _logger = Logger("ThumbnailWidget");
 
-  static final kVideoIconOverlay = Container(
+  static final kVideoIconOverlay = SizedBox(
     height: 64,
     child: Icon(
       Icons.play_circle_outline,
@@ -44,13 +44,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   );
 
   static final kLiveVideoIconOverlay = Align(
-    alignment: Alignment.bottomRight,
+    alignment: Alignment.topRight,
     child: Padding(
-      padding: const EdgeInsets.only(right: 4, bottom: 4),
+      padding: const EdgeInsets.only(right: 8, top: 4),
       child: Icon(
         Icons.wb_sunny_outlined,
         size: 14,
-        color: Colors.white70,
+        color: Colors.white.withOpacity(0.9),
       ),
     ),
   );
@@ -64,7 +64,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           Colors.transparent,
           Colors.black.withOpacity(0.6),
         ],
-        stops: [0.75, 1],
+        stops: const [0.75, 1],
       ),
     ),
     child: Align(
@@ -121,7 +121,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     } else {
       _loadLocalImage(context);
     }
-    var image;
+    Widget image;
     if (_imageProvider != null) {
       image = Image(
         image: _imageProvider,
@@ -129,7 +129,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       );
     }
 
-    var content;
+    Widget content;
     if (image != null) {
       if (widget.file.fileType == FileType.video) {
         content = Stack(
@@ -159,7 +159,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           duration: Duration(milliseconds: 200),
           child: content,
         ),
-        widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
+        widget.shouldShowSyncStatus && widget.file.uploadedFileID != null
             ? kUnsyncedIconOverlay
             : emptyContainer,
       ],
