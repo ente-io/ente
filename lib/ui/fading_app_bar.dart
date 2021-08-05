@@ -251,17 +251,17 @@ class FadingAppBarState extends State<FadingAppBar> {
     await dialog.show();
     if (file.fileType == FileType.image ||
         file.fileType == FileType.livePhoto) {
-      file.localID = (await PhotoManager.editor.saveImageWithPath(
+      final savedAsset = (await PhotoManager.editor.saveImageWithPath(
         (await getFile(file)).path,
         title: file.title,
-      ))
-          .id;
+      ));
+      file.localID = savedAsset.id;
     } else if (file.fileType == FileType.video) {
-      file.localID = (await PhotoManager.editor.saveVideo(
-        (await getFile(file)),
+      final savedAsset = (await PhotoManager.editor.saveImageWithPath(
+        (await getFile(file)).path,
         title: file.title,
-      ))
-          .id;
+      ));
+      file.localID = savedAsset.id;
     }
     await FilesDB.instance.insert(file);
     await LocalSyncService.instance.trackDownloadedFile(file);
