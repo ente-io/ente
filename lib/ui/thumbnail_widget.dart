@@ -16,6 +16,7 @@ class ThumbnailWidget extends StatefulWidget {
   final File file;
   final BoxFit fit;
   final bool shouldShowSyncStatus;
+  final bool shouldShowLivePhotoOverlay;
   final Duration diskLoadDeferDuration;
   final Duration serverLoadDeferDuration;
 
@@ -24,6 +25,7 @@ class ThumbnailWidget extends StatefulWidget {
     Key key,
     this.fit = BoxFit.cover,
     this.shouldShowSyncStatus = true,
+    this.shouldShowLivePhotoOverlay = false,
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
   }) : super(key: key ?? Key(file.tag()));
@@ -139,7 +141,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           ],
           fit: StackFit.expand,
         );
-      } else if (widget.file.fileType == FileType.livePhoto) {
+      } else if (widget.file.fileType == FileType.livePhoto &&
+          widget.shouldShowLivePhotoOverlay) {
         content = Stack(
           children: [
             image,
@@ -159,7 +162,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           duration: Duration(milliseconds: 200),
           child: content,
         ),
-        widget.shouldShowSyncStatus && widget.file.uploadedFileID != null
+        widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
             ? kUnsyncedIconOverlay
             : emptyContainer,
       ],

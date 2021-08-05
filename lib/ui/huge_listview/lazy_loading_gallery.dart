@@ -323,6 +323,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                 LazyLoadingGridView.kThumbnailDiskLoadDeferDuration,
             serverLoadDeferDuration:
                 LazyLoadingGridView.kThumbnailServerLoadDeferDuration,
+            shouldShowLivePhotoOverlay: true,
             key: Key(widget.tag + file.tag()),
           ),
         ),
