@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
-import billingService, { Subscription } from 'services/billingService';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getToken } from 'utils/common/key';
@@ -21,7 +20,7 @@ import { Collection } from 'services/collectionService';
 import { useRouter } from 'next/router';
 import LinkButton from './pages/gallery/LinkButton';
 import { downloadApp } from 'utils/common';
-import { logoutUser } from 'services/userService';
+import { getUserDetails, logoutUser } from 'services/userService';
 import { LogoImage } from 'pages/_app';
 import { SetDialogMessage } from './MessageDialog';
 import EnteSpinner from './EnteSpinner';
@@ -31,6 +30,7 @@ import ExportModal from './ExportModal';
 import { SetLoading } from 'pages/gallery';
 import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
+import { Subscription } from 'services/billingService';
 
 interface Props {
     collections: Collection[];
@@ -55,10 +55,10 @@ export default function Sidebar(props: Props) {
             if (!isOpen) {
                 return;
             }
-            const usage = await billingService.getUsage();
-
-            SetUsage(usage);
-            setSubscription(getUserSubscription());
+            const userDetails=await getUserDetails();
+            setUser({ ...user, email: userDetails.email });
+            SetUsage(userDetails.usage);
+            setSubscription(userDetails.subscription);
         };
         main();
     }, [isOpen]);
