@@ -72,20 +72,26 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
 
   if (file.fileType == FileType.livePhoto && io.Platform.isIOS) {
     final io.File videoUrl = await Motionphoto.getLivePhotoFile(file.localID);
-    final tempPath =  Configuration.instance.getTempDirectory();
-    final zipFilePath = tempPath + file.generatedID.toString() + ".zip";
-    _logger.fine("Uploading zipped live photo from " + zipFilePath);
+    if (videoUrl == null || !videoUrl.existsSync()) {
+      String errMsg = "missing livePhoto url for " + file.toString();
+      _logger.severe(errMsg);
+      throw InvalidFileUploadState(errMsg);
+    }
+    final tempPath = Configuration.instance.getTempDirectory();
+    // .elv -> Ente live photo
+    final livePhotoPath = tempPath + file.generatedID.toString() + ".elv";
+    _logger.fine("Uploading zipped live photo from " + livePhotoPath);
     var encoder = ZipFileEncoder();
-    encoder.create(zipFilePath);
+    encoder.create(livePhotoPath);
     encoder.addFile(videoUrl, "video" + extension(videoUrl.path));
     encoder.addFile(sourceFile, "image" + extension(sourceFile.path));
     encoder.close();
     // delete the temporary video and image copy (only in IOS)
-    if(io.Platform.isIOS) {
+    if (io.Platform.isIOS) {
       sourceFile.deleteSync();
     }
     // new sourceFile which needs to be uploaded
-    sourceFile = io.File(zipFilePath);
+    sourceFile = io.File(livePhotoPath);
   }
 
   thumbnailData = await asset.thumbDataWithSize(
