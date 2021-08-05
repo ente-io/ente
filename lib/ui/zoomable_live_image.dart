@@ -110,6 +110,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     if (_videoPlayerController != null) {
       return;
     }
+    // todo: add wrapper to download file from server if local is missing
     getFile(widget.photo, liveVideo: true).then((file) {
       if (file != null && file.existsSync()) {
         _logger.fine("loading  from local");

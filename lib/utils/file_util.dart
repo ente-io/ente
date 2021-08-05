@@ -176,6 +176,7 @@ Future<io.File> _downloadLivePhoto(ente.File file,
     return liveVideo ? videoFileCache : imageFileCache;
   }).catchError((e) {
     fileDownloadsInProgress.remove(file.uploadedFileID);
+    _logger.warning("failed to download live photos" + e.toString());
   });
 }
 
