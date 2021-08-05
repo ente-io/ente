@@ -12,6 +12,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -38,27 +39,15 @@ class ZoomableLiveImage extends StatefulWidget {
 class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     with SingleTickerProviderStateMixin {
   final Logger _logger = Logger("ZoomableLiveImage");
-  File _photo;
-  ImageProvider _imageProvider;
-  bool _loadedSmallThumbnail = false;
-  bool _loadingLargeThumbnail = false;
-  bool _loadedLargeThumbnail = false;
-  bool _loadingFinalImage = false;
-  bool _loadedFinalImage = false;
+  File _livePhoto;
   bool _loadLivePhotoVideo = false;
-  ValueChanged<PhotoViewScaleState> _scaleStateChangedCallback;
 
   VideoPlayerController _videoPlayerController;
   ChewieController _chewieController;
 
   @override
   void initState() {
-    _photo = widget.photo;
-    _scaleStateChangedCallback = (value) {
-      if (widget.shouldDisableScroll != null) {
-        widget.shouldDisableScroll(value != PhotoViewScaleState.initial);
-      }
-    };
+    _livePhoto = widget.photo;
     _loadLiveVideo();
     super.initState();
   }
@@ -77,35 +66,19 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
 
   @override
   Widget build(BuildContext context) {
-    if (_photo.isRemoteFile()) {
-      _loadNetworkImage();
+    Widget content;
+    if (_loadLivePhotoVideo && _videoPlayerController != null) {
+      content = _getVideoPlayer();
     } else {
-      _loadLocalImage(context);
+      content = ZoomableImage(_livePhoto,
+          tagPrefix: widget.tagPrefix,
+          shouldDisableScroll: widget.shouldDisableScroll,
+          backgroundDecoration: widget.backgroundDecoration);
     }
-
-    if (_imageProvider != null) {
-      Widget content;
-      if (_loadLivePhotoVideo && _videoPlayerController != null) {
-        content = _getVideoPlayer();
-      } else {
-        content = PhotoView(
-          imageProvider: _imageProvider,
-          scaleStateChangedCallback: _scaleStateChangedCallback,
-          minScale: PhotoViewComputedScale.contained,
-          gaplessPlayback: true,
-          heroAttributes: PhotoViewHeroAttributes(
-            tag: widget.tagPrefix + _photo.tag(),
-          ),
-          backgroundDecoration: widget.backgroundDecoration,
-        );
-      }
-      return GestureDetector(
-          onLongPressStart: (_) => {_onLongPressEvent(true)},
-          onLongPressEnd: (_) => {_onLongPressEvent(false)},
-          child: content);
-    } else {
-      return loadWidget;
-    }
+    return GestureDetector(
+        onLongPressStart: (_) => {_onLongPressEvent(true)},
+        onLongPressEnd: (_) => {_onLongPressEvent(false)},
+        child: content);
   }
 
   @override
@@ -162,111 +135,5 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
           setState(() {});
         }
       });
-  }
-
-  void _loadNetworkImage() {
-    if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      final cachedThumbnail = ThumbnailLruCache.get(_photo);
-      if (cachedThumbnail != null) {
-        _imageProvider = Image.memory(cachedThumbnail).image;
-        _loadedSmallThumbnail = true;
-      } else {
-        getThumbnailFromServer(_photo).then((file) {
-          final imageProvider = Image.memory(file).image;
-          if (mounted) {
-            precacheImage(imageProvider, context).then((value) {
-              if (mounted) {
-                setState(() {
-                  _imageProvider = imageProvider;
-                  _loadedSmallThumbnail = true;
-                });
-              }
-            }).catchError((e) {
-              _logger.severe("Could not load image " + _photo.toString());
-              _loadedSmallThumbnail = true;
-            });
-          }
-        });
-      }
-    }
-    if (!_loadedFinalImage) {
-      getFileFromServer(_photo).then((file) {
-        _onFinalImageLoaded(Image.file(
-          file,
-          gaplessPlayback: true,
-        ).image);
-      });
-    }
-  }
-
-  void _loadLocalImage(BuildContext context) {
-    if (!_loadedSmallThumbnail &&
-        !_loadedLargeThumbnail &&
-        !_loadedFinalImage) {
-      final cachedThumbnail =
-          ThumbnailLruCache.get(_photo, kThumbnailSmallSize);
-      if (cachedThumbnail != null) {
-        _imageProvider = Image.memory(cachedThumbnail).image;
-        _loadedSmallThumbnail = true;
-      }
-    }
-
-    if (!_loadingLargeThumbnail &&
-        !_loadedLargeThumbnail &&
-        !_loadedFinalImage) {
-      _loadingLargeThumbnail = true;
-      getThumbnailFromLocal(_photo, size: kThumbnailLargeSize, quality: 100)
-          .then((cachedThumbnail) {
-        if (cachedThumbnail != null) {
-          _onLargeThumbnailLoaded(Image.memory(cachedThumbnail).image, context);
-        }
-      });
-    }
-
-    if (!_loadingFinalImage && !_loadedFinalImage) {
-      _loadingFinalImage = true;
-      getFile(_photo).then((file) {
-        if (file != null && file.existsSync()) {
-          _onFinalImageLoaded(Image.file(file).image);
-        } else {
-          _logger.info("File was deleted " + _photo.toString());
-          if (_photo.uploadedFileID != null) {
-            _photo.localID = null;
-            FilesDB.instance.update(_photo);
-            _loadNetworkImage();
-          } else {
-            FilesDB.instance.deleteLocalFile(_photo);
-            Bus.instance.fire(LocalPhotosUpdatedEvent([_photo]));
-          }
-        }
-      });
-    }
-  }
-
-  void _onLargeThumbnailLoaded(
-      ImageProvider imageProvider, BuildContext context) {
-    if (mounted && !_loadedFinalImage) {
-      precacheImage(imageProvider, context).then((value) {
-        if (mounted && !_loadedFinalImage) {
-          setState(() {
-            _imageProvider = imageProvider;
-            _loadedLargeThumbnail = true;
-          });
-        }
-      });
-    }
-  }
-
-  void _onFinalImageLoaded(ImageProvider imageProvider) {
-    if (mounted) {
-      precacheImage(imageProvider, context).then((value) {
-        if (mounted) {
-          setState(() {
-            _imageProvider = imageProvider;
-            _loadedFinalImage = true;
-          });
-        }
-      });
-    }
   }
 }
