@@ -9,7 +9,7 @@ import Container from 'components/Container';
 import { Card, Button } from 'react-bootstrap';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
-import { B64EncryptionResult } from 'services/uploadService';
+import { B64EncryptionResult } from 'services/upload/uploadService';
 import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
 
 export default function Recover() {

@@ -1,5 +1,5 @@
 import { KEK } from 'pages/generate';
-import { B64EncryptionResult } from 'services/uploadService';
+import { B64EncryptionResult } from 'services/upload/uploadService';
 import { KeyAttributes } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';

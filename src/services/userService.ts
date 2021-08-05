@@ -6,7 +6,7 @@ import { clearData } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
-import { B64EncryptionResult } from './uploadService';
+import { B64EncryptionResult } from './upload/uploadService';
 import { logError } from 'utils/sentry';
 import { Subscription } from './billingService';
 

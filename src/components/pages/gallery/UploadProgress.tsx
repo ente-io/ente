@@ -3,7 +3,7 @@ import {
     Alert, Button, Modal, ProgressBar,
 } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
-import { UPLOAD_STAGES, FileUploadErrorCode } from 'services/uploadService';
+import { UPLOAD_STAGES, FileUploadErrorCode } from 'services/upload/uploadService';
 import constants from 'utils/strings/constants';
 
 interface Props {

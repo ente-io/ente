@@ -10,7 +10,7 @@ import constants from 'utils/strings/constants';
 import Container from 'components/Container';
 import { useRouter } from 'next/router';
 import VerifyTwoFactor from 'components/VerifyTwoFactor';
-import { B64EncryptionResult } from 'services/uploadService';
+import { B64EncryptionResult } from 'services/upload/uploadService';
 import { encryptWithRecoveryKey } from 'utils/crypto';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { AppContext } from 'pages/_app';

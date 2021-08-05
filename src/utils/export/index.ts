@@ -1,6 +1,6 @@
 import { ExportRecord } from 'services/exportService';
 import { File } from 'services/fileService';
-import { MetadataObject } from 'services/uploadService';
+import { MetadataObject } from 'services/upload/uploadService';
 import { formatDate } from 'utils/file';
 
 

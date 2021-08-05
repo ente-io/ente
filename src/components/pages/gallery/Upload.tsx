@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import UploadService, { FileWithCollection, UPLOAD_STAGES } from 'services/uploadService';
+import UploadService, { FileWithCollection, UPLOAD_STAGES } from 'services/upload/uploadService';
 import { createAlbum } from 'services/collectionService';
 import { getLocalFiles } from 'services/fileService';
 import constants from 'utils/strings/constants';

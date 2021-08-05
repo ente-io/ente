@@ -1,8 +1,8 @@
 import { getEndpoint } from 'utils/common/apiUtil';
-import HTTPService from './HTTPService';
+import HTTPService from '../HTTPService';
 import EXIF from 'exif-js';
-import { File, fileAttribute } from './fileService';
-import { Collection } from './collectionService';
+import { File, fileAttribute } from '../fileService';
+import { Collection } from '../collectionService';
 import { FILE_TYPE, SetFiles } from 'pages/gallery';
 import { retryAsyncFunction, sleep } from 'utils/common';
 import {
