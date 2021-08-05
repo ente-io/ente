@@ -448,6 +448,11 @@ const englishConstants = {
     LOCAL_STORAGE_NOT_ACCESSIBLE: 'local storage not accessible',
     LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE: 'your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
     RETRY: 'retry',
+    UPDATE_EMAIL: 'change email',
+    SEND_OTT: 'send otp',
+    EMAIl_ALREADY_OWNED: 'email already taken',
+    EMAIL_UDPATE_SUCCESSFUL: 'your email has been udpated successfully',
+
 };
 
 export default englishConstants;
