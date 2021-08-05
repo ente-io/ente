@@ -251,8 +251,12 @@ class UploadService {
         const { file: rawFile, collection } = fileWithCollection;
         this.fileProgress.set(rawFile.name, 0);
         this.updateProgressBarUI();
+        let file:FileInMemory=null;
+        let encryptedFile: EncryptedFile=null;
         try {
-            let file: FileInMemory = await this.readFile(reader, rawFile);
+            // read the file into memory
+            file = await this.readFile(reader, rawFile);
+
             if (this.fileAlreadyInCollection(file, collection)) {
                 // set progress to -2 indicating that file upload was skipped
                 this.fileProgress.set(rawFile.name, FileUploadErrorCode.SKIPPED);
@@ -261,10 +265,9 @@ class UploadService {
                 // remove completed files for file progress list
                 this.fileProgress.delete(rawFile.name);
             } else {
-                let encryptedFile: EncryptedFile =
-                    await this.encryptFile(worker, file, collection.key);
+                encryptedFile = await this.encryptFile(worker, file, collection.key);
 
-                let backupedFile: BackupedFile = await this.uploadToBucket(
+                const backupedFile: BackupedFile = await this.uploadToBucket(
                     encryptedFile.file,
                 );
 
@@ -274,8 +277,6 @@ class UploadService {
                     encryptedFile.fileKey,
                 );
 
-                encryptedFile = null;
-                backupedFile = null;
 
                 const uploadedFile =await this.uploadFile(uploadFile);
                 const decryptedFile=await decryptFile(uploadedFile, collection);
@@ -285,7 +286,6 @@ class UploadService {
                 await localForage.setItem('files', removeUnneccessaryFileProps(this.existingFiles));
                 this.setFiles(this.existingFiles);
 
-                file = null;
                 uploadFile = null;
 
                 this.fileProgress.delete(rawFile.name);
@@ -297,6 +297,9 @@ class UploadService {
             // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
             this.fileProgress.set(rawFile.name, FileUploadErrorCode.FAILED);
             handleError(e);
+        } finally {
+            file=null;
+            encryptedFile=null;
         }
         this.updateProgressBarUI();
 
