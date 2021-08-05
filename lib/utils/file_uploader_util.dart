@@ -89,10 +89,13 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   }
 
   thumbnailData = await asset.thumbDataWithSize(
-    kThumbnailSmallSize,
-    kThumbnailSmallSize,
+    kThumbnailLargeSize,
+    kThumbnailLargeSize,
     quality: kThumbnailQuality,
   );
+  if (thumbnailData == null) {
+    throw InvalidFileError();
+  }
   int compressionAttempts = 0;
   while (thumbnailData.length > kThumbnailDataLimit &&
       compressionAttempts < kMaximumThumbnailCompressionAttempts) {

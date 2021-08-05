@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/change_email_dialog.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/recovery_key_dialog.dart';
@@ -53,8 +56,12 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
+            AppLock.of(context).setEnabled(false);
             final result = await requestAuthentication();
+            AppLock.of(context)
+                .setEnabled(Configuration.instance.shouldShowLockScreen());
             if (!result) {
+              Logger("harami").info("Showing toast");
               showToast("please authenticate to view your recovery key");
               return;
             }
@@ -88,11 +95,14 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            // final result = await requestAuthentication();
-            // if (!result) {
-            //   showToast("please authenticate to change your email");
-            //   return;
-            // }
+            AppLock.of(context).setEnabled(false);
+            final result = await requestAuthentication();
+            AppLock.of(context)
+                .setEnabled(Configuration.instance.shouldShowLockScreen());
+            if (!result) {
+              showToast("please authenticate to change your email");
+              return;
+            }
             showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -113,7 +123,10 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
+            AppLock.of(context).setEnabled(false);
             final result = await requestAuthentication();
+            AppLock.of(context)
+                .setEnabled(Configuration.instance.shouldShowLockScreen());
             if (!result) {
               showToast("please authenticate to change your password");
               return;
