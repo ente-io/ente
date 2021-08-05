@@ -75,7 +75,7 @@ function ChangeEmailForm(props:Props) {
             appContext.setDisappearingFlashMessage({ message: constants.EMAIL_UDPATE_SUCCESSFUL, severity: 'success' });
             router.push('/gallery');
         } catch (e) {
-            setFieldError('ott', `${constants.UNKNOWN_ERROR} ${e.message}`);
+            setFieldError('ott', `${constants.INCORRECT_CODE}`);
         }
         setLoading(false);
     };
