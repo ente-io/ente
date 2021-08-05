@@ -58,7 +58,7 @@ export interface TwoFactorRecoveryResponse {
 
 export interface UserDetails{
     email:string;
-    usage:string;
+    usage:number;
     fileCount:number;
     sharedCollectionCount:number;
     subscription:Subscription;

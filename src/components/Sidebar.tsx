@@ -13,6 +13,7 @@ import {
     isOnFreePlan,
     isSubscriptionCancelled,
     isSubscribed,
+    convertToHumanReadable,
 } from 'utils/billingUtil';
 
 import isElectron from 'is-electron';
@@ -57,7 +58,7 @@ export default function Sidebar(props: Props) {
             }
             const userDetails=await getUserDetails();
             setUser({ ...user, email: userDetails.email });
-            SetUsage(userDetails.usage);
+            SetUsage(convertToHumanReadable(userDetails.usage));
             setSubscription(userDetails.subscription);
         };
         main();
