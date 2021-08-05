@@ -2,11 +2,16 @@ import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:archive/archive_io.dart';
 import 'package:logging/logging.dart';
+import 'package:motionphoto/motionphoto.dart';
+import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/models/file.dart' as ente;
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 
 import 'file_util.dart';
@@ -61,6 +66,34 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   if (!sourceFile.existsSync()) {
     throw InvalidFileError();
   }
+
+  // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
+  await _decorateEnteFileData(file, asset);
+
+  if (file.fileType == FileType.livePhoto && io.Platform.isIOS) {
+    final io.File videoUrl = await Motionphoto.getLivePhotoFile(file.localID);
+    if (videoUrl == null || !videoUrl.existsSync()) {
+      String errMsg = "missing livePhoto url for " + file.toString();
+      _logger.severe(errMsg);
+      throw InvalidFileUploadState(errMsg);
+    }
+    final tempPath = Configuration.instance.getTempDirectory();
+    // .elv -> Ente live photo
+    final livePhotoPath = tempPath + file.generatedID.toString() + ".elv";
+    _logger.fine("Uploading zipped live photo from " + livePhotoPath);
+    var encoder = ZipFileEncoder();
+    encoder.create(livePhotoPath);
+    encoder.addFile(videoUrl, "video" + extension(videoUrl.path));
+    encoder.addFile(sourceFile, "image" + extension(sourceFile.path));
+    encoder.close();
+    // delete the temporary video and image copy (only in IOS)
+    if (io.Platform.isIOS) {
+      sourceFile.deleteSync();
+    }
+    // new sourceFile which needs to be uploaded
+    sourceFile = io.File(livePhotoPath);
+  }
+
   thumbnailData = await asset.thumbDataWithSize(
     kThumbnailLargeSize,
     kThumbnailLargeSize,
@@ -80,8 +113,6 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   }
 
   isDeleted = asset == null || !(await asset.exists);
-  // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
-  await _decorateEnteFileData(file, asset);
   return MediaUploadData(sourceFile, thumbnailData, isDeleted);
 }
 

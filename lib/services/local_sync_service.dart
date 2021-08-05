@@ -148,9 +148,9 @@ class LocalSyncService {
     }
   }
 
-  Future<void> trackDownloadedFile(File file) async {
+  Future<void> trackDownloadedFile(String localID) async {
     final downloadedIDs = getDownloadedFileIDs();
-    downloadedIDs.add(file.localID);
+    downloadedIDs.add(localID);
     await _prefs.setStringList(kDownloadedFileIDsKey, downloadedIDs);
   }
 

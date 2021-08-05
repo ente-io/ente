@@ -1,5 +1,9 @@
 class InvalidFileError extends Error {}
 
+class InvalidFileUploadState extends AssertionError {
+  InvalidFileUploadState(String message) : super(message);
+}
+
 class WiFiUnavailableError extends Error {}
 
 class SyncStopRequestedError extends Error {}

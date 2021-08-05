@@ -24,6 +24,9 @@ Future<void> share(BuildContext context, List<File> files) async {
   final List<Future<String>> pathFutures = [];
   for (File file in files) {
     pathFutures.add(getFile(file).then((file) => file.path));
+    if (file.fileType == FileType.livePhoto) {
+      pathFutures.add(getFile(file, liveVideo: true).then((file) => file.path));
+    }
   }
   final paths = await Future.wait(pathFutures);
   await dialog.hide();

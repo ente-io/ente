@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'dart:io' as io;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
@@ -249,21 +250,36 @@ class FadingAppBarState extends State<FadingAppBar> {
   Future<void> _download(File file) async {
     final dialog = createProgressDialog(context, "downloading...");
     await dialog.show();
-    if (file.fileType == FileType.image) {
-      file.localID = (await PhotoManager.editor.saveImageWithPath(
-        (await getFile(file)).path,
-        title: file.title,
-      )).id;
-    } else {
-      file.localID = (await PhotoManager.editor.saveVideo(
-        (await getFile(file)),
-        title: file.title,
-      )).id;
-    }
+    FileType type = file.fileType;
+    // save and track image for livePhoto/image and video for FileType.video
+    io.File fileToSave = await getFile(file);
+    final savedAsset = type == FileType.video
+        ? (await PhotoManager.editor.saveVideo(fileToSave, title: file.title))
+        : (await PhotoManager.editor
+        .saveImageWithPath(fileToSave.path, title: file.title));
+    // immediately track assetID to avoid duplicate upload
+    await LocalSyncService.instance.trackDownloadedFile(savedAsset.id);
+    file.localID = savedAsset.id;
     await FilesDB.instance.insert(file);
-    await LocalSyncService.instance.trackDownloadedFile(file);
+
+    if (type == FileType.livePhoto) {
+      io.File liveVideo = await getFileFromServer(file, liveVideo: true);
+      if (liveVideo == null) {
+        _logger.warning("Failed to find live video" + file.tag());
+      } else {
+        final savedAsset = (await PhotoManager.editor.saveVideo(liveVideo));
+        // in case of livePhoto, file.localID only points the image asset.
+        // ignore the saved video asset for live photo from future downloads
+        await LocalSyncService.instance.trackDownloadedFile(savedAsset.id);
+      }
+    }
+
     Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
     await dialog.hide();
-    showToast("file saved to gallery");
+    if (file.fileType == FileType.livePhoto) {
+      showToast("photo and video saved to gallery");
+    } else {
+      showToast("file saved to gallery");
+    }
   }
 }

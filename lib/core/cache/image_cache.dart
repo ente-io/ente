@@ -6,11 +6,11 @@ import 'package:photos/models/file.dart';
 class FileLruCache {
   static final LRUMap<String, io.File> _map = LRUMap(25);
 
-  static io.File get(File file) {
-    return _map.get(file.tag());
+  static io.File get(String key) {
+    return _map.get(key);
   }
 
-  static void put(File file, io.File imageData) {
-    _map.put(file.tag(), imageData);
+  static void put(String key, io.File imageData) {
+    _map.put(key, imageData);
   }
 }

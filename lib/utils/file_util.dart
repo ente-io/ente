@@ -2,24 +2,21 @@ import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
-import 'package:path/path.dart';
+import 'package:motionphoto/motionphoto.dart';
 import 'package:photos/core/cache/image_cache.dart';
+import 'package:path/path.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/core/network.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/file_type.dart';
-import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/thumbnail_util.dart';
-
-import 'crypto_util.dart';
-import 'file_uploader_util.dart';
+import 'package:photos/utils/file_download_util.dart';
 
 final _logger = Logger("FileUtil");
 
@@ -30,14 +27,17 @@ void preloadFile(ente.File file) {
   getFile(file);
 }
 
-Future<io.File> getFile(ente.File file) async {
+Future<io.File> getFile(ente.File file,
+    {bool liveVideo = false} // only relevant for live photos
+    ) async {
   if (file.isRemoteFile()) {
-    return getFileFromServer(file);
+    return getFileFromServer(file, liveVideo: liveVideo);
   } else {
-    final cachedFile = FileLruCache.get(file);
+    String key = file.tag() + liveVideo.toString();
+    final cachedFile = FileLruCache.get(key);
     if (cachedFile == null) {
-      final diskFile = await _getLocalDiskFile(file);
-      FileLruCache.put(file, diskFile);
+      final diskFile = await _getLocalDiskFile(file, liveVideo: liveVideo);
+      FileLruCache.put(key, diskFile);
       return diskFile;
     }
     return cachedFile;
@@ -48,13 +48,16 @@ Future<bool> doesLocalFileExist(ente.File file) async {
   return await _getLocalDiskFile(file) != null;
 }
 
-Future<io.File> _getLocalDiskFile(ente.File file) async {
+Future<io.File> _getLocalDiskFile(ente.File file, {bool liveVideo = false}) async {
   if (file.isSharedMediaToAppSandbox()) {
     var localFile = io.File(getSharedMediaFilePath(file));
     return localFile.exists().then((exist) {
       return exist ? localFile : null;
     });
-  } else {
+  } else if (file.fileType == FileType.livePhoto && liveVideo) {
+    return Motionphoto.getLivePhotoFile(file.localID);
+  }
+  else {
     return file.getAsset().then((asset) async {
       if (asset == null || !(await asset.exists)) {
         return null;
@@ -65,8 +68,9 @@ Future<io.File> _getLocalDiskFile(ente.File file) async {
 }
 
 String getSharedMediaFilePath(ente.File file) {
-  return Configuration.instance.getSharedMediaCacheDirectory()
-      + "/" + file.localID.replaceAll(kSharedMediaIdentifier, '');
+  return Configuration.instance.getSharedMediaCacheDirectory() +
+      "/" +
+      file.localID.replaceAll(kSharedMediaIdentifier, '');
 }
 
 void preloadThumbnail(ente.File file) {
@@ -80,19 +84,29 @@ void preloadThumbnail(ente.File file) {
 final Map<int, Future<io.File>> fileDownloadsInProgress =
     Map<int, Future<io.File>>();
 
-Future<io.File> getFileFromServer(ente.File file,
-    {ProgressCallback progressCallback}) async {
-  final cacheManager = file.fileType == FileType.video
+Future<io.File> getFileFromServer(
+  ente.File file, {
+  ProgressCallback progressCallback,
+  bool liveVideo = false, // only needed in case of live photos
+}) async {
+  final cacheManager = (file.fileType == FileType.video || liveVideo)
       ? VideoCacheManager.instance
       : DefaultCacheManager();
   return cacheManager.getFileFromCache(file.getDownloadUrl()).then((info) {
     if (info == null) {
       if (!fileDownloadsInProgress.containsKey(file.uploadedFileID)) {
-        fileDownloadsInProgress[file.uploadedFileID] = _downloadAndDecrypt(
-          file,
-          cacheManager,
-          progressCallback: progressCallback,
-        );
+        if (file.fileType == FileType.livePhoto) {
+          fileDownloadsInProgress[file.uploadedFileID] = _downloadLivePhoto(
+              file,
+              progressCallback: progressCallback,
+              liveVideo: liveVideo);
+        } else {
+          fileDownloadsInProgress[file.uploadedFileID] = _downloadAndCache(
+            file,
+            cacheManager,
+            progressCallback: progressCallback,
+          );
+        }
       }
       return fileDownloadsInProgress[file.uploadedFileID];
     } else {
@@ -101,54 +115,80 @@ Future<io.File> getFileFromServer(ente.File file,
   });
 }
 
-Future<io.File> _downloadAndDecrypt(
-    ente.File file, BaseCacheManager cacheManager,
-    {ProgressCallback progressCallback}) async {
-  _logger.info("Downloading file " + file.uploadedFileID.toString());
-  final encryptedFilePath = Configuration.instance.getTempDirectory() +
-      file.generatedID.toString() +
-      ".encrypted";
-  final decryptedFilePath = Configuration.instance.getTempDirectory() +
-      file.generatedID.toString() +
-      ".decrypted";
+Future<io.File> _downloadLivePhoto(ente.File file,
+    {ProgressCallback progressCallback, bool liveVideo=false}) async {
+  return downloadAndDecrypt(file, progressCallback: progressCallback)
+      .then((decryptedFile) async {
+    if (decryptedFile == null) {
+      return null;
+    }
+    _logger.fine("Decoded zipped live photo from " + decryptedFile.path);
+    io.File imageFileCache, videoFileCache;
+    List<int> bytes = decryptedFile.readAsBytesSync();
+    Archive archive = ZipDecoder().decodeBytes(bytes);
+    final tempPath = Configuration.instance.getTempDirectory();
+    // Extract the contents of Zip compressed archive to disk
+    for (ArchiveFile archiveFile in archive) {
+      if (archiveFile.isFile) {
+        String filename = archiveFile.name;
+        String fileExtension = getExtension(archiveFile.name);
+        String decodePath =
+            tempPath + file.uploadedFileID.toString() + filename;
+        List<int> data = archiveFile.content;
+        if (filename.startsWith("image")) {
+          io.File imageFile = io.File(decodePath)
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(data);
+          io.File imageConvertedFile = imageFile;
+          if ((fileExtension == "unknown") ||
+              (io.Platform.isAndroid && fileExtension == "heic")) {
+            imageConvertedFile = await FlutterImageCompress.compressAndGetFile(
+              decodePath,
+              decodePath + ".jpg",
+              keepExif: true,
+            );
+            imageFile.deleteSync();
+          }
+          imageFileCache = await DefaultCacheManager().putFile(
+            file.getDownloadUrl(),
+            imageConvertedFile.readAsBytesSync(),
+            eTag: file.getDownloadUrl(),
+            maxAge: Duration(days: 365),
+            fileExtension: fileExtension,
+          );
+          imageConvertedFile.deleteSync();
+        } else if (filename.startsWith("video")) {
+          io.File videoFile = io.File(decodePath)
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(data);
+          videoFileCache = await VideoCacheManager.instance.putFile(
+            file.getDownloadUrl(),
+            videoFile.readAsBytesSync(),
+            eTag: file.getDownloadUrl(),
+            maxAge: Duration(days: 365),
+            fileExtension: fileExtension,
+          );
+          videoFile.deleteSync();
+        }
+      }
+    }
+    fileDownloadsInProgress.remove(file.uploadedFileID);
+    return liveVideo ? videoFileCache : imageFileCache;
+  }).catchError((e) {
+    fileDownloadsInProgress.remove(file.uploadedFileID);
+    _logger.warning("failed to download live photos" + e.toString());
+  });
+}
 
-  final encryptedFile = io.File(encryptedFilePath);
-  final decryptedFile = io.File(decryptedFilePath);
-  final startTime = DateTime.now().millisecondsSinceEpoch;
-  return Network.instance
-      .getDio()
-      .download(
-        file.getDownloadUrl(),
-        encryptedFilePath,
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
-        onReceiveProgress: progressCallback,
-      )
-      .then((response) async {
-    if (response.statusCode != 200) {
-      _logger.warning("Could not download file: ", response.toString());
-      return null;
-    } else if (!encryptedFile.existsSync()) {
-      _logger.warning("File was not downloaded correctly.");
+Future<io.File> _downloadAndCache(ente.File file, BaseCacheManager cacheManager,
+    {ProgressCallback progressCallback}) async {
+  return downloadAndDecrypt(file, progressCallback: progressCallback)
+      .then((decryptedFile) async {
+    if (decryptedFile == null) {
       return null;
     }
-    _logger.info("File downloaded: " + file.uploadedFileID.toString());
-    _logger.info("Download speed: " +
-        (io.File(encryptedFilePath).lengthSync() /
-                (DateTime.now().millisecondsSinceEpoch - startTime))
-            .toString() +
-        "kBps");
-    await CryptoUtil.decryptFile(encryptedFilePath, decryptedFilePath,
-        Sodium.base642bin(file.fileDecryptionHeader), decryptFileKey(file));
-    _logger.info("File decrypted: " + file.uploadedFileID.toString());
-    encryptedFile.deleteSync();
-    var fileExtension = "unknown";
-    try {
-      fileExtension = extension(file.title).substring(1).toLowerCase();
-    } catch (e) {
-      _logger.severe("Could not capture file extension");
-    }
+    var decryptedFilePath = decryptedFile.path;
+    String fileExtension = getExtension(file.title);
     var outputFile = decryptedFile;
     if ((fileExtension == "unknown" && file.fileType == FileType.image) ||
         (io.Platform.isAndroid && fileExtension == "heic")) {
@@ -174,12 +214,14 @@ Future<io.File> _downloadAndDecrypt(
   });
 }
 
-Uint8List decryptFileKey(ente.File file) {
-  final encryptedKey = Sodium.base642bin(file.encryptedKey);
-  final nonce = Sodium.base642bin(file.keyDecryptionNonce);
-  final collectionKey =
-      CollectionsService.instance.getCollectionKey(file.collectionID);
-  return CryptoUtil.decryptSync(encryptedKey, collectionKey, nonce);
+String getExtension(String nameOrPath) {
+   var fileExtension = "unknown";
+  try {
+    fileExtension = extension(nameOrPath).substring(1).toLowerCase();
+  } catch (e) {
+    _logger.severe("Could not capture file extension");
+  }
+  return fileExtension;
 }
 
 Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
