@@ -145,7 +145,6 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
         _logger.fine("loading from remote");
         getFileFromServer(widget.photo, liveVideo: true).then((file) {
           if (file != null && file.existsSync()) {
-            showToast("Found in remote remote");
             _setVideoPlayerController(file: file);
           } else {
             _logger.warning("failed to load from remote" + widget.photo.tag());
