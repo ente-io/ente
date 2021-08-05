@@ -1,19 +1,14 @@
-import { getEndpoint } from 'utils/common/apiUtil';
-import HTTPService from '../HTTPService';
 import EXIF from 'exif-js';
 import { File, fileAttribute } from '../fileService';
 import { Collection } from '../collectionService';
 import { FILE_TYPE, SetFiles } from 'pages/gallery';
-import { retryAsyncFunction, sleep } from 'utils/common';
 import {
     handleError,
     parseError,
     THUMBNAIL_GENERATION_FAILED,
 } from 'utils/common/errorUtil';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
-import * as convert from 'xml-js';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
-import { getToken } from 'utils/common/key';
 import {
     fileIsHEIC,
     convertHEIC2JPEG,
@@ -24,10 +19,11 @@ import {
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
-const ENDPOINT = getEndpoint();
+import { sleep } from 'utils/common';
+import NetworkClient, { UploadURL } from './networkClient';
+
 
 const THUMBNAIL_HEIGHT = 720;
-const MAX_URL_REQUESTS = 50;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;
 const MAX_CONCURRENT_UPLOADS = 4;
@@ -38,13 +34,13 @@ const TYPE_JSON = 'json';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
 const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
-const CHUNKS_COMBINED_FOR_UPLOAD = 5;
-const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 const NULL_LOCATION: Location = { latitude: null, longitude: null };
 const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
 const FILE_UPLOAD_COMPLETED = 100;
 const EDITED_FILE_SUFFIX = '-edited';
 const TwoSecondInMillSeconds = 2000;
+export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
+export const CHUNKS_COMBINED_FOR_UPLOAD = 5;
 
 export enum FileUploadErrorCode {
     FAILED = -1,
@@ -82,12 +78,8 @@ export interface B64EncryptionResult {
     nonce: string;
 }
 
-interface UploadURL {
-    url: string;
-    objectKey: string;
-}
 
-interface MultipartUploadURLs {
+export interface MultipartUploadURLs {
     objectKey: string;
     partURLs: string[];
     completeURL: string;
@@ -121,7 +113,7 @@ interface ProcessedFile {
 }
 interface BackupedFile extends Omit<ProcessedFile, 'filename'> { }
 
-interface uploadFile extends BackupedFile {
+export interface UploadFile extends BackupedFile {
     collectionID: number;
     encryptedKey: string;
     keyDecryptionNonce: string;
@@ -202,7 +194,8 @@ class UploadService {
             this.filesCompleted = 0;
             this.updateProgressBarUI();
             try {
-                await this.fetchUploadURLs();
+                // checking for any subscription related errors
+                await NetworkClient.fetchUploadURLs(this.totalFileCount, this.uploadURLs);
             } catch (e) {
                 logError(e, 'error fetching uploadURLs');
                 const { parsedError, parsed } = parseError(e);
@@ -271,14 +264,14 @@ class UploadService {
                     encryptedFile.file,
                 );
 
-                let uploadFile: uploadFile = this.getUploadFile(
+                let uploadFile: UploadFile = this.getUploadFile(
                     collection,
                     backupedFile,
                     encryptedFile.fileKey,
                 );
 
 
-                const uploadedFile =await this.uploadFile(uploadFile);
+                const uploadedFile =await NetworkClient.uploadFile(uploadFile);
                 const decryptedFile=await decryptFile(uploadedFile, collection);
 
                 this.existingFiles.push(decryptedFile);
@@ -510,28 +503,30 @@ class UploadService {
                 const uploadPartCount = Math.ceil(
                     chunkCount / CHUNKS_COMBINED_FOR_UPLOAD,
                 );
-                const filePartUploadURLs = await this.fetchMultipartUploadURLs(
+                const filePartUploadURLs = await NetworkClient.fetchMultipartUploadURLs(
                     uploadPartCount,
                 );
-                fileObjectKey = await this.putFileInParts(
+                fileObjectKey = await NetworkClient.putFileInParts(
                     filePartUploadURLs,
                     stream,
                     file.filename,
                     uploadPartCount,
+                    this.trackUploadProgress,
                 );
             } else {
                 const fileUploadURL = await this.getUploadURL();
-                fileObjectKey = await this.putFile(
+                const progressTracker=this.trackUploadProgress.bind(this, file.filename);
+                fileObjectKey = await NetworkClient.putFile(
                     fileUploadURL,
                     file.file.encryptedData,
-                    file.filename,
+                    progressTracker,
                 );
             }
             const thumbnailUploadURL = await this.getUploadURL();
-            const thumbnailObjectKey = await this.putFile(
+            const thumbnailObjectKey = await NetworkClient.putFile(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData as Uint8Array,
-                null,
+                ()=>null,
             );
 
             const backupedFile: BackupedFile = {
@@ -556,8 +551,8 @@ class UploadService {
         collection: Collection,
         backupedFile: BackupedFile,
         fileKey: B64EncryptionResult,
-    ): uploadFile {
-        const uploadFile: uploadFile = {
+    ): UploadFile {
+        const uploadFile: UploadFile = {
             collectionID: collection.id,
             encryptedKey: fileKey.encryptedData,
             keyDecryptionNonce: fileKey.nonce,
@@ -567,26 +562,6 @@ class UploadService {
         return uploadFile;
     }
 
-    private async uploadFile(uploadFile: uploadFile):Promise<File> {
-        try {
-            const token = getToken();
-            if (!token) {
-                return;
-            }
-            const response = await retryAsyncFunction(()=>HTTPService.post(
-                `${ENDPOINT}/files`,
-                uploadFile,
-                null,
-                {
-                    'X-Auth-Token': token,
-                },
-            ));
-            return response.data;
-        } catch (e) {
-            logError(e, 'upload Files Failed');
-            throw e;
-        }
-    }
 
     private async seedMetadataMap(receivedFile: globalThis.File) {
         try {
@@ -836,189 +811,12 @@ class UploadService {
 
     private async getUploadURL() {
         if (this.uploadURLs.length === 0) {
-            await this.fetchUploadURLs();
+            await NetworkClient.fetchUploadURLs(this.totalFileCount-this.filesCompleted, this.uploadURLs);
         }
         return this.uploadURLs.pop();
     }
 
-    private async fetchUploadURLs(): Promise<void> {
-        try {
-            if (!this.uploadURLFetchInProgress) {
-                try {
-                    const token = getToken();
-                    if (!token) {
-                        return;
-                    }
-                    this.uploadURLFetchInProgress = HTTPService.get(
-                        `${ENDPOINT}/files/upload-urls`,
-                        {
-                            count: Math.min(
-                                MAX_URL_REQUESTS,
-                                (this.totalFileCount - this.filesCompleted) * 2,
-                            ),
-                        },
-                        { 'X-Auth-Token': token },
-                    );
-                    const response = await this.uploadURLFetchInProgress;
-                    this.uploadURLs.push(...response.data['urls']);
-                } finally {
-                    this.uploadURLFetchInProgress = null;
-                }
-            }
-            return this.uploadURLFetchInProgress;
-        } catch (e) {
-            logError(e, 'fetch upload-url failed ');
-            throw e;
-        }
-    }
 
-    private async fetchMultipartUploadURLs(
-        count: number,
-    ): Promise<MultipartUploadURLs> {
-        try {
-            const token = getToken();
-            if (!token) {
-                return;
-            }
-            const response = await HTTPService.get(
-                `${ENDPOINT}/files/multipart-upload-urls`,
-                {
-                    count,
-                },
-                { 'X-Auth-Token': token },
-            );
-
-            return response.data['urls'];
-        } catch (e) {
-            logError(e, 'fetch multipart-upload-url failed');
-            throw e;
-        }
-    }
-
-    private async putFile(
-        fileUploadURL: UploadURL,
-        file: Uint8Array,
-        filename: string,
-    ): Promise<string> {
-        try {
-            await retryAsyncFunction(()=>
-                HTTPService.put(
-                    fileUploadURL.url,
-                    file,
-                    null,
-                    null,
-                    this.trackUploadProgress(filename),
-                ),
-            );
-            return fileUploadURL.objectKey;
-        } catch (e) {
-            logError(e, 'putFile to dataStore failed ');
-            throw e;
-        }
-    }
-
-    private async putFileInParts(
-        multipartUploadURLs: MultipartUploadURLs,
-        file: ReadableStream<Uint8Array>,
-        filename: string,
-        uploadPartCount: number,
-    ) {
-        try {
-            const streamEncryptedFileReader = file.getReader();
-            const percentPerPart = Math.round(
-                RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount,
-            );
-            const resParts = [];
-            for (const [
-                index,
-                fileUploadURL,
-            ] of multipartUploadURLs.partURLs.entries()) {
-                const combinedChunks = [];
-                for (let i = 0; i < CHUNKS_COMBINED_FOR_UPLOAD; i++) {
-                    const { done, value: chunk } =
-                        await streamEncryptedFileReader.read();
-                    if (done) {
-                        break;
-                    }
-                    for (let index = 0; index < chunk.length; index++) {
-                        combinedChunks.push(chunk[index]);
-                    }
-                }
-                const uploadChunk = Uint8Array.from(combinedChunks);
-                const response=await retryAsyncFunction(async ()=>{
-                    const resp =await HTTPService.put(
-                        fileUploadURL,
-                        uploadChunk,
-                        null,
-                        null,
-                        this.trackUploadProgress(filename, percentPerPart, index),
-                    );
-                    if (!resp?.headers?.etag) {
-                        const err=Error('no header/etag present in response body');
-                        logError(err);
-                        throw err;
-                    }
-                    return resp;
-                });
-                resParts.push({
-                    PartNumber: index + 1,
-                    ETag: response.headers.etag,
-                });
-            }
-            const options = { compact: true, ignoreComment: true, spaces: 4 };
-            const body = convert.js2xml(
-                { CompleteMultipartUpload: { Part: resParts } },
-                options,
-            );
-            await retryAsyncFunction(()=>
-                HTTPService.post(multipartUploadURLs.completeURL, body, null, {
-                    'content-type': 'text/xml',
-                }),
-            );
-            return multipartUploadURLs.objectKey;
-        } catch (e) {
-            logError(e, 'put file in parts failed');
-            throw e;
-        }
-    }
-
-    private trackUploadProgress(
-        filename,
-        percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
-        index = 0,
-    ) {
-        const cancel={ exec: null };
-        let timeout=null;
-        const resetTimeout=()=>{
-            if (timeout) {
-                clearTimeout(timeout);
-            }
-            timeout=setTimeout(()=>cancel.exec(), 30*1000);
-        };
-        return {
-            cancel,
-            onUploadProgress: (event) => {
-                filename &&
-                    this.fileProgress.set(
-                        filename,
-                        Math.min(
-                            Math.round(
-                                percentPerPart * index +
-                                (percentPerPart * event.loaded) /
-                                event.total,
-                            ),
-                            98,
-                        ),
-                    );
-                this.updateProgressBarUI();
-                if (event.loaded===event.total) {
-                    clearTimeout(timeout);
-                } else {
-                    resetTimeout();
-                }
-            },
-        };
-    }
     private async getExifData(
         reader: FileReader,
         receivedFile: globalThis.File,
@@ -1101,6 +899,43 @@ class UploadService {
         }
 
         return dd;
+    }
+    private trackUploadProgress(
+        filename:string,
+        percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
+        index = 0,
+    ) {
+        const cancel={ exec: null };
+        let timeout=null;
+        const resetTimeout=()=>{
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+            timeout=setTimeout(()=>cancel.exec(), 30*1000);
+        };
+        return {
+            cancel,
+            onUploadProgress: (event) => {
+                filename &&
+                    this.fileProgress.set(
+                        filename,
+                        Math.min(
+                            Math.round(
+                                percentPerPart * index +
+                                (percentPerPart * event.loaded) /
+                                event.total,
+                            ),
+                            98,
+                        ),
+                    );
+                this.updateProgressBarUI();
+                if (event.loaded===event.total) {
+                    clearTimeout(timeout);
+                } else {
+                    resetTimeout();
+                }
+            },
+        };
     }
 }
 
