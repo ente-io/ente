@@ -14,6 +14,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
+import 'package:photos/utils/toast_util.dart';
 import 'package:video_player/video_player.dart';
 
 class ZoomableLiveImage extends StatefulWidget {
@@ -58,6 +59,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
         widget.shouldDisableScroll(value != PhotoViewScaleState.initial);
       }
     };
+    _loadLiveVideo();
     super.initState();
   }
 
@@ -66,11 +68,10 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       // stop playing video
       _videoPlayerController.pause();
     }
-    if (isPressed != _loadLivePhotoVideo) {
-      _loadLivePhotoVideo = isPressed;
-      if (mounted) {
-        setState(() {});
-      }
+    if (mounted) {
+      setState(() {
+        _loadLivePhotoVideo = isPressed;
+      });
     }
   }
 
@@ -81,11 +82,10 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     } else {
       _loadLocalImage(context);
     }
-    _loadLiveVideo();
+
     if (_imageProvider != null) {
       Widget content;
-      if (_loadLivePhotoVideo && _videoPlayerController != null
-      && _videoPlayerController.value.isInitialized) {
+      if (_loadLivePhotoVideo && _videoPlayerController != null) {
         content = _getVideoPlayer();
       } else {
         content = PhotoView(
@@ -102,23 +102,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       return GestureDetector(
           onLongPressStart: (_) => {_onLongPressEvent(true)},
           onLongPressEnd: (_) => {_onLongPressEvent(false)},
-          child: Stack(
-            children: [
-              content,
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 18, bottom: 14),
-                  child: Icon(
-                    Icons.featured_video,
-                    size: 12,
-                    color: Colors.white.withOpacity(0.5),
-                  ),
-                ),
-              ),
-            ],
-            fit: StackFit.expand,
-          ));
+          child: content);
     } else {
       return loadWidget;
     }
@@ -139,30 +123,32 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   Widget _getVideoPlayer() {
     _videoPlayerController.seekTo(Duration.zero);
     _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController,
-      aspectRatio: _videoPlayerController.value.aspectRatio,
-      autoPlay: true,
-      autoInitialize: true,
-      looping: false,
-      allowFullScreen: false,
-      showControls: false
-    );
+        videoPlayerController: _videoPlayerController,
+        aspectRatio: _videoPlayerController.value.aspectRatio,
+        autoPlay: true,
+        autoInitialize: true,
+        looping: false,
+        allowFullScreen: false,
+        showControls: false);
     return Chewie(controller: _chewieController);
   }
 
   void _loadLiveVideo() {
     if (_videoPlayerController != null) {
-      return ;
+      return;
     }
     getFile(widget.photo, liveVideo: true).then((file) {
       if (file != null && file.existsSync()) {
-        _logger.fine("loading live from local");
+        _logger.fine("loading  from local");
         _setVideoPlayerController(file: file);
       } else if (widget.photo.uploadedFileID != null) {
-        _logger.fine("loading live from remote");
+        _logger.fine("loading from remote");
         getFileFromServer(widget.photo, liveVideo: true).then((file) {
           if (file != null && file.existsSync()) {
+            showToast("Found in remote remote");
             _setVideoPlayerController(file: file);
+          } else {
+            _logger.warning("failed to load from remote" + widget.photo.tag());
           }
         });
       }
