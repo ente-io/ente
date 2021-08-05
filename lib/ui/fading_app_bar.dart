@@ -249,28 +249,36 @@ class FadingAppBarState extends State<FadingAppBar> {
   Future<void> _download(File file) async {
     final dialog = createProgressDialog(context, "downloading...");
     await dialog.show();
-    if (file.fileType == FileType.image ||
-        file.fileType == FileType.livePhoto) {
-      final savedAsset = (await PhotoManager.editor.saveImageWithPath(
-        (await getFile(file)).path,
-        title: file.title,
-      ));
-      file.localID = savedAsset.id;
-    } else if (file.fileType == FileType.video) {
+    FileType type = file.fileType;
+    if (type == FileType.image || type == FileType.livePhoto) {
       final savedAsset = (await PhotoManager.editor.saveImageWithPath(
         (await getFile(file)).path,
         title: file.title,
       ));
       file.localID = savedAsset.id;
     }
+
+    if (type == FileType.video || type == FileType.livePhoto) {
+      final savedAsset = (await PhotoManager.editor.saveVideo(
+        (await getFile(file)),
+        title: file.title,
+      ));
+      if (type == FileType.video) {
+        file.localID = savedAsset.id;
+      } else if (type == FileType.livePhoto) {
+        // in case of livePhoto, file.localID only points the image asset.
+        // ignore the saved video asset for live photo from future downloads
+        await LocalSyncService.instance.trackDownloadedFile(savedAsset.id);
+      }
+    }
     await FilesDB.instance.insert(file);
-    await LocalSyncService.instance.trackDownloadedFile(file);
+    await LocalSyncService.instance.trackDownloadedFile(file.localID);
     Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
     await dialog.hide();
-    if (file.fileType != FileType.livePhoto) {
-      showToast("file saved to gallery");
+    if (file.fileType == FileType.livePhoto) {
+      showToast("photo and video saved to gallery");
     } else {
-      showToast("only image saved, live photo support coming soon");
+      showToast("file saved to gallery");
     }
   }
 }
