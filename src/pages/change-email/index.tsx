@@ -1,7 +1,7 @@
 import Container from 'components/Container';
 import LogoImg from 'components/LogoImg';
 import { Formik, FormikHelpers } from 'formik';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Alert, Button, Card, Col, Form, FormControl } from 'react-bootstrap';
 import * as Yup from 'yup';
 import constants from 'utils/strings/constants';
@@ -9,6 +9,7 @@ import SubmitButton from 'components/SubmitButton';
 import router from 'next/router';
 import { changeEmail, getOTTForEmailChange } from 'services/userService';
 import styled from 'styled-components';
+import { AppContext } from 'pages/_app';
 
 interface formValues {
     email: string;
@@ -21,18 +22,18 @@ const EmailRow =styled.div`
     border: 1px solid grey;
     margin-bottom: 19px;
     align-items: center;
-    padding: 5px 0;
     text-align: left;
     color: #fff;
 `;
 
 function ChangeEmailForm() {
+    const [email, setEmail]=useState('');
     const [loading, setLoading]=useState(false);
     const [OttInputVisible, setShowOttInputVisibility]=useState(false);
     const [showMessage, setShwoMessage]=useState(false);
     const emailInputElement = useRef(null);
     const ottInputRef=useRef(null);
-
+    const appContext = useContext(AppContext);
     useEffect(() => {
         setTimeout(() => {
             emailInputElement.current?.focus();
@@ -44,6 +45,7 @@ function ChangeEmailForm() {
         try {
             setLoading(true);
             await getOTTForEmailChange(email);
+            setEmail(email);
             setShwoMessage(true);
             setShowOttInputVisibility(true);
             setTimeout(() => {
@@ -56,11 +58,12 @@ function ChangeEmailForm() {
     };
 
 
-    const requestEmailChange= async( { email, ott }: formValues,
+    const requestEmailChange= async( { ott }: formValues,
         { setFieldError }: FormikHelpers<formValues>)=>{
         try {
             setLoading(true);
             await changeEmail(email, ott);
+            appContext.setDisappearingFlashMessage({ message: constants.EMAIL_UDPATE_SUCCESSFUL, severity: 'success' });
             router.push('/gallery');
         } catch (e) {
             setFieldError('ott', `${constants.UNKNOWN_ERROR} ${e.message}`);
@@ -78,11 +81,12 @@ function ChangeEmailForm() {
                     <Alert
                         variant="success"
                         show={showMessage}
+                        style={{ paddingBottom: 0 }}
                         transition
                         dismissible
                         onClose={()=>setShwoMessage(false)}
                     >
-                        ott sent !!!
+                        {constants.EMAIL_SENT({ email })}
                     </Alert>
                     <Formik<formValues>
                         initialValues={{ email: '' }}

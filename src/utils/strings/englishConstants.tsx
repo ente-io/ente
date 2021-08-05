@@ -451,6 +451,8 @@ const englishConstants = {
     UPDATE_EMAIL: 'change email',
     SEND_OTT: 'send otp',
     EMAIl_ALREADY_OWNED: 'email already owned by a user',
+    EMAIL_UDPATE_SUCCESSFUL: 'your email has been udpated successfully',
+
 };
 
 export default englishConstants;
