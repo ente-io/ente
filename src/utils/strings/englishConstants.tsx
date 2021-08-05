@@ -450,7 +450,7 @@ const englishConstants = {
     RETRY: 'retry',
     UPDATE_EMAIL: 'change email',
     SEND_OTT: 'send otp',
-    EMAIl_ALREADY_OWNED: 'email already owned by a user',
+    EMAIl_ALREADY_OWNED: 'email already taken',
     EMAIL_UDPATE_SUCCESSFUL: 'your email has been udpated successfully',
 
 };
