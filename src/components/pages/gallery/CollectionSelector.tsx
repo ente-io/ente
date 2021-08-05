@@ -79,7 +79,10 @@ function CollectionSelector({
     );
 
     return (
-        <Modal {...props} size="xl" centered>
+        <Modal {...props}
+            size="xl"
+            centered contentClassName="plan-selector-modal-content"
+        >
             <Modal.Header closeButton onHide={() => props.onHide(true)}>
                 <Modal.Title>{attributes.title}</Modal.Title>
             </Modal.Header>
