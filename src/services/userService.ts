@@ -8,6 +8,7 @@ import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
 import { B64EncryptionResult } from './uploadService';
 import { logError } from 'utils/sentry';
+import { Subscription } from './billingService';
 
 export interface UpdatedKey {
     kekSalt: string;
@@ -53,6 +54,14 @@ export interface TwoFactorSecret {
 export interface TwoFactorRecoveryResponse {
     encryptedSecret: string
     secretDecryptionNonce: string
+}
+
+export interface UserDetails{
+    email:string;
+    usage:string;
+    fileCount:number;
+    sharedCollectionCount:number;
+    subscription:Subscription;
 }
 
 export const getOtt = (email: string) => HTTPService.get(`${ENDPOINT}/users/ott`, {
@@ -207,4 +216,17 @@ export const changeEmail=async (email:string, ott:string)=>{
     }, null, {
         'X-Auth-Token': getToken(),
     });
+};
+
+export const getUserDetails = async ():Promise<UserDetails> => {
+    const token = getToken();
+
+    const resp = await HTTPService.get(
+        `${ENDPOINT}/users/details`,
+        null,
+        {
+            'X-Auth-Token': token,
+        },
+    );
+    return resp.data['details'];
 };
