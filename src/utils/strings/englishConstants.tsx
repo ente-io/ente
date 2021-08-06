@@ -93,7 +93,6 @@ const englishConstants = {
     },
     UPLOADING_FILES: 'file upload',
     FILE_NOT_UPLOADED_LIST: 'following files were not uploaded',
-    UNSUPPORTED_FILE_LIST: 'unsupported files',
     FILE_UPLOAD_PROGRESS: (name:string, progress:number) => (
         <div id={name}>
             <strong>{name}</strong>

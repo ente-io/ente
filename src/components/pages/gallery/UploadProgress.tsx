@@ -141,9 +141,9 @@ export default function UploadProgress(props: Props) {
                 </FileList>
                 }
                 {fileUploadResults?.get(FileUploadResults.FAILED)?.length>0 &&(<>
-                    <SectionHeader onClick={()=>setFailedView(!failedFilesView)}>failed files {failedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
+                    <SectionHeader onClick={()=>setFailedView(!failedFilesView)}>{constants.FAILED_FILES} {failedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
                     <FileList collapsed={!failedFilesView}>
-                        <p> unable to upload files because of network issue, you can retry upload this files</p>
+                        <p> {constants.FAILED_INFO}</p>
                         {fileUploadResults.get(FileUploadResults.FAILED).map((fileName) => (
 
                             <li key={fileName} style={{ marginTop: '12px' }}>
@@ -154,9 +154,9 @@ export default function UploadProgress(props: Props) {
                 </>)}
 
                 {fileUploadResults?.get(FileUploadResults.SKIPPED)?.length>0 &&(<>
-                    <SectionHeader onClick={()=>setSkippedFilesView(!skippedFilesView)}> duplicate files {skippedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
+                    <SectionHeader onClick={()=>setSkippedFilesView(!skippedFilesView)}>{constants.SKIPPED_FILES} {skippedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
                     <FileList collapsed={!skippedFilesView}>
-                        <p>these files already existed in the album</p>
+                        <p>{constants.SKIPPED_INFO}</p>
                         {fileUploadResults.get(FileUploadResults.SKIPPED).map((fileName) => (
 
                             <li key={fileName} style={{ marginTop: '12px' }}>
@@ -167,7 +167,8 @@ export default function UploadProgress(props: Props) {
                 </>)}
 
                 {fileUploadResults?.get(FileUploadResults.UNSUPPORTED)?.length>0 &&(<>
-                    <SectionHeader onClick={()=>setUnsupportedFilesView(!unsupportedFilesView)} > unsupported files {unsupportedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
+                    <SectionHeader onClick={()=>setUnsupportedFilesView(!unsupportedFilesView)} >{constants.UNSUPPORTED_FILES}{unsupportedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
+                    <p>{constants.UNSUPPORTED_INFO}</p>
                     <FileList collapsed={!unsupportedFilesView}>
                         {fileUploadResults.get(FileUploadResults.UNSUPPORTED).map((fileName) => (
 
@@ -179,7 +180,8 @@ export default function UploadProgress(props: Props) {
                 </>)}
 
                 {fileUploadResults?.get(FileUploadResults.UPLOADED)?.length>0 &&(<>
-                    <SectionHeader onClick={()=>setUploadedFileView(!uploadedFileView)} > successfully uploaded files {uploadedFileView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
+                    <SectionHeader onClick={()=>setUploadedFileView(!uploadedFileView)} > {constants.UPLOADED_FILES} {uploadedFileView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
+                    <p>{constants.UPLOADED_INFO}</p>
                     <FileList collapsed={!uploadedFileView}>
                         {fileUploadResults.get(FileUploadResults.UPLOADED).map((fileName) => (
 
