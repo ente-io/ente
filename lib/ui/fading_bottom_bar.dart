@@ -55,7 +55,9 @@ class FadingBottomBarState extends State<FadingBottomBar> {
         ),
       ),
     );
-    if (widget.file.fileType == FileType.image) {
+    if (widget.file.fileType == FileType.image ||
+        widget.file.fileType == FileType.livePhoto
+    ) {
       children.add(
         Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
