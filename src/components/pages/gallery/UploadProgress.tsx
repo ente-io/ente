@@ -7,7 +7,9 @@ import {
 import { FileRejection } from 'react-dropzone';
 import { FileUploadResults, UPLOAD_STAGES } from 'services/uploadService';
 import styled from 'styled-components';
+import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
 import constants from 'utils/strings/constants';
+import englishConstants from 'utils/strings/englishConstants';
 
 interface Props {
     fileCounter;
@@ -46,14 +48,16 @@ export default function UploadProgress(props: Props) {
     const [failedFilesView, setFailedView]=useState(false);
     const [skippedFilesView, setSkippedFilesView]=useState(false);
     const [unsupportedFilesView, setUnsupportedFilesView]=useState(false);
-    const [uploadedFileView, setUploadedFileView]=useState(false);
+    const [uploadedFilesView, setUploadedFilesView]=useState(false);
+    const [blockedFilesView, setBlockedFilesView]=useState(false);
 
     useEffect(()=>{
         if (props.show) {
             setFailedView(false);
             setSkippedFilesView(false);
             setUnsupportedFilesView(false);
-            setUploadedFileView(false);
+            setUploadedFilesView(false);
+            setBlockedFilesView(false);
         }
     }, [props.show]);
 
@@ -77,6 +81,7 @@ export default function UploadProgress(props: Props) {
             const fileList= fileUploadResults.get(progress);
             fileUploadResults.set(progress, [...fileList, fileName]);
         }
+        // fileUploadResults.set(FileUploadResults.BLOCKED, ['random']);
     }
 
     return (
@@ -140,6 +145,18 @@ export default function UploadProgress(props: Props) {
                     ))}
                 </FileList>
                 }
+                {fileUploadResults?.get(FileUploadResults.BLOCKED)?.length>0 &&(<>
+                    <SectionHeader onClick={()=>setBlockedFilesView(!blockedFilesView)} > blocked files {blockedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
+                    <FileList collapsed={!blockedFilesView}>
+                        {englishConstants.ETAGS_BLOCKED(DESKTOP_APP_DOWNLOAD_URL)}
+                        {fileUploadResults.get(FileUploadResults.BLOCKED).map((fileName) => (
+
+                            <li key={fileName} style={{ marginTop: '12px' }}>
+                                {fileName}
+                            </li>
+                        ))}
+                    </FileList>
+                </>)}
                 {fileUploadResults?.get(FileUploadResults.FAILED)?.length>0 &&(<>
                     <SectionHeader onClick={()=>setFailedView(!failedFilesView)}>{constants.FAILED_FILES} {failedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
                     <FileList collapsed={!failedFilesView}>
@@ -180,9 +197,9 @@ export default function UploadProgress(props: Props) {
                 </>)}
 
                 {fileUploadResults?.get(FileUploadResults.UPLOADED)?.length>0 &&(<>
-                    <SectionHeader onClick={()=>setUploadedFileView(!uploadedFileView)} > {constants.UPLOADED_FILES} {uploadedFileView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
+                    <SectionHeader onClick={()=>setUploadedFilesView(!uploadedFilesView)} > {constants.UPLOADED_FILES} {uploadedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
                     <p>{constants.UPLOADED_INFO}</p>
-                    <FileList collapsed={!uploadedFileView}>
+                    <FileList collapsed={!uploadedFilesView}>
                         {fileUploadResults.get(FileUploadResults.UPLOADED).map((fileName) => (
 
                             <li key={fileName} style={{ marginTop: '12px' }}>

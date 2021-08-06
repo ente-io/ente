@@ -32,12 +32,6 @@ export function parseError(error) {
                 parsedMessage = constants.SESSION_EXPIRED_MESSAGE;
                 break;
         }
-    } else if (error?.message) {
-        const errorMessage = error.message.toString();
-        switch (errorMessage) {
-            case CustomError.ETAG_MISSING:
-                parsedMessage=CustomError.ETAG_MISSING;
-        }
     }
     if (parsedMessage) {
         return { parsedError: new Error(parsedMessage), parsed: true };

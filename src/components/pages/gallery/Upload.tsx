@@ -13,8 +13,6 @@ import { SetFiles, SetLoading } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { FileRejection } from 'react-dropzone';
-import { CustomError } from 'utils/common/errorUtil';
-import { DESKTOP_APP_DOWNLOAD_URL, downloadApp } from 'utils/common';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
@@ -219,19 +217,7 @@ export default function Upload(props: Props) {
                 props.setFiles,
             );
         } catch (err) {
-            if (err?.message===CustomError.ETAG_MISSING) {
-                props.setDialogMessage({ title: constants.UPLOAD_FAILED,
-                    staticBackdrop: true,
-                    close: { variant: 'danger', text: constants.CLOSE },
-                    content: constants.ETAGS_BLOCKED(DESKTOP_APP_DOWNLOAD_URL),
-                    proceed: {
-                        text: constants.DOWNLOAD,
-                        action: downloadApp,
-                        variant: 'success',
-                    } });
-            } else {
-                props.setBannerMessage(err.message);
-            }
+            props.setBannerMessage(err.message);
             setProgressView(false);
             throw err;
         } finally {

@@ -50,6 +50,7 @@ export enum FileUploadResults {
     FAILED = -1,
     SKIPPED = -2,
     UNSUPPORTED = -3,
+    BLOCKED=-4,
     UPLOADED = 100,
 }
 
@@ -293,10 +294,13 @@ class UploadService {
             }
         } catch (e) {
             logError(e, 'file upload failed');
-            this.failedFiles.push(fileWithCollection);
-            // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
-            this.fileProgress.set(rawFile.name, FileUploadResults.FAILED);
             handleError(e);
+            this.failedFiles.push(fileWithCollection);
+            if (e.message ===CustomError.ETAG_MISSING) {
+                this.fileProgress.set(rawFile.name, FileUploadResults.BLOCKED);
+            } else {
+                this.fileProgress.set(rawFile.name, FileUploadResults.FAILED);
+            }
         } finally {
             file=null;
             encryptedFile=null;

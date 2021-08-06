@@ -457,7 +457,7 @@ const englishConstants = {
         <p> please disable any addons that might be preventing ente from using <code>eTags</code> to upload large files, or use our
             {' '}
             <a
-                href={url} style={{ color: '#2dc262' }}
+                href={url} style={{ color: '#2dc262', textDecoration: 'underline' }}
                 target="_blank" rel="noreferrer">
                     desktop app
             </a>
