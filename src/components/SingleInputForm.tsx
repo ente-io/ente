@@ -18,8 +18,11 @@ interface Props {
     buttonText: string;
 }
 
-const Group = styled.div`
-    display: flex;
+const PositioningDiv = styled.div`
+    float:right;
+    position:absolute;
+    top:0;
+    right:0;
 `;
 
 const Button = styled.button`
@@ -58,26 +61,25 @@ export default function SingleInputForm(props: Props) {
                 values, touched, errors, handleChange, handleSubmit,
             }) => (
                 <Form noValidate onSubmit={handleSubmit}>
-                    <Form.Group>
-                        <Group>
-                            <Form.Control
-                                type={showPassword ? 'text' : props.fieldType}
-                                placeholder={props.placeholder}
-                                value={values.passphrase}
-                                onChange={handleChange('passphrase')}
-                                isInvalid={Boolean(
-                                    touched.passphrase && errors.passphrase,
-                                )}
-                                disabled={loading}
-                                autoFocus
-                            />
-                            {
-                                props.fieldType === 'password' &&
+                    <Form.Group style={{ position: 'relative' }}>
+                        <Form.Control
+                            type={showPassword ? 'text' : props.fieldType}
+                            placeholder={props.placeholder}
+                            value={values.passphrase}
+                            onChange={handleChange('passphrase')}
+                            isInvalid={Boolean(
+                                touched.passphrase && errors.passphrase,
+                            )}
+                            disabled={loading}
+                            autoFocus
+                        />
+                        <PositioningDiv>
+                            {props.fieldType === 'password' &&
                                 <Button type='button' onClick={() => setShowPassword(!showPassword)}>
                                     {showPassword ? <VisibilityOff /> : <Visibility />}
                                 </Button>
                             }
-                        </Group>
+                        </PositioningDiv>
                         <Form.Control.Feedback type="invalid">
                             {errors.passphrase}
                         </Form.Control.Feedback>
