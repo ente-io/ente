@@ -1,6 +1,6 @@
 import constants from 'utils/strings/constants';
 
-const DESKTOP_APP_DOWNLOAD_URL = 'https://github.com/ente-io/bhari-frame/releases/';
+export const DESKTOP_APP_DOWNLOAD_URL = 'https://github.com/ente-io/bhari-frame/releases/latest';
 
 const retrySleepTime = [2000, 5000, 10000];
 

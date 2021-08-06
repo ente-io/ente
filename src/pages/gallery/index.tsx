@@ -39,7 +39,6 @@ import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import { getSelectedFileIds, sortFilesIntoCollections } from 'utils/file';
 import { addFilesToCollection } from 'utils/collection';
-import { errorCodes } from 'utils/common/errorUtil';
 import SearchBar, { DateValue } from 'components/SearchBar';
 import { Bbox } from 'services/searchService';
 import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
@@ -55,6 +54,7 @@ import PlanSelector from 'components/pages/gallery/PlanSelector';
 import Upload from 'components/pages/gallery/Upload';
 import Collections from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
+import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
 
 export enum FILE_TYPE {
     IMAGE,
@@ -200,7 +200,7 @@ export default function Gallery() {
         try {
             checkConnectivity();
             if (!(await isTokenValid())) {
-                throw new Error(errorCodes.ERR_SESSION_EXPIRED);
+                throw new Error(ServerErrorCodes.SESSION_EXPIRED);
             }
             !silent && loadingBar.current?.continuousStart();
             await billingService.syncSubscription();
@@ -209,7 +209,7 @@ export default function Gallery() {
             await initDerivativeState(collections, files);
         } catch (e) {
             switch (e.message) {
-                case errorCodes.ERR_SESSION_EXPIRED:
+                case ServerErrorCodes.SESSION_EXPIRED:
                     setBannerMessage(constants.SESSION_EXPIRED_MESSAGE);
                     setDialogMessage({
                         title: constants.SESSION_EXPIRED,
@@ -219,11 +219,9 @@ export default function Gallery() {
                             text: constants.LOGIN,
                             action: logoutUser,
                             variant: 'success',
-                        },
-                        nonClosable: true,
-                    });
+                        } });
                     break;
-                case errorCodes.ERR_KEY_MISSING:
+                case CustomError.KEY_MISSING:
                     clearKeys();
                     router.push('/credentials');
                     break;
@@ -308,7 +306,7 @@ export default function Gallery() {
         } catch (e) {
             loadingBar.current.complete();
             switch (e.status?.toString()) {
-                case errorCodes.ERR_FORBIDDEN:
+                case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
                         title: constants.ERROR,
                         staticBackdrop: true,

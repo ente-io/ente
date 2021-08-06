@@ -452,6 +452,19 @@ const englishConstants = {
     SEND_OTT: 'send otp',
     EMAIl_ALREADY_OWNED: 'email already taken',
     EMAIL_UDPATE_SUCCESSFUL: 'your email has been udpated successfully',
+    UPLOAD_FAILED: 'upload failed',
+    ETAGS_BLOCKED: (url:string)=>(<>
+        <p> we were unable to upload the following files because of your browser configuration.</p>
+        <p> please disable any addons that might be preventing ente from using <code>eTags</code> to upload large files, or use our
+            {' '}
+            <a
+                href={url} style={{ color: '#2dc262' }}
+                target="_blank" rel="noreferrer">
+                    desktop app
+            </a>
+            {' '}
+                    for a more reliable import experience.</p>
+    </>),
 
 };
 

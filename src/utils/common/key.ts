@@ -2,7 +2,7 @@ import { B64EncryptionResult } from 'services/uploadService';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { errorCodes } from './errorUtil';
+import { CustomError } from './errorUtil';
 
 export const getActualKey = async () => {
     try {
@@ -18,7 +18,7 @@ export const getActualKey = async () => {
         );
         return key;
     } catch (e) {
-        throw new Error(errorCodes.ERR_KEY_MISSING);
+        throw new Error(CustomError.KEY_MISSING);
     }
 };
 
