@@ -19,7 +19,7 @@ import { VariableSizeList as List } from 'react-window';
 import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
 import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 import { SetDialogMessage } from './MessageDialog';
-import { VIDEO_PLAYBACK_FAILED } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/common/errorUtil';
 import {
     GAP_BTW_TILES, DATE_CONTAINER_HEIGHT, IMAGE_CONTAINER_MAX_HEIGHT,
     IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS, SPACE_BTW_DATES,
@@ -306,7 +306,7 @@ const PhotoFrame = ({
                         const t = setTimeout(
                             () => {
                                 reject(
-                                    Error(`${VIDEO_PLAYBACK_FAILED} err: wait time exceeded`),
+                                    Error(`${CustomError.VIDEO_PLAYBACK_FAILED} err: wait time exceeded`),
                                 );
                             },
                             WAIT_FOR_VIDEO_PLAYBACK,

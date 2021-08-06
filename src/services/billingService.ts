@@ -4,7 +4,7 @@ import { checkConnectivity, runningInBrowser } from 'utils/common/';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
 import { convertToHumanReadable } from 'utils/billingUtil';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
-import { SUBSCRIPTION_VERIFICATION_ERROR } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/common/errorUtil';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 
@@ -142,7 +142,7 @@ class billingService {
         try {
             await this.verifySubscription();
         } catch (e) {
-            throw new Error(SUBSCRIPTION_VERIFICATION_ERROR);
+            throw new Error(CustomError.SUBSCRIPTION_VERIFICATION_ERROR);
         }
     }
 

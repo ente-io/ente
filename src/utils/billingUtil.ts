@@ -9,7 +9,7 @@ import { NextRouter } from 'next/router';
 import { SetDialogMessage } from 'components/MessageDialog';
 import { SetLoading } from 'pages/gallery';
 import { getData, LS_KEYS } from './storage/localStorage';
-import { SUBSCRIPTION_VERIFICATION_ERROR } from './common/errorUtil';
+import { CustomError } from './common/errorUtil';
 
 const STRIPE = 'stripe';
 
@@ -123,7 +123,7 @@ export async function updateSubscription(
                     close: { text: constants.CANCEL },
                 });
                 break;
-            case SUBSCRIPTION_VERIFICATION_ERROR:
+            case CustomError.SUBSCRIPTION_VERIFICATION_ERROR:
                 setDialogMessage({
                     title: constants.ERROR,
                     content: constants.SUBSCRIPTION_VERIFICATION_FAILED,
@@ -239,7 +239,7 @@ export async function checkSubscriptionPurchase(
             } catch (e) {
                 setDialogMessage({
                     title: constants.ERROR,
-                    content: SUBSCRIPTION_VERIFICATION_ERROR,
+                    content: CustomError.SUBSCRIPTION_VERIFICATION_ERROR,
                     close: {},
                 });
             }
