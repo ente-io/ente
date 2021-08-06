@@ -35,6 +35,9 @@ class LocalSyncService {
   Future<void> init(bool isBackground) async {
     _isBackground = isBackground;
     _prefs = await SharedPreferences.getInstance();
+    if (_isBackground) {
+      await PhotoManager.setIgnorePermissionCheck(true);
+    }
     await _computer.turnOn(workersCount: 1);
   }
 
@@ -57,9 +60,6 @@ class LocalSyncService {
     final editedFileIDs = getEditedFileIDs().toSet();
     final downloadedFileIDs = getDownloadedFileIDs().toSet();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
-    if (_isBackground) {
-      await PhotoManager.setIgnorePermissionCheck(true);
-    }
     final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
     final startTime = DateTime.now().microsecondsSinceEpoch;
     if (lastDBUpdationTime != 0) {

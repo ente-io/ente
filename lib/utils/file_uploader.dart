@@ -25,8 +25,8 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
-import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_download_util.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FileUploader {
@@ -274,14 +274,15 @@ class FileUploader {
           file.toString() +
           ", isForced: " +
           forcedUpload.toString());
-      mediaUploadData =
-          await getUploadDataFromEnteFile(file).catchError((e) async {
+      try {
+        mediaUploadData = await getUploadDataFromEnteFile(file);
+      } catch (e) {
         if (e is InvalidFileError) {
           _onInvalidFileError(file);
         } else {
-          throw e;
+          rethrow;
         }
-      });
+      }
       Uint8List key;
       var isAlreadyUploadedFile = file.uploadedFileID != null;
       if (isAlreadyUploadedFile) {
