@@ -63,7 +63,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
       throw e;
     }
   });
-  if (!sourceFile.existsSync()) {
+  if (sourceFile == null || !sourceFile.existsSync()) {
     throw InvalidFileError();
   }
 
