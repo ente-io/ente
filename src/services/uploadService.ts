@@ -8,7 +8,7 @@ import { retryAsyncFunction, sleep } from 'utils/common';
 import {
     handleError,
     parseError,
-    THUMBNAIL_GENERATION_FAILED,
+    CustomError,
 } from 'utils/common/errorUtil';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
 import * as convert from 'xml-js';
@@ -691,7 +691,7 @@ class UploadService {
                             } catch (e) {
                                 reject(e);
                                 logError(e);
-                                reject(Error(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`));
+                                reject(Error(`${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`));
                             }
                         };
                         timeout = setTimeout(
@@ -729,7 +729,7 @@ class UploadService {
                             } catch (e) {
                                 reject(e);
                                 logError(e);
-                                reject(Error(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`));
+                                reject(Error(`${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`));
                             }
                         });
                         video.preload = 'metadata';
@@ -954,7 +954,7 @@ class UploadService {
                         this.trackUploadProgress(filename, percentPerPart, index),
                     );
                     if (!resp?.headers?.etag) {
-                        const err=Error('no header/etag present in response body');
+                        const err=Error(CustomError.ETAG_MISSING);
                         logError(err);
                         throw err;
                     }
