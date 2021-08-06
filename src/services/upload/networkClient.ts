@@ -99,7 +99,6 @@ class NetworkClient {
         progressTracker:()=>any,
     ): Promise<string> {
         try {
-            console.log(fileUploadURL, file);
             await retryAsyncFunction(()=>
                 HTTPService.put(
                     fileUploadURL.url,
