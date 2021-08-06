@@ -46,10 +46,11 @@ const FILE_UPLOAD_COMPLETED = 100;
 const EDITED_FILE_SUFFIX = '-edited';
 const TwoSecondInMillSeconds = 2000;
 
-export enum FileUploadErrorCode {
+export enum FileUploadResults {
     FAILED = -1,
     SKIPPED = -2,
     UNSUPPORTED = -3,
+    UPLOADED = 100,
 }
 
 interface Location {
@@ -261,11 +262,9 @@ class UploadService {
 
             if (this.fileAlreadyInCollection(file, collection)) {
                 // set progress to -2 indicating that file upload was skipped
-                this.fileProgress.set(rawFile.name, FileUploadErrorCode.SKIPPED);
+                this.fileProgress.set(rawFile.name, FileUploadResults.SKIPPED);
                 this.updateProgressBarUI();
                 await sleep(TwoSecondInMillSeconds);
-                // remove completed files for file progress list
-                this.fileProgress.delete(rawFile.name);
             } else {
                 encryptedFile = await this.encryptFile(worker, file, collection.key);
 
@@ -289,14 +288,14 @@ class UploadService {
                 this.setFiles(this.existingFiles);
 
                 uploadFile = null;
-
+                this.fileProgress.set(rawFile.name, FileUploadResults.UPLOADED);
                 this.filesCompleted++;
             }
         } catch (e) {
             logError(e, 'file upload failed');
             this.failedFiles.push(fileWithCollection);
             // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
-            this.fileProgress.set(rawFile.name, FileUploadErrorCode.FAILED);
+            this.fileProgress.set(rawFile.name, FileUploadResults.FAILED);
             handleError(e);
         } finally {
             file=null;

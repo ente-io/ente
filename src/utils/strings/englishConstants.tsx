@@ -92,7 +92,7 @@ const englishConstants = {
         3: 'backup complete!',
     },
     UPLOADING_FILES: 'file upload',
-    FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
+    FILE_NOT_UPLOADED_LIST: 'following files were not uploaded',
     UNSUPPORTED_FILE_LIST: 'unsupported files',
     FILE_UPLOAD_PROGRESS: (name:string, progress:number) => (
         <div id={name}>
@@ -108,24 +108,6 @@ const englishConstants = {
                         return ',unsupported file format, skipping....';
                     default:
                         return `${progress}%`;
-                }
-            })()}
-        </div>
-    ),
-    FILE_UPLOAD_RESULT: (name:string, progress:number) => (
-        <div id={name}>
-            <strong>{name}</strong>
-            {' - '}
-            {(() => {
-                switch (progress) {
-                    case -1:
-                        return 'failed';
-                    case -2:
-                        return 'skipped duplicate';
-                    case -3:
-                        return 'skipped unsupported format';
-                    default:
-                        return `uploaded`;
                 }
             })()}
         </div>
@@ -485,6 +467,14 @@ const englishConstants = {
     </>),
 
     RETRY_FAILED: 'retry failed files',
+    FAILED_FILES: 'failed files ',
+    SKIPPED_FILES: 'duplicate files',
+    UNSUPPORTED_FILES: 'unsupported files',
+    UPLOADED_FILES: 'successfully uploaded files',
+    FAILED_INFO: ' unable to upload these files because of network issue, you can retry upload these files',
+    SKIPPED_INFO: 'these files already existed in the album',
+    UNSUPPORTED_INFO: 'these files are currently not supported by ente',
+    UPLOADED_INFO: 'successfully backed-up memories',
 };
 
 export default englishConstants;

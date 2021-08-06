@@ -81,6 +81,7 @@ export default function Upload(props: Props) {
         setUploadStage(UPLOAD_STAGES.START);
         setFileCounter({ current: 0, total: 0 });
         setFileProgress(new Map<string, number>());
+        setUploadResult(new Map<string, number>());
         setPercentComplete(0);
         setProgressView(true);
     };
