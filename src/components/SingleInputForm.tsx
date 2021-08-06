@@ -25,7 +25,7 @@ const Group = styled.div`
 const Button = styled.button`
     background: transparent;
     border: none;
-    width: 34px;
+    width: 46px;
     height: 34px;
     position: absolute;
     top: 1px;
