@@ -78,8 +78,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
       throw InvalidFileUploadState(errMsg);
     }
     final tempPath = Configuration.instance.getTempDirectory();
-    // .elv -> Ente live photo
-    final livePhotoPath = tempPath + file.generatedID.toString() + ".elv";
+    // .elp -> ente live photo
+    final livePhotoPath = tempPath + file.generatedID.toString() + ".elp";
     _logger.fine("Uploading zipped live photo from " + livePhotoPath);
     var encoder = ZipFileEncoder();
     encoder.create(livePhotoPath);
