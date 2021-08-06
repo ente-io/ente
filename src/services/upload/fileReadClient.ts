@@ -234,20 +234,7 @@ async function generateThumbnail(
 }
 
 function getFileStream(reader: FileReader, file: globalThis.File) {
-    const self = this;
-    const fileChunkReader = (async function* fileChunkReaderMaker(
-        fileSize,
-        self,
-    ) {
-        let offset = 0;
-        while (offset < fileSize) {
-            const blob = file.slice(offset, ENCRYPTION_CHUNK_SIZE + offset);
-            const fileChunk = await self.getUint8ArrayView(reader, blob);
-            yield fileChunk;
-            offset += ENCRYPTION_CHUNK_SIZE;
-        }
-        return null;
-    })(file.size, self);
+    const fileChunkReader = fileChunkReaderMaker(reader, file);
     return {
         stream: new ReadableStream<Uint8Array>({
             async pull(controller: ReadableStreamDefaultController) {
@@ -262,6 +249,18 @@ function getFileStream(reader: FileReader, file: globalThis.File) {
         chunkCount: Math.ceil(file.size / ENCRYPTION_CHUNK_SIZE),
     };
 }
+
+async function* fileChunkReaderMaker(reader:FileReader, file:globalThis.File) {
+    let offset = 0;
+    while (offset < file.size) {
+        const blob = file.slice(offset, ENCRYPTION_CHUNK_SIZE + offset);
+        const fileChunk = await getUint8ArrayView(reader, blob);
+        yield fileChunk;
+        offset += ENCRYPTION_CHUNK_SIZE;
+    }
+    return null;
+}
+
 async function getUint8ArrayView(
     reader: FileReader,
     file: Blob,
