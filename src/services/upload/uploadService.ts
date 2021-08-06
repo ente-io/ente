@@ -1,17 +1,12 @@
-import EXIF from 'exif-js';
 import { File, fileAttribute } from '../fileService';
 import { Collection } from '../collectionService';
 import { FILE_TYPE, SetFiles } from 'pages/gallery';
 import {
     handleError,
     parseError,
-    THUMBNAIL_GENERATION_FAILED,
 } from 'utils/common/errorUtil';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
-import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import {
-    fileIsHEIC,
-    convertHEIC2JPEG,
     sortFilesIntoCollections,
     sortFiles,
     decryptFile,
@@ -21,23 +16,12 @@ import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import { sleep } from 'utils/common';
 import NetworkClient, { UploadURL } from './networkClient';
+import readFile, { ParsedMetaDataJSON, parseMetadataJSON } from './fileReadClient';
 
 
-const THUMBNAIL_HEIGHT = 720;
-const MAX_ATTEMPTS = 3;
-const MIN_THUMBNAIL_SIZE = 50000;
 const MAX_CONCURRENT_UPLOADS = 4;
-const TYPE_IMAGE = 'image';
-const TYPE_VIDEO = 'video';
-const TYPE_HEIC = 'HEIC';
 const TYPE_JSON = 'json';
-const SOUTH_DIRECTION = 'S';
-const WEST_DIRECTION = 'W';
-const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
-const NULL_LOCATION: Location = { latitude: null, longitude: null };
-const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
 const FILE_UPLOAD_COMPLETED = 100;
-const EDITED_FILE_SUFFIX = '-edited';
 const TwoSecondInMillSeconds = 2000;
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 export const CHUNKS_COMBINED_FOR_UPLOAD = 5;
@@ -48,14 +32,6 @@ export enum FileUploadErrorCode {
     UNSUPPORTED = -3,
 }
 
-interface Location {
-    latitude: number;
-    longitude: number;
-}
-interface ParsedEXIFData {
-    location: Location;
-    creationTime: number;
-}
 export interface FileWithCollection {
     file: globalThis.File;
     collection: Collection;
@@ -113,6 +89,8 @@ interface ProcessedFile {
 }
 interface BackupedFile extends Omit<ProcessedFile, 'filename'> { }
 
+export type MetadataMap = Map<string, ParsedMetaDataJSON>
+
 export interface UploadFile extends BackupedFile {
     collectionID: number;
     encryptedKey: string;
@@ -129,12 +107,11 @@ export enum UPLOAD_STAGES {
 class UploadService {
     private cryptoWorkers = new Array<ComlinkWorker>(MAX_CONCURRENT_UPLOADS);
     private uploadURLs: UploadURL[] = [];
-    private uploadURLFetchInProgress: Promise<any> = null;
     private perFileProgress: number;
     private filesCompleted: number;
     private totalFileCount: number;
     private fileProgress: Map<string, number>;
-    private metadataMap: Map<string, Object>;
+    private metadataMap: Map<string, ParsedMetaDataJSON>;
     private filesToBeUploaded: FileWithCollection[];
     private progressBarProps;
     private failedFiles: FileWithCollection[];
@@ -153,7 +130,7 @@ class UploadService {
             this.filesCompleted = 0;
             this.fileProgress = new Map<string, number>();
             this.failedFiles = [];
-            this.metadataMap = new Map<string, object>();
+            this.metadataMap = new Map<string, ParsedMetaDataJSON>();
             this.progressBarProps = progressBarProps;
             this.existingFiles=existingFiles;
             this.existingFilesCollectionWise = sortFilesIntoCollections(existingFiles);
@@ -183,7 +160,8 @@ class UploadService {
             this.filesCompleted = 0;
 
             for (const rawFile of metadataFiles) {
-                await this.seedMetadataMap(rawFile);
+                const parsedMetaDataJSON=await parseMetadataJSON(rawFile);
+                this.metadataMap.set(parsedMetaDataJSON.title, parsedMetaDataJSON);
                 this.filesCompleted++;
                 this.updateProgressBarUI();
             }
@@ -248,7 +226,7 @@ class UploadService {
         let encryptedFile: EncryptedFile=null;
         try {
             // read the file into memory
-            file = await this.readFile(reader, rawFile);
+            file = await readFile(reader, rawFile, this.metadataMap);
 
             if (this.fileAlreadyInCollection(file, collection)) {
                 // set progress to -2 indicating that file upload was skipped
@@ -359,74 +337,6 @@ class UploadService {
         }
     }
 
-    private async readFile(reader: FileReader, receivedFile: globalThis.File) {
-        try {
-            const { thumbnail, hasStaticThumbnail } = await this.generateThumbnail(
-                reader,
-                receivedFile,
-            );
-
-            let fileType: FILE_TYPE;
-            switch (receivedFile.type.split('/')[0]) {
-                case TYPE_IMAGE:
-                    fileType = FILE_TYPE.IMAGE;
-                    break;
-                case TYPE_VIDEO:
-                    fileType = FILE_TYPE.VIDEO;
-                    break;
-                default:
-                    fileType = FILE_TYPE.OTHERS;
-            }
-            if (
-                fileType === FILE_TYPE.OTHERS &&
-                receivedFile.type.length === 0 &&
-                receivedFile.name.endsWith(TYPE_HEIC)
-            ) {
-                fileType = FILE_TYPE.IMAGE;
-            }
-
-            const { location, creationTime } = await this.getExifData(
-                reader,
-                receivedFile,
-                fileType,
-            );
-            let receivedFileOriginalName = receivedFile.name;
-            if (receivedFile.name.endsWith(EDITED_FILE_SUFFIX)) {
-                receivedFileOriginalName = receivedFile.name.slice(
-                    0,
-                    -1 * EDITED_FILE_SUFFIX.length,
-                );
-            }
-            const metadata = Object.assign(
-                {
-                    title: receivedFile.name,
-                    creationTime:
-                        creationTime || receivedFile.lastModified * 1000,
-                    modificationTime: receivedFile.lastModified * 1000,
-                    latitude: location?.latitude,
-                    longitude: location?.latitude,
-                    fileType,
-                },
-                this.metadataMap.get(receivedFileOriginalName),
-            );
-            if (hasStaticThumbnail) {
-                metadata['hasStaticThumbnail'] = hasStaticThumbnail;
-            }
-            const filedata =
-                receivedFile.size > MIN_STREAM_FILE_SIZE ?
-                    this.getFileStream(reader, receivedFile) :
-                    await this.getUint8ArrayView(reader, receivedFile);
-
-            return {
-                filedata,
-                thumbnail,
-                metadata,
-            };
-        } catch (e) {
-            logError(e, 'error reading files');
-            throw e;
-        }
-    }
 
     private async encryptFile(
         worker: any,
@@ -563,252 +473,6 @@ class UploadService {
     }
 
 
-    private async seedMetadataMap(receivedFile: globalThis.File) {
-        try {
-            const metadataJSON: object = await new Promise(
-                (resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onabort = () => reject(Error('file reading was aborted'));
-                    reader.onerror = () => reject(Error('file reading has failed'));
-                    reader.onload = () => {
-                        const result =
-                            typeof reader.result !== 'string' ?
-                                new TextDecoder().decode(reader.result) :
-                                reader.result;
-                        resolve(JSON.parse(result));
-                    };
-                    reader.readAsText(receivedFile);
-                },
-            );
-
-            const metaDataObject = {};
-            if (!metadataJSON) {
-                return;
-            }
-            if (
-                metadataJSON['photoTakenTime'] &&
-                metadataJSON['photoTakenTime']['timestamp']
-            ) {
-                metaDataObject['creationTime'] =
-                    metadataJSON['photoTakenTime']['timestamp'] * 1000000;
-            }
-            if (
-                metadataJSON['modificationTime'] &&
-                metadataJSON['modificationTime']['timestamp']
-            ) {
-                metaDataObject['modificationTime'] =
-                    metadataJSON['modificationTime']['timestamp'] * 1000000;
-            }
-            let locationData = null;
-            if (
-                metadataJSON['geoData'] &&
-                (metadataJSON['geoData']['latitude'] !== 0.0 ||
-                    metadataJSON['geoData']['longitude'] !== 0.0)
-            ) {
-                locationData = metadataJSON['geoData'];
-            } else if (
-                metadataJSON['geoDataExif'] &&
-                (metadataJSON['geoDataExif']['latitude'] !== 0.0 ||
-                    metadataJSON['geoDataExif']['longitude'] !== 0.0)
-            ) {
-                locationData = metadataJSON['geoDataExif'];
-            }
-            if (locationData !== null) {
-                metaDataObject['latitude'] = locationData['latitude'];
-                metaDataObject['longitude'] = locationData['longitude'];
-            }
-            this.metadataMap.set(metadataJSON['title'], metaDataObject);
-        } catch (e) {
-            logError(e);
-            // ignore
-        }
-    }
-    private async generateThumbnail(
-        reader: FileReader,
-        file: globalThis.File,
-    ): Promise<{ thumbnail: Uint8Array, hasStaticThumbnail: boolean }> {
-        try {
-            let hasStaticThumbnail = false;
-            const canvas = document.createElement('canvas');
-            // eslint-disable-next-line camelcase
-            const canvas_CTX = canvas.getContext('2d');
-            let imageURL = null;
-            let timeout = null;
-            try {
-                if (file.type.match(TYPE_IMAGE) || fileIsHEIC(file.name)) {
-                    if (fileIsHEIC(file.name)) {
-                        file = new globalThis.File(
-                            [await convertHEIC2JPEG(file)],
-                            null,
-                            null,
-                        );
-                    }
-                    let image = new Image();
-                    imageURL = URL.createObjectURL(file);
-                    image.setAttribute('src', imageURL);
-                    await new Promise((resolve, reject) => {
-                        image.onload = () => {
-                            try {
-                                const thumbnailWidth =
-                                    (image.width * THUMBNAIL_HEIGHT) / image.height;
-                                canvas.width = thumbnailWidth;
-                                canvas.height = THUMBNAIL_HEIGHT;
-                                canvas_CTX.drawImage(
-                                    image,
-                                    0,
-                                    0,
-                                    thumbnailWidth,
-                                    THUMBNAIL_HEIGHT,
-                                );
-                                image = null;
-                                clearTimeout(timeout);
-                                resolve(null);
-                            } catch (e) {
-                                reject(e);
-                                logError(e);
-                                reject(Error(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`));
-                            }
-                        };
-                        timeout = setTimeout(
-                            () =>
-                                reject(
-                                    Error(`wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`),
-                                ),
-                            WAIT_TIME_THUMBNAIL_GENERATION,
-                        );
-                    });
-                } else {
-                    await new Promise((resolve, reject) => {
-                        let video = document.createElement('video');
-                        imageURL = URL.createObjectURL(file);
-                        video.addEventListener('timeupdate', function () {
-                            try {
-                                if (!video) {
-                                    return;
-                                }
-                                const thumbnailWidth =
-                                    (video.videoWidth * THUMBNAIL_HEIGHT) /
-                                    video.videoHeight;
-                                canvas.width = thumbnailWidth;
-                                canvas.height = THUMBNAIL_HEIGHT;
-                                canvas_CTX.drawImage(
-                                    video,
-                                    0,
-                                    0,
-                                    thumbnailWidth,
-                                    THUMBNAIL_HEIGHT,
-                                );
-                                video = null;
-                                clearTimeout(timeout);
-                                resolve(null);
-                            } catch (e) {
-                                reject(e);
-                                logError(e);
-                                reject(Error(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`));
-                            }
-                        });
-                        video.preload = 'metadata';
-                        video.src = imageURL;
-                        video.currentTime = 3;
-                        setTimeout(
-                            () =>
-                                reject(Error(`wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`)),
-                            WAIT_TIME_THUMBNAIL_GENERATION,
-                        );
-                    });
-                }
-                URL.revokeObjectURL(imageURL);
-            } catch (e) {
-                logError(e);
-                // ignore and set staticThumbnail
-                hasStaticThumbnail = true;
-            }
-            let thumbnailBlob = null;
-            let attempts = 0;
-            let quality = 1;
-
-            do {
-                attempts++;
-                quality /= 2;
-                thumbnailBlob = await new Promise((resolve) => {
-                    canvas.toBlob(
-                        function (blob) {
-                            resolve(blob);
-                        },
-                        'image/jpeg',
-                        quality,
-                    );
-                });
-                thumbnailBlob = thumbnailBlob ?? new Blob([]);
-            } while (
-                thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
-                attempts <= MAX_ATTEMPTS
-            );
-            const thumbnail = await this.getUint8ArrayView(
-                reader,
-                thumbnailBlob,
-            );
-            return { thumbnail, hasStaticThumbnail };
-        } catch (e) {
-            logError(e, 'Error generating thumbnail');
-            throw e;
-        }
-    }
-
-    private getFileStream(reader: FileReader, file: globalThis.File) {
-        const self = this;
-        const fileChunkReader = (async function* fileChunkReaderMaker(
-            fileSize,
-            self,
-        ) {
-            let offset = 0;
-            while (offset < fileSize) {
-                const blob = file.slice(offset, ENCRYPTION_CHUNK_SIZE + offset);
-                const fileChunk = await self.getUint8ArrayView(reader, blob);
-                yield fileChunk;
-                offset += ENCRYPTION_CHUNK_SIZE;
-            }
-            return null;
-        })(file.size, self);
-        return {
-            stream: new ReadableStream<Uint8Array>({
-                async pull(controller: ReadableStreamDefaultController) {
-                    const chunk = await fileChunkReader.next();
-                    if (chunk.done) {
-                        controller.close();
-                    } else {
-                        controller.enqueue(chunk.value);
-                    }
-                },
-            }),
-            chunkCount: Math.ceil(file.size / ENCRYPTION_CHUNK_SIZE),
-        };
-    }
-
-    private async getUint8ArrayView(
-        reader: FileReader,
-        file: Blob,
-    ): Promise<Uint8Array> {
-        try {
-            return await new Promise((resolve, reject) => {
-                reader.onabort = () => reject(Error('file reading was aborted'));
-                reader.onerror = () => reject(Error('file reading has failed'));
-                reader.onload = () => {
-                    // Do whatever you want with the file contents
-                    const result =
-                        typeof reader.result === 'string' ?
-                            new TextEncoder().encode(reader.result) :
-                            new Uint8Array(reader.result);
-                    resolve(result);
-                };
-                reader.readAsArrayBuffer(file);
-            });
-        } catch (e) {
-            logError(e, 'error reading file to byte-array');
-            throw e;
-        }
-    }
-
     private async getUploadURL() {
         if (this.uploadURLs.length === 0) {
             await NetworkClient.fetchUploadURLs(this.totalFileCount-this.filesCompleted, this.uploadURLs);
@@ -817,89 +481,6 @@ class UploadService {
     }
 
 
-    private async getExifData(
-        reader: FileReader,
-        receivedFile: globalThis.File,
-        fileType: FILE_TYPE,
-    ): Promise<ParsedEXIFData> {
-        try {
-            if (fileType === FILE_TYPE.VIDEO) {
-                // Todo  extract exif data from videos
-                return { location: NULL_LOCATION, creationTime: null };
-            }
-            const exifData: any = await new Promise((resolve) => {
-                reader.onload = () => {
-                    resolve(EXIF.readFromBinaryFile(reader.result));
-                };
-                reader.readAsArrayBuffer(receivedFile);
-            });
-            if (!exifData) {
-                return { location: NULL_LOCATION, creationTime: null };
-            }
-            return {
-                location: this.getEXIFLocation(exifData),
-                creationTime: this.getUNIXTime(exifData),
-            };
-        } catch (e) {
-            logError(e, 'error reading exif data');
-            throw e;
-        }
-    }
-    private getUNIXTime(exifData: any) {
-        const dateString: string = exifData.DateTimeOriginal || exifData.DateTime;
-        if (!dateString || dateString==='0000:00:00 00:00:00') {
-            return null;
-        }
-        const parts = dateString.split(' ')[0].split(':');
-        const date = new Date(
-            Number(parts[0]),
-            Number(parts[1]) - 1,
-            Number(parts[2]),
-        );
-        return date.getTime() * 1000;
-    }
-
-    private getEXIFLocation(exifData): Location {
-        if (!exifData.GPSLatitude) {
-            return NULL_LOCATION;
-        }
-
-        const latDegree = exifData.GPSLatitude[0];
-        const latMinute = exifData.GPSLatitude[1];
-        const latSecond = exifData.GPSLatitude[2];
-
-        const lonDegree = exifData.GPSLongitude[0];
-        const lonMinute = exifData.GPSLongitude[1];
-        const lonSecond = exifData.GPSLongitude[2];
-
-        const latDirection = exifData.GPSLatitudeRef;
-        const lonDirection = exifData.GPSLongitudeRef;
-
-        const latFinal = this.convertDMSToDD(
-            latDegree,
-            latMinute,
-            latSecond,
-            latDirection,
-        );
-
-        const lonFinal = this.convertDMSToDD(
-            lonDegree,
-            lonMinute,
-            lonSecond,
-            lonDirection,
-        );
-        return { latitude: latFinal * 1.0, longitude: lonFinal * 1.0 };
-    }
-
-    private convertDMSToDD(degrees, minutes, seconds, direction) {
-        let dd = degrees + minutes / 60 + seconds / 3600;
-
-        if (direction === SOUTH_DIRECTION || direction === WEST_DIRECTION) {
-            dd = dd * -1;
-        }
-
-        return dd;
-    }
     private trackUploadProgress(
         filename:string,
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
