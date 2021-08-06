@@ -216,7 +216,7 @@ export default function Upload(props: Props) {
             );
         } catch (err) {
             if (err?.message===CustomError.ETAG_MISSING) {
-                props. setDialogMessage({ title: constants.UPLOAD_FAILED,
+                props.setDialogMessage({ title: constants.UPLOAD_FAILED,
                     staticBackdrop: true,
                     close: { variant: 'danger', text: constants.CLOSE },
                     content: constants.ETAGS_BLOCKED(DESKTOP_APP_DOWNLOAD_URL),
