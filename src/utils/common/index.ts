@@ -32,7 +32,7 @@ export function reverseString(title: string) {
         .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
 }
 
-export async function retryAsyncFunction(func: ()=>Promise<any>, retryCount: number = 0) {
+export async function retryAsyncFunction(func: ()=>Promise<any>, retryCount: number = 3) {
     try {
         const resp = await func();
         return resp;
