@@ -30,7 +30,7 @@ interface FileProgresses{
 const FileList =styled.ul<{collapsed:boolean, sm?:boolean}>`
     margin-top: 10px;
     overflow: auto;
-    height:${(props)=> props.collapsed?'0px':props.sm?'192px':'250px'};
+    height:${(props)=> props.collapsed?'0px':props.sm?'156px':'220px'};
     transition: height 0.2s ease-out;
     & > li{
         margin-bottom:12px;
