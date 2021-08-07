@@ -133,6 +133,10 @@ const GlobalStyles = createGlobalStyle`
         margin:5% auto;
         width:90%;
     }
+    .modal-body{
+        max-height:80vh;
+        overflow:auto;
+    }
     .modal-xl{
         max-width:90% !important;
     }

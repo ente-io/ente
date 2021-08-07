@@ -92,7 +92,7 @@ const englishConstants = {
         3: 'backup complete!',
     },
     UPLOADING_FILES: 'file upload',
-    FILE_NOT_UPLOADED_LIST: 'following files were not uploaded',
+    FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
     FILE_UPLOAD_PROGRESS: (name:string, progress:number) => (
         <div id={name}>
             <strong>{name}</strong>
