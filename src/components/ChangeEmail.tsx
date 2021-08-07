@@ -9,6 +9,7 @@ import router from 'next/router';
 import { changeEmail, getOTTForEmailChange } from 'services/userService';
 import styled from 'styled-components';
 import { AppContext } from 'pages/_app';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 
 interface formValues {
     email: string;
@@ -71,6 +72,7 @@ function ChangeEmailForm(props:Props) {
         try {
             setLoading(true);
             await changeEmail(email, ott);
+            setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), email });
             appContext.setDisappearingFlashMessage({ message: constants.EMAIL_UDPATE_SUCCESSFUL, severity: 'success' });
             router.push('/gallery');
         } catch (e) {
