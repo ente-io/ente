@@ -31,7 +31,6 @@ const Button = styled.button`
     top: 1px;
     right: 1px;
     border-radius: 5px;
-    background-color: #fff;
     align-items: center;
 `;
 
