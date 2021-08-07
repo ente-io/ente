@@ -9,7 +9,6 @@ import router from 'next/router';
 import { changeEmail, getOTTForEmailChange } from 'services/userService';
 import styled from 'styled-components';
 import { AppContext } from 'pages/_app';
-import englishConstants from 'utils/strings/englishConstants';
 
 interface formValues {
     email: string;
@@ -125,7 +124,7 @@ function ChangeEmailForm(props:Props) {
                                 </Col>
                                 <Col xs ="4" >
                                     <Button variant="link" onClick={()=>setShowOttInputVisibility(false)}>
-                                        {englishConstants.CHANGE}
+                                        {constants.CHANGE}
                                     </Button>
                                 </Col>
                             </EmailRow>

@@ -13,8 +13,6 @@ import { SetFiles, SetLoading } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { FileRejection } from 'react-dropzone';
-import { CustomError } from 'utils/common/errorUtil';
-import { DESKTOP_APP_DOWNLOAD_URL, downloadApp } from 'utils/common';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
@@ -40,6 +38,7 @@ interface AnalysisResult {
     suggestedCollectionName: string;
     multipleFolders: boolean;
 }
+
 export default function Upload(props: Props) {
     const [progressView, setProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
@@ -47,6 +46,7 @@ export default function Upload(props: Props) {
     );
     const [fileCounter, setFileCounter] = useState({ current: 0, total: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<string, number>());
+    const [uploadResult, setUploadResult]=useState(new Map<string, number>());
     const [percentComplete, setPercentComplete] = useState(0);
     const [choiceModalView, setChoiceModalView] = useState(false);
     const [fileAnalysisResult, setFileAnalysisResult] = useState<AnalysisResult>(null);
@@ -79,6 +79,7 @@ export default function Upload(props: Props) {
         setUploadStage(UPLOAD_STAGES.START);
         setFileCounter({ current: 0, total: 0 });
         setFileProgress(new Map<string, number>());
+        setUploadResult(new Map<string, number>());
         setPercentComplete(0);
         setProgressView(true);
     };
@@ -211,23 +212,12 @@ export default function Upload(props: Props) {
                     setFileCounter,
                     setUploadStage,
                     setFileProgress,
+                    setUploadResult,
                 },
                 props.setFiles,
             );
         } catch (err) {
-            if (err?.message===CustomError.ETAG_MISSING) {
-                props.setDialogMessage({ title: constants.UPLOAD_FAILED,
-                    staticBackdrop: true,
-                    close: { variant: 'danger', text: constants.CLOSE },
-                    content: constants.ETAGS_BLOCKED(DESKTOP_APP_DOWNLOAD_URL),
-                    proceed: {
-                        text: constants.DOWNLOAD,
-                        action: downloadApp,
-                        variant: 'success',
-                    } });
-            } else {
-                props.setBannerMessage(err.message);
-            }
+            props.setBannerMessage(err.message);
             setProgressView(false);
             throw err;
         } finally {
@@ -272,6 +262,7 @@ export default function Upload(props: Props) {
                 closeModal={() => setProgressView(false)}
                 retryFailed={retryFailed}
                 fileRejections={props.fileRejections}
+                uploadResult={uploadResult}
             />
         </>
     );

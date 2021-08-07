@@ -7,7 +7,7 @@ import DeleteIcon from 'components/icons/DeleteIcon';
 import CrossIcon from 'components/icons/CrossIcon';
 import AddIcon from 'components/icons/AddIcon';
 import { IconButton } from 'components/Container';
-import constants from 'utils/strings/englishConstants';
+import constants from 'utils/strings/constants';
 
 interface Props {
     addToCollectionHelper: (collectionName, collection) => void;
