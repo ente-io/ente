@@ -171,13 +171,11 @@ export default function UploadProgress(props: Props) {
                     <AlertBanner variant="warning">
                         {constants.FILE_NOT_UPLOADED_LIST}
                     </AlertBanner>
-                )
-                }
+                )}
                 <ResultSection fileUploadResultMap={fileUploadResultMap} fileUploadResult={FileUploadResults.BLOCKED} sectionTitle={constants.BLOCKED_UPLOADS} sectionInfo={constants.ETAGS_BLOCKED(DESKTOP_APP_DOWNLOAD_URL)} infoHeight={140}/>
                 <ResultSection fileUploadResultMap={fileUploadResultMap} fileUploadResult={FileUploadResults.FAILED} sectionTitle={constants.FAILED_UPLOADS} sectionInfo={constants.FAILED_INFO} infoHeight={48}/>
                 <ResultSection fileUploadResultMap={fileUploadResultMap} fileUploadResult={FileUploadResults.SKIPPED} sectionTitle={constants.SKIPPED_FILES} sectionInfo={constants.SKIPPED_INFO} infoHeight={32}/>
                 <ResultSection fileUploadResultMap={fileUploadResultMap} fileUploadResult={FileUploadResults.UNSUPPORTED} sectionTitle={constants.UNSUPPORTED_FILES} sectionInfo={constants.UNSUPPORTED_INFO} infoHeight={32}/>
-
 
                 {props.uploadStage === UPLOAD_STAGES.FINISH && (
                     <Modal.Footer style={{ border: 'none' }}>
