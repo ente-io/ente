@@ -30,8 +30,13 @@ interface FileProgresses{
 const FileList =styled.ul<{collapsed:boolean, sm?:boolean}>`
     margin-top: 10px;
     overflow: auto;
-    height:${(props)=> props.collapsed?'0px':props.sm?'144px':'200px'};
+    height:${(props)=> props.collapsed?'0px':props.sm?'192px':'250px'};
     transition: height 0.2s ease-out;
+    & > li{
+        margin-bottom:12px;
+        color:#ddd;
+        padding-left:10px;
+    }
 `;
 
 const SectionHeader =styled.div`
@@ -112,15 +117,7 @@ export default function UploadProgress(props: Props) {
                 </h4>
             </Modal.Header>
             <Modal.Body>
-                {props.uploadStage===UPLOAD_STAGES.FINISH ? (
-                    filesNotUploaded && (
-                        <Alert variant="warning">
-
-                            {constants.FILE_NOT_UPLOADED_LIST}
-                        </Alert>
-                    )
-                ) :
-                    (props.uploadStage === UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES ||
+                {(props.uploadStage === UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES ||
                         props.uploadStage === UPLOAD_STAGES.UPLOADING) &&
                     (
                         < ProgressBar
@@ -145,8 +142,28 @@ export default function UploadProgress(props: Props) {
                     ))}
                 </FileList>
                 }
+                {fileUploadResults?.get(FileUploadResults.UPLOADED)?.length>0 &&(<>
+                    <SectionHeader onClick={()=>setUploadedFilesView(!uploadedFilesView)} > {constants.SUCCESSFUL_UPLOADS} {uploadedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
+                    <FileList collapsed={!uploadedFilesView}>
+                        <p>{constants.SUCCESS_INFO}</p>
+                        {fileUploadResults.get(FileUploadResults.UPLOADED).map((fileName) => (
+
+                            <li key={fileName} style={{ marginTop: '12px' }}>
+                                {fileName}
+                            </li>
+                        ))}
+                    </FileList>
+                </>)}
+
+                {props.uploadStage === UPLOAD_STAGES.FINISH && filesNotUploaded && (
+                    <Alert variant="warning">
+
+                        {constants.FILE_NOT_UPLOADED_LIST}
+                    </Alert>
+                )
+                }
                 {fileUploadResults?.get(FileUploadResults.BLOCKED)?.length>0 &&(<>
-                    <SectionHeader onClick={()=>setBlockedFilesView(!blockedFilesView)} > blocked files {blockedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
+                    <SectionHeader onClick={()=>setBlockedFilesView(!blockedFilesView)} > {constants.BLOCKED_UPLOADS} {blockedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
                     <FileList collapsed={!blockedFilesView}>
                         {englishConstants.ETAGS_BLOCKED(DESKTOP_APP_DOWNLOAD_URL)}
                         {fileUploadResults.get(FileUploadResults.BLOCKED).map((fileName) => (
@@ -158,7 +175,7 @@ export default function UploadProgress(props: Props) {
                     </FileList>
                 </>)}
                 {fileUploadResults?.get(FileUploadResults.FAILED)?.length>0 &&(<>
-                    <SectionHeader onClick={()=>setFailedView(!failedFilesView)}>{constants.FAILED_FILES} {failedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
+                    <SectionHeader onClick={()=>setFailedView(!failedFilesView)}>{constants.FAILED_UPLOADS} {failedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
                     <FileList collapsed={!failedFilesView}>
                         <p> {constants.FAILED_INFO}</p>
                         {fileUploadResults.get(FileUploadResults.FAILED).map((fileName) => (
@@ -185,8 +202,8 @@ export default function UploadProgress(props: Props) {
 
                 {fileUploadResults?.get(FileUploadResults.UNSUPPORTED)?.length>0 &&(<>
                     <SectionHeader onClick={()=>setUnsupportedFilesView(!unsupportedFilesView)} >{constants.UNSUPPORTED_FILES}{unsupportedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
-                    <p>{constants.UNSUPPORTED_INFO}</p>
                     <FileList collapsed={!unsupportedFilesView}>
+                        <p>{constants.UNSUPPORTED_INFO}</p>
                         {fileUploadResults.get(FileUploadResults.UNSUPPORTED).map((fileName) => (
 
                             <li key={fileName} style={{ marginTop: '12px' }}>
@@ -196,18 +213,6 @@ export default function UploadProgress(props: Props) {
                     </FileList>
                 </>)}
 
-                {fileUploadResults?.get(FileUploadResults.UPLOADED)?.length>0 &&(<>
-                    <SectionHeader onClick={()=>setUploadedFilesView(!uploadedFilesView)} > {constants.UPLOADED_FILES} {uploadedFilesView?<ExpandLess/>:<ExpandMore/>}</SectionHeader>
-                    <p>{constants.UPLOADED_INFO}</p>
-                    <FileList collapsed={!uploadedFilesView}>
-                        {fileUploadResults.get(FileUploadResults.UPLOADED).map((fileName) => (
-
-                            <li key={fileName} style={{ marginTop: '12px' }}>
-                                {fileName}
-                            </li>
-                        ))}
-                    </FileList>
-                </>)}
 
                 {props.uploadStage === UPLOAD_STAGES.FINISH && (
                     <Modal.Footer style={{ border: 'none' }}>

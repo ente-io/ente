@@ -465,15 +465,16 @@ const englishConstants = {
                     for a more reliable import experience.</p>
     </>),
 
-    RETRY_FAILED: 'retry failed files',
-    FAILED_FILES: 'failed files ',
+    RETRY_FAILED: 'retry failed uploads',
+    FAILED_UPLOADS: 'failed uploads ',
     SKIPPED_FILES: 'duplicate files',
     UNSUPPORTED_FILES: 'unsupported files',
-    UPLOADED_FILES: 'successfully uploaded files',
+    SUCCESSFUL_UPLOADS: 'successful uploads',
     FAILED_INFO: ' unable to upload these files because of network issue, you can retry upload these files',
     SKIPPED_INFO: 'these files already existed in the album',
     UNSUPPORTED_INFO: 'these files are currently not supported by ente',
-    UPLOADED_INFO: 'successfully backed-up memories',
+    SUCCESS_INFO: 'successfully backed-up memories',
+    BLOCKED_UPLOADS: 'blocked uploads',
 };
 
 export default englishConstants;
