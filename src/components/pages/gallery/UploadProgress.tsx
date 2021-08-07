@@ -39,8 +39,10 @@ const Content =styled.div<{collapsed:boolean, sm?:boolean, height?:number}>`
 `;
 const FileList =styled.ul`
     padding-left:50px;
+    margin-top:5px;
     & > li {
         padding-left:10px;
+        margin-bottom:10px;
         color:#ccc;
     }
 `;
@@ -50,7 +52,7 @@ const SectionTitle =styled.div`
     justify-content:space-between;
     padding:0 20px;
     color:#eee;
-    font-size:17px;
+    font-size:20px;
     cursor:pointer;
 `;
 
@@ -70,12 +72,12 @@ const ResultSection =(props:ResultSectionProps)=>{
     }
     return (<>
         <SectionTitle onClick={()=>setListView(!listView)} > {props.sectionTitle} {listView?<ExpandLess/>:<ExpandMore/>}</SectionTitle>
-        <Content collapsed={!listView} height={fileList.length *36 + props.infoHeight}>
+        <Content collapsed={!listView} height={fileList.length *33 + props.infoHeight}>
             <p>{props.sectionInfo}</p>
             <FileList>
                 {fileList.map((fileName) => (
 
-                    <li key={fileName} style={{ marginTop: '12px' }}>
+                    <li key={fileName}>
                         {fileName}
                     </li>
                 ))}
