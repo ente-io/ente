@@ -12,6 +12,7 @@ import AppUpdater from './utils/appUpdater';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
+import * as Sentry from "@sentry/electron";
 
 let tray: Tray;
 let mainWindow: BrowserWindow;
@@ -61,6 +62,7 @@ else {
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
     app.on('ready', () => {
+        Sentry.init({ dsn: "https://e9268b784d1042a7a116f53c58ad2165@sentry.ente.io/5" });
         setIsUpdateAvailable(false)
         mainWindow = createWindow();
 
