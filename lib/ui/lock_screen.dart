@@ -48,8 +48,8 @@ class _LockScreenState extends State<LockScreen> {
       if (result) {
         AppLock.of(context).didUnlock();
       }
-    } catch (e) {
-      _logger.severe(e);
+    } catch (e, s) {
+      _logger.severe(e, s);
     }
   }
 }
