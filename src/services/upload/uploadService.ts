@@ -16,11 +16,13 @@ import {
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import { sleep } from 'utils/common';
-import NetworkClient, { UploadURL } from './networkClient';
+import NetworkClient from './networkClient';
 import { extractMetatdata, ParsedMetaDataJSON, parseMetadataJSON } from './metadataService';
 import { generateThumbnail } from './thumbnailService';
 import { getFileType, getFileOriginalName, getFileData } from './readFileService';
 import { encryptFiledata } from './encryptionService';
+import { ENCRYPTION_CHUNK_SIZE } from 'types';
+import { uploadStreamUsingMultipart } from './s3Service';
 
 
 const MAX_CONCURRENT_UPLOADS = 4;
@@ -28,7 +30,8 @@ const TYPE_JSON = 'json';
 const FILE_UPLOAD_COMPLETED = 100;
 const TwoSecondInMillSeconds = 2000;
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
-export const CHUNKS_COMBINED_FOR_UPLOAD = 5;
+export const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
+export const CHUNKS_COMBINED_FOR_A_UPLOAD_PART = Math.floor(MIN_STREAM_FILE_SIZE/ENCRYPTION_CHUNK_SIZE);
 
 export enum FileUploadResults {
     FAILED = -1,
@@ -36,6 +39,11 @@ export enum FileUploadResults {
     UNSUPPORTED = -3,
     BLOCKED=-4,
     UPLOADED = 100,
+}
+
+export interface UploadURL {
+    url: string;
+    objectKey: string;
 }
 
 export interface FileWithCollection {
@@ -87,7 +95,7 @@ interface EncryptedFile {
     file: ProcessedFile;
     fileKey: B64EncryptionResult;
 }
-interface ProcessedFile {
+export interface ProcessedFile {
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: fileAttribute;
@@ -420,25 +428,13 @@ class UploadService {
 
     private async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
         try {
-            let fileObjectKey;
+            let fileObjectKey:string=null;
             if (isDataStream(file.file.encryptedData)) {
-                const { chunkCount, stream } = file.file.encryptedData;
-                const uploadPartCount = Math.ceil(
-                    chunkCount / CHUNKS_COMBINED_FOR_UPLOAD,
-                );
-                const filePartUploadURLs = await NetworkClient.fetchMultipartUploadURLs(
-                    uploadPartCount,
-                );
-                fileObjectKey = await NetworkClient.putFileInParts(
-                    filePartUploadURLs,
-                    stream,
-                    file.filename,
-                    uploadPartCount,
-                    this.trackUploadProgress.bind(this),
-                );
+                const progressTracker=this.trackUploadProgress.bind(this);
+                fileObjectKey=await uploadStreamUsingMultipart(file.filename, file.file.encryptedData, progressTracker);
             } else {
-                const fileUploadURL = await this.getUploadURL();
                 const progressTracker=this.trackUploadProgress.bind(this, file.filename);
+                const fileUploadURL = await this.getUploadURL();
                 fileObjectKey = await NetworkClient.putFile(
                     fileUploadURL,
                     file.file.encryptedData,

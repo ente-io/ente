@@ -1,11 +1,11 @@
 import { FILE_TYPE } from 'pages/gallery';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { logError } from 'utils/sentry';
+import { MIN_STREAM_FILE_SIZE } from './uploadService';
 
 const TYPE_VIDEO = 'video';
 const TYPE_HEIC = 'HEIC';
 export const TYPE_IMAGE = 'image';
-const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
 const EDITED_FILE_SUFFIX = '-edited';
 
 

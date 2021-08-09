@@ -3,8 +3,7 @@ import { retryAsyncFunction } from 'utils/common';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
-import { CHUNKS_COMBINED_FOR_UPLOAD, MultipartUploadURLs, RANDOM_PERCENTAGE_PROGRESS_FOR_PUT, UploadFile } from './uploadService';
-import * as convert from 'xml-js';
+import { MultipartUploadURLs, UploadFile, UploadURL } from './uploadService';
 import { File } from '../fileService';
 import { CustomError } from 'utils/common/errorUtil';
 
@@ -12,10 +11,6 @@ const ENDPOINT = getEndpoint();
 const MAX_URL_REQUESTS = 50;
 
 
-export interface UploadURL {
-    url: string;
-    objectKey: string;
-}
 class NetworkClient {
     private uploadURLFetchInProgress=null;
 
@@ -116,72 +111,49 @@ class NetworkClient {
         }
     }
 
-    async putFileInParts(
-        multipartUploadURLs: MultipartUploadURLs,
-        file: ReadableStream<Uint8Array>,
-        filename: string,
-        uploadPartCount: number,
-        trackUploadProgress,
+
+    async putFilePart(
+        partUploadURL: string,
+        filePart: Uint8Array,
+        progressTracker,
     ) {
         try {
-            const streamEncryptedFileReader = file.getReader();
-            const percentPerPart = Math.round(
-                RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount,
-            );
-            const resParts = [];
-            for (const [
-                index,
-                fileUploadURL,
-            ] of multipartUploadURLs.partURLs.entries()) {
-                const combinedChunks = [];
-                for (let i = 0; i < CHUNKS_COMBINED_FOR_UPLOAD; i++) {
-                    const { done, value: chunk } =
-                    await streamEncryptedFileReader.read();
-                    if (done) {
-                        break;
-                    }
-                    for (let index = 0; index < chunk.length; index++) {
-                        combinedChunks.push(chunk[index]);
-                    }
+            const response=await retryAsyncFunction(async ()=>{
+                const resp =await HTTPService.put(
+                    partUploadURL,
+                    filePart,
+                    null,
+                    null,
+                    progressTracker(),
+                );
+                if (!resp?.headers?.etag) {
+                    const err=Error(CustomError.ETAG_MISSING);
+                    logError(err);
+                    throw err;
                 }
-                const uploadChunk = Uint8Array.from(combinedChunks);
-                const response=await retryAsyncFunction(async ()=>{
-                    const resp =await HTTPService.put(
-                        fileUploadURL,
-                        uploadChunk,
-                        null,
-                        null,
-                        trackUploadProgress(filename, percentPerPart, index),
-                    );
-                    if (!resp?.headers?.etag) {
-                        const err=Error(CustomError.ETAG_MISSING);
-                        logError(err);
-                        throw err;
-                    }
-                    return resp;
-                });
-                resParts.push({
-                    PartNumber: index + 1,
-                    ETag: response.headers.etag,
-                });
-            }
-            const options = { compact: true, ignoreComment: true, spaces: 4 };
-            const body = convert.js2xml(
-                { CompleteMultipartUpload: { Part: resParts } },
-                options,
-            );
+                return resp;
+            });
+            return response.headers.etag;
+        } catch (e) {
+            logError(e, 'put filePart failed');
+            throw e;
+        }
+    }
+
+    async completeMultipartUpload(completeURL:string, reqBody:any) {
+        try {
             await retryAsyncFunction(()=>
-                HTTPService.post(multipartUploadURLs.completeURL, body, null, {
+                HTTPService.post(completeURL, reqBody, null, {
                     'content-type': 'text/xml',
                 }),
             );
-            return multipartUploadURLs.objectKey;
         } catch (e) {
             logError(e, 'put file in parts failed');
             throw e;
         }
     }
 }
+
 export default new NetworkClient();
 
 
