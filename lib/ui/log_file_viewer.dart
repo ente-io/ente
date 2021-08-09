@@ -39,7 +39,7 @@ class _LogFileViewerState extends State<LogFileViewer> {
       return loadWidget;
     }
     return Container(
-      padding: EdgeInsets.only(left: 12, right: 12),
+      padding: EdgeInsets.only(left: 12, top: 8, right: 12),
       child: SingleChildScrollView(
         child: Text(
           _logs,
@@ -48,6 +48,7 @@ class _LogFileViewerState extends State<LogFileViewer> {
               FontFeature.tabularFigures(),
             ],
             color: Colors.white.withOpacity(0.7),
+            height: 1.2,
           ),
         ),
       ),
