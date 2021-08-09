@@ -25,3 +25,5 @@ class RequestCancelledError extends Error {}
 class InvalidSyncStatusError extends AssertionError {
   InvalidSyncStatusError(String message) : super(message);
 }
+
+class UnauthorizedEditError extends AssertionError {}

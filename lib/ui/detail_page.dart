@@ -3,7 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/core/errors.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/fading_app_bar.dart';
@@ -102,17 +104,15 @@ class _DetailPageState extends State<DetailPage> {
       ),
       extendBodyBehindAppBar: true,
       body: Center(
-        child: Container(
-          child: Stack(
-            children: [
-              _buildPageView(),
-              FadingBottomBar(
-                _files[_selectedIndex],
-                _onEditFileRequested,
-                key: _bottomBarKey,
-              ),
-            ],
-          ),
+        child: Stack(
+          children: [
+            _buildPageView(),
+            FadingBottomBar(
+              _files[_selectedIndex],
+              _onEditFileRequested,
+              key: _bottomBarKey,
+            ),
+          ],
         ),
       ),
       backgroundColor: Colors.black,
@@ -136,7 +136,7 @@ class _DetailPageState extends State<DetailPage> {
             },
             tagPrefix: widget.config.tagPrefix,
           );
-        } else if(file.fileType == FileType.livePhoto) {
+        } else if (file.fileType == FileType.livePhoto) {
           content = ZoomableLiveImage(
             file,
             shouldDisableScroll: (value) {
@@ -146,8 +146,7 @@ class _DetailPageState extends State<DetailPage> {
             },
             tagPrefix: widget.config.tagPrefix,
           );
-        }
-        else if (file.fileType == FileType.video) {
+        } else if (file.fileType == FileType.video) {
           content = VideoWidget(
             file,
             autoPlay: !_hasPageChanged, // Autoplay if it was opened directly
@@ -268,6 +267,14 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Future<void> _onEditFileRequested(File file) async {
+    if (file.uploadedFileID != null &&
+        file.ownerID != Configuration.instance.getUserID()) {
+      _logger.severe("Attempt to edit unowned file", UnauthorizedEditError(),
+          StackTrace.current);
+      showErrorDialog(context, "sorry",
+          "we don't support editing photos and albums that you don't own yet");
+      return;
+    }
     final dialog = createProgressDialog(context, "please wait...");
     await dialog.show();
     final imageProvider =
