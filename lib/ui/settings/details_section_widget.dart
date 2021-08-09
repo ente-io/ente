@@ -65,6 +65,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
       margin: EdgeInsets.fromLTRB(12, 8, 12, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           GestureDetector(
             onTap: () {
@@ -106,33 +107,38 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               initialAngleInDegree: 270,
             ),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _userDetails.email,
-                style: TextStyle(
-                  // color: Theme.of(context).buttonColor,
-                  fontSize: 16,
+          Padding(padding: EdgeInsets.all(4)),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _userDetails.email,
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Padding(padding: EdgeInsets.all(8)),
-              Text(
-                _userDetails.fileCount.toString() + " memories preserved",
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                Padding(padding: EdgeInsets.all(6)),
+                Text(
+                  _userDetails.fileCount.toString() + " memories preserved",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-              Padding(padding: EdgeInsets.all(4)),
-              Text(
-                _userDetails.sharedCollectionsCount.toString() +
-                    " albums shared",
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                Padding(padding: EdgeInsets.all(3)),
+                Text(
+                  _userDetails.sharedCollectionsCount.toString() +
+                      " albums shared",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

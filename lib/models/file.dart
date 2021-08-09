@@ -59,8 +59,7 @@ class File {
         type = FileType.image;
         // PHAssetMediaSubtype.photoLive.rawValue is 8
         // This hack should go away once photos_manager support livePhotos
-        if (kDebugMode && // only enable live photo in debug builds
-            asset.subTypes != null &&
+        if (asset.subTypes != null &&
             asset.subTypes > -1 &&
             (asset.subTypes & 8) != 0) {
           type = FileType.livePhoto;
