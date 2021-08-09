@@ -126,9 +126,9 @@ export async function generateVideoThumbnail(file:globalThis.File) {
                 clearTimeout(timeout);
                 resolve(null);
             } catch (e) {
-                reject(e);
-                logError(e);
-                reject(Error(`${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`));
+                const err=Error(`${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`);
+                logError(err);
+                reject(err);
             }
         });
         video.preload = 'metadata';
@@ -140,6 +140,7 @@ export async function generateVideoThumbnail(file:globalThis.File) {
             WAIT_TIME_THUMBNAIL_GENERATION,
         );
     });
+    return canvas;
 }
 
 export async function thumbnailCanvasToBlob(canvas:HTMLCanvasElement) {
