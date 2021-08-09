@@ -336,10 +336,10 @@ class FileUploader {
           file,
           fileObjectKey,
           fileDecryptionHeader,
-          encryptedFile.lengthSync(),
+          await encryptedFile.length(),
           thumbnailObjectKey,
           thumbnailDecryptionHeader,
-          encryptedThumbnailFile.lengthSync(),
+          await encryptedThumbnailFile.length(),
           encryptedMetadata,
           metadataDecryptionHeader,
         );
@@ -352,10 +352,10 @@ class FileUploader {
           fileAttributes,
           fileObjectKey,
           fileDecryptionHeader,
-          encryptedFile.lengthSync(),
+          await encryptedFile.length(),
           thumbnailObjectKey,
           thumbnailDecryptionHeader,
-          encryptedThumbnailFile.lengthSync(),
+          await encryptedThumbnailFile.length(),
           encryptedMetadata,
           metadataDecryptionHeader,
         );
@@ -601,7 +601,7 @@ class FileUploader {
     int contentLength,
     int attempt = 1,
   }) async {
-    final fileSize = contentLength ?? file.lengthSync();
+    final fileSize = contentLength ?? await file.length();
     final startTime = DateTime.now().millisecondsSinceEpoch;
     try {
       await _dio.put(
@@ -614,8 +614,7 @@ class FileUploader {
         ),
       );
       _logger.info("Upload speed : " +
-          (file.lengthSync() /
-                  (DateTime.now().millisecondsSinceEpoch - startTime))
+          (fileSize / (DateTime.now().millisecondsSinceEpoch - startTime))
               .toString() +
           " kilo bytes per second");
 

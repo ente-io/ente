@@ -41,7 +41,7 @@ Future<io.File> downloadAndDecrypt(ente.File file,
     }
     _logger.info("File downloaded: " + file.uploadedFileID.toString());
     _logger.info("Download speed: " +
-        (io.File(encryptedFilePath).lengthSync() /
+        (await io.File(encryptedFilePath).length() /
                 (DateTime.now().millisecondsSinceEpoch - startTime))
             .toString() +
         "kBps");

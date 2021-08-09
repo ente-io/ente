@@ -27,7 +27,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
 
   @override
   void initState() {
-    _isImage = widget.file.fileType == FileType.image || widget.file.fileType == FileType.livePhoto ;
+    _isImage = widget.file.fileType == FileType.image ||
+        widget.file.fileType == FileType.livePhoto;
     if (_isImage) {
       _getExif().then((exif) {
         setState(() {
@@ -433,7 +434,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
 
   Widget _getFileSize() {
     return FutureBuilder(
-      future: getFile(widget.file).then((f) => f.lengthSync()),
+      future: getFile(widget.file).then((f) => f.length()),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Text(

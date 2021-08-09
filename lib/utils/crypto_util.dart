@@ -47,7 +47,7 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
   final logger = Logger("ChaChaEncrypt");
   final sourceFile = io.File(args["sourceFilePath"]);
   final destinationFile = io.File(args["destinationFilePath"]);
-  final sourceFileLength = sourceFile.lengthSync();
+  final sourceFileLength = await sourceFile.length();
   logger.info("Encrypting file of size " + sourceFileLength.toString());
 
   final inputFile = sourceFile.openSync(mode: io.FileMode.read);
@@ -81,7 +81,7 @@ Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
   final decryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final sourceFile = io.File(args["sourceFilePath"]);
   final destinationFile = io.File(args["destinationFilePath"]);
-  final sourceFileLength = sourceFile.lengthSync();
+  final sourceFileLength = await sourceFile.length();
   logger.info("Decrypting file of size " + sourceFileLength.toString());
 
   final inputFile = sourceFile.openSync(mode: io.FileMode.read);
