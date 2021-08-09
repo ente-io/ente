@@ -434,7 +434,7 @@ class UploadService {
                     stream,
                     file.filename,
                     uploadPartCount,
-                    this.trackUploadProgress,
+                    this.trackUploadProgress.bind(this),
                 );
             } else {
                 const fileUploadURL = await this.getUploadURL();
