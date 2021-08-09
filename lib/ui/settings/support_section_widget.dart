@@ -40,6 +40,20 @@ class SupportSectionWidget extends StatelessWidget {
         Divider(height: 4),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return CrispChatPage();
+                },
+              ),
+            );
+          },
+          child: SettingsTextItem(text: "chat", icon: Icons.navigate_next),
+        ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
