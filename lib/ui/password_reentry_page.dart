@@ -144,8 +144,10 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         ),
         GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () {
-            Configuration.instance.logout();
+          onTap: () async {
+            final dialog = createProgressDialog(context, "please wait...");
+            await Configuration.instance.logout();
+            dialog.hide();
             Navigator.of(context).popUntil((route) => route.isFirst);
           },
           child: Container(
