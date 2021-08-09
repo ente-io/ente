@@ -142,6 +142,25 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             ),
           ),
         ),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            Configuration.instance.logout();
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          },
+          child: Container(
+            padding: EdgeInsets.all(16),
+            child: Center(
+              child: Text(
+                "change email?",
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
