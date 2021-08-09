@@ -42,7 +42,7 @@ EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
       encryptedData: encryptedData, header: initPushResult.header);
 }
 
-EncryptionResult chachaEncryptFile(Map<String, dynamic> args) {
+Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final logger = Logger("ChaChaEncrypt");
   final sourceFile = io.File(args["sourceFilePath"]);
@@ -66,7 +66,7 @@ EncryptionResult chachaEncryptFile(Map<String, dynamic> args) {
     bytesRead += chunkSize;
     final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
         initPushResult.state, buffer, null, tag);
-    destinationFile.writeAsBytesSync(encryptedData, mode: io.FileMode.append);
+    await destinationFile.writeAsBytes(encryptedData, mode: io.FileMode.append);
   }
   inputFile.closeSync();
 
@@ -76,7 +76,7 @@ EncryptionResult chachaEncryptFile(Map<String, dynamic> args) {
   return EncryptionResult(key: key, header: initPushResult.header);
 }
 
-void chachaDecryptFile(Map<String, dynamic> args) {
+Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
   final logger = Logger("ChaChaDecrypt");
   final decryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final sourceFile = io.File(args["sourceFilePath"]);
@@ -99,7 +99,7 @@ void chachaDecryptFile(Map<String, dynamic> args) {
     bytesRead += chunkSize;
     final pullResult =
         Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, buffer, null);
-    destinationFile.writeAsBytesSync(pullResult.m, mode: io.FileMode.append);
+    await destinationFile.writeAsBytes(pullResult.m, mode: io.FileMode.append);
     tag = pullResult.tag;
   }
   inputFile.closeSync();

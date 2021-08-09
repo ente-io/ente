@@ -136,9 +136,9 @@ Future<io.File> _downloadLivePhoto(ente.File file,
             tempPath + file.uploadedFileID.toString() + filename;
         List<int> data = archiveFile.content;
         if (filename.startsWith("image")) {
-          io.File imageFile = io.File(decodePath)
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(data);
+          final imageFile = io.File(decodePath);
+          await imageFile.create(recursive: true);
+          await imageFile.writeAsBytes(data);
           io.File imageConvertedFile = imageFile;
           if ((fileExtension == "unknown") ||
               (io.Platform.isAndroid && fileExtension == "heic")) {
@@ -151,16 +151,16 @@ Future<io.File> _downloadLivePhoto(ente.File file,
           }
           imageFileCache = await DefaultCacheManager().putFile(
             file.getDownloadUrl(),
-            imageConvertedFile.readAsBytesSync(),
+            await imageConvertedFile.readAsBytes(),
             eTag: file.getDownloadUrl(),
             maxAge: Duration(days: 365),
             fileExtension: fileExtension,
           );
           await imageConvertedFile.delete();
         } else if (filename.startsWith("video")) {
-          io.File videoFile = io.File(decodePath)
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(data);
+          final videoFile = io.File(decodePath);
+          await videoFile.create(recursive: true);
+          await videoFile.writeAsBytes(data);
           videoFileCache = await VideoCacheManager.instance.putFile(
             file.getDownloadUrl(),
             videoFile.readAsBytesSync(),

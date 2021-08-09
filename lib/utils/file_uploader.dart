@@ -308,8 +308,8 @@ class FileUploader {
         await io.File(encryptedThumbnailPath).delete();
       }
       final encryptedThumbnailFile = io.File(encryptedThumbnailPath);
-      encryptedThumbnailFile
-          .writeAsBytesSync(encryptedThumbnailData.encryptedData);
+      await encryptedThumbnailFile
+          .writeAsBytes(encryptedThumbnailData.encryptedData);
 
       final thumbnailUploadURL = await _getUploadURL();
       String thumbnailObjectKey =
