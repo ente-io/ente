@@ -16,7 +16,10 @@ import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import { sleep } from 'utils/common';
 import NetworkClient, { UploadURL } from './networkClient';
-import readFile, { ParsedMetaDataJSON, parseMetadataJSON } from './fileReadClient';
+import { extractMetatdata, ParsedMetaDataJSON, parseMetadataJSON } from './metadataService';
+import { generateThumbnail } from './thumbnailService';
+import { getFileType, getFileOriginalName, getFileData } from './readFileService';
+import { encryptFiledata } from './encryptionService';
 
 
 const MAX_CONCURRENT_UPLOADS = 4;
@@ -41,10 +44,10 @@ export interface DataStream {
     chunkCount: number;
 }
 
-function isDataStream(object: any): object is DataStream {
+export function isDataStream(object: any): object is DataStream {
     return 'stream' in object;
 }
-interface EncryptionResult {
+export interface EncryptionResult {
     file: fileAttribute;
     key: string;
 }
@@ -226,7 +229,7 @@ class UploadService {
         let encryptedFile: EncryptedFile=null;
         try {
             // read the file into memory
-            file = await readFile(reader, rawFile, this.metadataMap);
+            file = await this.readFile(reader, rawFile, this.metadataMap);
 
             if (this.fileAlreadyInCollection(file, collection)) {
                 // set progress to -2 indicating that file upload was skipped
@@ -308,6 +311,37 @@ class UploadService {
         setFileProgress(this.fileProgress);
     }
 
+    async readFile(reader: FileReader, receivedFile: globalThis.File, metadataMap:Map<string, ParsedMetaDataJSON>) {
+        try {
+            const fileType=getFileType(receivedFile);
+
+            const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
+                reader,
+                receivedFile,
+                fileType,
+            );
+
+            const originalName=getFileOriginalName(receivedFile);
+            const googleMetadata=metadataMap.get(originalName);
+            const extractedMetadata:MetadataObject =await extractMetatdata(reader, receivedFile, fileType);
+            if (hasStaticThumbnail) {
+                extractedMetadata.hasStaticThumbnail=true;
+            }
+            const metadata:MetadataObject={ ...extractedMetadata, ...googleMetadata };
+
+            const filedata = await getFileData(reader, receivedFile);
+
+            return {
+                filedata,
+                thumbnail,
+                metadata,
+            };
+        } catch (e) {
+            logError(e, 'error reading files');
+            throw e;
+        }
+    }
+
     private fileAlreadyInCollection(
         newFile: FileInMemory,
         collection: Collection,
@@ -344,10 +378,7 @@ class UploadService {
         encryptionKey: string,
     ): Promise<EncryptedFile> {
         try {
-            const { key: fileKey, file: encryptedFiledata }: EncryptionResult =
-                isDataStream(file.filedata) ?
-                    await this.encryptFileStream(worker, file.filedata) :
-                    await worker.encryptFile(file.filedata);
+            const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(worker, file.filedata);
 
             const { file: encryptedThumbnail }: EncryptionResult =
                 await worker.encryptThumbnail(file.thumbnail, fileKey);
@@ -375,35 +406,6 @@ class UploadService {
         }
     }
 
-    private async encryptFileStream(worker, fileData: DataStream) {
-        const { stream, chunkCount } = fileData;
-        const fileStreamReader = stream.getReader();
-        const { key, decryptionHeader, pushState } =
-            await worker.initChunkEncryption();
-        const ref = { pullCount: 1 };
-        const encryptedFileStream = new ReadableStream({
-            async pull(controller) {
-                const { value } = await fileStreamReader.read();
-                const encryptedFileChunk = await worker.encryptFileChunk(
-                    value,
-                    pushState,
-                    ref.pullCount === chunkCount,
-                );
-                controller.enqueue(encryptedFileChunk);
-                if (ref.pullCount === chunkCount) {
-                    controller.close();
-                }
-                ref.pullCount++;
-            },
-        });
-        return {
-            key,
-            file: {
-                decryptionHeader,
-                encryptedData: { stream: encryptedFileStream, chunkCount },
-            },
-        };
-    }
 
     private async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
         try {
