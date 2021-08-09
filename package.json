@@ -44,11 +44,13 @@
   },
   "author": "ente <code@ente.io>",
   "devDependencies": {
+    "@sentry/cli": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^4.20.0",
     "@typescript-eslint/parser": "^4.20.0",
     "electron": "^11.0.2",
     "electron-builder": "^22.10.5",
     "electron-builder-notarize": "^1.2.0",
+    "electron-download": "^4.1.1",
     "eslint": "^7.23.0",
     "typescript": "^4.2.3"
   },
