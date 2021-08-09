@@ -98,7 +98,7 @@ class _CrispChatPageState extends State<CrispChatPage> {
     );
     _crisp.register(
       user: CrispUser(
-        email: Configuration.instance.getEmail(),
+        email: Configuration.instance.getUserID().toString() + "@ente.io",
       ),
     );
     super.initState();
