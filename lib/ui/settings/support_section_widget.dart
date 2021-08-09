@@ -40,30 +40,6 @@ class SupportSectionWidget extends StatelessWidget {
         Divider(height: 4),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return CrispChatPage();
-                },
-              ),
-            );
-          },
-          child: SettingsTextItem(text: "chat", icon: Icons.navigate_next),
-        ),
-        Divider(height: 4),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            await sendLogs(context, "bug@ente.io");
-            showToast("thanks for reporting a bug!");
-          },
-          child: SettingsTextItem(
-              text: "report bug 🐞", icon: Icons.navigate_next),
-        ),
-        Divider(height: 4),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -88,6 +64,16 @@ class SupportSectionWidget extends StatelessWidget {
             launch("https://reddit.com/r/enteio");
           },
           child: SettingsTextItem(text: "community", icon: Icons.navigate_next),
+        ),
+        Divider(height: 4),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            await sendLogs(context, "bug@ente.io");
+            showToast("thanks for reporting a bug!");
+          },
+          child: SettingsTextItem(
+              text: "report bug 🐞", icon: Icons.navigate_next),
         ),
       ],
     );
