@@ -12,6 +12,8 @@ import AppUpdater from './utils/appUpdater';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
+import initSentry from './utils/sentry';
+
 
 let tray: Tray;
 let mainWindow: BrowserWindow;
@@ -61,11 +63,10 @@ else {
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
     app.on('ready', () => {
+        initSentry();
         setIsUpdateAvailable(false)
         mainWindow = createWindow();
-
         Menu.setApplicationMenu(buildMenuBar())
-
 
         app.on('activate', function () {
             // On macOS it's common to re-create a window in the app when the
