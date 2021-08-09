@@ -35,7 +35,7 @@ class FileDownloadItem {
 Future<Uint8List> getThumbnailFromServer(File file) async {
   final cachedThumbnail = getCachedThumbnail(file);
   if (cachedThumbnail.existsSync()) {
-    final data = cachedThumbnail.readAsBytesSync();
+    final data = await cachedThumbnail.readAsBytes();
     ThumbnailLruCache.put(file, data);
     return data;
   }
@@ -66,7 +66,7 @@ Future<Uint8List> getThumbnailFromLocal(File file,
   }
   final cachedThumbnail = getCachedThumbnail(file);
   if (cachedThumbnail.existsSync()) {
-    final data = cachedThumbnail.readAsBytesSync();
+    final data = await cachedThumbnail.readAsBytes();
     ThumbnailLruCache.put(file, data);
     return data;
   }

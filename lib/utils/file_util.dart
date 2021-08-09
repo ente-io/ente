@@ -124,7 +124,7 @@ Future<io.File> _downloadLivePhoto(ente.File file,
     }
     _logger.fine("Decoded zipped live photo from " + decryptedFile.path);
     io.File imageFileCache, videoFileCache;
-    List<int> bytes = decryptedFile.readAsBytesSync();
+    List<int> bytes = await decryptedFile.readAsBytes();
     Archive archive = ZipDecoder().decodeBytes(bytes);
     final tempPath = Configuration.instance.getTempDirectory();
     // Extract the contents of Zip compressed archive to disk
@@ -163,7 +163,7 @@ Future<io.File> _downloadLivePhoto(ente.File file,
           await videoFile.writeAsBytes(data);
           videoFileCache = await VideoCacheManager.instance.putFile(
             file.getDownloadUrl(),
-            videoFile.readAsBytesSync(),
+            await videoFile.readAsBytes(),
             eTag: file.getDownloadUrl(),
             maxAge: Duration(days: 365),
             fileExtension: fileExtension,
@@ -201,7 +201,7 @@ Future<io.File> _downloadAndCache(ente.File file, BaseCacheManager cacheManager,
     }
     final cachedFile = await cacheManager.putFile(
       file.getDownloadUrl(),
-      outputFile.readAsBytesSync(),
+      await outputFile.readAsBytes(),
       eTag: file.getDownloadUrl(),
       maxAge: Duration(days: 365),
       fileExtension: fileExtension,

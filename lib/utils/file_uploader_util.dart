@@ -149,7 +149,7 @@ Future<Uint8List> getThumbnailFromInAppCacheFile(ente.File file) async {
   if (!localFile.existsSync()) {
     return null;
   }
-  var thumbnailData = localFile.readAsBytesSync();
+  var thumbnailData = await localFile.readAsBytes();
   int compressionAttempts = 0;
   while (thumbnailData.length > kThumbnailDataLimit &&
       compressionAttempts < kMaximumThumbnailCompressionAttempts) {

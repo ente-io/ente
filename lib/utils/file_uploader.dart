@@ -625,11 +625,12 @@ class FileUploader {
               "HttpException: Content size exceeds specified contentLength.") &&
           attempt == 1) {
         return _putFile(uploadURL, file,
-            contentLength: file.readAsBytesSync().length, attempt: 2);
+            contentLength: (await file.readAsBytes()).length, attempt: 2);
       } else if (attempt < kMaximumUploadAttempts) {
         final newUploadURL = await _getUploadURL();
         return _putFile(newUploadURL, file,
-            contentLength: file.readAsBytesSync().length, attempt: attempt + 1);
+            contentLength: (await file.readAsBytes()).length,
+            attempt: attempt + 1);
       } else {
         _logger.info(
             "Upload failed for file with size " + fileSize.toString(), e);
