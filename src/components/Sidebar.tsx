@@ -60,6 +60,8 @@ export default function Sidebar(props: Props) {
             setUser({ ...user, email: userDetails.email });
             SetUsage(convertToHumanReadable(userDetails.usage));
             setSubscription(userDetails.subscription);
+            setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), email: userDetails.email });
+            setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
         };
         main();
     }, [isOpen]);

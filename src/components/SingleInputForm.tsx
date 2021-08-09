@@ -19,16 +19,18 @@ interface Props {
 }
 
 const Group = styled.div`
-    display: flex;
+    position: relative;
 `;
 
 const Button = styled.button`
     background: transparent;
     border: none;
-    width: 36px;
-    height: 36px;
-    margin-left: -36px;
-    display: flex;
+    width: 46px;
+    height: 34px;
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    border-radius: 5px;
     align-items: center;
 `;
 
@@ -77,10 +79,10 @@ export default function SingleInputForm(props: Props) {
                                     {showPassword ? <VisibilityOff /> : <Visibility />}
                                 </Button>
                             }
+                            <Form.Control.Feedback type="invalid">
+                                {errors.passphrase}
+                            </Form.Control.Feedback>
                         </Group>
-                        <Form.Control.Feedback type="invalid">
-                            {errors.passphrase}
-                        </Form.Control.Feedback>
                     </Form.Group>
                     <SubmitButton
                         buttonText={props.buttonText}

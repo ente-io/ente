@@ -89,12 +89,11 @@ const englishConstants = {
         0: 'preparing to upload',
         1: 'reading google metadata files',
         2: (fileCounter) => `${fileCounter.finished} / ${fileCounter.total} files backed up`,
-        3: 'backup complete!',
+        3: 'backup complete',
     },
     UPLOADING_FILES: 'file upload',
-    FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
-    UNSUPPORTED_FILE_LIST: 'unsupported files',
-    FILE_UPLOAD_PROGRESS: (name, progress) => (
+    FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
+    FILE_UPLOAD_PROGRESS: (name:string, progress:number) => (
         <div id={name}>
             <strong>{name}</strong>
             {' - '}
@@ -105,7 +104,7 @@ const englishConstants = {
                     case -2:
                         return 'already uploaded, skipping...';
                     case -3:
-                        return 'unsupported file format, ignored';
+                        return ',unsupported file format, skipping....';
                     default:
                         return `${progress}%`;
                 }
@@ -452,7 +451,30 @@ const englishConstants = {
     SEND_OTT: 'send otp',
     EMAIl_ALREADY_OWNED: 'email already taken',
     EMAIL_UDPATE_SUCCESSFUL: 'your email has been udpated successfully',
+    UPLOAD_FAILED: 'upload failed',
+    ETAGS_BLOCKED: (url:string)=>(<>
+        <p> we were unable to upload the following files because of your browser configuration.</p>
+        <p> please disable any addons that might be preventing ente from using <code>eTags</code> to upload large files, or use our
+            {' '}
+            <a
+                href={url} style={{ color: '#2dc262', textDecoration: 'underline' }}
+                target="_blank" rel="noreferrer">
+                    desktop app
+            </a>
+            {' '}
+                    for a more reliable import experience.</p>
+    </>),
 
+    RETRY_FAILED: 'retry failed uploads',
+    FAILED_UPLOADS: 'failed uploads ',
+    SKIPPED_FILES: 'duplicate files',
+    UNSUPPORTED_FILES: 'unsupported files',
+    SUCCESSFUL_UPLOADS: 'successful uploads',
+    FAILED_INFO: ' unable to upload these files because of network issue, you can retry upload these files',
+    SKIPPED_INFO: 'these files already existed in the album',
+    UNSUPPORTED_INFO: 'these files are currently not supported by ente',
+    SUCCESS_INFO: 'successfully backed-up memories',
+    BLOCKED_UPLOADS: 'blocked uploads',
 };
 
 export default englishConstants;

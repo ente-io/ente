@@ -2,6 +2,7 @@ import { File, fileAttribute } from '../fileService';
 import { Collection } from '../collectionService';
 import { FILE_TYPE, SetFiles } from 'pages/gallery';
 import {
+    CustomError,
     handleError,
     parseError,
 } from 'utils/common/errorUtil';
@@ -29,10 +30,12 @@ const TwoSecondInMillSeconds = 2000;
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 export const CHUNKS_COMBINED_FOR_UPLOAD = 5;
 
-export enum FileUploadErrorCode {
+export enum FileUploadResults {
     FAILED = -1,
     SKIPPED = -2,
     UNSUPPORTED = -3,
+    BLOCKED=-4,
+    UPLOADED = 100,
 }
 
 export interface FileWithCollection {
@@ -114,6 +117,7 @@ class UploadService {
     private filesCompleted: number;
     private totalFileCount: number;
     private fileProgress: Map<string, number>;
+    private uploadResult:Map<string, number>;
     private metadataMap: Map<string, ParsedMetaDataJSON>;
     private filesToBeUploaded: FileWithCollection[];
     private progressBarProps;
@@ -132,6 +136,7 @@ class UploadService {
 
             this.filesCompleted = 0;
             this.fileProgress = new Map<string, number>();
+            this.uploadResult = new Map<string, number>();
             this.failedFiles = [];
             this.metadataMap = new Map<string, ParsedMetaDataJSON>();
             this.progressBarProps = progressBarProps;
@@ -233,11 +238,9 @@ class UploadService {
 
             if (this.fileAlreadyInCollection(file, collection)) {
                 // set progress to -2 indicating that file upload was skipped
-                this.fileProgress.set(rawFile.name, FileUploadErrorCode.SKIPPED);
+                this.fileProgress.set(rawFile.name, FileUploadResults.SKIPPED);
                 this.updateProgressBarUI();
                 await sleep(TwoSecondInMillSeconds);
-                // remove completed files for file progress list
-                this.fileProgress.delete(rawFile.name);
             } else {
                 encryptedFile = await this.encryptFile(worker, file, collection.key);
 
@@ -262,19 +265,26 @@ class UploadService {
 
                 uploadFile = null;
 
-                this.fileProgress.delete(rawFile.name);
+                this.fileProgress.set(rawFile.name, FileUploadResults.UPLOADED);
+
                 this.filesCompleted++;
             }
         } catch (e) {
             logError(e, 'file upload failed');
-            this.failedFiles.push(fileWithCollection);
-            // set progress to -1 indicating that file upload failed but keep it to show in the file-upload list progress
-            this.fileProgress.set(rawFile.name, FileUploadErrorCode.FAILED);
+            logError(e, 'file upload failed');
             handleError(e);
+            this.failedFiles.push(fileWithCollection);
+            if (e.message ===CustomError.ETAG_MISSING) {
+                this.fileProgress.set(rawFile.name, FileUploadResults.BLOCKED);
+            } else {
+                this.fileProgress.set(rawFile.name, FileUploadResults.FAILED);
+            }
         } finally {
             file=null;
             encryptedFile=null;
         }
+        this.uploadResult.set(rawFile.name, this.fileProgress.get(rawFile.name));
+        this.fileProgress.delete(rawFile.name);
         this.updateProgressBarUI();
 
         if (this.filesToBeUploaded.length > 0) {
@@ -290,7 +300,7 @@ class UploadService {
     }
 
     private updateProgressBarUI() {
-        const { setPercentComplete, setFileCounter, setFileProgress } =
+        const { setPercentComplete, setFileCounter, setFileProgress, setUploadResult } =
             this.progressBarProps;
         setFileCounter({
             finished: this.filesCompleted,
@@ -309,6 +319,7 @@ class UploadService {
         }
         setPercentComplete(percentComplete);
         setFileProgress(this.fileProgress);
+        setUploadResult(this.uploadResult);
     }
 
     async readFile(reader: FileReader, receivedFile: globalThis.File, metadataMap:Map<string, ParsedMetaDataJSON>) {

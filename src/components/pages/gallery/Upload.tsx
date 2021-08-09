@@ -38,6 +38,7 @@ interface AnalysisResult {
     suggestedCollectionName: string;
     multipleFolders: boolean;
 }
+
 export default function Upload(props: Props) {
     const [progressView, setProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
@@ -45,6 +46,7 @@ export default function Upload(props: Props) {
     );
     const [fileCounter, setFileCounter] = useState({ current: 0, total: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<string, number>());
+    const [uploadResult, setUploadResult]=useState(new Map<string, number>());
     const [percentComplete, setPercentComplete] = useState(0);
     const [choiceModalView, setChoiceModalView] = useState(false);
     const [fileAnalysisResult, setFileAnalysisResult] = useState<AnalysisResult>(null);
@@ -77,6 +79,7 @@ export default function Upload(props: Props) {
         setUploadStage(UPLOAD_STAGES.START);
         setFileCounter({ current: 0, total: 0 });
         setFileProgress(new Map<string, number>());
+        setUploadResult(new Map<string, number>());
         setPercentComplete(0);
         setProgressView(true);
     };
@@ -209,6 +212,7 @@ export default function Upload(props: Props) {
                     setFileCounter,
                     setUploadStage,
                     setFileProgress,
+                    setUploadResult,
                 },
                 props.setFiles,
             );
@@ -258,6 +262,7 @@ export default function Upload(props: Props) {
                 closeModal={() => setProgressView(false)}
                 retryFailed={retryFailed}
                 fileRejections={props.fileRejections}
+                uploadResult={uploadResult}
             />
         </>
     );

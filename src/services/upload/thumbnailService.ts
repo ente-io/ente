@@ -1,5 +1,5 @@
 import { FILE_TYPE } from 'pages/gallery';
-import { THUMBNAIL_GENERATION_FAILED } from 'utils/common/errorUtil';
+import { CustomError } from 'utils/common/errorUtil';
 import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from './readFileService';
@@ -81,7 +81,7 @@ export async function generateImageThumbnail(file:globalThis.File) {
             } catch (e) {
                 reject(e);
                 logError(e);
-                reject(Error(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`));
+                reject(Error(`${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`));
             }
         };
         timeout = setTimeout(
@@ -128,7 +128,7 @@ export async function generateVideoThumbnail(file:globalThis.File) {
             } catch (e) {
                 reject(e);
                 logError(e);
-                reject(Error(`${THUMBNAIL_GENERATION_FAILED} err: ${e}`));
+                reject(Error(`${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`));
             }
         });
         video.preload = 'metadata';

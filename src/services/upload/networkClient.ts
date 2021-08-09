@@ -6,6 +6,7 @@ import { logError } from 'utils/sentry';
 import { CHUNKS_COMBINED_FOR_UPLOAD, MultipartUploadURLs, RANDOM_PERCENTAGE_PROGRESS_FOR_PUT, UploadFile } from './uploadService';
 import * as convert from 'xml-js';
 import { File } from '../fileService';
+import { CustomError } from 'utils/common/errorUtil';
 
 const ENDPOINT = getEndpoint();
 const MAX_URL_REQUESTS = 50;
@@ -153,7 +154,7 @@ class NetworkClient {
                         trackUploadProgress(filename, percentPerPart, index),
                     );
                     if (!resp?.headers?.etag) {
-                        const err=Error('no header/etag present in response body');
+                        const err=Error(CustomError.ETAG_MISSING);
                         logError(err);
                         throw err;
                     }
