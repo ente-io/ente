@@ -742,7 +742,7 @@ class UploadService {
                         video.preload = 'metadata';
                         video.src = imageURL;
                         video.currentTime = 3;
-                        setTimeout(
+                        timeout=setTimeout(
                             () =>
                                 reject(Error(`wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`)),
                             WAIT_TIME_THUMBNAIL_GENERATION,
