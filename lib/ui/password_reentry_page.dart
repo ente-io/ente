@@ -146,8 +146,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           behavior: HitTestBehavior.opaque,
           onTap: () async {
             final dialog = createProgressDialog(context, "please wait...");
+            await dialog.show();
             await Configuration.instance.logout();
-            dialog.hide();
+            await dialog.hide();
             Navigator.of(context).popUntil((route) => route.isFirst);
           },
           child: Container(
