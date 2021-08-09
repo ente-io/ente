@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,10 +15,62 @@ bool isValidEmail(String email) {
 
 Future<void> sendLogs(
   BuildContext context,
-  String toEmail, [
+  String title,
+  String toEmail, {
+  Function postShare,
   String subject,
   String body,
-]) async {
+}) async {
+  final confirmation = AlertDialog(
+    title: Text(
+      title,
+      style: TextStyle(
+        fontSize: 18,
+      ),
+    ),
+    content: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Text(
+            "this will send across metrics and logs that will help us debug your issue better",
+            style: TextStyle(
+              height: 1.5,
+              fontFamily: 'Ubuntu',
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    ),
+    actions: [
+      TextButton(
+        child: Text(
+          title,
+          style: TextStyle(
+            color: Theme.of(context).buttonColor,
+          ),
+        ),
+        onPressed: () async {
+          Navigator.of(context).pop();
+          await _sendLogs(context, toEmail, subject, body);
+          if (postShare != null) {
+            postShare();
+          }
+        },
+      ),
+    ],
+  );
+  showDialog(
+    context: context,
+    builder: (_) {
+      return confirmation;
+    },
+  );
+}
+
+Future<void> _sendLogs(
+    BuildContext context, String toEmail, String subject, String body) async {
   final dialog = createProgressDialog(context, "preparing logs...");
   await dialog.show();
   final tempPath = (await getTemporaryDirectory()).path;

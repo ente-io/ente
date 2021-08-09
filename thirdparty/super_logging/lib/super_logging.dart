@@ -184,6 +184,7 @@ class SuperLogging {
 
   static void setUserID(String userID) {
     Sentry.configureScope((scope) => scope.user = SentryUser(id: userID));
+    $.info("setting sentry user ID to: $userID");
   }
 
   static Future<void> _sendErrorToSentry(Object error, StackTrace stack) async {
