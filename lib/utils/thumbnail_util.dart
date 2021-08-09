@@ -13,8 +13,8 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/crypto_util.dart';
-import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/file_download_util.dart';
+import 'package:photos/utils/file_util.dart';
 
 import 'file_uploader_util.dart';
 
@@ -83,9 +83,7 @@ Future<Uint8List> getThumbnailFromLocal(File file,
       if (asset == null || !(await asset.exists)) {
         return null;
       }
-      return asset
-          .thumbDataWithSize(size, size, quality: quality)
-          .then((data) {
+      return asset.thumbDataWithSize(size, size, quality: quality).then((data) {
         ThumbnailLruCache.put(file, data, size);
         return data;
       });
@@ -152,7 +150,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   ThumbnailLruCache.put(item.file, data);
   final cachedThumbnail = getCachedThumbnail(item.file);
   if (cachedThumbnail.existsSync()) {
-    cachedThumbnail.deleteSync();
+    await cachedThumbnail.delete();
   }
   cachedThumbnail.writeAsBytes(data);
   if (_map.containsKey(file.uploadedFileID)) {

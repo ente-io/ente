@@ -50,7 +50,7 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
           ),
         ),
         onPressed: () async {
-          _saveKeys();
+          await _saveKeys();
         },
       ));
     }
@@ -77,7 +77,7 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
             ),
           ),
           onPressed: () async {
-            _saveKeys();
+            await _saveKeys();
           },
         ),
       );
@@ -138,7 +138,7 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
 
   Future _shareRecoveryKey(String recoveryKey) async {
     if (_recoveryKeyFile.existsSync()) {
-      _recoveryKeyFile.deleteSync();
+      await _recoveryKeyFile.delete();
     }
     _recoveryKeyFile.writeAsStringSync(recoveryKey);
     await Share.shareFiles([_recoveryKeyFile.path]);
@@ -151,10 +151,10 @@ class _RecoveryKeyDialogState extends State<RecoveryKeyDialog> {
     });
   }
 
-  void _saveKeys() async {
+  Future<void> _saveKeys() async {
     Navigator.of(context, rootNavigator: true).pop();
     if (_recoveryKeyFile.existsSync()) {
-      _recoveryKeyFile.deleteSync();
+      await _recoveryKeyFile.delete();
     }
     widget.onDone();
   }

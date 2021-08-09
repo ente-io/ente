@@ -88,7 +88,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     encoder.close();
     // delete the temporary video and image copy (only in IOS)
     if (io.Platform.isIOS) {
-      sourceFile.deleteSync();
+      await sourceFile.delete();
     }
     // new sourceFile which needs to be uploaded
     sourceFile = io.File(livePhotoPath);

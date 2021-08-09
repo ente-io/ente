@@ -292,7 +292,7 @@ class FileUploader {
       }
 
       if (io.File(encryptedFilePath).existsSync()) {
-        io.File(encryptedFilePath).deleteSync();
+        await io.File(encryptedFilePath).delete();
       }
       final encryptedFile = io.File(encryptedFilePath);
       final fileAttributes = await CryptoUtil.encryptFile(
@@ -305,7 +305,7 @@ class FileUploader {
       final encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key);
       if (io.File(encryptedThumbnailPath).existsSync()) {
-        io.File(encryptedThumbnailPath).deleteSync();
+        await io.File(encryptedThumbnailPath).delete();
       }
       final encryptedThumbnailFile = io.File(encryptedThumbnailPath);
       encryptedThumbnailFile
@@ -379,13 +379,13 @@ class FileUploader {
       if (io.Platform.isIOS &&
           mediaUploadData != null &&
           mediaUploadData.sourceFile != null) {
-        mediaUploadData.sourceFile.deleteSync();
+        await mediaUploadData.sourceFile.delete();
       }
       if (io.File(encryptedFilePath).existsSync()) {
-        io.File(encryptedFilePath).deleteSync();
+        await io.File(encryptedFilePath).delete();
       }
       if (io.File(encryptedThumbnailPath).existsSync()) {
-        io.File(encryptedThumbnailPath).deleteSync();
+        await io.File(encryptedThumbnailPath).delete();
       }
       await _uploadLocks.releaseLock(file.localID, _processType.toString());
     }

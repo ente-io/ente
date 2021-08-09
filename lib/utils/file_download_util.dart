@@ -1,5 +1,6 @@
 import 'dart:io' as io;
 import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
@@ -51,7 +52,7 @@ Future<io.File> downloadAndDecrypt(ente.File file,
     await CryptoUtil.decryptFile(encryptedFilePath, decryptedFilePath,
         Sodium.base642bin(file.fileDecryptionHeader), decryptFileKey(file));
     _logger.info("File decrypted: " + file.uploadedFileID.toString());
-    encryptedFile.deleteSync();
+    await encryptedFile.delete();
     return decryptedFile;
   });
 }

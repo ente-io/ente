@@ -219,7 +219,7 @@ class RemoteSyncService {
               foundMatchingCollection = true;
               file.generatedID = existingFile.generatedID;
               toBeInserted.add(file);
-              clearCache(file);
+              await clearCache(file);
               localButUpdatedOnRemote++;
               break;
             }

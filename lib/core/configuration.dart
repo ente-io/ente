@@ -83,7 +83,7 @@ class Configuration {
       if (tempDirectory.existsSync() &&
           (_preferences.getInt(lastTempFolderClearTimeKey) ?? 0) <
               (currentTime - kTempFolderDeletionTimeBuffer)) {
-        tempDirectory.deleteSync(recursive: true);
+        await tempDirectory.delete(recursive: true);
         await _preferences.setInt(lastTempFolderClearTimeKey, currentTime);
         _logger.info("Cleared temp folder");
       } else {
