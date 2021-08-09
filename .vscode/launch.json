@@ -5,15 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Flutter",
+            "name": "Android Prod",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
             "program": "lib/main.dart",
             "args": [
                 "--flavor",
-                "playstore"
+                "independent"
             ]
+        },
+        {
+            "name": "iOS Prod",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "program": "lib/main.dart"
         }
     ]
 }
