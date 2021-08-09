@@ -6,8 +6,6 @@ import 'package:photos/models/backup_status.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
-import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class FreeSpacePage extends StatefulWidget {
   final BackupStatus status;
@@ -140,7 +138,9 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
           Padding(padding: EdgeInsets.all(32)),
           Container(
             width: double.infinity,
-            height: 64,
+            constraints: BoxConstraints(
+              minHeight: 64,
+            ),
             padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
             child: button(
               "free up " + formatBytes(status.size),
