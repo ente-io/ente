@@ -1,7 +1,7 @@
 import EXIF from 'exif-js';
 import { FILE_TYPE } from 'pages/gallery';
 import { logError } from 'utils/sentry';
-import { NULL_LOCATION, Location } from './fileReadClient';
+import { NULL_LOCATION, Location } from './metadataService';
 
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
