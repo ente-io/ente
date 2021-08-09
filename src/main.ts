@@ -12,9 +12,8 @@ import AppUpdater from './utils/appUpdater';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
-import * as Sentry from "@sentry/electron";
+import initSentry from './utils/sentry';
 
-const SENTRY_DSN="https://e9268b784d1042a7a116f53c58ad2165@sentry.ente.io/5";
 
 let tray: Tray;
 let mainWindow: BrowserWindow;
@@ -64,10 +63,9 @@ else {
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
     app.on('ready', () => {
-        Sentry.init({ dsn: SENTRY_DSN});
+        initSentry();
         setIsUpdateAvailable(false)
         mainWindow = createWindow();
-
         Menu.setApplicationMenu(buildMenuBar())
 
         app.on('activate', function () {
