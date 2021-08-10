@@ -4,18 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photos/core/cache/thumbnail_cache.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/thumbnail_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 class ZoomableLiveImage extends StatefulWidget {
@@ -42,6 +36,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   File _livePhoto;
   bool _loadLivePhotoVideo = false;
 
+
   VideoPlayerController _videoPlayerController;
   ChewieController _chewieController;
 
@@ -49,6 +44,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   void initState() {
     _livePhoto = widget.photo;
     _loadLiveVideo();
+    _showLivePhotoToast();
     super.initState();
   }
 
@@ -133,5 +129,14 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
           setState(() {});
         }
       });
+  }
+
+  void _showLivePhotoToast() async {
+    var _preferences = await SharedPreferences.getInstance();
+    int promptTillNow = _preferences.getInt(kLivePhotoToastCounterKey) ?? 0;
+    if (promptTillNow < kMaxLivePhotoToastCount) {
+      showToast("press and hold to play video");
+    }
+    _preferences.setInt(kLivePhotoToastCounterKey, promptTillNow + 1);
   }
 }
