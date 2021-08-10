@@ -1,11 +1,11 @@
 import HTTPService from 'services/HTTPService';
-import { retryAsyncFunction } from 'utils/common';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
 import { MultipartUploadURLs, UploadFile, UploadURL } from './uploadService';
 import { File } from '../fileService';
 import { CustomError } from 'utils/common/errorUtil';
+import { retryAsyncFunction } from 'utils/network';
 
 const ENDPOINT = getEndpoint();
 const MAX_URL_REQUESTS = 50;
@@ -133,7 +133,7 @@ class NetworkClient {
                 }
                 return resp;
             });
-            return response.headers.etag;
+            return response.headers.etag as string;
         } catch (e) {
             logError(e, 'put filePart failed');
             throw e;
