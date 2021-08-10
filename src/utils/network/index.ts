@@ -1,4 +1,4 @@
-import { sleep } from 'utils/upload';
+import { sleep } from 'utils/common';
 
 const retrySleepTime = [2000, 5000, 10000];
 
