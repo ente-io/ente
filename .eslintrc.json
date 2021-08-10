@@ -48,7 +48,8 @@
             "error",
             "always"
         ],
-        "space-before-function-paren": "off"
+        "space-before-function-paren": "off",
+        "operator-linebreak":["error","after", { "overrides": { "?": "before", ":": "before" } }]
     },
     "settings": {
         "react": {
