@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
-import UploadService, { FileWithCollection, UPLOAD_STAGES } from 'services/upload/uploadService';
+
 import { createAlbum } from 'services/collectionService';
-import { getLocalFiles } from 'services/fileService';
 import constants from 'utils/strings/constants';
 import { SetDialogMessage } from 'components/MessageDialog';
 import UploadProgress from './UploadProgress';
@@ -13,6 +12,11 @@ import { SetFiles, SetLoading } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { FileRejection } from 'react-dropzone';
+import UploadManager, {
+    FileWithCollection,
+    UPLOAD_STAGES,
+} from 'services/upload/uploadManager';
+import uploadManager from 'services/upload/uploadManager';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
@@ -25,8 +29,8 @@ interface Props {
     setDialogMessage: SetDialogMessage;
     setUploadInProgress: any;
     showCollectionSelector: () => void;
-    fileRejections:FileRejection[];
-    setFiles:SetFiles;
+    fileRejections: FileRejection[];
+    setFiles: SetFiles;
 }
 
 export enum UPLOAD_STRATEGY {
@@ -38,22 +42,50 @@ interface AnalysisResult {
     suggestedCollectionName: string;
     multipleFolders: boolean;
 }
+export interface ProgressUpdater {
+    setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
+    setFileCounter: React.Dispatch<
+        React.SetStateAction<{
+            finished: number;
+            total: number;
+        }>
+    >;
+    setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
+    setFileProgress: React.Dispatch<React.SetStateAction<Map<string, number>>>;
+    setUploadResult: React.Dispatch<React.SetStateAction<Map<string, number>>>;
+}
 
 export default function Upload(props: Props) {
     const [progressView, setProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
         UPLOAD_STAGES.START,
     );
-    const [fileCounter, setFileCounter] = useState({ current: 0, total: 0 });
+    const [fileCounter, setFileCounter] = useState({ finished: 0, total: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<string, number>());
-    const [uploadResult, setUploadResult]=useState(new Map<string, number>());
+    const [uploadResult, setUploadResult] = useState(new Map<string, number>());
     const [percentComplete, setPercentComplete] = useState(0);
     const [choiceModalView, setChoiceModalView] = useState(false);
-    const [fileAnalysisResult, setFileAnalysisResult] = useState<AnalysisResult>(null);
+    const [fileAnalysisResult, setFileAnalysisResult] =
+        useState<AnalysisResult>(null);
     const appContext = useContext(AppContext);
 
     useEffect(() => {
-        if (props.acceptedFiles?.length > 0 || appContext.sharedFiles?.length > 0) {
+        UploadManager.initUploader(
+            {
+                setPercentComplete,
+                setFileCounter,
+                setFileProgress,
+                setUploadResult,
+                setUploadStage,
+            },
+            props.setFiles,
+        );
+    });
+    useEffect(() => {
+        if (
+            props.acceptedFiles?.length > 0 ||
+            appContext.sharedFiles?.length > 0
+        ) {
             props.setLoading(true);
 
             let fileAnalysisResult;
@@ -77,7 +109,7 @@ export default function Upload(props: Props) {
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
-        setFileCounter({ current: 0, total: 0 });
+        setFileCounter({ finished: 0, total: 0 });
         setFileProgress(new Map<string, number>());
         setUploadResult(new Map<string, number>());
         setPercentComplete(0);
@@ -99,9 +131,9 @@ export default function Upload(props: Props) {
     };
 
     const nextModal = (fileAnalysisResult: AnalysisResult) => {
-        fileAnalysisResult?.multipleFolders ?
-            setChoiceModalView(true) :
-            showCreateCollectionModal(fileAnalysisResult);
+        fileAnalysisResult?.multipleFolders
+            ? setChoiceModalView(true)
+            : showCreateCollectionModal(fileAnalysisResult);
     };
 
     function analyseUploadFiles(): AnalysisResult {
@@ -148,10 +180,11 @@ export default function Upload(props: Props) {
     const uploadFilesToExistingCollection = async (collection) => {
         try {
             uploadInit();
-            const filesWithCollectionToUpload: FileWithCollection[] = props.acceptedFiles.map((file) => ({
-                file,
-                collection,
-            }));
+            const filesWithCollectionToUpload: FileWithCollection[] =
+                props.acceptedFiles.map((file) => ({
+                    file,
+                    collection,
+                }));
             await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
             logError(e, 'Failed to upload files to existing collections');
@@ -203,18 +236,8 @@ export default function Upload(props: Props) {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await props.syncWithRemote(true, true);
-            const localFiles= await getLocalFiles();
-            await UploadService.uploadFiles(
+            await uploadManager.queueFilesForUpload(
                 filesWithCollectionToUpload,
-                localFiles,
-                {
-                    setPercentComplete,
-                    setFileCounter,
-                    setUploadStage,
-                    setFileProgress,
-                    setUploadResult,
-                },
-                props.setFiles,
             );
         } catch (err) {
             props.setBannerMessage(err.message);
@@ -226,14 +249,12 @@ export default function Upload(props: Props) {
             props.syncWithRemote();
         }
     };
-    const retryFailed = async (
-    ) => {
+    const retryFailed = async () => {
         try {
             props.setUploadInProgress(true);
             uploadInit();
             await props.syncWithRemote(true, true);
-            const localFiles= await getLocalFiles();
-            await UploadService.retryFailedFiles(localFiles);
+            await uploadManager.retryFailedFiles();
         } catch (err) {
             props.setBannerMessage(err.message);
             setProgressView(false);
@@ -244,14 +265,15 @@ export default function Upload(props: Props) {
         }
     };
 
-
     return (
         <>
             <ChoiceModal
                 show={choiceModalView}
                 onHide={() => setChoiceModalView(false)}
                 uploadFiles={uploadFilesToNewCollections}
-                showCollectionCreateModal={() => showCreateCollectionModal(fileAnalysisResult)}
+                showCollectionCreateModal={() =>
+                    showCreateCollectionModal(fileAnalysisResult)
+                }
             />
             <UploadProgress
                 now={percentComplete}
