@@ -36,7 +36,6 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   File _livePhoto;
   bool _loadLivePhotoVideo = false;
 
-
   VideoPlayerController _videoPlayerController;
   ChewieController _chewieController;
 
@@ -136,7 +135,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     int promptTillNow = _preferences.getInt(kLivePhotoToastCounterKey) ?? 0;
     if (promptTillNow < kMaxLivePhotoToastCount) {
       showToast("press and hold to play video");
+      _preferences.setInt(kLivePhotoToastCounterKey, promptTillNow + 1);
     }
-    _preferences.setInt(kLivePhotoToastCounterKey, promptTillNow + 1);
   }
 }
