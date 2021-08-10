@@ -23,6 +23,7 @@ import { getFileType, getFileOriginalName, getFileData } from './readFileService
 import { encryptFiledata } from './encryptionService';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { uploadStreamUsingMultipart } from './s3Service';
+import { fileAlreadyInCollection } from 'utils/upload';
 
 
 const MAX_CONCURRENT_UPLOADS = 4;
@@ -85,7 +86,7 @@ export interface MetadataObject {
     hasStaticThumbnail?: boolean;
 }
 
-interface FileInMemory {
+export interface FileInMemory {
     filedata: Uint8Array | DataStream;
     thumbnail: Uint8Array;
     metadata: MetadataObject;
@@ -244,7 +245,7 @@ class UploadService {
             // read the file into memory
             file = await this.readFile(reader, rawFile, this.metadataMap);
 
-            if (this.fileAlreadyInCollection(file, collection)) {
+            if (fileAlreadyInCollection(this.existingFilesCollectionWise, file, collection)) {
                 // set progress to -2 indicating that file upload was skipped
                 this.fileProgress.set(rawFile.name, FileUploadResults.SKIPPED);
                 this.updateProgressBarUI();
@@ -256,7 +257,7 @@ class UploadService {
                     encryptedFile.file,
                 );
 
-                let uploadFile: UploadFile = this.getUploadFile(
+                const uploadFile: UploadFile = this.getUploadFile(
                     collection,
                     backupedFile,
                     encryptedFile.fileKey,
@@ -270,15 +271,10 @@ class UploadService {
                 this.existingFiles=sortFiles(this.existingFiles);
                 await localForage.setItem('files', removeUnneccessaryFileProps(this.existingFiles));
                 this.setFiles(this.existingFiles);
-
-                uploadFile = null;
-
                 this.fileProgress.set(rawFile.name, FileUploadResults.UPLOADED);
-
                 this.filesCompleted++;
             }
         } catch (e) {
-            logError(e, 'file upload failed');
             logError(e, 'file upload failed');
             handleError(e);
             this.failedFiles.push(fileWithCollection);
@@ -360,36 +356,6 @@ class UploadService {
             throw e;
         }
     }
-
-    private fileAlreadyInCollection(
-        newFile: FileInMemory,
-        collection: Collection,
-    ): boolean {
-        const collectionFiles =
-            this.existingFilesCollectionWise.get(collection.id) ?? [];
-        for (const existingFile of collectionFiles) {
-            if (this.areFilesSame(existingFile.metadata, newFile.metadata)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    private areFilesSame(
-        existingFile: MetadataObject,
-        newFile: MetadataObject,
-    ): boolean {
-        if (
-            existingFile.fileType === newFile.fileType &&
-            existingFile.creationTime === newFile.creationTime &&
-            existingFile.modificationTime === newFile.modificationTime &&
-            existingFile.title === newFile.title
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
 
     private async encryptFile(
         worker: any,
