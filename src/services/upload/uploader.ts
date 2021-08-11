@@ -1,3 +1,4 @@
+import { Collection } from 'services/collectionService';
 import { File } from 'services/fileService';
 import { sleep } from 'utils/common';
 import { handleError, CustomError } from 'utils/common/errorUtil';
@@ -6,12 +7,11 @@ import { logError } from 'utils/sentry';
 import { fileAlreadyInCollection } from 'utils/upload';
 import NetworkClient from './networkClient';
 import UIService from './uiService';
+import { FileUploadResults, FileWithCollection } from './uploadManager';
 import UploadService, {
     BackupedFile,
     EncryptedFile,
     FileInMemory,
-    FileUploadResults,
-    FileWithCollection,
     UploadFile,
 } from './uploadService';
 
@@ -26,8 +26,10 @@ export default async function uploader(
     reader: FileReader,
     fileWithCollection: FileWithCollection,
     existingFilesCollectionWise: Map<number, File[]>,
+    collections: Map<number, Collection>,
 ): Promise<UploadResponse> {
-    const { file: rawFile, collection } = fileWithCollection;
+    const { file: rawFile, collectionID } = fileWithCollection;
+    const collection = collections.get(collectionID);
     UIService.setFileProgress(rawFile.name, 0);
     let file: FileInMemory = null;
     let encryptedFile: EncryptedFile = null;

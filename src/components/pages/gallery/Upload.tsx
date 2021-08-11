@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { createAlbum } from 'services/collectionService';
+import { Collection, createAlbum } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import { SetDialogMessage } from 'components/MessageDialog';
 import UploadProgress from './UploadProgress';
@@ -183,7 +183,7 @@ export default function Upload(props: Props) {
             const filesWithCollectionToUpload: FileWithCollection[] =
                 props.acceptedFiles.map((file) => ({
                     file,
-                    collection,
+                    collectionID: collection.id,
                 }));
             await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
@@ -198,7 +198,8 @@ export default function Upload(props: Props) {
         try {
             uploadInit();
 
-            const filesWithCollectionToUpload = [];
+            const filesWithCollectionToUpload: FileWithCollection[] = [];
+            const collections: Collection[] = [];
             let collectionWiseFiles = new Map<string, globalThis.File[]>();
             if (strategy === UPLOAD_STRATEGY.SINGLE_COLLECTION) {
                 collectionWiseFiles.set(collectionName, props.acceptedFiles);
@@ -208,8 +209,12 @@ export default function Upload(props: Props) {
             try {
                 for (const [collectionName, files] of collectionWiseFiles) {
                     const collection = await createAlbum(collectionName);
+                    collections.push(collection);
                     for (const file of files) {
-                        filesWithCollectionToUpload.push({ collection, file });
+                        filesWithCollectionToUpload.push({
+                            collectionID: collection.id,
+                            file,
+                        });
                     }
                 }
             } catch (e) {
@@ -223,7 +228,7 @@ export default function Upload(props: Props) {
                 });
                 throw e;
             }
-            await uploadFiles(filesWithCollectionToUpload);
+            await uploadFiles(filesWithCollectionToUpload, collections);
         } catch (e) {
             logError(e, 'Failed to upload files to new collections');
         }
@@ -231,6 +236,7 @@ export default function Upload(props: Props) {
 
     const uploadFiles = async (
         filesWithCollectionToUpload: FileWithCollection[],
+        collections?: Collection[],
     ) => {
         try {
             props.setUploadInProgress(true);
@@ -238,6 +244,7 @@ export default function Upload(props: Props) {
             await props.syncWithRemote(true, true);
             await uploadManager.queueFilesForUpload(
                 filesWithCollectionToUpload,
+                collections,
             );
         } catch (err) {
             props.setBannerMessage(err.message);

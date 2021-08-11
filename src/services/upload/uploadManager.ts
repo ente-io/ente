@@ -1,5 +1,5 @@
 import { File, getLocalFiles } from '../fileService';
-import { Collection } from '../collectionService';
+import { Collection, getLocalCollections } from '../collectionService';
 import { SetFiles } from 'pages/gallery';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
 import {
@@ -9,7 +9,11 @@ import {
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
-import { ParsedMetaDataJSON, parseMetadataJSON } from './metadataService';
+import {
+    getMetadataKey,
+    ParsedMetaDataJSON,
+    parseMetadataJSON,
+} from './metadataService';
 import { segregateFiles } from 'utils/upload';
 import { ProgressUpdater } from 'components/pages/gallery/Upload';
 import uploader from './uploader';
@@ -34,7 +38,7 @@ export interface UploadURL {
 
 export interface FileWithCollection {
     file: globalThis.File;
-    collection: Collection;
+    collectionID: number;
 }
 
 export enum UPLOAD_STAGES {
@@ -44,21 +48,23 @@ export enum UPLOAD_STAGES {
     FINISH,
 }
 
+export type MetadataMap = Map<string, ParsedMetaDataJSON>;
+
 class UploadManager {
     private cryptoWorkers = new Array<ComlinkWorker>(MAX_CONCURRENT_UPLOADS);
-    private metadataMap: Map<string, ParsedMetaDataJSON>;
+    private metadataMap: MetadataMap;
     private filesToBeUploaded: FileWithCollection[];
     private failedFiles: FileWithCollection[];
     private existingFilesCollectionWise: Map<number, File[]>;
     private existingFiles: File[];
     private setFiles: SetFiles;
-
+    private collections: Map<number, Collection>;
     public initUploader(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
     }
 
-    private async init() {
+    private async init(newCollections?: Collection[]) {
         this.filesToBeUploaded = [];
         this.failedFiles = [];
         this.metadataMap = new Map<string, ParsedMetaDataJSON>();
@@ -66,16 +72,23 @@ class UploadManager {
         this.existingFilesCollectionWise = sortFilesIntoCollections(
             this.existingFiles,
         );
+        const collections = await getLocalCollections();
+        if (newCollections) {
+            collections.push(...newCollections);
+        }
+        this.collections = new Map(
+            collections.map((collection) => [collection.id, collection]),
+        );
     }
 
     public async queueFilesForUpload(
-        filesWithCollectionToUpload: FileWithCollection[],
+        fileWithCollectionTobeUploaded: FileWithCollection[],
+        collections?: Collection[],
     ) {
         try {
-            await this.init();
-
+            await this.init(collections);
             const { metadataFiles, mediaFiles } = segregateFiles(
-                filesWithCollectionToUpload,
+                fileWithCollectionTobeUploaded,
             );
             if (metadataFiles.length) {
                 UIService.setUploadStage(
@@ -99,12 +112,20 @@ class UploadManager {
         }
     }
 
-    private async seedMetadataMap(metadataFiles: globalThis.File[]) {
+    private async seedMetadataMap(metadataFiles: FileWithCollection[]) {
         UIService.reset(metadataFiles.length);
 
-        for (const rawFile of metadataFiles) {
-            const parsedMetaDataJSON = await parseMetadataJSON(rawFile);
-            this.metadataMap.set(parsedMetaDataJSON.title, parsedMetaDataJSON);
+        for (const fileWithCollection of metadataFiles) {
+            const parsedMetaDataJSON = await parseMetadataJSON(
+                fileWithCollection.file,
+            );
+            this.metadataMap.set(
+                getMetadataKey(
+                    fileWithCollection.collectionID,
+                    parsedMetaDataJSON.title,
+                ),
+                parsedMetaDataJSON,
+            );
             UIService.increaseFileUploaded();
         }
     }
@@ -142,6 +163,7 @@ class UploadManager {
                 fileReader,
                 fileWithCollection,
                 this.existingFilesCollectionWise,
+                this.collections,
             );
 
             if (fileUploadResult === FileUploadResults.UPLOADED) {
