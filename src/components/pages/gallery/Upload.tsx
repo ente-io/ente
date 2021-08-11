@@ -155,6 +155,11 @@ export default function Upload(props: Props) {
                 1,
                 commonPathPrefix.lastIndexOf('/') - 1,
             );
+            if (commonPathPrefix) {
+                commonPathPrefix = commonPathPrefix.substr(
+                    commonPathPrefix.lastIndexOf('/') + 1,
+                );
+            }
         }
         return {
             suggestedCollectionName: commonPathPrefix,
