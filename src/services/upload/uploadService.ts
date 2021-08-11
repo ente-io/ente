@@ -13,6 +13,7 @@ import {
 import { encryptFiledata } from './encryptionService';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { uploadStreamUsingMultipart } from './s3Service';
+import uiService from './uiService';
 
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 export const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
@@ -106,8 +107,12 @@ export enum UPLOAD_STAGES {
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
-    private pendingFilesUploads: number;
     private metadataMap: Map<string, ParsedMetaDataJSON>;
+    private pendingUploadCount: number = 0;
+
+    setPendingUploadCount(count: number) {
+        this.pendingUploadCount = count;
+    }
 
     async readFile(reader: FileReader, receivedFile: globalThis.File) {
         try {
@@ -140,7 +145,7 @@ class UploadService {
                 filedata,
                 thumbnail,
                 metadata,
-            };
+            } as FileInMemory;
         } catch (e) {
             logError(e, 'error reading files');
             throw e;
@@ -182,22 +187,16 @@ class UploadService {
         }
     }
 
-    async uploadToBucket(
-        file: ProcessedFile,
-        trackUploadProgress,
-    ): Promise<BackupedFile> {
+    async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
         try {
             let fileObjectKey: string = null;
             if (isDataStream(file.file.encryptedData)) {
-                const progressTracker = trackUploadProgress;
                 fileObjectKey = await uploadStreamUsingMultipart(
                     file.filename,
                     file.file.encryptedData,
-                    progressTracker,
                 );
             } else {
-                const progressTracker = trackUploadProgress.bind(
-                    null,
+                const progressTracker = uiService.trackUploadProgress(
                     file.filename,
                 );
                 const fileUploadURL = await this.getUploadURL();
@@ -211,7 +210,7 @@ class UploadService {
             const thumbnailObjectKey = await NetworkClient.putFile(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData as Uint8Array,
-                () => null,
+                null,
             );
 
             const backupedFile: BackupedFile = {
@@ -248,13 +247,21 @@ class UploadService {
     }
 
     private async getUploadURL() {
-        if (this.uploadURLs.length === 0) {
-            await NetworkClient.fetchUploadURLs(
-                this.pendingFilesUploads,
-                this.uploadURLs,
-            );
+        if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
+            await this.fetchUploadURLs();
         }
         return this.uploadURLs.pop();
+    }
+
+    public async preFetchUploadURLs() {
+        await this.fetchUploadURLs();
+    }
+
+    private async fetchUploadURLs() {
+        await NetworkClient.fetchUploadURLs(
+            this.pendingUploadCount,
+            this.uploadURLs,
+        );
     }
 }
 

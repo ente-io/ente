@@ -10,24 +10,20 @@ import { retryAsyncFunction } from 'utils/network';
 const ENDPOINT = getEndpoint();
 const MAX_URL_REQUESTS = 50;
 
-
 class NetworkClient {
-    private uploadURLFetchInProgress=null;
+    private uploadURLFetchInProgress = null;
 
-    async uploadFile(uploadFile: UploadFile):Promise<File> {
+    async uploadFile(uploadFile: UploadFile): Promise<File> {
         try {
             const token = getToken();
             if (!token) {
                 return;
             }
-            const response = await retryAsyncFunction(()=>HTTPService.post(
-                `${ENDPOINT}/files`,
-                uploadFile,
-                null,
-                {
+            const response = await retryAsyncFunction(() =>
+                HTTPService.post(`${ENDPOINT}/files`, uploadFile, null, {
                     'X-Auth-Token': token,
-                },
-            ));
+                }),
+            );
             return response.data;
         } catch (e) {
             logError(e, 'upload Files Failed');
@@ -35,7 +31,7 @@ class NetworkClient {
         }
     }
 
-    async fetchUploadURLs(count:number, urlStore:UploadURL[]): Promise<void> {
+    async fetchUploadURLs(count: number, urlStore: UploadURL[]): Promise<void> {
         try {
             if (!this.uploadURLFetchInProgress) {
                 try {
@@ -46,10 +42,7 @@ class NetworkClient {
                     this.uploadURLFetchInProgress = HTTPService.get(
                         `${ENDPOINT}/files/upload-urls`,
                         {
-                            count: Math.min(
-                                MAX_URL_REQUESTS,
-                                count * 2,
-                            ),
+                            count: Math.min(MAX_URL_REQUESTS, count * 2),
                         },
                         { 'X-Auth-Token': token },
                     );
@@ -92,16 +85,16 @@ class NetworkClient {
     async putFile(
         fileUploadURL: UploadURL,
         file: Uint8Array,
-        progressTracker:()=>any,
+        progressTracker,
     ): Promise<string> {
         try {
-            await retryAsyncFunction(()=>
+            await retryAsyncFunction(() =>
                 HTTPService.put(
                     fileUploadURL.url,
                     file,
                     null,
                     null,
-                    progressTracker(),
+                    progressTracker,
                 ),
             );
             return fileUploadURL.objectKey;
@@ -111,15 +104,14 @@ class NetworkClient {
         }
     }
 
-
     async putFilePart(
         partUploadURL: string,
         filePart: Uint8Array,
         progressTracker,
     ) {
         try {
-            const response=await retryAsyncFunction(async ()=>{
-                const resp =await HTTPService.put(
+            const response = await retryAsyncFunction(async () => {
+                const resp = await HTTPService.put(
                     partUploadURL,
                     filePart,
                     null,
@@ -127,7 +119,7 @@ class NetworkClient {
                     progressTracker(),
                 );
                 if (!resp?.headers?.etag) {
-                    const err=Error(CustomError.ETAG_MISSING);
+                    const err = Error(CustomError.ETAG_MISSING);
                     logError(err);
                     throw err;
                 }
@@ -140,9 +132,9 @@ class NetworkClient {
         }
     }
 
-    async completeMultipartUpload(completeURL:string, reqBody:any) {
+    async completeMultipartUpload(completeURL: string, reqBody: any) {
         try {
-            await retryAsyncFunction(()=>
+            await retryAsyncFunction(() =>
                 HTTPService.post(completeURL, reqBody, null, {
                     'content-type': 'text/xml',
                 }),
@@ -155,5 +147,3 @@ class NetworkClient {
 }
 
 export default new NetworkClient();
-
-

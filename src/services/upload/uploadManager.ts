@@ -10,12 +10,12 @@ import {
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
-import NetworkClient from './networkClient';
 import { ParsedMetaDataJSON, parseMetadataJSON } from './metadataService';
 import { segregateFiles } from 'utils/upload';
 import { ProgressUpdater } from 'components/pages/gallery/Upload';
 import uploader from './uploader';
 import uiService from './uiService';
+import uploadService from './uploadService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -85,7 +85,7 @@ class UploadManager {
                 uiService.setUploadStage(
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
                 );
-                await this.processMetadataFiles(metadataFiles);
+                await this.seedMetadataMap(metadataFiles);
             }
             if (mediaFiles.length) {
                 uiService.setUploadStage(UPLOAD_STAGES.START);
@@ -104,20 +104,7 @@ class UploadManager {
         }
     }
 
-    private async preFetchUploadURLs(count: number) {
-        try {
-            // checking for any subscription related errors
-            await NetworkClient.fetchUploadURLs(count, this.uploadURLs);
-        } catch (e) {
-            logError(e, 'error fetching uploadURLs');
-            const { parsedError, parsed } = parseError(e);
-            if (parsed) {
-                throw parsedError;
-            }
-        }
-    }
-
-    private async processMetadataFiles(metadataFiles: globalThis.File[]) {
+    private async seedMetadataMap(metadataFiles: globalThis.File[]) {
         uiService.reset(metadataFiles.length);
 
         for (const rawFile of metadataFiles) {
@@ -152,8 +139,22 @@ class UploadManager {
         await Promise.all(uploadProcesses);
     }
 
+    private async preFetchUploadURLs(count: number) {
+        try {
+            uploadService.setPendingUploadCount(count);
+            uploadService.preFetchUploadURLs();
+            // checking for any subscription related errors
+        } catch (e) {
+            logError(e, 'error fetching uploadURLs');
+            const { parsedError, parsed } = parseError(e);
+            if (parsed) {
+                throw parsedError;
+            }
+        }
+    }
+
     private async uploadNextFileInQueue(worker: any, fileReader: FileReader) {
-        if (this.filesToBeUploaded.length > 0) {
+        while (this.filesToBeUploaded.length > 0) {
             const fileWithCollection = this.filesToBeUploaded.pop();
             const { fileUploadResult, file } = await uploader(
                 worker,
