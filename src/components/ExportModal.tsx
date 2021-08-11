@@ -1,7 +1,12 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import exportService, { ExportProgress, ExportStage, ExportStats, ExportType } from 'services/exportService';
+import exportService, {
+    ExportProgress,
+    ExportStage,
+    ExportStats,
+    ExportType,
+} from 'services/exportService';
 import { getLocalFiles } from 'services/fileService';
 import styled from 'styled-components';
 import { sleep } from 'utils/common';
@@ -18,38 +23,44 @@ import MessageDialog from './MessageDialog';
 
 const FolderIconWrapper = styled.div`
     width: 15%;
-    margin-left: 10px; 
-    cursor: pointer; 
+    margin-left: 10px;
+    cursor: pointer;
     padding: 3px;
     border: 1px solid #444;
-    border-radius:15%;
-    &:hover{
-        background-color:#444;
+    border-radius: 15%;
+    &:hover {
+        background-color: #444;
     }
 `;
 
-const ExportFolderPathContainer =styled.span`
-    white-space: nowrap;                   
+const ExportFolderPathContainer = styled.span`
+    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;  
+    text-overflow: ellipsis;
     width: 200px;
-    
+
     /* Beginning of string */
     direction: rtl;
     text-align: left;
 `;
 
 interface Props {
-    show: boolean
-    onHide: () => void
-    usage: string
+    show: boolean;
+    onHide: () => void;
+    usage: string;
 }
 export default function ExportModal(props: Props) {
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState('');
     const [exportSize, setExportSize] = useState('');
-    const [exportProgress, setExportProgress] = useState<ExportProgress>({ current: 0, total: 0 });
-    const [exportStats, setExportStats] = useState<ExportStats>({ failed: 0, success: 0 });
+    const [exportProgress, setExportProgress] = useState<ExportProgress>({
+        current: 0,
+        total: 0,
+    });
+    const [exportStats, setExportStats] = useState<ExportStats>({
+        failed: 0,
+        success: 0,
+    });
     const [lastExportTime, setLastExportTime] = useState(0);
 
     // ====================
@@ -64,7 +75,9 @@ export default function ExportModal(props: Props) {
         exportService.ElectronAPIs.registerStopExportListener(stopExport);
         exportService.ElectronAPIs.registerPauseExportListener(pauseExport);
         exportService.ElectronAPIs.registerResumeExportListener(resumeExport);
-        exportService.ElectronAPIs.registerRetryFailedExportListener(retryFailedExport);
+        exportService.ElectronAPIs.registerRetryFailedExportListener(
+            retryFailedExport,
+        );
     }, []);
 
     useEffect(() => {
@@ -76,7 +89,10 @@ export default function ExportModal(props: Props) {
             setExportStage(exportInfo?.stage ?? ExportStage.INIT);
             setLastExportTime(exportInfo?.lastAttemptTimestamp);
             setExportProgress(exportInfo?.progress ?? { current: 0, total: 0 });
-            setExportStats({ success: exportInfo?.exportedFiles?.length ?? 0, failed: exportInfo?.failedFiles?.length ?? 0 });
+            setExportStats({
+                success: exportInfo?.exportedFiles?.length ?? 0,
+                failed: exportInfo?.failedFiles?.length ?? 0,
+            });
             if (exportInfo?.stage === ExportStage.INPROGRESS) {
                 resumeExport();
             }
@@ -96,17 +112,27 @@ export default function ExportModal(props: Props) {
                 const failedFilesCnt = exportRecord.failedFiles.length;
                 const syncedFilesCnt = localFiles.length;
                 if (syncedFilesCnt > exportedFileCnt + failedFilesCnt) {
-                    updateExportProgress({ current: exportedFileCnt + failedFilesCnt, total: syncedFilesCnt });
-                    const exportFileUIDs = new Set([...exportRecord.exportedFiles, ...exportRecord.failedFiles]);
-                    const unExportedFiles = localFiles.filter((file) => !exportFileUIDs.has(getFileUID(file)));
-                    exportService.addFilesQueuedRecord(exportFolder, unExportedFiles);
+                    updateExportProgress({
+                        current: exportedFileCnt + failedFilesCnt,
+                        total: syncedFilesCnt,
+                    });
+                    const exportFileUIDs = new Set([
+                        ...exportRecord.exportedFiles,
+                        ...exportRecord.failedFiles,
+                    ]);
+                    const unExportedFiles = localFiles.filter(
+                        (file) => !exportFileUIDs.has(getFileUID(file)),
+                    );
+                    exportService.addFilesQueuedRecord(
+                        exportFolder,
+                        unExportedFiles,
+                    );
                     updateExportStage(ExportStage.PAUSED);
                 }
             }
         };
         main();
     }, [props.show]);
-
 
     useEffect(() => {
         setExportSize(props.usage);
@@ -162,7 +188,10 @@ export default function ExportModal(props: Props) {
     const startExport = async () => {
         await preExportRun();
         updateExportProgress({ current: 0, total: 0 });
-        const { paused } = await exportService.exportFiles(updateExportProgress, ExportType.NEW);
+        const { paused } = await exportService.exportFiles(
+            updateExportProgress,
+            ExportType.NEW,
+        );
         await postExportRun(paused);
     };
 
@@ -184,13 +213,15 @@ export default function ExportModal(props: Props) {
         const pausedStageProgress = exportRecord.progress;
         setExportProgress(pausedStageProgress);
 
-        const updateExportStatsWithOffset = ((progress: ExportProgress) => updateExportProgress(
-            {
+        const updateExportStatsWithOffset = (progress: ExportProgress) =>
+            updateExportProgress({
                 current: pausedStageProgress.current + progress.current,
                 total: pausedStageProgress.current + progress.total,
-            },
-        ));
-        const { paused } = await exportService.exportFiles(updateExportStatsWithOffset, ExportType.PENDING);
+            });
+        const { paused } = await exportService.exportFiles(
+            updateExportStatsWithOffset,
+            ExportType.PENDING,
+        );
 
         await postExportRun(paused);
     };
@@ -199,7 +230,10 @@ export default function ExportModal(props: Props) {
         await preExportRun();
         updateExportProgress({ current: 0, total: exportStats.failed });
 
-        const { paused } = await exportService.exportFiles(updateExportProgress, ExportType.RETRY_FAILED);
+        const { paused } = await exportService.exportFiles(
+            updateExportProgress,
+            ExportType.RETRY_FAILED,
+        );
         await postExportRun(paused);
     };
 
@@ -224,7 +258,8 @@ export default function ExportModal(props: Props) {
         switch (exportStage) {
             case ExportStage.INIT:
                 return (
-                    <ExportInit {...props}
+                    <ExportInit
+                        {...props}
                         exportFolder={exportFolder}
                         exportSize={exportSize}
                         updateExportFolder={updateExportFolder}
@@ -235,7 +270,8 @@ export default function ExportModal(props: Props) {
             case ExportStage.INPROGRESS:
             case ExportStage.PAUSED:
                 return (
-                    <ExportInProgress {...props}
+                    <ExportInProgress
+                        {...props}
                         exportFolder={exportFolder}
                         exportSize={exportSize}
                         exportStage={exportStage}
@@ -259,7 +295,8 @@ export default function ExportModal(props: Props) {
                     />
                 );
 
-            default: return (<></>);
+            default:
+                return <></>;
         }
     };
 
@@ -269,34 +306,50 @@ export default function ExportModal(props: Props) {
             onHide={props.onHide}
             attributes={{
                 title: constants.EXPORT_DATA,
-            }}
-        >
-            <div style={{ borderBottom: '1px solid #444', marginBottom: '20px', padding: '0 5%', width: '450px' }}>
+            }}>
+            <div
+                style={{
+                    borderBottom: '1px solid #444',
+                    marginBottom: '20px',
+                    padding: '0 5%',
+                    width: '450px',
+                }}>
                 <Row>
                     <Label width="40%">{constants.DESTINATION}</Label>
                     <Value width="60%">
-                        {!exportFolder ?
-                            (<Button variant={'outline-success'} size={'sm'} onClick={selectExportDirectory}>{constants.SELECT_FOLDER}</Button>) :
-                            (<>
+                        {!exportFolder ? (
+                            <Button
+                                variant={'outline-success'}
+                                size={'sm'}
+                                onClick={selectExportDirectory}>
+                                {constants.SELECT_FOLDER}
+                            </Button>
+                        ) : (
+                            <>
                                 {/* <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}> */}
                                 <ExportFolderPathContainer>
                                     {exportFolder}
                                 </ExportFolderPathContainer>
                                 {/* </span> */}
-                                {(exportStage === ExportStage.FINISHED || exportStage === ExportStage.INIT) && (
-                                    <FolderIconWrapper onClick={selectExportDirectory} >
+                                {(exportStage === ExportStage.FINISHED ||
+                                    exportStage === ExportStage.INIT) && (
+                                    <FolderIconWrapper
+                                        onClick={selectExportDirectory}>
                                         <FolderIcon />
                                     </FolderIconWrapper>
                                 )}
-                            </>)
-                        }
+                            </>
+                        )}
                     </Value>
                 </Row>
                 <Row>
-                    <Label width="40%">{constants.TOTAL_EXPORT_SIZE} </Label><Value width="60%">{exportSize ? `${exportSize}` : <InProgressIcon />}</Value>
+                    <Label width="40%">{constants.TOTAL_EXPORT_SIZE} </Label>
+                    <Value width="60%">
+                        {exportSize ? `${exportSize}` : <InProgressIcon />}
+                    </Value>
                 </Row>
             </div>
             <ExportDynamicState />
-        </MessageDialog >
+        </MessageDialog>
     );
 }

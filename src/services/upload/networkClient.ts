@@ -2,10 +2,11 @@ import HTTPService from 'services/HTTPService';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
-import { MultipartUploadURLs, UploadFile, UploadURL } from './uploadService';
+import { UploadFile, UploadURL } from './uploadService';
 import { File } from '../fileService';
 import { CustomError } from 'utils/common/errorUtil';
 import { retryAsyncFunction } from 'utils/network';
+import { MultipartUploadURLs } from './s3Service';
 
 const ENDPOINT = getEndpoint();
 const MAX_URL_REQUESTS = 50;
@@ -116,7 +117,7 @@ class NetworkClient {
                     filePart,
                     null,
                     null,
-                    progressTracker(),
+                    progressTracker,
                 );
                 if (!resp?.headers?.etag) {
                     const err = Error(CustomError.ETAG_MISSING);

@@ -29,7 +29,8 @@ export async function decryptChaCha(
         header,
         await fromB64(key),
     );
-    const decryptionChunkSize = ENCRYPTION_CHUNK_SIZE +
+    const decryptionChunkSize =
+        ENCRYPTION_CHUNK_SIZE +
         sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
     let bytesRead = 0;
     const decryptedData = [];
@@ -59,7 +60,8 @@ export async function initChunkDecryption(header: Uint8Array, key: Uint8Array) {
         header,
         key,
     );
-    const decryptionChunkSize = ENCRYPTION_CHUNK_SIZE +
+    const decryptionChunkSize =
+        ENCRYPTION_CHUNK_SIZE +
         sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
     const tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
     return { pullState, decryptionChunkSize, tag };
@@ -78,12 +80,11 @@ export async function decryptChunk(data: Uint8Array, pullState: StateAddress) {
 export async function encryptChaChaOneShot(data: Uint8Array, key?: string) {
     await sodium.ready;
 
-    const uintkey: Uint8Array = key ?
-        await fromB64(key) :
-        sodium.crypto_secretstream_xchacha20poly1305_keygen();
-    const initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(
-        uintkey,
-    );
+    const uintkey: Uint8Array = key
+        ? await fromB64(key)
+        : sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    const initPushResult =
+        sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
 
     const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
@@ -104,13 +105,12 @@ export async function encryptChaChaOneShot(data: Uint8Array, key?: string) {
 export async function encryptChaCha(data: Uint8Array, key?: string) {
     await sodium.ready;
 
-    const uintkey: Uint8Array = key ?
-        await fromB64(key) :
-        sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    const uintkey: Uint8Array = key
+        ? await fromB64(key)
+        : sodium.crypto_secretstream_xchacha20poly1305_keygen();
 
-    const initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(
-        uintkey,
-    );
+    const initPushResult =
+        sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
     let bytesRead = 0;
     let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
@@ -148,9 +148,8 @@ export async function encryptChaCha(data: Uint8Array, key?: string) {
 export async function initChunkEncryption() {
     await sodium.ready;
     const key = sodium.crypto_secretstream_xchacha20poly1305_keygen();
-    const initPushResult = sodium.crypto_secretstream_xchacha20poly1305_init_push(
-        key,
-    );
+    const initPushResult =
+        sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
     return {
         key: await toB64(key),
@@ -165,9 +164,9 @@ export async function encryptFileChunk(
 ) {
     await sodium.ready;
 
-    const tag = finalChunk ?
-        sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL :
-        sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
+    const tag = finalChunk
+        ? sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL
+        : sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
     const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
         pushState,
         data,

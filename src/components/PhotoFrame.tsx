@@ -21,8 +21,12 @@ import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
 import { SetDialogMessage } from './MessageDialog';
 import { CustomError } from 'utils/common/errorUtil';
 import {
-    GAP_BTW_TILES, DATE_CONTAINER_HEIGHT, IMAGE_CONTAINER_MAX_HEIGHT,
-    IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS, SPACE_BTW_DATES,
+    GAP_BTW_TILES,
+    DATE_CONTAINER_HEIGHT,
+    IMAGE_CONTAINER_MAX_HEIGHT,
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+    SPACE_BTW_DATES,
 } from 'types';
 
 const NO_OF_PAGES = 2;
@@ -68,21 +72,24 @@ const getTemplateColumns = (columns: number, groups?: number[]): string => {
         if (sum < columns) {
             groups[groups.length - 1] += columns - sum;
         }
-        return groups.map((x) => `repeat(${x}, 1fr)`).join(` ${SPACE_BTW_DATES}px `);
+        return groups
+            .map((x) => `repeat(${x}, 1fr)`)
+            .join(` ${SPACE_BTW_DATES}px `);
     } else {
         return `repeat(${columns}, 1fr)`;
     }
 };
 
-const ListContainer = styled.div<{ columns: number, groups?: number[] }>`
+const ListContainer = styled.div<{ columns: number; groups?: number[] }>`
     display: grid;
-    grid-template-columns: ${({ columns, groups }) => getTemplateColumns(columns, groups)};
+    grid-template-columns: ${({ columns, groups }) =>
+        getTemplateColumns(columns, groups)};
     grid-column-gap: ${GAP_BTW_TILES}px;
     padding: 0 24px;
     width: 100%;
     color: #fff;
 
-    @media(max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
         padding: 0 4px;
     }
 `;
@@ -139,7 +146,7 @@ interface Props {
     search: Search;
     setSearchStats: setSearchStats;
     deleted?: number[];
-    setDialogMessage: SetDialogMessage
+    setDialogMessage: SetDialogMessage;
 }
 
 const PhotoFrame = ({
@@ -303,14 +310,13 @@ const PhotoFrame = ({
                         video.preload = 'metadata';
                         video.src = url;
                         video.currentTime = 3;
-                        const t = setTimeout(
-                            () => {
-                                reject(
-                                    Error(`${CustomError.VIDEO_PLAYBACK_FAILED} err: wait time exceeded`),
-                                );
-                            },
-                            WAIT_FOR_VIDEO_PLAYBACK,
-                        );
+                        const t = setTimeout(() => {
+                            reject(
+                                Error(
+                                    `${CustomError.VIDEO_PLAYBACK_FAILED} err: wait time exceeded`,
+                                ),
+                            );
+                        }, WAIT_FOR_VIDEO_PLAYBACK);
                     });
                     item.html = `
                         <video width="320" height="240" controls>
@@ -332,7 +338,8 @@ const PhotoFrame = ({
                     };
                     setDialogMessage({
                         title: constants.VIDEO_PLAYBACK_FAILED,
-                        content: constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD,
+                        content:
+                            constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD,
                         staticBackdrop: true,
                         proceed: {
                             text: constants.DOWNLOAD,
@@ -397,11 +404,10 @@ const PhotoFrame = ({
             return false;
         });
 
-    const isSameDay = (first, second) => (
+    const isSameDay = (first, second) =>
         first.getFullYear() === second.getFullYear() &&
         first.getMonth() === second.getMonth() &&
-        first.getDate() === second.getDate()
-    );
+        first.getDate() === second.getDate();
 
     /**
      * Checks and merge multiple dates into a single row.
@@ -410,7 +416,10 @@ const PhotoFrame = ({
      * @param columns
      * @returns
      */
-    const mergeTimeStampList = (items: TimeStampListItem[], columns: number): TimeStampListItem[] => {
+    const mergeTimeStampList = (
+        items: TimeStampListItem[],
+        columns: number,
+    ): TimeStampListItem[] => {
         const newList: TimeStampListItem[] = [];
         let index = 0;
         let newIndex = 0;
@@ -423,12 +432,18 @@ const PhotoFrame = ({
                 // we can add more items to the same list.
                 if (newList[newIndex]) {
                     // Check if items can be added to same list
-                    if (newList[newIndex + 1].items.length + items[index + 1].items.length <= columns) {
+                    if (
+                        newList[newIndex + 1].items.length +
+                            items[index + 1].items.length <=
+                        columns
+                    ) {
                         newList[newIndex].dates.push({
                             date: currItem.date,
                             span: items[index + 1].items.length,
                         });
-                        newList[newIndex + 1].items = newList[newIndex + 1].items.concat(items[index + 1].items);
+                        newList[newIndex + 1].items = newList[
+                            newIndex + 1
+                        ].items.concat(items[index + 1].items);
                         index += 2;
                     } else {
                         // Adding items would exceed the number of columns.
@@ -441,10 +456,12 @@ const PhotoFrame = ({
                     newList.push({
                         ...currItem,
                         date: null,
-                        dates: [{
-                            date: currItem.date,
-                            span: items[index + 1].items.length,
-                        }],
+                        dates: [
+                            {
+                                date: currItem.date,
+                                span: items[index + 1].items.length,
+                            },
+                        ],
                     });
                     newList.push(items[index + 1]);
                     index += 2;
@@ -474,7 +491,7 @@ const PhotoFrame = ({
         <>
             {!isFirstLoad && files.length === 0 && !searchMode ? (
                 <EmptyScreen>
-                    <img height={150} src='/images/gallery.png' />
+                    <img height={150} src="/images/gallery.png" />
                     <Button
                         variant="outline-success"
                         onClick={openFileUploader}
@@ -484,8 +501,7 @@ const PhotoFrame = ({
                             paddingRight: '32px',
                             paddingTop: '12px',
                             paddingBottom: '12px',
-                        }}
-                    >
+                        }}>
                         {constants.UPLOAD_FIRST_PHOTO}
                     </Button>
                 </EmptyScreen>
@@ -493,7 +509,9 @@ const PhotoFrame = ({
                 <Container>
                     <AutoSizer>
                         {({ height, width }) => {
-                            let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
+                            let columns = Math.floor(
+                                width / IMAGE_CONTAINER_MAX_WIDTH,
+                            );
                             let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
                             let skipMerge = false;
                             if (columns < MIN_COLUMNS) {
@@ -506,27 +524,36 @@ const PhotoFrame = ({
                             let listItemIndex = 0;
                             let currentDate = -1;
                             filteredData.forEach((item, index) => {
-                                if (!isSameDay(new Date(item.metadata.creationTime / 1000), new Date(currentDate))) {
-                                    currentDate = item.metadata.creationTime / 1000;
-                                    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-                                        weekday: 'short',
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                    });
+                                if (
+                                    !isSameDay(
+                                        new Date(
+                                            item.metadata.creationTime / 1000,
+                                        ),
+                                        new Date(currentDate),
+                                    )
+                                ) {
+                                    currentDate =
+                                        item.metadata.creationTime / 1000;
+                                    const dateTimeFormat =
+                                        new Intl.DateTimeFormat('en-IN', {
+                                            weekday: 'short',
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                        });
                                     timeStampList.push({
                                         itemType: ITEM_TYPE.TIME,
                                         date: isSameDay(
                                             new Date(currentDate),
                                             new Date(),
-                                        ) ?
-                                            'Today' :
-                                            isSameDay(
+                                        )
+                                            ? 'Today'
+                                            : isSameDay(
                                                 new Date(currentDate),
                                                 new Date(Date.now() - A_DAY),
-                                            ) ?
-                                                'Yesterday' :
-                                                dateTimeFormat.format(
+                                            )
+                                                ? 'Yesterday'
+                                                : dateTimeFormat.format(
                                                     currentDate,
                                                 ),
                                         id: currentDate.toString(),
@@ -553,7 +580,10 @@ const PhotoFrame = ({
                             });
 
                             if (!skipMerge) {
-                                timeStampList = mergeTimeStampList(timeStampList, columns);
+                                timeStampList = mergeTimeStampList(
+                                    timeStampList,
+                                    columns,
+                                );
                             }
 
                             const getItemSize = (index) => {
@@ -567,68 +597,89 @@ const PhotoFrame = ({
                                 }
                             };
 
-                            const photoFrameHeight=(()=>{
-                                let sum=0;
-                                for (let i=0; i<timeStampList.length; i++) {
-                                    sum+=getItemSize(i);
+                            const photoFrameHeight = (() => {
+                                let sum = 0;
+                                for (let i = 0; i < timeStampList.length; i++) {
+                                    sum += getItemSize(i);
                                 }
                                 return sum;
                             })();
-                            files.length < 30 && !searchMode &&
+                            files.length < 30 &&
+                                !searchMode &&
                                 timeStampList.push({
                                     itemType: ITEM_TYPE.BANNER,
                                     banner: (
                                         <BannerContainer span={columns}>
-                                            <p>{constants.INSTALL_MOBILE_APP()}</p>
+                                            <p>
+                                                {constants.INSTALL_MOBILE_APP()}
+                                            </p>
                                         </BannerContainer>
                                     ),
                                     id: 'install-banner',
-                                    height: Math.max(48, height-photoFrameHeight),
+                                    height: Math.max(
+                                        48,
+                                        height - photoFrameHeight,
+                                    ),
                                 });
                             const extraRowsToRender = Math.ceil(
-                                (NO_OF_PAGES * height) / IMAGE_CONTAINER_MAX_HEIGHT,
+                                (NO_OF_PAGES * height) /
+                                    IMAGE_CONTAINER_MAX_HEIGHT,
                             );
 
                             const generateKey = (index) => {
                                 switch (timeStampList[index].itemType) {
                                     case ITEM_TYPE.TILE:
-                                        return `${timeStampList[index].items[0].id}-${timeStampList[index].items.slice(-1)[0].id}`;
+                                        return `${
+                                            timeStampList[index].items[0].id
+                                        }-${
+                                            timeStampList[index].items.slice(
+                                                -1,
+                                            )[0].id
+                                        }`;
                                     default:
                                         return `${timeStampList[index].id}-${index}`;
                                 }
                             };
 
-
-                            const renderListItem = (listItem: TimeStampListItem) => {
+                            const renderListItem = (
+                                listItem: TimeStampListItem,
+                            ) => {
                                 switch (listItem.itemType) {
                                     case ITEM_TYPE.TIME:
-                                        return listItem.dates ?
+                                        return listItem.dates ? (
                                             listItem.dates.map((item) => (
                                                 <>
-                                                    <DateContainer key={item.date} span={item.span}>
+                                                    <DateContainer
+                                                        key={item.date}
+                                                        span={item.span}>
                                                         {item.date}
                                                     </DateContainer>
                                                     <div />
                                                 </>
-                                            )) :
-                                            (
-                                                <DateContainer span={columns}>
-                                                    {listItem.date}
-                                                </DateContainer>
-                                            );
+                                            ))
+                                        ) : (
+                                            <DateContainer span={columns}>
+                                                {listItem.date}
+                                            </DateContainer>
+                                        );
                                     case ITEM_TYPE.BANNER:
                                         return listItem.banner;
-                                    default:
-                                    {
-                                        const ret = (listItem.items.map(
-                                            (item, idx) => getThumbnail(
-                                                filteredData,
-                                                listItem.itemStartIndex + idx,
-                                            ),
-                                        ));
+                                    default: {
+                                        const ret = listItem.items.map(
+                                            (item, idx) =>
+                                                getThumbnail(
+                                                    filteredData,
+                                                    listItem.itemStartIndex +
+                                                        idx,
+                                                ),
+                                        );
                                         if (listItem.groups) {
                                             let sum = 0;
-                                            for (let i = 0; i < listItem.groups.length - 1; i++) {
+                                            for (
+                                                let i = 0;
+                                                i < listItem.groups.length - 1;
+                                                i++
+                                            ) {
                                                 sum = sum + listItem.groups[i];
                                                 ret.splice(sum, 0, <div />);
                                                 sum += 1;
@@ -648,12 +699,17 @@ const PhotoFrame = ({
                                     width={width}
                                     itemCount={timeStampList.length}
                                     itemKey={generateKey}
-                                    overscanCount={extraRowsToRender}
-                                >
+                                    overscanCount={extraRowsToRender}>
                                     {({ index, style }) => (
                                         <ListItem style={style}>
-                                            <ListContainer columns={columns} groups={timeStampList[index].groups}>
-                                                {renderListItem(timeStampList[index])}
+                                            <ListContainer
+                                                columns={columns}
+                                                groups={
+                                                    timeStampList[index].groups
+                                                }>
+                                                {renderListItem(
+                                                    timeStampList[index],
+                                                )}
                                             </ListContainer>
                                         </ListItem>
                                     )}

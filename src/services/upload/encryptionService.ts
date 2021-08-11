@@ -30,8 +30,11 @@ async function encryptFileStream(worker, fileData: DataStream) {
     };
 }
 
-export async function encryptFiledata(worker, filedata:Uint8Array | DataStream) :Promise<EncryptionResult> {
-    return isDataStream(filedata) ?
-        await encryptFileStream(worker, filedata) :
-        await worker.encryptFile(filedata);
+export async function encryptFiledata(
+    worker,
+    filedata: Uint8Array | DataStream,
+): Promise<EncryptionResult> {
+    return isDataStream(filedata)
+        ? await encryptFileStream(worker, filedata)
+        : await worker.encryptFile(filedata);
 }
