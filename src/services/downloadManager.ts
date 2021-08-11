@@ -1,12 +1,16 @@
 import { getToken } from 'utils/common/key';
 import { getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
 import CryptoWorker from 'utils/crypto';
-import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
+import {
+    fileIsHEIC,
+    convertHEIC2JPEG,
+    fileNameWithoutExtension,
+} from 'utils/file';
 import HTTPService from './HTTPService';
 import { File } from './fileService';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'pages/gallery';
-import { downloadAndDecodeMotionPhoto } from './motionPhotoService';
+import { decodeMotionPhoto } from './motionPhotoService';
 
 class DownloadManager {
     private fileDownloads = new Map<string, string>();
@@ -60,25 +64,26 @@ class DownloadManager {
     getFile = async (file: File, forPreview = false) => {
         try {
             if (!this.fileDownloads.get(`${file.id}_${forPreview}`)) {
-                let fileBlob: Blob;
                 // unzip motion photo and return fileBlob of the image for preview
-                if (
-                    forPreview &&
-                    file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
-                ) {
-                    const motionPhoto = await downloadAndDecodeMotionPhoto(
-                        file,
-                    );
-                    fileBlob = await new Response(
-                        await motionPhoto.imageBlob,
-                    ).blob();
-                } else {
-                    const fileStream = await this.downloadFile(file);
-                    fileBlob = await new Response(fileStream).blob();
-                }
+                const fileStream = await this.downloadFile(file);
+                let fileBlob = await new Response(fileStream).blob();
+
                 if (forPreview) {
                     if (fileIsHEIC(file.metadata.title)) {
                         fileBlob = await convertHEIC2JPEG(fileBlob);
+                    }
+
+                    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+                        const originalName = fileNameWithoutExtension(
+                            file.metadata.title,
+                        );
+                        const motionPhoto = await decodeMotionPhoto(
+                            fileBlob,
+                            originalName,
+                        );
+                        fileBlob = await new Response(
+                            motionPhoto.imageBlob,
+                        ).blob();
                     }
                 }
                 this.fileDownloads.set(
