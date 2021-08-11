@@ -1,4 +1,5 @@
 import { ProgressUpdater } from 'components/pages/gallery/Upload';
+import { UPLOAD_STAGES } from './uploadManager';
 
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 
@@ -32,14 +33,12 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    setUploadStage(stage) {
+    setUploadStage(stage: UPLOAD_STAGES) {
         this.progressUpdater.setUploadStage(stage);
-        this.updateProgressBarUI();
     }
 
-    setPercentComplete(percent) {
+    setPercentComplete(percent: number) {
         this.progressUpdater.setPercentComplete(percent);
-        this.updateProgressBarUI();
     }
 
     increaseFileUploaded() {
@@ -64,7 +63,7 @@ class UIService {
             finished: this.filesUploaded,
             total: this.totalFileCount,
         });
-        let percentComplete = this.perFileProgress * this.filesUploaded;
+        let percentComplete = this.perFileProgress * this.uploadResult.size;
         if (this.fileProgress) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             for (const [_, progress] of this.fileProgress) {
