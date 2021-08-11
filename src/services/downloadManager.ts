@@ -5,6 +5,28 @@ import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
 import HTTPService from './HTTPService';
 import { File } from './fileService';
 import { logError } from 'utils/sentry';
+import JSZip from 'jszip';
+import { FILE_TYPE } from 'pages/gallery';
+
+class MotionPhoto {
+    public imageBlob: Promise<Uint8Array>;
+    public videoBlob: Promise<Uint8Array>;
+
+    public static CreateMotitionPhoto(zipBlob: Blob) {
+        return JSZip.loadAsync(zipBlob, { createFolders: true })
+            .then(function (zip) {
+                let instnace = new MotionPhoto();
+                Object.keys(zip.files).forEach(function (filename) {
+                    if (filename.startsWith("image")) {
+                        instnace.imageBlob = zip.files[filename].async('uint8array');
+                    } else if (filename.startsWith("video")) {
+                        instnace.videoBlob = zip.files[filename].async('uint8array');
+                    }
+                })
+                return instnace;
+            });
+    }
+}
 
 class DownloadManager {
     private fileDownloads = new Map<string, string>();
@@ -60,6 +82,11 @@ class DownloadManager {
             if (!this.fileDownloads.get(`${file.id}_${forPreview}`)) {
                 const fileStream = await this.downloadFile(file);
                 let fileBlob= await new Response(fileStream).blob();
+                // unzip motion photo and return fileBlob of the image for preview
+                if (forPreview && file.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
+                    let im = await MotionPhoto.CreateMotitionPhoto(fileBlob);
+                    fileBlob = await new Response(await im.imageBlob).blob();
+                }
                 if (forPreview) {
                     if (fileIsHEIC(file.metadata.title)) {
                         fileBlob = await convertHEIC2JPEG(fileBlob);
@@ -79,7 +106,7 @@ class DownloadManager {
         if (!token) {
             return null;
         }
-        if (file.metadata.fileType === 0) {
+        if (file.metadata.fileType === FILE_TYPE.IMAGE || file.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
             const resp = await HTTPService.get(
                 getFileUrl(file.id),
                 null,
@@ -91,7 +118,6 @@ class DownloadManager {
                 await worker.fromB64(file.file.decryptionHeader),
                 file.key,
             );
-
             return new ReadableStream({
                 async start(controller: ReadableStreamDefaultController) {
                     controller.enqueue(decrypted);
