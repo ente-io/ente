@@ -7,26 +7,7 @@ import { File } from './fileService';
 import { logError } from 'utils/sentry';
 import JSZip from 'jszip';
 import { FILE_TYPE } from 'pages/gallery';
-
-class MotionPhoto {
-    public imageBlob: Promise<Uint8Array>;
-    public videoBlob: Promise<Uint8Array>;
-
-    public static CreateMotitionPhoto(zipBlob: Blob) {
-        return JSZip.loadAsync(zipBlob, { createFolders: true })
-            .then(function (zip) {
-                let instnace = new MotionPhoto();
-                Object.keys(zip.files).forEach(function (filename) {
-                    if (filename.startsWith("image")) {
-                        instnace.imageBlob = zip.files[filename].async('uint8array');
-                    } else if (filename.startsWith("video")) {
-                        instnace.videoBlob = zip.files[filename].async('uint8array');
-                    }
-                })
-                return instnace;
-            });
-    }
-}
+import { downloadAndDecodeMotionPhoto } from './motionPhotoService';
 
 class DownloadManager {
     private fileDownloads = new Map<string, string>();
@@ -80,12 +61,14 @@ class DownloadManager {
     getFile = async (file: File, forPreview=false) => {
         try {
             if (!this.fileDownloads.get(`${file.id}_${forPreview}`)) {
-                const fileStream = await this.downloadFile(file);
-                let fileBlob= await new Response(fileStream).blob();
+                let fileBlob: Blob;
                 // unzip motion photo and return fileBlob of the image for preview
                 if (forPreview && file.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
-                    let im = await MotionPhoto.CreateMotitionPhoto(fileBlob);
-                    fileBlob = await new Response(await im.imageBlob).blob();
+                    let motionPhoto = await downloadAndDecodeMotionPhoto(file);
+                    fileBlob = await new Response(await motionPhoto.imageBlob).blob();
+                } else {
+                    const fileStream = await this.downloadFile(file);
+                    fileBlob = await new Response(fileStream).blob();
                 }
                 if (forPreview) {
                     if (fileIsHEIC(file.metadata.title)) {
