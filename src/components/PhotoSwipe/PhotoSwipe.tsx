@@ -16,7 +16,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import styled from 'styled-components';
 import events from './events';
-import { formatDateTime } from 'utils/file';
+import { fileNameWithoutExtension, formatDateTime } from 'utils/file';
 import { FormCheck } from 'react-bootstrap';
 import { FILE_TYPE } from 'pages/gallery';
 
@@ -270,9 +270,10 @@ function PhotoSwipe(props: Iprops) {
         loadingBar.current.continuousStart();
         a.href = await DownloadManger.getFile(file);
         loadingBar.current.complete();
-        a.download = file.metadata.title;
         if (file.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
-            a.download = file.metadata.title + ".zip";
+            a.download = fileNameWithoutExtension(file.metadata.title) + ".zip";
+        } else {
+            a.download = file.metadata.title;
         }
         document.body.appendChild(a);
         a.click();
