@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import events from './events';
 import { formatDateTime } from 'utils/file';
 import { FormCheck } from 'react-bootstrap';
+import { FILE_TYPE } from 'pages/gallery';
 
 interface Iprops {
     isOpen: boolean;
@@ -270,6 +271,9 @@ function PhotoSwipe(props: Iprops) {
         a.href = await DownloadManger.getFile(file);
         loadingBar.current.complete();
         a.download = file.metadata.title;
+        if (file.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
+            a.download = file.metadata.title + ".zip";
+        }
         document.body.appendChild(a);
         a.click();
         a.remove();
