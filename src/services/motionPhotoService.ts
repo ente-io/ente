@@ -15,17 +15,17 @@ export const downloadAndDecodeMotionPhoto = async (file: File) => {
     let zipBlob = await new Response(fileStream).blob();
     return JSZip.loadAsync(zipBlob, { createFolders: true })
         .then(function (zip) {
-            let instnace = new MotionPhoto();
+            let instance = new MotionPhoto();
             let orignalName = fileNameWithoutExtension(file.metadata.title)
             Object.keys(zip.files).forEach(function (zipFilename) {
                 if (zipFilename.startsWith("image")) {
-                    instnace.imageNameTitle = orignalName() + fileExtensionWithDot(zipFilename);
-                    instnace.imageBlob = zip.files[zipFilename].async('uint8array');
+                    instance.imageNameTitle = orignalName + fileExtensionWithDot(zipFilename);
+                    instance.imageBlob = zip.files[zipFilename].async('uint8array');
                 } else if (zipFilename.startsWith("video")) {
-                    instnace.videoNameTitle = orignalName() + fileExtensionWithDot(zipFilename);
-                    instnace.videoBlob = zip.files[zipFilename].async('uint8array');
+                    instance.videoNameTitle = orignalName + fileExtensionWithDot(zipFilename);
+                    instance.videoBlob = zip.files[zipFilename].async('uint8array');
                 }
             })
-            return instnace;
+            return instance;
         });
 }
