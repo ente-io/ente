@@ -153,6 +153,12 @@ class UploadManager {
                 );
                 this.setFiles(this.existingFiles);
             }
+            if (
+                fileUploadResult === FileUploadResults.BLOCKED ||
+                FileUploadResults.FAILED
+            ) {
+                this.failedFiles.push(fileWithCollection);
+            }
 
             UIService.moveFileToResultList(fileWithCollection.file.name);
         }
