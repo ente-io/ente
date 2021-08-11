@@ -227,7 +227,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return WebPage("how it works", "https://ente.io/encryption");
+                  return WebPage("how it works", "https://ente.io/architecture");
                 },
               ),
             );

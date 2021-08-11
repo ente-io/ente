@@ -357,7 +357,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           MaterialPageRoute(
                             builder: (BuildContext context) {
                               return WebPage(
-                                  "encryption", "https://ente.io/encryption");
+                                  "encryption", "https://ente.io/architecture");
                             },
                           ),
                         );
