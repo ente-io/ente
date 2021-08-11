@@ -218,6 +218,7 @@ export default function Gallery() {
                         title: constants.SESSION_EXPIRED,
                         content: constants.SESSION_EXPIRED_MESSAGE,
                         staticBackdrop: true,
+                        nonClosable: true,
                         proceed: {
                             text: constants.LOGIN,
                             action: logoutUser,
