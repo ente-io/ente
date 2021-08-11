@@ -146,3 +146,15 @@ export function removeUnneccessaryFileProps(files:File[]):File[] {
     });
     return stripedFiles;
 }
+
+export function fileNameWithoutExtension(filename) {
+    var lastDotPosition = filename.lastIndexOf(".");
+    if (lastDotPosition === -1) return filename;
+    else return filename.substr(0, lastDotPosition);
+}
+
+export function fileExtensionWithDot(filename) {
+    var lastDotPosition = filename.lastIndexOf(".");
+    if (lastDotPosition === -1) return "";
+    else return filename.substr(lastDotPosition);
+}
