@@ -5,7 +5,6 @@ import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
 import HTTPService from './HTTPService';
 import { File } from './fileService';
 import { logError } from 'utils/sentry';
-import JSZip from 'jszip';
 import { FILE_TYPE } from 'pages/gallery';
 import { downloadAndDecodeMotionPhoto } from './motionPhotoService';
 
@@ -56,16 +55,23 @@ class DownloadManager {
             // TODO: handle storage full exception.
         }
         return URL.createObjectURL(new Blob([decrypted]));
-    }
+    };
 
-    getFile = async (file: File, forPreview=false) => {
+    getFile = async (file: File, forPreview = false) => {
         try {
             if (!this.fileDownloads.get(`${file.id}_${forPreview}`)) {
                 let fileBlob: Blob;
                 // unzip motion photo and return fileBlob of the image for preview
-                if (forPreview && file.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
-                    let motionPhoto = await downloadAndDecodeMotionPhoto(file);
-                    fileBlob = await new Response(await motionPhoto.imageBlob).blob();
+                if (
+                    forPreview &&
+                    file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+                ) {
+                    const motionPhoto = await downloadAndDecodeMotionPhoto(
+                        file,
+                    );
+                    fileBlob = await new Response(
+                        await motionPhoto.imageBlob,
+                    ).blob();
                 } else {
                     const fileStream = await this.downloadFile(file);
                     fileBlob = await new Response(fileStream).blob();
@@ -75,7 +81,10 @@ class DownloadManager {
                         fileBlob = await convertHEIC2JPEG(fileBlob);
                     }
                 }
-                this.fileDownloads.set(`${file.id}_${forPreview}`, URL.createObjectURL(fileBlob));
+                this.fileDownloads.set(
+                    `${file.id}_${forPreview}`,
+                    URL.createObjectURL(fileBlob),
+                );
             }
             return this.fileDownloads.get(`${file.id}_${forPreview}`);
         } catch (e) {
@@ -89,7 +98,10 @@ class DownloadManager {
         if (!token) {
             return null;
         }
-        if (file.metadata.fileType === FILE_TYPE.IMAGE || file.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
+        if (
+            file.metadata.fileType === FILE_TYPE.IMAGE ||
+            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+        ) {
             const resp = await HTTPService.get(
                 getFileUrl(file.id),
                 null,
@@ -120,10 +132,8 @@ class DownloadManager {
                     file.file.decryptionHeader,
                 );
                 const fileKey = await worker.fromB64(file.key);
-                const {
-                    pullState,
-                    decryptionChunkSize,
-                } = await worker.initDecryption(decryptionHeader, fileKey);
+                const { pullState, decryptionChunkSize } =
+                    await worker.initDecryption(decryptionHeader, fileKey);
                 let data = new Uint8Array();
                 // The following function handles each data chunk
                 function push() {
@@ -135,21 +145,17 @@ class DownloadManager {
                                 data.byteLength + value.byteLength,
                             );
                             buffer.set(new Uint8Array(data), 0);
-                            buffer.set(
-                                new Uint8Array(value),
-                                data.byteLength,
-                            );
+                            buffer.set(new Uint8Array(value), data.byteLength);
                             if (buffer.length > decryptionChunkSize) {
                                 const fileData = buffer.slice(
                                     0,
                                     decryptionChunkSize,
                                 );
-                                const {
-                                    decryptedData,
-                                } = await worker.decryptChunk(
-                                    fileData,
-                                    pullState,
-                                );
+                                const { decryptedData } =
+                                    await worker.decryptChunk(
+                                        fileData,
+                                        pullState,
+                                    );
                                 controller.enqueue(decryptedData);
                                 data = buffer.slice(decryptionChunkSize);
                             } else {
@@ -158,12 +164,8 @@ class DownloadManager {
                             push();
                         } else {
                             if (data) {
-                                const {
-                                    decryptedData,
-                                } = await worker.decryptChunk(
-                                    data,
-                                    pullState,
-                                );
+                                const { decryptedData } =
+                                    await worker.decryptChunk(data, pullState);
                                 controller.enqueue(decryptedData);
                                 data = null;
                             }
