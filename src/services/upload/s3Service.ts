@@ -1,19 +1,25 @@
-import { CHUNKS_COMBINED_FOR_A_UPLOAD_PART, DataStream, MultipartUploadURLs, RANDOM_PERCENTAGE_PROGRESS_FOR_PUT } from './uploadService';
+import {
+    CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
+    DataStream,
+    MultipartUploadURLs,
+    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+} from './uploadService';
 import NetworkClient from './networkClient';
 import * as convert from 'xml-js';
+import uiService from './uiService';
 
-
-interface PartEtag{
-    PartNumber:number;
-    Etag:string;
+interface PartEtag {
+    PartNumber: number;
+    Etag: string;
 }
 export function calculatePartCount(chunkCount: number) {
-    const partCount = Math.ceil(
-        chunkCount / CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
-    );
+    const partCount = Math.ceil(chunkCount / CHUNKS_COMBINED_FOR_A_UPLOAD_PART);
     return partCount;
 }
-export async function uploadStreamUsingMultipart(filename:string, dataStream:DataStream, progressTracker) {
+export async function uploadStreamUsingMultipart(
+    filename: string,
+    dataStream: DataStream,
+) {
     const uploadPartCount = calculatePartCount(dataStream.chunkCount);
     const multipartUploadURLs = await NetworkClient.fetchMultipartUploadURLs(
         uploadPartCount,
@@ -23,7 +29,6 @@ export async function uploadStreamUsingMultipart(filename:string, dataStream:Dat
         dataStream.stream,
         filename,
         uploadPartCount,
-        progressTracker,
     );
     return fileObjectKey;
 }
@@ -33,38 +38,46 @@ export async function uploadStreamInParts(
     dataStream: ReadableStream<Uint8Array>,
     filename: string,
     uploadPartCount: number,
-    progressTracker,
 ) {
     const streamReader = dataStream.getReader();
     const percentPerPart = getRandomProgressPerPartUpload(uploadPartCount);
 
-    const partEtags:PartEtag[] = [];
+    const partEtags: PartEtag[] = [];
     for (const [
         index,
         fileUploadURL,
     ] of multipartUploadURLs.partURLs.entries()) {
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
-        const eTag= await NetworkClient.putFilePart(fileUploadURL, uploadChunk, progressTracker.bind(null, filename, percentPerPart, index));
-        partEtags.push({ PartNumber: index+1, Etag: eTag });
+        const progressTracker = uiService.trackUploadProgress(
+            filename,
+            percentPerPart,
+            index,
+        );
+
+        const eTag = await NetworkClient.putFilePart(
+            fileUploadURL,
+            uploadChunk,
+            progressTracker,
+        );
+        partEtags.push({ PartNumber: index + 1, Etag: eTag });
     }
     await completeMultipartUpload(partEtags, multipartUploadURLs.completeURL);
     return multipartUploadURLs.objectKey;
 }
 
-
-export function getRandomProgressPerPartUpload(uploadPartCount:number) {
+export function getRandomProgressPerPartUpload(uploadPartCount: number) {
     const percentPerPart = Math.round(
         RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount,
     );
     return percentPerPart;
 }
 
-
-export async function combineChunksToFormUploadPart(streamReader:ReadableStreamDefaultReader<Uint8Array>) {
+export async function combineChunksToFormUploadPart(
+    streamReader: ReadableStreamDefaultReader<Uint8Array>,
+) {
     const combinedChunks = [];
     for (let i = 0; i < CHUNKS_COMBINED_FOR_A_UPLOAD_PART; i++) {
-        const { done, value: chunk } =
-        await streamReader.read();
+        const { done, value: chunk } = await streamReader.read();
         if (done) {
             break;
         }
@@ -75,8 +88,10 @@ export async function combineChunksToFormUploadPart(streamReader:ReadableStreamD
     return Uint8Array.from(combinedChunks);
 }
 
-
-async function completeMultipartUpload(partEtags:PartEtag[], completeURL:string) {
+async function completeMultipartUpload(
+    partEtags: PartEtag[],
+    completeURL: string,
+) {
     const options = { compact: true, ignoreComment: true, spaces: 4 };
     const body = convert.js2xml(
         { CompleteMultipartUpload: { Part: partEtags } },

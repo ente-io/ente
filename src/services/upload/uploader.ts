@@ -32,7 +32,6 @@ export default async function uploader(
     let file: FileInMemory = null;
     let encryptedFile: EncryptedFile = null;
     try {
-        // read the file into memory
         file = await UploadService.readFile(reader, rawFile);
 
         if (
@@ -56,7 +55,6 @@ export default async function uploader(
 
         const backupedFile: BackupedFile = await UploadService.uploadToBucket(
             encryptedFile.file,
-            this.trackUploadProgress.bind(this),
         );
 
         const uploadFile: UploadFile = UploadService.getUploadFile(

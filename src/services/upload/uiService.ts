@@ -77,7 +77,7 @@ class UIService {
         setUploadResult(this.uploadResult);
     }
 
-    private trackUploadProgress(
+    trackUploadProgress(
         filename: string,
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
         index = 0,
