@@ -6,20 +6,8 @@ import { fileExtensionWithDot, fileNameWithoutExtension } from "utils/file";
 class MotionPhoto {
     imageBlob: Promise<Uint8Array>
     videoBlob: Promise<Uint8Array>
-    title: String
-    // name of the file which contains image
-    _zipImageName: String
-    // name of the file which contains video
-    _zipVideoName: String
-
-    imageName() {
-        return fileNameWithoutExtension(this.title) + fileExtensionWithDot(this._zipImageName);
-    }
-
-    videoName() {
-        return fileNameWithoutExtension(this.title) + fileExtensionWithDot(this._zipVideoName);
-    }
-
+    imageNameTitle: String
+    videoNameTitle: String
 }
 
 export const downloadAndDecodeMotionPhoto = async (file: File) => {
@@ -28,14 +16,14 @@ export const downloadAndDecodeMotionPhoto = async (file: File) => {
     return JSZip.loadAsync(zipBlob, { createFolders: true })
         .then(function (zip) {
             let instnace = new MotionPhoto();
-            instnace.title = file.metadata.title
-            Object.keys(zip.files).forEach(function (filename) {
-                if (filename.startsWith("image")) {
-                    instnace._zipImageName = filename
-                    instnace.imageBlob = zip.files[filename].async('uint8array');
-                } else if (filename.startsWith("video")) {
-                    instnace._zipVideoName = filename
-                    instnace.videoBlob = zip.files[filename].async('uint8array');
+            let orignalName = fileNameWithoutExtension(file.metadata.title)
+            Object.keys(zip.files).forEach(function (zipFilename) {
+                if (zipFilename.startsWith("image")) {
+                    instnace.imageNameTitle = orignalName() + fileExtensionWithDot(zipFilename);
+                    instnace.imageBlob = zip.files[zipFilename].async('uint8array');
+                } else if (zipFilename.startsWith("video")) {
+                    instnace.videoNameTitle = orignalName() + fileExtensionWithDot(zipFilename);
+                    instnace.videoBlob = zip.files[zipFilename].async('uint8array');
                 }
             })
             return instnace;
