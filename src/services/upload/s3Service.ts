@@ -5,7 +5,7 @@ import UIService, { RANDOM_PERCENTAGE_PROGRESS_FOR_PUT } from './uiService';
 
 interface PartEtag {
     PartNumber: number;
-    Etag: string;
+    ETag: string;
 }
 
 export interface MultipartUploadURLs {
@@ -61,7 +61,7 @@ export async function uploadStreamInParts(
             uploadChunk,
             progressTracker,
         );
-        partEtags.push({ PartNumber: index + 1, Etag: eTag });
+        partEtags.push({ PartNumber: index + 1, ETag: eTag });
     }
     await completeMultipartUpload(partEtags, multipartUploadURLs.completeURL);
     return multipartUploadURLs.objectKey;
