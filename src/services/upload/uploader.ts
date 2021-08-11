@@ -5,7 +5,7 @@ import { decryptFile } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { fileAlreadyInCollection } from 'utils/upload';
 import NetworkClient from './networkClient';
-import uiService from './uiService';
+import UIService from './uiService';
 import UploadService, {
     BackupedFile,
     EncryptedFile,
@@ -28,7 +28,7 @@ export default async function uploader(
     existingFilesCollectionWise: Map<number, File[]>,
 ): Promise<UploadResponse> {
     const { file: rawFile, collection } = fileWithCollection;
-    uiService.setFileProgress(rawFile.name, 0);
+    UIService.setFileProgress(rawFile.name, 0);
     let file: FileInMemory = null;
     let encryptedFile: EncryptedFile = null;
     try {
@@ -42,7 +42,7 @@ export default async function uploader(
             )
         ) {
             // set progress to -2 indicating that file upload was skipped
-            uiService.setFileProgress(rawFile.name, FileUploadResults.SKIPPED);
+            UIService.setFileProgress(rawFile.name, FileUploadResults.SKIPPED);
             await sleep(TwoSecondInMillSeconds);
             return { fileUploadResult: FileUploadResults.SKIPPED };
         }
@@ -66,8 +66,8 @@ export default async function uploader(
         const uploadedFile = await NetworkClient.uploadFile(uploadFile);
         const decryptedFile = await decryptFile(uploadedFile, collection);
 
-        uiService.setFileProgress(rawFile.name, FileUploadResults.UPLOADED);
-        uiService.increaseFileUploaded();
+        UIService.setFileProgress(rawFile.name, FileUploadResults.UPLOADED);
+        UIService.increaseFileUploaded();
         return {
             fileUploadResult: FileUploadResults.UPLOADED,
             file: decryptedFile,
@@ -76,10 +76,10 @@ export default async function uploader(
         logError(e, 'file upload failed');
         handleError(e);
         if (e.message === CustomError.ETAG_MISSING) {
-            uiService.setFileProgress(rawFile.name, FileUploadResults.BLOCKED);
+            UIService.setFileProgress(rawFile.name, FileUploadResults.BLOCKED);
             return { fileUploadResult: FileUploadResults.BLOCKED };
         } else {
-            uiService.setFileProgress(rawFile.name, FileUploadResults.FAILED);
+            UIService.setFileProgress(rawFile.name, FileUploadResults.FAILED);
             return { fileUploadResult: FileUploadResults.FAILED };
         }
     } finally {

@@ -13,8 +13,8 @@ import { ParsedMetaDataJSON, parseMetadataJSON } from './metadataService';
 import { segregateFiles } from 'utils/upload';
 import { ProgressUpdater } from 'components/pages/gallery/Upload';
 import uploader from './uploader';
-import uiService from './uiService';
-import uploadService from './uploadService';
+import UIService from './uiService';
+import UploadService from './uploadService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -54,7 +54,7 @@ class UploadManager {
     private setFiles: SetFiles;
 
     public initUploader(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
-        uiService.init(progressUpdater);
+        UIService.init(progressUpdater);
         this.setFiles = setFiles;
     }
 
@@ -78,17 +78,17 @@ class UploadManager {
                 filesWithCollectionToUpload,
             );
             if (metadataFiles.length) {
-                uiService.setUploadStage(
+                UIService.setUploadStage(
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
                 );
                 await this.seedMetadataMap(metadataFiles);
             }
             if (mediaFiles.length) {
-                uiService.setUploadStage(UPLOAD_STAGES.START);
+                UIService.setUploadStage(UPLOAD_STAGES.START);
                 await this.uploadMediaFiles(mediaFiles);
             }
-            uiService.setUploadStage(UPLOAD_STAGES.FINISH);
-            uiService.setPercentComplete(FILE_UPLOAD_COMPLETED);
+            UIService.setUploadStage(UPLOAD_STAGES.FINISH);
+            UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
         } catch (e) {
             logError(e, 'uploading failed with error');
             throw e;
@@ -100,22 +100,22 @@ class UploadManager {
     }
 
     private async seedMetadataMap(metadataFiles: globalThis.File[]) {
-        uiService.reset(metadataFiles.length);
+        UIService.reset(metadataFiles.length);
 
         for (const rawFile of metadataFiles) {
             const parsedMetaDataJSON = await parseMetadataJSON(rawFile);
             this.metadataMap.set(parsedMetaDataJSON.title, parsedMetaDataJSON);
-            uiService.increaseFileUploaded();
+            UIService.increaseFileUploaded();
         }
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
         this.filesToBeUploaded.push(...mediaFiles);
-        uiService.reset(mediaFiles.length);
+        UIService.reset(mediaFiles.length);
 
-        uploadService.init(mediaFiles.length, this.metadataMap);
+        UploadService.init(mediaFiles.length, this.metadataMap);
 
-        uiService.setUploadStage(UPLOAD_STAGES.UPLOADING);
+        UIService.setUploadStage(UPLOAD_STAGES.UPLOADING);
 
         const uploadProcesses = [];
         for (
@@ -154,7 +154,7 @@ class UploadManager {
                 this.setFiles(this.existingFiles);
             }
 
-            uiService.moveFileToResultList(fileWithCollection.file.name);
+            UIService.moveFileToResultList(fileWithCollection.file.name);
         }
     }
 

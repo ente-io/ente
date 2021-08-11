@@ -13,7 +13,7 @@ import {
 import { encryptFiledata } from './encryptionService';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { uploadStreamUsingMultipart } from './s3Service';
-import uiService from './uiService';
+import UIService from './uiService';
 import { parseError } from 'utils/common/errorUtil';
 
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
@@ -199,7 +199,7 @@ class UploadService {
                     file.file.encryptedData,
                 );
             } else {
-                const progressTracker = uiService.trackUploadProgress(
+                const progressTracker = UIService.trackUploadProgress(
                     file.filename,
                 );
                 const fileUploadURL = await this.getUploadURL();

@@ -6,7 +6,7 @@ import {
 } from './uploadService';
 import NetworkClient from './networkClient';
 import * as convert from 'xml-js';
-import uiService from './uiService';
+import UIService from './uiService';
 
 interface PartEtag {
     PartNumber: number;
@@ -48,7 +48,7 @@ export async function uploadStreamInParts(
         fileUploadURL,
     ] of multipartUploadURLs.partURLs.entries()) {
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
-        const progressTracker = uiService.trackUploadProgress(
+        const progressTracker = UIService.trackUploadProgress(
             filename,
             percentPerPart,
             index,
