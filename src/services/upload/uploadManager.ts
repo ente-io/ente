@@ -116,17 +116,18 @@ class UploadManager {
         UIService.reset(metadataFiles.length);
 
         for (const fileWithCollection of metadataFiles) {
-            const parsedMetaDataJSON = await parseMetadataJSON(
+            const parsedMetaDataJSONWithTitle = await parseMetadataJSON(
                 fileWithCollection.file,
             );
-            this.metadataMap.set(
-                getMetadataKey(
-                    fileWithCollection.collectionID,
-                    parsedMetaDataJSON.title,
-                ),
-                parsedMetaDataJSON,
-            );
-            UIService.increaseFileUploaded();
+            if (parsedMetaDataJSONWithTitle) {
+                const { title, ...parsedMetaDataJSON } =
+                    parsedMetaDataJSONWithTitle;
+                this.metadataMap.set(
+                    getMetadataKey(fileWithCollection.collectionID, title),
+                    parsedMetaDataJSON,
+                );
+                UIService.increaseFileUploaded();
+            }
         }
     }
 

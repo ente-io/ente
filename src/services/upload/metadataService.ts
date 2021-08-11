@@ -9,7 +9,7 @@ export interface Location {
 }
 
 export interface ParsedMetaDataJSON {
-    title: string;
+    title?: string;
     creationTime: number;
     modificationTime: number;
     location: Location;
