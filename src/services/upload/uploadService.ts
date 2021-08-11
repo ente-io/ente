@@ -111,10 +111,10 @@ class UploadService {
     private metadataMap: Map<string, ParsedMetaDataJSON>;
     private pendingUploadCount: number = 0;
 
-    init(count: number, metadataMap: MetadataMap) {
+    async init(count: number, metadataMap: MetadataMap) {
         this.pendingUploadCount = count;
         this.metadataMap = metadataMap;
-        this.preFetchUploadURLs();
+        await this.preFetchUploadURLs();
     }
 
     async readFile(reader: FileReader, receivedFile: globalThis.File) {

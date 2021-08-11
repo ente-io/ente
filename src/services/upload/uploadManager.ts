@@ -113,7 +113,7 @@ class UploadManager {
         this.filesToBeUploaded.push(...mediaFiles);
         UIService.reset(mediaFiles.length);
 
-        UploadService.init(mediaFiles.length, this.metadataMap);
+        await UploadService.init(mediaFiles.length, this.metadataMap);
 
         UIService.setUploadStage(UPLOAD_STAGES.UPLOADING);
 
