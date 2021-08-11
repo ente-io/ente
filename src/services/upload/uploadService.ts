@@ -3,7 +3,11 @@ import { Collection } from '../collectionService';
 import { FILE_TYPE } from 'pages/gallery';
 import { logError } from 'utils/sentry';
 import NetworkClient from './networkClient';
-import { extractMetatdata, ParsedMetaDataJSON } from './metadataService';
+import {
+    extractMetatdata,
+    getMetadataKey,
+    ParsedMetaDataJSON,
+} from './metadataService';
 import { generateThumbnail } from './thumbnailService';
 import {
     getFileType,
@@ -15,30 +19,18 @@ import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { uploadStreamUsingMultipart } from './s3Service';
 import UIService from './uiService';
 import { parseError } from 'utils/common/errorUtil';
+import { FileWithCollection, MetadataMap } from './uploadManager';
 
-export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 export const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
 export const CHUNKS_COMBINED_FOR_A_UPLOAD_PART = Math.floor(
     MIN_STREAM_FILE_SIZE / ENCRYPTION_CHUNK_SIZE,
 );
-
-export enum FileUploadResults {
-    FAILED = -1,
-    SKIPPED = -2,
-    UNSUPPORTED = -3,
-    BLOCKED = -4,
-    UPLOADED = 100,
-}
 
 export interface UploadURL {
     url: string;
     objectKey: string;
 }
 
-export interface FileWithCollection {
-    file: globalThis.File;
-    collection: Collection;
-}
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
     chunkCount: number;
@@ -55,12 +47,6 @@ export interface B64EncryptionResult {
     encryptedData: string;
     key: string;
     nonce: string;
-}
-
-export interface MultipartUploadURLs {
-    objectKey: string;
-    partURLs: string[];
-    completeURL: string;
 }
 
 export interface MetadataObject {
@@ -91,19 +77,10 @@ export interface ProcessedFile {
 }
 export interface BackupedFile extends Omit<ProcessedFile, 'filename'> {}
 
-export type MetadataMap = Map<string, ParsedMetaDataJSON>;
-
 export interface UploadFile extends BackupedFile {
     collectionID: number;
     encryptedKey: string;
     keyDecryptionNonce: string;
-}
-
-export enum UPLOAD_STAGES {
-    START,
-    READING_GOOGLE_METADATA_FILES,
-    UPLOADING,
-    FINISH,
 }
 
 class UploadService {
@@ -117,9 +94,10 @@ class UploadService {
         await this.preFetchUploadURLs();
     }
 
-    async readFile(reader: FileReader, receivedFile: globalThis.File) {
+    async readFile(reader: FileReader, fileWithCollection: FileWithCollection) {
         try {
-            const fileType = getFileType(receivedFile);
+            const { file: receivedFile, collectionID } = fileWithCollection;
+            const fileType = getFileType(fileWithCollection.file);
 
             const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
                 reader,
@@ -128,7 +106,9 @@ class UploadService {
             );
 
             const originalName = getFileOriginalName(receivedFile);
-            const googleMetadata = this.metadataMap.get(originalName);
+            const googleMetadata = this.metadataMap.get(
+                getMetadataKey(collectionID, originalName),
+            );
             const extractedMetadata: MetadataObject = await extractMetatdata(
                 reader,
                 receivedFile,

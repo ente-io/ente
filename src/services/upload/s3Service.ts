@@ -1,17 +1,19 @@
-import {
-    CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
-    DataStream,
-    MultipartUploadURLs,
-    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-} from './uploadService';
+import { CHUNKS_COMBINED_FOR_A_UPLOAD_PART, DataStream } from './uploadService';
 import NetworkClient from './networkClient';
 import * as convert from 'xml-js';
-import UIService from './uiService';
+import UIService, { RANDOM_PERCENTAGE_PROGRESS_FOR_PUT } from './uiService';
 
 interface PartEtag {
     PartNumber: number;
     Etag: string;
 }
+
+export interface MultipartUploadURLs {
+    objectKey: string;
+    partURLs: string[];
+    completeURL: string;
+}
+
 export function calculatePartCount(chunkCount: number) {
     const partCount = Math.ceil(chunkCount / CHUNKS_COMBINED_FOR_A_UPLOAD_PART);
     return partCount;

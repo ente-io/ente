@@ -46,6 +46,9 @@ export async function extractMetatdata(
     return extractedMetadata;
 }
 
+export const getMetadataKey = (fileWithCollection: number, title: string) =>
+    `${fileWithCollection}_${title}`;
+
 export async function parseMetadataJSON(receivedFile: globalThis.File) {
     try {
         const metadataJSON: object = await new Promise((resolve, reject) => {

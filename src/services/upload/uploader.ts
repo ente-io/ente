@@ -34,7 +34,7 @@ export default async function uploader(
     let file: FileInMemory = null;
     let encryptedFile: EncryptedFile = null;
     try {
-        file = await UploadService.readFile(reader, rawFile);
+        file = await UploadService.readFile(reader, fileWithCollection);
 
         if (
             fileAlreadyInCollection(

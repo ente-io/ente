@@ -8,14 +8,13 @@ const TYPE_HEIC = 'HEIC';
 export const TYPE_IMAGE = 'image';
 const EDITED_FILE_SUFFIX = '-edited';
 
-
-export async function getFileData(reader:FileReader, file:globalThis.File) {
-    return file.size > MIN_STREAM_FILE_SIZE ?
-        getFileStream(reader, file) :
-        await getUint8ArrayView(reader, file);
+export async function getFileData(reader: FileReader, file: globalThis.File) {
+    return file.size > MIN_STREAM_FILE_SIZE
+        ? getFileStream(reader, file)
+        : await getUint8ArrayView(reader, file);
 }
 
-export function getFileType(receivedFile:globalThis.File) {
+export function getFileType(receivedFile: globalThis.File) {
     let fileType: FILE_TYPE;
     switch (receivedFile.type.split('/')[0]) {
         case TYPE_IMAGE:
@@ -37,18 +36,14 @@ export function getFileType(receivedFile:globalThis.File) {
     return fileType;
 }
 
+export function getFileOriginalName(file: globalThis.File) {
+    let originalName: string = null;
 
-export function getFileOriginalName(file:globalThis.File) {
-    let originalName:string=null;
-
-    const isEditedFile=file.name.endsWith(EDITED_FILE_SUFFIX);
+    const isEditedFile = file.name.endsWith(EDITED_FILE_SUFFIX);
     if (isEditedFile) {
-        originalName = file.name.slice(
-            0,
-            -1 * EDITED_FILE_SUFFIX.length,
-        );
+        originalName = file.name.slice(0, -1 * EDITED_FILE_SUFFIX.length);
     } else {
-        originalName=file.name;
+        originalName = file.name;
     }
     return originalName;
 }
@@ -70,7 +65,10 @@ function getFileStream(reader: FileReader, file: globalThis.File) {
     };
 }
 
-async function* fileChunkReaderMaker(reader:FileReader, file:globalThis.File) {
+async function* fileChunkReaderMaker(
+    reader: FileReader,
+    file: globalThis.File,
+) {
     let offset = 0;
     while (offset < file.size) {
         const blob = file.slice(offset, ENCRYPTION_CHUNK_SIZE + offset);
@@ -92,9 +90,9 @@ export async function getUint8ArrayView(
             reader.onload = () => {
                 // Do whatever you want with the file contents
                 const result =
-                    typeof reader.result === 'string' ?
-                        new TextEncoder().encode(reader.result) :
-                        new Uint8Array(reader.result);
+                    typeof reader.result === 'string'
+                        ? new TextEncoder().encode(reader.result)
+                        : new Uint8Array(reader.result);
                 resolve(result);
             };
             reader.readAsArrayBuffer(file);
@@ -104,5 +102,3 @@ export async function getUint8ArrayView(
         throw e;
     }
 }
-
-

@@ -37,7 +37,7 @@ export function areFilesSame(
 export function segregateFiles(
     filesWithCollectionToUpload: FileWithCollection[],
 ) {
-    const metadataFiles: globalThis.File[] = [];
+    const metadataFiles: FileWithCollection[] = [];
     const mediaFiles: FileWithCollection[] = [];
     filesWithCollectionToUpload.forEach((fileWithCollection) => {
         const file = fileWithCollection.file;
@@ -46,7 +46,7 @@ export function segregateFiles(
             return;
         }
         if (file.name.slice(-4) === TYPE_JSON) {
-            metadataFiles.push(fileWithCollection.file);
+            metadataFiles.push(fileWithCollection);
         } else {
             mediaFiles.push(fileWithCollection);
         }
