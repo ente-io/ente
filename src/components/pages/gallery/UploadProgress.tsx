@@ -214,31 +214,30 @@ export default function UploadProgress(props: Props) {
                     sectionInfo={constants.UNSUPPORTED_INFO}
                     infoHeight={32}
                 />
-
-                {props.uploadStage === UPLOAD_STAGES.FINISH && (
-                    <Modal.Footer style={{ border: 'none' }}>
-                        {props.uploadStage === UPLOAD_STAGES.FINISH &&
-                            (fileUploadResultMap?.get(FileUploadResults.FAILED)
-                                ?.length > 0 ||
-                            fileUploadResultMap?.get(FileUploadResults.BLOCKED)
-                                ?.length > 0 ? (
-                                    <Button
-                                        variant="outline-success"
-                                        style={{ width: '100%' }}
-                                        onClick={props.retryFailed}>
-                                        {constants.RETRY_FAILED}
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        variant="outline-secondary"
-                                        style={{ width: '100%' }}
-                                        onClick={props.closeModal}>
-                                        {constants.CLOSE}
-                                    </Button>
-                                ))}
-                    </Modal.Footer>
-                )}
             </Modal.Body>
+            {props.uploadStage === UPLOAD_STAGES.FINISH && (
+                <Modal.Footer style={{ border: 'none' }}>
+                    {props.uploadStage === UPLOAD_STAGES.FINISH &&
+                        (fileUploadResultMap?.get(FileUploadResults.FAILED)
+                            ?.length > 0 ||
+                        fileUploadResultMap?.get(FileUploadResults.BLOCKED)
+                            ?.length > 0 ? (
+                                <Button
+                                    variant="outline-success"
+                                    style={{ width: '100%' }}
+                                    onClick={props.retryFailed}>
+                                    {constants.RETRY_FAILED}
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="outline-secondary"
+                                    style={{ width: '100%' }}
+                                    onClick={props.closeModal}>
+                                    {constants.CLOSE}
+                                </Button>
+                            ))}
+                </Modal.Footer>
+            )}
         </Modal>
     );
 }
