@@ -1,7 +1,6 @@
 import { File, getLocalFiles } from '../fileService';
 import { Collection } from '../collectionService';
 import { SetFiles } from 'pages/gallery';
-import { parseError } from 'utils/common/errorUtil';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
 import {
     sortFilesIntoCollections,
@@ -47,7 +46,6 @@ export enum UPLOAD_STAGES {
 
 class UploadManager {
     private cryptoWorkers = new Array<ComlinkWorker>(MAX_CONCURRENT_UPLOADS);
-    private uploadURLs: UploadURL[] = [];
     private metadataMap: Map<string, ParsedMetaDataJSON>;
     private filesToBeUploaded: FileWithCollection[];
     private failedFiles: FileWithCollection[];
@@ -55,15 +53,13 @@ class UploadManager {
     private existingFiles: File[];
     private setFiles: SetFiles;
 
-    public async initUploader(
-        progressUpdater: ProgressUpdater,
-        setFiles: SetFiles,
-    ) {
+    public initUploader(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
         uiService.init(progressUpdater);
         this.setFiles = setFiles;
     }
 
     private async init() {
+        this.filesToBeUploaded = [];
         this.failedFiles = [];
         this.metadataMap = new Map<string, ParsedMetaDataJSON>();
         this.existingFiles = await getLocalFiles();
@@ -95,7 +91,6 @@ class UploadManager {
             uiService.setPercentComplete(FILE_UPLOAD_COMPLETED);
         } catch (e) {
             logError(e, 'uploading failed with error');
-            this.filesToBeUploaded = [];
             throw e;
         } finally {
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
@@ -118,14 +113,14 @@ class UploadManager {
         this.filesToBeUploaded.push(...mediaFiles);
         uiService.reset(mediaFiles.length);
 
-        this.preFetchUploadURLs(mediaFiles.length);
+        uploadService.init(mediaFiles.length, this.metadataMap);
 
         uiService.setUploadStage(UPLOAD_STAGES.UPLOADING);
 
         const uploadProcesses = [];
         for (
             let i = 0;
-            i < Math.min(MAX_CONCURRENT_UPLOADS, this.filesToBeUploaded.length);
+            i < MAX_CONCURRENT_UPLOADS && this.filesToBeUploaded.length > 0;
             i++
         ) {
             this.cryptoWorkers[i] = getDedicatedCryptoWorker();
@@ -137,20 +132,6 @@ class UploadManager {
             );
         }
         await Promise.all(uploadProcesses);
-    }
-
-    private async preFetchUploadURLs(count: number) {
-        try {
-            uploadService.setPendingUploadCount(count);
-            uploadService.preFetchUploadURLs();
-            // checking for any subscription related errors
-        } catch (e) {
-            logError(e, 'error fetching uploadURLs');
-            const { parsedError, parsed } = parseError(e);
-            if (parsed) {
-                throw parsedError;
-            }
-        }
     }
 
     private async uploadNextFileInQueue(worker: any, fileReader: FileReader) {

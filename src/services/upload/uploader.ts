@@ -75,7 +75,6 @@ export default async function uploader(
     } catch (e) {
         logError(e, 'file upload failed');
         handleError(e);
-        this.failedFiles.push(fileWithCollection);
         if (e.message === CustomError.ETAG_MISSING) {
             uiService.setFileProgress(rawFile.name, FileUploadResults.BLOCKED);
             return { fileUploadResult: FileUploadResults.BLOCKED };

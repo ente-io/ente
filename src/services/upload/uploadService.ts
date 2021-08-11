@@ -14,6 +14,7 @@ import { encryptFiledata } from './encryptionService';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { uploadStreamUsingMultipart } from './s3Service';
 import uiService from './uiService';
+import { parseError } from 'utils/common/errorUtil';
 
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 export const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
@@ -110,8 +111,10 @@ class UploadService {
     private metadataMap: Map<string, ParsedMetaDataJSON>;
     private pendingUploadCount: number = 0;
 
-    setPendingUploadCount(count: number) {
+    init(count: number, metadataMap: MetadataMap) {
         this.pendingUploadCount = count;
+        this.metadataMap = metadataMap;
+        this.preFetchUploadURLs();
     }
 
     async readFile(reader: FileReader, receivedFile: globalThis.File) {
@@ -254,7 +257,16 @@ class UploadService {
     }
 
     public async preFetchUploadURLs() {
-        await this.fetchUploadURLs();
+        try {
+            await this.fetchUploadURLs();
+            // checking for any subscription related errors
+        } catch (e) {
+            logError(e, 'error fetching uploadURLs');
+            const { parsedError, parsed } = parseError(e);
+            if (parsed) {
+                throw parsedError;
+            }
+        }
     }
 
     private async fetchUploadURLs() {

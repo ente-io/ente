@@ -17,6 +17,9 @@ class UIService {
     reset(count: number) {
         this.setTotalFileCount(count);
         this.filesUploaded = 0;
+        this.fileProgress = new Map<string, number>();
+        this.uploadResult = new Map<string, number>();
+        this.updateProgressBarUI();
     }
 
     setTotalFileCount(count: number) {
