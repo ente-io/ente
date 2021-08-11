@@ -37,7 +37,6 @@ interface Props {
     directlyShowNextModal: boolean;
     collectionsAndTheirLatestFile: CollectionAndItsLatestFile[];
     attributes: CollectionSelectorAttributes;
-    syncWithRemote:(force?: boolean, silent?:boolean)=>Promise<void>;
 }
 function CollectionSelector({
     attributes,
@@ -62,12 +61,11 @@ function CollectionSelector({
                 onClick={() => {
                     attributes.callback(item.collection);
                     props.onHide();
-                }}
-            >
+                }}>
                 <CollectionCard>
                     <PreviewCard
                         file={item.file}
-                        updateUrl={() => { }}
+                        updateUrl={() => {}}
                         forcedEnable
                     />
                     <Card.Text className="text-center">
@@ -79,10 +77,11 @@ function CollectionSelector({
     );
 
     return (
-        <Modal {...props}
+        <Modal
+            {...props}
             size="xl"
-            centered contentClassName="plan-selector-modal-content"
-        >
+            centered
+            contentClassName="plan-selector-modal-content">
             <Modal.Header closeButton onHide={() => props.onHide(true)}>
                 <Modal.Title>{attributes.title}</Modal.Title>
             </Modal.Header>
@@ -91,8 +90,7 @@ function CollectionSelector({
                     display: 'flex',
                     justifyContent: 'space-around',
                     flexWrap: 'wrap',
-                }}
-            >
+                }}>
                 <AddCollectionButton showNextModal={attributes.showNextModal} />
                 {CollectionIcons}
             </Modal.Body>
