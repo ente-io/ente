@@ -65,6 +65,7 @@ import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
 export enum FILE_TYPE {
     IMAGE,
     VIDEO,
+    LIVE_PHOTO,
     OTHERS,
 }
 
@@ -413,7 +414,6 @@ export default function Gallery() {
                         collectionsAndTheirLatestFile?.length === 0
                     }
                     attributes={collectionSelectorAttributes}
-                    syncWithRemote={syncWithRemote}
                 />
                 <Upload
                     syncWithRemote={syncWithRemote}

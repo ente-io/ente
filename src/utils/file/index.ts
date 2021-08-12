@@ -146,3 +146,24 @@ export function removeUnneccessaryFileProps(files:File[]):File[] {
     });
     return stripedFiles;
 }
+
+export function fileNameWithoutExtension(filename) {
+    const lastDotPosition = filename.lastIndexOf('.');
+    if (lastDotPosition === -1) return filename;
+    else return filename.substr(0, lastDotPosition);
+}
+
+export function fileExtensionWithDot(filename) {
+    const lastDotPosition = filename.lastIndexOf('.');
+    if (lastDotPosition === -1) return '';
+    else return filename.substr(lastDotPosition);
+}
+
+export function generateStreamFromArrayBuffer(data: Uint8Array) {
+    return new ReadableStream({
+        async start(controller: ReadableStreamDefaultController) {
+            controller.enqueue(data);
+            controller.close();
+        },
+    });
+}

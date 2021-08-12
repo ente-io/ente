@@ -3,7 +3,7 @@ import { File } from 'services/fileService';
 import { MetadataObject } from 'services/upload/uploadService';
 import { formatDate } from 'utils/file';
 
-export const getFileUID = (file: File) =>
+export const getExportRecordFileUID = (file: File) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
 export const getExportPendingFiles = async (
@@ -12,8 +12,7 @@ export const getExportPendingFiles = async (
 ) => {
     const queuedFiles = new Set(exportRecord?.queuedFiles);
     const unExportedFiles = allFiles.filter((file) => {
-        const fileUID = `${file.id}_${file.collectionID}`;
-        if (queuedFiles.has(fileUID)) {
+        if (queuedFiles.has(getExportRecordFileUID(file))) {
             return file;
         }
     });
@@ -26,8 +25,7 @@ export const getFilesUploadedAfterLastExport = async (
 ) => {
     const exportedFiles = new Set(exportRecord?.exportedFiles);
     const unExportedFiles = allFiles.filter((file) => {
-        const fileUID = `${file.id}_${file.collectionID}`;
-        if (!exportedFiles.has(fileUID)) {
+        if (!exportedFiles.has(getExportRecordFileUID(file))) {
             return file;
         }
     });
@@ -40,7 +38,7 @@ export const getExportFailedFiles = async (
 ) => {
     const failedFiles = new Set(exportRecord?.failedFiles);
     const filesToExport = allFiles.filter((file) => {
-        if (failedFiles.has(`${file.id}_${file.collectionID}`)) {
+        if (failedFiles.has(getExportRecordFileUID(file))) {
             return file;
         }
     });

@@ -1,11 +1,12 @@
 import { runningInBrowser } from 'utils/common';
+import { FILE_TYPE } from 'pages/gallery';
 import {
     getExportPendingFiles,
     getExportFailedFiles,
     getFilesUploadedAfterLastExport,
-    getFileUID,
     dedupe,
     getGoogleLikeMetadataFile,
+    getExportRecordFileUID,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -13,6 +14,11 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Collection, getLocalCollections } from './collectionService';
 import downloadManager from './downloadManager';
 import { File, getLocalFiles } from './fileService';
+import { decodeMotionPhoto } from './motionPhotoService';
+import {
+    fileNameWithoutExtension,
+    generateStreamFromArrayBuffer,
+} from 'utils/file';
 
 export interface ExportProgress {
     current: number;
@@ -219,12 +225,12 @@ class ExportService {
     }
     async addFilesQueuedRecord(folder: string, files: File[]) {
         const exportRecord = await this.getExportRecord(folder);
-        exportRecord.queuedFiles = files.map(getFileUID);
+        exportRecord.queuedFiles = files.map(getExportRecordFileUID);
         await this.updateExportRecord(exportRecord, folder);
     }
 
     async addFileExportRecord(folder: string, file: File, type: RecordType) {
-        const fileUID = getFileUID(file);
+        const fileUID = getExportRecordFileUID(file);
         const exportRecord = await this.getExportRecord(folder);
         exportRecord.queuedFiles = exportRecord.queuedFiles.filter(
             (queuedFilesUID) => queuedFilesUID !== fileUID,
@@ -295,14 +301,36 @@ class ExportService {
         const fileStream = await retryAsyncFunction(() =>
             downloadManager.downloadFile(file),
         );
-        this.ElectronAPIs.saveStreamToDisk(
-            `${collectionPath}/${uid}`,
-            fileStream,
-        );
+        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+            this.exportMotionPhoto(fileStream, file, collectionPath);
+        } else {
+            this.ElectronAPIs.saveStreamToDisk(
+                `${collectionPath}/${uid}`,
+                fileStream,
+            );
+        }
         this.ElectronAPIs.saveFileToDisk(
             `${collectionPath}/${MetadataFolderName}/${uid}.json`,
             getGoogleLikeMetadataFile(uid, file.metadata),
         );
+    }
+
+    private async exportMotionPhoto(
+        fileStream: ReadableStream<any>,
+        file: File,
+        collectionPath: string,
+    ) {
+        const fileBlob = await new Response(fileStream).blob();
+        const originalName = fileNameWithoutExtension(file.metadata.title);
+        const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+
+        const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
+        const imageSavePath = `${collectionPath}/${file.id}_${motionPhoto.imageNameTitle}`;
+        this.ElectronAPIs.saveStreamToDisk(imageSavePath, imageStream);
+
+        const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
+        const videoSavePath = `${collectionPath}/${file.id}_${motionPhoto.videoNameTitle}`;
+        this.ElectronAPIs.saveStreamToDisk(videoSavePath, videoStream);
     }
 
     private sanitizeName(name) {

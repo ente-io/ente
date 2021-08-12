@@ -10,7 +10,7 @@ import exportService, {
 import { getLocalFiles } from 'services/fileService';
 import styled from 'styled-components';
 import { sleep } from 'utils/common';
-import { getFileUID } from 'utils/export';
+import { getExportRecordFileUID } from 'utils/export';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { Label, Row, Value } from './Container';
@@ -121,7 +121,8 @@ export default function ExportModal(props: Props) {
                         ...exportRecord.failedFiles,
                     ]);
                     const unExportedFiles = localFiles.filter(
-                        (file) => !exportFileUIDs.has(getFileUID(file)),
+                        (file) =>
+                            !exportFileUIDs.has(getExportRecordFileUID(file)),
                     );
                     exportService.addFilesQueuedRecord(
                         exportFolder,
