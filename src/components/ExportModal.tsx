@@ -5,7 +5,7 @@ import exportService, { ExportProgress, ExportStage, ExportStats, ExportType } f
 import { getLocalFiles } from 'services/fileService';
 import styled from 'styled-components';
 import { sleep } from 'utils/common';
-import { getFileUID } from 'utils/export';
+import { getExportRecordFileUID } from 'utils/export';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { Label, Row, Value } from './Container';
@@ -98,7 +98,7 @@ export default function ExportModal(props: Props) {
                 if (syncedFilesCnt > exportedFileCnt + failedFilesCnt) {
                     updateExportProgress({ current: exportedFileCnt + failedFilesCnt, total: syncedFilesCnt });
                     const exportFileUIDs = new Set([...exportRecord.exportedFiles, ...exportRecord.failedFiles]);
-                    const unExportedFiles = localFiles.filter((file) => !exportFileUIDs.has(getFileUID(file)));
+                    const unExportedFiles = localFiles.filter((file) => !exportFileUIDs.has(getExportRecordFileUID(file)));
                     exportService.addFilesQueuedRecord(exportFolder, unExportedFiles);
                     updateExportStage(ExportStage.PAUSED);
                 }
@@ -275,7 +275,7 @@ export default function ExportModal(props: Props) {
                 <Row>
                     <Label width="40%">{constants.DESTINATION}</Label>
                     <Value width="60%">
-                        {!exportFolder ?
+                    {!exportFolder ?
                             (<Button variant={'outline-success'} size={'sm'} onClick={selectExportDirectory}>{constants.SELECT_FOLDER}</Button>) :
                             (<>
                                 {/* <span style={{ overflow: 'hidden', direction: 'rtl', height: '1.5rem', width: '90%', whiteSpace: 'nowrap' }}> */}
