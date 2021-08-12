@@ -1,10 +1,13 @@
+import { FILE_TYPE } from 'pages/gallery';
 import { retryAsyncFunction, runningInBrowser } from 'utils/common';
 import { getExportPendingFiles, getExportFailedFiles, getFilesUploadedAfterLastExport, getExportRecordFileUID, dedupe, getGoogleLikeMetadataFile } from 'utils/export';
+import { fileNameWithoutExtension, generateStreamFromArrayBuffer } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Collection, getLocalCollections } from './collectionService';
 import downloadManager from './downloadManager';
 import { File, getLocalFiles } from './fileService';
+import { decodeMotionPhoto } from './motionPhotoService';
 
 export interface ExportProgress {
     current: number;
@@ -255,11 +258,33 @@ class ExportService {
             file.metadata.title,
         )}`;
         const fileStream = await retryAsyncFunction(()=>downloadManager.downloadFile(file));
-        this.ElectronAPIs.saveStreamToDisk(`${collectionPath}/${uid}`, fileStream);
+        if (file.metadata.fileType===FILE_TYPE.LIVE_PHOTO) {
+            this.exportMotionPhoto(fileStream, file, collectionPath);
+        } else {
+            this.ElectronAPIs.saveStreamToDisk(`${collectionPath}/${uid}`, fileStream);
+        }
         this.ElectronAPIs.saveFileToDisk(
             `${collectionPath}/${MetadataFolderName}/${uid}.json`,
             getGoogleLikeMetadataFile(uid, file.metadata),
         );
+    }
+
+    private async exportMotionPhoto(
+        fileStream: ReadableStream<any>,
+        file: File,
+        collectionPath: string,
+    ) {
+        const fileBlob = await new Response(fileStream).blob();
+        const originalName = fileNameWithoutExtension(file.metadata.title);
+        const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+
+        const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
+        const imageSavePath=`${collectionPath}/${file.id}_${motionPhoto.imageNameTitle}`;
+        this.ElectronAPIs.saveStreamToDisk(imageSavePath, imageStream);
+
+        const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
+        const videoSavePath=`${collectionPath}/${file.id}_${motionPhoto.videoNameTitle}`;
+        this.ElectronAPIs.saveStreamToDisk(videoSavePath, videoStream);
     }
 
     private sanitizeName(name) {
