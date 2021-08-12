@@ -3,11 +3,13 @@ import { File } from 'services/fileService';
 import { MetadataObject } from 'services/upload/uploadService';
 import { formatDate } from 'utils/file';
 
+export const getFileUID = (file: File) =>
+    `${file.id}_${file.collectionID}_${file.updationTime}`;
 
-export const getFileUID = (file: File) => `${file.id}_${file.collectionID}_${file.updationTime}`;
-
-
-export const getExportPendingFiles = async (allFiles: File[], exportRecord: ExportRecord) => {
+export const getExportPendingFiles = async (
+    allFiles: File[],
+    exportRecord: ExportRecord,
+) => {
     const queuedFiles = new Set(exportRecord?.queuedFiles);
     const unExportedFiles = allFiles.filter((file) => {
         const fileUID = `${file.id}_${file.collectionID}`;
@@ -18,7 +20,10 @@ export const getExportPendingFiles = async (allFiles: File[], exportRecord: Expo
     return unExportedFiles;
 };
 
-export const getFilesUploadedAfterLastExport = async (allFiles: File[], exportRecord: ExportRecord) => {
+export const getFilesUploadedAfterLastExport = async (
+    allFiles: File[],
+    exportRecord: ExportRecord,
+) => {
     const exportedFiles = new Set(exportRecord?.exportedFiles);
     const unExportedFiles = allFiles.filter((file) => {
         const fileUID = `${file.id}_${file.collectionID}`;
@@ -29,7 +34,10 @@ export const getFilesUploadedAfterLastExport = async (allFiles: File[], exportRe
     return unExportedFiles;
 };
 
-export const getExportFailedFiles = async (allFiles: File[], exportRecord: ExportRecord) => {
+export const getExportFailedFiles = async (
+    allFiles: File[],
+    exportRecord: ExportRecord,
+) => {
     const failedFiles = new Set(exportRecord?.failedFiles);
     const filesToExport = allFiles.filter((file) => {
         if (failedFiles.has(`${file.id}_${file.collectionID}`)) {
@@ -45,20 +53,29 @@ export const dedupe = (files: any[]) => {
     return dedupedArray;
 };
 
-export const getGoogleLikeMetadataFile=(uid :string, metadata:MetadataObject)=>{
-    return JSON.stringify({
-        title: uid,
-        creationTime: {
-            timestamp: metadata.creationTime,
-            formatted: formatDate(metadata.creationTime),
+export const getGoogleLikeMetadataFile = (
+    uid: string,
+    metadata: MetadataObject,
+) => {
+    const creationTime = metadata.creationTime / 1000000;
+    const modificationTime = metadata.modificationTime / 1000000;
+    return JSON.stringify(
+        {
+            title: uid,
+            creationTime: {
+                timestamp: creationTime,
+                formatted: formatDate(creationTime),
+            },
+            modificationTime: {
+                timestamp: modificationTime,
+                formatted: formatDate(modificationTime),
+            },
+            geoData: {
+                latitude: metadata.latitude,
+                longitude: metadata.longitude,
+            },
         },
-        modificationTime: {
-            timestamp: metadata.modificationTime,
-            formatted: formatDate(metadata.modificationTime),
-        },
-        geoData: {
-            latitude: metadata.latitude,
-            longitude: metadata.longitude,
-        },
-    }, null, 2);
+        null,
+        2,
+    );
 };
