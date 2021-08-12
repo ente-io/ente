@@ -69,10 +69,6 @@ class DownloadManager {
                 const fileStream = await this.downloadFile(file);
                 let fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
-                    if (fileIsHEIC(file.metadata.title)) {
-                        fileBlob = await convertHEIC2JPEG(fileBlob);
-                    }
-
                     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
                         const originalName = fileNameWithoutExtension(
                             file.metadata.title,
@@ -81,7 +77,10 @@ class DownloadManager {
                             fileBlob,
                             originalName,
                         );
-                        fileBlob = await new Response(motionPhoto.image).blob();
+                        fileBlob = new Blob([motionPhoto.image]);
+                    }
+                    if (fileIsHEIC(file.metadata.title)) {
+                        fileBlob = await convertHEIC2JPEG(fileBlob);
                     }
                 }
                 this.fileDownloads.set(
