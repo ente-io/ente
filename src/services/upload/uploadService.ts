@@ -19,7 +19,7 @@ import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { uploadStreamUsingMultipart } from './s3Service';
 import UIService from './uiService';
 import { parseError } from 'utils/common/errorUtil';
-import { FileWithCollection, MetadataMap } from './uploadManager';
+import { MetadataMap } from './uploadManager';
 
 export const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
 export const CHUNKS_COMBINED_FOR_A_UPLOAD_PART = Math.floor(
@@ -94,24 +94,27 @@ class UploadService {
         await this.preFetchUploadURLs();
     }
 
-    async readFile(reader: FileReader, fileWithCollection: FileWithCollection) {
+    async readFile(
+        reader: FileReader,
+        rawFile: globalThis.File,
+        collection: Collection,
+    ) {
         try {
-            const { file: receivedFile, collectionID } = fileWithCollection;
-            const fileType = getFileType(fileWithCollection.file);
+            const fileType = getFileType(rawFile);
 
             const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
                 reader,
-                receivedFile,
+                rawFile,
                 fileType,
             );
 
-            const originalName = getFileOriginalName(receivedFile);
+            const originalName = getFileOriginalName(rawFile);
             const googleMetadata = this.metadataMap.get(
-                getMetadataKey(collectionID, originalName),
+                getMetadataKey(collection.id, originalName),
             );
             const extractedMetadata: MetadataObject = await extractMetatdata(
                 reader,
-                receivedFile,
+                rawFile,
                 fileType,
             );
             if (hasStaticThumbnail) {
@@ -124,7 +127,7 @@ class UploadService {
                 extractedMetadata[key] = value;
             }
 
-            const filedata = await getFileData(reader, receivedFile);
+            const filedata = await getFileData(reader, rawFile);
 
             return {
                 filedata,
@@ -243,7 +246,6 @@ class UploadService {
             await this.fetchUploadURLs();
             // checking for any subscription related errors
         } catch (e) {
-            logError(e, 'error fetching uploadURLs');
             const { parsedError, parsed } = parseError(e);
             if (parsed) {
                 throw parsedError;

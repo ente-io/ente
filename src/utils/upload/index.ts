@@ -1,17 +1,13 @@
-import { Collection } from 'services/collectionService';
 import { FileWithCollection } from 'services/upload/uploadManager';
 import { FileInMemory, MetadataObject } from 'services/upload/uploadService';
 
 const TYPE_JSON = 'json';
 
 export function fileAlreadyInCollection(
-    existingFilesCollectionWise,
+    existingFilesInCollection,
     newFile: FileInMemory,
-    collection: Collection,
 ): boolean {
-    const collectionFiles =
-        existingFilesCollectionWise.get(collection.id) ?? [];
-    for (const existingFile of collectionFiles) {
+    for (const existingFile of existingFilesInCollection) {
         if (areFilesSame(existingFile.metadata, newFile.metadata)) {
             return true;
         }

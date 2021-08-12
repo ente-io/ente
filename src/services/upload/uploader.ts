@@ -7,7 +7,7 @@ import { logError } from 'utils/sentry';
 import { fileAlreadyInCollection } from 'utils/upload';
 import NetworkClient from './networkClient';
 import UIService from './uiService';
-import { FileUploadResults, FileWithCollection } from './uploadManager';
+import { FileUploadResults } from './uploadManager';
 import UploadService, {
     BackupedFile,
     EncryptedFile,
@@ -24,25 +24,17 @@ interface UploadResponse {
 export default async function uploader(
     worker: any,
     reader: FileReader,
-    fileWithCollection: FileWithCollection,
-    existingFilesCollectionWise: Map<number, File[]>,
-    collections: Map<number, Collection>,
+    existingFilesInCollection: File[],
+    rawFile: globalThis.File,
+    collection: Collection,
 ): Promise<UploadResponse> {
-    const { file: rawFile, collectionID } = fileWithCollection;
-    const collection = collections.get(collectionID);
     UIService.setFileProgress(rawFile.name, 0);
     let file: FileInMemory = null;
     let encryptedFile: EncryptedFile = null;
     try {
-        file = await UploadService.readFile(reader, fileWithCollection);
+        file = await UploadService.readFile(reader, rawFile, collection);
 
-        if (
-            fileAlreadyInCollection(
-                existingFilesCollectionWise,
-                file,
-                collection,
-            )
-        ) {
+        if (fileAlreadyInCollection(existingFilesInCollection, file)) {
             // set progress to -2 indicating that file upload was skipped
             UIService.setFileProgress(rawFile.name, FileUploadResults.SKIPPED);
             await sleep(TwoSecondInMillSeconds);

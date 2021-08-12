@@ -108,21 +108,25 @@ class UploadManager {
     }
 
     private async seedMetadataMap(metadataFiles: FileWithCollection[]) {
-        UIService.reset(metadataFiles.length);
+        try {
+            UIService.reset(metadataFiles.length);
 
-        for (const fileWithCollection of metadataFiles) {
-            const parsedMetaDataJSONWithTitle = await parseMetadataJSON(
-                fileWithCollection.file,
-            );
-            if (parsedMetaDataJSONWithTitle) {
-                const { title, ...parsedMetaDataJSON } =
-                    parsedMetaDataJSONWithTitle;
-                this.metadataMap.set(
-                    getMetadataKey(fileWithCollection.collectionID, title),
-                    parsedMetaDataJSON,
+            for (const fileWithCollection of metadataFiles) {
+                const parsedMetaDataJSONWithTitle = await parseMetadataJSON(
+                    fileWithCollection.file,
                 );
-                UIService.increaseFileUploaded();
+                if (parsedMetaDataJSONWithTitle) {
+                    const { title, ...parsedMetaDataJSON } =
+                        parsedMetaDataJSONWithTitle;
+                    this.metadataMap.set(
+                        getMetadataKey(fileWithCollection.collectionID, title),
+                        parsedMetaDataJSON,
+                    );
+                    UIService.increaseFileUploaded();
+                }
             }
+        } catch (e) {
+            logError(e, 'error seeding Metadatamap');
         }
     }
 
@@ -154,12 +158,19 @@ class UploadManager {
     private async uploadNextFileInQueue(worker: any, fileReader: FileReader) {
         while (this.filesToBeUploaded.length > 0) {
             const fileWithCollection = this.filesToBeUploaded.pop();
+            const existingFilesInCollection =
+                this.existingFilesCollectionWise.get(
+                    fileWithCollection.collectionID,
+                );
+            const collection = this.collections.get(
+                fileWithCollection.collectionID,
+            );
             const { fileUploadResult, file } = await uploader(
                 worker,
                 fileReader,
-                fileWithCollection,
-                this.existingFilesCollectionWise,
-                this.collections,
+                existingFilesInCollection,
+                fileWithCollection.file,
+                collection,
             );
 
             if (fileUploadResult === FileUploadResults.UPLOADED) {
