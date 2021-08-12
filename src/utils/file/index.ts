@@ -148,13 +148,22 @@ export function removeUnneccessaryFileProps(files:File[]):File[] {
 }
 
 export function fileNameWithoutExtension(filename) {
-    var lastDotPosition = filename.lastIndexOf(".");
+    const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return filename;
     else return filename.substr(0, lastDotPosition);
 }
 
 export function fileExtensionWithDot(filename) {
-    var lastDotPosition = filename.lastIndexOf(".");
-    if (lastDotPosition === -1) return "";
+    const lastDotPosition = filename.lastIndexOf('.');
+    if (lastDotPosition === -1) return '';
     else return filename.substr(lastDotPosition);
+}
+
+export function generateStreamFromArrayBuffer(data: Uint8Array) {
+    return new ReadableStream({
+        async start(controller: ReadableStreamDefaultController) {
+            controller.enqueue(data);
+            controller.close();
+        },
+    });
 }

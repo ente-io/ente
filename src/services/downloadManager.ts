@@ -5,6 +5,7 @@ import {
     fileIsHEIC,
     convertHEIC2JPEG,
     fileNameWithoutExtension,
+    generateStreamFromArrayBuffer,
 } from 'utils/file';
 import HTTPService from './HTTPService';
 import { File } from './fileService';
@@ -116,12 +117,7 @@ class DownloadManager {
                 await worker.fromB64(file.file.decryptionHeader),
                 file.key,
             );
-            return new ReadableStream({
-                async start(controller: ReadableStreamDefaultController) {
-                    controller.enqueue(decrypted);
-                    controller.close();
-                },
-            });
+            return generateStreamFromArrayBuffer(decrypted);
         }
         const resp = await fetch(getFileUrl(file.id), {
             headers: {
