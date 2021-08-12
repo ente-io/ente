@@ -2,8 +2,8 @@ import JSZip from 'jszip';
 import { fileExtensionWithDot } from 'utils/file';
 
 class MotionPhoto {
-    imageBlob: Uint8Array;
-    videoBlob: Uint8Array;
+    image: Uint8Array;
+    video: Uint8Array;
     imageNameTitle: String;
     videoNameTitle: String;
 }
@@ -19,13 +19,13 @@ export const decodeMotionPhoto = async (
         if (zipFilename.startsWith('image')) {
             motionPhoto.imageNameTitle =
                 originalName + fileExtensionWithDot(zipFilename);
-            motionPhoto.imageBlob = await zip.files[zipFilename].async(
+            motionPhoto.image = await zip.files[zipFilename].async(
                 'uint8array',
             );
         } else if (zipFilename.startsWith('video')) {
             motionPhoto.videoNameTitle =
                 originalName + fileExtensionWithDot(zipFilename);
-            motionPhoto.videoBlob = await zip.files[zipFilename].async(
+            motionPhoto.video = await zip.files[zipFilename].async(
                 'uint8array',
             );
         }

@@ -81,9 +81,7 @@ class DownloadManager {
                             fileBlob,
                             originalName,
                         );
-                        fileBlob = await new Response(
-                            motionPhoto.imageBlob,
-                        ).blob();
+                        fileBlob = await new Response(motionPhoto.image).blob();
                     }
                 }
                 this.fileDownloads.set(
