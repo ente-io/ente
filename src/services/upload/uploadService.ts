@@ -117,17 +117,19 @@ class UploadService {
             if (hasStaticThumbnail) {
                 extractedMetadata.hasStaticThumbnail = true;
             }
-            const metadata: MetadataObject = {
-                ...extractedMetadata,
-                ...googleMetadata,
-            };
+            for (const [key, value] of Object.entries(googleMetadata)) {
+                if (!value) {
+                    continue;
+                }
+                extractedMetadata[key] = value;
+            }
 
             const filedata = await getFileData(reader, receivedFile);
 
             return {
                 filedata,
                 thumbnail,
-                metadata,
+                metadata: extractedMetadata,
             } as FileInMemory;
         } catch (e) {
             logError(e, 'error reading files');

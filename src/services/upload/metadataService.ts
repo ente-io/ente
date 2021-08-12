@@ -12,7 +12,8 @@ export interface ParsedMetaDataJSON {
     title?: string;
     creationTime: number;
     modificationTime: number;
-    location: Location;
+    latitude: number;
+    longitude: number;
 }
 
 export const NULL_LOCATION: Location = { latitude: null, longitude: null };
@@ -21,7 +22,7 @@ const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
     title: null,
     creationTime: null,
     modificationTime: null,
-    location: NULL_LOCATION,
+    ...NULL_LOCATION,
 };
 
 export async function extractMetatdata(
@@ -78,6 +79,12 @@ export async function parseMetadataJSON(receivedFile: globalThis.File) {
         ) {
             parsedMetaDataJSON.creationTime =
                 metadataJSON['photoTakenTime']['timestamp'] * 1000000;
+        } else if (
+            metadataJSON['creationTime'] &&
+            metadataJSON['creationTime']['timestamp']
+        ) {
+            parsedMetaDataJSON.creationTime =
+                metadataJSON['creationTime']['timestamp'] * 1000000;
         }
         if (
             metadataJSON['modificationTime'] &&
@@ -101,7 +108,8 @@ export async function parseMetadataJSON(receivedFile: globalThis.File) {
             locationData = metadataJSON['geoDataExif'];
         }
         if (locationData !== null) {
-            parsedMetaDataJSON.location = locationData;
+            parsedMetaDataJSON.latitude = locationData.latitude;
+            parsedMetaDataJSON.longitude = locationData.longitude;
         }
         return parsedMetaDataJSON;
     } catch (e) {
