@@ -68,7 +68,6 @@ class DownloadManager {
                 // unzip motion photo and return fileBlob of the image for preview
                 const fileStream = await this.downloadFile(file);
                 let fileBlob = await new Response(fileStream).blob();
-
                 if (forPreview) {
                     if (fileIsHEIC(file.metadata.title)) {
                         fileBlob = await convertHEIC2JPEG(fileBlob);
