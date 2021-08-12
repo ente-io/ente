@@ -124,8 +124,8 @@ export default function LandingPage() {
     const login = () => setShowLogin(true);
 
     return <Container>
-        {loading ? <EnteSpinner /> :
-            (<>
+        {loading ? <EnteSpinner />
+            : (<>
                 <SlideContainer>
                     <UpperText>
                         {constants.HERO_HEADER()}

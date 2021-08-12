@@ -69,8 +69,8 @@ export default function SetupTwoFactor() {
                             <>
                                 <p>{constants.TWO_FACTOR_QR_INSTRUCTION}</p>
                                 <DeadCenter>
-                                    {!twoFactorSecret ? <div style={{ height: '200px', width: '200px', margin: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '1px solid #aaa' }}><EnteSpinner /></div> :
-                                        <QRCode src={`data:image/png;base64,${twoFactorSecret.qrCode}`} />
+                                    {!twoFactorSecret ? <div style={{ height: '200px', width: '200px', margin: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '1px solid #aaa' }}><EnteSpinner /></div>
+                                        : <QRCode src={`data:image/png;base64,${twoFactorSecret.qrCode}`} />
                                     }
                                     <Button block variant="link" onClick={() => setSetupMode(SetupMode.MANUAL_CODE)}>
                                         {constants.ENTER_CODE_MANUALLY}

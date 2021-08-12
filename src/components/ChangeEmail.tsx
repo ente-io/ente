@@ -101,8 +101,8 @@ function ChangeEmailForm(props:Props) {
                 handleSubmit,
             }) => (
                 <Form noValidate onSubmit={handleSubmit}>
-                    {!ottInputVisible ?
-                        <Form.Group controlId="formBasicEmail">
+                    {!ottInputVisible
+                        ? <Form.Group controlId="formBasicEmail">
                             <Form.Control
                                 ref={emailInputElement}
                                 type="email"
@@ -118,8 +118,8 @@ function ChangeEmailForm(props:Props) {
                             <FormControl.Feedback type="invalid">
                                 {errors.email}
                             </FormControl.Feedback>
-                        </Form.Group> :
-                        <>
+                        </Form.Group>
+                        : <>
                             <EmailRow>
                                 <Col xs="8">
                                     {values.email}

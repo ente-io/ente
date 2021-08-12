@@ -427,9 +427,9 @@ class UploadService {
                 metadata['hasStaticThumbnail'] = hasStaticThumbnail;
             }
             const filedata =
-                receivedFile.size > MIN_STREAM_FILE_SIZE ?
-                    this.getFileStream(reader, receivedFile) :
-                    await this.getUint8ArrayView(reader, receivedFile);
+                receivedFile.size > MIN_STREAM_FILE_SIZE
+                    ? this.getFileStream(reader, receivedFile)
+                    : await this.getUint8ArrayView(reader, receivedFile);
 
             return {
                 filedata,
@@ -449,9 +449,9 @@ class UploadService {
     ): Promise<EncryptedFile> {
         try {
             const { key: fileKey, file: encryptedFiledata }: EncryptionResult =
-                isDataStream(file.filedata) ?
-                    await this.encryptFileStream(worker, file.filedata) :
-                    await worker.encryptFile(file.filedata);
+                isDataStream(file.filedata)
+                    ? await this.encryptFileStream(worker, file.filedata)
+                    : await worker.encryptFile(file.filedata);
 
             const { file: encryptedThumbnail }: EncryptionResult =
                 await worker.encryptThumbnail(file.thumbnail, fileKey);
@@ -604,9 +604,9 @@ class UploadService {
                     reader.onerror = () => reject(Error('file reading has failed'));
                     reader.onload = () => {
                         const result =
-                            typeof reader.result !== 'string' ?
-                                new TextDecoder().decode(reader.result) :
-                                reader.result;
+                            typeof reader.result !== 'string'
+                                ? new TextDecoder().decode(reader.result)
+                                : reader.result;
                         resolve(JSON.parse(result));
                     };
                     reader.readAsText(receivedFile);
@@ -828,9 +828,9 @@ class UploadService {
                 reader.onload = () => {
                     // Do whatever you want with the file contents
                     const result =
-                        typeof reader.result === 'string' ?
-                            new TextEncoder().encode(reader.result) :
-                            new Uint8Array(reader.result);
+                        typeof reader.result === 'string'
+                            ? new TextEncoder().encode(reader.result)
+                            : new Uint8Array(reader.result);
                     resolve(result);
                 };
                 reader.readAsArrayBuffer(file);

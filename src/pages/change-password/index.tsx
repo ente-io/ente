@@ -75,9 +75,9 @@ export default function Generate() {
             callback={onSubmit}
             buttonText={constants.CHANGE_PASSWORD}
             back={
-                getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?
-                    redirectToGallery :
-                    null
+                getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
+                    ? redirectToGallery
+                    : null
             }
         />
     );

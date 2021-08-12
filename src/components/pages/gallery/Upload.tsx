@@ -99,9 +99,9 @@ export default function Upload(props: Props) {
     };
 
     const nextModal = (fileAnalysisResult: AnalysisResult) => {
-        fileAnalysisResult?.multipleFolders ?
-            setChoiceModalView(true) :
-            showCreateCollectionModal(fileAnalysisResult);
+        fileAnalysisResult?.multipleFolders
+            ? setChoiceModalView(true)
+            : showCreateCollectionModal(fileAnalysisResult);
     };
 
     function analyseUploadFiles(): AnalysisResult {

@@ -43,9 +43,9 @@ export default function ExportFinished(props: Props) {
             <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around' }}>
                 <Button block variant={'outline-secondary'} onClick={props.onHide}>{constants.CLOSE}</Button>
                 <div style={{ width: '30px' }} />
-                {props.exportStats.failed !== 0 ?
-                    <Button block variant={'outline-danger'} onClick={props.retryFailed}>{constants.RETRY_EXPORT_}</Button> :
-                    <Button block variant={'outline-success'} onClick={props.exportFiles}>{constants.EXPORT_AGAIN}</Button>
+                {props.exportStats.failed !== 0
+                    ? <Button block variant={'outline-danger'} onClick={props.retryFailed}>{constants.RETRY_EXPORT_}</Button>
+                    : <Button block variant={'outline-success'} onClick={props.exportFiles}>{constants.EXPORT_AGAIN}</Button>
                 }
             </div>
         </>

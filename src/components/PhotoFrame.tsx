@@ -519,14 +519,14 @@ const PhotoFrame = ({
                                         date: isSameDay(
                                             new Date(currentDate),
                                             new Date(),
-                                        ) ?
-                                            'Today' :
-                                            isSameDay(
+                                        )
+                                            ? 'Today'
+                                            : isSameDay(
                                                 new Date(currentDate),
                                                 new Date(Date.now() - A_DAY),
-                                            ) ?
-                                                'Yesterday' :
-                                                dateTimeFormat.format(
+                                            )
+                                                ? 'Yesterday'
+                                                : dateTimeFormat.format(
                                                     currentDate,
                                                 ),
                                         id: currentDate.toString(),
@@ -602,16 +602,16 @@ const PhotoFrame = ({
                             const renderListItem = (listItem: TimeStampListItem) => {
                                 switch (listItem.itemType) {
                                     case ITEM_TYPE.TIME:
-                                        return listItem.dates ?
-                                            listItem.dates.map((item) => (
+                                        return listItem.dates
+                                            ? listItem.dates.map((item) => (
                                                 <>
                                                     <DateContainer key={item.date} span={item.span}>
                                                         {item.date}
                                                     </DateContainer>
                                                     <div />
                                                 </>
-                                            )) :
-                                            (
+                                            ))
+                                            : (
                                                 <DateContainer span={columns}>
                                                     {listItem.date}
                                                 </DateContainer>

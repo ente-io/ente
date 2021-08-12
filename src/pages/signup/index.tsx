@@ -30,8 +30,8 @@ export default function SignUpPage() {
 
     return (
         <Container>{
-            loading ? <EnteSpinner /> :
-                <Card style={{ minWidth: '320px' }} className="text-center">
+            loading ? <EnteSpinner />
+                : <Card style={{ minWidth: '320px' }} className="text-center">
                     <Card.Body style={{ padding: '40px 30px' }}>
                         <SignUp login={login} />
                     </Card.Body>

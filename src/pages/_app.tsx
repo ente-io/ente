@@ -513,17 +513,17 @@ export default function App({ Component, err }) {
             <Head>
                 <title>{constants.TITLE}</title>
                 {/* Cloudflare Web Analytics */}
-                {pageRootURL?.hostname && (pageRootURL.hostname === 'photos.ente.io' ?
-                    <script
+                {pageRootURL?.hostname && (pageRootURL.hostname === 'photos.ente.io'
+                    ? <script
                         defer
                         src="https://static.cloudflareinsights.com/beacon.min.js"
                         data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
-                    /> : pageRootURL.hostname === 'web.ente.io' ?
-                        < script
+                    /> : pageRootURL.hostname === 'web.ente.io'
+                        ? < script
                             defer
                             src='https://static.cloudflareinsights.com/beacon.min.js'
-                            data-cf-beacon='{"token": "dfde128b7bb34a618ad34a08f1ba7609"}' /> :
-                        console.warn('Web analytics is disabled')
+                            data-cf-beacon='{"token": "dfde128b7bb34a618ad34a08f1ba7609"}' />
+                        : console.warn('Web analytics is disabled')
                 )
                 }
                 {/* End Cloudflare Web Analytics  */}
@@ -543,9 +543,9 @@ export default function App({ Component, err }) {
             <MessageContainer>{offline && constants.OFFLINE_MSG}</MessageContainer>
             {
                 sharedFiles &&
-                (router.pathname === '/gallery' ?
-                    <MessageContainer>{constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}</MessageContainer> :
-                    <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(sharedFiles.length)}</MessageContainer>)
+                (router.pathname === '/gallery'
+                    ? <MessageContainer>{constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}</MessageContainer>
+                    : <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(sharedFiles.length)}</MessageContainer>)
             }
             {flashMessage && <FlashMessageBar flashMessage={flashMessage} onClose={() => setFlashMessage(null)} />}
             <AppContext.Provider value={{

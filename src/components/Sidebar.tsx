@@ -157,9 +157,9 @@ export default function Sidebar(props: Props) {
                             size="sm"
                             onClick={onManageClick}
                         >
-                            {isSubscribed(subscription) ?
-                                constants.MANAGE :
-                                constants.SUBSCRIBE}
+                            {isSubscribed(subscription)
+                                ? constants.MANAGE
+                                : constants.SUBSCRIBE}
                         </Button>
                     </div>
                 </div>

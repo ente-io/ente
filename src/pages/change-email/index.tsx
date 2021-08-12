@@ -27,11 +27,11 @@ function ChangeEmailPage() {
 
 
     return (
-        <Container>{waiting ?
-            <EnteSpinner>
+        <Container>{waiting
+            ? <EnteSpinner>
                 <span className="sr-only">Loading...</span>
-            </EnteSpinner>:
-            <EnteCard size={showBigDialog?'md':'sm'}>
+            </EnteSpinner>
+            :<EnteCard size={showBigDialog?'md':'sm'}>
                 <Card.Body style={{ padding: '40px 30px' }}>
                     <Card.Title style={{ marginBottom: '32px' }}>
                         <LogoImg src="/icon.svg" />

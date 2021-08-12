@@ -113,9 +113,9 @@ export default function UploadProgress(props: Props) {
         <Modal
             show={props.show}
             onHide={
-                props.uploadStage !== UPLOAD_STAGES.FINISH ?
-                    () => null :
-                    props.closeModal
+                props.uploadStage !== UPLOAD_STAGES.FINISH
+                    ? () => null
+                    : props.closeModal
             }
             aria-labelledby="contained-modal-title-vcenter"
             centered
@@ -134,11 +134,11 @@ export default function UploadProgress(props: Props) {
             >
 
                 <h4 style={{ width: '100%' }}>
-                    {props.uploadStage === UPLOAD_STAGES.UPLOADING ?
-                        constants.UPLOAD[props.uploadStage](
+                    {props.uploadStage === UPLOAD_STAGES.UPLOADING
+                        ? constants.UPLOAD[props.uploadStage](
                             props.fileCounter,
-                        ) :
-                        constants.UPLOAD[props.uploadStage]}
+                        )
+                        : constants.UPLOAD[props.uploadStage]}
                 </h4>
             </Modal.Header>
             <Modal.Body>
@@ -156,9 +156,9 @@ export default function UploadProgress(props: Props) {
                 <FileList>
                     {fileProgressStatuses.map(({ fileName, progress }) => (
                         <li key={fileName} style={{ marginTop: '12px' }}>
-                            {props.uploadStage===UPLOAD_STAGES.FINISH ?
-                                fileName :
-                                constants.FILE_UPLOAD_PROGRESS(
+                            {props.uploadStage===UPLOAD_STAGES.FINISH
+                                ? fileName
+                                : constants.FILE_UPLOAD_PROGRESS(
                                     fileName,
                                     progress,
                                 )

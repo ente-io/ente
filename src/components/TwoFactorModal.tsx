@@ -87,8 +87,8 @@ function TwoFactorModal(props: Props) {
         >
             <div {...(!isTwoFactorEnabled ? { style: { padding: '10px 10px 30px 10px' } } : { style: { padding: '10px' } })}>
                 {
-                    isTwoFactorEnabled ?
-                        <>
+                    isTwoFactorEnabled
+                        ? <>
                             <Row>
                                 <Label>{constants.UPDATE_TWO_FACTOR_HINT}</Label>
                                 <Value>

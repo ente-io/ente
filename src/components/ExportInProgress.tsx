@@ -35,9 +35,9 @@ export default function ExportInProgress(props: Props) {
                     />
                 </div>
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around' }}>
-                    {props.exportStage === ExportStage.PAUSED ?
-                        <Button block variant={'outline-secondary'} onClick={props.resumeExport}>{constants.RESUME}</Button> :
-                        <Button block variant={'outline-secondary'} onClick={props.pauseExport}>{constants.PAUSE}</Button>
+                    {props.exportStage === ExportStage.PAUSED
+                        ? <Button block variant={'outline-secondary'} onClick={props.resumeExport}>{constants.RESUME}</Button>
+                        : <Button block variant={'outline-secondary'} onClick={props.pauseExport}>{constants.PAUSE}</Button>
                     }
                     <div style={{ width: '30px' }} />
                     <Button block variant={'outline-danger'} onClick={props.cancelExport}>{constants.CANCEL}</Button>

@@ -79,9 +79,9 @@ function PlanSelector(props: Props) {
     const [plans, setPlans] = useState(null);
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
     const togglePeriod = () => {
-        setPlanPeriod((prevPeriod) => (prevPeriod === PLAN_PERIOD.MONTH ?
-            PLAN_PERIOD.YEAR :
-            PLAN_PERIOD.MONTH));
+        setPlanPeriod((prevPeriod) => (prevPeriod === PLAN_PERIOD.MONTH
+            ? PLAN_PERIOD.YEAR
+            : PLAN_PERIOD.MONTH));
     };
     useEffect(() => {
         if ( props.modalView) {
@@ -213,9 +213,9 @@ function PlanSelector(props: Props) {
                     }}
                 >
                     <span>
-                        {hasPaidSubscription(subscription) ?
-                            constants.MANAGE_PLAN :
-                            constants.CHOOSE_PLAN}
+                        {hasPaidSubscription(subscription)
+                            ? constants.MANAGE_PLAN
+                            : constants.CHOOSE_PLAN}
                     </span>
                 </Modal.Title>
             </Modal.Header>
@@ -331,9 +331,9 @@ function PlanSelector(props: Props) {
                             onClick={props.closeModal}
                             style={{ color: 'rgb(121, 121, 121)', marginTop: '20px' }}
                         >
-                            {isOnFreePlan(subscription) ?
-                                constants.SKIP :
-                                constants.CLOSE}
+                            {isOnFreePlan(subscription)
+                                ? constants.SKIP
+                                : constants.CLOSE}
                         </LinkButton>
                     )}
                 </DeadCenter>
