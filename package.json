@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
+    "esfix": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
     "build": "next build",
     "build-analyze": "ANALYZE=true next build",
     "postbuild": "next export",
