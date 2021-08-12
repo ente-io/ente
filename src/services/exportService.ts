@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'pages/gallery';
 import { retryAsyncFunction, runningInBrowser } from 'utils/common';
-import { getExportPendingFiles, getExportFailedFiles, getFilesUploadedAfterLastExport, getFileUID, dedupe, getGoogleLikeMetadataFile } from 'utils/export';
+import { getExportPendingFiles, getExportFailedFiles, getFilesUploadedAfterLastExport, getExportRecordFileUID, dedupe, getGoogleLikeMetadataFile } from 'utils/export';
 import { fileNameWithoutExtension, generateStreamFromArrayBuffer } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -192,12 +192,12 @@ class ExportService {
     }
     async addFilesQueuedRecord(folder: string, files: File[]) {
         const exportRecord = await this.getExportRecord(folder);
-        exportRecord.queuedFiles = files.map(getFileUID);
+        exportRecord.queuedFiles = files.map(getExportRecordFileUID);
         await this.updateExportRecord(exportRecord, folder);
     }
 
     async addFileExportRecord(folder: string, file: File, type: RecordType) {
-        const fileUID = getFileUID(file);
+        const fileUID = getExportRecordFileUID(file);
         const exportRecord = await this.getExportRecord(folder);
         exportRecord.queuedFiles = exportRecord.queuedFiles.filter((queuedFilesUID) => queuedFilesUID !== fileUID);
         if (type === RecordType.SUCCESS) {
