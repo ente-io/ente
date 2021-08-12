@@ -31,11 +31,6 @@ export enum FileUploadResults {
     UPLOADED = 100,
 }
 
-export interface UploadURL {
-    url: string;
-    objectKey: string;
-}
-
 export interface FileWithCollection {
     file: globalThis.File;
     collectionID: number;
@@ -83,10 +78,10 @@ class UploadManager {
 
     public async queueFilesForUpload(
         fileWithCollectionTobeUploaded: FileWithCollection[],
-        collections?: Collection[],
+        newCreatedCollections?: Collection[],
     ) {
         try {
-            await this.init(collections);
+            await this.init(newCreatedCollections);
             const { metadataFiles, mediaFiles } = segregateFiles(
                 fileWithCollectionTobeUploaded,
             );
@@ -178,7 +173,7 @@ class UploadManager {
             }
             if (
                 fileUploadResult === FileUploadResults.BLOCKED ||
-                FileUploadResults.FAILED
+                fileUploadResult === FileUploadResults.FAILED
             ) {
                 this.failedFiles.push(fileWithCollection);
             }
