@@ -7,7 +7,7 @@ import SubmitButton from 'components/SubmitButton';
 import router from 'next/router';
 import { changeEmail, getOTTForEmailChange } from 'services/userService';
 import styled from 'styled-components';
-import { AppContext } from 'pages/_app';
+import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 
 interface formValues {
@@ -77,7 +77,7 @@ function ChangeEmailForm(props: Props) {
             setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), email });
             appContext.setDisappearingFlashMessage({
                 message: constants.EMAIL_UDPATE_SUCCESSFUL,
-                severity: 'success',
+                type: FLASH_MESSAGE_TYPE.SUCCESS,
             });
             router.push('/gallery');
         } catch (e) {
