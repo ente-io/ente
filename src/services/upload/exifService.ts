@@ -11,11 +11,10 @@ interface ParsedEXIFData {
     creationTime: number;
 }
 
-
 export async function getExifData(
     reader: FileReader,
     receivedFile: globalThis.File,
-    fileType: FILE_TYPE,
+    fileType: FILE_TYPE
 ): Promise<ParsedEXIFData> {
     try {
         if (fileType === FILE_TYPE.VIDEO) {
@@ -43,14 +42,14 @@ export async function getExifData(
 
 function getUNIXTime(exifData: any) {
     const dateString: string = exifData.DateTimeOriginal || exifData.DateTime;
-    if (!dateString || dateString==='0000:00:00 00:00:00') {
+    if (!dateString || dateString === '0000:00:00 00:00:00') {
         return null;
     }
     const parts = dateString.split(' ')[0].split(':');
     const date = new Date(
         Number(parts[0]),
         Number(parts[1]) - 1,
-        Number(parts[2]),
+        Number(parts[2])
     );
     return date.getTime() * 1000;
 }
@@ -75,14 +74,14 @@ function getEXIFLocation(exifData): Location {
         latDegree,
         latMinute,
         latSecond,
-        latDirection,
+        latDirection
     );
 
     const lonFinal = convertDMSToDD(
         lonDegree,
         lonMinute,
         lonSecond,
-        lonDirection,
+        lonDirection
     );
     return { latitude: latFinal * 1.0, longitude: lonFinal * 1.0 };
 }

@@ -65,29 +65,29 @@ class UploadManager {
         this.metadataMap = new Map<string, ParsedMetaDataJSON>();
         this.existingFiles = await getLocalFiles();
         this.existingFilesCollectionWise = sortFilesIntoCollections(
-            this.existingFiles,
+            this.existingFiles
         );
         const collections = await getLocalCollections();
         if (newCollections) {
             collections.push(...newCollections);
         }
         this.collections = new Map(
-            collections.map((collection) => [collection.id, collection]),
+            collections.map((collection) => [collection.id, collection])
         );
     }
 
     public async queueFilesForUpload(
         fileWithCollectionTobeUploaded: FileWithCollection[],
-        newCreatedCollections?: Collection[],
+        newCreatedCollections?: Collection[]
     ) {
         try {
             await this.init(newCreatedCollections);
             const { metadataFiles, mediaFiles } = segregateFiles(
-                fileWithCollectionTobeUploaded,
+                fileWithCollectionTobeUploaded
             );
             if (metadataFiles.length) {
                 UIService.setUploadStage(
-                    UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
+                    UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
                 );
                 await this.seedMetadataMap(metadataFiles);
             }
@@ -113,14 +113,14 @@ class UploadManager {
 
             for (const fileWithCollection of metadataFiles) {
                 const parsedMetaDataJSONWithTitle = await parseMetadataJSON(
-                    fileWithCollection.file,
+                    fileWithCollection.file
                 );
                 if (parsedMetaDataJSONWithTitle) {
                     const { title, ...parsedMetaDataJSON } =
                         parsedMetaDataJSONWithTitle;
                     this.metadataMap.set(
                         getMetadataKey(fileWithCollection.collectionID, title),
-                        parsedMetaDataJSON,
+                        parsedMetaDataJSON
                     );
                     UIService.increaseFileUploaded();
                 }
@@ -148,8 +148,8 @@ class UploadManager {
             uploadProcesses.push(
                 this.uploadNextFileInQueue(
                     await new this.cryptoWorkers[i].comlink(),
-                    new FileReader(),
-                ),
+                    new FileReader()
+                )
             );
         }
         await Promise.all(uploadProcesses);
@@ -160,17 +160,17 @@ class UploadManager {
             const fileWithCollection = this.filesToBeUploaded.pop();
             const existingFilesInCollection =
                 this.existingFilesCollectionWise.get(
-                    fileWithCollection.collectionID,
+                    fileWithCollection.collectionID
                 );
             const collection = this.collections.get(
-                fileWithCollection.collectionID,
+                fileWithCollection.collectionID
             );
             const { fileUploadResult, file } = await uploader(
                 worker,
                 fileReader,
                 existingFilesInCollection,
                 fileWithCollection.file,
-                collection,
+                collection
             );
 
             if (fileUploadResult === FileUploadResults.UPLOADED) {
@@ -178,7 +178,7 @@ class UploadManager {
                 this.existingFiles = sortFiles(this.existingFiles);
                 await localForage.setItem(
                     'files',
-                    removeUnneccessaryFileProps(this.existingFiles),
+                    removeUnneccessaryFileProps(this.existingFiles)
                 );
                 this.setFiles(this.existingFiles);
             }

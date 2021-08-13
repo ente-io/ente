@@ -5,7 +5,7 @@ const TYPE_JSON = 'json';
 
 export function fileAlreadyInCollection(
     existingFilesInCollection,
-    newFile: FileInMemory,
+    newFile: FileInMemory
 ): boolean {
     for (const existingFile of existingFilesInCollection) {
         if (areFilesSame(existingFile.metadata, newFile.metadata)) {
@@ -16,7 +16,7 @@ export function fileAlreadyInCollection(
 }
 export function areFilesSame(
     existingFile: MetadataObject,
-    newFile: MetadataObject,
+    newFile: MetadataObject
 ): boolean {
     if (
         existingFile.fileType === newFile.fileType &&
@@ -31,7 +31,7 @@ export function areFilesSame(
 }
 
 export function segregateFiles(
-    filesWithCollectionToUpload: FileWithCollection[],
+    filesWithCollectionToUpload: FileWithCollection[]
 ) {
     const metadataFiles: FileWithCollection[] = [];
     const mediaFiles: FileWithCollection[] = [];

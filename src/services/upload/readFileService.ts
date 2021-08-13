@@ -67,7 +67,7 @@ function getFileStream(reader: FileReader, file: globalThis.File) {
 
 async function* fileChunkReaderMaker(
     reader: FileReader,
-    file: globalThis.File,
+    file: globalThis.File
 ) {
     let offset = 0;
     while (offset < file.size) {
@@ -81,7 +81,7 @@ async function* fileChunkReaderMaker(
 
 export async function getUint8ArrayView(
     reader: FileReader,
-    file: Blob,
+    file: Blob
 ): Promise<Uint8Array> {
     try {
         return await new Promise((resolve, reject) => {

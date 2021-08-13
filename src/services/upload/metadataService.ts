@@ -28,12 +28,12 @@ const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
 export async function extractMetatdata(
     reader: FileReader,
     receivedFile: globalThis.File,
-    fileType: FILE_TYPE,
+    fileType: FILE_TYPE
 ) {
     const { location, creationTime } = await getExifData(
         reader,
         receivedFile,
-        fileType,
+        fileType
     );
 
     const extractedMetadata: MetadataObject = {

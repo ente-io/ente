@@ -12,7 +12,7 @@ async function encryptFileStream(worker, fileData: DataStream) {
             const encryptedFileChunk = await worker.encryptFileChunk(
                 value,
                 pushState,
-                ref.pullCount === chunkCount,
+                ref.pullCount === chunkCount
             );
             controller.enqueue(encryptedFileChunk);
             if (ref.pullCount === chunkCount) {
@@ -32,7 +32,7 @@ async function encryptFileStream(worker, fileData: DataStream) {
 
 export async function encryptFiledata(
     worker,
-    filedata: Uint8Array | DataStream,
+    filedata: Uint8Array | DataStream
 ): Promise<EncryptionResult> {
     return isDataStream(filedata)
         ? await encryptFileStream(worker, filedata)

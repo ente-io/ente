@@ -20,17 +20,17 @@ export function calculatePartCount(chunkCount: number) {
 }
 export async function uploadStreamUsingMultipart(
     filename: string,
-    dataStream: DataStream,
+    dataStream: DataStream
 ) {
     const uploadPartCount = calculatePartCount(dataStream.chunkCount);
     const multipartUploadURLs = await NetworkClient.fetchMultipartUploadURLs(
-        uploadPartCount,
+        uploadPartCount
     );
     const fileObjectKey = await uploadStreamInParts(
         multipartUploadURLs,
         dataStream.stream,
         filename,
-        uploadPartCount,
+        uploadPartCount
     );
     return fileObjectKey;
 }
@@ -39,7 +39,7 @@ export async function uploadStreamInParts(
     multipartUploadURLs: MultipartUploadURLs,
     dataStream: ReadableStream<Uint8Array>,
     filename: string,
-    uploadPartCount: number,
+    uploadPartCount: number
 ) {
     const streamReader = dataStream.getReader();
     const percentPerPart = getRandomProgressPerPartUpload(uploadPartCount);
@@ -53,13 +53,13 @@ export async function uploadStreamInParts(
         const progressTracker = UIService.trackUploadProgress(
             filename,
             percentPerPart,
-            index,
+            index
         );
 
         const eTag = await NetworkClient.putFilePart(
             fileUploadURL,
             uploadChunk,
-            progressTracker,
+            progressTracker
         );
         partEtags.push({ PartNumber: index + 1, ETag: eTag });
     }
@@ -69,13 +69,13 @@ export async function uploadStreamInParts(
 
 export function getRandomProgressPerPartUpload(uploadPartCount: number) {
     const percentPerPart = Math.round(
-        RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount,
+        RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount
     );
     return percentPerPart;
 }
 
 export async function combineChunksToFormUploadPart(
-    streamReader: ReadableStreamDefaultReader<Uint8Array>,
+    streamReader: ReadableStreamDefaultReader<Uint8Array>
 ) {
     const combinedChunks = [];
     for (let i = 0; i < CHUNKS_COMBINED_FOR_A_UPLOAD_PART; i++) {
@@ -92,12 +92,12 @@ export async function combineChunksToFormUploadPart(
 
 async function completeMultipartUpload(
     partEtags: PartEtag[],
-    completeURL: string,
+    completeURL: string
 ) {
     const options = { compact: true, ignoreComment: true, spaces: 4 };
     const body = convert.js2xml(
         { CompleteMultipartUpload: { Part: partEtags } },
-        options,
+        options
     );
     await NetworkClient.completeMultipartUpload(completeURL, body);
 }

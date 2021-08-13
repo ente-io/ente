@@ -26,7 +26,7 @@ export default async function uploader(
     reader: FileReader,
     existingFilesInCollection: File[],
     rawFile: globalThis.File,
-    collection: Collection,
+    collection: Collection
 ): Promise<UploadResponse> {
     UIService.setFileProgress(rawFile.name, 0);
     let file: FileInMemory = null;
@@ -44,17 +44,17 @@ export default async function uploader(
         encryptedFile = await UploadService.encryptFile(
             worker,
             file,
-            collection.key,
+            collection.key
         );
 
         const backupedFile: BackupedFile = await UploadService.uploadToBucket(
-            encryptedFile.file,
+            encryptedFile.file
         );
 
         const uploadFile: UploadFile = UploadService.getUploadFile(
             collection,
             backupedFile,
-            encryptedFile.fileKey,
+            encryptedFile.fileKey
         );
 
         const uploadedFile = await NetworkClient.uploadFile(uploadFile);

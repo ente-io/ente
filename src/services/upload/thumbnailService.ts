@@ -9,34 +9,29 @@ const THUMBNAIL_HEIGHT = 720;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;
 
-
 const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
-
 
 export async function generateThumbnail(
     reader: FileReader,
     file: globalThis.File,
-    fileType:FILE_TYPE,
-): Promise<{ thumbnail: Uint8Array, hasStaticThumbnail: boolean }> {
+    fileType: FILE_TYPE
+): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
         let hasStaticThumbnail = false;
         let canvas = null;
         try {
-            if (fileType===FILE_TYPE.IMAGE) {
-                canvas=await generateImageThumbnail(file);
+            if (fileType === FILE_TYPE.IMAGE) {
+                canvas = await generateImageThumbnail(file);
             } else {
-                canvas=await generateVideoThumbnail(file);
+                canvas = await generateVideoThumbnail(file);
             }
         } catch (e) {
             logError(e);
             // ignore and set staticThumbnail
             hasStaticThumbnail = true;
         }
-        const thumbnailBlob=await thumbnailCanvasToBlob(canvas);
-        const thumbnail = await getUint8ArrayView(
-            reader,
-            thumbnailBlob,
-        );
+        const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
+        const thumbnail = await getUint8ArrayView(reader, thumbnailBlob);
         return { thumbnail, hasStaticThumbnail };
     } catch (e) {
         logError(e, 'Error generating thumbnail');
@@ -44,19 +39,15 @@ export async function generateThumbnail(
     }
 }
 
-export async function generateImageThumbnail(file:globalThis.File) {
+export async function generateImageThumbnail(file: globalThis.File) {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
 
-    let imageURL=null;
+    let imageURL = null;
     let timeout = null;
 
     if (fileIsHEIC(file.name)) {
-        file = new globalThis.File(
-            [await convertHEIC2JPEG(file)],
-            null,
-            null,
-        );
+        file = new globalThis.File([await convertHEIC2JPEG(file)], null, null);
     }
     let image = new Image();
     imageURL = URL.createObjectURL(file);
@@ -65,7 +56,7 @@ export async function generateImageThumbnail(file:globalThis.File) {
         image.onload = () => {
             try {
                 const thumbnailWidth =
-                        (image.width * THUMBNAIL_HEIGHT) / image.height;
+                    (image.width * THUMBNAIL_HEIGHT) / image.height;
                 canvas.width = thumbnailWidth;
                 canvas.height = THUMBNAIL_HEIGHT;
                 canvasCTX.drawImage(
@@ -73,7 +64,7 @@ export async function generateImageThumbnail(file:globalThis.File) {
                     0,
                     0,
                     thumbnailWidth,
-                    THUMBNAIL_HEIGHT,
+                    THUMBNAIL_HEIGHT
                 );
                 image = null;
                 clearTimeout(timeout);
@@ -81,26 +72,34 @@ export async function generateImageThumbnail(file:globalThis.File) {
             } catch (e) {
                 reject(e);
                 logError(e);
-                reject(Error(`${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`));
+                reject(
+                    Error(
+                        `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`
+                    )
+                );
             }
         };
         timeout = setTimeout(
             () =>
                 reject(
-                    Error(`wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`),
+                    Error(
+                        `wait time exceeded for format ${
+                            file.name.split('.').slice(-1)[0]
+                        }`
+                    )
                 ),
-            WAIT_TIME_THUMBNAIL_GENERATION,
+            WAIT_TIME_THUMBNAIL_GENERATION
         );
     });
     return canvas;
 }
 
-export async function generateVideoThumbnail(file:globalThis.File) {
+export async function generateVideoThumbnail(file: globalThis.File) {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
 
-    let videoURL=null;
-    let timeout=null;
+    let videoURL = null;
+    let timeout = null;
 
     await new Promise((resolve, reject) => {
         let video = document.createElement('video');
@@ -111,8 +110,7 @@ export async function generateVideoThumbnail(file:globalThis.File) {
                     return;
                 }
                 const thumbnailWidth =
-                    (video.videoWidth * THUMBNAIL_HEIGHT) /
-                    video.videoHeight;
+                    (video.videoWidth * THUMBNAIL_HEIGHT) / video.videoHeight;
                 canvas.width = thumbnailWidth;
                 canvas.height = THUMBNAIL_HEIGHT;
                 canvasCTX.drawImage(
@@ -120,13 +118,15 @@ export async function generateVideoThumbnail(file:globalThis.File) {
                     0,
                     0,
                     thumbnailWidth,
-                    THUMBNAIL_HEIGHT,
+                    THUMBNAIL_HEIGHT
                 );
                 video = null;
                 clearTimeout(timeout);
                 resolve(null);
             } catch (e) {
-                const err=Error(`${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`);
+                const err = Error(
+                    `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`
+                );
                 logError(err);
                 reject(err);
             }
@@ -134,16 +134,22 @@ export async function generateVideoThumbnail(file:globalThis.File) {
         video.preload = 'metadata';
         video.src = videoURL;
         video.currentTime = 3;
-        timeout=setTimeout(
+        timeout = setTimeout(
             () =>
-                reject(Error(`wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`)),
-            WAIT_TIME_THUMBNAIL_GENERATION,
+                reject(
+                    Error(
+                        `wait time exceeded for format ${
+                            file.name.split('.').slice(-1)[0]
+                        }`
+                    )
+                ),
+            WAIT_TIME_THUMBNAIL_GENERATION
         );
     });
     return canvas;
 }
 
-export async function thumbnailCanvasToBlob(canvas:HTMLCanvasElement) {
+export async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
     let thumbnailBlob = null;
     let attempts = 0;
     let quality = 1;
@@ -157,13 +163,13 @@ export async function thumbnailCanvasToBlob(canvas:HTMLCanvasElement) {
                     resolve(blob);
                 },
                 'image/jpeg',
-                quality,
+                quality
             );
         });
         thumbnailBlob = thumbnailBlob ?? new Blob([]);
     } while (
         thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
-            attempts <= MAX_ATTEMPTS
+        attempts <= MAX_ATTEMPTS
     );
 
     return thumbnailBlob;

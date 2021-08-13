@@ -23,7 +23,7 @@ import { MetadataMap } from './uploadManager';
 
 export const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
 export const CHUNKS_COMBINED_FOR_A_UPLOAD_PART = Math.floor(
-    MIN_STREAM_FILE_SIZE / ENCRYPTION_CHUNK_SIZE,
+    MIN_STREAM_FILE_SIZE / ENCRYPTION_CHUNK_SIZE
 );
 
 export interface UploadURL {
@@ -97,7 +97,7 @@ class UploadService {
     async readFile(
         reader: FileReader,
         rawFile: globalThis.File,
-        collection: Collection,
+        collection: Collection
     ) {
         try {
             const fileType = getFileType(rawFile);
@@ -105,17 +105,17 @@ class UploadService {
             const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
                 reader,
                 rawFile,
-                fileType,
+                fileType
             );
 
             const originalName = getFileOriginalName(rawFile);
             const googleMetadata = this.metadataMap.get(
-                getMetadataKey(collection.id, originalName),
+                getMetadataKey(collection.id, originalName)
             );
             const extractedMetadata: MetadataObject = await extractMetatdata(
                 reader,
                 rawFile,
-                fileType,
+                fileType
             );
             if (hasStaticThumbnail) {
                 extractedMetadata.hasStaticThumbnail = true;
@@ -143,7 +143,7 @@ class UploadService {
     async encryptFile(
         worker: any,
         file: FileInMemory,
-        encryptionKey: string,
+        encryptionKey: string
     ): Promise<EncryptedFile> {
         try {
             const { key: fileKey, file: encryptedFiledata } =
@@ -156,7 +156,7 @@ class UploadService {
 
             const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
                 fileKey,
-                encryptionKey,
+                encryptionKey
             );
 
             const result: EncryptedFile = {
@@ -181,24 +181,24 @@ class UploadService {
             if (isDataStream(file.file.encryptedData)) {
                 fileObjectKey = await uploadStreamUsingMultipart(
                     file.filename,
-                    file.file.encryptedData,
+                    file.file.encryptedData
                 );
             } else {
                 const progressTracker = UIService.trackUploadProgress(
-                    file.filename,
+                    file.filename
                 );
                 const fileUploadURL = await this.getUploadURL();
                 fileObjectKey = await NetworkClient.putFile(
                     fileUploadURL,
                     file.file.encryptedData,
-                    progressTracker,
+                    progressTracker
                 );
             }
             const thumbnailUploadURL = await this.getUploadURL();
             const thumbnailObjectKey = await NetworkClient.putFile(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData as Uint8Array,
-                null,
+                null
             );
 
             const backupedFile: BackupedFile = {
@@ -222,7 +222,7 @@ class UploadService {
     getUploadFile(
         collection: Collection,
         backupedFile: BackupedFile,
-        fileKey: B64EncryptionResult,
+        fileKey: B64EncryptionResult
     ): UploadFile {
         const uploadFile: UploadFile = {
             collectionID: collection.id,
@@ -256,7 +256,7 @@ class UploadService {
     private async fetchUploadURLs() {
         await NetworkClient.fetchUploadURLs(
             this.pendingUploadCount,
-            this.uploadURLs,
+            this.uploadURLs
         );
     }
 }

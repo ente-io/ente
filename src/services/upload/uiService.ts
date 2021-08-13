@@ -82,7 +82,7 @@ class UIService {
     trackUploadProgress(
         filename: string,
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
-        index = 0,
+        index = 0
     ) {
         const cancel = { exec: null };
         let timeout = null;
@@ -102,10 +102,10 @@ class UIService {
                             Math.round(
                                 percentPerPart * index +
                                     (percentPerPart * event.loaded) /
-                                        event.total,
+                                        event.total
                             ),
-                            98,
-                        ),
+                            98
+                        )
                     );
                 this.updateProgressBarUI();
                 if (event.loaded === event.total) {
