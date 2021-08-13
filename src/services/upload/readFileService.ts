@@ -39,6 +39,10 @@ export function getFileType(receivedFile: globalThis.File) {
     return fileType;
 }
 
+/*
+    Get the original file name for edited file to associate it to original file's metadataJSON file 
+    as edited file doesn't have their own metadata file
+*/
 export function getFileOriginalName(file: globalThis.File) {
     let originalName: string = null;
 
