@@ -1,5 +1,5 @@
 import { CHUNKS_COMBINED_FOR_A_UPLOAD_PART, DataStream } from './uploadService';
-import NetworkClient from './networkClient';
+import UploadHttpClient from './uploadHttpClient';
 import * as convert from 'xml-js';
 import UIService, { RANDOM_PERCENTAGE_PROGRESS_FOR_PUT } from './uiService';
 
@@ -23,7 +23,7 @@ export async function uploadStreamUsingMultipart(
     dataStream: DataStream
 ) {
     const uploadPartCount = calculatePartCount(dataStream.chunkCount);
-    const multipartUploadURLs = await NetworkClient.fetchMultipartUploadURLs(
+    const multipartUploadURLs = await UploadHttpClient.fetchMultipartUploadURLs(
         uploadPartCount
     );
     const fileObjectKey = await uploadStreamInParts(
@@ -56,7 +56,7 @@ export async function uploadStreamInParts(
             index
         );
 
-        const eTag = await NetworkClient.putFilePart(
+        const eTag = await UploadHttpClient.putFilePart(
             fileUploadURL,
             uploadChunk,
             progressTracker
@@ -99,5 +99,5 @@ async function completeMultipartUpload(
         { CompleteMultipartUpload: { Part: partEtags } },
         options
     );
-    await NetworkClient.completeMultipartUpload(completeURL, body);
+    await UploadHttpClient.completeMultipartUpload(completeURL, body);
 }

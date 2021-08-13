@@ -11,7 +11,7 @@ import { MultipartUploadURLs } from './multiPartUploadService';
 const ENDPOINT = getEndpoint();
 const MAX_URL_REQUESTS = 50;
 
-class NetworkClient {
+class UploadHttpClient {
     private uploadURLFetchInProgress = null;
 
     async uploadFile(uploadFile: UploadFile): Promise<File> {
@@ -147,4 +147,4 @@ class NetworkClient {
     }
 }
 
-export default new NetworkClient();
+export default new UploadHttpClient();

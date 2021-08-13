@@ -4,7 +4,7 @@ import { handleError, CustomError } from 'utils/common/errorUtil';
 import { decryptFile } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { fileAlreadyInCollection } from 'utils/upload';
-import NetworkClient from './networkClient';
+import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import { FileUploadResults, FileWithCollection } from './uploadManager';
 import UploadService, {
@@ -58,7 +58,7 @@ export default async function uploader(
             encryptedFile.fileKey
         );
 
-        const uploadedFile = await NetworkClient.uploadFile(uploadFile);
+        const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
         const decryptedFile = await decryptFile(uploadedFile, collection);
 
         UIService.setFileProgress(rawFile.name, FileUploadResults.UPLOADED);

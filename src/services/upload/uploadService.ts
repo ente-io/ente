@@ -1,7 +1,7 @@
 import { fileAttribute, FILE_TYPE } from '../fileService';
 import { Collection } from '../collectionService';
 import { logError } from 'utils/sentry';
-import NetworkClient from './networkClient';
+import UploadHttpClient from './uploadHttpClient';
 import {
     extractMetadata,
     getMetadataMapKey,
@@ -183,14 +183,14 @@ class UploadService {
                     file.filename
                 );
                 const fileUploadURL = await this.getUploadURL();
-                fileObjectKey = await NetworkClient.putFile(
+                fileObjectKey = await UploadHttpClient.putFile(
                     fileUploadURL,
                     file.file.encryptedData,
                     progressTracker
                 );
             }
             const thumbnailUploadURL = await this.getUploadURL();
-            const thumbnailObjectKey = await NetworkClient.putFile(
+            const thumbnailObjectKey = await UploadHttpClient.putFile(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData as Uint8Array,
                 null
@@ -249,7 +249,7 @@ class UploadService {
     }
 
     private async fetchUploadURLs() {
-        await NetworkClient.fetchUploadURLs(
+        await UploadHttpClient.fetchUploadURLs(
             this.pendingUploadCount,
             this.uploadURLs
         );
