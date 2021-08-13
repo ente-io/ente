@@ -155,8 +155,6 @@ export async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
     let quality = 1;
 
     do {
-        attempts++;
-        quality /= 2;
         thumbnailBlob = await new Promise((resolve) => {
             canvas.toBlob(
                 function (blob) {
@@ -167,6 +165,8 @@ export async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
             );
         });
         thumbnailBlob = thumbnailBlob ?? new Blob([]);
+        attempts++;
+        quality /= 2;
     } while (
         thumbnailBlob.size > MIN_THUMBNAIL_SIZE &&
         attempts <= MAX_ATTEMPTS
