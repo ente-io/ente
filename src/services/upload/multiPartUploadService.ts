@@ -14,7 +14,7 @@ export interface MultipartUploadURLs {
     completeURL: string;
 }
 
-export function calculatePartCount(chunkCount: number) {
+function calculatePartCount(chunkCount: number) {
     const partCount = Math.ceil(chunkCount / CHUNKS_COMBINED_FOR_A_UPLOAD_PART);
     return partCount;
 }
@@ -67,14 +67,14 @@ export async function uploadStreamInParts(
     return multipartUploadURLs.objectKey;
 }
 
-export function getRandomProgressPerPartUpload(uploadPartCount: number) {
+function getRandomProgressPerPartUpload(uploadPartCount: number) {
     const percentPerPart = Math.round(
         RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount
     );
     return percentPerPart;
 }
 
-export async function combineChunksToFormUploadPart(
+async function combineChunksToFormUploadPart(
     streamReader: ReadableStreamDefaultReader<Uint8Array>
 ) {
     const combinedChunks = [];
