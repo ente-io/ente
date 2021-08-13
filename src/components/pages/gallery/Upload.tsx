@@ -17,6 +17,7 @@ import UploadManager, {
     UPLOAD_STAGES,
 } from 'services/upload/uploadManager';
 import uploadManager from 'services/upload/uploadManager';
+import { METADATA_FOLDER_NAME } from 'services/exportService';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
@@ -169,8 +170,12 @@ export default function Upload(props: Props) {
     function getCollectionWiseFiles() {
         const collectionWiseFiles = new Map<string, globalThis.File[]>();
         for (const file of props.acceptedFiles) {
-            const filePath = file['path'];
-            const folderPath = filePath.substr(0, filePath.lastIndexOf('/'));
+            const filePath = file['path'] as string;
+
+            let folderPath = filePath.substr(0, filePath.lastIndexOf('/'));
+            if (folderPath.endsWith(METADATA_FOLDER_NAME)) {
+                folderPath = folderPath.substr(0, folderPath.lastIndexOf('/'));
+            }
             const folderName = folderPath.substr(
                 folderPath.lastIndexOf('/') + 1
             );

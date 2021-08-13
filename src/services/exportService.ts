@@ -10,7 +10,11 @@ import {
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { Collection, getLocalCollections } from './collectionService';
+import {
+    Collection,
+    getLocalCollections,
+    getNonEmptyCollections,
+} from './collectionService';
 import downloadManager from './downloadManager';
 import { File, FILE_TYPE, getLocalFiles } from './fileService';
 import { decodeMotionPhoto } from './motionPhotoService';
@@ -63,8 +67,8 @@ export enum ExportType {
     RETRY_FAILED,
 }
 
-const ExportRecordFileName = 'export_status.json';
-const MetadataFolderName = 'metadata';
+const EXPORT_RECORD_FILE_NAME = 'export_status.json';
+export const METADATA_FOLDER_NAME = 'metadata';
 
 class ExportService {
     ElectronAPIs: any;
@@ -103,6 +107,10 @@ class ExportService {
         let filesToExport: File[];
         const allFiles = await getLocalFiles();
         const collections = await getLocalCollections();
+        const nonEmptyCollections = getNonEmptyCollections(
+            collections,
+            allFiles
+        );
         const exportRecord = await this.getExportRecord(exportDir);
 
         if (exportType === ExportType.NEW) {
@@ -117,7 +125,7 @@ class ExportService {
         }
         this.exportInProgress = this.fileExporter(
             filesToExport,
-            collections,
+            nonEmptyCollections,
             updateProgress,
             exportDir
         );
@@ -162,7 +170,7 @@ class ExportService {
                     collectionFolderPath
                 );
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
-                    `${collectionFolderPath}/${MetadataFolderName}`
+                    `${collectionFolderPath}/${METADATA_FOLDER_NAME}`
                 );
                 collectionIDMap.set(collection.id, collectionFolderPath);
             }
@@ -267,7 +275,7 @@ class ExportService {
                 const exportRecord = await this.getExportRecord(folder);
                 const newRecord = { ...exportRecord, ...newData };
                 await this.ElectronAPIs.setExportRecord(
-                    `${folder}/${ExportRecordFileName}`,
+                    `${folder}/${EXPORT_RECORD_FILE_NAME}`,
                     JSON.stringify(newRecord, null, 2)
                 );
             } catch (e) {
@@ -283,7 +291,7 @@ class ExportService {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
             }
             const recordFile = await this.ElectronAPIs.getExportRecord(
-                `${folder}/${ExportRecordFileName}`
+                `${folder}/${EXPORT_RECORD_FILE_NAME}`
             );
             if (recordFile) {
                 return JSON.parse(recordFile);
@@ -303,15 +311,9 @@ class ExportService {
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             this.exportMotionPhoto(fileStream, file, collectionPath);
         } else {
-            this.ElectronAPIs.saveStreamToDisk(
-                `${collectionPath}/${uid}`,
-                fileStream
-            );
+            this.saveMediaFile(collectionPath, uid, fileStream);
+            this.saveMetadataFile(collectionPath, uid, file.metadata);
         }
-        this.ElectronAPIs.saveFileToDisk(
-            `${collectionPath}/${MetadataFolderName}/${uid}.json`,
-            getGoogleLikeMetadataFile(uid, file.metadata)
-        );
     }
 
     private async exportMotionPhoto(
@@ -324,12 +326,27 @@ class ExportService {
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
 
         const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
-        const imageSavePath = `${collectionPath}/${file.id}_${motionPhoto.imageNameTitle}`;
-        this.ElectronAPIs.saveStreamToDisk(imageSavePath, imageStream);
+        const imageUID = `${file.id}_${motionPhoto.imageNameTitle}`;
+        this.saveMediaFile(collectionPath, imageUID, imageStream);
+        this.saveMetadataFile(collectionPath, imageUID, file.metadata);
 
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
-        const videoSavePath = `${collectionPath}/${file.id}_${motionPhoto.videoNameTitle}`;
-        this.ElectronAPIs.saveStreamToDisk(videoSavePath, videoStream);
+        const videoUID = `${file.id}_${motionPhoto.videoNameTitle}`;
+        this.saveMediaFile(collectionPath, videoUID, videoStream);
+        this.saveMetadataFile(collectionPath, videoUID, file.metadata);
+    }
+
+    private saveMediaFile(collectionPath, uid, fileStream) {
+        this.ElectronAPIs.saveStreamToDisk(
+            `${collectionPath}/${uid}`,
+            fileStream
+        );
+    }
+    private saveMetadataFile(collectionPath, uid, metadata) {
+        this.ElectronAPIs.saveFileToDisk(
+            `${collectionPath}/${METADATA_FOLDER_NAME}/${uid}.json`,
+            getGoogleLikeMetadataFile(uid, metadata)
+        );
     }
 
     private sanitizeName(name) {
