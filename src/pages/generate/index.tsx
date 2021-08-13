@@ -35,7 +35,7 @@ export default function Generate() {
             setLoading(true);
             const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
             const keyAttributes: KeyAttributes = getData(
-                LS_KEYS.ORIGINAL_KEY_ATTRIBUTES,
+                LS_KEYS.ORIGINAL_KEY_ATTRIBUTES
             );
             router.prefetch('/gallery');
             const user = getData(LS_KEYS.USER);
@@ -64,14 +64,14 @@ export default function Generate() {
     const onSubmit = async (passphrase, setFieldError) => {
         try {
             const { keyAttributes, masterKey } = await generateKeyAttributes(
-                passphrase,
+                passphrase
             );
 
             await putAttributes(token, keyAttributes);
             await generateAndSaveIntermediateKeyAttributes(
                 passphrase,
                 keyAttributes,
-                masterKey,
+                masterKey
             );
             await setSessionKeys(masterKey);
             setJustSignedUp(true);

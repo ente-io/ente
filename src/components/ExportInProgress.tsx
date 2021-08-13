@@ -48,7 +48,7 @@ export default function ExportInProgress(props: Props) {
                     <ProgressBar
                         now={Math.round(
                             (props.exportProgress.current * 100) /
-                                props.exportProgress.total,
+                                props.exportProgress.total
                         )}
                         animated={!(props.exportStage === ExportStage.PAUSED)}
                         variant="upload-progress-bar"

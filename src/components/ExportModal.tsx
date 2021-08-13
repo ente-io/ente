@@ -76,7 +76,7 @@ export default function ExportModal(props: Props) {
         exportService.ElectronAPIs.registerPauseExportListener(pauseExport);
         exportService.ElectronAPIs.registerResumeExportListener(resumeExport);
         exportService.ElectronAPIs.registerRetryFailedExportListener(
-            retryFailedExport,
+            retryFailedExport
         );
     }, []);
 
@@ -122,11 +122,11 @@ export default function ExportModal(props: Props) {
                     ]);
                     const unExportedFiles = localFiles.filter(
                         (file) =>
-                            !exportFileUIDs.has(getExportRecordFileUID(file)),
+                            !exportFileUIDs.has(getExportRecordFileUID(file))
                     );
                     exportService.addFilesQueuedRecord(
                         exportFolder,
-                        unExportedFiles,
+                        unExportedFiles
                     );
                     updateExportStage(ExportStage.PAUSED);
                 }
@@ -191,7 +191,7 @@ export default function ExportModal(props: Props) {
         updateExportProgress({ current: 0, total: 0 });
         const { paused } = await exportService.exportFiles(
             updateExportProgress,
-            ExportType.NEW,
+            ExportType.NEW
         );
         await postExportRun(paused);
     };
@@ -221,7 +221,7 @@ export default function ExportModal(props: Props) {
             });
         const { paused } = await exportService.exportFiles(
             updateExportStatsWithOffset,
-            ExportType.PENDING,
+            ExportType.PENDING
         );
 
         await postExportRun(paused);
@@ -233,7 +233,7 @@ export default function ExportModal(props: Props) {
 
         const { paused } = await exportService.exportFiles(
             updateExportProgress,
-            ExportType.RETRY_FAILED,
+            ExportType.RETRY_FAILED
         );
         await postExportRun(paused);
     };

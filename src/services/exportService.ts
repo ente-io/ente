@@ -89,7 +89,7 @@ class ExportService {
     }
     async exportFiles(
         updateProgress: (progress: ExportProgress) => void,
-        exportType: ExportType,
+        exportType: ExportType
     ) {
         if (this.exportInProgress) {
             this.ElectronAPIs.sendNotification(ExportNotification.IN_PROGRESS);
@@ -109,7 +109,7 @@ class ExportService {
         if (exportType === ExportType.NEW) {
             filesToExport = await getFilesUploadedAfterLastExport(
                 allFiles,
-                exportRecord,
+                exportRecord
             );
         } else if (exportType === ExportType.RETRY_FAILED) {
             filesToExport = await getExportFailedFiles(allFiles, exportRecord);
@@ -120,7 +120,7 @@ class ExportService {
             filesToExport,
             collections,
             updateProgress,
-            exportDir,
+            exportDir
         );
         const resp = await this.exportInProgress;
         this.exportInProgress = null;
@@ -131,12 +131,12 @@ class ExportService {
         files: File[],
         collections: Collection[],
         updateProgress: (progress: ExportProgress) => void,
-        dir: string,
+        dir: string
     ): Promise<{ paused: boolean }> {
         try {
             if (!files?.length) {
                 this.ElectronAPIs.sendNotification(
-                    ExportNotification.UP_TO_DATE,
+                    ExportNotification.UP_TO_DATE
                 );
                 return { paused: false };
             }
@@ -160,10 +160,10 @@ class ExportService {
                     collection.id
                 }_${this.sanitizeName(collection.name)}`;
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
-                    collectionFolderPath,
+                    collectionFolderPath
                 );
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
-                    `${collectionFolderPath}/${MetadataFolderName}`,
+                    `${collectionFolderPath}/${MetadataFolderName}`
                 );
                 collectionIDMap.set(collection.id, collectionFolderPath);
             }
@@ -183,17 +183,17 @@ class ExportService {
                     await this.addFileExportRecord(
                         dir,
                         file,
-                        RecordType.SUCCESS,
+                        RecordType.SUCCESS
                     );
                 } catch (e) {
                     await this.addFileExportRecord(
                         dir,
                         file,
-                        RecordType.FAILED,
+                        RecordType.FAILED
                     );
                     logError(
                         e,
-                        'download and save failed for file during export',
+                        'download and save failed for file during export'
                     );
                 }
                 this.ElectronAPIs.showOnTray({
@@ -233,7 +233,7 @@ class ExportService {
         const fileUID = getExportRecordFileUID(file);
         const exportRecord = await this.getExportRecord(folder);
         exportRecord.queuedFiles = exportRecord.queuedFiles.filter(
-            (queuedFilesUID) => queuedFilesUID !== fileUID,
+            (queuedFilesUID) => queuedFilesUID !== fileUID
         );
         if (type === RecordType.SUCCESS) {
             if (!exportRecord.exportedFiles) {
@@ -242,7 +242,7 @@ class ExportService {
             exportRecord.exportedFiles.push(fileUID);
             exportRecord.failedFiles &&
                 (exportRecord.failedFiles = exportRecord.failedFiles.filter(
-                    (FailedFileUID) => FailedFileUID !== fileUID,
+                    (FailedFileUID) => FailedFileUID !== fileUID
                 ));
         } else {
             if (!exportRecord.failedFiles) {
@@ -269,7 +269,7 @@ class ExportService {
                 const newRecord = { ...exportRecord, ...newData };
                 await this.ElectronAPIs.setExportRecord(
                     `${folder}/${ExportRecordFileName}`,
-                    JSON.stringify(newRecord, null, 2),
+                    JSON.stringify(newRecord, null, 2)
                 );
             } catch (e) {
                 logError(e, 'error updating Export Record');
@@ -284,7 +284,7 @@ class ExportService {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
             }
             const recordFile = await this.ElectronAPIs.getExportRecord(
-                `${folder}/${ExportRecordFileName}`,
+                `${folder}/${ExportRecordFileName}`
             );
             if (recordFile) {
                 return JSON.parse(recordFile);
@@ -299,26 +299,26 @@ class ExportService {
     async downloadAndSave(file: File, collectionPath: string) {
         const uid = `${file.id}_${this.sanitizeName(file.metadata.title)}`;
         const fileStream = await retryAsyncFunction(() =>
-            downloadManager.downloadFile(file),
+            downloadManager.downloadFile(file)
         );
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             this.exportMotionPhoto(fileStream, file, collectionPath);
         } else {
             this.ElectronAPIs.saveStreamToDisk(
                 `${collectionPath}/${uid}`,
-                fileStream,
+                fileStream
             );
         }
         this.ElectronAPIs.saveFileToDisk(
             `${collectionPath}/${MetadataFolderName}/${uid}.json`,
-            getGoogleLikeMetadataFile(uid, file.metadata),
+            getGoogleLikeMetadataFile(uid, file.metadata)
         );
     }
 
     private async exportMotionPhoto(
         fileStream: ReadableStream<any>,
         file: File,
-        collectionPath: string,
+        collectionPath: string
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const originalName = fileNameWithoutExtension(file.metadata.title);

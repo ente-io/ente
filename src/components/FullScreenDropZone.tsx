@@ -5,9 +5,9 @@ import CrossIcon from './icons/CrossIcon';
 
 const CloseButtonWrapper = styled.div`
     position: absolute;
-    top:10px;
-    right:10px;
-    cursor:pointer;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
 `;
 const DropDiv = styled.div`
     flex: 1;
@@ -62,14 +62,10 @@ export default function FullScreenDropZone(props: Props) {
                     e.preventDefault();
                     props.showCollectionSelector();
                 },
-            })}
-        >
+            })}>
             <input {...props.getInputProps()} />
             {isDragActive && (
-                <Overlay
-                    onDrop={onDragLeave}
-                    onDragLeave={onDragLeave}
-                >
+                <Overlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
                     <CloseButtonWrapper onClick={onDragLeave}>
                         <CrossIcon />
                     </CloseButtonWrapper>

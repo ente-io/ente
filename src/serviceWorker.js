@@ -8,17 +8,25 @@ pageCache();
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
-registerRoute('/share-target', async ({ event }) => {
-    event.waitUntil(async function() {
-        const data = await event.request.formData();
-        const client = await self.clients.get(event.resultingClientId || event.clientId);
-        const files = data.getAll('files');
-        setTimeout(() => {
-            client.postMessage({ files, action: 'upload-files' });
-        }, 1000);
-    }());
-    return Response.redirect('./');
-}, 'POST');
+registerRoute(
+    '/share-target',
+    async ({ event }) => {
+        event.waitUntil(
+            (async function () {
+                const data = await event.request.formData();
+                const client = await self.clients.get(
+                    event.resultingClientId || event.clientId
+                );
+                const files = data.getAll('files');
+                setTimeout(() => {
+                    client.postMessage({ files, action: 'upload-files' });
+                }, 1000);
+            })()
+        );
+        return Response.redirect('./');
+    },
+    'POST'
+);
 
 // Use a stale-while-revalidate strategy for all other requests.
 setDefaultHandler(new NetworkOnly());

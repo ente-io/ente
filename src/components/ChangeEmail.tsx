@@ -50,7 +50,7 @@ function ChangeEmailForm(props: Props) {
 
     const requestOTT = async (
         { email }: formValues,
-        { setFieldError }: FormikHelpers<formValues>,
+        { setFieldError }: FormikHelpers<formValues>
     ) => {
         try {
             setLoading(true);
@@ -69,7 +69,7 @@ function ChangeEmailForm(props: Props) {
 
     const requestEmailChange = async (
         { email, ott }: formValues,
-        { setFieldError }: FormikHelpers<formValues>,
+        { setFieldError }: FormikHelpers<formValues>
     ) => {
         try {
             setLoading(true);
@@ -108,7 +108,7 @@ function ChangeEmailForm(props: Props) {
                                 value={values.email}
                                 onChange={handleChange('email')}
                                 isInvalid={Boolean(
-                                    touched.email && errors.email,
+                                    touched.email && errors.email
                                 )}
                                 autoFocus
                                 disabled={loading}
@@ -139,7 +139,7 @@ function ChangeEmailForm(props: Props) {
                                     value={values.ott}
                                     onChange={handleChange('ott')}
                                     isInvalid={Boolean(
-                                        touched.ott && errors.ott,
+                                        touched.ott && errors.ott
                                     )}
                                     disabled={loading}
                                 />

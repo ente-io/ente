@@ -1,7 +1,7 @@
 import constants from 'utils/strings/constants';
 
-export const DESKTOP_APP_DOWNLOAD_URL = 'https://github.com/ente-io/bhari-frame/releases/latest';
-
+export const DESKTOP_APP_DOWNLOAD_URL =
+    'https://github.com/ente-io/bhari-frame/releases/latest';
 
 export function checkConnectivity() {
     if (navigator.onLine) {
@@ -30,4 +30,3 @@ export function reverseString(title: string) {
         ?.split(' ')
         .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
 }
-

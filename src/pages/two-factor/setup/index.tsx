@@ -51,7 +51,7 @@ export default function SetupTwoFactor() {
                     await encryptWithRecoveryKey(twoFactorSecret.secretCode);
                 setTwoFactorSecret(twoFactorSecret);
                 setRecoveryEncryptedTwoFactorSecret(
-                    recoveryEncryptedTwoFactorSecret,
+                    recoveryEncryptedTwoFactorSecret
                 );
             } catch (e) {
                 appContext.setDisappearingFlashMessage({

@@ -419,7 +419,7 @@ export default function App({ Component, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(
-        typeof window !== 'undefined' && !window.navigator.onLine,
+        typeof window !== 'undefined' && !window.navigator.onLine
     );
     const [showNavbar, setShowNavBar] = useState(false);
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
@@ -451,7 +451,7 @@ export default function App({ Component, err }) {
             (error) => {
                 logError(error);
                 return Promise.reject(error);
-            },
+            }
         );
     }, []);
 
@@ -462,7 +462,7 @@ export default function App({ Component, err }) {
     useEffect(() => {
         console.log(
             `%c${constants.CONSOLE_WARNING_STOP}`,
-            'color: red; font-size: 52px;',
+            'color: red; font-size: 52px;'
         );
         console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
 
@@ -487,7 +487,7 @@ export default function App({ Component, err }) {
                 const user = getData(LS_KEYS.USER);
                 if (user?.token) {
                     window.location.href = redirectMap[redirectName](
-                        user.token,
+                        user.token
                     );
                 }
             }

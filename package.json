@@ -8,7 +8,8 @@
     "build": "next build",
     "build-analyze": "ANALYZE=true next build",
     "postbuild": "next export",
-    "start": "next start"
+    "start": "next start",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@ente-io/next-with-workbox": "^1.0.3",
@@ -72,12 +73,17 @@
     "babel-plugin-styled-components": "^1.11.1",
     "eslint": "^7.27.0",
     "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-react": "^7.23.2",
-    "husky": "^6.0.0",
-    "lint-staged": "^11.0.0",
+    "husky": "^7.0.1",
+    "lint-staged": "^11.1.2",
+    "prettier": "2.3.2",
     "typescript": "^4.1.3"
   },
   "standard": {
     "parser": "babel-eslint"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": ["eslint --fix","prettier --write --ignore-unknown"]
   }
 }

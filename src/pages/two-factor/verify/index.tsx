@@ -52,21 +52,23 @@ export default function Home() {
             <Card style={{ minWidth: '300px' }} className="text-center">
                 <Card.Body style={{ padding: '40px 30px', minHeight: '400px' }}>
                     <Card.Title style={{ marginBottom: '32px' }}>
-                        <LogoImg src='/icon.svg' />
+                        <LogoImg src="/icon.svg" />
                         {constants.TWO_FACTOR}
                     </Card.Title>
-                    <VerifyTwoFactor onSubmit={onSubmit} back={router.back} buttonText={constants.VERIFY} />
+                    <VerifyTwoFactor
+                        onSubmit={onSubmit}
+                        back={router.back}
+                        buttonText={constants.VERIFY}
+                    />
                     <div
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
                             marginTop: '12px',
-                        }}
-                    >
+                        }}>
                         <Button
                             variant="link"
-                            onClick={() => router.push('/two-factor/recover')}
-                        >
+                            onClick={() => router.push('/two-factor/recover')}>
                             {constants.LOST_DEVICE}
                         </Button>
                         <Button variant="link" onClick={logoutUser}>

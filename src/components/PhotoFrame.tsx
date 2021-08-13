@@ -313,8 +313,8 @@ const PhotoFrame = ({
                         const t = setTimeout(() => {
                             reject(
                                 Error(
-                                    `${CustomError.VIDEO_PLAYBACK_FAILED} err: wait time exceeded`,
-                                ),
+                                    `${CustomError.VIDEO_PLAYBACK_FAILED} err: wait time exceeded`
+                                )
                             );
                         }, WAIT_FOR_VIDEO_PLAYBACK);
                     });
@@ -380,7 +380,7 @@ const PhotoFrame = ({
             if (
                 search.date &&
                 !isSameDayAnyYear(search.date)(
-                    new Date(item.metadata.creationTime / 1000),
+                    new Date(item.metadata.creationTime / 1000)
                 )
             ) {
                 return false;
@@ -418,7 +418,7 @@ const PhotoFrame = ({
      */
     const mergeTimeStampList = (
         items: TimeStampListItem[],
-        columns: number,
+        columns: number
     ): TimeStampListItem[] => {
         const newList: TimeStampListItem[] = [];
         let index = 0;
@@ -510,7 +510,7 @@ const PhotoFrame = ({
                     <AutoSizer>
                         {({ height, width }) => {
                             let columns = Math.floor(
-                                width / IMAGE_CONTAINER_MAX_WIDTH,
+                                width / IMAGE_CONTAINER_MAX_WIDTH
                             );
                             let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
                             let skipMerge = false;
@@ -527,9 +527,9 @@ const PhotoFrame = ({
                                 if (
                                     !isSameDay(
                                         new Date(
-                                            item.metadata.creationTime / 1000,
+                                            item.metadata.creationTime / 1000
                                         ),
-                                        new Date(currentDate),
+                                        new Date(currentDate)
                                     )
                                 ) {
                                     currentDate =
@@ -545,17 +545,17 @@ const PhotoFrame = ({
                                         itemType: ITEM_TYPE.TIME,
                                         date: isSameDay(
                                             new Date(currentDate),
-                                            new Date(),
+                                            new Date()
                                         )
                                             ? 'Today'
                                             : isSameDay(
-                                                new Date(currentDate),
-                                                new Date(Date.now() - A_DAY),
-                                            )
-                                                ? 'Yesterday'
-                                                : dateTimeFormat.format(
-                                                    currentDate,
-                                                ),
+                                                  new Date(currentDate),
+                                                  new Date(Date.now() - A_DAY)
+                                              )
+                                            ? 'Yesterday'
+                                            : dateTimeFormat.format(
+                                                  currentDate
+                                              ),
                                         id: currentDate.toString(),
                                     });
                                     timeStampList.push({
@@ -582,7 +582,7 @@ const PhotoFrame = ({
                             if (!skipMerge) {
                                 timeStampList = mergeTimeStampList(
                                     timeStampList,
-                                    columns,
+                                    columns
                                 );
                             }
 
@@ -618,12 +618,12 @@ const PhotoFrame = ({
                                     id: 'install-banner',
                                     height: Math.max(
                                         48,
-                                        height - photoFrameHeight,
+                                        height - photoFrameHeight
                                     ),
                                 });
                             const extraRowsToRender = Math.ceil(
                                 (NO_OF_PAGES * height) /
-                                    IMAGE_CONTAINER_MAX_HEIGHT,
+                                    IMAGE_CONTAINER_MAX_HEIGHT
                             );
 
                             const generateKey = (index) => {
@@ -633,7 +633,7 @@ const PhotoFrame = ({
                                             timeStampList[index].items[0].id
                                         }-${
                                             timeStampList[index].items.slice(
-                                                -1,
+                                                -1
                                             )[0].id
                                         }`;
                                     default:
@@ -642,7 +642,7 @@ const PhotoFrame = ({
                             };
 
                             const renderListItem = (
-                                listItem: TimeStampListItem,
+                                listItem: TimeStampListItem
                             ) => {
                                 switch (listItem.itemType) {
                                     case ITEM_TYPE.TIME:
@@ -670,8 +670,8 @@ const PhotoFrame = ({
                                                 getThumbnail(
                                                     filteredData,
                                                     listItem.itemStartIndex +
-                                                        idx,
-                                                ),
+                                                        idx
+                                                )
                                         );
                                         if (listItem.groups) {
                                             let sum = 0;
@@ -708,7 +708,7 @@ const PhotoFrame = ({
                                                     timeStampList[index].groups
                                                 }>
                                                 {renderListItem(
-                                                    timeStampList[index],
+                                                    timeStampList[index]
                                                 )}
                                             </ListContainer>
                                         </ListItem>

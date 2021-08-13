@@ -40,7 +40,7 @@ export default function SingleInputForm(props: Props) {
 
     const submitForm = async (
         values: formValues,
-        { setFieldError }: FormikHelpers<formValues>,
+        { setFieldError }: FormikHelpers<formValues>
     ) => {
         SetLoading(true);
         await props.callback(values.passphrase, setFieldError);
@@ -54,11 +54,8 @@ export default function SingleInputForm(props: Props) {
                 passphrase: Yup.string().required(constants.REQUIRED),
             })}
             validateOnChange={false}
-            validateOnBlur={false}
-        >
-            {({
-                values, touched, errors, handleChange, handleSubmit,
-            }) => (
+            validateOnBlur={false}>
+            {({ values, touched, errors, handleChange, handleSubmit }) => (
                 <Form noValidate onSubmit={handleSubmit}>
                     <Form.Group>
                         <Group>
@@ -68,17 +65,24 @@ export default function SingleInputForm(props: Props) {
                                 value={values.passphrase}
                                 onChange={handleChange('passphrase')}
                                 isInvalid={Boolean(
-                                    touched.passphrase && errors.passphrase,
+                                    touched.passphrase && errors.passphrase
                                 )}
                                 disabled={loading}
                                 autoFocus
                             />
-                            {
-                                props.fieldType === 'password' &&
-                                <Button type='button' onClick={() => setShowPassword(!showPassword)}>
-                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                            {props.fieldType === 'password' && (
+                                <Button
+                                    type="button"
+                                    onClick={() =>
+                                        setShowPassword(!showPassword)
+                                    }>
+                                    {showPassword ? (
+                                        <VisibilityOff />
+                                    ) : (
+                                        <Visibility />
+                                    )}
                                 </Button>
-                            }
+                            )}
                             <Form.Control.Feedback type="invalid">
                                 {errors.passphrase}
                             </Form.Control.Feedback>

@@ -71,7 +71,7 @@ export default function Sidebar(props: Props) {
 
     function openFeedbackURL() {
         const feedbackURL: string = `${getEndpoint()}/users/feedback?token=${encodeURIComponent(
-            getToken(),
+            getToken()
         )}`;
         const win = window.open(feedbackURL, '_blank');
         win.focus();
@@ -151,15 +151,15 @@ export default function Sidebar(props: Props) {
                         {isSubscriptionActive(subscription) ? (
                             isOnFreePlan(subscription) ? (
                                 constants.FREE_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime,
+                                    subscription?.expiryTime
                                 )
                             ) : isSubscriptionCancelled(subscription) ? (
                                 constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime,
+                                    subscription?.expiryTime
                                 )
                             ) : (
                                 constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime,
+                                    subscription?.expiryTime
                                 )
                             )
                         ) : (
@@ -185,9 +185,7 @@ export default function Sidebar(props: Props) {
                         {usage ? (
                             constants.USAGE_INFO(
                                 usage,
-                                Number(
-                                    convertBytesToGBs(subscription?.storage),
-                                ),
+                                Number(convertBytesToGBs(subscription?.storage))
                             )
                         ) : (
                             <div style={{ textAlign: 'center' }}>

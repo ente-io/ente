@@ -19,15 +19,13 @@ function ChoiceModal({
         <MessageDialog
             size="lg"
             {...props}
-            attributes={{ title: constants.MULTI_FOLDER_UPLOAD }}
-        >
+            attributes={{ title: constants.MULTI_FOLDER_UPLOAD }}>
             <p>{constants.UPLOAD_STRATEGY_CHOICE}</p>
             <div
                 style={{
                     display: 'flex',
                     flexWrap: 'wrap',
-                }}
-            >
+                }}>
                 <Button
                     variant="outline-success"
                     onClick={() => {
@@ -38,8 +36,7 @@ function ChoiceModal({
                         padding: '12px 24px',
                         flex: 2,
                         whiteSpace: 'nowrap',
-                    }}
-                >
+                    }}>
                     {constants.UPLOAD_STRATEGY_SINGLE_COLLECTION}
                 </Button>
                 <div
@@ -48,8 +45,7 @@ function ChoiceModal({
                         textAlign: 'center',
                         minWidth: '100px',
                         margin: '2% auto',
-                    }}
-                >
+                    }}>
                     <strong>{constants.OR}</strong>
                 </div>
                 <Button
@@ -62,8 +58,7 @@ function ChoiceModal({
                         padding: '12px 24px',
                         flex: 2,
                         whiteSpace: 'nowrap',
-                    }}
-                >
+                    }}>
                     {constants.UPLOAD_STRATEGY_COLLECTION_PER_FOLDER}
                 </Button>
             </div>

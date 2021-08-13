@@ -113,7 +113,7 @@ const defaultGalleryContext: GalleryContextType = {
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
-    defaultGalleryContext,
+    defaultGalleryContext
 );
 
 export default function Gallery() {
@@ -278,7 +278,7 @@ export default function Gallery() {
     }
     const addToCollectionHelper = (
         collectionName: string,
-        collection: Collection,
+        collection: Collection
     ) => {
         loadingBar.current?.continuousStart();
         addFilesToCollection(
@@ -289,7 +289,7 @@ export default function Gallery() {
             syncWithRemote,
             selectCollection,
             collectionName,
-            collection,
+            collection
         );
     };
 
@@ -349,7 +349,7 @@ export default function Gallery() {
                 getInputProps={getInputProps}
                 showCollectionSelector={setCollectionSelectorView.bind(
                     null,
-                    true,
+                    true
                 )}>
                 {loading && (
                     <LoadingOverlay>
@@ -421,14 +421,14 @@ export default function Gallery() {
                     acceptedFiles={acceptedFiles}
                     showCollectionSelector={setCollectionSelectorView.bind(
                         null,
-                        true,
+                        true
                     )}
                     setCollectionSelectorAttributes={
                         setCollectionSelectorAttributes
                     }
                     closeCollectionSelector={setCollectionSelectorView.bind(
                         null,
-                        false,
+                        false
                     )}
                     setLoading={setLoading}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}

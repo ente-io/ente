@@ -4,18 +4,18 @@ import { Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
 interface Props {
-    show: boolean
-    onHide: () => void
+    show: boolean;
+    onHide: () => void;
     updateExportFolder: (newFolder: string) => void;
-    exportFolder: string
-    startExport: () => void
+    exportFolder: string;
+    startExport: () => void;
     exportSize: string;
-    selectExportDirectory: () => void
+    selectExportDirectory: () => void;
 }
 export default function ExportInit(props: Props) {
     return (
         <>
-            <DeadCenter >
+            <DeadCenter>
                 <Button
                     variant="outline-success"
                     size="lg"
@@ -26,8 +26,9 @@ export default function ExportInit(props: Props) {
                         flex: 1,
                         whiteSpace: 'nowrap',
                     }}
-                    onClick={props.startExport}
-                >{constants.START}</Button>
+                    onClick={props.startExport}>
+                    {constants.START}
+                </Button>
             </DeadCenter>
         </>
     );

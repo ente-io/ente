@@ -21,8 +21,7 @@ function UploadButton({ openFileUploader, isFirstFetch }) {
                 viewBox="0 0 24 24"
                 fill="green"
                 width="32px"
-                height="32px"
-            >
+                height="32px">
                 <path fill="none" d="M0 0h24v24H0z" />
                 <path
                     fill="#2dc262"

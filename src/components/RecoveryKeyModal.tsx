@@ -12,11 +12,11 @@ export const CodeBlock = styled.div<{ height: number }>`
     justify-content: center;
     background: #1a1919;
     height: ${(props) => props.height}px;
-    padding-left:30px;
-    padding-right:20px;
+    padding-left: 30px;
+    padding-right: 20px;
     color: white;
     margin: 20px 0;
-    width:100%;
+    width: 100%;
 `;
 
 export const FreeFlowText = styled.div`
@@ -71,20 +71,17 @@ function RecoveryKeyModal({ somethingWentWrong, ...props }: Props) {
                     disabled: !recoveryKey,
                     variant: 'success',
                 },
-            }}
-        >
+            }}>
             <p>{constants.RECOVERY_KEY_DESCRIPTION}</p>
             <CodeBlock height={150}>
                 {recoveryKey ? (
-                    <FreeFlowText>
-                        {recoveryKey}
-                    </FreeFlowText>
+                    <FreeFlowText>{recoveryKey}</FreeFlowText>
                 ) : (
                     <EnteSpinner />
                 )}
             </CodeBlock>
             <p>{constants.KEY_NOT_STORED_DISCLAIMER}</p>
-        </MessageDialog >
+        </MessageDialog>
     );
 }
 export default RecoveryKeyModal;

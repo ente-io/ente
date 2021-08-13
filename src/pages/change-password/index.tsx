@@ -61,7 +61,7 @@ export default function Generate() {
         await generateAndSaveIntermediateKeyAttributes(
             passphrase,
             updatedKeyAttributes,
-            key,
+            key
         );
 
         setSessionKeys(key);

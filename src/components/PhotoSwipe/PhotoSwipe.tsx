@@ -78,18 +78,18 @@ function ExifData(props: { exif: any }) {
                 exif?.ImageHeight &&
                 renderInfoItem(
                     constants.IMAGE_SIZE,
-                    `${exif.ImageWidth} x ${exif.ImageHeight}`,
+                    `${exif.ImageWidth} x ${exif.ImageHeight}`
                 )}
             {exif?.Flash && renderInfoItem(constants.FLASH, exif.Flash)}
             {exif?.FocalLength &&
                 renderInfoItem(
                     constants.FOCAL_LENGTH,
-                    exif.FocalLength.toString(),
+                    exif.FocalLength.toString()
                 )}
             {exif?.ApertureValue &&
                 renderInfoItem(
                     constants.APERTURE,
-                    exif.ApertureValue.toString(),
+                    exif.ApertureValue.toString()
                 )}
             {exif?.ISOSpeedRatings &&
                 renderInfoItem(constants.ISO, exif.ISOSpeedRatings.toString())}
@@ -184,7 +184,7 @@ function PhotoSwipe(props: Iprops) {
             pswpElement.current,
             PhotoswipeUIDefault,
             items,
-            options,
+            options
         );
         events.forEach((event) => {
             const callback = props[event];
@@ -265,7 +265,7 @@ function PhotoSwipe(props: Iprops) {
         setExif(null);
         setTimeout(() => {
             const img = document.querySelector(
-                '.pswp__img:not(.pswp__img--placeholder)',
+                '.pswp__img:not(.pswp__img--placeholder)'
             );
             if (img) {
                 // @ts-expect-error
@@ -404,21 +404,19 @@ function PhotoSwipe(props: Iprops) {
                         </div>
                         {renderInfoItem(
                             constants.FILE_ID,
-                            items[photoSwipe?.getCurrentIndex()]?.id,
+                            items[photoSwipe?.getCurrentIndex()]?.id
                         )}
                         {metadata?.title &&
                             renderInfoItem(constants.FILE_NAME, metadata.title)}
                         {metadata?.creationTime &&
                             renderInfoItem(
                                 constants.CREATION_TIME,
-                                formatDateTime(metadata.creationTime / 1000),
+                                formatDateTime(metadata.creationTime / 1000)
                             )}
                         {metadata?.modificationTime &&
                             renderInfoItem(
                                 constants.UPDATED_ON,
-                                formatDateTime(
-                                    metadata.modificationTime / 1000,
-                                ),
+                                formatDateTime(metadata.modificationTime / 1000)
                             )}
                         {metadata?.longitude &&
                             metadata?.longitude &&
@@ -429,7 +427,7 @@ function PhotoSwipe(props: Iprops) {
                                     target="_blank"
                                     rel="noopener noreferrer">
                                     {constants.SHOW_MAP}
-                                </a>,
+                                </a>
                             )}
                         {exif && (
                             <>

@@ -82,7 +82,7 @@ function PlanSelector(props: Props) {
         setPlanPeriod((prevPeriod) =>
             prevPeriod === PLAN_PERIOD.MONTH
                 ? PLAN_PERIOD.YEAR
-                : PLAN_PERIOD.MONTH,
+                : PLAN_PERIOD.MONTH
         );
     };
     useEffect(() => {
@@ -93,7 +93,7 @@ function PlanSelector(props: Props) {
 
                 const planNotListed =
                     plans.filter((plan) =>
-                        isUserSubscribedPlan(plan, subscription),
+                        isUserSubscribedPlan(plan, subscription)
                     ).length === 0;
                 if (!isOnFreePlan(subscription) && planNotListed) {
                     plans = [planForSubscription(subscription), ...plans];
@@ -119,7 +119,7 @@ function PlanSelector(props: Props) {
         } else if (hasStripeSubscription(subscription)) {
             props.setDialogMessage({
                 title: `${constants.CONFIRM} ${reverseString(
-                    constants.UPDATE_SUBSCRIPTION,
+                    constants.UPDATE_SUBSCRIPTION
                 )}`,
                 content: constants.UPDATE_SUBSCRIPTION_MESSAGE,
                 staticBackdrop: true,
@@ -130,7 +130,7 @@ function PlanSelector(props: Props) {
                         plan,
                         props.setDialogMessage,
                         props.setLoading,
-                        props.closeModal,
+                        props.closeModal
                     ),
                     variant: 'success',
                 },
@@ -273,7 +273,7 @@ function PlanSelector(props: Props) {
                                             title: constants.CONFIRM_ACTIVATE_SUBSCRIPTION,
                                             content:
                                                 constants.ACTIVATE_SUBSCRIPTION_MESSAGE(
-                                                    subscription.expiryTime,
+                                                    subscription.expiryTime
                                                 ),
                                             staticBackdrop: true,
                                             proceed: {
@@ -282,7 +282,7 @@ function PlanSelector(props: Props) {
                                                     null,
                                                     props.setDialogMessage,
                                                     props.closeModal,
-                                                    props.setLoading,
+                                                    props.setLoading
                                                 ),
                                                 variant: 'success',
                                             },
@@ -308,7 +308,7 @@ function PlanSelector(props: Props) {
                                                     null,
                                                     props.setDialogMessage,
                                                     props.closeModal,
-                                                    props.setLoading,
+                                                    props.setLoading
                                                 ),
                                                 variant: 'danger',
                                             },
@@ -325,7 +325,7 @@ function PlanSelector(props: Props) {
                                 onClick={updatePaymentMethod.bind(
                                     null,
                                     props.setDialogMessage,
-                                    props.setLoading,
+                                    props.setLoading
                                 )}
                                 style={{ marginTop: '20px' }}>
                                 {constants.MANAGEMENT_PORTAL}

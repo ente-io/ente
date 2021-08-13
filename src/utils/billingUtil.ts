@@ -17,14 +17,14 @@ export function convertBytesToGBs(bytes, precision?): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2);
 }
 
-export function convertToHumanReadable(bytes:number, precision=2): string {
-    if (bytes===0) {
+export function convertToHumanReadable(bytes: number, precision = 2): string {
+    if (bytes === 0) {
         return '0 MB';
     }
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
-    return (bytes / Math.pow(1024, i)).toFixed(precision)+ ' ' + sizes[i];
+    return (bytes / Math.pow(1024, i)).toFixed(precision) + ' ' + sizes[i];
 }
 
 export function hasPaidSubscription(subscription?: Subscription) {
@@ -89,7 +89,7 @@ export async function updateSubscription(
     plan: Plan,
     setDialogMessage: SetDialogMessage,
     setLoading: SetLoading,
-    closePlanSelectorModal: () => null,
+    closePlanSelectorModal: () => null
 ) {
     try {
         setLoading(true);
@@ -99,7 +99,7 @@ export async function updateSubscription(
         setDialogMessage({
             title: constants.SUCCESS,
             content: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
-                getUserSubscription().expiryTime,
+                getUserSubscription().expiryTime
             ),
             close: { variant: 'success' },
         });
@@ -117,7 +117,7 @@ export async function updateSubscription(
                             null,
 
                             setDialogMessage,
-                            setLoading,
+                            setLoading
                         ),
                     },
                     close: { text: constants.CANCEL },
@@ -146,7 +146,7 @@ export async function updateSubscription(
 export async function cancelSubscription(
     setDialogMessage: SetDialogMessage,
     closePlanSelectorModal: () => null,
-    setLoading: SetLoading,
+    setLoading: SetLoading
 ) {
     try {
         setLoading(true);
@@ -171,7 +171,7 @@ export async function cancelSubscription(
 export async function activateSubscription(
     setDialogMessage: SetDialogMessage,
     closePlanSelectorModal: () => null,
-    setLoading: SetLoading,
+    setLoading: SetLoading
 ) {
     try {
         setLoading(true);
@@ -195,7 +195,7 @@ export async function activateSubscription(
 
 export async function updatePaymentMethod(
     setDialogMessage: SetDialogMessage,
-    setLoading: SetLoading,
+    setLoading: SetLoading
 ) {
     try {
         setLoading(true);
@@ -213,7 +213,7 @@ export async function updatePaymentMethod(
 
 export async function checkSubscriptionPurchase(
     setDialogMessage: SetDialogMessage,
-    router: NextRouter,
+    router: NextRouter
 ) {
     try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -227,13 +227,13 @@ export async function checkSubscriptionPurchase(
         } else if (sessionId) {
             try {
                 const subscription = await billingService.verifySubscription(
-                    sessionId,
+                    sessionId
                 );
                 setDialogMessage({
                     title: constants.SUBSCRIPTION_PURCHASE_SUCCESS_TITLE,
                     close: { variant: 'success' },
                     content: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
-                        subscription?.expiryTime,
+                        subscription?.expiryTime
                     ),
                 });
             } catch (e) {
@@ -251,11 +251,12 @@ export async function checkSubscriptionPurchase(
     }
 }
 
-export function planForSubscription(subscription:Subscription) {
+export function planForSubscription(subscription: Subscription) {
     if (!subscription) {
         return null;
     }
-    return { id: subscription.productID,
+    return {
+        id: subscription.productID,
         storage: subscription.storage,
         price: subscription.price,
         period: subscription.period,

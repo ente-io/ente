@@ -25,7 +25,7 @@ const Check = styled.input`
     opacity: 0;
     outline: none;
     cursor: pointer;
-    @media(pointer: coarse) {
+    @media (pointer: coarse) {
         pointer-events: none;
     }
 
@@ -183,8 +183,7 @@ export default function PreviewCard(props: IProps) {
             onClick={handleClick}
             disabled={!forcedEnable && !file?.msrc && !imgSrc}
             selected={selected}
-            {...(selectable ? useLongPress(longPressCallback, 500) : {})}
-        >
+            {...(selectable ? useLongPress(longPressCallback, 500) : {})}>
             {selectable && (
                 <Check
                     type="checkbox"

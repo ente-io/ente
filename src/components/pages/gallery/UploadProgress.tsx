@@ -162,9 +162,9 @@ export default function UploadProgress(props: Props) {
                                 {props.uploadStage === UPLOAD_STAGES.FINISH
                                     ? fileName
                                     : constants.FILE_UPLOAD_PROGRESS(
-                                        fileName,
-                                        progress,
-                                    )}
+                                          fileName,
+                                          progress
+                                      )}
                             </li>
                         ))}
                     </FileList>
@@ -180,16 +180,16 @@ export default function UploadProgress(props: Props) {
 
                 {props.uploadStage === UPLOAD_STAGES.FINISH &&
                     filesNotUploaded && (
-                    <AlertBanner variant="warning">
-                        {constants.FILE_NOT_UPLOADED_LIST}
-                    </AlertBanner>
-                )}
+                        <AlertBanner variant="warning">
+                            {constants.FILE_NOT_UPLOADED_LIST}
+                        </AlertBanner>
+                    )}
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.BLOCKED}
                     sectionTitle={constants.BLOCKED_UPLOADS}
                     sectionInfo={constants.ETAGS_BLOCKED(
-                        DESKTOP_APP_DOWNLOAD_URL,
+                        DESKTOP_APP_DOWNLOAD_URL
                     )}
                     infoHeight={140}
                 />
@@ -222,20 +222,20 @@ export default function UploadProgress(props: Props) {
                             ?.length > 0 ||
                         fileUploadResultMap?.get(FileUploadResults.BLOCKED)
                             ?.length > 0 ? (
-                                <Button
-                                    variant="outline-success"
-                                    style={{ width: '100%' }}
-                                    onClick={props.retryFailed}>
-                                    {constants.RETRY_FAILED}
-                                </Button>
-                            ) : (
-                                <Button
-                                    variant="outline-secondary"
-                                    style={{ width: '100%' }}
-                                    onClick={props.closeModal}>
-                                    {constants.CLOSE}
-                                </Button>
-                            ))}
+                            <Button
+                                variant="outline-success"
+                                style={{ width: '100%' }}
+                                onClick={props.retryFailed}>
+                                {constants.RETRY_FAILED}
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="outline-secondary"
+                                style={{ width: '100%' }}
+                                onClick={props.closeModal}>
+                                {constants.CLOSE}
+                            </Button>
+                        ))}
                 </Modal.Footer>
             )}
         </Modal>

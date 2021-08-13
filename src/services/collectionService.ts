@@ -52,7 +52,7 @@ export interface CollectionAndItsLatestFile {
 
 const getCollectionWithSecrets = async (
     collection: Collection,
-    masterKey: string,
+    masterKey: string
 ) => {
     const worker = await new CryptoWorker();
     const userID = getData(LS_KEYS.USER).id;
@@ -61,26 +61,27 @@ const getCollectionWithSecrets = async (
         decryptedKey = await worker.decryptB64(
             collection.encryptedKey,
             collection.keyDecryptionNonce,
-            masterKey,
+            masterKey
         );
     } else {
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const secretKey = await worker.decryptB64(
             keyAttributes.encryptedSecretKey,
             keyAttributes.secretKeyDecryptionNonce,
-            masterKey,
+            masterKey
         );
         decryptedKey = await worker.boxSealOpen(
             collection.encryptedKey,
             keyAttributes.publicKey,
-            secretKey,
+            secretKey
         );
     }
-    collection.name = collection.name ||
+    collection.name =
+        collection.name ||
         (await worker.decryptToUTF8(
             collection.encryptedName,
             collection.nameDecryptionNonce,
-            decryptedKey,
+            decryptedKey
         ));
     return {
         ...collection,
@@ -91,7 +92,7 @@ const getCollectionWithSecrets = async (
 const getCollections = async (
     token: string,
     sinceTime: number,
-    key: string,
+    key: string
 ): Promise<Collection[]> => {
     try {
         const resp = await HTTPService.get(
@@ -99,7 +100,7 @@ const getCollections = async (
             {
                 sinceTime,
             },
-            { 'X-Auth-Token': token },
+            { 'X-Auth-Token': token }
         );
         const promises: Promise<Collection>[] = resp.data.collections.map(
             async (collection: Collection) => {
@@ -110,16 +111,16 @@ const getCollections = async (
                 try {
                     collectionWithSecrets = await getCollectionWithSecrets(
                         collection,
-                        key,
+                        key
                     );
                     return collectionWithSecrets;
                 } catch (e) {
                     logError(
                         e,
-                        `decryption failed for collection with id=${collection.id}`,
+                        `decryption failed for collection with id=${collection.id}`
                     );
                 }
-            },
+            }
         );
         return await Promise.all(promises);
     } catch (e) {
@@ -129,18 +130,21 @@ const getCollections = async (
 };
 
 export const getLocalCollections = async (): Promise<Collection[]> => {
-    const collections: Collection[] = (await localForage.getItem(COLLECTIONS)) ?? [];
+    const collections: Collection[] =
+        (await localForage.getItem(COLLECTIONS)) ?? [];
     return collections;
 };
 
-export const getCollectionUpdationTime = async (): Promise<number> => (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
+export const getCollectionUpdationTime = async (): Promise<number> =>
+    (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
 
 export const syncCollections = async () => {
     const localCollections = await getLocalCollections();
     const lastCollectionUpdationTime = await getCollectionUpdationTime();
     const token = getToken();
     const key = await getActualKey();
-    const updatedCollections = (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
+    const updatedCollections =
+        (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
     if (updatedCollections.length === 0) {
         return localCollections;
     }
@@ -153,7 +157,7 @@ export const syncCollections = async () => {
         if (
             !latestCollectionsInstances.has(collection.id) ||
             latestCollectionsInstances.get(collection.id).updationTime <
-            collection.updationTime
+                collection.updationTime
         ) {
             latestCollectionsInstances.set(collection.id, collection);
         }
@@ -161,7 +165,7 @@ export const syncCollections = async () => {
 
     const collections: Collection[] = [];
     let updationTime = await localForage.getItem<number>(
-        COLLECTION_UPDATION_TIME,
+        COLLECTION_UPDATION_TIME
     );
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [_, collection] of latestCollectionsInstances) {
@@ -179,7 +183,7 @@ export const syncCollections = async () => {
 
 export const getCollectionsAndTheirLatestFile = (
     collections: Collection[],
-    files: File[],
+    files: File[]
 ): CollectionAndItsLatestFile[] => {
     const latestFile = new Map<number, File>();
 
@@ -213,15 +217,16 @@ export const getFavItemIds = async (files: File[]): Promise<Set<number>> => {
     return new Set(
         files
             .filter((file) => file.collectionID === favCollection.id)
-            .map((file): number => file.id),
+            .map((file): number => file.id)
     );
 };
 
-export const createAlbum = async (albumName: string) => createCollection(albumName, CollectionType.album);
+export const createAlbum = async (albumName: string) =>
+    createCollection(albumName, CollectionType.album);
 
 export const createCollection = async (
     collectionName: string,
-    type: CollectionType,
+    type: CollectionType
 ): Promise<Collection> => {
     try {
         const existingCollections = await syncCollections();
@@ -239,14 +244,14 @@ export const createCollection = async (
             nonce: keyDecryptionNonce,
         }: B64EncryptionResult = await worker.encryptToB64(
             collectionKey,
-            encryptionKey,
+            encryptionKey
         );
         const {
             encryptedData: encryptedName,
             nonce: nameDecryptionNonce,
         }: B64EncryptionResult = await worker.encryptUTF8(
             collectionName,
-            collectionKey,
+            collectionKey
         );
         const newCollection: Collection = {
             id: null,
@@ -263,11 +268,11 @@ export const createCollection = async (
         };
         let createdCollection: Collection = await postCollection(
             newCollection,
-            token,
+            token
         );
         createdCollection = await getCollectionWithSecrets(
             createdCollection,
-            encryptionKey,
+            encryptionKey
         );
         return createdCollection;
     } catch (e) {
@@ -278,14 +283,14 @@ export const createCollection = async (
 
 const postCollection = async (
     collectionData: Collection,
-    token: string,
+    token: string
 ): Promise<Collection> => {
     try {
         const response = await HTTPService.post(
             `${ENDPOINT}/collections`,
             collectionData,
             null,
-            { 'X-Auth-Token': token },
+            { 'X-Auth-Token': token }
         );
         return response.data.collection;
     } catch (e) {
@@ -298,7 +303,7 @@ export const addToFavorites = async (file: File) => {
     if (!favCollection) {
         favCollection = await createCollection(
             'Favorites',
-            CollectionType.favorites,
+            CollectionType.favorites
         );
         await localForage.setItem(FAV_COLLECTION, favCollection);
     }
@@ -312,7 +317,7 @@ export const removeFromFavorites = async (file: File) => {
 
 export const addToCollection = async (
     collection: Collection,
-    files: File[],
+    files: File[]
 ) => {
     try {
         const params = {};
@@ -322,7 +327,8 @@ export const addToCollection = async (
         await Promise.all(
             files.map(async (file) => {
                 file.collectionID = collection.id;
-                const newEncryptedKey: B64EncryptionResult = await worker.encryptToB64(file.key, collection.key);
+                const newEncryptedKey: B64EncryptionResult =
+                    await worker.encryptToB64(file.key, collection.key);
                 file.encryptedKey = newEncryptedKey.encryptedData;
                 file.keyDecryptionNonce = newEncryptedKey.nonce;
                 if (params['files'] === undefined) {
@@ -334,13 +340,13 @@ export const addToCollection = async (
                     keyDecryptionNonce: file.keyDecryptionNonce,
                 });
                 return file;
-            }),
+            })
         );
         await HTTPService.post(
             `${ENDPOINT}/collections/add-files`,
             params,
             null,
-            { 'X-Auth-Token': token },
+            { 'X-Auth-Token': token }
         );
     } catch (e) {
         logError(e, 'Add to collection Failed ');
@@ -357,13 +363,13 @@ const removeFromCollection = async (collection: Collection, files: File[]) => {
                     params['fileIDs'] = [];
                 }
                 params['fileIDs'].push(file.id);
-            }),
+            })
         );
         await HTTPService.post(
             `${ENDPOINT}/collections/remove-files`,
             params,
             null,
-            { 'X-Auth-Token': token },
+            { 'X-Auth-Token': token }
         );
     } catch (e) {
         logError(e, 'remove from collection failed ');
@@ -374,7 +380,7 @@ export const deleteCollection = async (
     collectionID: number,
     syncWithRemote: () => Promise<void>,
     redirectToAll: () => void,
-    setDialogMessage: SetDialogMessage,
+    setDialogMessage: SetDialogMessage
 ) => {
     try {
         const token = getToken();
@@ -383,7 +389,7 @@ export const deleteCollection = async (
             `${ENDPOINT}/collections/${collectionID}`,
             null,
             null,
-            { 'X-Auth-Token': token },
+            { 'X-Auth-Token': token }
         );
         await syncWithRemote();
         redirectToAll();
@@ -399,7 +405,7 @@ export const deleteCollection = async (
 
 export const renameCollection = async (
     collection: Collection,
-    newCollectionName: string,
+    newCollectionName: string
 ) => {
     const token = getToken();
     const worker = await new CryptoWorker();
@@ -408,7 +414,7 @@ export const renameCollection = async (
         nonce: nameDecryptionNonce,
     }: B64EncryptionResult = await worker.encryptUTF8(
         newCollectionName,
-        collection.key,
+        collection.key
     );
     const collectionRenameRequest = {
         collectionID: collection.id,
@@ -421,12 +427,12 @@ export const renameCollection = async (
         null,
         {
             'X-Auth-Token': token,
-        },
+        }
     );
 };
 export const shareCollection = async (
     collection: Collection,
-    withUserEmail: string,
+    withUserEmail: string
 ) => {
     try {
         const worker = await new CryptoWorker();
@@ -435,7 +441,7 @@ export const shareCollection = async (
         const publicKey: string = await getPublicKey(withUserEmail);
         const encryptedKey: string = await worker.boxSeal(
             collection.key,
-            publicKey,
+            publicKey
         );
         const shareCollectionRequest = {
             collectionID: collection.id,
@@ -448,7 +454,7 @@ export const shareCollection = async (
             null,
             {
                 'X-Auth-Token': token,
-            },
+            }
         );
     } catch (e) {
         logError(e, 'share collection failed ');
@@ -458,7 +464,7 @@ export const shareCollection = async (
 
 export const unshareCollection = async (
     collection: Collection,
-    withUserEmail: string,
+    withUserEmail: string
 ) => {
     try {
         const token = getToken();
@@ -472,7 +478,7 @@ export const unshareCollection = async (
             null,
             {
                 'X-Auth-Token': token,
-            },
+            }
         );
     } catch (e) {
         logError(e, 'unshare collection failed ');
@@ -492,11 +498,13 @@ export const getFavCollection = async () => {
 
 export const getNonEmptyCollections = (
     collections: Collection[],
-    files: File[],
+    files: File[]
 ) => {
     const nonEmptyCollectionsIds = new Set<number>();
     for (const file of files) {
         nonEmptyCollectionsIds.add(file.collectionID);
     }
-    return collections.filter((collection) => nonEmptyCollectionsIds.has(collection.id));
+    return collections.filter((collection) =>
+        nonEmptyCollectionsIds.has(collection.id)
+    );
 };

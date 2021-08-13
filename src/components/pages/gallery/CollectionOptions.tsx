@@ -24,7 +24,7 @@ interface Props {
 const CollectionOptions = (props: Props) => {
     const collectionRename = async (
         selectedCollection: Collection,
-        newName: string,
+        newName: string
     ) => {
         if (selectedCollection.name !== newName) {
             await renameCollection(selectedCollection, newName);
@@ -37,16 +37,16 @@ const CollectionOptions = (props: Props) => {
             buttonText: constants.RENAME,
             autoFilledName: getSelectedCollection(
                 props.selectedCollectionID,
-                props.collections,
+                props.collections
             )?.name,
             callback: (newName) => {
                 props.startLoadingBar();
                 collectionRename(
                     getSelectedCollection(
                         props.selectedCollectionID,
-                        props.collections,
+                        props.collections
                     ),
-                    newName,
+                    newName
                 );
             },
         });
@@ -64,7 +64,7 @@ const CollectionOptions = (props: Props) => {
                         props.selectedCollectionID,
                         props.syncWithRemote,
                         props.redirectToAll,
-                        props.setDialogMessage,
+                        props.setDialogMessage
                     );
                 },
                 variant: 'danger',
@@ -78,8 +78,7 @@ const CollectionOptions = (props: Props) => {
     const MenuLink = (props) => (
         <LinkButton
             style={{ fontSize: '14px', fontWeight: 700, padding: '8px 1em' }}
-            {...props}
-        >
+            {...props}>
             {props.children}
         </LinkButton>
     );
@@ -89,8 +88,7 @@ const CollectionOptions = (props: Props) => {
             style={{
                 background: '#282828',
                 padding: 0,
-            }}
-        >
+            }}>
             {props.children}
         </ListGroup.Item>
     );
@@ -111,8 +109,7 @@ const CollectionOptions = (props: Props) => {
                     <MenuItem>
                         <MenuLink
                             variant="danger"
-                            onClick={confirmDeleteCollection}
-                        >
+                            onClick={confirmDeleteCollection}>
                             {constants.DELETE}
                         </MenuLink>
                     </MenuItem>

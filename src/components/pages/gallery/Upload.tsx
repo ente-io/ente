@@ -58,7 +58,7 @@ export interface ProgressUpdater {
 export default function Upload(props: Props) {
     const [progressView, setProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
-        UPLOAD_STAGES.START,
+        UPLOAD_STAGES.START
     );
     const [fileCounter, setFileCounter] = useState({ finished: 0, total: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<string, number>());
@@ -78,7 +78,7 @@ export default function Upload(props: Props) {
                 setUploadResult,
                 setUploadStage,
             },
-            props.setFiles,
+            props.setFiles
         );
     });
     useEffect(() => {
@@ -124,7 +124,7 @@ export default function Upload(props: Props) {
                 props.closeCollectionSelector();
                 await uploadFilesToNewCollections(
                     UPLOAD_STRATEGY.SINGLE_COLLECTION,
-                    collectionName,
+                    collectionName
                 );
             },
         });
@@ -153,11 +153,11 @@ export default function Upload(props: Props) {
         if (commonPathPrefix) {
             commonPathPrefix = commonPathPrefix.substr(
                 1,
-                commonPathPrefix.lastIndexOf('/') - 1,
+                commonPathPrefix.lastIndexOf('/') - 1
             );
             if (commonPathPrefix) {
                 commonPathPrefix = commonPathPrefix.substr(
-                    commonPathPrefix.lastIndexOf('/') + 1,
+                    commonPathPrefix.lastIndexOf('/') + 1
                 );
             }
         }
@@ -172,7 +172,7 @@ export default function Upload(props: Props) {
             const filePath = file['path'];
             const folderPath = filePath.substr(0, filePath.lastIndexOf('/'));
             const folderName = folderPath.substr(
-                folderPath.lastIndexOf('/') + 1,
+                folderPath.lastIndexOf('/') + 1
             );
             if (!collectionWiseFiles.has(folderName)) {
                 collectionWiseFiles.set(folderName, []);
@@ -198,7 +198,7 @@ export default function Upload(props: Props) {
 
     const uploadFilesToNewCollections = async (
         strategy: UPLOAD_STRATEGY,
-        collectionName,
+        collectionName
     ) => {
         try {
             uploadInit();
@@ -241,7 +241,7 @@ export default function Upload(props: Props) {
 
     const uploadFiles = async (
         filesWithCollectionToUpload: FileWithCollection[],
-        collections?: Collection[],
+        collections?: Collection[]
     ) => {
         try {
             props.setUploadInProgress(true);
@@ -249,7 +249,7 @@ export default function Upload(props: Props) {
             await props.syncWithRemote(true, true);
             await uploadManager.queueFilesForUpload(
                 filesWithCollectionToUpload,
-                collections,
+                collections
             );
         } catch (err) {
             props.setBannerMessage(err.message);

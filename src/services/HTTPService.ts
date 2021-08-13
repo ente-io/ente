@@ -21,7 +21,7 @@ class HTTPService {
                 }
                 const { response } = err;
                 return Promise.reject(response);
-            },
+            }
         );
     }
 
@@ -77,7 +77,9 @@ class HTTPService {
             ...config.headers,
         };
         if (customConfig?.cancel) {
-            config.cancelToken=new axios.CancelToken((c)=> (customConfig.cancel.exec=c));
+            config.cancelToken = new axios.CancelToken(
+                (c) => (customConfig.cancel.exec = c)
+            );
         }
         return await axios({ ...config, ...customConfig });
     }
@@ -89,7 +91,7 @@ class HTTPService {
         url: string,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any,
+        customConfig?: any
     ) {
         return this.request(
             {
@@ -98,7 +100,7 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig,
+            customConfig
         );
     }
 
@@ -110,7 +112,7 @@ class HTTPService {
         data?: any,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any,
+        customConfig?: any
     ) {
         return this.request(
             {
@@ -120,7 +122,7 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig,
+            customConfig
         );
     }
 
@@ -132,7 +134,7 @@ class HTTPService {
         data: any,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any,
+        customConfig?: any
     ) {
         return this.request(
             {
@@ -142,7 +144,7 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig,
+            customConfig
         );
     }
 
@@ -154,7 +156,7 @@ class HTTPService {
         data: any,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any,
+        customConfig?: any
     ) {
         return this.request(
             {
@@ -164,7 +166,7 @@ class HTTPService {
                 params,
                 url,
             },
-            customConfig,
+            customConfig
         );
     }
 }

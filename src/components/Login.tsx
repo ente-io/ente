@@ -17,7 +17,7 @@ interface formValues {
 }
 
 interface LoginProps {
-    signUp: () => void
+    signUp: () => void;
 }
 
 export default function Login(props: LoginProps) {
@@ -39,7 +39,7 @@ export default function Login(props: LoginProps) {
 
     const loginUser = async (
         { email }: formValues,
-        { setFieldError }: FormikHelpers<formValues>,
+        { setFieldError }: FormikHelpers<formValues>
     ) => {
         try {
             setWaiting(true);
@@ -73,15 +73,8 @@ export default function Login(props: LoginProps) {
                 })}
                 validateOnChange={false}
                 validateOnBlur={false}
-                onSubmit={loginUser}
-            >
-                {({
-                    values,
-                    errors,
-                    touched,
-                    handleChange,
-                    handleSubmit,
-                }) => (
+                onSubmit={loginUser}>
+                {({ values, errors, touched, handleChange, handleSubmit }) => (
                     <Form noValidate onSubmit={handleSubmit}>
                         <Form.Group controlId="formBasicEmail">
                             <Form.Control
@@ -91,7 +84,7 @@ export default function Login(props: LoginProps) {
                                 value={values.email}
                                 onChange={handleChange('email')}
                                 isInvalid={Boolean(
-                                    touched.email && errors.email,
+                                    touched.email && errors.email
                                 )}
                                 autoFocus
                                 disabled={loading}
@@ -105,7 +98,11 @@ export default function Login(props: LoginProps) {
                             loading={waiting}
                         />
                         <br />
-                        <Button block variant="link" className="text-center" onClick={props.signUp}>
+                        <Button
+                            block
+                            variant="link"
+                            className="text-center"
+                            onClick={props.signUp}>
                             {constants.NO_ACCOUNT}
                         </Button>
                     </Form>

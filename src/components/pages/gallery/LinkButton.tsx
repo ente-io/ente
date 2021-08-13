@@ -4,7 +4,7 @@ enum ButtonVariant {
     success = 'success',
     danger = 'danger',
     secondary = 'secondary',
-    warning='warning'
+    warning = 'warning',
 }
 type Props = React.PropsWithChildren<{
     onClick: any;
@@ -35,8 +35,7 @@ export default function LinkButton(props: Props) {
                 marginBottom: 0,
                 ...props.style,
             }}
-            onClick={props?.onClick ?? (() => null)}
-        >
+            onClick={props?.onClick ?? (() => null)}>
             {props.children}
         </h5>
     );

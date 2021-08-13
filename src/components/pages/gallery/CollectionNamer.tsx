@@ -51,8 +51,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
             size="sm"
             attributes={{
                 title: attributes?.title,
-            }}
-        >
+            }}>
             <Formik<formValues>
                 initialValues={{ albumName: attributes.autoFilledName }}
                 validationSchema={Yup.object().shape({
@@ -60,11 +59,8 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                 })}
                 validateOnChange={false}
                 validateOnBlur={false}
-                onSubmit={onSubmit}
-            >
-                {({
-                    values, touched, errors, handleChange, handleSubmit,
-                }) => (
+                onSubmit={onSubmit}>
+                {({ values, touched, errors, handleChange, handleSubmit }) => (
                     <Form noValidate onSubmit={handleSubmit}>
                         <Form.Group>
                             <Form.Control
@@ -73,7 +69,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                                 value={values.albumName}
                                 onChange={handleChange('albumName')}
                                 isInvalid={Boolean(
-                                    touched.albumName && errors.albumName,
+                                    touched.albumName && errors.albumName
                                 )}
                                 placeholder={constants.ENTER_ALBUM_NAME}
                                 ref={collectionNameInputRef}
@@ -82,8 +78,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
 
                             <Form.Control.Feedback
                                 type="invalid"
-                                className="text-center"
-                            >
+                                className="text-center">
                                 {errors.albumName}
                             </Form.Control.Feedback>
                         </Form.Group>

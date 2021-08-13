@@ -73,7 +73,7 @@ function CollectionSelector({
                     </Card.Text>
                 </CollectionCard>
             </CollectionIcon>
-        ),
+        )
     );
 
     return (

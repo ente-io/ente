@@ -11,7 +11,7 @@ export enum LS_KEYS {
     JUST_SIGNED_UP = 'justSignedUp',
     SHOW_BACK_BUTTON = 'showBackButton',
     EXPORT = 'export',
-    AnonymizeUserID='anonymizedUserID'
+    AnonymizeUserID = 'anonymizedUserID',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {
