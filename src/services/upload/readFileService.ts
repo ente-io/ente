@@ -16,7 +16,9 @@ export async function getFileData(reader: FileReader, file: globalThis.File) {
 
 export function getFileType(receivedFile: globalThis.File) {
     let fileType: FILE_TYPE;
-    switch (receivedFile.type.split('/')[0]) {
+    const mimeType = receivedFile.type;
+    const majorType = mimeType.split('/')[0];
+    switch (majorType) {
         case TYPE_IMAGE:
             fileType = FILE_TYPE.IMAGE;
             break;
