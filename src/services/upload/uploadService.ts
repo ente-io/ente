@@ -3,7 +3,7 @@ import { Collection } from '../collectionService';
 import { logError } from 'utils/sentry';
 import NetworkClient from './networkClient';
 import {
-    extractMetatdata,
+    extractMetadata,
     getMetadataMapKey,
     ParsedMetaDataJSON,
 } from './metadataService';
@@ -98,46 +98,41 @@ class UploadService {
         rawFile: globalThis.File,
         collection: Collection
     ) {
-        try {
-            const fileType = getFileType(rawFile);
+        const fileType = getFileType(rawFile);
 
-            const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-                reader,
-                rawFile,
-                fileType
-            );
+        const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
+            reader,
+            rawFile,
+            fileType
+        );
 
-            const originalName = getFileOriginalName(rawFile);
-            const googleMetadata =
-                this.metadataMap.get(
-                    getMetadataMapKey(collection.id, originalName)
-                ) ?? {};
-            const extractedMetadata: MetadataObject = await extractMetatdata(
-                reader,
-                rawFile,
-                fileType
-            );
-            if (hasStaticThumbnail) {
-                extractedMetadata.hasStaticThumbnail = true;
-            }
-            for (const [key, value] of Object.entries(googleMetadata)) {
-                if (!value) {
-                    continue;
-                }
-                extractedMetadata[key] = value;
-            }
-
-            const filedata = await getFileData(reader, rawFile);
-
-            return {
-                filedata,
-                thumbnail,
-                metadata: extractedMetadata,
-            } as FileInMemory;
-        } catch (e) {
-            logError(e, 'error reading files');
-            throw e;
+        const originalName = getFileOriginalName(rawFile);
+        const googleMetadata =
+            this.metadataMap.get(
+                getMetadataMapKey(collection.id, originalName)
+            ) ?? {};
+        const extractedMetadata: MetadataObject = await extractMetadata(
+            reader,
+            rawFile,
+            fileType
+        );
+        if (hasStaticThumbnail) {
+            extractedMetadata.hasStaticThumbnail = true;
         }
+        for (const [key, value] of Object.entries(googleMetadata)) {
+            if (!value) {
+                continue;
+            }
+            extractedMetadata[key] = value;
+        }
+
+        const filedata = await getFileData(reader, rawFile);
+
+        return {
+            filedata,
+            thumbnail,
+            metadata: extractedMetadata,
+        } as FileInMemory;
     }
 
     async encryptFile(

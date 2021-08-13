@@ -27,7 +27,7 @@ const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
     ...NULL_LOCATION,
 };
 
-export async function extractMetatdata(
+export async function extractMetadata(
     reader: FileReader,
     receivedFile: globalThis.File,
     fileType: FILE_TYPE
