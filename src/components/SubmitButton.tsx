@@ -7,22 +7,24 @@ interface Props {
     inline?: any;
     disabled?: boolean;
 }
-const SubmitButton = ({
-    loading, buttonText, inline, disabled,
-}: Props) => (
+const SubmitButton = ({ loading, buttonText, inline, disabled }: Props) => (
     <Button
         className="submitButton"
         variant="outline-success"
         type="submit"
         block={!inline}
         disabled={loading || disabled}
-        style={{ padding: '6px 1em' }}
-    >
+        style={{ padding: '6px 1em' }}>
         {loading ? (
             <Spinner
                 as="span"
                 animation="border"
-                style={{ width: '22px', height: '22px', borderWidth: '0.20em', color: '#2dc262' }}
+                style={{
+                    width: '22px',
+                    height: '22px',
+                    borderWidth: '0.20em',
+                    color: '#2dc262',
+                }}
             />
         ) : (
             buttonText

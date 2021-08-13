@@ -12,7 +12,8 @@ const HeartUI = styled.button<{
     cursor: pointer;
     background-size: cover;
     border: none;
-    ${({ isClick, size }) => isClick &&
+    ${({ isClick, size }) =>
+        isClick &&
         `background-position: -${
             28 * size
         }px;transition: background 1s steps(28);`}

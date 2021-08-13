@@ -26,8 +26,8 @@ export interface Subscription {
     attributes: {
         isCancelled: boolean;
     };
-    price:string;
-    period:string;
+    price: string;
+    period: string;
 }
 export interface Plan {
     id: string;
@@ -64,9 +64,11 @@ class billingService {
         }
     }
 
-    public async getPlans():Promise<Plan[]> {
+    public async getPlans(): Promise<Plan[]> {
         try {
-            const response = await HTTPService.get(`${ENDPOINT}/billing/plans/v2`);
+            const response = await HTTPService.get(
+                `${ENDPOINT}/billing/plans/v2`
+            );
             const { plans } = response.data;
             return plans;
         } catch (e) {
@@ -81,12 +83,12 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            logError(e, 'failed to get user\'s subscription details');
+            logError(e, "failed to get user's subscription details");
         }
     }
 
@@ -112,7 +114,7 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             const { result } = response.data;
             switch (result.status) {
@@ -122,12 +124,12 @@ class billingService {
                     break;
                 case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
                     throw new Error(
-                        PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD,
+                        PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD
                     );
                 case PAYMENT_INTENT_STATUS.REQUIRE_ACTION:
                     {
                         const { error } = await this.stripe.confirmCardPayment(
-                            result.clientSecret,
+                            result.clientSecret
                         );
                         if (error) {
                             throw error;
@@ -154,7 +156,7 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
@@ -172,7 +174,7 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
@@ -190,12 +192,12 @@ class billingService {
             },
             {
                 'X-Auth-Token': getToken(),
-            },
+            }
         );
     }
 
     public async verifySubscription(
-        sessionID: string = null,
+        sessionID: string = null
     ): Promise<Subscription> {
         try {
             const response = await HTTPService.post(
@@ -208,7 +210,7 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
@@ -226,7 +228,7 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             window.location.href = response.data.url;
         } catch (e) {
@@ -242,7 +244,7 @@ class billingService {
                 { startTime: 0, endTime: Date.now() * 1000 },
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             return convertToHumanReadable(response.data.usage);
         } catch (e) {

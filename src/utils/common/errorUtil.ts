@@ -7,15 +7,13 @@ export const ServerErrorCodes = {
     STORAGE_LIMIT_EXCEEDED: '426',
 };
 
-
-export const CustomError ={
+export const CustomError = {
     SUBSCRIPTION_VERIFICATION_ERROR: 'Subscription verification failed',
     THUMBNAIL_GENERATION_FAILED: 'thumbnail generation failed',
     VIDEO_PLAYBACK_FAILED: 'video playback failed',
     ETAG_MISSING: 'no header/etag present in response body',
     KEY_MISSING: 'encrypted key missing from localStorage',
 };
-
 
 export function parseError(error) {
     let parsedMessage = null;
@@ -36,9 +34,10 @@ export function parseError(error) {
     if (parsedMessage) {
         return { parsedError: new Error(parsedMessage), parsed: true };
     } else {
-        return ({
-            parsedError: new Error(`${constants.UNKNOWN_ERROR} ${error}`), parsed: false,
-        });
+        return {
+            parsedError: new Error(`${constants.UNKNOWN_ERROR} ${error}`),
+            parsed: false,
+        };
     }
 }
 

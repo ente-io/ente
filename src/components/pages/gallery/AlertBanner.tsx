@@ -2,17 +2,18 @@ import React from 'react';
 import Alert from 'react-bootstrap/Alert';
 import { getVariantColor } from './LinkButton';
 
-interface Props{
-    bannerMessage?:any
-    variant?:string
-    children?:any
+interface Props {
+    bannerMessage?: any;
+    variant?: string;
+    children?: any;
 }
-export default function AlertBanner(props:Props) {
+export default function AlertBanner(props: Props) {
     return (
         <Alert
-            variant={props.variant??'danger'}
+            variant={props.variant ?? 'danger'}
             style={{
-                display: props.bannerMessage || props.children ? 'block' : 'none',
+                display:
+                    props.bannerMessage || props.children ? 'block' : 'none',
                 textAlign: 'center',
 
                 border: 'none',
@@ -23,9 +24,8 @@ export default function AlertBanner(props:Props) {
                 padding: 0,
                 margin: '0 25px',
                 marginBottom: '10px',
-            }}
-        >
-            {props.bannerMessage?props.bannerMessage:props.children}
+            }}>
+            {props.bannerMessage ? props.bannerMessage : props.children}
         </Alert>
     );
 }

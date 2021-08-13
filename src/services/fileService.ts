@@ -43,7 +43,10 @@ export const getLocalFiles = async () => {
     return files;
 };
 
-export const syncFiles = async (collections: Collection[], setFiles: (files: File[]) => void) => {
+export const syncFiles = async (
+    collections: Collection[],
+    setFiles: (files: File[]) => void
+) => {
     const localFiles = await getLocalFiles();
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
@@ -54,11 +57,19 @@ export const syncFiles = async (collections: Collection[], setFiles: (files: Fil
         if (!getToken()) {
             continue;
         }
-        const lastSyncTime = (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
+        const lastSyncTime =
+            (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
         if (collection.updationTime === lastSyncTime) {
             continue;
         }
-        const fetchedFiles = (await getFiles(collection, lastSyncTime, DIFF_LIMIT, files, setFiles)) ?? [];
+        const fetchedFiles =
+            (await getFiles(
+                collection,
+                lastSyncTime,
+                DIFF_LIMIT,
+                files,
+                setFiles
+            )) ?? [];
         files.push(...fetchedFiles);
         const latestVersionFiles = new Map<string, File>();
         files.forEach((file) => {
@@ -78,17 +89,19 @@ export const syncFiles = async (collections: Collection[], setFiles: (files: Fil
             }
             files.push(file);
         }
-        files=sortFiles(files);
+        files = sortFiles(files);
         await localForage.setItem('files', files);
         await localForage.setItem(
             `${collection.id}-time`,
-            collection.updationTime,
+            collection.updationTime
         );
-        setFiles(files.map((item) => ({
-            ...item,
-            w: window.innerWidth,
-            h: window.innerHeight,
-        })));
+        setFiles(
+            files.map((item) => ({
+                ...item,
+                w: window.innerWidth,
+                h: window.innerHeight,
+            }))
+        );
     }
     return {
         files: files.map((item) => ({
@@ -104,11 +117,12 @@ export const getFiles = async (
     sinceTime: number,
     limit: number,
     files: File[],
-    setFiles: (files: File[]) => void,
+    setFiles: (files: File[]) => void
 ): Promise<File[]> => {
     try {
         const decryptedFiles: File[] = [];
-        let time = sinceTime ||
+        let time =
+            sinceTime ||
             (await localForage.getItem<number>(`${collection.id}-time`)) ||
             0;
         let resp;
@@ -126,7 +140,7 @@ export const getFiles = async (
                 },
                 {
                     'X-Auth-Token': token,
-                },
+                }
             );
 
             decryptedFiles.push(
@@ -136,16 +150,21 @@ export const getFiles = async (
                             file = await decryptFile(file, collection);
                         }
                         return file;
-                    }) as Promise<File>[],
-                )),
+                    }) as Promise<File>[]
+                ))
             );
 
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime;
             }
-            setFiles([...(files || []), ...decryptedFiles].filter((item) => !item.isDeleted).sort(
-                (a, b) => b.metadata.creationTime - a.metadata.creationTime,
-            ));
+            setFiles(
+                [...(files || []), ...decryptedFiles]
+                    .filter((item) => !item.isDeleted)
+                    .sort(
+                        (a, b) =>
+                            b.metadata.creationTime - a.metadata.creationTime
+                    )
+            );
         } while (resp.data.diff.length === limit);
         return decryptedFiles;
     } catch (e) {
@@ -155,7 +174,7 @@ export const getFiles = async (
 
 const removeDeletedCollectionFiles = async (
     collections: Collection[],
-    files: File[],
+    files: File[]
 ) => {
     const syncedCollectionIds = new Set<number>();
     for (const collection of collections) {
@@ -168,7 +187,7 @@ const removeDeletedCollectionFiles = async (
 export const deleteFiles = async (
     filesToDelete: number[],
     clearSelection: Function,
-    syncWithRemote: Function,
+    syncWithRemote: Function
 ) => {
     try {
         const token = getToken();
@@ -181,7 +200,7 @@ export const deleteFiles = async (
             null,
             {
                 'X-Auth-Token': token,
-            },
+            }
         );
         clearSelection();
         syncWithRemote();

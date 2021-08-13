@@ -397,29 +397,29 @@ export interface BannerMessage {
     variant: string;
 }
 
-
 type AppContextType = {
     showNavBar: (show: boolean) => void;
     sharedFiles: File[];
     resetSharedFiles: () => void;
     setDisappearingFlashMessage: (message: FlashMessage) => void;
-}
+};
 
 export interface FlashMessage {
     message: string;
-    severity: string
+    severity: string;
 }
 export const AppContext = createContext<AppContextType>(null);
 
 const redirectMap = {
-    roadmap: (token: string) => `${getEndpoint()}/users/roadmap?token=${encodeURIComponent(token)}`,
+    roadmap: (token: string) =>
+        `${getEndpoint()}/users/roadmap?token=${encodeURIComponent(token)}`,
 };
 
 export default function App({ Component, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(
-        typeof window !== 'undefined' && !window.navigator.onLine,
+        typeof window !== 'undefined' && !window.navigator.onLine
     );
     const [showNavbar, setShowNavBar] = useState(false);
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
@@ -451,7 +451,7 @@ export default function App({ Component, err }) {
             (error) => {
                 logError(error);
                 return Promise.reject(error);
-            },
+            }
         );
     }, []);
 
@@ -462,7 +462,7 @@ export default function App({ Component, err }) {
     useEffect(() => {
         console.log(
             `%c${constants.CONSOLE_WARNING_STOP}`,
-            'color: red; font-size: 52px;',
+            'color: red; font-size: 52px;'
         );
         console.log(`%c${constants.CONSOLE_WARNING_DESC}`, 'font-size: 20px;');
 
@@ -486,7 +486,9 @@ export default function App({ Component, err }) {
             if (redirectName) {
                 const user = getData(LS_KEYS.USER);
                 if (user?.token) {
-                    window.location.href = redirectMap[redirectName](user.token);
+                    window.location.href = redirectMap[redirectName](
+                        user.token
+                    );
                 }
             }
         });
@@ -513,24 +515,27 @@ export default function App({ Component, err }) {
             <Head>
                 <title>{constants.TITLE}</title>
                 {/* Cloudflare Web Analytics */}
-                {pageRootURL?.hostname && (pageRootURL.hostname === 'photos.ente.io'
-                    ? <script
-                        defer
-                        src="https://static.cloudflareinsights.com/beacon.min.js"
-                        data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
-                    /> : pageRootURL.hostname === 'web.ente.io'
-                        ? < script
+                {pageRootURL?.hostname &&
+                    (pageRootURL.hostname === 'photos.ente.io' ? (
+                        <script
                             defer
-                            src='https://static.cloudflareinsights.com/beacon.min.js'
-                            data-cf-beacon='{"token": "dfde128b7bb34a618ad34a08f1ba7609"}' />
-                        : console.warn('Web analytics is disabled')
-                )
-                }
+                            src="https://static.cloudflareinsights.com/beacon.min.js"
+                            data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
+                        />
+                    ) : pageRootURL.hostname === 'web.ente.io' ? (
+                        <script
+                            defer
+                            src="https://static.cloudflareinsights.com/beacon.min.js"
+                            data-cf-beacon='{"token": "dfde128b7bb34a618ad34a08f1ba7609"}'
+                        />
+                    ) : (
+                        console.warn('Web analytics is disabled')
+                    ))}
                 {/* End Cloudflare Web Analytics  */}
             </Head>
             <GlobalStyles />
-            {
-                showNavbar && <Navbar>
+            {showNavbar && (
+                <Navbar>
                     <FlexContainer>
                         <LogoImage
                             style={{ height: '24px', padding: '3px' }}
@@ -539,21 +544,33 @@ export default function App({ Component, err }) {
                         />
                     </FlexContainer>
                 </Navbar>
-            }
-            <MessageContainer>{offline && constants.OFFLINE_MSG}</MessageContainer>
-            {
-                sharedFiles &&
-                (router.pathname === '/gallery'
-                    ? <MessageContainer>{constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}</MessageContainer>
-                    : <MessageContainer>{constants.LOGIN_TO_UPLOAD_FILES(sharedFiles.length)}</MessageContainer>)
-            }
-            {flashMessage && <FlashMessageBar flashMessage={flashMessage} onClose={() => setFlashMessage(null)} />}
-            <AppContext.Provider value={{
-                showNavBar,
-                sharedFiles,
-                resetSharedFiles,
-                setDisappearingFlashMessage,
-            }}>
+            )}
+            <MessageContainer>
+                {offline && constants.OFFLINE_MSG}
+            </MessageContainer>
+            {sharedFiles &&
+                (router.pathname === '/gallery' ? (
+                    <MessageContainer>
+                        {constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}
+                    </MessageContainer>
+                ) : (
+                    <MessageContainer>
+                        {constants.LOGIN_TO_UPLOAD_FILES(sharedFiles.length)}
+                    </MessageContainer>
+                ))}
+            {flashMessage && (
+                <FlashMessageBar
+                    flashMessage={flashMessage}
+                    onClose={() => setFlashMessage(null)}
+                />
+            )}
+            <AppContext.Provider
+                value={{
+                    showNavBar,
+                    sharedFiles,
+                    resetSharedFiles,
+                    setDisappearingFlashMessage,
+                }}>
                 {loading ? (
                     <Container>
                         <EnteSpinner>

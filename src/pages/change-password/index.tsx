@@ -45,7 +45,8 @@ export default function Generate() {
             setFieldError('confirm', constants.PASSWORD_GENERATION_FAILED);
             return;
         }
-        const encryptedKeyAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(key, kek.key);
+        const encryptedKeyAttributes: B64EncryptionResult =
+            await cryptoWorker.encryptToB64(key, kek.key);
         const updatedKey: UpdatedKey = {
             kekSalt,
             encryptedKey: encryptedKeyAttributes.encryptedData,
@@ -60,7 +61,7 @@ export default function Generate() {
         await generateAndSaveIntermediateKeyAttributes(
             passphrase,
             updatedKeyAttributes,
-            key,
+            key
         );
 
         setSessionKeys(key);

@@ -27,14 +27,19 @@ export default function Home() {
         router.push('/signup');
     };
 
-    return <Container>{loading
-        ? <EnteSpinner>
-            <span className="sr-only">Loading...</span>
-        </EnteSpinner>
-        :<Card style={{ minWidth: '320px' }} className="text-center">
-            <Card.Body style={{ padding: '40px 30px' }}>
-                <Login signUp={register}/>
-            </Card.Body>
-        </Card>}
-    </Container>;
+    return (
+        <Container>
+            {loading ? (
+                <EnteSpinner>
+                    <span className="sr-only">Loading...</span>
+                </EnteSpinner>
+            ) : (
+                <Card style={{ minWidth: '320px' }} className="text-center">
+                    <Card.Body style={{ padding: '40px 30px' }}>
+                        <Login signUp={register} />
+                    </Card.Body>
+                </Card>
+            )}
+        </Container>
+    );
 }

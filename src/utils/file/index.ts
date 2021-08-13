@@ -66,9 +66,9 @@ export function getSelectedFiles(selectedFiles, files: File[]): File[] {
     return filesToDelete;
 }
 
-export function checkFileFormatSupport(name :string) {
+export function checkFileFormatSupport(name: string) {
     for (const format of UNSUPPORTED_FORMATS) {
-        if ( name.toLowerCase().endsWith(format)) {
+        if (name.toLowerCase().endsWith(format)) {
             throw Error('unsupported format');
         }
     }
@@ -97,7 +97,7 @@ export function formatDateTime(date: number | Date) {
     return `${dateTimeFormat.format(date)} ${timeFormat.format(date)}`;
 }
 
-export function sortFiles(files:File[]) {
+export function sortFiles(files: File[]) {
     // sort according to modification time first
     files = files.sort((a, b) => {
         if (!b.metadata?.modificationTime) {
@@ -111,29 +111,33 @@ export function sortFiles(files:File[]) {
     });
 
     // then sort according to creation time, maintaining ordering according to modification time for files with creation time
-    files = files.map((file, index) => ({ index, file })).sort((a, b) => {
-        let diff = b.file.metadata.creationTime - a.file.metadata.creationTime;
-        if (diff === 0) {
-            diff = a.index - b.index;
-        }
-        return diff;
-    }).map((file) => file.file);
+    files = files
+        .map((file, index) => ({ index, file }))
+        .sort((a, b) => {
+            let diff =
+                b.file.metadata.creationTime - a.file.metadata.creationTime;
+            if (diff === 0) {
+                diff = a.index - b.index;
+            }
+            return diff;
+        })
+        .map((file) => file.file);
     return files;
 }
 
-export async function decryptFile(file:File, collection:Collection) {
+export async function decryptFile(file: File, collection: Collection) {
     const worker = await new CryptoWorker();
     file.key = await worker.decryptB64(
         file.encryptedKey,
         file.keyDecryptionNonce,
-        collection.key,
+        collection.key
     );
     file.metadata = await worker.decryptMetadata(file);
     return file;
 }
 
-export function removeUnneccessaryFileProps(files:File[]):File[] {
-    const stripedFiles=files.map((file)=>{
+export function removeUnneccessaryFileProps(files: File[]): File[] {
+    const stripedFiles = files.map((file) => {
         delete file.src;
         delete file.msrc;
         delete file.file.objectKey;

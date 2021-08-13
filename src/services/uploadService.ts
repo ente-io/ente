@@ -5,11 +5,7 @@ import { File, fileAttribute } from './fileService';
 import { Collection } from './collectionService';
 import { FILE_TYPE, SetFiles } from 'pages/gallery';
 import { retryAsyncFunction, sleep } from 'utils/common';
-import {
-    handleError,
-    parseError,
-    CustomError,
-} from 'utils/common/errorUtil';
+import { handleError, parseError, CustomError } from 'utils/common/errorUtil';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
 import * as convert from 'xml-js';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
@@ -50,7 +46,7 @@ export enum FileUploadResults {
     FAILED = -1,
     SKIPPED = -2,
     UNSUPPORTED = -3,
-    BLOCKED=-4,
+    BLOCKED = -4,
     UPLOADED = 100,
 }
 
@@ -121,7 +117,7 @@ interface ProcessedFile {
     metadata: fileAttribute;
     filename: string;
 }
-interface BackupedFile extends Omit<ProcessedFile, 'filename'> { }
+interface BackupedFile extends Omit<ProcessedFile, 'filename'> {}
 
 interface uploadFile extends BackupedFile {
     collectionID: number;
@@ -144,19 +140,19 @@ class UploadService {
     private filesCompleted: number;
     private totalFileCount: number;
     private fileProgress: Map<string, number>;
-    private uploadResult:Map<string, number>;
+    private uploadResult: Map<string, number>;
     private metadataMap: Map<string, Object>;
     private filesToBeUploaded: FileWithCollection[];
     private progressBarProps;
     private failedFiles: FileWithCollection[];
     private existingFilesCollectionWise: Map<number, File[]>;
     private existingFiles: File[];
-    private setFiles:SetFiles;
+    private setFiles: SetFiles;
     public async uploadFiles(
         filesWithCollectionToUpload: FileWithCollection[],
         existingFiles: File[],
         progressBarProps,
-        setFiles:SetFiles,
+        setFiles: SetFiles
     ) {
         try {
             progressBarProps.setUploadStage(UPLOAD_STAGES.START);
@@ -167,10 +163,11 @@ class UploadService {
             this.failedFiles = [];
             this.metadataMap = new Map<string, object>();
             this.progressBarProps = progressBarProps;
-            this.existingFiles=existingFiles;
-            this.existingFilesCollectionWise = sortFilesIntoCollections(existingFiles);
+            this.existingFiles = existingFiles;
+            this.existingFilesCollectionWise =
+                sortFilesIntoCollections(existingFiles);
             this.updateProgressBarUI();
-            this.setFiles=setFiles;
+            this.setFiles = setFiles;
             const metadataFiles: globalThis.File[] = [];
             const actualFiles: FileWithCollection[] = [];
             filesWithCollectionToUpload.forEach((fileWithCollection) => {
@@ -188,7 +185,7 @@ class UploadService {
             this.filesToBeUploaded = actualFiles;
 
             progressBarProps.setUploadStage(
-                UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
+                UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
             );
             this.totalFileCount = metadataFiles.length;
             this.perFileProgress = 100 / metadataFiles.length;
@@ -215,20 +212,16 @@ class UploadService {
                 }
             }
             const uploadProcesses = [];
-            for (
-                let i = 0;
-                i < MAX_CONCURRENT_UPLOADS;
-                i++
-            ) {
-                if (this.filesToBeUploaded.length>0) {
-                    const fileWithCollection= this.filesToBeUploaded.pop();
+            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+                if (this.filesToBeUploaded.length > 0) {
+                    const fileWithCollection = this.filesToBeUploaded.pop();
                     this.cryptoWorkers[i] = getDedicatedCryptoWorker();
                     uploadProcesses.push(
                         this.uploader(
                             await new this.cryptoWorkers[i].comlink(),
                             new FileReader(),
-                            fileWithCollection,
-                        ),
+                            fileWithCollection
+                        )
                     );
                 }
             }
@@ -250,13 +243,13 @@ class UploadService {
     private async uploader(
         worker: any,
         reader: FileReader,
-        fileWithCollection: FileWithCollection,
+        fileWithCollection: FileWithCollection
     ) {
         const { file: rawFile, collection } = fileWithCollection;
         this.fileProgress.set(rawFile.name, 0);
         this.updateProgressBarUI();
-        let file:FileInMemory=null;
-        let encryptedFile: EncryptedFile=null;
+        let file: FileInMemory = null;
+        let encryptedFile: EncryptedFile = null;
         try {
             // read the file into memory
             file = await this.readFile(reader, rawFile);
@@ -267,25 +260,34 @@ class UploadService {
                 this.updateProgressBarUI();
                 await sleep(TwoSecondInMillSeconds);
             } else {
-                encryptedFile = await this.encryptFile(worker, file, collection.key);
+                encryptedFile = await this.encryptFile(
+                    worker,
+                    file,
+                    collection.key
+                );
 
                 const backupedFile: BackupedFile = await this.uploadToBucket(
-                    encryptedFile.file,
+                    encryptedFile.file
                 );
 
                 let uploadFile: uploadFile = this.getUploadFile(
                     collection,
                     backupedFile,
-                    encryptedFile.fileKey,
+                    encryptedFile.fileKey
                 );
 
-
-                const uploadedFile =await this.uploadFile(uploadFile);
-                const decryptedFile=await decryptFile(uploadedFile, collection);
+                const uploadedFile = await this.uploadFile(uploadFile);
+                const decryptedFile = await decryptFile(
+                    uploadedFile,
+                    collection
+                );
 
                 this.existingFiles.push(decryptedFile);
-                this.existingFiles=sortFiles(this.existingFiles);
-                await localForage.setItem('files', removeUnneccessaryFileProps(this.existingFiles));
+                this.existingFiles = sortFiles(this.existingFiles);
+                await localForage.setItem(
+                    'files',
+                    removeUnneccessaryFileProps(this.existingFiles)
+                );
                 this.setFiles(this.existingFiles);
 
                 uploadFile = null;
@@ -296,34 +298,42 @@ class UploadService {
             logError(e, 'file upload failed');
             handleError(e);
             this.failedFiles.push(fileWithCollection);
-            if (e.message ===CustomError.ETAG_MISSING) {
+            if (e.message === CustomError.ETAG_MISSING) {
                 this.fileProgress.set(rawFile.name, FileUploadResults.BLOCKED);
             } else {
                 this.fileProgress.set(rawFile.name, FileUploadResults.FAILED);
             }
         } finally {
-            file=null;
-            encryptedFile=null;
+            file = null;
+            encryptedFile = null;
         }
-        this.uploadResult.set(rawFile.name, this.fileProgress.get(rawFile.name));
+        this.uploadResult.set(
+            rawFile.name,
+            this.fileProgress.get(rawFile.name)
+        );
         this.fileProgress.delete(rawFile.name);
         this.updateProgressBarUI();
 
         if (this.filesToBeUploaded.length > 0) {
-            await this.uploader(
-                worker,
-                reader,
-                this.filesToBeUploaded.pop(),
-            );
+            await this.uploader(worker, reader, this.filesToBeUploaded.pop());
         }
     }
-    async retryFailedFiles(localFiles:File[]) {
-        await this.uploadFiles(this.failedFiles, localFiles, this.progressBarProps, this.setFiles);
+    async retryFailedFiles(localFiles: File[]) {
+        await this.uploadFiles(
+            this.failedFiles,
+            localFiles,
+            this.progressBarProps,
+            this.setFiles
+        );
     }
 
     private updateProgressBarUI() {
-        const { setPercentComplete, setFileCounter, setFileProgress, setUploadResult } =
-            this.progressBarProps;
+        const {
+            setPercentComplete,
+            setFileCounter,
+            setFileProgress,
+            setUploadResult,
+        } = this.progressBarProps;
         setFileCounter({
             finished: this.filesCompleted,
             total: this.totalFileCount,
@@ -346,7 +356,7 @@ class UploadService {
 
     private fileAlreadyInCollection(
         newFile: FileInMemory,
-        collection: Collection,
+        collection: Collection
     ): boolean {
         const collectionFiles =
             this.existingFilesCollectionWise.get(collection.id) ?? [];
@@ -359,7 +369,7 @@ class UploadService {
     }
     private areFilesSame(
         existingFile: MetadataObject,
-        newFile: MetadataObject,
+        newFile: MetadataObject
     ): boolean {
         if (
             existingFile.fileType === newFile.fileType &&
@@ -375,10 +385,8 @@ class UploadService {
 
     private async readFile(reader: FileReader, receivedFile: globalThis.File) {
         try {
-            const { thumbnail, hasStaticThumbnail } = await this.generateThumbnail(
-                reader,
-                receivedFile,
-            );
+            const { thumbnail, hasStaticThumbnail } =
+                await this.generateThumbnail(reader, receivedFile);
 
             let fileType: FILE_TYPE;
             switch (receivedFile.type.split('/')[0]) {
@@ -402,13 +410,13 @@ class UploadService {
             const { location, creationTime } = await this.getExifData(
                 reader,
                 receivedFile,
-                fileType,
+                fileType
             );
             let receivedFileOriginalName = receivedFile.name;
             if (receivedFile.name.endsWith(EDITED_FILE_SUFFIX)) {
                 receivedFileOriginalName = receivedFile.name.slice(
                     0,
-                    -1 * EDITED_FILE_SUFFIX.length,
+                    -1 * EDITED_FILE_SUFFIX.length
                 );
             }
             const metadata = Object.assign(
@@ -421,7 +429,7 @@ class UploadService {
                     longitude: location?.latitude,
                     fileType,
                 },
-                this.metadataMap.get(receivedFileOriginalName),
+                this.metadataMap.get(receivedFileOriginalName)
             );
             if (hasStaticThumbnail) {
                 metadata['hasStaticThumbnail'] = hasStaticThumbnail;
@@ -445,7 +453,7 @@ class UploadService {
     private async encryptFile(
         worker: any,
         file: FileInMemory,
-        encryptionKey: string,
+        encryptionKey: string
     ): Promise<EncryptedFile> {
         try {
             const { key: fileKey, file: encryptedFiledata }: EncryptionResult =
@@ -460,7 +468,7 @@ class UploadService {
 
             const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
                 fileKey,
-                encryptionKey,
+                encryptionKey
             );
 
             const result: EncryptedFile = {
@@ -491,7 +499,7 @@ class UploadService {
                 const encryptedFileChunk = await worker.encryptFileChunk(
                     value,
                     pushState,
-                    ref.pullCount === chunkCount,
+                    ref.pullCount === chunkCount
                 );
                 controller.enqueue(encryptedFileChunk);
                 if (ref.pullCount === chunkCount) {
@@ -515,30 +523,30 @@ class UploadService {
             if (isDataStream(file.file.encryptedData)) {
                 const { chunkCount, stream } = file.file.encryptedData;
                 const uploadPartCount = Math.ceil(
-                    chunkCount / CHUNKS_COMBINED_FOR_UPLOAD,
+                    chunkCount / CHUNKS_COMBINED_FOR_UPLOAD
                 );
                 const filePartUploadURLs = await this.fetchMultipartUploadURLs(
-                    uploadPartCount,
+                    uploadPartCount
                 );
                 fileObjectKey = await this.putFileInParts(
                     filePartUploadURLs,
                     stream,
                     file.filename,
-                    uploadPartCount,
+                    uploadPartCount
                 );
             } else {
                 const fileUploadURL = await this.getUploadURL();
                 fileObjectKey = await this.putFile(
                     fileUploadURL,
                     file.file.encryptedData,
-                    file.filename,
+                    file.filename
                 );
             }
             const thumbnailUploadURL = await this.getUploadURL();
             const thumbnailObjectKey = await this.putFile(
                 thumbnailUploadURL,
                 file.thumbnail.encryptedData as Uint8Array,
-                null,
+                null
             );
 
             const backupedFile: BackupedFile = {
@@ -562,7 +570,7 @@ class UploadService {
     private getUploadFile(
         collection: Collection,
         backupedFile: BackupedFile,
-        fileKey: B64EncryptionResult,
+        fileKey: B64EncryptionResult
     ): uploadFile {
         const uploadFile: uploadFile = {
             collectionID: collection.id,
@@ -574,20 +582,17 @@ class UploadService {
         return uploadFile;
     }
 
-    private async uploadFile(uploadFile: uploadFile):Promise<File> {
+    private async uploadFile(uploadFile: uploadFile): Promise<File> {
         try {
             const token = getToken();
             if (!token) {
                 return;
             }
-            const response = await retryAsyncFunction(()=>HTTPService.post(
-                `${ENDPOINT}/files`,
-                uploadFile,
-                null,
-                {
+            const response = await retryAsyncFunction(() =>
+                HTTPService.post(`${ENDPOINT}/files`, uploadFile, null, {
                     'X-Auth-Token': token,
-                },
-            ));
+                })
+            );
             return response.data;
         } catch (e) {
             logError(e, 'upload Files Failed');
@@ -600,8 +605,10 @@ class UploadService {
             const metadataJSON: object = await new Promise(
                 (resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onabort = () => reject(Error('file reading was aborted'));
-                    reader.onerror = () => reject(Error('file reading has failed'));
+                    reader.onabort = () =>
+                        reject(Error('file reading was aborted'));
+                    reader.onerror = () =>
+                        reject(Error('file reading has failed'));
                     reader.onload = () => {
                         const result =
                             typeof reader.result !== 'string'
@@ -610,7 +617,7 @@ class UploadService {
                         resolve(JSON.parse(result));
                     };
                     reader.readAsText(receivedFile);
-                },
+                }
             );
 
             const metaDataObject = {};
@@ -657,8 +664,8 @@ class UploadService {
     }
     private async generateThumbnail(
         reader: FileReader,
-        file: globalThis.File,
-    ): Promise<{ thumbnail: Uint8Array, hasStaticThumbnail: boolean }> {
+        file: globalThis.File
+    ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
         try {
             let hasStaticThumbnail = false;
             const canvas = document.createElement('canvas');
@@ -672,7 +679,7 @@ class UploadService {
                         file = new globalThis.File(
                             [await convertHEIC2JPEG(file)],
                             null,
-                            null,
+                            null
                         );
                     }
                     let image = new Image();
@@ -682,7 +689,8 @@ class UploadService {
                         image.onload = () => {
                             try {
                                 const thumbnailWidth =
-                                    (image.width * THUMBNAIL_HEIGHT) / image.height;
+                                    (image.width * THUMBNAIL_HEIGHT) /
+                                    image.height;
                                 canvas.width = thumbnailWidth;
                                 canvas.height = THUMBNAIL_HEIGHT;
                                 canvas_CTX.drawImage(
@@ -690,7 +698,7 @@ class UploadService {
                                     0,
                                     0,
                                     thumbnailWidth,
-                                    THUMBNAIL_HEIGHT,
+                                    THUMBNAIL_HEIGHT
                                 );
                                 image = null;
                                 clearTimeout(timeout);
@@ -698,15 +706,23 @@ class UploadService {
                             } catch (e) {
                                 reject(e);
                                 logError(e);
-                                reject(Error(`${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`));
+                                reject(
+                                    Error(
+                                        `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`
+                                    )
+                                );
                             }
                         };
                         timeout = setTimeout(
                             () =>
                                 reject(
-                                    Error(`wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`),
+                                    Error(
+                                        `wait time exceeded for format ${
+                                            file.name.split('.').slice(-1)[0]
+                                        }`
+                                    )
                                 ),
-                            WAIT_TIME_THUMBNAIL_GENERATION,
+                            WAIT_TIME_THUMBNAIL_GENERATION
                         );
                     });
                 } else {
@@ -728,7 +744,7 @@ class UploadService {
                                     0,
                                     0,
                                     thumbnailWidth,
-                                    THUMBNAIL_HEIGHT,
+                                    THUMBNAIL_HEIGHT
                                 );
                                 video = null;
                                 clearTimeout(timeout);
@@ -736,16 +752,26 @@ class UploadService {
                             } catch (e) {
                                 reject(e);
                                 logError(e);
-                                reject(Error(`${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`));
+                                reject(
+                                    Error(
+                                        `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`
+                                    )
+                                );
                             }
                         });
                         video.preload = 'metadata';
                         video.src = imageURL;
                         video.currentTime = 3;
-                        timeout=setTimeout(
+                        timeout = setTimeout(
                             () =>
-                                reject(Error(`wait time exceeded for format ${file.name.split('.').slice(-1)[0]}`)),
-                            WAIT_TIME_THUMBNAIL_GENERATION,
+                                reject(
+                                    Error(
+                                        `wait time exceeded for format ${
+                                            file.name.split('.').slice(-1)[0]
+                                        }`
+                                    )
+                                ),
+                            WAIT_TIME_THUMBNAIL_GENERATION
                         );
                     });
                 }
@@ -768,7 +794,7 @@ class UploadService {
                             resolve(blob);
                         },
                         'image/jpeg',
-                        quality,
+                        quality
                     );
                 });
                 thumbnailBlob = thumbnailBlob ?? new Blob([]);
@@ -778,7 +804,7 @@ class UploadService {
             );
             const thumbnail = await this.getUint8ArrayView(
                 reader,
-                thumbnailBlob,
+                thumbnailBlob
             );
             return { thumbnail, hasStaticThumbnail };
         } catch (e) {
@@ -791,7 +817,7 @@ class UploadService {
         const self = this;
         const fileChunkReader = (async function* fileChunkReaderMaker(
             fileSize,
-            self,
+            self
         ) {
             let offset = 0;
             while (offset < fileSize) {
@@ -819,11 +845,12 @@ class UploadService {
 
     private async getUint8ArrayView(
         reader: FileReader,
-        file: Blob,
+        file: Blob
     ): Promise<Uint8Array> {
         try {
             return await new Promise((resolve, reject) => {
-                reader.onabort = () => reject(Error('file reading was aborted'));
+                reader.onabort = () =>
+                    reject(Error('file reading was aborted'));
                 reader.onerror = () => reject(Error('file reading has failed'));
                 reader.onload = () => {
                     // Do whatever you want with the file contents
@@ -861,10 +888,10 @@ class UploadService {
                         {
                             count: Math.min(
                                 MAX_URL_REQUESTS,
-                                (this.totalFileCount - this.filesCompleted) * 2,
+                                (this.totalFileCount - this.filesCompleted) * 2
                             ),
                         },
-                        { 'X-Auth-Token': token },
+                        { 'X-Auth-Token': token }
                     );
                     const response = await this.uploadURLFetchInProgress;
                     this.uploadURLs.push(...response.data['urls']);
@@ -880,7 +907,7 @@ class UploadService {
     }
 
     private async fetchMultipartUploadURLs(
-        count: number,
+        count: number
     ): Promise<MultipartUploadURLs> {
         try {
             const token = getToken();
@@ -892,7 +919,7 @@ class UploadService {
                 {
                     count,
                 },
-                { 'X-Auth-Token': token },
+                { 'X-Auth-Token': token }
             );
 
             return response.data['urls'];
@@ -905,17 +932,17 @@ class UploadService {
     private async putFile(
         fileUploadURL: UploadURL,
         file: Uint8Array,
-        filename: string,
+        filename: string
     ): Promise<string> {
         try {
-            await retryAsyncFunction(()=>
+            await retryAsyncFunction(() =>
                 HTTPService.put(
                     fileUploadURL.url,
                     file,
                     null,
                     null,
-                    this.trackUploadProgress(filename),
-                ),
+                    this.trackUploadProgress(filename)
+                )
             );
             return fileUploadURL.objectKey;
         } catch (e) {
@@ -928,12 +955,12 @@ class UploadService {
         multipartUploadURLs: MultipartUploadURLs,
         file: ReadableStream<Uint8Array>,
         filename: string,
-        uploadPartCount: number,
+        uploadPartCount: number
     ) {
         try {
             const streamEncryptedFileReader = file.getReader();
             const percentPerPart = Math.round(
-                RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount,
+                RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount
             );
             const resParts = [];
             for (const [
@@ -952,16 +979,20 @@ class UploadService {
                     }
                 }
                 const uploadChunk = Uint8Array.from(combinedChunks);
-                const response=await retryAsyncFunction(async ()=>{
-                    const resp =await HTTPService.put(
+                const response = await retryAsyncFunction(async () => {
+                    const resp = await HTTPService.put(
                         fileUploadURL,
                         uploadChunk,
                         null,
                         null,
-                        this.trackUploadProgress(filename, percentPerPart, index),
+                        this.trackUploadProgress(
+                            filename,
+                            percentPerPart,
+                            index
+                        )
                     );
                     if (!resp?.headers?.etag) {
-                        const err=Error(CustomError.ETAG_MISSING);
+                        const err = Error(CustomError.ETAG_MISSING);
                         logError(err);
                         throw err;
                     }
@@ -975,12 +1006,12 @@ class UploadService {
             const options = { compact: true, ignoreComment: true, spaces: 4 };
             const body = convert.js2xml(
                 { CompleteMultipartUpload: { Part: resParts } },
-                options,
+                options
             );
-            await retryAsyncFunction(()=>
+            await retryAsyncFunction(() =>
                 HTTPService.post(multipartUploadURLs.completeURL, body, null, {
                     'content-type': 'text/xml',
-                }),
+                })
             );
             return multipartUploadURLs.objectKey;
         } catch (e) {
@@ -992,15 +1023,15 @@ class UploadService {
     private trackUploadProgress(
         filename,
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
-        index = 0,
+        index = 0
     ) {
-        const cancel={ exec: null };
-        let timeout=null;
-        const resetTimeout=()=>{
+        const cancel = { exec: null };
+        let timeout = null;
+        const resetTimeout = () => {
             if (timeout) {
                 clearTimeout(timeout);
             }
-            timeout=setTimeout(()=>cancel.exec(), 30*1000);
+            timeout = setTimeout(() => cancel.exec(), 30 * 1000);
         };
         return {
             cancel,
@@ -1011,14 +1042,14 @@ class UploadService {
                         Math.min(
                             Math.round(
                                 percentPerPart * index +
-                                (percentPerPart * event.loaded) /
-                                event.total,
+                                    (percentPerPart * event.loaded) /
+                                        event.total
                             ),
-                            98,
-                        ),
+                            98
+                        )
                     );
                 this.updateProgressBarUI();
-                if (event.loaded===event.total) {
+                if (event.loaded === event.total) {
                     clearTimeout(timeout);
                 } else {
                     resetTimeout();
@@ -1029,7 +1060,7 @@ class UploadService {
     private async getExifData(
         reader: FileReader,
         receivedFile: globalThis.File,
-        fileType: FILE_TYPE,
+        fileType: FILE_TYPE
     ): Promise<ParsedEXIFData> {
         try {
             if (fileType === FILE_TYPE.VIDEO) {
@@ -1055,15 +1086,16 @@ class UploadService {
         }
     }
     private getUNIXTime(exifData: any) {
-        const dateString: string = exifData.DateTimeOriginal || exifData.DateTime;
-        if (!dateString || dateString==='0000:00:00 00:00:00') {
+        const dateString: string =
+            exifData.DateTimeOriginal || exifData.DateTime;
+        if (!dateString || dateString === '0000:00:00 00:00:00') {
             return null;
         }
         const parts = dateString.split(' ')[0].split(':');
         const date = new Date(
             Number(parts[0]),
             Number(parts[1]) - 1,
-            Number(parts[2]),
+            Number(parts[2])
         );
         return date.getTime() * 1000;
     }
@@ -1088,14 +1120,14 @@ class UploadService {
             latDegree,
             latMinute,
             latSecond,
-            latDirection,
+            latDirection
         );
 
         const lonFinal = this.convertDMSToDD(
             lonDegree,
             lonMinute,
             lonSecond,
-            lonDirection,
+            lonDirection
         );
         return { latitude: latFinal * 1.0, longitude: lonFinal * 1.0 };
     }

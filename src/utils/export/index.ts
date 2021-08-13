@@ -8,7 +8,7 @@ export const getExportRecordFileUID = (file: File) =>
 
 export const getExportPendingFiles = async (
     allFiles: File[],
-    exportRecord: ExportRecord,
+    exportRecord: ExportRecord
 ) => {
     const queuedFiles = new Set(exportRecord?.queuedFiles);
     const unExportedFiles = allFiles.filter((file) => {
@@ -21,7 +21,7 @@ export const getExportPendingFiles = async (
 
 export const getFilesUploadedAfterLastExport = async (
     allFiles: File[],
-    exportRecord: ExportRecord,
+    exportRecord: ExportRecord
 ) => {
     const exportedFiles = new Set(exportRecord?.exportedFiles);
     const unExportedFiles = allFiles.filter((file) => {
@@ -34,7 +34,7 @@ export const getFilesUploadedAfterLastExport = async (
 
 export const getExportFailedFiles = async (
     allFiles: File[],
-    exportRecord: ExportRecord,
+    exportRecord: ExportRecord
 ) => {
     const failedFiles = new Set(exportRecord?.failedFiles);
     const filesToExport = allFiles.filter((file) => {
@@ -53,7 +53,7 @@ export const dedupe = (files: any[]) => {
 
 export const getGoogleLikeMetadataFile = (
     uid: string,
-    metadata: MetadataObject,
+    metadata: MetadataObject
 ) => {
     const creationTime = metadata.creationTime / 1000000;
     const modificationTime = metadata.modificationTime / 1000000;
@@ -74,6 +74,6 @@ export const getGoogleLikeMetadataFile = (
             },
         },
         null,
-        2,
+        2
     );
 };

@@ -11,8 +11,8 @@ interface formValues {
     otp: string;
 }
 interface Props {
-    onSubmit: any
-    back: any
+    onSubmit: any;
+    back: any;
     buttonText: string;
 }
 
@@ -21,7 +21,7 @@ export default function VerifyTwoFactor(props: Props) {
     const otpInputRef = useRef(null);
     const submitForm = async (
         { otp }: formValues,
-        { setFieldError, resetForm }: FormikHelpers<formValues>,
+        { setFieldError, resetForm }: FormikHelpers<formValues>
     ) => {
         try {
             setWaiting(true);
@@ -36,7 +36,11 @@ export default function VerifyTwoFactor(props: Props) {
         setWaiting(false);
     };
 
-    const onChange = (otp: string, callback: Function, triggerSubmit: Function) => {
+    const onChange = (
+        otp: string,
+        callback: Function,
+        triggerSubmit: Function
+    ) => {
         callback(otp);
         if (otp.length === 6) {
             triggerSubmit(otp);
@@ -44,13 +48,14 @@ export default function VerifyTwoFactor(props: Props) {
     };
     return (
         <>
-            <p style={{ marginBottom: '30px' }}>enter the 6-digit code from your authenticator app.</p>
+            <p style={{ marginBottom: '30px' }}>
+                enter the 6-digit code from your authenticator app.
+            </p>
             <Formik<formValues>
                 initialValues={{ otp: '' }}
                 validateOnChange={false}
                 validateOnBlur={false}
-                onSubmit={submitForm}
-            >
+                onSubmit={submitForm}>
                 {({
                     values,
                     errors,
@@ -58,8 +63,13 @@ export default function VerifyTwoFactor(props: Props) {
                     handleSubmit,
                     submitForm,
                 }) => (
-                    <Form noValidate onSubmit={handleSubmit} style={{ width: '100%' }}>
-                        <Form.Group style={{ marginBottom: '32px' }} controlId="formBasicEmail">
+                    <Form
+                        noValidate
+                        onSubmit={handleSubmit}
+                        style={{ width: '100%' }}>
+                        <Form.Group
+                            style={{ marginBottom: '32px' }}
+                            controlId="formBasicEmail">
                             <DeadCenter>
                                 <OtpInput
                                     placeholder="123456"
@@ -67,16 +77,27 @@ export default function VerifyTwoFactor(props: Props) {
                                     shouldAutoFocus
                                     value={values.otp}
                                     onChange={(otp) => {
-                                        onChange(otp, handleChange('otp'), submitForm);
+                                        onChange(
+                                            otp,
+                                            handleChange('otp'),
+                                            submitForm
+                                        );
                                     }}
                                     numInputs={6}
                                     separator={'-'}
                                     isInputNum
                                     className={'otp-input'}
                                 />
-                                {errors.otp &&
-                                    <div style={{ display: 'block', marginTop: '16px' }} className="invalid-feedback">{constants.INCORRECT_CODE}</div>
-                                }
+                                {errors.otp && (
+                                    <div
+                                        style={{
+                                            display: 'block',
+                                            marginTop: '16px',
+                                        }}
+                                        className="invalid-feedback">
+                                        {constants.INCORRECT_CODE}
+                                    </div>
+                                )}
                             </DeadCenter>
                         </Form.Group>
                         <SubmitButton
@@ -87,10 +108,6 @@ export default function VerifyTwoFactor(props: Props) {
                     </Form>
                 )}
             </Formik>
-
-
         </>
     );
 }
-
-

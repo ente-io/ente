@@ -10,7 +10,7 @@ class MotionPhoto {
 
 export const decodeMotionPhoto = async (
     zipBlob: Blob,
-    originalName: string,
+    originalName: string
 ) => {
     const zip = await JSZip.loadAsync(zipBlob, { createFolders: true });
 
@@ -20,13 +20,13 @@ export const decodeMotionPhoto = async (
             motionPhoto.imageNameTitle =
                 originalName + fileExtensionWithDot(zipFilename);
             motionPhoto.image = await zip.files[zipFilename].async(
-                'uint8array',
+                'uint8array'
             );
         } else if (zipFilename.startsWith('video')) {
             motionPhoto.videoNameTitle =
                 originalName + fileExtensionWithDot(zipFilename);
             motionPhoto.video = await zip.files[zipFilename].async(
-                'uint8array',
+                'uint8array'
             );
         }
     }

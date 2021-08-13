@@ -36,7 +36,7 @@ export default function SignUp(props: SignUpProps) {
 
     const registerUser = async (
         { email, passphrase, confirm }: FormValues,
-        { setFieldError }: FormikHelpers<FormValues>,
+        { setFieldError }: FormikHelpers<FormValues>
     ) => {
         setLoading(true);
         try {
@@ -47,12 +47,13 @@ export default function SignUp(props: SignUpProps) {
         }
         try {
             if (passphrase === confirm) {
-                const { keyAttributes, masterKey } = await generateKeyAttributes(passphrase);
+                const { keyAttributes, masterKey } =
+                    await generateKeyAttributes(passphrase);
                 setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
                 await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
                     keyAttributes,
-                    masterKey,
+                    masterKey
                 );
 
                 await setSessionKeys(masterKey);
@@ -68,113 +69,110 @@ export default function SignUp(props: SignUpProps) {
         setLoading(false);
     };
 
-    return (<>
-        <Card.Title style={{ marginBottom: '32px' }}>
-            <LogoImg src="/icon.svg" />
-            {constants.SIGN_UP}
-        </Card.Title>
-        <Formik<FormValues>
-            initialValues={{
-                email: '',
-                passphrase: '',
-                confirm: '',
-            }}
-            validationSchema={Yup.object().shape({
-                email: Yup.string()
-                    .email(constants.EMAIL_ERROR)
-                    .required(constants.REQUIRED),
-                passphrase: Yup.string().required(
-                    constants.REQUIRED,
-                ),
-                confirm: Yup.string().required(constants.REQUIRED),
-            })}
-            validateOnChange={false}
-            validateOnBlur={false}
-            onSubmit={registerUser}
-        >
-            {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleSubmit,
-            }): JSX.Element => (
-                <Form noValidate onSubmit={handleSubmit}>
-                    <Form.Group controlId="registrationForm.email">
-                        <Form.Control
-                            type="email"
-                            placeholder={constants.ENTER_EMAIL}
-                            value={values.email}
-                            onChange={handleChange('email')}
-                            isInvalid={Boolean(
-                                touched.email && errors.email,
-                            )}
-                            autoFocus
-                            disabled={loading}
+    return (
+        <>
+            <Card.Title style={{ marginBottom: '32px' }}>
+                <LogoImg src="/icon.svg" />
+                {constants.SIGN_UP}
+            </Card.Title>
+            <Formik<FormValues>
+                initialValues={{
+                    email: '',
+                    passphrase: '',
+                    confirm: '',
+                }}
+                validationSchema={Yup.object().shape({
+                    email: Yup.string()
+                        .email(constants.EMAIL_ERROR)
+                        .required(constants.REQUIRED),
+                    passphrase: Yup.string().required(constants.REQUIRED),
+                    confirm: Yup.string().required(constants.REQUIRED),
+                })}
+                validateOnChange={false}
+                validateOnBlur={false}
+                onSubmit={registerUser}>
+                {({
+                    values,
+                    errors,
+                    touched,
+                    handleChange,
+                    handleSubmit,
+                }): JSX.Element => (
+                    <Form noValidate onSubmit={handleSubmit}>
+                        <Form.Group controlId="registrationForm.email">
+                            <Form.Control
+                                type="email"
+                                placeholder={constants.ENTER_EMAIL}
+                                value={values.email}
+                                onChange={handleChange('email')}
+                                isInvalid={Boolean(
+                                    touched.email && errors.email
+                                )}
+                                autoFocus
+                                disabled={loading}
+                            />
+                            <FormControl.Feedback type="invalid">
+                                {errors.email}
+                            </FormControl.Feedback>
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Control
+                                type="password"
+                                placeholder={constants.PASSPHRASE_HINT}
+                                value={values.passphrase}
+                                onChange={handleChange('passphrase')}
+                                isInvalid={Boolean(
+                                    touched.passphrase && errors.passphrase
+                                )}
+                                disabled={loading}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                {errors.passphrase}
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Control
+                                type="password"
+                                placeholder={constants.RE_ENTER_PASSPHRASE}
+                                value={values.confirm}
+                                onChange={handleChange('confirm')}
+                                isInvalid={Boolean(
+                                    touched.confirm && errors.confirm
+                                )}
+                                disabled={loading}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                {errors.confirm}
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group
+                            style={{
+                                marginBottom: '0',
+                                textAlign: 'left',
+                            }}
+                            controlId="formBasicCheckbox-1">
+                            <Form.Check
+                                checked={acceptTerms}
+                                onChange={(e) =>
+                                    setAcceptTerms(e.target.checked)
+                                }
+                                type="checkbox"
+                                label={constants.TERMS_AND_CONDITIONS()}
+                            />
+                        </Form.Group>
+                        <br />
+                        <SubmitButton
+                            buttonText={constants.SUBMIT}
+                            loading={loading}
+                            disabled={!acceptTerms}
                         />
-                        <FormControl.Feedback type="invalid">
-                            {errors.email}
-                        </FormControl.Feedback>
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Control
-                            type="password"
-                            placeholder={constants.PASSPHRASE_HINT}
-                            value={values.passphrase}
-                            onChange={handleChange('passphrase')}
-                            isInvalid={Boolean(
-                                touched.passphrase &&
-                                    errors.passphrase,
-                            )}
-                            disabled={loading}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            {errors.passphrase}
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Control
-                            type="password"
-                            placeholder={
-                                constants.RE_ENTER_PASSPHRASE
-                            }
-                            value={values.confirm}
-                            onChange={handleChange('confirm')}
-                            isInvalid={Boolean(
-                                touched.confirm && errors.confirm,
-                            )}
-                            disabled={loading}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            {errors.confirm}
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                    <Form.Group
-                        style={{
-                            marginBottom: '0',
-                            textAlign: 'left',
-                        }}
-                        controlId="formBasicCheckbox-1"
-                    >
-                        <Form.Check
-                            checked={acceptTerms}
-                            onChange={(e) => setAcceptTerms(e.target.checked)}
-                            type="checkbox"
-                            label={constants.TERMS_AND_CONDITIONS()}
-                        />
-                    </Form.Group>
-                    <br />
-                    <SubmitButton
-                        buttonText={constants.SUBMIT}
-                        loading={loading}
-                        disabled={!acceptTerms}
-                    />
-                    <br />
-                    <Button block variant="link" onClick={props.login}>
-                        {constants.ACCOUNT_EXISTS}
-                    </Button>
-                </Form>
-            )}
-        </Formik>
-    </>);
+                        <br />
+                        <Button block variant="link" onClick={props.login}>
+                            {constants.ACCOUNT_EXISTS}
+                        </Button>
+                    </Form>
+                )}
+            </Formik>
+        </>
+    );
 }

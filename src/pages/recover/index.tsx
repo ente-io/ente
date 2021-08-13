@@ -38,7 +38,7 @@ export default function Recover() {
             const masterKey: string = await cryptoWorker.decryptB64(
                 keyAttributes.masterKeyEncryptedWithRecoveryKey,
                 keyAttributes.masterKeyDecryptionNonce,
-                await cryptoWorker.fromHex(recoveryKey),
+                await cryptoWorker.fromHex(recoveryKey)
             );
             setSessionKeys(masterKey);
             router.push('/changePassword');
@@ -51,13 +51,10 @@ export default function Recover() {
     return (
         <>
             <Container>
-                <Card
-                    style={{ minWidth: '320px' }}
-                    className="text-center"
-                >
+                <Card style={{ minWidth: '320px' }} className="text-center">
                     <Card.Body style={{ padding: '40px 30px' }}>
                         <Card.Title style={{ marginBottom: '32px' }}>
-                            <LogoImg src='/icon.svg' />
+                            <LogoImg src="/icon.svg" />
                             {constants.RECOVER_ACCOUNT}
                         </Card.Title>
                         <SingleInputForm
@@ -71,12 +68,10 @@ export default function Recover() {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 marginTop: '12px',
-                            }}
-                        >
+                            }}>
                             <Button
                                 variant="link"
-                                onClick={() => SetMessageDialogView(true)}
-                            >
+                                onClick={() => SetMessageDialogView(true)}>
                                 {constants.NO_RECOVERY_KEY}
                             </Button>
                             <Button variant="link" onClick={router.back}>

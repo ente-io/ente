@@ -43,18 +43,18 @@ class DownloadManager {
             getThumbnailUrl(file.id),
             null,
             { 'X-Auth-Token': token },
-            { responseType: 'arraybuffer' },
+            { responseType: 'arraybuffer' }
         );
         const worker = await new CryptoWorker();
         const decrypted: any = await worker.decryptThumbnail(
             new Uint8Array(resp.data),
             await worker.fromB64(file.thumbnail.decryptionHeader),
-            file.key,
+            file.key
         );
         try {
             await cache.put(
                 file.id.toString(),
-                new Response(new Blob([decrypted])),
+                new Response(new Blob([decrypted]))
             );
         } catch (e) {
             // TODO: handle storage full exception.
@@ -71,11 +71,11 @@ class DownloadManager {
                 if (forPreview) {
                     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
                         const originalName = fileNameWithoutExtension(
-                            file.metadata.title,
+                            file.metadata.title
                         );
                         const motionPhoto = await decodeMotionPhoto(
                             fileBlob,
-                            originalName,
+                            originalName
                         );
                         fileBlob = new Blob([motionPhoto.image]);
                     }
@@ -85,7 +85,7 @@ class DownloadManager {
                 }
                 this.fileDownloads.set(
                     `${file.id}_${forPreview}`,
-                    URL.createObjectURL(fileBlob),
+                    URL.createObjectURL(fileBlob)
                 );
             }
             return this.fileDownloads.get(`${file.id}_${forPreview}`);
@@ -108,12 +108,12 @@ class DownloadManager {
                 getFileUrl(file.id),
                 null,
                 { 'X-Auth-Token': token },
-                { responseType: 'arraybuffer' },
+                { responseType: 'arraybuffer' }
             );
             const decrypted: any = await worker.decryptFile(
                 new Uint8Array(resp.data),
                 await worker.fromB64(file.file.decryptionHeader),
-                file.key,
+                file.key
             );
             return generateStreamFromArrayBuffer(decrypted);
         }
@@ -126,7 +126,7 @@ class DownloadManager {
         const stream = new ReadableStream({
             async start(controller) {
                 const decryptionHeader = await worker.fromB64(
-                    file.file.decryptionHeader,
+                    file.file.decryptionHeader
                 );
                 const fileKey = await worker.fromB64(file.key);
                 const { pullState, decryptionChunkSize } =
@@ -139,19 +139,19 @@ class DownloadManager {
                         // Is there more data to read?
                         if (!done) {
                             const buffer = new Uint8Array(
-                                data.byteLength + value.byteLength,
+                                data.byteLength + value.byteLength
                             );
                             buffer.set(new Uint8Array(data), 0);
                             buffer.set(new Uint8Array(value), data.byteLength);
                             if (buffer.length > decryptionChunkSize) {
                                 const fileData = buffer.slice(
                                     0,
-                                    decryptionChunkSize,
+                                    decryptionChunkSize
                                 );
                                 const { decryptedData } =
                                     await worker.decryptChunk(
                                         fileData,
-                                        pullState,
+                                        pullState
                                     );
                                 controller.enqueue(decryptedData);
                                 data = buffer.slice(decryptionChunkSize);

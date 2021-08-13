@@ -1,7 +1,17 @@
 import { FILE_TYPE } from 'pages/gallery';
 import { retryAsyncFunction, runningInBrowser } from 'utils/common';
-import { getExportPendingFiles, getExportFailedFiles, getFilesUploadedAfterLastExport, getExportRecordFileUID, dedupe, getGoogleLikeMetadataFile } from 'utils/export';
-import { fileNameWithoutExtension, generateStreamFromArrayBuffer } from 'utils/file';
+import {
+    getExportPendingFiles,
+    getExportFailedFiles,
+    getFilesUploadedAfterLastExport,
+    getExportRecordFileUID,
+    dedupe,
+    getGoogleLikeMetadataFile,
+} from 'utils/export';
+import {
+    fileNameWithoutExtension,
+    generateStreamFromArrayBuffer,
+} from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Collection, getLocalCollections } from './collectionService';
@@ -19,7 +29,7 @@ export interface ExportStats {
 }
 
 export interface ExportRecord {
-    stage: ExportStage
+    stage: ExportStage;
     lastAttemptTimestamp: number;
     progress: ExportProgress;
     queuedFiles: string[];
@@ -30,7 +40,7 @@ export enum ExportStage {
     INIT,
     INPROGRESS,
     PAUSED,
-    FINISHED
+    FINISHED,
 }
 
 enum ExportNotification {
@@ -40,26 +50,26 @@ enum ExportNotification {
     FAILED = 'export failed',
     ABORT = 'export aborted',
     PAUSE = 'export paused',
-    UP_TO_DATE = `no new files to export`
+    UP_TO_DATE = `no new files to export`,
 }
 
 enum RecordType {
     SUCCESS = 'success',
-    FAILED = 'failed'
+    FAILED = 'failed',
 }
 export enum ExportType {
     NEW,
     PENDING,
-    RETRY_FAILED
+    RETRY_FAILED,
 }
 
-const ExportRecordFileName='export_status.json';
-const MetadataFolderName='metadata';
+const ExportRecordFileName = 'export_status.json';
+const MetadataFolderName = 'metadata';
 
 class ExportService {
     ElectronAPIs: any;
 
-    private exportInProgress: Promise<{ paused: boolean; }> = null;
+    private exportInProgress: Promise<{ paused: boolean }> = null;
     private recordUpdateInProgress = Promise.resolve();
     private stopExport: boolean = false;
     private pauseExport: boolean = false;
@@ -76,7 +86,10 @@ class ExportService {
     pauseRunningExport() {
         this.pauseExport = true;
     }
-    async exportFiles(updateProgress: (progress: ExportProgress) => void, exportType: ExportType) {
+    async exportFiles(
+        updateProgress: (progress: ExportProgress) => void,
+        exportType: ExportType
+    ) {
         if (this.exportInProgress) {
             this.ElectronAPIs.sendNotification(ExportNotification.IN_PROGRESS);
             return this.exportInProgress;
@@ -93,22 +106,37 @@ class ExportService {
         const exportRecord = await this.getExportRecord(exportDir);
 
         if (exportType === ExportType.NEW) {
-            filesToExport = await getFilesUploadedAfterLastExport(allFiles, exportRecord);
+            filesToExport = await getFilesUploadedAfterLastExport(
+                allFiles,
+                exportRecord
+            );
         } else if (exportType === ExportType.RETRY_FAILED) {
             filesToExport = await getExportFailedFiles(allFiles, exportRecord);
         } else {
             filesToExport = await getExportPendingFiles(allFiles, exportRecord);
         }
-        this.exportInProgress = this.fileExporter(filesToExport, collections, updateProgress, exportDir);
+        this.exportInProgress = this.fileExporter(
+            filesToExport,
+            collections,
+            updateProgress,
+            exportDir
+        );
         const resp = await this.exportInProgress;
         this.exportInProgress = null;
         return resp;
     }
 
-    async fileExporter(files: File[], collections: Collection[], updateProgress: (progress: ExportProgress,) => void, dir: string): Promise<{ paused: boolean }> {
+    async fileExporter(
+        files: File[],
+        collections: Collection[],
+        updateProgress: (progress: ExportProgress) => void,
+        dir: string
+    ): Promise<{ paused: boolean }> {
         try {
             if (!files?.length) {
-                this.ElectronAPIs.sendNotification(ExportNotification.UP_TO_DATE);
+                this.ElectronAPIs.sendNotification(
+                    ExportNotification.UP_TO_DATE
+                );
                 return { paused: false };
             }
             this.stopExport = false;
@@ -117,22 +145,24 @@ class ExportService {
             const failedFileCount = 0;
 
             this.ElectronAPIs.showOnTray({
-                export_progress:
-                    `0 / ${files.length} files exported`,
+                export_progress: `0 / ${files.length} files exported`,
             });
             updateProgress({
-                current: 0, total: files.length,
+                current: 0,
+                total: files.length,
             });
             this.ElectronAPIs.sendNotification(ExportNotification.START);
 
             const collectionIDMap = new Map<number, string>();
             for (const collection of collections) {
-                const collectionFolderPath = `${dir}/${collection.id}_${this.sanitizeName(collection.name)}`;
+                const collectionFolderPath = `${dir}/${
+                    collection.id
+                }_${this.sanitizeName(collection.name)}`;
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
-                    collectionFolderPath,
+                    collectionFolderPath
                 );
                 await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
-                    `${collectionFolderPath}/${MetadataFolderName}`,
+                    `${collectionFolderPath}/${MetadataFolderName}`
                 );
                 collectionIDMap.set(collection.id, collectionFolderPath);
             }
@@ -140,8 +170,7 @@ class ExportService {
                 if (this.stopExport || this.pauseExport) {
                     if (this.pauseExport) {
                         this.ElectronAPIs.showOnTray({
-                            export_progress:
-                                `${index} / ${files.length} files exported (paused)`,
+                            export_progress: `${index} / ${files.length} files exported (paused)`,
                             paused: true,
                         });
                     }
@@ -150,39 +179,42 @@ class ExportService {
                 const collectionPath = collectionIDMap.get(file.collectionID);
                 try {
                     await this.downloadAndSave(file, collectionPath);
-                    await this.addFileExportRecord(dir, file, RecordType.SUCCESS);
+                    await this.addFileExportRecord(
+                        dir,
+                        file,
+                        RecordType.SUCCESS
+                    );
                 } catch (e) {
-                    await this.addFileExportRecord(dir, file, RecordType.FAILED);
-                    logError(e, 'download and save failed for file during export');
+                    await this.addFileExportRecord(
+                        dir,
+                        file,
+                        RecordType.FAILED
+                    );
+                    logError(
+                        e,
+                        'download and save failed for file during export'
+                    );
                 }
                 this.ElectronAPIs.showOnTray({
-                    export_progress:
-                        `${index + 1} / ${files.length} files exported`,
+                    export_progress: `${index + 1} / ${
+                        files.length
+                    } files exported`,
                 });
                 updateProgress({ current: index + 1, total: files.length });
             }
             if (this.stopExport) {
-                this.ElectronAPIs.sendNotification(
-                    ExportNotification.ABORT,
-                );
+                this.ElectronAPIs.sendNotification(ExportNotification.ABORT);
                 this.ElectronAPIs.showOnTray();
             } else if (this.pauseExport) {
-                this.ElectronAPIs.sendNotification(
-                    ExportNotification.PAUSE,
-                );
+                this.ElectronAPIs.sendNotification(ExportNotification.PAUSE);
                 return { paused: true };
             } else if (failedFileCount > 0) {
-                this.ElectronAPIs.sendNotification(
-                    ExportNotification.FAILED,
-                );
+                this.ElectronAPIs.sendNotification(ExportNotification.FAILED);
                 this.ElectronAPIs.showOnTray({
-                    retry_export:
-                        `export failed - retry export`,
+                    retry_export: `export failed - retry export`,
                 });
             } else {
-                this.ElectronAPIs.sendNotification(
-                    ExportNotification.FINISH,
-                );
+                this.ElectronAPIs.sendNotification(ExportNotification.FINISH);
                 this.ElectronAPIs.showOnTray();
             }
             return { paused: false };
@@ -199,13 +231,18 @@ class ExportService {
     async addFileExportRecord(folder: string, file: File, type: RecordType) {
         const fileUID = getExportRecordFileUID(file);
         const exportRecord = await this.getExportRecord(folder);
-        exportRecord.queuedFiles = exportRecord.queuedFiles.filter((queuedFilesUID) => queuedFilesUID !== fileUID);
+        exportRecord.queuedFiles = exportRecord.queuedFiles.filter(
+            (queuedFilesUID) => queuedFilesUID !== fileUID
+        );
         if (type === RecordType.SUCCESS) {
             if (!exportRecord.exportedFiles) {
                 exportRecord.exportedFiles = [];
             }
             exportRecord.exportedFiles.push(fileUID);
-            exportRecord.failedFiles && (exportRecord.failedFiles = exportRecord.failedFiles.filter((FailedFileUID) => FailedFileUID !== fileUID));
+            exportRecord.failedFiles &&
+                (exportRecord.failedFiles = exportRecord.failedFiles.filter(
+                    (FailedFileUID) => FailedFileUID !== fileUID
+                ));
         } else {
             if (!exportRecord.failedFiles) {
                 exportRecord.failedFiles = [];
@@ -229,7 +266,10 @@ class ExportService {
                 }
                 const exportRecord = await this.getExportRecord(folder);
                 const newRecord = { ...exportRecord, ...newData };
-                await this.ElectronAPIs.setExportRecord(`${folder}/${ExportRecordFileName}`, JSON.stringify(newRecord, null, 2));
+                await this.ElectronAPIs.setExportRecord(
+                    `${folder}/${ExportRecordFileName}`,
+                    JSON.stringify(newRecord, null, 2)
+                );
             } catch (e) {
                 logError(e, 'error updating Export Record');
             }
@@ -242,7 +282,9 @@ class ExportService {
             if (!folder) {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
             }
-            const recordFile = await this.ElectronAPIs.getExportRecord(`${folder}/${ExportRecordFileName}`);
+            const recordFile = await this.ElectronAPIs.getExportRecord(
+                `${folder}/${ExportRecordFileName}`
+            );
             if (recordFile) {
                 return JSON.parse(recordFile);
             } else {
@@ -253,37 +295,40 @@ class ExportService {
         }
     }
 
-    async downloadAndSave(file: File, collectionPath:string) {
-        const uid = `${file.id}_${this.sanitizeName(
-            file.metadata.title,
-        )}`;
-        const fileStream = await retryAsyncFunction(()=>downloadManager.downloadFile(file));
-        if (file.metadata.fileType===FILE_TYPE.LIVE_PHOTO) {
+    async downloadAndSave(file: File, collectionPath: string) {
+        const uid = `${file.id}_${this.sanitizeName(file.metadata.title)}`;
+        const fileStream = await retryAsyncFunction(() =>
+            downloadManager.downloadFile(file)
+        );
+        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             this.exportMotionPhoto(fileStream, file, collectionPath);
         } else {
-            this.ElectronAPIs.saveStreamToDisk(`${collectionPath}/${uid}`, fileStream);
+            this.ElectronAPIs.saveStreamToDisk(
+                `${collectionPath}/${uid}`,
+                fileStream
+            );
         }
         this.ElectronAPIs.saveFileToDisk(
             `${collectionPath}/${MetadataFolderName}/${uid}.json`,
-            getGoogleLikeMetadataFile(uid, file.metadata),
+            getGoogleLikeMetadataFile(uid, file.metadata)
         );
     }
 
     private async exportMotionPhoto(
         fileStream: ReadableStream<any>,
         file: File,
-        collectionPath: string,
+        collectionPath: string
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const originalName = fileNameWithoutExtension(file.metadata.title);
         const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
 
         const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
-        const imageSavePath=`${collectionPath}/${file.id}_${motionPhoto.imageNameTitle}`;
+        const imageSavePath = `${collectionPath}/${file.id}_${motionPhoto.imageNameTitle}`;
         this.ElectronAPIs.saveStreamToDisk(imageSavePath, imageStream);
 
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
-        const videoSavePath=`${collectionPath}/${file.id}_${motionPhoto.videoNameTitle}`;
+        const videoSavePath = `${collectionPath}/${file.id}_${motionPhoto.videoNameTitle}`;
         this.ElectronAPIs.saveStreamToDisk(videoSavePath, videoStream);
     }
 
@@ -293,6 +338,6 @@ class ExportService {
 
     isExportInProgress = () => {
         return this.exportInProgress !== null;
-    }
+    };
 }
 export default new ExportService();

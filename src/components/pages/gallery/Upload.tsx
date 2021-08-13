@@ -1,5 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
-import UploadService, { FileWithCollection, UPLOAD_STAGES } from 'services/uploadService';
+import UploadService, {
+    FileWithCollection,
+    UPLOAD_STAGES,
+} from 'services/uploadService';
 import { createAlbum } from 'services/collectionService';
 import { getLocalFiles } from 'services/fileService';
 import constants from 'utils/strings/constants';
@@ -25,8 +28,8 @@ interface Props {
     setDialogMessage: SetDialogMessage;
     setUploadInProgress: any;
     showCollectionSelector: () => void;
-    fileRejections:FileRejection[];
-    setFiles:SetFiles;
+    fileRejections: FileRejection[];
+    setFiles: SetFiles;
 }
 
 export enum UPLOAD_STRATEGY {
@@ -42,18 +45,22 @@ interface AnalysisResult {
 export default function Upload(props: Props) {
     const [progressView, setProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
-        UPLOAD_STAGES.START,
+        UPLOAD_STAGES.START
     );
     const [fileCounter, setFileCounter] = useState({ current: 0, total: 0 });
     const [fileProgress, setFileProgress] = useState(new Map<string, number>());
-    const [uploadResult, setUploadResult]=useState(new Map<string, number>());
+    const [uploadResult, setUploadResult] = useState(new Map<string, number>());
     const [percentComplete, setPercentComplete] = useState(0);
     const [choiceModalView, setChoiceModalView] = useState(false);
-    const [fileAnalysisResult, setFileAnalysisResult] = useState<AnalysisResult>(null);
+    const [fileAnalysisResult, setFileAnalysisResult] =
+        useState<AnalysisResult>(null);
     const appContext = useContext(AppContext);
 
     useEffect(() => {
-        if (props.acceptedFiles?.length > 0 || appContext.sharedFiles?.length > 0) {
+        if (
+            props.acceptedFiles?.length > 0 ||
+            appContext.sharedFiles?.length > 0
+        ) {
             props.setLoading(true);
 
             let fileAnalysisResult;
@@ -92,7 +99,7 @@ export default function Upload(props: Props) {
                 props.closeCollectionSelector();
                 await uploadFilesToNewCollections(
                     UPLOAD_STRATEGY.SINGLE_COLLECTION,
-                    collectionName,
+                    collectionName
                 );
             },
         });
@@ -121,7 +128,7 @@ export default function Upload(props: Props) {
         if (commonPathPrefix) {
             commonPathPrefix = commonPathPrefix.substr(
                 1,
-                commonPathPrefix.lastIndexOf('/') - 1,
+                commonPathPrefix.lastIndexOf('/') - 1
             );
         }
         return {
@@ -135,7 +142,7 @@ export default function Upload(props: Props) {
             const filePath = file['path'];
             const folderPath = filePath.substr(0, filePath.lastIndexOf('/'));
             const folderName = folderPath.substr(
-                folderPath.lastIndexOf('/') + 1,
+                folderPath.lastIndexOf('/') + 1
             );
             if (!collectionWiseFiles.has(folderName)) {
                 collectionWiseFiles.set(folderName, []);
@@ -148,10 +155,11 @@ export default function Upload(props: Props) {
     const uploadFilesToExistingCollection = async (collection) => {
         try {
             uploadInit();
-            const filesWithCollectionToUpload: FileWithCollection[] = props.acceptedFiles.map((file) => ({
-                file,
-                collection,
-            }));
+            const filesWithCollectionToUpload: FileWithCollection[] =
+                props.acceptedFiles.map((file) => ({
+                    file,
+                    collection,
+                }));
             await uploadFiles(filesWithCollectionToUpload);
         } catch (e) {
             logError(e, 'Failed to upload files to existing collections');
@@ -160,7 +168,7 @@ export default function Upload(props: Props) {
 
     const uploadFilesToNewCollections = async (
         strategy: UPLOAD_STRATEGY,
-        collectionName,
+        collectionName
     ) => {
         try {
             uploadInit();
@@ -197,13 +205,13 @@ export default function Upload(props: Props) {
     };
 
     const uploadFiles = async (
-        filesWithCollectionToUpload: FileWithCollection[],
+        filesWithCollectionToUpload: FileWithCollection[]
     ) => {
         try {
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
             await props.syncWithRemote(true, true);
-            const localFiles= await getLocalFiles();
+            const localFiles = await getLocalFiles();
             await UploadService.uploadFiles(
                 filesWithCollectionToUpload,
                 localFiles,
@@ -214,7 +222,7 @@ export default function Upload(props: Props) {
                     setFileProgress,
                     setUploadResult,
                 },
-                props.setFiles,
+                props.setFiles
             );
         } catch (err) {
             props.setBannerMessage(err.message);
@@ -226,13 +234,12 @@ export default function Upload(props: Props) {
             props.syncWithRemote();
         }
     };
-    const retryFailed = async (
-    ) => {
+    const retryFailed = async () => {
         try {
             props.setUploadInProgress(true);
             uploadInit();
             await props.syncWithRemote(true, true);
-            const localFiles= await getLocalFiles();
+            const localFiles = await getLocalFiles();
             await UploadService.retryFailedFiles(localFiles);
         } catch (err) {
             props.setBannerMessage(err.message);
@@ -244,14 +251,15 @@ export default function Upload(props: Props) {
         }
     };
 
-
     return (
         <>
             <ChoiceModal
                 show={choiceModalView}
                 onHide={() => setChoiceModalView(false)}
                 uploadFiles={uploadFilesToNewCollections}
-                showCollectionCreateModal={() => showCreateCollectionModal(fileAnalysisResult)}
+                showCollectionCreateModal={() =>
+                    showCreateCollectionModal(fileAnalysisResult)
+                }
             />
             <UploadProgress
                 now={percentComplete}

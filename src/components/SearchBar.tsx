@@ -97,7 +97,9 @@ export default function SearchBar(props: Props) {
     }, [props.isOpen]);
 
     useEffect(() => {
-        window.addEventListener('resize', () => setWindowWidth(window.innerWidth));
+        window.addEventListener('resize', () =>
+            setWindowWidth(window.innerWidth)
+        );
     });
     // = =========================
     // Functionality
@@ -119,18 +121,19 @@ export default function SearchBar(props: Props) {
                 type: SuggestionType.DATE,
                 value: searchedDate,
                 label: getFormattedDate(searchedDate),
-            })),
+            }))
         );
 
         const searchResults = await searchLocation(searchPhrase);
         option.push(
             ...searchResults.map(
-                (searchResult) => ({
-                    type: SuggestionType.LOCATION,
-                    value: searchResult.bbox,
-                    label: searchResult.place,
-                } as Suggestion),
-            ),
+                (searchResult) =>
+                    ({
+                        type: SuggestionType.LOCATION,
+                        value: searchResult.bbox,
+                        label: searchResult.place,
+                    } as Suggestion)
+            )
         );
         return option;
     };
@@ -174,7 +177,8 @@ export default function SearchBar(props: Props) {
     // UI
     // = =========================
 
-    const getIconByType = (type: SuggestionType) => (type === SuggestionType.DATE ? <DateIcon /> : <LocationIcon />);
+    const getIconByType = (type: SuggestionType) =>
+        type === SuggestionType.DATE ? <DateIcon /> : <LocationIcon />;
 
     const LabelWithIcon = (props: { type: SuggestionType; label: string }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -198,8 +202,7 @@ export default function SearchBar(props: Props) {
                 style={{
                     paddingLeft: '10px',
                     paddingBottom: '4px',
-                }}
-            >
+                }}>
                 {props.getValue().length === 0 || props.menuIsOpen ? (
                     <SearchIcon />
                 ) : props.getValue()[0].type === SuggestionType.DATE ? (
@@ -215,13 +218,13 @@ export default function SearchBar(props: Props) {
     const customStyles = {
         control: (style, { isFocused }) => ({
             ...style,
-            'backgroundColor': '#282828',
-            'color': '#d1d1d1',
-            'borderColor': isFocused ? '#2dc262' : '#444',
-            'boxShadow': 'none',
+            backgroundColor: '#282828',
+            color: '#d1d1d1',
+            borderColor: isFocused ? '#2dc262' : '#444',
+            boxShadow: 'none',
             ':hover': {
-                'borderColor': '#2dc262',
-                'cursor': 'text',
+                borderColor: '#2dc262',
+                cursor: 'text',
                 '&>.icon': { color: '#2dc262' },
             },
         }),
@@ -276,8 +279,7 @@ export default function SearchBar(props: Props) {
                         style={{
                             flex: 1,
                             margin: '10px',
-                        }}
-                    >
+                        }}>
                         <AsyncSelect
                             components={{
                                 Option: OptionWithIcon,
@@ -297,8 +299,7 @@ export default function SearchBar(props: Props) {
                         {props.isOpen && (
                             <div
                                 style={{ cursor: 'pointer' }}
-                                onClick={resetSearch}
-                            >
+                                onClick={resetSearch}>
                                 <CrossIcon />
                             </div>
                         )}
@@ -307,8 +308,7 @@ export default function SearchBar(props: Props) {
             ) : (
                 <SearchButton
                     isDisabled={props.isFirstFetch}
-                    onClick={() => !props.isFirstFetch && props.setOpen(true)}
-                >
+                    onClick={() => !props.isFirstFetch && props.setOpen(true)}>
                     <SearchIcon />
                 </SearchButton>
             )}
