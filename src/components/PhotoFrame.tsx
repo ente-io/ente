@@ -1,7 +1,6 @@
 import router from 'next/router';
 import {
     DeadCenter,
-    FILE_TYPE,
     GalleryContext,
     Search,
     SetFiles,
@@ -10,7 +9,7 @@ import {
 import PreviewCard from './pages/gallery/PreviewCard';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { File } from 'services/fileService';
+import { File, FILE_TYPE } from 'services/fileService';
 import styled from 'styled-components';
 import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';

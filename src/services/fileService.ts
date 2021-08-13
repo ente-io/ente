@@ -19,6 +19,13 @@ export interface fileAttribute {
     decryptionHeader: string;
 }
 
+export enum FILE_TYPE {
+    IMAGE,
+    VIDEO,
+    LIVE_PHOTO,
+    OTHERS,
+}
+
 export interface File {
     id: number;
     collectionID: number;

@@ -1,5 +1,4 @@
 import { runningInBrowser } from 'utils/common';
-import { FILE_TYPE } from 'pages/gallery';
 import {
     getExportPendingFiles,
     getExportFailedFiles,
@@ -13,7 +12,7 @@ import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { Collection, getLocalCollections } from './collectionService';
 import downloadManager from './downloadManager';
-import { File, getLocalFiles } from './fileService';
+import { File, FILE_TYPE, getLocalFiles } from './fileService';
 import { decodeMotionPhoto } from './motionPhotoService';
 import {
     fileNameWithoutExtension,

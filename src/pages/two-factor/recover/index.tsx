@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import CryptoWorker from 'utils/crypto';
+import CryptoWorker, { B64EncryptionResult } from 'utils/crypto';
 import SingleInputForm from 'components/SingleInputForm';
 import MessageDialog from 'components/MessageDialog';
 import Container from 'components/Container';
 import { Card, Button } from 'react-bootstrap';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
-import { B64EncryptionResult } from 'services/upload/uploadService';
 import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
 
 export default function Recover() {

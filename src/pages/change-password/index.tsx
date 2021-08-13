@@ -2,10 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { B64EncryptionResult } from 'services/upload/uploadService';
 import CryptoWorker, {
     setSessionKeys,
     generateAndSaveIntermediateKeyAttributes,
+    B64EncryptionResult,
 } from 'utils/crypto';
 import { getActualKey } from 'utils/common/key';
 import { setKeys, UpdatedKey } from 'services/userService';
