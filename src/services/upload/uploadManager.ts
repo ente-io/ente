@@ -161,7 +161,7 @@ class UploadManager {
             const existingFilesInCollection =
                 this.existingFilesCollectionWise.get(
                     fileWithCollection.collectionID
-                );
+                ) ?? [];
             const collection = this.collections.get(
                 fileWithCollection.collectionID
             );

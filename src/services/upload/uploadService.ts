@@ -108,9 +108,10 @@ class UploadService {
             );
 
             const originalName = getFileOriginalName(rawFile);
-            const googleMetadata = this.metadataMap.get(
-                getMetadataKey(collection.id, originalName)
-            );
+            const googleMetadata =
+                this.metadataMap.get(
+                    getMetadataKey(collection.id, originalName)
+                ) ?? {};
             const extractedMetadata: MetadataObject = await extractMetatdata(
                 reader,
                 rawFile,
