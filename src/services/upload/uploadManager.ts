@@ -35,7 +35,7 @@ export enum FileUploadResults {
 export interface FileWithCollection {
     file: globalThis.File;
     collectionID?: number;
-    collection: Collection;
+    collection?: Collection;
 }
 
 export enum UPLOAD_STAGES {
