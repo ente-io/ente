@@ -1,4 +1,4 @@
-import { fileAttribute } from '../fileService';
+import { fileAttribute, FILE_TYPE } from '../fileService';
 import { Collection } from '../collectionService';
 import { logError } from 'utils/sentry';
 import NetworkClient from './networkClient';

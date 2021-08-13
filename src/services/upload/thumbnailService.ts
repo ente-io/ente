@@ -1,3 +1,4 @@
+import { FILE_TYPE } from 'services/fileService';
 import { CustomError } from 'utils/common/errorUtil';
 import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';
