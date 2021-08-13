@@ -1,4 +1,7 @@
-import { CHUNKS_COMBINED_FOR_A_UPLOAD_PART, DataStream } from './uploadService';
+import {
+    FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
+    DataStream,
+} from './uploadService';
 import UploadHttpClient from './uploadHttpClient';
 import * as convert from 'xml-js';
 import UIService, { RANDOM_PERCENTAGE_PROGRESS_FOR_PUT } from './uiService';
@@ -15,7 +18,9 @@ export interface MultipartUploadURLs {
 }
 
 function calculatePartCount(chunkCount: number) {
-    const partCount = Math.ceil(chunkCount / CHUNKS_COMBINED_FOR_A_UPLOAD_PART);
+    const partCount = Math.ceil(
+        chunkCount / FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART
+    );
     return partCount;
 }
 export async function uploadStreamUsingMultipart(
@@ -78,7 +83,7 @@ async function combineChunksToFormUploadPart(
     streamReader: ReadableStreamDefaultReader<Uint8Array>
 ) {
     const combinedChunks = [];
-    for (let i = 0; i < CHUNKS_COMBINED_FOR_A_UPLOAD_PART; i++) {
+    for (let i = 0; i < FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART; i++) {
         const { done, value: chunk } = await streamReader.read();
         if (done) {
             break;

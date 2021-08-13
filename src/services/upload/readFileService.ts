@@ -1,7 +1,6 @@
 import { FILE_TYPE } from 'services/fileService';
-import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { logError } from 'utils/sentry';
-import { MIN_STREAM_FILE_SIZE } from './uploadService';
+import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from './uploadService';
 
 const TYPE_VIDEO = 'video';
 const TYPE_HEIC = 'HEIC';
@@ -9,8 +8,8 @@ export const TYPE_IMAGE = 'image';
 const EDITED_FILE_SUFFIX = '-edited';
 
 export async function getFileData(reader: FileReader, file: globalThis.File) {
-    if (file.size > MIN_STREAM_FILE_SIZE) {
-        return getFileStream(reader, file, ENCRYPTION_CHUNK_SIZE);
+    if (file.size > MULTIPART_PART_SIZE) {
+        return getFileStream(reader, file, FILE_READER_CHUNK_SIZE);
     } else {
         await getUint8ArrayView(reader, file);
     }

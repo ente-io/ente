@@ -20,9 +20,13 @@ import UIService from './uiService';
 import { parseError } from 'utils/common/errorUtil';
 import { MetadataMap } from './uploadManager';
 
-export const MIN_STREAM_FILE_SIZE = 20 * 1024 * 1024;
-export const CHUNKS_COMBINED_FOR_A_UPLOAD_PART = Math.floor(
-    MIN_STREAM_FILE_SIZE / ENCRYPTION_CHUNK_SIZE
+// this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
+export const MULTIPART_PART_SIZE = 20 * 1024 * 1024;
+
+export const FILE_READER_CHUNK_SIZE = ENCRYPTION_CHUNK_SIZE;
+
+export const FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART = Math.floor(
+    MULTIPART_PART_SIZE / FILE_READER_CHUNK_SIZE
 );
 
 export interface UploadURL {
