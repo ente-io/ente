@@ -1,5 +1,4 @@
 import { KEK } from 'pages/generate';
-import { B64EncryptionResult } from 'services/uploadService';
 import { KeyAttributes } from 'types';
 import * as Comlink from 'comlink';
 import { runningInBrowser } from 'utils/common';
@@ -12,6 +11,12 @@ import { logError } from 'utils/sentry';
 export interface ComlinkWorker {
     comlink: any;
     worker: Worker;
+}
+
+export interface B64EncryptionResult {
+    encryptedData: string;
+    key: string;
+    nonce: string;
 }
 
 export const getDedicatedCryptoWorker = (): ComlinkWorker => {

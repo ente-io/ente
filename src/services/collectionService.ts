@@ -7,7 +7,7 @@ import CryptoWorker from 'utils/crypto';
 import { SetDialogMessage } from 'components/MessageDialog';
 import constants from 'utils/strings/constants';
 import { getPublicKey, User } from './userService';
-import { B64EncryptionResult } from './uploadService';
+import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
 import { File } from './fileService';
 import { logError } from 'utils/sentry';

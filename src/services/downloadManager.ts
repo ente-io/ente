@@ -8,9 +8,8 @@ import {
     generateStreamFromArrayBuffer,
 } from 'utils/file';
 import HTTPService from './HTTPService';
-import { File } from './fileService';
+import { File, FILE_TYPE } from './fileService';
 import { logError } from 'utils/sentry';
-import { FILE_TYPE } from 'pages/gallery';
 import { decodeMotionPhoto } from './motionPhotoService';
 
 class DownloadManager {

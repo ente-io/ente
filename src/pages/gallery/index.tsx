@@ -62,13 +62,6 @@ import Collections from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
 
-export enum FILE_TYPE {
-    IMAGE,
-    VIDEO,
-    LIVE_PHOTO,
-    OTHERS,
-}
-
 export const DeadCenter = styled.div`
     flex: 1;
     display: flex;
