@@ -6,7 +6,7 @@ import { UploadFile, UploadURL } from './uploadService';
 import { File } from '../fileService';
 import { CustomError } from 'utils/common/errorUtil';
 import { retryAsyncFunction } from 'utils/network';
-import { MultipartUploadURLs } from './s3Service';
+import { MultipartUploadURLs } from './multiPartUploadService';
 
 const ENDPOINT = getEndpoint();
 const MAX_URL_REQUESTS = 50;

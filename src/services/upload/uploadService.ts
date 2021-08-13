@@ -15,7 +15,7 @@ import {
 } from './readFileService';
 import { encryptFiledata } from './encryptionService';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
-import { uploadStreamUsingMultipart } from './s3Service';
+import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { parseError } from 'utils/common/errorUtil';
 import { MetadataMap } from './uploadManager';
