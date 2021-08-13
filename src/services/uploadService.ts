@@ -1,9 +1,9 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from './HTTPService';
 import EXIF from 'exif-js';
-import { File, fileAttribute } from './fileService';
+import { File, fileAttribute, FILE_TYPE } from './fileService';
 import { Collection } from './collectionService';
-import { FILE_TYPE, SetFiles } from 'pages/gallery';
+import { SetFiles } from 'pages/gallery';
 import { retryAsyncFunction, sleep } from 'utils/common';
 import { handleError, parseError, CustomError } from 'utils/common/errorUtil';
 import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';

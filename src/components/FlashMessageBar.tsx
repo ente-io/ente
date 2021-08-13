@@ -12,7 +12,7 @@ export default function FlashMessageBar({
     return (
         <Alert
             className="flash-message text-center"
-            variant={flashMessage.severity}
+            variant={flashMessage.type}
             dismissible
             onClose={onClose}>
             <div style={{ maxWidth: '1024px', width: '80%', margin: 'auto' }}>
