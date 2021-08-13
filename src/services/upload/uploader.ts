@@ -37,6 +37,7 @@ export default async function uploader(
         if (fileAlreadyInCollection(existingFilesInCollection, file)) {
             // set progress to -2 indicating that file upload was skipped
             UIService.setFileProgress(rawFile.name, FileUploadResults.SKIPPED);
+            // wait two second before removing the file from the progress in file section
             await sleep(TwoSecondInMillSeconds);
             return { fileUploadResult: FileUploadResults.SKIPPED };
         }
