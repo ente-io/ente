@@ -136,7 +136,7 @@ export async function decryptFile(file: File, collection: Collection) {
     return file;
 }
 
-export function removeUnneccessaryFileProps(files: File[]): File[] {
+export function removeUnnecessaryFileProps(files: File[]): File[] {
     const stripedFiles = files.map((file) => {
         delete file.src;
         delete file.msrc;

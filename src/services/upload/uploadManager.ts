@@ -5,7 +5,7 @@ import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
 import {
     sortFilesIntoCollections,
     sortFiles,
-    removeUnneccessaryFileProps,
+    removeUnnecessaryFileProps,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
@@ -77,13 +77,13 @@ class UploadManager {
     }
 
     public async queueFilesForUpload(
-        fileWithCollectionTobeUploaded: FileWithCollection[],
+        fileWithCollectionToBeUploaded: FileWithCollection[],
         newCreatedCollections?: Collection[]
     ) {
         try {
             await this.init(newCreatedCollections);
             const { metadataFiles, mediaFiles } = segregateFiles(
-                fileWithCollectionTobeUploaded
+                fileWithCollectionToBeUploaded
             );
             if (metadataFiles.length) {
                 UIService.setUploadStage(
@@ -129,8 +129,8 @@ class UploadManager {
                 }
             }
         } catch (e) {
-            logError(e, 'error seeding Metadatamap');
-            // silenty ignore the error
+            logError(e, 'error seeding MetadataMap');
+            // silently ignore the error
         }
     }
 
@@ -182,7 +182,7 @@ class UploadManager {
                 this.existingFiles = sortFiles(this.existingFiles);
                 await localForage.setItem(
                     'files',
-                    removeUnneccessaryFileProps(this.existingFiles)
+                    removeUnnecessaryFileProps(this.existingFiles)
                 );
                 this.setFiles(this.existingFiles);
             }
