@@ -76,7 +76,7 @@ enum PLAN_PERIOD {
 }
 function PlanSelector(props: Props) {
     const subscription: Subscription = getUserSubscription();
-    const [plans, setPlans] = useState(null);
+    const [plans, setPlans] = useState<Plan[]>(null);
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
     const togglePeriod = () => {
         setPlanPeriod((prevPeriod) =>
@@ -95,7 +95,11 @@ function PlanSelector(props: Props) {
                     plans.filter((plan) =>
                         isUserSubscribedPlan(plan, subscription)
                     ).length === 0;
-                if (!isOnFreePlan(subscription) && planNotListed) {
+                if (
+                    subscription &&
+                    !isOnFreePlan(subscription) &&
+                    planNotListed
+                ) {
                     plans = [planForSubscription(subscription), ...plans];
                 }
                 setPlans(plans);
