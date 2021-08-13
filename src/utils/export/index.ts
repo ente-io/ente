@@ -55,18 +55,18 @@ export const getGoogleLikeMetadataFile = (
     uid: string,
     metadata: MetadataObject
 ) => {
-    const creationTime = metadata.creationTime / 1000000;
-    const modificationTime = metadata.modificationTime / 1000000;
+    const creationTime = Math.floor(metadata.creationTime / 1000000);
+    const modificationTime = Math.floor(metadata.modificationTime / 1000000);
     return JSON.stringify(
         {
             title: uid,
             creationTime: {
                 timestamp: creationTime,
-                formatted: formatDate(creationTime),
+                formatted: formatDate(creationTime * 1000),
             },
             modificationTime: {
                 timestamp: modificationTime,
-                formatted: formatDate(modificationTime),
+                formatted: formatDate(modificationTime * 1000),
             },
             geoData: {
                 latitude: metadata.latitude,
