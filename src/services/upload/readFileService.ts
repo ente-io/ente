@@ -9,9 +9,11 @@ export const TYPE_IMAGE = 'image';
 const EDITED_FILE_SUFFIX = '-edited';
 
 export async function getFileData(reader: FileReader, file: globalThis.File) {
-    return file.size > MIN_STREAM_FILE_SIZE
-        ? getFileStream(reader, file)
-        : await getUint8ArrayView(reader, file);
+    if (file.size > MIN_STREAM_FILE_SIZE) {
+        return getFileStream(reader, file, ENCRYPTION_CHUNK_SIZE);
+    } else {
+        await getUint8ArrayView(reader, file);
+    }
 }
 
 export function getFileType(receivedFile: globalThis.File) {
@@ -50,33 +52,41 @@ export function getFileOriginalName(file: globalThis.File) {
     return originalName;
 }
 
-function getFileStream(reader: FileReader, file: globalThis.File) {
-    const fileChunkReader = fileChunkReaderMaker(reader, file);
+function getFileStream(
+    reader: FileReader,
+    file: globalThis.File,
+    chunkSize: number
+) {
+    const fileChunkReader = fileChunkReaderMaker(reader, file, chunkSize);
+
+    const stream = new ReadableStream<Uint8Array>({
+        async pull(controller: ReadableStreamDefaultController) {
+            const chunk = await fileChunkReader.next();
+            if (chunk.done) {
+                controller.close();
+            } else {
+                controller.enqueue(chunk.value);
+            }
+        },
+    });
+    const chunkCount = Math.ceil(file.size / chunkSize);
     return {
-        stream: new ReadableStream<Uint8Array>({
-            async pull(controller: ReadableStreamDefaultController) {
-                const chunk = await fileChunkReader.next();
-                if (chunk.done) {
-                    controller.close();
-                } else {
-                    controller.enqueue(chunk.value);
-                }
-            },
-        }),
-        chunkCount: Math.ceil(file.size / ENCRYPTION_CHUNK_SIZE),
+        stream,
+        chunkCount,
     };
 }
 
 async function* fileChunkReaderMaker(
     reader: FileReader,
-    file: globalThis.File
+    file: globalThis.File,
+    chunkSize: number
 ) {
     let offset = 0;
     while (offset < file.size) {
-        const blob = file.slice(offset, ENCRYPTION_CHUNK_SIZE + offset);
+        const blob = file.slice(offset, chunkSize + offset);
         const fileChunk = await getUint8ArrayView(reader, blob);
         yield fileChunk;
-        offset += ENCRYPTION_CHUNK_SIZE;
+        offset += chunkSize;
     }
     return null;
 }
