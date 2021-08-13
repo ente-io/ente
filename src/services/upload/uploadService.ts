@@ -17,7 +17,7 @@ import { encryptFiledata } from './encryptionService';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
-import { parseError } from 'utils/common/errorUtil';
+import { CustomError, parseError } from 'utils/common/errorUtil';
 import { MetadataMap } from './uploadManager';
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
@@ -102,8 +102,10 @@ class UploadService {
         rawFile: globalThis.File,
         collection: Collection
     ): Promise<FileInMemory> {
-        const fileType = getFileType(rawFile);
-
+        const fileType = await getFileType(reader, rawFile);
+        if (fileType === FILE_TYPE.OTHERS) {
+            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+        }
         const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
             reader,
             rawFile,

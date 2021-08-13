@@ -4,7 +4,6 @@ import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from './readFileService';
 
-export const TYPE_IMAGE = 'image';
 const THUMBNAIL_HEIGHT = 720;
 const MAX_ATTEMPTS = 3;
 const MIN_THUMBNAIL_SIZE = 50000;

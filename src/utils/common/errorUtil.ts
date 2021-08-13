@@ -15,6 +15,7 @@ export const CustomError = {
     KEY_MISSING: 'encrypted key missing from localStorage',
     FAILED_TO_LOAD_WEB_WORKER: 'failed to load web worker',
     CHUNK_MORE_THAN_EXPECTED: 'chunks more than expected',
+    UNSUPPORTED_FILE_FORMAT: 'unsupported file formats',
 };
 
 export function parseError(error) {

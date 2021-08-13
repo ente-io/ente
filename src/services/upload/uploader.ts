@@ -70,12 +70,25 @@ export default async function uploader(
     } catch (e) {
         logError(e, 'file upload failed');
         handleError(e);
-        if (e.message === CustomError.ETAG_MISSING) {
-            UIService.setFileProgress(rawFile.name, FileUploadResults.BLOCKED);
-            return { fileUploadResult: FileUploadResults.BLOCKED };
-        } else {
-            UIService.setFileProgress(rawFile.name, FileUploadResults.FAILED);
-            return { fileUploadResult: FileUploadResults.FAILED };
+        switch (e.message) {
+            case CustomError.ETAG_MISSING:
+                UIService.setFileProgress(
+                    rawFile.name,
+                    FileUploadResults.BLOCKED
+                );
+                return { fileUploadResult: FileUploadResults.BLOCKED };
+            case CustomError.UNSUPPORTED_FILE_FORMAT:
+                UIService.setFileProgress(
+                    rawFile.name,
+                    FileUploadResults.UNSUPPORTED
+                );
+                return { fileUploadResult: FileUploadResults.UNSUPPORTED };
+            default:
+                UIService.setFileProgress(
+                    rawFile.name,
+                    FileUploadResults.FAILED
+                );
+                return { fileUploadResult: FileUploadResults.FAILED };
         }
     } finally {
         file = null;

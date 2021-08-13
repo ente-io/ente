@@ -1,11 +1,13 @@
 import { FILE_TYPE } from 'services/fileService';
 import { logError } from 'utils/sentry';
 import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from './uploadService';
+import FileType, { FileTypeResult } from 'file-type/browser';
 
 const TYPE_VIDEO = 'video';
-const TYPE_HEIC = 'HEIC';
-export const TYPE_IMAGE = 'image';
+const TYPE_HEIC = 'heic';
+const TYPE_IMAGE = 'image';
 const EDITED_FILE_SUFFIX = '-edited';
+const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
 
 export async function getFileData(reader: FileReader, file: globalThis.File) {
     if (file.size > MULTIPART_PART_SIZE) {
@@ -15,10 +17,13 @@ export async function getFileData(reader: FileReader, file: globalThis.File) {
     }
 }
 
-export function getFileType(receivedFile: globalThis.File) {
+export async function getFileType(
+    reader: FileReader,
+    receivedFile: globalThis.File
+) {
     let fileType: FILE_TYPE;
-    const mimeType = receivedFile.type;
-    const majorType = mimeType.split('/')[0];
+    const mimeType = await getMimeType(reader, receivedFile);
+    const majorType = mimeType.split('/')[0].toLowerCase();
     switch (majorType) {
         case TYPE_IMAGE:
             fileType = FILE_TYPE.IMAGE;
@@ -32,7 +37,7 @@ export function getFileType(receivedFile: globalThis.File) {
     if (
         fileType === FILE_TYPE.OTHERS &&
         receivedFile.type.length === 0 &&
-        receivedFile.name.endsWith(TYPE_HEIC)
+        receivedFile.name.toLowerCase().endsWith(TYPE_HEIC)
     ) {
         fileType = FILE_TYPE.IMAGE;
     }
@@ -53,6 +58,14 @@ export function getFileOriginalName(file: globalThis.File) {
         originalName = file.name;
     }
     return originalName;
+}
+
+async function getMimeType(reader: FileReader, file: globalThis.File) {
+    let result: FileTypeResult = null;
+    const fileChunkBlob = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
+    const initialFiledata = await getUint8ArrayView(reader, fileChunkBlob);
+    result = await FileType.fromBuffer(initialFiledata);
+    return result.mime;
 }
 
 function getFileStream(
