@@ -13,7 +13,7 @@ export async function getFileData(reader: FileReader, file: globalThis.File) {
     if (file.size > MULTIPART_PART_SIZE) {
         return getFileStream(reader, file, FILE_READER_CHUNK_SIZE);
     } else {
-        await getUint8ArrayView(reader, file);
+        return await getUint8ArrayView(reader, file);
     }
 }
 
@@ -23,7 +23,7 @@ export async function getFileType(
 ) {
     let fileType: FILE_TYPE;
     const mimeType = await getMimeType(reader, receivedFile);
-    const majorType = mimeType.split('/')[0].toLowerCase();
+    const majorType = mimeType?.split('/')[0].toLowerCase();
     switch (majorType) {
         case TYPE_IMAGE:
             fileType = FILE_TYPE.IMAGE;
@@ -65,7 +65,7 @@ async function getMimeType(reader: FileReader, file: globalThis.File) {
     const fileChunkBlob = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
     const initialFiledata = await getUint8ArrayView(reader, fileChunkBlob);
     result = await FileType.fromBuffer(initialFiledata);
-    return result.mime;
+    return result?.mime;
 }
 
 function getFileStream(
