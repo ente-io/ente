@@ -18,7 +18,7 @@ export async function generateThumbnail(
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
         let hasStaticThumbnail = false;
-        let canvas = null;
+        let canvas = document.createElement('canvas');
         try {
             if (fileType === FILE_TYPE.IMAGE) {
                 canvas = await generateImageThumbnail(file);
