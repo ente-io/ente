@@ -17,7 +17,7 @@ import VerifyTwoFactor from 'components/VerifyTwoFactor';
 import { B64EncryptionResult } from 'utils/crypto';
 import { encryptWithRecoveryKey } from 'utils/crypto';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
-import { AppContext } from 'pages/_app';
+import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 
 enum SetupMode {
     QR_CODE,
@@ -56,7 +56,7 @@ export default function SetupTwoFactor() {
             } catch (e) {
                 appContext.setDisappearingFlashMessage({
                     message: constants.TWO_FACTOR_SETUP_FAILED,
-                    severity: 'danger',
+                    type: FLASH_MESSAGE_TYPE.DANGER,
                 });
                 router.push('/gallery');
             }
@@ -71,7 +71,7 @@ export default function SetupTwoFactor() {
         });
         appContext.setDisappearingFlashMessage({
             message: constants.TWO_FACTOR_SETUP_SUCCESS,
-            severity: 'info',
+            type: FLASH_MESSAGE_TYPE.SUCCESS,
         });
         router.push('/gallery');
     };

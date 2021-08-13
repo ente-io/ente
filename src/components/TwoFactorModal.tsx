@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { DeadCenter, SetLoading } from 'pages/gallery';
-import { AppContext } from 'pages/_app';
+import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, Row } from 'react-bootstrap';
 import { disableTwoFactor, getTwoFactorStatus } from 'services/userService';
@@ -63,12 +63,12 @@ function TwoFactorModal(props: Props) {
             props.closeSidebar();
             appContext.setDisappearingFlashMessage({
                 message: constants.TWO_FACTOR_DISABLE_SUCCESS,
-                severity: 'info',
+                type: FLASH_MESSAGE_TYPE.INFO,
             });
         } catch (e) {
             appContext.setDisappearingFlashMessage({
                 message: constants.TWO_FACTOR_DISABLE_FAILED,
-                severity: 'danger',
+                type: FLASH_MESSAGE_TYPE.DANGER,
             });
         }
     };

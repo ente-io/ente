@@ -404,9 +404,15 @@ type AppContextType = {
     setDisappearingFlashMessage: (message: FlashMessage) => void;
 };
 
+export enum FLASH_MESSAGE_TYPE {
+    DANGER = 'danger',
+    INFO = 'info',
+    SUCCESS = 'success',
+    WARNING = 'warning',
+}
 export interface FlashMessage {
     message: string;
-    severity: string;
+    type: FLASH_MESSAGE_TYPE;
 }
 export const AppContext = createContext<AppContextType>(null);
 
