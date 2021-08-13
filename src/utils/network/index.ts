@@ -1,6 +1,6 @@
 import { sleep } from 'utils/common';
 
-const retrySleepTime = [2000, 5000, 10000];
+const retrySleepTimeInMilliSeconds = [2000, 5000, 10000];
 
 export async function retryAsyncFunction(
     func: () => Promise<any>,
@@ -11,7 +11,7 @@ export async function retryAsyncFunction(
         return resp;
     } catch (e) {
         if (retryCount > 0) {
-            await sleep(retrySleepTime[3 - retryCount]);
+            await sleep(retrySleepTimeInMilliSeconds[3 - retryCount]);
             await retryAsyncFunction(func, retryCount - 1);
         } else {
             throw e;
