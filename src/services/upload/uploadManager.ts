@@ -116,7 +116,7 @@ class UploadManager {
                     fileWithCollection.file
                 );
                 if (parsedMetaDataJSONWithTitle) {
-                    const { title, ...parsedMetaDataJSON } =
+                    const { title, parsedMetaDataJSON } =
                         parsedMetaDataJSONWithTitle;
                     this.metadataMap.set(
                         getMetadataKey(fileWithCollection.collectionID, title),

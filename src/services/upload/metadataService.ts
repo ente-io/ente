@@ -9,17 +9,19 @@ export interface Location {
 }
 
 export interface ParsedMetaDataJSON {
-    title?: string;
     creationTime: number;
     modificationTime: number;
     latitude: number;
     longitude: number;
 }
+interface ParsedMetaDataJSONWithTitle {
+    title: string;
+    parsedMetaDataJSON: ParsedMetaDataJSON;
+}
 
 export const NULL_LOCATION: Location = { latitude: null, longitude: null };
 
 const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
-    title: null,
     creationTime: null,
     modificationTime: null,
     ...NULL_LOCATION,
@@ -72,7 +74,7 @@ export async function parseMetadataJSON(receivedFile: globalThis.File) {
             return;
         }
 
-        parsedMetaDataJSON.title = metadataJSON['title'];
+        const title = metadataJSON['title'];
         if (
             metadataJSON['photoTakenTime'] &&
             metadataJSON['photoTakenTime']['timestamp']
@@ -111,7 +113,7 @@ export async function parseMetadataJSON(receivedFile: globalThis.File) {
             parsedMetaDataJSON.latitude = locationData.latitude;
             parsedMetaDataJSON.longitude = locationData.longitude;
         }
-        return parsedMetaDataJSON;
+        return { title, parsedMetaDataJSON } as ParsedMetaDataJSONWithTitle;
     } catch (e) {
         logError(e);
         // ignore
