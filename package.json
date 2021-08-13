@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
-    "esfix": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
     "build": "next build",
     "build-analyze": "ANALYZE=true next build",
     "postbuild": "next export",
@@ -85,6 +84,6 @@
     "parser": "babel-eslint"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx}": ["eslint","prettier --write --ignore-unknown"]
+    "src/**/*.{js,jsx,ts,tsx}": ["eslint --fix","prettier --write --ignore-unknown"]
   }
 }
