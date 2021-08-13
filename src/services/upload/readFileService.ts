@@ -4,7 +4,6 @@ import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from './uploadService';
 import FileType, { FileTypeResult } from 'file-type/browser';
 
 const TYPE_VIDEO = 'video';
-const TYPE_HEIC = 'heic';
 const TYPE_IMAGE = 'image';
 const EDITED_FILE_SUFFIX = '-edited';
 const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
@@ -33,13 +32,6 @@ export async function getFileType(
             break;
         default:
             fileType = FILE_TYPE.OTHERS;
-    }
-    if (
-        fileType === FILE_TYPE.OTHERS &&
-        receivedFile.type.length === 0 &&
-        receivedFile.name.toLowerCase().endsWith(TYPE_HEIC)
-    ) {
-        fileType = FILE_TYPE.IMAGE;
     }
     return fileType;
 }
