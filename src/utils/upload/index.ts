@@ -1,10 +1,10 @@
 import { FileWithCollection } from 'services/upload/uploadManager';
 import { FileInMemory, MetadataObject } from 'services/upload/uploadService';
-
+import { File } from 'services/fileService';
 const TYPE_JSON = 'json';
 
 export function fileAlreadyInCollection(
-    existingFilesInCollection,
+    existingFilesInCollection: File[],
     newFile: FileInMemory
 ): boolean {
     for (const existingFile of existingFilesInCollection) {
