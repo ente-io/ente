@@ -13,6 +13,7 @@ export const CustomError = {
     VIDEO_PLAYBACK_FAILED: 'video playback failed',
     ETAG_MISSING: 'no header/etag present in response body',
     KEY_MISSING: 'encrypted key missing from localStorage',
+    FAILED_TO_LOAD_WEB_WORKER: 'failed to load web worker',
 };
 
 export function parseError(error) {

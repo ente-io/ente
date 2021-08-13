@@ -19,6 +19,7 @@ import { ProgressUpdater } from 'components/pages/gallery/Upload';
 import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
+import { CustomError } from 'utils/common/errorUtil';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -33,7 +34,8 @@ export enum FileUploadResults {
 
 export interface FileWithCollection {
     file: globalThis.File;
-    collectionID: number;
+    collectionID?: number;
+    collection: Collection;
 }
 
 export enum UPLOAD_STAGES {
@@ -148,7 +150,11 @@ class UploadManager {
             i < MAX_CONCURRENT_UPLOADS && this.filesToBeUploaded.length > 0;
             i++
         ) {
-            this.cryptoWorkers[i] = getDedicatedCryptoWorker();
+            const cryptoWorker = getDedicatedCryptoWorker();
+            if (!cryptoWorker) {
+                throw Error(CustomError.FAILED_TO_LOAD_WEB_WORKER);
+            }
+            this.cryptoWorkers[i] = cryptoWorker;
             uploadProcesses.push(
                 this.uploadNextFileInQueue(
                     await new this.cryptoWorkers[i].comlink(),
@@ -169,12 +175,12 @@ class UploadManager {
             const collection = this.collections.get(
                 fileWithCollection.collectionID
             );
+            fileWithCollection.collection = collection;
             const { fileUploadResult, file } = await uploader(
                 worker,
                 fileReader,
                 existingFilesInCollection,
-                fileWithCollection.file,
-                collection
+                fileWithCollection
             );
 
             if (fileUploadResult === FileUploadResults.UPLOADED) {
