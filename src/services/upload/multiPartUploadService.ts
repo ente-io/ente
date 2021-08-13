@@ -5,6 +5,7 @@ import {
 import UploadHttpClient from './uploadHttpClient';
 import * as convert from 'xml-js';
 import UIService, { RANDOM_PERCENTAGE_PROGRESS_FOR_PUT } from './uiService';
+import { CustomError } from 'utils/common/errorUtil';
 
 interface PartEtag {
     PartNumber: number;
@@ -67,6 +68,10 @@ export async function uploadStreamInParts(
             progressTracker
         );
         partEtags.push({ PartNumber: index + 1, ETag: eTag });
+    }
+    const { done } = await streamReader.read();
+    if (!done) {
+        throw Error(CustomError.CHUNK_MORE_THAN_EXPECTED);
     }
     await completeMultipartUpload(partEtags, multipartUploadURLs.completeURL);
     return multipartUploadURLs.objectKey;
