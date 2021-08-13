@@ -97,7 +97,7 @@ class UploadService {
         reader: FileReader,
         rawFile: globalThis.File,
         collection: Collection
-    ) {
+    ): Promise<FileInMemory> {
         const fileType = getFileType(rawFile);
 
         const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
@@ -132,7 +132,7 @@ class UploadService {
             filedata,
             thumbnail,
             metadata: extractedMetadata,
-        } as FileInMemory;
+        };
     }
 
     async encryptFile(
