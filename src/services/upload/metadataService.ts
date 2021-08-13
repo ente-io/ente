@@ -1,4 +1,4 @@
-import { FILE_TYPE } from 'pages/gallery';
+import { FILE_TYPE } from 'services/fileService';
 import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
 import { MetadataObject } from './uploadService';

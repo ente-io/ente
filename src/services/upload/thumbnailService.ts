@@ -1,4 +1,3 @@
-import { FILE_TYPE } from 'pages/gallery';
 import { CustomError } from 'utils/common/errorUtil';
 import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';

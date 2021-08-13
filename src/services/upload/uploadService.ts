@@ -1,6 +1,5 @@
 import { fileAttribute } from '../fileService';
 import { Collection } from '../collectionService';
-import { FILE_TYPE } from 'pages/gallery';
 import { logError } from 'utils/sentry';
 import NetworkClient from './networkClient';
 import {

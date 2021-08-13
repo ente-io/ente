@@ -1,4 +1,4 @@
-import { FILE_TYPE } from 'pages/gallery';
+import { FILE_TYPE } from 'services/fileService';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { logError } from 'utils/sentry';
 import { MIN_STREAM_FILE_SIZE } from './uploadService';

@@ -1,5 +1,5 @@
 import EXIF from 'exif-js';
-import { FILE_TYPE } from 'pages/gallery';
+import { FILE_TYPE } from 'services/fileService';
 import { logError } from 'utils/sentry';
 import { NULL_LOCATION, Location } from './metadataService';
 
