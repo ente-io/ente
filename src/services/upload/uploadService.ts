@@ -4,7 +4,7 @@ import { logError } from 'utils/sentry';
 import NetworkClient from './networkClient';
 import {
     extractMetatdata,
-    getMetadataKey,
+    getMetadataMapKey,
     ParsedMetaDataJSON,
 } from './metadataService';
 import { generateThumbnail } from './thumbnailService';
@@ -87,8 +87,8 @@ class UploadService {
     private metadataMap: Map<string, ParsedMetaDataJSON>;
     private pendingUploadCount: number = 0;
 
-    async init(count: number, metadataMap: MetadataMap) {
-        this.pendingUploadCount = count;
+    async init(fileCount: number, metadataMap: MetadataMap) {
+        this.pendingUploadCount = fileCount;
         this.metadataMap = metadataMap;
         await this.preFetchUploadURLs();
     }
@@ -110,7 +110,7 @@ class UploadService {
             const originalName = getFileOriginalName(rawFile);
             const googleMetadata =
                 this.metadataMap.get(
-                    getMetadataKey(collection.id, originalName)
+                    getMetadataMapKey(collection.id, originalName)
                 ) ?? {};
             const extractedMetadata: MetadataObject = await extractMetatdata(
                 reader,

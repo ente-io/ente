@@ -10,7 +10,7 @@ import {
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import {
-    getMetadataKey,
+    getMetadataMapKey,
     ParsedMetaDataJSON,
     parseMetadataJSON,
 } from './metadataService';
@@ -119,7 +119,10 @@ class UploadManager {
                     const { title, parsedMetaDataJSON } =
                         parsedMetaDataJSONWithTitle;
                     this.metadataMap.set(
-                        getMetadataKey(fileWithCollection.collectionID, title),
+                        getMetadataMapKey(
+                            fileWithCollection.collectionID,
+                            title
+                        ),
                         parsedMetaDataJSON
                     );
                     UIService.increaseFileUploaded();
@@ -127,6 +130,7 @@ class UploadManager {
             }
         } catch (e) {
             logError(e, 'error seeding Metadatamap');
+            // silenty ignore the error
         }
     }
 

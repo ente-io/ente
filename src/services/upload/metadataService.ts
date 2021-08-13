@@ -49,8 +49,8 @@ export async function extractMetatdata(
     return extractedMetadata;
 }
 
-export const getMetadataKey = (fileWithCollection: number, title: string) =>
-    `${fileWithCollection}_${title}`;
+export const getMetadataMapKey = (collectionID: number, title: string) =>
+    `${collectionID}_${title}`;
 
 export async function parseMetadataJSON(receivedFile: globalThis.File) {
     try {
