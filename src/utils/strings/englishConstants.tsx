@@ -24,13 +24,21 @@ const Logo = styled.img`
 `;
 
 const englishConstants = {
-    HERO_HEADER: () => <div>with <Logo src='/icon.svg' /><br />your <Strong>memories</Strong> are</div>,
+    HERO_HEADER: () => (
+        <div>
+            with <Logo src="/icon.svg" />
+            <br />
+            your <Strong>memories</Strong> are
+        </div>
+    ),
     HERO_SLIDE_1_TITLE: 'protected',
-    HERO_SLIDE_1: 'end-to-end encrypted with your password, visible only to you',
+    HERO_SLIDE_1:
+        'end-to-end encrypted with your password, visible only to you',
     HERO_SLIDE_2_TITLE: 'synced',
     HERO_SLIDE_2: 'available across all your devices, web, android and ios',
     HERO_SLIDE_3_TITLE: 'preserved',
-    HERO_SLIDE_3: 'reliably replicated to a fallout shelter, designed to outlive',
+    HERO_SLIDE_3:
+        'reliably replicated to a fallout shelter, designed to outlive',
     COMPANY_NAME: 'ente',
     LOGIN: 'login',
     SIGN_UP: 'sign up',
@@ -39,7 +47,7 @@ const englishConstants = {
     ENTER_NAME: 'your name',
     EMAIL: 'email',
     ENTER_EMAIL: 'email',
-    DATA_DISCLAIMER: 'we\'ll never share your data with anyone else.',
+    DATA_DISCLAIMER: "we'll never share your data with anyone else.",
     SUBMIT: 'submit',
     EMAIL_ERROR: 'enter a valid email',
     REQUIRED: 'required',
@@ -68,17 +76,16 @@ const englishConstants = {
     PASSPHRASE_DISCLAIMER: () => (
         <p>
             we don't store your password, so if you forget,
-            <strong> we will not be able to help you</strong>
-            {' '}
-            recover your data.
+            <strong> we will not be able to help you</strong> recover your data.
         </p>
     ),
     PASSPHRASE_HINT: 'password',
     RE_ENTER_PASSPHRASE: 'password again',
     CONFIRM_PASSPHRASE: 'confirm your password',
-    PASSPHRASE_MATCH_ERROR: 'passwords don\'t match',
+    PASSPHRASE_MATCH_ERROR: "passwords don't match",
     CONSOLE_WARNING_STOP: 'STOP!',
-    CONSOLE_WARNING_DESC: 'This is a browser feature intended for developers. Please don\'t copy-paste unverified code here.',
+    CONSOLE_WARNING_DESC:
+        "This is a browser feature intended for developers. Please don't copy-paste unverified code here.",
     SELECT_COLLECTION: 'select an album to upload to',
     CREATE_COLLECTION: 'create album',
     ENTER_ALBUM_NAME: 'album name',
@@ -88,13 +95,13 @@ const englishConstants = {
     UPLOAD: {
         0: 'preparing to upload',
         1: 'reading google metadata files',
-        2: (fileCounter) => `${fileCounter.finished} / ${fileCounter.total} files backed up`,
-        3: 'backup complete!',
+        2: (fileCounter) =>
+            `${fileCounter.finished} / ${fileCounter.total} files backed up`,
+        3: 'backup complete',
     },
     UPLOADING_FILES: 'file upload',
-    FAILED_UPLOAD_FILE_LIST: 'upload failed for following files',
-    UNSUPPORTED_FILE_LIST: 'unsupported files',
-    FILE_UPLOAD_PROGRESS: (name, progress) => (
+    FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
+    FILE_UPLOAD_PROGRESS: (name: string, progress: number) => (
         <div id={name}>
             <strong>{name}</strong>
             {' - '}
@@ -105,7 +112,7 @@ const englishConstants = {
                     case -2:
                         return 'already uploaded, skipping...';
                     case -3:
-                        return 'unsupported file format, ignored';
+                        return ',unsupported file format, skipping....';
                     default:
                         return `${progress}%`;
                 }
@@ -119,7 +126,7 @@ const englishConstants = {
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
-    NO_ACCOUNT: 'don\'t have an account?',
+    NO_ACCOUNT: "don't have an account?",
     ACCOUNT_EXISTS: 'already have an account?',
     ALBUM_NAME: 'album name',
     CREATE: 'create',
@@ -148,7 +155,8 @@ const englishConstants = {
     SESSION_EXPIRED: 'session expired',
     SYNC_FAILED:
         'failed to sync with remote server, please refresh page to try again',
-    PASSWORD_GENERATION_FAILED: 'your browser was unable to generate a strong enough password  that meets ente\'s encryption standards, please try using the mobile app or another browser',
+    PASSWORD_GENERATION_FAILED:
+        "your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser",
     CHANGE_PASSWORD: 'change password',
     GO_BACK: 'go back',
     DOWNLOAD_RECOVERY_KEY: 'recovery key',
@@ -159,7 +167,7 @@ const englishConstants = {
     RECOVER_KEY_GENERATION_FAILED:
         'recovery code could be generated, please try again',
     KEY_NOT_STORED_DISCLAIMER:
-        'we don\'t store this key, so please save this in a safe place',
+        "we don't store this key, so please save this in a safe place",
     RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
     FORGOT_PASSWORD: 'forgot password?',
     RECOVER_ACCOUNT: 'recover account',
@@ -170,9 +178,13 @@ const englishConstants = {
     SORRY: 'sorry',
     NO_RECOVERY_KEY_MESSAGE:
         'due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
-    NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE: () => (<>
-        please drop an email to <a href="mailto:support@ente.io">support@ente.io</a> from your registered email
-    </>),
+    NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE: () => (
+        <>
+            please drop an email to{' '}
+            <a href="mailto:support@ente.io">support@ente.io</a> from your
+            registered email
+        </>
+    ),
     CONTACT_SUPPORT: 'contact support',
     REQUEST_FEATURE: 'request feature',
     SUPPORT: 'support',
@@ -193,20 +205,17 @@ const englishConstants = {
             <a
                 href="https://play.google.com/store/apps/details?id=io.ente.photos"
                 target="_blank"
-                style={{ color: '#2dc262' }} rel="noreferrer"
-            >
+                style={{ color: '#2dc262' }}
+                rel="noreferrer">
                 android
-            </a>
-            {' '}
-            or
-            {' '}
+            </a>{' '}
+            or{' '}
             <a
                 href="https://apps.apple.com/in/app/ente-photos/id1542026904"
                 style={{ color: '#2dc262' }}
-                target="_blank" rel="noreferrer"
-            >
-                ios app
-                {' '}
+                target="_blank"
+                rel="noreferrer">
+                ios app{' '}
             </a>
             to automatically backup all your photos
         </>
@@ -237,17 +246,13 @@ const englishConstants = {
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
             <p>
-                you are on the <strong>free</strong>
-                {' '}
-                plan that expires on{' '}
+                you are on the <strong>free</strong> plan that expires on{' '}
                 {dateString(expiryTime)}
             </p>
         </>
     ),
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <p>
-            your subscription will renew on {dateString(expiryTime)}
-        </p>
+        <p>your subscription will renew on {dateString(expiryTime)}</p>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
@@ -260,11 +265,7 @@ const englishConstants = {
 
     USAGE_INFO: (usage, quota) => (
         <p>
-            you have used {usage}
-            {' '}
-            out of your {quota}
-            {' '}
-            GB quota
+            you have used {usage} out of your {quota} GB quota
         </p>
     ),
 
@@ -277,7 +278,8 @@ const englishConstants = {
     ),
     SUBSCRIPTION_PURCHASE_CANCELLED:
         'your purchase was canceled, please try again if you want to subscribe',
-    SUBSCRIPTION_VERIFICATION_FAILED: 'we were not able to verify your purchase, verification can take few hours',
+    SUBSCRIPTION_VERIFICATION_FAILED:
+        'we were not able to verify your purchase, verification can take few hours',
     SUBSCRIPTION_PURCHASE_FAILED:
         'subscription purchase failed , please try again later',
 
@@ -305,12 +307,14 @@ const englishConstants = {
 
     ACTIVATE_SUBSCRIPTION: 'reactivate subscription',
     CONFIRM_ACTIVATE_SUBSCRIPTION: 'confirm subscription activation',
-    ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) => `once reactivated, you will be billed on ${dateString(expiryTime)}`,
+    ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
+        `once reactivated, you will be billed on ${dateString(expiryTime)}`,
     SUBSCRIPTION_ACTIVATE_SUCCESS: 'subscription successfully activated',
     SUBSCRIPTION_ACTIVATE_FAILED: 'failed to reactivate subscription renewals',
 
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
-    CANCEL_SUBSCRIPTION_ON_MOBILE: 'please cancel your subscription from the mobile app to activate a subscription here',
+    CANCEL_SUBSCRIPTION_ON_MOBILE:
+        'please cancel your subscription from the mobile app to activate a subscription here',
     RENAME: 'rename',
     RENAME_COLLECTION: 'rename album',
     CONFIRM_DELETE_COLLECTION: 'confirm album deletion',
@@ -336,48 +340,43 @@ const englishConstants = {
         </>
     ),
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
-    ALREADY_SHARED: (email) => `oops, you're already sharing this with ${email}`,
+    ALREADY_SHARED: (email) =>
+        `oops, you're already sharing this with ${email}`,
     SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
     CREATE_ALBUM_FAILED: 'failed to create album , please try again',
-    SEARCH_HINT: () => <span>try searching for New York, April 14, Christmas...</span>,
+    SEARCH_HINT: () => (
+        <span>try searching for New York, April 14, Christmas...</span>
+    ),
     TERMS_AND_CONDITIONS: () => (
         <p>
             I agree to the{' '}
             <a href="https://ente.io/terms" target="_blank" rel="noreferrer">
                 terms
-            </a>
-            {' '}
-            and
-            {' '}
+            </a>{' '}
+            and{' '}
             <a href="https://ente.io/privacy" target="_blank" rel="noreferrer">
                 privacy policy
-            </a>
-            {' '}
+            </a>{' '}
         </p>
     ),
     CONFIRM_PASSWORD_NOT_SAVED: () => (
         <p>
             i understand that if i lose my password , i may lose my data since
             my data is{' '}
-            <a href="https://ente.io/encryption" target="_blank" rel="noreferrer">
+            <a
+                href="https://ente.io/encryption"
+                target="_blank"
+                rel="noreferrer">
                 end-to-end encrypted
-            </a>
-            {' '}
+            </a>{' '}
             with ente
         </p>
     ),
     SEARCH_STATS: ({ resultCount, timeTaken }) => (
         <span>
-            found <span style={{ color: '#2dc262' }}>{resultCount}</span>
-            {' '}
-            memories (
-            {' '}
-            <span style={{ color: '#2dc262' }}>
-                {' '}
-                {timeTaken}
-            </span>
-            {' '}
+            found <span style={{ color: '#2dc262' }}>{resultCount}</span>{' '}
+            memories ( <span style={{ color: '#2dc262' }}> {timeTaken}</span>{' '}
             seconds )
         </span>
     ),
@@ -385,7 +384,8 @@ const englishConstants = {
     ADD_TO_COLLECTION: 'add to collection',
     SELECTED: 'selected',
     VIDEO_PLAYBACK_FAILED: 'video format not supported',
-    VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD: 'this video cannot be played on your browser',
+    VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD:
+        'this video cannot be played on your browser',
     METADATA: 'metadata',
     INFO: 'information',
     FILE_ID: 'file id',
@@ -402,13 +402,21 @@ const englishConstants = {
     APERTURE: 'aperture',
     ISO: 'iso',
     SHOW_ALL: 'show all',
-    LOGIN_TO_UPLOAD_FILES: (count: number) => count === 1 ? `1 file received. login to upload` : `${count} files received. login to upload`,
-    FILES_TO_BE_UPLOADED: (count: number) => count === 1 ? `1 file received. uploading in a jiffy` : `${count} files received. Uploading in a jiffy`,
+    LOGIN_TO_UPLOAD_FILES: (count: number) =>
+        count === 1
+            ? `1 file received. login to upload`
+            : `${count} files received. login to upload`,
+    FILES_TO_BE_UPLOADED: (count: number) =>
+        count === 1
+            ? `1 file received. uploading in a jiffy`
+            : `${count} files received. Uploading in a jiffy`,
     TWO_FACTOR: 'two-factor',
     TWO_FACTOR_AUTHENTICATION: 'two-factor authentication',
-    TWO_FACTOR_QR_INSTRUCTION: 'scan the QR code below with your favorite authenticator app',
+    TWO_FACTOR_QR_INSTRUCTION:
+        'scan the QR code below with your favorite authenticator app',
     ENTER_CODE_MANUALLY: 'enter the code manually',
-    TWO_FACTOR_MANUAL_CODE_INSTRUCTION: 'please enter this code in your favorite authenticator app',
+    TWO_FACTOR_MANUAL_CODE_INSTRUCTION:
+        'please enter this code in your favorite authenticator app',
     SCAN_QR_CODE: 'scan QR code instead',
     CONTINUE: 'continue',
     BACK: 'back',
@@ -417,18 +425,22 @@ const englishConstants = {
     LOST_DEVICE: 'lost two-factor device?',
     INCORRECT_CODE: 'incorrect code',
     RECOVER_TWO_FACTOR: 'recover two-factor',
-    TWO_FACTOR_INFO: 'add an additional layer of security by requiring more than your email and password to log in to your account',
+    TWO_FACTOR_INFO:
+        'add an additional layer of security by requiring more than your email and password to log in to your account',
     DISABLE_TWO_FACTOR_HINT: 'disable two-factor authentication',
     UPDATE_TWO_FACTOR_HINT: 'update your authenticator device',
     DISABLE: 'disable',
     RECONFIGURE: 'reconfigure',
     UPDATE_TWO_FACTOR: 'update two-factor',
-    UPDATE_TWO_FACTOR_MESSAGE: 'continuing forward will void any previously configured authenticators',
+    UPDATE_TWO_FACTOR_MESSAGE:
+        'continuing forward will void any previously configured authenticators',
     UPDATE: 'update',
     DISABLE_TWO_FACTOR: 'disable two-factor',
-    DISABLE_TWO_FACTOR_MESSAGE: 'are you sure you want to disable your two-factor authentication',
+    DISABLE_TWO_FACTOR_MESSAGE:
+        'are you sure you want to disable your two-factor authentication',
     TWO_FACTOR_SETUP_FAILED: 'failed to setup two factor, please try again',
-    TWO_FACTOR_SETUP_SUCCESS: 'two factor authentication successfully configured',
+    TWO_FACTOR_SETUP_SUCCESS:
+        'two factor authentication successfully configured',
     TWO_FACTOR_DISABLE_SUCCESS: 'two factor authentication disabled',
     TWO_FACTOR_DISABLE_FAILED: 'failed to disable two factor, please try again',
     EXPORT_DATA: 'export data',
@@ -446,8 +458,48 @@ const englishConstants = {
     EXPORT_AGAIN: 'resync',
     RETRY_EXPORT_: 'retry failed exports',
     LOCAL_STORAGE_NOT_ACCESSIBLE: 'local storage not accessible',
-    LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE: 'your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
+    LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE:
+        'your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
     RETRY: 'retry',
+    UPDATE_EMAIL: 'change email',
+    SEND_OTT: 'send otp',
+    EMAIl_ALREADY_OWNED: 'email already taken',
+    EMAIL_UDPATE_SUCCESSFUL: 'your email has been udpated successfully',
+    UPLOAD_FAILED: 'upload failed',
+    ETAGS_BLOCKED: (url: string) => (
+        <>
+            <p>
+                {' '}
+                we were unable to upload the following files because of your
+                browser configuration.
+            </p>
+            <p>
+                {' '}
+                please disable any addons that might be preventing ente from
+                using <code>eTags</code> to upload large files, or use our{' '}
+                <a
+                    href={url}
+                    style={{ color: '#2dc262', textDecoration: 'underline' }}
+                    target="_blank"
+                    rel="noreferrer">
+                    desktop app
+                </a>{' '}
+                for a more reliable import experience.
+            </p>
+        </>
+    ),
+
+    RETRY_FAILED: 'retry failed uploads',
+    FAILED_UPLOADS: 'failed uploads ',
+    SKIPPED_FILES: 'duplicate files',
+    UNSUPPORTED_FILES: 'unsupported files',
+    SUCCESSFUL_UPLOADS: 'successful uploads',
+    FAILED_INFO:
+        ' unable to upload these files because of network issue, you can retry upload these files',
+    SKIPPED_INFO: 'these files already existed in the album',
+    UNSUPPORTED_INFO: 'these files are currently not supported by ente',
+    SUCCESS_INFO: 'successfully backed-up memories',
+    BLOCKED_UPLOADS: 'blocked uploads',
 };
 
 export default englishConstants;

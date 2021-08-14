@@ -56,14 +56,24 @@ export default function Verify() {
 
     const onSubmit = async (
         { ott }: formValues,
-        { setFieldError }: FormikHelpers<formValues>,
+        { setFieldError }: FormikHelpers<formValues>
     ) => {
         try {
             setLoading(true);
             const resp = await verifyOtt(email, ott);
-            const { keyAttributes, encryptedToken, token, id, twoFactorSessionID } = resp.data as EmailVerificationResponse;
+            const {
+                keyAttributes,
+                encryptedToken,
+                token,
+                id,
+                twoFactorSessionID,
+            } = resp.data as EmailVerificationResponse;
             if (twoFactorSessionID) {
-                setData(LS_KEYS.USER, { email, twoFactorSessionID, isTwoFactorEnabled: true });
+                setData(LS_KEYS.USER, {
+                    email,
+                    twoFactorSessionID,
+                    isTwoFactorEnabled: true,
+                });
                 router.push('/two-factor/verify');
                 return;
             }
@@ -109,7 +119,7 @@ export default function Verify() {
             <Card style={{ minWidth: '300px' }} className="text-center">
                 <Card.Body style={{ padding: '40px 30px' }}>
                     <Card.Title style={{ marginBottom: '32px' }}>
-                        <LogoImg src='/icon.svg' />
+                        <LogoImg src="/icon.svg" />
                         {constants.VERIFY_EMAIL}
                     </Card.Title>
                     {constants.EMAIL_SENT({ email })}
@@ -123,8 +133,7 @@ export default function Verify() {
                         })}
                         validateOnChange={false}
                         validateOnBlur={false}
-                        onSubmit={onSubmit}
-                    >
+                        onSubmit={onSubmit}>
                         {({
                             values,
                             touched,
@@ -140,7 +149,7 @@ export default function Verify() {
                                         value={values.ott}
                                         onChange={handleChange('ott')}
                                         isInvalid={Boolean(
-                                            touched.ott && errors.ott,
+                                            touched.ott && errors.ott
                                         )}
                                         placeholder={constants.ENTER_OTT}
                                         disabled={loading}

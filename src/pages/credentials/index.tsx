@@ -29,7 +29,10 @@ export default function Credentials() {
         const user = getData(LS_KEYS.USER);
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        if ((!user?.token && !user?.encryptedToken) || !keyAttributes?.memLimit) {
+        if (
+            (!user?.token && !user?.encryptedToken) ||
+            !keyAttributes?.memLimit
+        ) {
             clearData();
             router.push('/');
         } else if (!keyAttributes) {
@@ -51,7 +54,7 @@ export default function Credentials() {
                     passphrase,
                     keyAttributes.kekSalt,
                     keyAttributes.opsLimit,
-                    keyAttributes.memLimit,
+                    keyAttributes.memLimit
                 );
             } catch (e) {
                 console.error('failed to deriveKey ', e.message);
@@ -61,13 +64,13 @@ export default function Credentials() {
                 const key: string = await cryptoWorker.decryptB64(
                     keyAttributes.encryptedKey,
                     keyAttributes.keyDecryptionNonce,
-                    kek,
+                    kek
                 );
                 if (isFirstLogin()) {
                     await generateAndSaveIntermediateKeyAttributes(
                         passphrase,
                         keyAttributes,
-                        key,
+                        key
                     );
                 }
                 await setSessionKeys(key);
@@ -81,7 +84,7 @@ export default function Credentials() {
         } catch (e) {
             setFieldError(
                 'passphrase',
-                `${constants.UNKNOWN_ERROR} ${e.message}`,
+                `${constants.UNKNOWN_ERROR} ${e.message}`
             );
             console.error('failed to verifyPassphrase ', e.message);
         }
@@ -90,13 +93,10 @@ export default function Credentials() {
     return (
         <>
             <Container>
-                <Card
-                    style={{ minWidth: '320px' }}
-                    className="text-center"
-                >
+                <Card style={{ minWidth: '320px' }} className="text-center">
                     <Card.Body style={{ padding: '40px 30px' }}>
                         <Card.Title style={{ marginBottom: '32px' }}>
-                            <LogoImg src='/icon.svg' />
+                            <LogoImg src="/icon.svg" />
                             {constants.PASSWORD}
                         </Card.Title>
                         <SingleInputForm
@@ -110,12 +110,10 @@ export default function Credentials() {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 marginTop: '12px',
-                            }}
-                        >
+                            }}>
                             <Button
                                 variant="link"
-                                onClick={() => router.push('/recover')}
-                            >
+                                onClick={() => router.push('/recover')}>
                                 {constants.FORGOT_PASSWORD}
                             </Button>
                             <Button variant="link" onClick={logoutUser}>

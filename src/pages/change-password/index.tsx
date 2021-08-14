@@ -2,10 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { B64EncryptionResult } from 'services/uploadService';
 import CryptoWorker, {
     setSessionKeys,
     generateAndSaveIntermediateKeyAttributes,
+    B64EncryptionResult,
 } from 'utils/crypto';
 import { getActualKey } from 'utils/common/key';
 import { setKeys, UpdatedKey } from 'services/userService';
@@ -45,7 +45,8 @@ export default function Generate() {
             setFieldError('confirm', constants.PASSWORD_GENERATION_FAILED);
             return;
         }
-        const encryptedKeyAttributes: B64EncryptionResult = await cryptoWorker.encryptToB64(key, kek.key);
+        const encryptedKeyAttributes: B64EncryptionResult =
+            await cryptoWorker.encryptToB64(key, kek.key);
         const updatedKey: UpdatedKey = {
             kekSalt,
             encryptedKey: encryptedKeyAttributes.encryptedData,
@@ -60,7 +61,7 @@ export default function Generate() {
         await generateAndSaveIntermediateKeyAttributes(
             passphrase,
             updatedKeyAttributes,
-            key,
+            key
         );
 
         setSessionKeys(key);
@@ -75,9 +76,9 @@ export default function Generate() {
             callback={onSubmit}
             buttonText={constants.CHANGE_PASSWORD}
             back={
-                getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?
-                    redirectToGallery :
-                    null
+                getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
+                    ? redirectToGallery
+                    : null
             }
         />
     );

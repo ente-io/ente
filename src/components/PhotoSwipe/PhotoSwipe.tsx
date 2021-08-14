@@ -7,7 +7,7 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from 'services/collectionService';
-import { File } from 'services/fileService';
+import { File, FILE_TYPE } from 'services/fileService';
 import constants from 'utils/strings/constants';
 import DownloadManger from 'services/downloadManager';
 import EXIF from 'exif-js';
@@ -16,7 +16,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import styled from 'styled-components';
 import events from './events';
-import { formatDateTime } from 'utils/file';
+import { fileNameWithoutExtension, formatDateTime } from 'utils/file';
 import { FormCheck } from 'react-bootstrap';
 
 interface Iprops {
@@ -49,8 +49,12 @@ const Pre = styled.pre`
 
 const renderInfoItem = (label: string, value: string | JSX.Element) => (
     <>
-        <Form.Label column sm="4">{label}</Form.Label>
-        <Form.Label column sm="8">{value}</Form.Label>
+        <Form.Label column sm="4">
+            {label}
+        </Form.Label>
+        <Form.Label column sm="8">
+            {value}
+        </Form.Label>
     </>
 );
 
@@ -62,29 +66,49 @@ function ExifData(props: { exif: any }) {
         setShowAll(e.target.checked);
     };
 
-    const renderAllValues = () => (<Pre>{exif.raw}</Pre>);
+    const renderAllValues = () => <Pre>{exif.raw}</Pre>;
 
-    const renderSelectedValues = () => (<>
-        {exif?.Make && exif?.Model && renderInfoItem(constants.DEVICE, `${exif.Make} ${exif.Model}`)}
-        {exif?.ImageWidth && exif?.ImageHeight && renderInfoItem(constants.IMAGE_SIZE, `${exif.ImageWidth} x ${exif.ImageHeight}`)}
-        {exif?.Flash && renderInfoItem(constants.FLASH, exif.Flash)}
-        {exif?.FocalLength && renderInfoItem(constants.FOCAL_LENGTH, exif.FocalLength.toString())}
-        {exif?.ApertureValue && renderInfoItem(constants.APERTURE, exif.ApertureValue.toString())}
-        {exif?.ISOSpeedRatings && renderInfoItem(constants.ISO, exif.ISOSpeedRatings.toString())}
-    </>);
+    const renderSelectedValues = () => (
+        <>
+            {exif?.Make &&
+                exif?.Model &&
+                renderInfoItem(constants.DEVICE, `${exif.Make} ${exif.Model}`)}
+            {exif?.ImageWidth &&
+                exif?.ImageHeight &&
+                renderInfoItem(
+                    constants.IMAGE_SIZE,
+                    `${exif.ImageWidth} x ${exif.ImageHeight}`
+                )}
+            {exif?.Flash && renderInfoItem(constants.FLASH, exif.Flash)}
+            {exif?.FocalLength &&
+                renderInfoItem(
+                    constants.FOCAL_LENGTH,
+                    exif.FocalLength.toString()
+                )}
+            {exif?.ApertureValue &&
+                renderInfoItem(
+                    constants.APERTURE,
+                    exif.ApertureValue.toString()
+                )}
+            {exif?.ISOSpeedRatings &&
+                renderInfoItem(constants.ISO, exif.ISOSpeedRatings.toString())}
+        </>
+    );
 
-    return (<>
-        <LegendContainer>
-            <Legend>{constants.EXIF}</Legend>
-            <FormCheck>
-                <FormCheck.Label>
-                    <FormCheck.Input onChange={changeHandler} />
-                    {constants.SHOW_ALL}
-                </FormCheck.Label>
-            </FormCheck>
-        </LegendContainer>
-        {showAll ? renderAllValues() : renderSelectedValues()}
-    </>);
+    return (
+        <>
+            <LegendContainer>
+                <Legend>{constants.EXIF}</Legend>
+                <FormCheck>
+                    <FormCheck.Label>
+                        <FormCheck.Input onChange={changeHandler} />
+                        {constants.SHOW_ALL}
+                    </FormCheck.Label>
+                </FormCheck>
+            </LegendContainer>
+            {showAll ? renderAllValues() : renderSelectedValues()}
+        </>
+    );
 }
 
 function PhotoSwipe(props: Iprops) {
@@ -140,8 +164,14 @@ function PhotoSwipe(props: Iprops) {
                     const ele = document.getElementById(`thumb-${file.id}`);
                     if (ele) {
                         const rect = ele.getBoundingClientRect();
-                        const pageYScroll = window.pageYOffset || document.documentElement.scrollTop;
-                        return { x: rect.left, y: rect.top + pageYScroll, w: rect.width };
+                        const pageYScroll =
+                            window.pageYOffset ||
+                            document.documentElement.scrollTop;
+                        return {
+                            x: rect.left,
+                            y: rect.top + pageYScroll,
+                            w: rect.width,
+                        };
                     }
                     return null;
                 } catch (e) {
@@ -153,7 +183,7 @@ function PhotoSwipe(props: Iprops) {
             pswpElement.current,
             PhotoswipeUIDefault,
             items,
-            options,
+            options
         );
         events.forEach((event) => {
             const callback = props[event];
@@ -201,7 +231,8 @@ function PhotoSwipe(props: Iprops) {
         const { favItemIds } = props;
         if (favItemIds && file) {
             return favItemIds.has(file.id);
-        } return false;
+        }
+        return false;
     };
 
     const onFavClick = async (file) => {
@@ -232,7 +263,9 @@ function PhotoSwipe(props: Iprops) {
     const checkExifAvailable = () => {
         setExif(null);
         setTimeout(() => {
-            const img = document.querySelector('.pswp__img:not(.pswp__img--placeholder)');
+            const img = document.querySelector(
+                '.pswp__img:not(.pswp__img--placeholder)'
+            );
             if (img) {
                 // @ts-expect-error
                 EXIF.getData(img, function () {
@@ -269,7 +302,11 @@ function PhotoSwipe(props: Iprops) {
         loadingBar.current.continuousStart();
         a.href = await DownloadManger.getFile(file);
         loadingBar.current.complete();
-        a.download = file.metadata.title;
+        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+            a.download = fileNameWithoutExtension(file.metadata.title) + '.zip';
+        } else {
+            a.download = file.metadata.title;
+        }
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -285,8 +322,7 @@ function PhotoSwipe(props: Iprops) {
                 tabIndex={Number('-1')}
                 role="dialog"
                 aria-hidden="true"
-                ref={pswpElement}
-            >
+                ref={pswpElement}>
                 <div className="pswp__bg" />
                 <div className="pswp__scroll-wrap">
                     <div className="pswp__container">
@@ -306,7 +342,9 @@ function PhotoSwipe(props: Iprops) {
                             <button
                                 className="pswp-custom download-btn"
                                 title={constants.DOWNLOAD}
-                                onClick={() => downloadFile(photoSwipe.currItem)}
+                                onClick={() =>
+                                    downloadFile(photoSwipe.currItem)
+                                }
                             />
 
                             <button
@@ -363,26 +401,46 @@ function PhotoSwipe(props: Iprops) {
                         <div>
                             <Legend>{constants.METADATA}</Legend>
                         </div>
-                        {renderInfoItem(constants.FILE_ID, items[photoSwipe?.getCurrentIndex()]?.id)}
-                        {metadata?.title && renderInfoItem(constants.FILE_NAME, metadata.title)}
-                        {metadata?.creationTime && renderInfoItem(constants.CREATION_TIME, formatDateTime(metadata.creationTime / 1000))}
-                        {metadata?.modificationTime && renderInfoItem(constants.UPDATED_ON, formatDateTime(metadata.modificationTime / 1000))}
-                        {metadata?.longitude && metadata?.longitude && renderInfoItem(constants.LOCATION, (
-                            <a href={`https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}`}
-                                target='_blank' rel='noopener noreferrer'>
-                                {constants.SHOW_MAP}
-                            </a>
-                        ))}
+                        {renderInfoItem(
+                            constants.FILE_ID,
+                            items[photoSwipe?.getCurrentIndex()]?.id
+                        )}
+                        {metadata?.title &&
+                            renderInfoItem(constants.FILE_NAME, metadata.title)}
+                        {metadata?.creationTime &&
+                            renderInfoItem(
+                                constants.CREATION_TIME,
+                                formatDateTime(metadata.creationTime / 1000)
+                            )}
+                        {metadata?.modificationTime &&
+                            renderInfoItem(
+                                constants.UPDATED_ON,
+                                formatDateTime(metadata.modificationTime / 1000)
+                            )}
+                        {metadata?.longitude &&
+                            metadata?.longitude &&
+                            renderInfoItem(
+                                constants.LOCATION,
+                                <a
+                                    href={`https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer">
+                                    {constants.SHOW_MAP}
+                                </a>
+                            )}
                         {exif && (
                             <>
-                                <br /><br />
+                                <br />
+                                <br />
                                 <ExifData exif={exif} />
                             </>
                         )}
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="outline-secondary" onClick={handleCloseInfo}>
+                    <Button
+                        variant="outline-secondary"
+                        onClick={handleCloseInfo}>
                         {constants.CLOSE}
                     </Button>
                 </Modal.Footer>

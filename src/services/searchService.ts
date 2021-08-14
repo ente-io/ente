@@ -31,14 +31,15 @@ export function parseHumanDate(humanDate: string): DateValue[] {
             return dates.reverse();
         }
         return dates;
-    } if (date1) {
+    }
+    if (date1) {
         return [{ month: date1.getMonth() }];
     }
     return [];
 }
 
 export async function searchLocation(
-    searchPhrase: string,
+    searchPhrase: string
 ): Promise<LocationSearchResponse[]> {
     const resp = await HTTPService.get(
         `${ENDPOINT}/search/location`,
@@ -48,7 +49,7 @@ export async function searchLocation(
         },
         {
             'X-Auth-Token': getToken(),
-        },
+        }
     );
     return resp.data.results;
 }
@@ -75,7 +76,9 @@ export function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
             value: { month: 11, date: 31 },
             type: SuggestionType.DATE,
         },
-    ].filter((suggestion) => suggestion.label.toLowerCase().includes(searchPhrase.toLowerCase()));
+    ].filter((suggestion) =>
+        suggestion.label.toLowerCase().includes(searchPhrase.toLowerCase())
+    );
 }
 
 export function getYearSuggestion(searchPhrase: string): Suggestion[] {

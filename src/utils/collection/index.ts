@@ -15,14 +15,14 @@ export async function addFilesToCollection(
     syncWithRemote: () => Promise<void>,
     selectCollection: (id: number) => void,
     collectionName: string,
-    existingCollection: Collection,
+    existingCollection: Collection
 ) {
     setCollectionSelectorView(false);
     let collection;
     if (!existingCollection) {
         collection = await createCollection(
             collectionName,
-            CollectionType.album,
+            CollectionType.album
         );
     } else {
         collection = existingCollection;

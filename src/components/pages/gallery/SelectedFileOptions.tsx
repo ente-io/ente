@@ -7,7 +7,7 @@ import DeleteIcon from 'components/icons/DeleteIcon';
 import CrossIcon from 'components/icons/CrossIcon';
 import AddIcon from 'components/icons/AddIcon';
 import { IconButton } from 'components/Container';
-import constants from 'utils/strings/englishConstants';
+import constants from 'utils/strings/constants';
 
 interface Props {
     addToCollectionHelper: (collectionName, collection) => void;
@@ -42,32 +42,42 @@ const SelectedFileOptions = ({
     count,
     clearSelection,
 }: Props) => {
-    const addToCollection = () => setCollectionSelectorAttributes({
-        callback: (collection) => addToCollectionHelper(null, collection),
-        showNextModal: showCreateCollectionModal,
-        title: constants.ADD_TO_COLLECTION,
-    });
+    const addToCollection = () =>
+        setCollectionSelectorAttributes({
+            callback: (collection) => addToCollectionHelper(null, collection),
+            showNextModal: showCreateCollectionModal,
+            title: constants.ADD_TO_COLLECTION,
+        });
 
-    const deleteHandler = () => setDialogMessage({
-        title: constants.CONFIRM_DELETE_FILE,
-        content: constants.DELETE_FILE_MESSAGE,
-        staticBackdrop: true,
-        proceed: {
-            action: deleteFileHelper,
-            text: constants.DELETE,
-            variant: 'danger',
-        },
-        close: { text: constants.CANCEL },
-    });
+    const deleteHandler = () =>
+        setDialogMessage({
+            title: constants.CONFIRM_DELETE_FILE,
+            content: constants.DELETE_FILE_MESSAGE,
+            staticBackdrop: true,
+            proceed: {
+                action: deleteFileHelper,
+                text: constants.DELETE,
+                variant: 'danger',
+            },
+            close: { text: constants.CANCEL },
+        });
 
     return (
         <SelectionBar>
             <SelectionContainer>
-                <IconButton onClick={clearSelection}><CrossIcon /></IconButton>
-                <div>{count} {constants.SELECTED}</div>
+                <IconButton onClick={clearSelection}>
+                    <CrossIcon />
+                </IconButton>
+                <div>
+                    {count} {constants.SELECTED}
+                </div>
             </SelectionContainer>
-            <IconButton onClick={addToCollection}><AddIcon /></IconButton>
-            <IconButton onClick={deleteHandler}><DeleteIcon /></IconButton>
+            <IconButton onClick={addToCollection}>
+                <AddIcon />
+            </IconButton>
+            <IconButton onClick={deleteHandler}>
+                <DeleteIcon />
+            </IconButton>
         </SelectionBar>
     );
 };

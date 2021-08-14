@@ -4,6 +4,7 @@ enum ButtonVariant {
     success = 'success',
     danger = 'danger',
     secondary = 'secondary',
+    warning = 'warning',
 }
 type Props = React.PropsWithChildren<{
     onClick: any;
@@ -11,29 +12,30 @@ type Props = React.PropsWithChildren<{
     style?: any;
 }>;
 
-export default function LinkButton(props: Props) {
-    function getButtonColor(variant: string) {
-        switch (variant) {
-            case ButtonVariant.success:
-                return '#2dc262';
-            case ButtonVariant.danger:
-                return '#c93f3f';
-            case ButtonVariant.secondary:
-                return '#858585';
-            default:
-                return '#d1d1d1';
-        }
+export function getVariantColor(variant: string) {
+    switch (variant) {
+        case ButtonVariant.success:
+            return '#2dc262';
+        case ButtonVariant.danger:
+            return '#c93f3f';
+        case ButtonVariant.secondary:
+            return '#858585';
+        case ButtonVariant.warning:
+            return '#D7BB63';
+        default:
+            return '#d1d1d1';
     }
+}
+export default function LinkButton(props: Props) {
     return (
         <h5
             style={{
-                color: getButtonColor(props.variant),
+                color: getVariantColor(props.variant),
                 cursor: 'pointer',
                 marginBottom: 0,
                 ...props.style,
             }}
-            onClick={props?.onClick ?? (() => null)}
-        >
+            onClick={props?.onClick ?? (() => null)}>
             {props.children}
         </h5>
     );

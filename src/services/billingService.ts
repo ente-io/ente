@@ -15,9 +15,9 @@ export enum PAYMENT_INTENT_STATUS {
     REQUIRE_ACTION = 'requires_action',
     REQUIRE_PAYMENT_METHOD = 'requires_payment_method',
 }
-enum PaymentActionType{
-    Buy='buy',
-    Update='update'
+enum PaymentActionType {
+    Buy = 'buy',
+    Update = 'update',
 }
 export interface Subscription {
     id: number;
@@ -30,6 +30,8 @@ export interface Subscription {
     attributes: {
         isCancelled: boolean;
     };
+    price: string;
+    period: string;
 }
 export interface Plan {
     id: string;
@@ -66,11 +68,13 @@ class billingService {
         }
     }
 
-    public async updatePlans() {
+    public async getPlans(): Promise<Plan[]> {
         try {
-            const response = await HTTPService.get(`${ENDPOINT}/billing/plans`);
+            const response = await HTTPService.get(
+                `${ENDPOINT}/billing/plans/v2`
+            );
             const { plans } = response.data;
-            setData(LS_KEYS.PLANS, plans);
+            return plans;
         } catch (e) {
             logError(e, 'failed to get plans');
         }
@@ -83,12 +87,12 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            logError(e, 'failed to get user\'s subscription details');
+            logError(e, "failed to get user's subscription details");
         }
     }
 
@@ -98,8 +102,12 @@ class billingService {
             // await this.stripe.redirectToCheckout({
             //     sessionId: response.data.sessionID,
             // });
-            const paymentToken =await getPaymentToken();
-            await this.redirectToPayments(paymentToken, productID, PaymentActionType.Buy);
+            const paymentToken = await getPaymentToken();
+            await this.redirectToPayments(
+                paymentToken,
+                productID,
+                PaymentActionType.Buy
+            );
         } catch (e) {
             logError(e, 'unable to buy subscription');
             throw e;
@@ -139,8 +147,12 @@ class billingService {
             //         }
             //         break;
             // }
-            const paymentToken =await getPaymentToken();
-            await this.redirectToPayments(paymentToken, productID, PaymentActionType.Update);
+            const paymentToken = await getPaymentToken();
+            await this.redirectToPayments(
+                paymentToken,
+                productID,
+                PaymentActionType.Update
+            );
         } catch (e) {
             logError(e, 'subscription update failed');
             throw e;
@@ -160,7 +172,7 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
@@ -178,7 +190,7 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
@@ -196,12 +208,12 @@ class billingService {
             },
             {
                 'X-Auth-Token': getToken(),
-            },
+            }
         );
     }
 
     public async verifySubscription(
-        sessionID: string = null,
+        sessionID: string = null
     ): Promise<Subscription> {
         try {
             const response = await HTTPService.post(
@@ -214,7 +226,7 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
@@ -225,7 +237,11 @@ class billingService {
         }
     }
 
-    public async redirectToPayments(paymentToken:string, productID:string, action:string) {
+    public async redirectToPayments(
+        paymentToken: string,
+        productID: string,
+        action: string
+    ) {
         try {
             window.location.href = `${getPaymentsUrl()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&rootURL=${
                 window.location.origin
@@ -243,7 +259,7 @@ class billingService {
                 null,
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             window.location.href = response.data.url;
         } catch (e) {
@@ -259,7 +275,7 @@ class billingService {
                 { startTime: 0, endTime: Date.now() * 1000 },
                 {
                     'X-Auth-Token': getToken(),
-                },
+                }
             );
             return convertToHumanReadable(response.data.usage);
         } catch (e) {

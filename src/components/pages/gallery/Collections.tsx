@@ -3,9 +3,7 @@ import { SetDialogMessage } from 'components/MessageDialog';
 import NavigationButton, {
     SCROLL_DIRECTION,
 } from 'components/NavigationButton';
-import React, {
-    useEffect, useRef, useState,
-} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Collection, CollectionType } from 'services/collectionService';
 import { User } from 'services/userService';
@@ -26,7 +24,7 @@ interface CollectionProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     startLoadingBar: () => void;
     searchMode: boolean;
-    collectionFilesCount: Map<number, number>
+    collectionFilesCount: Map<number, number>;
 }
 
 const Container = styled.div`
@@ -38,7 +36,7 @@ const Container = styled.div`
     position: relative;
     padding: 0 24px;
 
-    @media(max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * 4}px) {
         padding: 0 4px;
     }
 `;
@@ -58,7 +56,8 @@ const Chip = styled.button<{ active: boolean }>`
     padding-left: 24px;
     margin: 3px;
     border: none;
-    background-color: ${(props) => (props.active ? '#fff' : 'rgba(255, 255, 255, 0.3)')};
+    background-color: ${(props) =>
+        props.active ? '#fff' : 'rgba(255, 255, 255, 0.3)'};
     outline: none !important;
     &:hover {
         background-color: ${(props) => !props.active && '#bbbbbb'};
@@ -71,9 +70,11 @@ const Chip = styled.button<{ active: boolean }>`
 
 export default function Collections(props: CollectionProps) {
     const { selected, collections, selectCollection } = props;
-    const [selectedCollectionID, setSelectedCollectionID] = useState<number>(null);
+    const [selectedCollectionID, setSelectedCollectionID] =
+        useState<number>(null);
     const collectionRef = useRef<HTMLDivElement>(null);
-    const [collectionShareModalView, setCollectionShareModalView] = useState(false);
+    const [collectionShareModalView, setCollectionShareModalView] =
+        useState(false);
     const [scrollObj, setScrollObj] = useState<{
         scrollLeft?: number;
         scrollWidth?: number;
@@ -82,7 +83,8 @@ export default function Collections(props: CollectionProps) {
 
     const updateScrollObj = () => {
         if (collectionRef.current) {
-            const { scrollLeft, scrollWidth, clientWidth } = collectionRef.current;
+            const { scrollLeft, scrollWidth, clientWidth } =
+                collectionRef.current;
             setScrollObj({ scrollLeft, scrollWidth, clientWidth });
         }
     };
@@ -126,10 +128,13 @@ export default function Collections(props: CollectionProps) {
     const renderTooltip = (collectionID) => {
         const fileCount = props.collectionFilesCount?.get(collectionID);
         return (
-            <Tooltip style={{
-                padding: '0',
-                paddingBottom: '5px',
-            }} id="button-tooltip" {...props}>
+            <Tooltip
+                style={{
+                    padding: '0',
+                    paddingBottom: '5px',
+                }}
+                id="button-tooltip"
+                {...props}>
                 <div
                     {...props}
                     style={{
@@ -139,8 +144,7 @@ export default function Collections(props: CollectionProps) {
                         color: '#ddd',
                         borderRadius: 3,
                         fontSize: '12px',
-                    }}
-                >
+                    }}>
                     {fileCount} {fileCount > 1 ? 'items' : 'item'}
                 </div>
             </Tooltip>
@@ -155,7 +159,7 @@ export default function Collections(props: CollectionProps) {
                     onHide={() => setCollectionShareModalView(false)}
                     collection={getSelectedCollection(
                         selectedCollectionID,
-                        props.collections,
+                        props.collections
                     )}
                     syncWithRemote={props.syncWithRemote}
                 />
@@ -181,35 +185,45 @@ export default function Collections(props: CollectionProps) {
                                 key={item.id}
                                 placement="top"
                                 delay={{ show: 250, hide: 400 }}
-                                overlay={renderTooltip(item.id)}
-                            >
+                                overlay={renderTooltip(item.id)}>
                                 <Chip
-
                                     active={selected === item.id}
-                                    onClick={clickHandler(item)}
-                                >
+                                    onClick={clickHandler(item)}>
                                     {item.name}
                                     {item.type !== CollectionType.favorites &&
-                                        item.owner.id === user?.id ? (<OverlayTrigger
+                                    item.owner.id === user?.id ? (
+                                        <OverlayTrigger
                                             rootClose
                                             trigger="click"
                                             placement="bottom"
-                                            overlay={collectionOptions}
-                                        >
+                                            overlay={collectionOptions}>
                                             <OptionIcon
-                                                onClick={() => setSelectedCollectionID(item.id)}
+                                                onClick={() =>
+                                                    setSelectedCollectionID(
+                                                        item.id
+                                                    )
+                                                }
                                             />
-                                        </OverlayTrigger>) : (<div style={{
-                                            display: 'inline-block',
-                                            width: '24px',
-                                        }}
-                                        />)}
+                                        </OverlayTrigger>
+                                    ) : (
+                                        <div
+                                            style={{
+                                                display: 'inline-block',
+                                                width: '24px',
+                                            }}
+                                        />
+                                    )}
                                 </Chip>
                             </OverlayTrigger>
                         ))}
                     </Wrapper>
                     {scrollObj.scrollLeft <
-                        scrollObj.scrollWidth - scrollObj.clientWidth && (<NavigationButton scrollDirection={SCROLL_DIRECTION.RIGHT} onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)} />)}
+                        scrollObj.scrollWidth - scrollObj.clientWidth && (
+                        <NavigationButton
+                            scrollDirection={SCROLL_DIRECTION.RIGHT}
+                            onClick={scrollCollection(SCROLL_DIRECTION.RIGHT)}
+                        />
+                    )}
                 </Container>
             </>
         )

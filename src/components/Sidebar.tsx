@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
-import billingService, { Subscription } from 'services/billingService';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getToken } from 'utils/common/key';
@@ -14,6 +13,7 @@ import {
     isOnFreePlan,
     isSubscriptionCancelled,
     isSubscribed,
+    convertToHumanReadable,
 } from 'utils/billingUtil';
 
 import isElectron from 'is-electron';
@@ -21,7 +21,7 @@ import { Collection } from 'services/collectionService';
 import { useRouter } from 'next/router';
 import LinkButton from './pages/gallery/LinkButton';
 import { downloadApp } from 'utils/common';
-import { logoutUser } from 'services/userService';
+import { getUserDetails, logoutUser } from 'services/userService';
 import { LogoImage } from 'pages/_app';
 import { SetDialogMessage } from './MessageDialog';
 import EnteSpinner from './EnteSpinner';
@@ -31,11 +31,12 @@ import ExportModal from './ExportModal';
 import { SetLoading } from 'pages/gallery';
 import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
+import { Subscription } from 'services/billingService';
 
 interface Props {
     collections: Collection[];
     setDialogMessage: SetDialogMessage;
-    setLoading: SetLoading,
+    setLoading: SetLoading;
     showPlanSelectorModal: () => void;
 }
 export default function Sidebar(props: Props) {
@@ -55,16 +56,23 @@ export default function Sidebar(props: Props) {
             if (!isOpen) {
                 return;
             }
-            const usage = await billingService.getUsage();
-
-            SetUsage(usage);
-            setSubscription(getUserSubscription());
+            const userDetails = await getUserDetails();
+            setUser({ ...user, email: userDetails.email });
+            SetUsage(convertToHumanReadable(userDetails.usage));
+            setSubscription(userDetails.subscription);
+            setData(LS_KEYS.USER, {
+                ...getData(LS_KEYS.USER),
+                email: userDetails.email,
+            });
+            setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
         };
         main();
     }, [isOpen]);
 
     function openFeedbackURL() {
-        const feedbackURL: string = `${getEndpoint()}/users/feedback?token=${encodeURIComponent(getToken())}`;
+        const feedbackURL: string = `${getEndpoint()}/users/feedback?token=${encodeURIComponent(
+            getToken()
+        )}`;
         const win = window.open(feedbackURL, '_blank');
         win.focus();
     }
@@ -105,9 +113,13 @@ export default function Sidebar(props: Props) {
         <Menu
             isOpen={isOpen}
             onStateChange={(state) => setIsOpen(state.isOpen)}
-            itemListElement="div"
-        >
-            <div style={{ display: 'flex', outline: 'none', textAlign: 'center' }}>
+            itemListElement="div">
+            <div
+                style={{
+                    display: 'flex',
+                    outline: 'none',
+                    textAlign: 'center',
+                }}>
                 <LogoImage
                     style={{ height: '24px', padding: '3px' }}
                     alt="logo"
@@ -119,11 +131,16 @@ export default function Sidebar(props: Props) {
                     outline: 'none',
                     color: 'rgb(45, 194, 98)',
                     fontSize: '16px',
-                }}
-            >
+                }}>
                 {user?.email}
             </div>
-            <div style={{ flex: 1, overflow: 'auto', outline: 'none', paddingTop: '0' }}>
+            <div
+                style={{
+                    flex: 1,
+                    overflow: 'auto',
+                    outline: 'none',
+                    paddingTop: '0',
+                }}>
                 <div style={{ outline: 'none' }}>
                     <div style={{ display: 'flex' }}>
                         <h5 style={{ margin: '4px 0 12px 2px' }}>
@@ -134,15 +151,15 @@ export default function Sidebar(props: Props) {
                         {isSubscriptionActive(subscription) ? (
                             isOnFreePlan(subscription) ? (
                                 constants.FREE_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime,
+                                    subscription?.expiryTime
                                 )
                             ) : isSubscriptionCancelled(subscription) ? (
                                 constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime,
+                                    subscription?.expiryTime
                                 )
                             ) : (
                                 constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
-                                    subscription?.expiryTime,
+                                    subscription?.expiryTime
                                 )
                             )
                         ) : (
@@ -152,11 +169,10 @@ export default function Sidebar(props: Props) {
                             variant="outline-success"
                             block
                             size="sm"
-                            onClick={onManageClick}
-                        >
-                            {isSubscribed(subscription) ?
-                                constants.MANAGE :
-                                constants.SUBSCRIBE}
+                            onClick={onManageClick}>
+                            {isSubscribed(subscription)
+                                ? constants.MANAGE
+                                : constants.SUBSCRIBE}
                         </Button>
                     </div>
                 </div>
@@ -169,7 +185,7 @@ export default function Sidebar(props: Props) {
                         {usage ? (
                             constants.USAGE_INFO(
                                 usage,
-                                Number(convertBytesToGBs(subscription?.storage)),
+                                Number(convertBytesToGBs(subscription?.storage))
                             )
                         ) : (
                             <div style={{ textAlign: 'center' }}>
@@ -194,29 +210,28 @@ export default function Sidebar(props: Props) {
                 />
                 <LinkButton
                     style={{ marginTop: '30px' }}
-                    onClick={openFeedbackURL}
-                >
+                    onClick={openFeedbackURL}>
                     {constants.REQUEST_FEATURE}
                 </LinkButton>
                 <LinkButton
                     style={{ marginTop: '30px' }}
-                    onClick={openSupportMail}
-                >
+                    onClick={openSupportMail}>
                     {constants.SUPPORT}
                 </LinkButton>
                 <>
                     <RecoveryKeyModal
                         show={recoverModalView}
                         onHide={() => setRecoveryModalView(false)}
-                        somethingWentWrong={() => props.setDialogMessage({
-                            title: constants.RECOVER_KEY_GENERATION_FAILED,
-                            close: { variant: 'danger' },
-                        })}
+                        somethingWentWrong={() =>
+                            props.setDialogMessage({
+                                title: constants.RECOVER_KEY_GENERATION_FAILED,
+                                close: { variant: 'danger' },
+                            })
+                        }
                     />
                     <LinkButton
                         style={{ marginTop: '30px' }}
-                        onClick={() => setRecoveryModalView(true)}
-                    >
+                        onClick={() => setRecoveryModalView(true)}>
                         {constants.DOWNLOAD_RECOVERY_KEY}
                     </LinkButton>
                 </>
@@ -230,8 +245,7 @@ export default function Sidebar(props: Props) {
                     />
                     <LinkButton
                         style={{ marginTop: '30px' }}
-                        onClick={() => setTwoFactorModalView(true)}
-                    >
+                        onClick={() => setTwoFactorModalView(true)}>
                         {constants.TWO_FACTOR}
                     </LinkButton>
                 </>
@@ -240,18 +254,32 @@ export default function Sidebar(props: Props) {
                     onClick={() => {
                         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
                         router.push('change-password');
-                    }}
-                >
+                    }}>
                     {constants.CHANGE_PASSWORD}
                 </LinkButton>
+                <LinkButton
+                    style={{ marginTop: '30px' }}
+                    onClick={() => {
+                        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
+                        router.push('change-email');
+                    }}>
+                    {constants.UPDATE_EMAIL}
+                </LinkButton>
                 <>
-                    <ExportModal show={exportModalView} onHide={() => setExportModalView(false)} usage={usage} />
-                    <LinkButton style={{ marginTop: '30px' }} onClick={exportFiles}>
+                    <ExportModal
+                        show={exportModalView}
+                        onHide={() => setExportModalView(false)}
+                        usage={usage}
+                    />
+                    <LinkButton
+                        style={{ marginTop: '30px' }}
+                        onClick={exportFiles}>
                         <div style={{ display: 'flex' }}>
-                            {constants.EXPORT}<div style={{ width: '20px' }} />
-                            {exportService.isExportInProgress() &&
+                            {constants.EXPORT}
+                            <div style={{ width: '20px' }} />
+                            {exportService.isExportInProgress() && (
                                 <InProgressIcon />
-                            }
+                            )}
                         </div>
                     </LinkButton>
                 </>
@@ -266,18 +294,19 @@ export default function Sidebar(props: Props) {
                 <LinkButton
                     variant="danger"
                     style={{ marginTop: '30px' }}
-                    onClick={() => props.setDialogMessage({
-                        title: `${constants.CONFIRM} ${constants.LOGOUT}`,
-                        content: constants.LOGOUT_MESSAGE,
-                        staticBackdrop: true,
-                        proceed: {
-                            text: constants.LOGOUT,
-                            action: logoutUser,
-                            variant: 'danger',
-                        },
-                        close: { text: constants.CANCEL },
-                    })}
-                >
+                    onClick={() =>
+                        props.setDialogMessage({
+                            title: `${constants.CONFIRM} ${constants.LOGOUT}`,
+                            content: constants.LOGOUT_MESSAGE,
+                            staticBackdrop: true,
+                            proceed: {
+                                text: constants.LOGOUT,
+                                action: logoutUser,
+                                variant: 'danger',
+                            },
+                            close: { text: constants.CANCEL },
+                        })
+                    }>
                     {constants.LOGOUT}
                 </LinkButton>
                 <div
@@ -287,6 +316,6 @@ export default function Sidebar(props: Props) {
                     }}
                 />
             </div>
-        </Menu >
+        </Menu>
     );
 }

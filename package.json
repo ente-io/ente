@@ -9,8 +9,7 @@
     "build-analyze": "ANALYZE=true next build",
     "postbuild": "next export",
     "start": "next start",
-    "lint-staged": "lint-staged",
-    "postinstall": "husky install"
+    "prepare": "husky install"
   },
   "dependencies": {
     "@ente-io/next-with-workbox": "^1.0.3",
@@ -18,7 +17,7 @@
     "@stripe/stripe-js": "^1.13.2",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
     "@typescript-eslint/parser": "^4.25.0",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "bootstrap": "^4.5.2",
     "chrono-node": "^2.2.6",
     "comlink": "^4.3.0",
@@ -32,6 +31,7 @@
     "heic2any": "^0.0.3",
     "http-proxy-middleware": "^1.0.5",
     "is-electron": "^2.2.0",
+    "jszip": "3.7.1",
     "libsodium-wrappers": "^0.7.8",
     "localforage": "^1.9.0",
     "next": "^10.2.3",
@@ -62,7 +62,6 @@
     "@next/bundle-analyzer": "^9.5.3",
     "@types/debounce-promise": "^3.1.3",
     "@types/libsodium-wrappers": "^0.7.8",
-    "@types/localforage": "^0.0.34",
     "@types/node": "^14.6.4",
     "@types/photoswipe": "^4.1.1",
     "@types/react": "^16.9.49",
@@ -74,20 +73,17 @@
     "babel-plugin-styled-components": "^1.11.1",
     "eslint": "^7.27.0",
     "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-react": "^7.23.2",
-    "husky": "^6.0.0",
-    "lint-staged": "^11.0.0",
+    "husky": "^7.0.1",
+    "lint-staged": "^11.1.2",
+    "prettier": "2.3.2",
     "typescript": "^4.1.3"
   },
   "standard": {
     "parser": "babel-eslint"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx}": "eslint"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn run lint-staged"
-    }
+    "src/**/*.{js,jsx,ts,tsx}": ["eslint --fix","prettier --write --ignore-unknown"]
   }
 }

@@ -8,7 +8,8 @@
         "plugin:react/recommended",
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
-        "google"
+        "google",
+        "prettier"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -23,13 +24,7 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "indent": [
-            "error",
-            4,
-            {
-                "SwitchCase": 1
-            }
-        ],
+        "indent":"off",
         "class-methods-use-this": "off",
         "react/prop-types": "off",
         "react/display-name": "off",
@@ -48,7 +43,8 @@
             "error",
             "always"
         ],
-        "space-before-function-paren": "off"
+        "space-before-function-paren": "off",
+        "operator-linebreak":["error","after", { "overrides": { "?": "before", ":": "before" } }]
     },
     "settings": {
         "react": {

@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import billingService, { Plan, Subscription } from 'services/billingService';
 import {
     convertBytesToGBs,
-    getPlans,
     getUserSubscription,
     isUserSubscribedPlan,
     isSubscriptionCancelled,
@@ -16,6 +15,7 @@ import {
     hasStripeSubscription,
     hasPaidSubscription,
     isOnFreePlan,
+    planForSubscription,
 } from 'utils/billingUtil';
 import { reverseString } from 'utils/common';
 import { SetDialogMessage } from 'components/MessageDialog';
@@ -25,7 +25,7 @@ import { DeadCenter, SetLoading } from 'pages/gallery';
 
 export const PlanIcon = styled.div<{ selected: boolean }>`
     border-radius: 20px;
-    width: 250px;
+    width: 220px;
     border: 2px solid #333;
     padding: 30px;
     margin: 10px;
@@ -55,7 +55,7 @@ export const PlanIcon = styled.div<{ selected: boolean }>`
     }
 
     &:hover {
-        transform: scale(1.2);
+        transform: scale(1.1);
         background-color: #ffffff11;
     }
 
@@ -76,18 +76,33 @@ enum PLAN_PERIOD {
 }
 function PlanSelector(props: Props) {
     const subscription: Subscription = getUserSubscription();
-    const plans = getPlans();
+    const [plans, setPlans] = useState<Plan[]>(null);
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
     const togglePeriod = () => {
-        setPlanPeriod((prevPeriod) => (prevPeriod === PLAN_PERIOD.MONTH ?
-            PLAN_PERIOD.YEAR :
-            PLAN_PERIOD.MONTH));
+        setPlanPeriod((prevPeriod) =>
+            prevPeriod === PLAN_PERIOD.MONTH
+                ? PLAN_PERIOD.YEAR
+                : PLAN_PERIOD.MONTH
+        );
     };
     useEffect(() => {
-        if (!plans && props.modalView) {
+        if (props.modalView) {
             const main = async () => {
                 props.setLoading(true);
-                await billingService.updatePlans();
+                let plans = await billingService.getPlans();
+
+                const planNotListed =
+                    plans.filter((plan) =>
+                        isUserSubscribedPlan(plan, subscription)
+                    ).length === 0;
+                if (
+                    subscription &&
+                    !isOnFreePlan(subscription) &&
+                    planNotListed
+                ) {
+                    plans = [planForSubscription(subscription), ...plans];
+                }
+                setPlans(plans);
                 props.setLoading(false);
             };
             main();
@@ -108,7 +123,7 @@ function PlanSelector(props: Props) {
         } else if (hasStripeSubscription(subscription)) {
             props.setDialogMessage({
                 title: `${constants.CONFIRM} ${reverseString(
-                    constants.UPDATE_SUBSCRIPTION,
+                    constants.UPDATE_SUBSCRIPTION
                 )}`,
                 content: constants.UPDATE_SUBSCRIPTION_MESSAGE,
                 staticBackdrop: true,
@@ -119,7 +134,7 @@ function PlanSelector(props: Props) {
                         plan,
                         props.setDialogMessage,
                         props.setLoading,
-                        props.closeModal,
+                        props.closeModal
                     ),
                     variant: 'success',
                 },
@@ -148,16 +163,15 @@ function PlanSelector(props: Props) {
                 key={plan.stripeID}
                 className="subscription-plan-selector"
                 selected={isUserSubscribedPlan(plan, subscription)}
-            >
+                onClick={async () => await onPlanSelect(plan)}>
                 <div>
                     <span
                         style={{
                             color: '#ECECEC',
                             fontWeight: 900,
-                            fontSize: '72px',
-                            lineHeight: '72px',
-                        }}
-                    >
+                            fontSize: '40px',
+                            lineHeight: '40px',
+                        }}>
                         {convertBytesToGBs(plan.storage, 0)}
                     </span>
                     <span
@@ -165,27 +179,32 @@ function PlanSelector(props: Props) {
                             color: '#858585',
                             fontSize: '24px',
                             fontWeight: 900,
-                        }}
-                    >
+                        }}>
                         {' '}
-                    GB
+                        GB
                     </span>
                 </div>
                 <div
                     className="bold-text"
-                    style={{ color: '#aaa', lineHeight: '36px', fontSize: '20px' }}
-                >
+                    style={{
+                        color: '#aaa',
+                        lineHeight: '36px',
+                        fontSize: '20px',
+                    }}>
                     {`${plan.price} / ${plan.period}`}
                 </div>
                 <Button
                     variant="outline-success"
                     block
-                    style={{ marginTop: '30px' }}
-                    disabled={isUserSubscribedPlan(plan, subscription)}
-                    onClick={async () => (await onPlanSelect(plan))}
-                >
+                    style={{
+                        marginTop: '20px',
+                        fontSize: '14px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
+                    disabled={isUserSubscribedPlan(plan, subscription)}>
                     {constants.CHOOSE_PLAN_BTN}
-                    <ArrowEast style={{ marginLeft: '10px' }} />
+                    <ArrowEast style={{ marginLeft: '5px' }} />
                 </Button>
             </PlanIcon>
         ));
@@ -196,19 +215,18 @@ function PlanSelector(props: Props) {
             size="xl"
             centered
             backdrop={hasPaidSubscription(subscription) ? 'true' : 'static'}
-        >
+            contentClassName="plan-selector-modal-content">
             <Modal.Header closeButton>
                 <Modal.Title
                     style={{
                         marginLeft: '12px',
                         width: '100%',
                         textAlign: 'center',
-                    }}
-                >
+                    }}>
                     <span>
-                        {hasPaidSubscription(subscription) ?
-                            constants.MANAGE_PLAN :
-                            constants.CHOOSE_PLAN}
+                        {hasPaidSubscription(subscription)
+                            ? constants.MANAGE_PLAN
+                            : constants.CHOOSE_PLAN}
                     </span>
                 </Modal.Title>
             </Modal.Header>
@@ -217,22 +235,23 @@ function PlanSelector(props: Props) {
                     <div style={{ display: 'flex' }}>
                         <span
                             className="bold-text"
-                            style={{ fontSize: '20px' }}
-                        >
+                            style={{ fontSize: '16px' }}>
                             {constants.MONTHLY}
                         </span>
 
                         <Form.Switch
                             checked={planPeriod === PLAN_PERIOD.YEAR}
                             id="plan-period-toggler"
-                            style={{ margin: '-4px 0 20px 15px' }}
+                            style={{
+                                margin: '-4px 0 20px 15px',
+                                fontSize: '10px',
+                            }}
                             className="custom-switch-md"
                             onChange={togglePeriod}
                         />
                         <span
                             className="bold-text"
-                            style={{ fontSize: '20px' }}
-                        >
+                            style={{ fontSize: '16px' }}>
                             {constants.YEARLY}
                         </span>
                     </div>
@@ -243,9 +262,8 @@ function PlanSelector(props: Props) {
                         justifyContent: 'space-around',
                         flexWrap: 'wrap',
                         minHeight: '212px',
-                        margin: '24px 0',
-                    }}
-                >
+                        margin: '5px 0',
+                    }}>
                     {plans && PlanIcons}
                 </div>
                 <DeadCenter style={{ marginBottom: '30px' }}>
@@ -254,55 +272,55 @@ function PlanSelector(props: Props) {
                             {isSubscriptionCancelled(subscription) ? (
                                 <LinkButton
                                     variant="success"
-                                    onClick={() => props.setDialogMessage({
-                                        title:
-                                                constants.CONFIRM_ACTIVATE_SUBSCRIPTION,
-                                        content: constants.ACTIVATE_SUBSCRIPTION_MESSAGE(
-                                            subscription.expiryTime,
-                                        ),
-                                        staticBackdrop: true,
-                                        proceed: {
-                                            text:
-                                                    constants.ACTIVATE_SUBSCRIPTION,
-                                            action: activateSubscription.bind(
-                                                null,
-                                                props.setDialogMessage,
-                                                props.closeModal,
-                                                props.setLoading,
-                                            ),
-                                            variant: 'success',
-                                        },
-                                        close: {
-                                            text: constants.CANCEL,
-                                        },
-                                    })}
-                                >
+                                    onClick={() =>
+                                        props.setDialogMessage({
+                                            title: constants.CONFIRM_ACTIVATE_SUBSCRIPTION,
+                                            content:
+                                                constants.ACTIVATE_SUBSCRIPTION_MESSAGE(
+                                                    subscription.expiryTime
+                                                ),
+                                            staticBackdrop: true,
+                                            proceed: {
+                                                text: constants.ACTIVATE_SUBSCRIPTION,
+                                                action: activateSubscription.bind(
+                                                    null,
+                                                    props.setDialogMessage,
+                                                    props.closeModal,
+                                                    props.setLoading
+                                                ),
+                                                variant: 'success',
+                                            },
+                                            close: {
+                                                text: constants.CANCEL,
+                                            },
+                                        })
+                                    }>
                                     {constants.ACTIVATE_SUBSCRIPTION}
                                 </LinkButton>
                             ) : (
                                 <LinkButton
                                     variant="danger"
-                                    onClick={() => props.setDialogMessage({
-                                        title:
-                                                constants.CONFIRM_CANCEL_SUBSCRIPTION,
-                                        content: constants.CANCEL_SUBSCRIPTION_MESSAGE(),
-                                        staticBackdrop: true,
-                                        proceed: {
-                                            text:
-                                                    constants.CANCEL_SUBSCRIPTION,
-                                            action: cancelSubscription.bind(
-                                                null,
-                                                props.setDialogMessage,
-                                                props.closeModal,
-                                                props.setLoading,
-                                            ),
-                                            variant: 'danger',
-                                        },
-                                        close: {
-                                            text: constants.CANCEL,
-                                        },
-                                    })}
-                                >
+                                    onClick={() =>
+                                        props.setDialogMessage({
+                                            title: constants.CONFIRM_CANCEL_SUBSCRIPTION,
+                                            content:
+                                                constants.CANCEL_SUBSCRIPTION_MESSAGE(),
+                                            staticBackdrop: true,
+                                            proceed: {
+                                                text: constants.CANCEL_SUBSCRIPTION,
+                                                action: cancelSubscription.bind(
+                                                    null,
+                                                    props.setDialogMessage,
+                                                    props.closeModal,
+                                                    props.setLoading
+                                                ),
+                                                variant: 'danger',
+                                            },
+                                            close: {
+                                                text: constants.CANCEL,
+                                            },
+                                        })
+                                    }>
                                     {constants.CANCEL_SUBSCRIPTION}
                                 </LinkButton>
                             )}
@@ -311,10 +329,9 @@ function PlanSelector(props: Props) {
                                 onClick={updatePaymentMethod.bind(
                                     null,
                                     props.setDialogMessage,
-                                    props.setLoading,
+                                    props.setLoading
                                 )}
-                                style={{ marginTop: '20px' }}
-                            >
+                                style={{ marginTop: '20px' }}>
                                 {constants.MANAGEMENT_PORTAL}
                             </LinkButton>
                         </>
@@ -322,11 +339,13 @@ function PlanSelector(props: Props) {
                         <LinkButton
                             variant="primary"
                             onClick={props.closeModal}
-                            style={{ color: 'rgb(121, 121, 121)', marginTop: '20px' }}
-                        >
-                            {isOnFreePlan(subscription) ?
-                                constants.SKIP :
-                                constants.CLOSE}
+                            style={{
+                                color: 'rgb(121, 121, 121)',
+                                marginTop: '20px',
+                            }}>
+                            {isOnFreePlan(subscription)
+                                ? constants.SKIP
+                                : constants.CLOSE}
                         </LinkButton>
                     )}
                 </DeadCenter>

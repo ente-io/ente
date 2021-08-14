@@ -34,7 +34,7 @@ function CollectionShare(props: Props) {
     const [loading, setLoading] = useState(false);
     const collectionShare = async (
         { email }: formValues,
-        { resetForm, setFieldError }: FormikHelpers<formValues>,
+        { resetForm, setFieldError }: FormikHelpers<formValues>
     ) => {
         try {
             setLoading(true);
@@ -89,8 +89,7 @@ function CollectionShare(props: Props) {
                         fontSize: '1.2em',
                         fontWeight: 900,
                     }}
-                    onClick={() => collectionUnshare(sharee)}
-                >
+                    onClick={() => collectionUnshare(sharee)}>
                     -
                 </Button>
             </td>
@@ -100,8 +99,7 @@ function CollectionShare(props: Props) {
         <MessageDialog
             show={props.show}
             onHide={props.onHide}
-            attributes={{ title: constants.SHARE_COLLECTION }}
-        >
+            attributes={{ title: constants.SHARE_COLLECTION }}>
             <DeadCenter style={{ width: '85%', margin: 'auto' }}>
                 <h6>{constants.SHARE_WITH_PEOPLE}</h6>
                 <p />
@@ -114,8 +112,7 @@ function CollectionShare(props: Props) {
                     })}
                     validateOnChange={false}
                     validateOnBlur={false}
-                    onSubmit={collectionShare}
-                >
+                    onSubmit={collectionShare}>
                     {({
                         values,
                         errors,
@@ -128,15 +125,14 @@ function CollectionShare(props: Props) {
                                 <Form.Group
                                     as={Col}
                                     xs={10}
-                                    controlId="formHorizontalEmail"
-                                >
+                                    controlId="formHorizontalEmail">
                                     <Form.Control
                                         type="email"
                                         placeholder={constants.ENTER_EMAIL}
                                         value={values.email}
                                         onChange={handleChange('email')}
                                         isInvalid={Boolean(
-                                            touched.email && errors.email,
+                                            touched.email && errors.email
                                         )}
                                         autoFocus
                                         disabled={loading}
@@ -148,8 +144,7 @@ function CollectionShare(props: Props) {
                                 <Form.Group
                                     as={Col}
                                     xs={2}
-                                    controlId="formHorizontalEmail"
-                                >
+                                    controlId="formHorizontalEmail">
                                     <SubmitButton
                                         loading={loading}
                                         inline

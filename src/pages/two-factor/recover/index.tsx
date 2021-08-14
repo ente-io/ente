@@ -2,20 +2,20 @@ import React, { useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import CryptoWorker from 'utils/crypto';
+import CryptoWorker, { B64EncryptionResult } from 'utils/crypto';
 import SingleInputForm from 'components/SingleInputForm';
 import MessageDialog from 'components/MessageDialog';
 import Container from 'components/Container';
 import { Card, Button } from 'react-bootstrap';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
-import { B64EncryptionResult } from 'services/uploadService';
 import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
 
 export default function Recover() {
     const router = useRouter();
     const [messageDialogView, SetMessageDialogView] = useState(false);
-    const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] = useState<B64EncryptionResult>(null);
+    const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
+        useState<B64EncryptionResult>(null);
     const [sessionID, setSessionID] = useState(null);
     useEffect(() => {
         router.prefetch('/gallery');
@@ -41,7 +41,7 @@ export default function Recover() {
             const twoFactorSecret: string = await cryptoWorker.decryptB64(
                 encryptedTwoFactorSecret.encryptedData,
                 encryptedTwoFactorSecret.nonce,
-                await cryptoWorker.fromHex(recoveryKey),
+                await cryptoWorker.fromHex(recoveryKey)
             );
             const resp = await removeTwoFactor(sessionID, twoFactorSecret);
             const { keyAttributes, encryptedToken, token, id } = resp;
@@ -63,13 +63,10 @@ export default function Recover() {
     return (
         <>
             <Container>
-                <Card
-                    style={{ minWidth: '320px' }}
-                    className="text-center"
-                >
+                <Card style={{ minWidth: '320px' }} className="text-center">
                     <Card.Body style={{ padding: '40px 30px' }}>
                         <Card.Title style={{ marginBottom: '32px' }}>
-                            <LogoImg src='/icon.svg' />
+                            <LogoImg src="/icon.svg" />
                             {constants.RECOVER_TWO_FACTOR}
                         </Card.Title>
                         <SingleInputForm
@@ -83,12 +80,10 @@ export default function Recover() {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 marginTop: '12px',
-                            }}
-                        >
+                            }}>
                             <Button
                                 variant="link"
-                                onClick={() => SetMessageDialogView(true)}
-                            >
+                                onClick={() => SetMessageDialogView(true)}>
                                 {constants.NO_RECOVERY_KEY}
                             </Button>
                             <Button variant="link" onClick={router.back}>

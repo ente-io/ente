@@ -6,8 +6,7 @@ export default function SadFace(props) {
             xmlns="http://www.w3.org/2000/svg"
             height={props.height}
             viewBox={props.viewBox}
-            width={props.width}
-        >
+            width={props.width}>
             <path d="M0 0h24v24H0V0z" fill="none" />
             <circle cx="15.5" cy="9.5" r="1.5" />
             <circle cx="8.5" cy="9.5" r="1.5" />

@@ -10,7 +10,8 @@ export enum LS_KEYS {
     IS_FIRST_LOGIN = 'isFirstLogin',
     JUST_SIGNED_UP = 'justSignedUp',
     SHOW_BACK_BUTTON = 'showBackButton',
-    EXPORT = 'export'
+    EXPORT = 'export',
+    AnonymizeUserID = 'anonymizedUserID',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {
