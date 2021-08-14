@@ -68,7 +68,8 @@ export default function MessageDialog({
                                     attributes.close?.variant ?? 'secondary'
                                 }`}
                                 onClick={() => {
-                                    attributes.close?.action();
+                                    attributes.close.action &&
+                                        attributes.close?.action();
                                     props.onHide();
                                 }}
                                 style={{
