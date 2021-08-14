@@ -1,7 +1,6 @@
 import constants from 'utils/strings/constants';
 import billingService, {
     FREE_PLAN,
-    PAYMENT_INTENT_STATUS,
     Plan,
     Subscription,
 } from 'services/billingService';
@@ -92,51 +91,41 @@ export async function updateSubscription(
     closePlanSelectorModal: () => null
 ) {
     try {
-        setLoading(true);
         await billingService.updateSubscription(plan.stripeID);
-        setLoading(false);
-        await new Promise((resolve) => setTimeout(() => resolve(null), 400));
-        setDialogMessage({
-            title: constants.SUCCESS,
-            content: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
-                getUserSubscription().expiryTime
-            ),
-            close: { variant: 'success' },
-        });
     } catch (err) {
-        switch (err?.message) {
-            case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
-                setDialogMessage({
-                    title: constants.UPDATE_PAYMENT_METHOD,
-                    content: constants.UPDATE_PAYMENT_METHOD_MESSAGE,
-                    staticBackdrop: true,
-                    proceed: {
-                        text: constants.UPDATE_PAYMENT_METHOD,
-                        variant: 'success',
-                        action: updatePaymentMethod.bind(
-                            null,
+        // switch (err?.message) {
+        // case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
+        //     setDialogMessage({
+        //         title: constants.UPDATE_PAYMENT_METHOD,
+        //         content: constants.UPDATE_PAYMENT_METHOD_MESSAGE,
+        //         staticBackdrop: true,
+        //         proceed: {
+        //             text: constants.UPDATE_PAYMENT_METHOD,
+        //             variant: 'success',
+        //             action: updatePaymentMethod.bind(
+        //                 null,
 
-                            setDialogMessage,
-                            setLoading
-                        ),
-                    },
-                    close: { text: constants.CANCEL },
-                });
-                break;
-            case CustomError.SUBSCRIPTION_VERIFICATION_ERROR:
-                setDialogMessage({
-                    title: constants.ERROR,
-                    content: constants.SUBSCRIPTION_VERIFICATION_FAILED,
-                    close: { variant: 'danger' },
-                });
-                break;
-            default:
-                setDialogMessage({
-                    title: constants.ERROR,
-                    content: constants.SUBSCRIPTION_PURCHASE_FAILED,
-                    close: { variant: 'danger' },
-                });
-        }
+        //                 setDialogMessage,
+        //                 setLoading
+        //             ),
+        //         },
+        //         close: { text: constants.CANCEL },
+        //     });
+        //     break;
+        // case CustomError.SUBSCRIPTION_VERIFICATION_ERROR:
+        //     setDialogMessage({
+        //         title: constants.ERROR,
+        //         content: constants.SUBSCRIPTION_VERIFICATION_FAILED,
+        //         close: { variant: 'danger' },
+        //     });
+        //     break;
+        // default:
+        setDialogMessage({
+            title: constants.ERROR,
+            content: constants.SUBSCRIPTION_UPDATE_FAILED,
+            close: { variant: 'danger' },
+        });
+        // }
     } finally {
         setLoading(false);
         closePlanSelectorModal();

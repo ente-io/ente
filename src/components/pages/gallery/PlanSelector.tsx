@@ -143,7 +143,7 @@ function PlanSelector(props: Props) {
         } else {
             try {
                 props.setLoading(true);
-                await billingService.buyPaidSubscription(plan.stripeID);
+                await billingService.buySubscription(plan.stripeID);
             } catch (e) {
                 props.setDialogMessage({
                     title: constants.ERROR,
