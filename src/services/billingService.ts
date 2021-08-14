@@ -227,7 +227,9 @@ class billingService {
 
     public async redirectToPayments(paymentToken:string, productID:string, action:string) {
         try {
-            window.location.href =`${getPaymentsUrl()}?productID=${productID}&payment-token=${paymentToken}&action=${action}`;
+            window.location.href = `${getPaymentsUrl()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&rootURL=${
+                window.location.origin
+            }`;
         } catch (e) {
             logError(e, 'unable to get payments url');
             throw e;
