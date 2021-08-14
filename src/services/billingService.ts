@@ -98,10 +98,6 @@ class billingService {
 
     public async buyPaidSubscription(productID) {
         try {
-            // const response = await this.createCheckoutSession(productID);
-            // await this.stripe.redirectToCheckout({
-            //     sessionId: response.data.sessionID,
-            // });
             const paymentToken = await getPaymentToken();
             await this.redirectToPayments(
                 paymentToken,
@@ -198,18 +194,6 @@ class billingService {
             logError(e);
             throw e;
         }
-    }
-
-    private async createCheckoutSession(productID) {
-        return HTTPService.get(
-            `${ENDPOINT}/billing/stripe/checkout-session`,
-            {
-                productID,
-            },
-            {
-                'X-Auth-Token': getToken(),
-            }
-        );
     }
 
     public async verifySubscription(
