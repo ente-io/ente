@@ -74,6 +74,7 @@ export default function Verify() {
                     twoFactorSessionID,
                     isTwoFactorEnabled: true,
                 });
+                setIsFirstLogin(true);
                 router.push('/two-factor/verify');
                 return;
             }
