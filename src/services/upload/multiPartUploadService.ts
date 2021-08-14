@@ -78,9 +78,8 @@ export async function uploadStreamInParts(
 }
 
 function getRandomProgressPerPartUpload(uploadPartCount: number) {
-    const percentPerPart = Math.round(
-        RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount
-    );
+    const percentPerPart =
+        RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
     return percentPerPart;
 }
 
