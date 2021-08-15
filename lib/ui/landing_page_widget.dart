@@ -155,7 +155,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
           child: Material(
             type: MaterialType.transparency,
             child: Text(
-              "sign up",
+              AppLocalizations.of(context).sign_up,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,

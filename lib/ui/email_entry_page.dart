@@ -201,7 +201,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 height: 64,
                 padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
                 child: button(
-                  "sign up",
+                  AppLocalizations.of(context).sign_up,
                   onPressed: _isFormValid()
                       ? () {
                           if (!isValidEmail(_email)) {
