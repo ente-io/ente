@@ -15,6 +15,7 @@ import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EmailEntryPage extends StatefulWidget {
   EmailEntryPage({Key key}) : super(key: key);
@@ -65,7 +66,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         child: Material(
           type: MaterialType.transparency,
           child: Text(
-            "sign up",
+            AppLocalizations.of(context).sign_up,
             style: TextStyle(
               fontSize: 18,
               letterSpacing: 0.6,

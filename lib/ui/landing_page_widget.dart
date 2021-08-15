@@ -8,6 +8,8 @@ import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/payment/subscription_page.dart';
+import 'package:photos/ui/subscription_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LandingPageWidget extends StatefulWidget {
   const LandingPageWidget({Key key}) : super(key: key);
@@ -110,7 +112,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                     child: Material(
                       type: MaterialType.transparency,
                       child: Text(
-                        "log in",
+                        AppLocalizations.of(context).log_in,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,

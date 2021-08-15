@@ -4,6 +4,7 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,6 +28,9 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_logging/super_logging.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'l10n/l10n.dart';
 
 final _logger = Logger("main");
 
@@ -241,6 +245,13 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       home: EnteApp._homeWidget,
       debugShowCheckedModeBanner: false,
       builder: EasyLoading.init(),
+      supportedLocales: L10n.all,
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
     );
   }
 
