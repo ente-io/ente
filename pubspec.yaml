@@ -39,6 +39,8 @@ dependencies:
     path: thirdparty/extended_image
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_cache_manager: ^3.0.1
   flutter_easyloading: ^3.0.0
   flutter_email_sender: ^5.0.0
@@ -143,6 +145,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  # Flutter localization
+  generate: true
 
   # To add assets to your application, add an assets section, like this:
   # assets:
