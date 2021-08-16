@@ -50,6 +50,7 @@ const FileList = styled.ul`
 `;
 
 const SectionTitle = styled.div`
+    margin-top: 10px;
     display: flex;
     justify-content: space-between;
     padding: 0 20px;
@@ -62,7 +63,7 @@ interface ResultSectionProps {
     fileUploadResultMap: Map<FileUploadResults, string[]>;
     fileUploadResult: FileUploadResults;
     sectionTitle;
-    sectionInfo;
+    sectionInfo?: any;
     infoHeight: number;
 }
 const ResultSection = (props: ResultSectionProps) => {
@@ -81,10 +82,43 @@ const ResultSection = (props: ResultSectionProps) => {
             <Content
                 collapsed={!listView}
                 height={fileList.length * 33 + props.infoHeight}>
-                <p>{props.sectionInfo}</p>
+                {props.sectionInfo && <p>{props.sectionInfo}</p>}
                 <FileList>
                     {fileList.map((fileName) => (
                         <li key={fileName}>{fileName}</li>
+                    ))}
+                </FileList>
+            </Content>
+        </>
+    );
+};
+
+interface InProgressProps {
+    sectionTitle: string;
+    fileProgressStatuses: FileProgresses[];
+}
+const InProgressSection = (props: InProgressProps) => {
+    const [listView, setListView] = useState(true);
+    const fileList = props.fileProgressStatuses;
+    if (!fileList?.length) {
+        return <></>;
+    }
+    if (!fileList?.length) {
+        return <></>;
+    }
+    return (
+        <>
+            <SectionTitle onClick={() => setListView(!listView)}>
+                {' '}
+                {props.sectionTitle}{' '}
+                {listView ? <ExpandLess /> : <ExpandMore />}
+            </SectionTitle>
+            <Content collapsed={!listView} height={fileList.length * 35}>
+                <FileList>
+                    {fileList.map(({ fileName, progress }) => (
+                        <li key={fileName} style={{ marginTop: '12px' }}>
+                            {constants.FILE_UPLOAD_PROGRESS(fileName, progress)}
+                        </li>
                     ))}
                 </FileList>
             </Content>
@@ -152,26 +186,15 @@ export default function UploadProgress(props: Props) {
                         variant="upload-progress-bar"
                     />
                 )}
-                {fileProgressStatuses.length > 0 && (
-                    <FileList>
-                        {fileProgressStatuses.map(({ fileName, progress }) => (
-                            <li key={fileName} style={{ marginTop: '12px' }}>
-                                {props.uploadStage === UPLOAD_STAGES.FINISH
-                                    ? fileName
-                                    : constants.FILE_UPLOAD_PROGRESS(
-                                          fileName,
-                                          progress
-                                      )}
-                            </li>
-                        ))}
-                    </FileList>
-                )}
+                <InProgressSection
+                    fileProgressStatuses={fileProgressStatuses}
+                    sectionTitle={constants.INPROGRESS_UPLOADS}
+                />
 
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.UPLOADED}
                     sectionTitle={constants.SUCCESSFUL_UPLOADS}
-                    sectionInfo={constants.SUCCESS_INFO}
                     infoHeight={32}
                 />
 
