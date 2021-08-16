@@ -3,7 +3,7 @@ import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import CryptoWorker, {
-    setSessionKeys,
+    SaveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
     B64EncryptionResult,
 } from 'utils/crypto';
@@ -11,6 +11,7 @@ import { getActualKey } from 'utils/common/key';
 import { setKeys, UpdatedKey } from 'services/userService';
 import SetPasswordForm from 'components/SetPasswordForm';
 import { AppContext } from 'pages/_app';
+import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 
 export interface KEK {
     key: string;
@@ -64,7 +65,7 @@ export default function Generate() {
             key
         );
 
-        setSessionKeys(key);
+        await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
         redirectToGallery();
     };
     const redirectToGallery = () => {

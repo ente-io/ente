@@ -5,7 +5,7 @@ import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
-    setSessionKeys,
+    SaveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
 } from 'utils/crypto';
@@ -73,7 +73,7 @@ export default function Generate() {
                 keyAttributes,
                 masterKey
             );
-            await setSessionKeys(masterKey);
+            await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
             setJustSignedUp(true);
             setRecoveryModalView(true);
         } catch (e) {

@@ -3,7 +3,7 @@ import constants from 'utils/strings/constants';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
-import CryptoWorker, { setSessionKeys } from 'utils/crypto';
+import CryptoWorker, { SaveKeyInSessionStore } from 'utils/crypto';
 import SingleInputForm from 'components/SingleInputForm';
 import MessageDialog from 'components/MessageDialog';
 import Container from 'components/Container';
@@ -11,6 +11,7 @@ import { Card, Button } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
+import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 
 export default function Recover() {
     const router = useRouter();
@@ -40,7 +41,8 @@ export default function Recover() {
                 keyAttributes.masterKeyDecryptionNonce,
                 await cryptoWorker.fromHex(recoveryKey)
             );
-            setSessionKeys(masterKey);
+            await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
+
             router.push('/changePassword');
         } catch (e) {
             logError(e);

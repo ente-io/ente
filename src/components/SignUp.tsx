@@ -13,11 +13,12 @@ import { Button } from 'react-bootstrap';
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
-    setSessionKeys,
+    SaveKeyInSessionStore,
 } from 'utils/crypto';
 import { setJustSignedUp } from 'utils/storage';
 import LogoImg from './LogoImg';
 import { logError } from 'utils/sentry';
+import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 
 interface FormValues {
     email: string;
@@ -56,7 +57,10 @@ export default function SignUp(props: SignUpProps) {
                     masterKey
                 );
 
-                await setSessionKeys(masterKey);
+                await SaveKeyInSessionStore(
+                    SESSION_KEYS.ENCRYPTION_KEY,
+                    masterKey
+                );
                 setJustSignedUp(true);
                 router.push('/verify');
             } else {
