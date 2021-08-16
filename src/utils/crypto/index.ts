@@ -96,10 +96,13 @@ export async function generateAndSaveIntermediateKeyAttributes(
     return intermediateKeyAttributes;
 }
 
-export const setSessionKeys = async (key: string) => {
+export const SaveKeyInSessionStore = async (
+    keyType: SESSION_KEYS,
+    key: string
+) => {
     const cryptoWorker = await new CryptoWorker();
     const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
-    setKey(SESSION_KEYS.ENCRYPTION_KEY, sessionKeyAttributes);
+    setKey(keyType, sessionKeyAttributes);
 };
 
 export const getRecoveryKey = async () => {

@@ -30,6 +30,10 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    token: string;
+    encryptedToken: string;
+    isTwoFactorEnabled: boolean;
+    twoFactorSessionID: string;
 }
 export interface EmailVerificationResponse {
     id: number;
