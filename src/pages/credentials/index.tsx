@@ -31,7 +31,7 @@ export default function Credentials() {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (
             (!user?.token && !user?.encryptedToken) ||
-            !keyAttributes?.memLimit
+            (keyAttributes && !keyAttributes.memLimit)
         ) {
             clearData();
             router.push('/');

@@ -13,12 +13,14 @@ import {
     logoutUser,
     clearFiles,
     EmailVerificationResponse,
+    User,
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
+import { KeyAttributes } from 'types';
 
 interface formValues {
     ott: string;
@@ -36,9 +38,14 @@ export default function Verify() {
             router.prefetch('/twoFactor/verify');
             router.prefetch('/credentials');
             router.prefetch('/generate');
-            const user = getData(LS_KEYS.USER);
+            const user: User = getData(LS_KEYS.USER);
+            const keyAttributes: KeyAttributes = getData(
+                LS_KEYS.KEY_ATTRIBUTES
+            );
             if (!user?.email) {
                 router.push('/');
+            } else if (keyAttributes.encryptedKey) {
+                router.push('credentials');
             } else {
                 setEmail(user.email);
             }
@@ -71,7 +78,6 @@ export default function Verify() {
                 router.push('/two-factor/verify');
             } else {
                 setData(LS_KEYS.USER, {
-                    ...getData(LS_KEYS.USER),
                     email,
                     token,
                     encryptedToken,

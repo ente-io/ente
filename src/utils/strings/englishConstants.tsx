@@ -498,8 +498,8 @@ const englishConstants = {
         ' unable to upload these files because of network issue, you can retry upload these files',
     SKIPPED_INFO: 'these files already existed in the album',
     UNSUPPORTED_INFO: 'these files are currently not supported by ente',
-    SUCCESS_INFO: 'successfully backed-up memories',
     BLOCKED_UPLOADS: 'blocked uploads',
+    INPROGRESS_UPLOADS: 'upload in progress',
 };
 
 export default englishConstants;
