@@ -44,7 +44,7 @@ export default function Verify() {
             );
             if (!user?.email) {
                 router.push('/');
-            } else if (keyAttributes.encryptedKey) {
+            } else if (keyAttributes?.encryptedKey) {
                 router.push('credentials');
             } else {
                 setEmail(user.email);
