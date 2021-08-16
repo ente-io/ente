@@ -67,6 +67,7 @@ export default function Verify() {
                     twoFactorSessionID,
                     isTwoFactorEnabled: true,
                 });
+                setIsFirstLogin(true);
                 router.push('/two-factor/verify');
             } else {
                 setData(LS_KEYS.USER, {
