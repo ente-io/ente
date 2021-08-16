@@ -1,7 +1,7 @@
 import { FILE_TYPE } from 'services/fileService';
 import { logError } from 'utils/sentry';
 import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from './uploadService';
-import FileType, { FileTypeResult } from 'file-type/browser';
+import FileType from 'file-type/browser';
 
 const TYPE_VIDEO = 'video';
 const TYPE_IMAGE = 'image';
@@ -33,7 +33,7 @@ export async function getFileType(
         default:
             fileType = FILE_TYPE.OTHERS;
     }
-    return fileType;
+    return { fileType, mimeType };
 }
 
 /*
@@ -53,10 +53,13 @@ export function getFileOriginalName(file: globalThis.File) {
 }
 
 async function getMimeType(reader: FileReader, file: globalThis.File) {
-    let result: FileTypeResult = null;
     const fileChunkBlob = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
-    const initialFiledata = await getUint8ArrayView(reader, fileChunkBlob);
-    result = await FileType.fromBuffer(initialFiledata);
+    return getMimeTypeFromBlob(reader, fileChunkBlob);
+}
+
+export async function getMimeTypeFromBlob(reader: FileReader, fileBlob: Blob) {
+    const initialFiledata = await getUint8ArrayView(reader, fileBlob);
+    const result = await FileType.fromBuffer(initialFiledata);
     return result?.mime;
 }
 

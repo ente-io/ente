@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'services/fileService';
 import { CustomError } from 'utils/common/errorUtil';
-import { fileIsHEIC, convertHEIC2JPEG } from 'utils/file';
+import { convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from './readFileService';
 
@@ -13,14 +13,15 @@ const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
 export async function generateThumbnail(
     reader: FileReader,
     file: globalThis.File,
-    fileType: FILE_TYPE
+    fileType: FILE_TYPE,
+    isHEIC: boolean
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
         let hasStaticThumbnail = false;
         let canvas = document.createElement('canvas');
         try {
             if (fileType === FILE_TYPE.IMAGE) {
-                canvas = await generateImageThumbnail(file);
+                canvas = await generateImageThumbnail(file, isHEIC);
             } else {
                 canvas = await generateVideoThumbnail(file);
             }
@@ -38,14 +39,17 @@ export async function generateThumbnail(
     }
 }
 
-export async function generateImageThumbnail(file: globalThis.File) {
+export async function generateImageThumbnail(
+    file: globalThis.File,
+    isHEIC: boolean
+) {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
 
     let imageURL = null;
     let timeout = null;
 
-    if (fileIsHEIC(file.name)) {
+    if (isHEIC) {
         file = new globalThis.File([await convertHEIC2JPEG(file)], null, null);
     }
     let image = new Image();

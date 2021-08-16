@@ -19,6 +19,7 @@ import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { CustomError, parseError } from 'utils/common/errorUtil';
 import { MetadataMap } from './uploadManager';
+import { fileIsHEIC } from 'utils/file';
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
 export const MULTIPART_PART_SIZE = 20 * 1024 * 1024;
@@ -102,14 +103,18 @@ class UploadService {
         rawFile: globalThis.File,
         collection: Collection
     ): Promise<FileInMemory> {
-        const fileType = await getFileType(reader, rawFile);
+        const { fileType, mimeType } = await getFileType(reader, rawFile);
         if (fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
+
+        const isHEIC = fileIsHEIC(mimeType);
+
         const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
             reader,
             rawFile,
-            fileType
+            fileType,
+            isHEIC
         );
 
         const originalName = getFileOriginalName(rawFile);
