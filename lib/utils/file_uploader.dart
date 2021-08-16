@@ -346,9 +346,19 @@ class FileUploader {
         // Update across all collections
         await FilesDB.instance.updateUploadedFileAcrossCollections(remoteFile);
       } else {
+        final encryptedFileKeyData = CryptoUtil.encryptSync(
+          fileAttributes.key,
+          CollectionsService.instance.getCollectionKey(collectionID),
+        );
+        final encryptedKey =
+            Sodium.bin2base64(encryptedFileKeyData.encryptedData);
+        final keyDecryptionNonce =
+            Sodium.bin2base64(encryptedFileKeyData.nonce);
         remoteFile = await _uploadFile(
           file,
           collectionID,
+          encryptedKey,
+          keyDecryptionNonce,
           fileAttributes,
           fileObjectKey,
           fileDecryptionHeader,
@@ -401,6 +411,8 @@ class FileUploader {
   Future<File> _uploadFile(
     File file,
     int collectionID,
+    String encryptedKey,
+    String keyDecryptionNonce,
     EncryptionResult fileAttributes,
     String fileObjectKey,
     String fileDecryptionHeader,
@@ -412,12 +424,6 @@ class FileUploader {
     String metadataDecryptionHeader, {
     int attempt = 1,
   }) async {
-    final encryptedFileKeyData = CryptoUtil.encryptSync(
-      fileAttributes.key,
-      CollectionsService.instance.getCollectionKey(collectionID),
-    );
-    final encryptedKey = Sodium.bin2base64(encryptedFileKeyData.encryptedData);
-    final keyDecryptionNonce = Sodium.bin2base64(encryptedFileKeyData.nonce);
     final request = {
       "collectionID": collectionID,
       "encryptedKey": encryptedKey,
@@ -464,6 +470,8 @@ class FileUploader {
         return _uploadFile(
           file,
           collectionID,
+          encryptedKey,
+          keyDecryptionNonce,
           fileAttributes,
           fileObjectKey,
           fileDecryptionHeader,
