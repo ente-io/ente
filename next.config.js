@@ -11,20 +11,22 @@ const gitSha = cp.execSync('git rev-parse --short HEAD', {
     encoding: 'utf8',
 });
 
-module.exports = withSentryConfig(withWorkbox(withBundleAnalyzer({
-    future: {
-        webpack5: true,
-    },
-    env: {
-        SENTRY_RELEASE: gitSha,
-    },
-    workbox: {
-        swSrc: 'src/serviceWorker.js',
-        exclude: [/manifest\.json$/i],
-    },
-    webpack: (config) => {
-        config.output.hotUpdateMainFilename =
-            'static/webpack/[fullhash].[runtime].hot-update.json';
-        return config;
-    },
-})), { release: gitSha });
+module.exports = withSentryConfig(
+    withWorkbox(
+        withBundleAnalyzer({
+            env: {
+                SENTRY_RELEASE: gitSha,
+            },
+            workbox: {
+                swSrc: 'src/serviceWorker.js',
+                exclude: [/manifest\.json$/i],
+            },
+            webpack: (config) => {
+                config.output.hotUpdateMainFilename =
+                    'static/webpack/[fullhash].[runtime].hot-update.json';
+                return config;
+            },
+        })
+    ),
+    { release: gitSha }
+);
