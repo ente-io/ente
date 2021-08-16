@@ -12,7 +12,6 @@ import {
     getOtt,
     logoutUser,
     clearFiles,
-    isTokenValid,
     EmailVerificationResponse,
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
@@ -40,12 +39,6 @@ export default function Verify() {
             const user = getData(LS_KEYS.USER);
             if (!user?.email) {
                 router.push('/');
-            } else if (user.token) {
-                if (await isTokenValid()) {
-                    router.push('/credentials');
-                } else {
-                    logoutUser();
-                }
             } else {
                 setEmail(user.email);
             }
