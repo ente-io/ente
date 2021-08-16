@@ -20,10 +20,13 @@ export default function Recover() {
     useEffect(() => {
         router.prefetch('/gallery');
         const user = getData(LS_KEYS.USER);
-        if (!user?.email) {
+        if (!user.isTwoFactorEnabled && (user.encryptedToken || user.token)) {
+            router.push('/credential');
+        } else if (!user.email || !user.twoFactorSessionID) {
             router.push('/');
+        } else {
+            setSessionID(user.twoFactorSessionID);
         }
-        setSessionID(user.twoFactorSessionID);
         const main = async () => {
             const resp = await recoverTwoFactor(user.twoFactorSessionID);
             setEncryptedTwoFactorSecret({

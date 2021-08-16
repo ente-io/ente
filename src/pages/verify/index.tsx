@@ -68,23 +68,24 @@ export default function Verify() {
                     isTwoFactorEnabled: true,
                 });
                 router.push('/two-factor/verify');
-                return;
-            }
-            setData(LS_KEYS.USER, {
-                ...getData(LS_KEYS.USER),
-                email,
-                token,
-                encryptedToken,
-                id,
-            });
-            keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-            clearFiles();
-            setIsFirstLogin(true);
-            if (keyAttributes?.encryptedKey) {
-                clearKeys();
-                router.push('/credentials');
             } else {
-                router.push('/generate');
+                setData(LS_KEYS.USER, {
+                    ...getData(LS_KEYS.USER),
+                    email,
+                    token,
+                    encryptedToken,
+                    id,
+                    isTwoFactorEnabled: false,
+                });
+                keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                clearFiles();
+                setIsFirstLogin(true);
+                if (keyAttributes?.encryptedKey) {
+                    clearKeys();
+                    router.push('/credentials');
+                } else {
+                    router.push('/generate');
+                }
             }
         } catch (e) {
             if (e?.status === 401) {
