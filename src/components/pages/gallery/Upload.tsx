@@ -3,8 +3,8 @@ import UploadService, {
     FileWithCollection,
     UPLOAD_STAGES,
 } from 'services/uploadService';
-import { createAlbum } from 'services/collectionService';
 import { getLocalFiles } from 'services/fileService';
+import { createAlbum, syncCollections } from 'services/collectionService';
 import constants from 'utils/strings/constants';
 import { SetDialogMessage } from 'components/MessageDialog';
 import UploadProgress from './UploadProgress';
@@ -186,8 +186,12 @@ export default function Upload(props: Props) {
                 collectionWiseFiles = getCollectionWiseFiles();
             }
             try {
+                const existingCollection = await syncCollections();
                 for (const [collectionName, files] of collectionWiseFiles) {
-                    const collection = await createAlbum(collectionName);
+                    const collection = await createAlbum(
+                        collectionName,
+                        existingCollection
+                    );
                     for (const file of files) {
                         filesWithCollectionToUpload.push({ collection, file });
                     }
