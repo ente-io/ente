@@ -491,7 +491,7 @@ const englishConstants = {
 
     RETRY_FAILED: 'retry failed uploads',
     FAILED_UPLOADS: 'failed uploads ',
-    SKIPPED_FILES: 'duplicate files',
+    SKIPPED_FILES: 'ignored uploads',
     UNSUPPORTED_FILES: 'unsupported files',
     SUCCESSFUL_UPLOADS: 'successful uploads',
     SKIPPED_INFO:
