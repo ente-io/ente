@@ -959,9 +959,8 @@ class UploadService {
     ) {
         try {
             const streamEncryptedFileReader = file.getReader();
-            const percentPerPart = Math.round(
-                RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount
-            );
+            const percentPerPart =
+                RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
             const resParts = [];
             for (const [
                 index,
