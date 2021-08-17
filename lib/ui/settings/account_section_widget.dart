@@ -11,7 +11,7 @@ import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/recovery_key_dialog.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
-import 'package:photos/ui/subscription_page.dart';
+import 'package:photos/ui/payment/subscription_page.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';

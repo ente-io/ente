@@ -12,7 +12,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/subscription_page.dart';
+import 'package:photos/ui/payment/subscription_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';

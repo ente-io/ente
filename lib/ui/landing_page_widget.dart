@@ -6,7 +6,7 @@ import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/login_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
-import 'package:photos/ui/subscription_page.dart';
+import 'package:photos/ui/payment/subscription_page.dart';
 
 class LandingPageWidget extends StatefulWidget {
   const LandingPageWidget({Key key}) : super(key: key);
