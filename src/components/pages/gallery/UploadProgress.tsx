@@ -32,8 +32,7 @@ const Content = styled.div<{
 }>`
     overflow: hidden;
     height: ${(props) => (props.collapsed ? '0px' : props.height + 'px')};
-    transition: ${(props) => 'height ' + 0.001 * props.height + 's ease-out'};
-    margin-bottom: 20px;
+    transition: height 0.2s ease-out;
     & > p {
         padding-left: 35px;
         margin: 0;
@@ -42,6 +41,7 @@ const Content = styled.div<{
 const FileList = styled.ul`
     padding-left: 50px;
     margin-top: 5px;
+    margin-bottom: 0px;
     & > li {
         padding-left: 10px;
         margin-bottom: 10px;
@@ -50,13 +50,17 @@ const FileList = styled.ul`
 `;
 
 const SectionTitle = styled.div`
-    margin-top: 10px;
     display: flex;
     justify-content: space-between;
     padding: 0 20px;
     color: #eee;
     font-size: 20px;
     cursor: pointer;
+`;
+
+const Section = styled.div`
+    margin-top: 10px;
+    margin-bottom: 10px;
 `;
 
 interface ResultSectionProps {
@@ -73,7 +77,7 @@ const ResultSection = (props: ResultSectionProps) => {
         return <></>;
     }
     return (
-        <>
+        <Section>
             <SectionTitle onClick={() => setListView(!listView)}>
                 {' '}
                 {props.sectionTitle}{' '}
@@ -89,7 +93,7 @@ const ResultSection = (props: ResultSectionProps) => {
                     ))}
                 </FileList>
             </Content>
-        </>
+        </Section>
     );
 };
 
@@ -107,7 +111,7 @@ const InProgressSection = (props: InProgressProps) => {
         return <></>;
     }
     return (
-        <>
+        <Section>
             <SectionTitle onClick={() => setListView(!listView)}>
                 {' '}
                 {props.sectionTitle}{' '}
@@ -116,13 +120,13 @@ const InProgressSection = (props: InProgressProps) => {
             <Content collapsed={!listView} height={fileList.length * 35}>
                 <FileList>
                     {fileList.map(({ fileName, progress }) => (
-                        <li key={fileName} style={{ marginTop: '12px' }}>
+                        <li key={fileName}>
                             {constants.FILE_UPLOAD_PROGRESS(fileName, progress)}
                         </li>
                     ))}
                 </FileList>
             </Content>
-        </>
+        </Section>
     );
 };
 
