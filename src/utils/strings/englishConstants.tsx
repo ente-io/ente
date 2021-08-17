@@ -103,20 +103,22 @@ const englishConstants = {
     FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
     FILE_UPLOAD_PROGRESS: (name: string, progress: number) => (
         <div id={name}>
-            <strong>{name}</strong>
+            {name}
             {' - '}
-            {(() => {
-                switch (progress) {
-                    case -1:
-                        return 'failed';
-                    case -2:
-                        return 'already uploaded, skipping...';
-                    case -3:
-                        return ',unsupported file format, skipping....';
-                    default:
-                        return `${progress}%`;
-                }
-            })()}
+            <span style={{ color: '#eee' }}>
+                {(() => {
+                    switch (progress) {
+                        case -1:
+                            return 'failed';
+                        case -2:
+                            return 'already uploaded, skipping...';
+                        case -3:
+                            return 'unsupported file format, skipping....';
+                        default:
+                            return `${progress}%`;
+                    }
+                })()}
+            </span>
         </div>
     ),
     SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew it',
