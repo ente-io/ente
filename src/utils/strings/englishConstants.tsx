@@ -496,10 +496,10 @@ const englishConstants = {
     SUCCESSFUL_UPLOADS: 'successful uploads',
     FAILED_INFO:
         ' unable to upload these files because of network issue, you can retry upload these files',
-    SKIPPED_INFO: 'these files already existed in the album',
+    SKIPPED_INFO: 'these files already exist in the album',
     UNSUPPORTED_INFO: 'these files are currently not supported by ente',
     BLOCKED_UPLOADS: 'blocked uploads',
-    INPROGRESS_UPLOADS: 'upload in progress',
+    INPROGRESS_UPLOADS: 'uploads in progress',
 };
 
 export default englishConstants;
