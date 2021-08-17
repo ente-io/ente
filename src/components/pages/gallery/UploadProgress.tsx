@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
 import constants from 'utils/strings/constants';
 import AlertBanner from './AlertBanner';
+import { Collapse } from 'react-collapse';
 
 interface Props {
     fileCounter;
@@ -25,19 +26,6 @@ interface FileProgresses {
     progress: number;
 }
 
-const Content = styled.div<{
-    collapsed: boolean;
-    sm?: boolean;
-    height?: number;
-}>`
-    overflow: hidden;
-    height: ${(props) => (props.collapsed ? '0px' : props.height + 'px')};
-    transition: height 0.2s ease-out;
-    & > p {
-        padding-left: 35px;
-        margin: 0;
-    }
-`;
 const FileList = styled.ul`
     padding-left: 50px;
     margin-top: 5px;
@@ -59,16 +47,23 @@ const SectionTitle = styled.div`
 `;
 
 const Section = styled.div`
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin: 10px 0;
+    & > .ReactCollapse--collapse {
+        transition: height 200ms;
+    }
+`;
+const SectionInfo = styled.div`
+    margin: 4px 0;
+    text-align: justify;
+    padding-left: 35px;
+    padding-right: 55px;
 `;
 
 interface ResultSectionProps {
     fileUploadResultMap: Map<FileUploadResults, string[]>;
     fileUploadResult: FileUploadResults;
-    sectionTitle;
+    sectionTitle: any;
     sectionInfo?: any;
-    infoHeight: number;
 }
 const ResultSection = (props: ResultSectionProps) => {
     const [listView, setListView] = useState(false);
@@ -83,16 +78,16 @@ const ResultSection = (props: ResultSectionProps) => {
                 {props.sectionTitle}{' '}
                 {listView ? <ExpandLess /> : <ExpandMore />}
             </SectionTitle>
-            <Content
-                collapsed={!listView}
-                height={fileList.length * 33 + 5 + props.infoHeight}>
-                {props.sectionInfo && <p>{props.sectionInfo}</p>}
+            <Collapse isOpened={listView}>
+                {props.sectionInfo && (
+                    <SectionInfo>{props.sectionInfo}</SectionInfo>
+                )}
                 <FileList>
                     {fileList.map((fileName) => (
                         <li key={fileName}>{fileName}</li>
                     ))}
                 </FileList>
-            </Content>
+            </Collapse>
         </Section>
     );
 };
@@ -117,7 +112,7 @@ const InProgressSection = (props: InProgressProps) => {
                 {props.sectionTitle}{' '}
                 {listView ? <ExpandLess /> : <ExpandMore />}
             </SectionTitle>
-            <Content collapsed={!listView} height={fileList.length * 35}>
+            <Collapse isOpened={listView}>
                 <FileList>
                     {fileList.map(({ fileName, progress }) => (
                         <li key={fileName}>
@@ -125,7 +120,7 @@ const InProgressSection = (props: InProgressProps) => {
                         </li>
                     ))}
                 </FileList>
-            </Content>
+            </Collapse>
         </Section>
     );
 };
@@ -205,11 +200,11 @@ export default function UploadProgress(props: Props) {
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.UPLOADED}
                     sectionTitle={constants.SUCCESSFUL_UPLOADS}
-                    infoHeight={0}
                 />
 
                 {props.uploadStage === UPLOAD_STAGES.FINISH &&
                     filesNotUploaded && <NotUploadSectionHeader />}
+
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.BLOCKED}
@@ -217,28 +212,23 @@ export default function UploadProgress(props: Props) {
                     sectionInfo={constants.ETAGS_BLOCKED(
                         DESKTOP_APP_DOWNLOAD_URL
                     )}
-                    infoHeight={140}
                 />
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.FAILED}
                     sectionTitle={constants.FAILED_UPLOADS}
-                    sectionInfo={constants.FAILED_INFO}
-                    infoHeight={48}
                 />
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.SKIPPED}
                     sectionTitle={constants.SKIPPED_FILES}
                     sectionInfo={constants.SKIPPED_INFO}
-                    infoHeight={32}
                 />
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.UNSUPPORTED}
                     sectionTitle={constants.UNSUPPORTED_FILES}
                     sectionInfo={constants.UNSUPPORTED_INFO}
-                    infoHeight={32}
                 />
 
                 {props.uploadStage === UPLOAD_STAGES.FINISH && (
