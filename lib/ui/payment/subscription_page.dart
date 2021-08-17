@@ -14,6 +14,8 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/billing_questions_widget.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/payment/skip_subscription_widget.dart';
+import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import 'package:photos/ui/progress_dialog.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -267,7 +269,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
     if (widget.isOnboarding &&
         _currentSubscription.productID == kFreeProductID) {
-      widgets.addAll([_getSkipButton(_freePlan)]);
+      widgets.addAll([SkipSubscriptionWidget(freePlan: _freePlan)]);
     }
     if (_currentSubscription.productID == kFreeProductID) {
       widgets.addAll([
@@ -469,94 +471,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             isActive: true,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _getSkipButton(FreePlan plan) {
-    return Container(
-      width: double.infinity,
-      height: 64,
-      margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
-      padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
-      child: button(
-        "continue on free plan",
-        fontSize: 16,
-        onPressed: () async {
-          showToast("thank you for signing up!");
-          Bus.instance.fire(SubscriptionPurchasedEvent());
-          Navigator.of(context).popUntil((route) => route.isFirst);
-          BillingService.instance
-              .verifySubscription(kFreeProductID, "", paymentProvider: "ente");
-        },
-      ),
-    );
-  }
-}
-
-class SubscriptionPlanWidget extends StatelessWidget {
-  const SubscriptionPlanWidget({
-    Key key,
-    @required this.storage,
-    @required this.price,
-    @required this.period,
-    this.isActive = false,
-  }) : super(key: key);
-
-  final int storage;
-  final String price;
-  final String period;
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).cardColor,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 36, 10),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  color: Color(0xDFFFFFFF),
-                  child: Container(
-                    width: 100,
-                    padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
-                    child: Column(
-                      children: [
-                        Text(
-                          convertBytesToReadableFormat(storage),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Theme.of(context).cardColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Text(price + (period.isNotEmpty ? " per " + period : "")),
-              Expanded(child: Container()),
-              isActive
-                  ? Expanded(
-                      child: Icon(
-                        Icons.check_circle,
-                        color: Theme.of(context).buttonColor,
-                      ),
-                    )
-                  : Container(),
-            ],
-          ),
-          Divider(
-            height: 1,
-          ),
-        ],
       ),
     );
   }
