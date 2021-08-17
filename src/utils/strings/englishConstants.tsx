@@ -491,15 +491,14 @@ const englishConstants = {
 
     RETRY_FAILED: 'retry failed uploads',
     FAILED_UPLOADS: 'failed uploads ',
-    SKIPPED_FILES: 'duplicate files',
+    SKIPPED_FILES: 'ignored uploads',
     UNSUPPORTED_FILES: 'unsupported files',
     SUCCESSFUL_UPLOADS: 'successful uploads',
-    FAILED_INFO:
-        ' unable to upload these files because of network issue, you can retry upload these files',
-    SKIPPED_INFO: 'these files already existed in the album',
-    UNSUPPORTED_INFO: 'these files are currently not supported by ente',
+    SKIPPED_INFO:
+        'skipped these as there are files with matching names in the same album',
+    UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'blocked uploads',
-    INPROGRESS_UPLOADS: 'upload in progress',
+    INPROGRESS_UPLOADS: 'uploads in progress',
 };
 
 export default englishConstants;
