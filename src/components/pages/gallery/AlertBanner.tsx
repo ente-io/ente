@@ -6,6 +6,7 @@ interface Props {
     bannerMessage?: any;
     variant?: string;
     children?: any;
+    style?: any;
 }
 export default function AlertBanner(props: Props) {
     return (
@@ -15,15 +16,13 @@ export default function AlertBanner(props: Props) {
                 display:
                     props.bannerMessage || props.children ? 'block' : 'none',
                 textAlign: 'center',
-
                 border: 'none',
-                borderBottom: '1px solid',
                 background: 'none',
                 borderRadius: '0px',
                 color: getVariantColor(props.variant),
                 padding: 0,
-                margin: '0 25px',
-                marginBottom: '10px',
+                margin: 0,
+                ...props.style,
             }}>
             {props.bannerMessage ? props.bannerMessage : props.children}
         </Alert>

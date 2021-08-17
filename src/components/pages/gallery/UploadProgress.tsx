@@ -85,7 +85,7 @@ const ResultSection = (props: ResultSectionProps) => {
             </SectionTitle>
             <Content
                 collapsed={!listView}
-                height={fileList.length * 33 + props.infoHeight}>
+                height={fileList.length * 33 + 5 + props.infoHeight}>
                 {props.sectionInfo && <p>{props.sectionInfo}</p>}
                 <FileList>
                     {fileList.map((fileName) => (
@@ -129,6 +129,12 @@ const InProgressSection = (props: InProgressProps) => {
         </Section>
     );
 };
+
+const NotUploadSectionHeader = () => (
+    <AlertBanner variant="warning" style={{ marginTop: '30px' }}>
+        {constants.FILE_NOT_UPLOADED_LIST}
+    </AlertBanner>
+);
 
 export default function UploadProgress(props: Props) {
     const fileProgressStatuses = [] as FileProgresses[];
@@ -199,15 +205,11 @@ export default function UploadProgress(props: Props) {
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.UPLOADED}
                     sectionTitle={constants.SUCCESSFUL_UPLOADS}
-                    infoHeight={32}
+                    infoHeight={0}
                 />
 
                 {props.uploadStage === UPLOAD_STAGES.FINISH &&
-                    filesNotUploaded && (
-                        <AlertBanner variant="warning">
-                            {constants.FILE_NOT_UPLOADED_LIST}
-                        </AlertBanner>
-                    )}
+                    filesNotUploaded && <NotUploadSectionHeader />}
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
                     fileUploadResult={FileUploadResults.BLOCKED}
