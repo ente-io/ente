@@ -135,7 +135,7 @@ const GlobalStyles = createGlobalStyle`
     }
     .modal-body{
         max-height:74vh;
-        overflow:auto;
+        overflow-y:auto;
     }
     .modal-xl{
         max-width:90% !important;
