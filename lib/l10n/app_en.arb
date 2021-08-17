@@ -5,8 +5,13 @@
   },
   "log_in": "log in",
   "ok": "ok",
-  "start_backup" : "start backup",
+  "oops": "oops",
+  "@oops": {
+    "description": "Usage: 'oops, I'm sorry!'  or 'oops, verification failed'"
+  },
+  "start_backup": "start backup",
   "auth_session_expired": "session expired",
   "auth_login_again": "please login again",
-  "auth_logging_out": "logging out..."
+  "auth_logging_out": "logging out...",
+  "email_already_claimed": "this email is already in use"
 }

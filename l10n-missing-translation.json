@@ -1,9 +1,11 @@
 {
   "de": [
     "ok",
+    "oops",
     "start_backup",
     "auth_session_expired",
     "auth_login_again",
-    "auth_logging_out"
+    "auth_logging_out",
+    "email_already_claimed"
   ]
 }

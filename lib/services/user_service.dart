@@ -28,7 +28,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class UserService {
   final _dio = Network.instance.getDio();
   final _logger = Logger("UserAuthenticator");
@@ -71,7 +71,8 @@ class UserService {
     } on DioError catch (e) {
       await dialog.hide();
       if (e.response != null && e.response.statusCode == 403) {
-        showErrorDialog(context, "oops", "this email is already in use");
+        showErrorDialog(context, AppLocalizations.of(context).oops,
+            AppLocalizations.of(context).email_already_claimed);
       } else {
         showGenericErrorDialog(context);
       }
@@ -179,13 +180,14 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
-        showErrorDialog(
-            context, "oops", "verification failed, please try again");
+        showErrorDialog(context, AppLocalizations.of(context).oops,
+            "verification failed, please try again");
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(context, "oops", "verification failed, please try again");
+      showErrorDialog(context, AppLocalizations.of(context).oops,
+          "verification failed, please try again");
     }
   }
 
@@ -217,11 +219,13 @@ class UserService {
         Bus.instance.fire(EmailChangedEvent());
         return;
       }
-      showErrorDialog(context, "oops", "verification failed, please try again");
+      showErrorDialog(context, AppLocalizations.of(context).oops,
+          "verification failed, please try again");
     } on DioError catch (e) {
       await dialog.hide();
       if (e.response != null && e.response.statusCode == 403) {
-        showErrorDialog(context, "oops", "this email is already in use");
+        showErrorDialog(context, AppLocalizations.of(context).oops,
+            AppLocalizations.of(context).email_already_claimed);
       } else {
         showErrorDialog(context, "incorrect code",
             "authentication failed, please try again");
@@ -229,7 +233,8 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(context, "oops", "verification failed, please try again");
+      showErrorDialog(context, AppLocalizations.of(context).oops,
+          "verification failed, please try again");
     }
   }
 
@@ -352,7 +357,8 @@ class UserService {
       await dialog.hide();
       _logger.severe(e);
       showErrorDialog(
-          context, "oops", "authentication failed, please try again");
+          context, AppLocalizations.of(context).oops,
+          "authentication failed, please try again");
     }
   }
 
@@ -393,12 +399,14 @@ class UserService {
         );
       } else {
         showErrorDialog(
-            context, "oops", "something went wrong, please try again");
+            context, AppLocalizations.of(context).oops,
+            "something went wrong, please try again");
       }
     } catch (e) {
       _logger.severe(e);
       showErrorDialog(
-          context, "oops", "something went wrong, please try again");
+          context, AppLocalizations.of(context).oops,
+          "something went wrong, please try again");
     } finally {
       await dialog.hide();
     }
@@ -459,12 +467,14 @@ class UserService {
         );
       } else {
         showErrorDialog(
-            context, "oops", "something went wrong, please try again");
+            context, AppLocalizations.of(context).oops,
+            "something went wrong, please try again");
       }
     } catch (e) {
       _logger.severe(e);
       showErrorDialog(
-          context, "oops", "something went wrong, please try again");
+          context, AppLocalizations.of(context).oops,
+          "something went wrong, please try again");
     } finally {
       await dialog.hide();
     }
