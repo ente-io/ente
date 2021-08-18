@@ -189,6 +189,12 @@ class UploadManager {
                     removeUnnecessaryFileProps(this.existingFiles)
                 );
                 this.setFiles(this.existingFiles);
+                if (!this.existingFilesCollectionWise.has(file.collectionID)) {
+                    this.existingFilesCollectionWise.set(file.collectionID, []);
+                }
+                this.existingFilesCollectionWise
+                    .get(file.collectionID)
+                    .push(file);
             }
             if (
                 fileUploadResult === FileUploadResults.BLOCKED ||
