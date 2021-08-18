@@ -33,7 +33,12 @@ export default async function uploader(
     let file: FileInMemory = null;
     let encryptedFile: EncryptedFile = null;
     try {
-        file = await UploadService.readFile(reader, rawFile, collection);
+        file = await UploadService.readFile(
+            worker,
+            reader,
+            rawFile,
+            collection
+        );
 
         if (fileAlreadyInCollection(existingFilesInCollection, file)) {
             UIService.setFileProgress(rawFile.name, FileUploadResults.SKIPPED);
@@ -68,6 +73,7 @@ export default async function uploader(
             file: decryptedFile,
         };
     } catch (e) {
+        console.log(e);
         logError(e, 'file upload failed');
         handleError(e);
         switch (e.message) {

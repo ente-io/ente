@@ -2,7 +2,6 @@ import { FILE_TYPE } from 'services/fileService';
 import { CustomError } from 'utils/common/errorUtil';
 import { convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';
-import { getUint8ArrayView } from './readFileService';
 
 const THUMBNAIL_HEIGHT = 720;
 const MAX_ATTEMPTS = 3;
@@ -11,6 +10,7 @@ const MIN_THUMBNAIL_SIZE = 50000;
 const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
 
 export async function generateThumbnail(
+    worker,
     reader: FileReader,
     file: globalThis.File,
     fileType: FILE_TYPE,
@@ -31,7 +31,7 @@ export async function generateThumbnail(
             hasStaticThumbnail = true;
         }
         const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
-        const thumbnail = await getUint8ArrayView(reader, thumbnailBlob);
+        const thumbnail = await worker.getUint8ArrayView(thumbnailBlob);
         return { thumbnail, hasStaticThumbnail };
     } catch (e) {
         logError(e, 'Error generating thumbnail');

@@ -82,8 +82,11 @@ class DownloadManager {
 
                     const typeFromExtension =
                         file.metadata.title.split('.')[-1];
+                    const worker = await new CryptoWorker();
+
                     const mimeType =
                         (await getMimeTypeFromBlob(
+                            worker,
                             new FileReader(),
                             fileBlob
                         )) ?? typeFromExtension;
