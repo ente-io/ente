@@ -66,7 +66,7 @@ class UpdateService {
   Future<LatestVersionInfo> _getLatestVersionInfo() async {
     final response = await Network.instance
         .getDio()
-        .get("https://static.ente.io/independent-release-info.json");
+        .get("https://ente.io/release-info/independent.json");
     return LatestVersionInfo.fromMap(response.data["latestVersion"]);
   }
 
