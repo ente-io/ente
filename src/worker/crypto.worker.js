@@ -148,6 +148,7 @@ export class Crypto {
         return libsodium.fromHex(string);
     }
 
+    // temporary fix for  https://github.com/vercel/next.js/issues/25484
     async getUint8ArrayView(file) {
         try {
             return await new Promise((resolve, reject) => {
