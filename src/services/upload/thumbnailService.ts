@@ -2,6 +2,7 @@ import { FILE_TYPE } from 'services/fileService';
 import { CustomError } from 'utils/common/errorUtil';
 import { convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';
+import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
 
 const THUMBNAIL_HEIGHT = 720;
 const MAX_ATTEMPTS = 3;
@@ -18,19 +19,25 @@ export async function generateThumbnail(
     try {
         let hasStaticThumbnail = false;
         let canvas = document.createElement('canvas');
+        let thumbnail: Uint8Array;
         try {
             if (fileType === FILE_TYPE.IMAGE) {
                 canvas = await generateImageThumbnail(file, isHEIC);
             } else {
                 canvas = await generateVideoThumbnail(file);
             }
+            const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
+            thumbnail = await worker.getUint8ArrayView(thumbnailBlob);
+            if (thumbnail.length === 0) {
+                throw Error('EMPTY THUMBNAIL');
+            }
         } catch (e) {
             logError(e);
-            // ignore and set staticThumbnail
+            thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
+                c.charCodeAt(0)
+            );
             hasStaticThumbnail = true;
         }
-        const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
-        const thumbnail = await worker.getUint8ArrayView(thumbnailBlob);
         return { thumbnail, hasStaticThumbnail };
     } catch (e) {
         logError(e, 'Error generating thumbnail');
@@ -106,10 +113,10 @@ export async function generateVideoThumbnail(file: globalThis.File) {
     await new Promise((resolve, reject) => {
         let video = document.createElement('video');
         videoURL = URL.createObjectURL(file);
-        video.addEventListener('timeupdate', function () {
+        video.addEventListener('loadeddata', function () {
             try {
                 if (!video) {
-                    return;
+                    throw Error('video load failed');
                 }
                 const thumbnailWidth =
                     (video.videoWidth * THUMBNAIL_HEIGHT) / video.videoHeight;
@@ -135,7 +142,6 @@ export async function generateVideoThumbnail(file: globalThis.File) {
         });
         video.preload = 'metadata';
         video.src = videoURL;
-        video.currentTime = 3;
         timeout = setTimeout(
             () =>
                 reject(
