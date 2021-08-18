@@ -75,18 +75,7 @@ class _PaymentWebPage extends State<PaymentWebPage> {
         paymentWebToken, widget.actionType, kMobilePaymentRedirect);
     _logger.info("paymentUrl : $paymentUri");
     return WillPopScope(
-        onWillPop: () async => showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-                    title: Text('Are you sure you want to exit?'),
-                    actions: <Widget>[
-                      TextButton(
-                          child: Text('yes'),
-                          onPressed: () => Navigator.of(context).pop(true)),
-                      TextButton(
-                          child: Text('no'),
-                          onPressed: () => Navigator.of(context).pop(false)),
-                    ])),
+        onWillPop: () async => _buildPageExitWidget(context),
         child: Scaffold(
           appBar: AppBar(
             title: const Text('ente payment'),
@@ -114,10 +103,10 @@ class _PaymentWebPage extends State<PaymentWebPage> {
                       (controller, navigationAction) async {
                     var loadingUri = navigationAction.request.url;
                     _logger.info("Loading url $loadingUri");
+
+                    // handle the payment response
                     if (_isPaymentActionComplete(loadingUri)) {
-                      // handle the payment response
                       await handlePaymentResponse(loadingUri);
-                      // and cancel the request
                       return NavigationActionPolicy.CANCEL;
                     }
                     return NavigationActionPolicy.ALLOW;
@@ -153,6 +142,22 @@ class _PaymentWebPage extends State<PaymentWebPage> {
     super.dispose();
   }
 
+  // show dialog to handle accidental back press.
+  Future<bool> _buildPageExitWidget(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+                title: Text('Are you sure you want to exit?'),
+                actions: <Widget>[
+                  TextButton(
+                      child: Text('yes'),
+                      onPressed: () => Navigator.of(context).pop(true)),
+                  TextButton(
+                      child: Text('no'),
+                      onPressed: () => Navigator.of(context).pop(false)),
+                ]));
+  }
+
   bool _isPaymentActionComplete(Uri loadingUri) {
     return loadingUri.toString().startsWith(kMobilePaymentRedirect);
   }
@@ -162,8 +167,8 @@ class _PaymentWebPage extends State<PaymentWebPage> {
     _logger.info(queryParams);
     // success or fail
     var paymentStatus = queryParams['status'] ?? '';
-    var reason = queryParams['reason'] ?? '';
     if ('fail' == paymentStatus) {
+      var reason = queryParams['reason'] ?? '';
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -181,27 +186,7 @@ class _PaymentWebPage extends State<PaymentWebPage> {
       return;
       // showToast("sorry, we couldn't process your payment due to $reason");
     } else if (paymentStatus == 'success') {
-      // sessionID can be null in case of update.
-      var result = await _handlePaymentSuccess(queryParams);
-      if (result) {
-        showToast("thank you for subscribing to ente!");
-        Navigator.of(context).pop();
-      } else {
-        showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-                    title: Text('failed to verify payment status'),
-                    content: Text("please wait for sometime before retrying"),
-                    actions: <Widget>[
-                      TextButton(
-                          child: Text('ok'),
-                          onPressed: () {
-                            Navigator.of(context).pop('dialog');
-                            Navigator.of(context).pop(true);
-                          }),
-                    ]));
-        return;
-      }
+      await _handlePaymentSuccess(queryParams);
     } else {
       // should never reach here
       _logger.severe("unexpected payement status", uri.toString());
@@ -210,21 +195,46 @@ class _PaymentWebPage extends State<PaymentWebPage> {
   }
 
   // return true if verifySubscription didn't throw any exceptions
-  Future<bool> _handlePaymentSuccess(Map<String, String> queryParams) async {
+  Future<void> _handlePaymentSuccess(Map<String, String> queryParams) async {
     var checkoutSessionID = queryParams['session_id'] ?? '';
     await _dialog.show();
-    bool verifiedSuccessfully = false;
     try {
       var response = await billingService.verifySubscription(
           widget.planId, checkoutSessionID,
           paymentProvider: kStripe);
-      verifiedSuccessfully = response != null;
+      await _dialog.hide();
+      if (response != null) {
+        var content = widget.actionType == 'buy'
+            ? 'you have successfully subscribed to ente'
+            : 'your ente subscription update was successful';
+        await _showExitPageDialog(title: 'thank you', content: content);
+      } else {
+        throw Exception("verifySubscription api failed");
+      }
     } catch (error) {
       _logger.severe(error);
       await _dialog.hide();
-      verifiedSuccessfully = false;
+      await _showExitPageDialog(
+        title: 'failed to verify payment status',
+        content: 'please wait for sometime before retrying',
+      );
     }
-    await _dialog.hide();
-    return verifiedSuccessfully;
+  }
+
+  // warn the user to wait for sometime before trying another payment
+  Future<dynamic> _showExitPageDialog({String title, String content}) {
+    return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+                title: Text(title),
+                content: Text(content),
+                actions: <Widget>[
+                  TextButton(
+                      child: Text('ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop('dialog');
+                        Navigator.of(context).pop(true);
+                      }),
+                ]));
   }
 }
