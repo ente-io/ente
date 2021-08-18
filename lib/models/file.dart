@@ -1,3 +1,4 @@
+import 'package:exif/exif.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -118,6 +119,8 @@ class File {
     metadata["subType"] = asset.subTypes;
     if (fileType == FileType.video) {
       metadata["duration"] = asset.duration;
+    } else {
+      metadata["exif"] = await readExifFromFile(await asset.originFile);
     }
     metadata["hash"] = hash;
     metadata["version"] = kMetadataVersion;
