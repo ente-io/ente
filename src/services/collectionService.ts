@@ -221,15 +221,20 @@ export const getFavItemIds = async (files: File[]): Promise<Set<number>> => {
     );
 };
 
-export const createAlbum = async (albumName: string) =>
-    createCollection(albumName, CollectionType.album);
+export const createAlbum = async (
+    albumName: string,
+    existingCollection?: Collection[]
+) => createCollection(albumName, CollectionType.album, existingCollection);
 
 export const createCollection = async (
     collectionName: string,
-    type: CollectionType
+    type: CollectionType,
+    existingCollections?: Collection[]
 ): Promise<Collection> => {
     try {
-        const existingCollections = await syncCollections();
+        if (!existingCollections) {
+            existingCollections = await syncCollections();
+        }
         for (const collection of existingCollections) {
             if (collection.name === collectionName) {
                 return collection;

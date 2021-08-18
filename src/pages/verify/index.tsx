@@ -12,14 +12,15 @@ import {
     getOtt,
     logoutUser,
     clearFiles,
-    isTokenValid,
     EmailVerificationResponse,
+    User,
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
+import { KeyAttributes } from 'types';
 
 interface formValues {
     ott: string;
@@ -37,15 +38,14 @@ export default function Verify() {
             router.prefetch('/twoFactor/verify');
             router.prefetch('/credentials');
             router.prefetch('/generate');
-            const user = getData(LS_KEYS.USER);
+            const user: User = getData(LS_KEYS.USER);
+            const keyAttributes: KeyAttributes = getData(
+                LS_KEYS.KEY_ATTRIBUTES
+            );
             if (!user?.email) {
                 router.push('/');
-            } else if (user.token) {
-                if (await isTokenValid()) {
-                    router.push('/credentials');
-                } else {
-                    logoutUser();
-                }
+            } else if (keyAttributes?.encryptedKey) {
+                router.push('credentials');
             } else {
                 setEmail(user.email);
             }
@@ -74,24 +74,25 @@ export default function Verify() {
                     twoFactorSessionID,
                     isTwoFactorEnabled: true,
                 });
+                setIsFirstLogin(true);
                 router.push('/two-factor/verify');
-                return;
-            }
-            setData(LS_KEYS.USER, {
-                ...getData(LS_KEYS.USER),
-                email,
-                token,
-                encryptedToken,
-                id,
-            });
-            keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-            clearFiles();
-            setIsFirstLogin(true);
-            if (keyAttributes?.encryptedKey) {
-                clearKeys();
-                router.push('/credentials');
             } else {
-                router.push('/generate');
+                setData(LS_KEYS.USER, {
+                    email,
+                    token,
+                    encryptedToken,
+                    id,
+                    isTwoFactorEnabled: false,
+                });
+                keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                clearFiles();
+                setIsFirstLogin(true);
+                if (keyAttributes?.encryptedKey) {
+                    clearKeys();
+                    router.push('/credentials');
+                } else {
+                    router.push('/generate');
+                }
             }
         } catch (e) {
             if (e?.status === 401) {

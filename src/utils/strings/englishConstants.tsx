@@ -103,20 +103,22 @@ const englishConstants = {
     FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
     FILE_UPLOAD_PROGRESS: (name: string, progress: number) => (
         <div id={name}>
-            <strong>{name}</strong>
+            {name}
             {' - '}
-            {(() => {
-                switch (progress) {
-                    case -1:
-                        return 'failed';
-                    case -2:
-                        return 'already uploaded, skipping...';
-                    case -3:
-                        return ',unsupported file format, skipping....';
-                    default:
-                        return `${progress}%`;
-                }
-            })()}
+            <span style={{ color: '#eee' }}>
+                {(() => {
+                    switch (progress) {
+                        case -1:
+                            return 'failed';
+                        case -2:
+                            return 'already uploaded, skipping...';
+                        case -3:
+                            return 'unsupported file format, skipping....';
+                        default:
+                            return `${progress}%`;
+                    }
+                })()}
+            </span>
         </div>
     ),
     SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew it',
@@ -494,15 +496,14 @@ const englishConstants = {
 
     RETRY_FAILED: 'retry failed uploads',
     FAILED_UPLOADS: 'failed uploads ',
-    SKIPPED_FILES: 'duplicate files',
+    SKIPPED_FILES: 'ignored uploads',
     UNSUPPORTED_FILES: 'unsupported files',
     SUCCESSFUL_UPLOADS: 'successful uploads',
-    FAILED_INFO:
-        ' unable to upload these files because of network issue, you can retry upload these files',
-    SKIPPED_INFO: 'these files already existed in the album',
-    UNSUPPORTED_INFO: 'these files are currently not supported by ente',
-    SUCCESS_INFO: 'successfully backed-up memories',
+    SKIPPED_INFO:
+        'skipped these as there are files with matching names in the same album',
+    UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'blocked uploads',
+    INPROGRESS_UPLOADS: 'uploads in progress',
 };
 
 export default englishConstants;

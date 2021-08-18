@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import constants from 'utils/strings/constants';
-import { logoutUser, putAttributes } from 'services/userService';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { logoutUser, putAttributes, User } from 'services/userService';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
-    setSessionKeys,
+    SaveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
 } from 'utils/crypto';
@@ -33,29 +33,23 @@ export default function Generate() {
     useEffect(() => {
         const main = async () => {
             setLoading(true);
-            const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+            const key: string = getKey(SESSION_KEYS.ENCRYPTION_KEY);
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.ORIGINAL_KEY_ATTRIBUTES
             );
             router.prefetch('/gallery');
-            const user = getData(LS_KEYS.USER);
+            router.prefetch('/credentials');
+            const user: User = getData(LS_KEYS.USER);
             if (!user?.token) {
                 router.push('/');
-                return;
-            }
-            setToken(user.token);
-            if (keyAttributes?.encryptedKey) {
-                try {
-                    await putAttributes(user.token, keyAttributes);
-                } catch (e) {
-                    // ignore
-                }
-                setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, null);
-                setRecoveryModalView(true);
+            } else if (keyAttributes?.encryptedKey) {
+                router.push('/credentials');
             } else if (key) {
                 router.push('/gallery');
+            } else {
+                setToken(user.token);
+                setLoading(false);
             }
-            setLoading(false);
         };
         main();
         appContext.showNavBar(true);
@@ -73,7 +67,7 @@ export default function Generate() {
                 keyAttributes,
                 masterKey
             );
-            await setSessionKeys(masterKey);
+            await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
             setJustSignedUp(true);
             setRecoveryModalView(true);
         } catch (e) {

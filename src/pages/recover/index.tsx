@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
-import CryptoWorker, { setSessionKeys } from 'utils/crypto';
+import CryptoWorker, { SaveKeyInSessionStore } from 'utils/crypto';
 import SingleInputForm from 'components/SingleInputForm';
 import MessageDialog from 'components/MessageDialog';
 import Container from 'components/Container';
@@ -11,6 +11,8 @@ import { Card, Button } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
+import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { User } from 'services/userService';
 
 export default function Recover() {
     const router = useRouter();
@@ -20,12 +22,19 @@ export default function Recover() {
 
     useEffect(() => {
         router.prefetch('/gallery');
-        const user = getData(LS_KEYS.USER);
-        const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-        if (!user?.token) {
+        const user: User = getData(LS_KEYS.USER);
+        const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        if (
+            (!user?.token && !user?.encryptedToken) ||
+            !keyAttributes?.memLimit
+        ) {
+            clearData();
             router.push('/');
         } else if (!keyAttributes) {
             router.push('/generate');
+        } else if (key) {
+            router.push('/gallery');
         } else {
             setKeyAttributes(keyAttributes);
         }
@@ -40,7 +49,8 @@ export default function Recover() {
                 keyAttributes.masterKeyDecryptionNonce,
                 await cryptoWorker.fromHex(recoveryKey)
             );
-            setSessionKeys(masterKey);
+            await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
+
             router.push('/changePassword');
         } catch (e) {
             logError(e);

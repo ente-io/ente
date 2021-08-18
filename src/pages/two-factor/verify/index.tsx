@@ -4,22 +4,25 @@ import VerifyTwoFactor from 'components/VerifyTwoFactor';
 import router from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
-import { logoutUser, verifyTwoFactor } from 'services/userService';
+import { logoutUser, User, verifyTwoFactor } from 'services/userService';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 
 export default function Home() {
-    const [email, setEmail] = useState('');
     const [sessionID, setSessionID] = useState('');
 
     useEffect(() => {
         const main = async () => {
             router.prefetch('/credentials');
-            const user = getData(LS_KEYS.USER);
-            if (!user?.email) {
+            const user: User = getData(LS_KEYS.USER);
+            if (
+                !user.isTwoFactorEnabled &&
+                (user.encryptedToken || user.token)
+            ) {
+                router.push('/credential');
+            } else if (!user?.email || !user.twoFactorSessionID) {
                 router.push('/');
             } else {
-                setEmail(user.email);
                 setSessionID(user.twoFactorSessionID);
             }
         };
@@ -32,7 +35,6 @@ export default function Home() {
             const { keyAttributes, encryptedToken, token, id } = resp;
             setData(LS_KEYS.USER, {
                 ...getData(LS_KEYS.USER),
-                email,
                 token,
                 encryptedToken,
                 id,

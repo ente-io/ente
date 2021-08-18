@@ -8,7 +8,7 @@ import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
-    setSessionKeys,
+    SaveKeyInSessionStore,
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
@@ -31,7 +31,7 @@ export default function Credentials() {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (
             (!user?.token && !user?.encryptedToken) ||
-            !keyAttributes?.memLimit
+            (keyAttributes && !keyAttributes.memLimit)
         ) {
             clearData();
             router.push('/');
@@ -73,7 +73,7 @@ export default function Credentials() {
                         key
                     );
                 }
-                await setSessionKeys(key);
+                await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
                 await decryptAndStoreToken(key);
 
                 router.push('/gallery');
