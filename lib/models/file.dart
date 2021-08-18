@@ -98,7 +98,7 @@ class File {
     fileType = getFileType(metadata["fileType"]);
   }
 
-  Map<String, dynamic> getMetadata() {
+  Future<Map<String, dynamic>> getMetadata() async {
     final metadata = <String, dynamic>{};
     metadata["localID"] = isSharedMediaToAppSandbox() ? null : localID;
     metadata["title"] = title;
@@ -112,6 +112,11 @@ class File {
       metadata["longitude"] = location.longitude;
     }
     metadata["fileType"] = fileType.index;
+    final asset = await getAsset();
+    metadata["subType"] = asset.subTypes;
+    if (fileType == FileType.video) {
+      metadata["duration"] = asset.duration;
+    }
     metadata["hash"] = hash;
     return metadata;
   }

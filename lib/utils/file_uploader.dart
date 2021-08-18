@@ -321,8 +321,9 @@ class FileUploader {
       file.hash = Sodium.bin2base64(
           await CryptoUtil.getHash(mediaUploadData.sourceFile));
 
+      final metadata = await file.getMetadata();
       final encryptedMetadataData = await CryptoUtil.encryptChaCha(
-          utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);
+          utf8.encode(jsonEncode(metadata)), fileAttributes.key);
       final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
           Sodium.bin2base64(encryptedThumbnailData.header);
