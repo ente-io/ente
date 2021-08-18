@@ -20,12 +20,16 @@ class File {
   int updationTime;
   Location location;
   FileType fileType;
+  int fileSubType;
+  int duration;
+  String exif;
+  String hash;
+  int metadataVersion = 1;
   String encryptedKey;
   String keyDecryptionNonce;
   String fileDecryptionHeader;
   String thumbnailDecryptionHeader;
   String metadataDecryptionHeader;
-  String hash;
 
   static const kMetadataVersion = 1;
 
@@ -52,6 +56,7 @@ class File {
       }
     }
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
+    file.fileSubType = asset.subTypes;
     return file;
   }
 
@@ -99,6 +104,11 @@ class File {
       location = Location(latitude, longitude);
     }
     fileType = getFileType(metadata["fileType"]);
+    fileSubType = metadata["subType"] ?? -1;
+    duration = metadata["duration"] ?? 0;
+    exif = metadata["exif"];
+    hash = metadata["hash"];
+    metadataVersion = metadata["version"] ?? 0;
   }
 
   Future<Map<String, dynamic>> getMetadata() async {
