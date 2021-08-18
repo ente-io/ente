@@ -23,7 +23,7 @@ export async function getFileType(
     let fileType: FILE_TYPE;
     const mimeType = await getMimeType(worker, receivedFile);
     const typeParts = mimeType?.split('/');
-    if (typeParts?.length < 2) {
+    if (typeParts?.length !== 2) {
         return { fileType: FILE_TYPE.OTHERS, exactType: null };
     }
     switch (typeParts[0]) {
