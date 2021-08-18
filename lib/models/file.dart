@@ -24,6 +24,7 @@ class File {
   String fileDecryptionHeader;
   String thumbnailDecryptionHeader;
   String metadataDecryptionHeader;
+  String hash;
 
   File();
 
@@ -111,6 +112,7 @@ class File {
       metadata["longitude"] = location.longitude;
     }
     metadata["fileType"] = fileType.index;
+    metadata["hash"] = hash;
     return metadata;
   }
 

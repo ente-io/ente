@@ -30,6 +30,28 @@ Uint8List cryptoPwHash(Map<String, dynamic> args) {
   );
 }
 
+Uint8List cryptoGenericHash(Map<String, dynamic> args) {
+  final sourceFile = io.File(args["sourceFilePath"]);
+  final sourceFileLength = sourceFile.lengthSync();
+  final inputFile = sourceFile.openSync(mode: io.FileMode.read);
+  final state =
+      Sodium.cryptoGenerichashInit(null, Sodium.cryptoGenerichashBytesMax);
+  var bytesRead = 0;
+  bool isDone = false;
+  while (!isDone) {
+    var chunkSize = encryptionChunkSize;
+    if (bytesRead + chunkSize >= sourceFileLength) {
+      chunkSize = sourceFileLength - bytesRead;
+      isDone = true;
+    }
+    final buffer = inputFile.readSync(chunkSize);
+    bytesRead += chunkSize;
+    Sodium.cryptoGenerichashUpdate(state, buffer);
+  }
+  inputFile.closeSync();
+  return Sodium.cryptoGenerichashFinal(state, Sodium.cryptoGenerichashBytesMax);
+}
+
 EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
   final initPushResult =
       Sodium.cryptoSecretstreamXchacha20poly1305InitPush(args["key"]);
@@ -255,6 +277,12 @@ class CryptoUtil {
       "salt": salt,
       "memLimit": memLimit,
       "opsLimit": opsLimit,
+    });
+  }
+
+  static Future<Uint8List> getHash(io.File source) {
+    return _computer.compute(cryptoGenericHash, param: {
+      "sourceFilePath": source.path,
     });
   }
 }
