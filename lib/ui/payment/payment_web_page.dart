@@ -5,14 +5,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
+import '../loading_widget.dart';
 import '../progress_dialog.dart';
 
-const kMobilePaymentRedirect = "ente://payment/";
+const kMobilePaymentRedirect = "https://payment.ente.io/mobile";
 
 class PaymentWebPage extends StatefulWidget {
   final String planId;
@@ -67,7 +69,7 @@ class _PaymentWebPage extends State<PaymentWebPage> {
   @override
   Widget build(BuildContext context) {
     if (paymentWebToken == null) {
-      return Container();
+      return loadWidget;
     }
     Uri paymentUri = _getPaymentUrl(basePaymentUrl, widget.planId,
         paymentWebToken, widget.actionType, kMobilePaymentRedirect);
@@ -112,7 +114,7 @@ class _PaymentWebPage extends State<PaymentWebPage> {
                       (controller, navigationAction) async {
                     var loadingUri = navigationAction.request.url;
                     _logger.info("Loading url $loadingUri");
-                    if (isPaymentActionComplete(loadingUri)) {
+                    if (_isPaymentActionComplete(loadingUri)) {
                       // handle the payment response
                       await handlePaymentResponse(loadingUri);
                       // and cancel the request
@@ -126,6 +128,11 @@ class _PaymentWebPage extends State<PaymentWebPage> {
                   onLoadStart: (controller, navigationAction) async {
                     if (!_dialog.isShowing()) {
                       await _dialog.show();
+                    }
+                  },
+                  onLoadError: (controller, navigationAction, code, msg) async {
+                    if (_dialog.isShowing()) {
+                      await _dialog.hide();
                     }
                   },
                   onLoadStop: (controller, navigationAction) async {
@@ -142,10 +149,11 @@ class _PaymentWebPage extends State<PaymentWebPage> {
 
   @override
   void dispose() {
+    _dialog.hide();
     super.dispose();
   }
 
-  bool isPaymentActionComplete(Uri loadingUri) {
+  bool _isPaymentActionComplete(Uri loadingUri) {
     return loadingUri.toString().startsWith(kMobilePaymentRedirect);
   }
 
@@ -156,22 +164,67 @@ class _PaymentWebPage extends State<PaymentWebPage> {
     var paymentStatus = queryParams['status'] ?? '';
     var reason = queryParams['reason'] ?? '';
     if ('fail' == paymentStatus) {
-      showToast("sorry, we couldn't process your payment due to $reason");
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                  title: Text('payment failed'),
+                  content:
+                      Text("unfortunately your payment failed due to $reason"),
+                  actions: <Widget>[
+                    TextButton(
+                        child: Text('ok'),
+                        onPressed: () {
+                          Navigator.of(context).pop('dialog');
+                          Navigator.of(context).pop(true);
+                        }),
+                  ]));
+      return;
+      // showToast("sorry, we couldn't process your payment due to $reason");
     } else if (paymentStatus == 'success') {
       // sessionID can be null in case of update.
-      var checkoutSessionID = queryParams['session_id'] ?? '';
-      await _dialog.show();
-      _logger.info("Receiving checkoutSession ID: $checkoutSessionID");
-      await billingService
-          .verifySubscription(widget.planId, checkoutSessionID,
-              paymentProvider: "stripe")
-          .then((value) {
+      var result = await _handlePaymentSuccess(queryParams);
+      if (result) {
         showToast("thank you for subscribing to ente!");
-      });
-      if (_dialog.isShowing()) {
-        await _dialog.hide();
+        Navigator.of(context).pop();
+      } else {
+        showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+                    title: Text('failed to verify payment status'),
+                    content: Text("please wait for sometime before retrying"),
+                    actions: <Widget>[
+                      TextButton(
+                          child: Text('ok'),
+                          onPressed: () {
+                            Navigator.of(context).pop('dialog');
+                            Navigator.of(context).pop(true);
+                          }),
+                    ]));
+        return;
       }
-      Navigator.of(context).pop(true);
+    } else {
+      // should never reach here
+      _logger.severe("unexpected payement status", uri.toString());
+      Navigator.of(context).pop();
     }
+  }
+
+  // return true if verifySubscription didn't throw any exceptions
+  Future<bool> _handlePaymentSuccess(Map<String, String> queryParams) async {
+    var checkoutSessionID = queryParams['session_id'] ?? '';
+    await _dialog.show();
+    bool verifiedSuccessfully = false;
+    try {
+      var response = await billingService.verifySubscription(
+          widget.planId, checkoutSessionID,
+          paymentProvider: kStripe);
+      verifiedSuccessfully = response != null;
+    } catch (error) {
+      _logger.severe(error);
+      await _dialog.hide();
+      verifiedSuccessfully = false;
+    }
+    await _dialog.hide();
+    return verifiedSuccessfully;
   }
 }
