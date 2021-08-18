@@ -85,11 +85,8 @@ class DownloadManager {
                     const worker = await new CryptoWorker();
 
                     const mimeType =
-                        (await getMimeTypeFromBlob(
-                            worker,
-                            new FileReader(),
-                            fileBlob
-                        )) ?? typeFromExtension;
+                        (await getMimeTypeFromBlob(worker, fileBlob)) ??
+                        typeFromExtension;
 
                     if (fileIsHEIC(mimeType)) {
                         fileBlob = await convertHEIC2JPEG(fileBlob);
