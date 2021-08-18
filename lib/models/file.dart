@@ -1,11 +1,13 @@
 import 'package:exif/exif.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
+import 'package:photos/utils/crypto_util.dart';
 
 class File {
   int generatedID;
@@ -24,14 +26,14 @@ class File {
   int duration;
   String exif;
   String hash;
-  int metadataVersion = 1;
+  int metadataVersion;
   String encryptedKey;
   String keyDecryptionNonce;
   String fileDecryptionHeader;
   String thumbnailDecryptionHeader;
   String metadataDecryptionHeader;
 
-  static const kMetadataVersion = 1;
+  static const kCurrentMetadataVersion = 1;
 
   File();
 
@@ -57,6 +59,7 @@ class File {
     }
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     file.fileSubType = asset.subTypes;
+    file.metadataVersion = kCurrentMetadataVersion;
     return file;
   }
 
@@ -126,14 +129,18 @@ class File {
     }
     metadata["fileType"] = fileType.index;
     final asset = await getAsset();
-    metadata["subType"] = asset.subTypes;
+    fileSubType = asset.subTypes;
+    metadata["subType"] = fileSubType;
     if (fileType == FileType.video) {
-      metadata["duration"] = asset.duration;
+      duration = asset.duration;
+      metadata["duration"] = duration;
     } else {
-      metadata["exif"] = await readExifFromFile(await asset.originFile);
+      exif = (await readExifFromFile(await asset.originFile)).toString();
+      metadata["exif"] = exif;
     }
+    hash = Sodium.bin2base64(await CryptoUtil.getHash(await asset.originFile));
     metadata["hash"] = hash;
-    metadata["version"] = kMetadataVersion;
+    metadata["version"] = metadataVersion;
     return metadata;
   }
 
