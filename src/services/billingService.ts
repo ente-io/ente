@@ -161,9 +161,9 @@ class billingService {
         action: string
     ) {
         try {
-            window.location.href = `${getPaymentsUrl()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&rootURL=${
+            window.location.href = `${getPaymentsUrl()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${
                 window.location.origin
-            }`;
+            }/gallery`;
         } catch (e) {
             logError(e, 'unable to get payments url');
             throw e;
