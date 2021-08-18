@@ -11,9 +11,10 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
+import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/billing_questions_widget.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/payment/payment_web_page.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import 'package:photos/ui/progress_dialog.dart';
@@ -47,10 +48,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   List<BillingPlan> _plans;
   bool _hasLoadedData = false;
   bool _isActiveStripeSubscriber;
+  // based on this flag, we would show ente payment page with stripe plans
+  bool _isIndependentApk;
 
   @override
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
+    _isIndependentApk = UpdateService.instance.isIndependentFlavor();
     _billingService.fetchSubscription().then((subscription) async {
       _currentSubscription = subscription;
       _hasActiveSubscription = _currentSubscription.isValid();
@@ -59,7 +63,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           _currentSubscription.paymentProvider == kStripe &&
               _currentSubscription.isValid();
       _plans = billingPlans.plans.where((plan) {
-        final productID = _isActiveStripeSubscriber
+        final productID = (_showStripePlans())
             ? plan.stripeID
             : Platform.isAndroid
                 ? plan.androidID
@@ -67,14 +71,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         return productID != null && productID.isNotEmpty;
       }).toList();
       _freePlan = billingPlans.freePlan;
-
       _usageFuture = _billingService.fetchUsage();
       _hasLoadedData = true;
-      setState(() {});
+      setState(() {
+      });
     });
     _setupPurchaseUpdateStreamListener();
     _dialog = createProgressDialog(context, "please wait...");
     super.initState();
+  }
+
+  bool _showStripePlans() {
+    return _isActiveStripeSubscriber || _isIndependentApk;
   }
 
   void _setupPurchaseUpdateStreamListener() {
@@ -201,7 +209,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     widgets.addAll([
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: _isActiveStripeSubscriber
+        children: _showStripePlans()
             ? _getStripePlanWidgets()
             : _getMobilePlanWidgets(),
       ),
@@ -331,8 +339,63 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (isActive) {
                 return;
               }
-              showErrorDialog(context, "sorry",
-                  "please visit web.ente.io to manage your subscription");
+              await _dialog.show();
+              if (_usageFuture != null) {
+                final usage = await _usageFuture;
+                await _dialog.hide();
+                if (usage > plan.storage) {
+                  showErrorDialog(
+                      context, "sorry", "you cannot downgrade to this plan");
+                  return;
+                }
+              }
+              if (_isActiveStripeSubscriber && !_isIndependentApk) {
+                showErrorDialog(context, "sorry",
+                    "please visit web.ente.io to manage your subscription");
+                return;
+              }
+
+              if (_isActiveStripeSubscriber) {
+                // check if user really wants to change his plan plan
+                  showDialog(context: context,
+                      builder: (BuildContext context)  {
+                    return AlertDialog(
+                            title: Text(
+                                'do you want really to change your subscription plan?'),
+                            actions: <Widget>[
+                              TextButton(
+                                  child: Text('yes'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop('dialog');
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) {
+                                          return PaymentWebPage(
+                                              planId: plan.stripeID,
+                                              actionType: "update");
+                                        },
+                                      ),
+                                    ); }
+                              ),
+                              TextButton(
+                                  child: Text('no'),
+                                  onPressed: () => {
+                                    Navigator.of(context,
+                                        rootNavigator: true)
+                                        .pop('dialog')
+                                  }),
+                            ]);
+                  });
+              } else {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return PaymentWebPage(
+                          planId: plan.stripeID, actionType: "buy");
+                    },
+                  ),
+                );
+              }
             },
             child: SubscriptionPlanWidget(
               storage: plan.storage,
