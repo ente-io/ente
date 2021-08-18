@@ -26,6 +26,8 @@ class File {
   String metadataDecryptionHeader;
   String hash;
 
+  static const kMetadataVersion = 1;
+
   File();
 
   static Future<File> fromAsset(String pathName, AssetEntity asset) async {
@@ -118,6 +120,7 @@ class File {
       metadata["duration"] = asset.duration;
     }
     metadata["hash"] = hash;
+    metadata["version"] = kMetadataVersion;
     return metadata;
   }
 
