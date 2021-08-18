@@ -318,8 +318,9 @@ class FileUploader {
       final fileUploadURL = await _getUploadURL();
       String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
+      final metadata = await file.getMetadata();
       final encryptedMetadataData = await CryptoUtil.encryptChaCha(
-          utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);
+          utf8.encode(jsonEncode(metadata)), fileAttributes.key);
       final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
           Sodium.bin2base64(encryptedThumbnailData.header);

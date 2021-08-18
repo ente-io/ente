@@ -1,10 +1,13 @@
+import 'package:exif/exif.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
+import 'package:photos/utils/crypto_util.dart';
 
 class File {
   int generatedID;
@@ -19,11 +22,18 @@ class File {
   int updationTime;
   Location location;
   FileType fileType;
+  int fileSubType;
+  int duration;
+  String exif;
+  String hash;
+  int metadataVersion;
   String encryptedKey;
   String keyDecryptionNonce;
   String fileDecryptionHeader;
   String thumbnailDecryptionHeader;
   String metadataDecryptionHeader;
+
+  static const kCurrentMetadataVersion = 1;
 
   File();
 
@@ -48,6 +58,8 @@ class File {
       }
     }
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
+    file.fileSubType = asset.subTypes;
+    file.metadataVersion = kCurrentMetadataVersion;
     return file;
   }
 
@@ -95,9 +107,14 @@ class File {
       location = Location(latitude, longitude);
     }
     fileType = getFileType(metadata["fileType"]);
+    fileSubType = metadata["subType"] ?? -1;
+    duration = metadata["duration"] ?? 0;
+    exif = metadata["exif"];
+    hash = metadata["hash"];
+    metadataVersion = metadata["version"] ?? 0;
   }
 
-  Map<String, dynamic> getMetadata() {
+  Future<Map<String, dynamic>> getMetadata() async {
     final metadata = <String, dynamic>{};
     metadata["localID"] = isSharedMediaToAppSandbox() ? null : localID;
     metadata["title"] = title;
@@ -111,6 +128,19 @@ class File {
       metadata["longitude"] = location.longitude;
     }
     metadata["fileType"] = fileType.index;
+    final asset = await getAsset();
+    fileSubType = asset.subTypes;
+    metadata["subType"] = fileSubType;
+    if (fileType == FileType.video) {
+      duration = asset.duration;
+      metadata["duration"] = duration;
+    } else {
+      exif = (await readExifFromFile(await asset.originFile)).toString();
+      metadata["exif"] = exif;
+    }
+    hash = Sodium.bin2base64(await CryptoUtil.getHash(await asset.originFile));
+    metadata["hash"] = hash;
+    metadata["version"] = metadataVersion;
     return metadata;
   }
 
