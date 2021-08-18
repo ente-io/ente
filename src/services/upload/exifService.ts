@@ -1,32 +1,31 @@
 import EXIF from 'exif-js';
-import { FILE_TYPE } from 'services/fileService';
+
 import { logError } from 'utils/sentry';
 import { NULL_LOCATION, Location } from './metadataService';
 
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
-
+const EXIF_HAVING_TYPES = new Set(['jpeg', 'jpg', 'tiff']);
+const CHUNK_SIZE_FOR_EXIF_READING = 4100;
 interface ParsedEXIFData {
     location: Location;
     creationTime: number;
 }
 
 export async function getExifData(
-    reader: FileReader,
+    worker,
     receivedFile: globalThis.File,
-    fileType: FILE_TYPE
+    exactType: string
 ): Promise<ParsedEXIFData> {
     try {
-        if (fileType === FILE_TYPE.VIDEO) {
-            // Todo  extract exif data from videos
+        if (!fileHasEXIF(exactType)) {
+            // files don't have exif
             return { location: NULL_LOCATION, creationTime: null };
         }
-        const exifData: any = await new Promise((resolve) => {
-            reader.onload = () => {
-                resolve(EXIF.readFromBinaryFile(reader.result));
-            };
-            reader.readAsArrayBuffer(receivedFile);
-        });
+        const fileChunk = await worker.getUint8ArrayView(
+            receivedFile.slice(0, CHUNK_SIZE_FOR_EXIF_READING)
+        );
+        const exifData = EXIF.readFromBinaryFile(fileChunk.buffer);
         if (!exifData) {
             return { location: NULL_LOCATION, creationTime: null };
         }
@@ -38,6 +37,10 @@ export async function getExifData(
         logError(e, 'error reading exif data');
         throw e;
     }
+}
+
+function fileHasEXIF(type) {
+    return EXIF_HAVING_TYPES.has(type);
 }
 
 function getUNIXTime(exifData: any) {

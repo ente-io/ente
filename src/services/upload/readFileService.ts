@@ -16,11 +16,17 @@ export async function getFileData(worker, file: globalThis.File) {
     }
 }
 
-export async function getFileType(worker, receivedFile: globalThis.File) {
+export async function getFileType(
+    worker,
+    receivedFile: globalThis.File
+): Promise<{ fileType: FILE_TYPE; exactType: string }> {
     let fileType: FILE_TYPE;
     const mimeType = await getMimeType(worker, receivedFile);
-    const majorType = mimeType?.split('/')[0].toLowerCase();
-    switch (majorType) {
+    const typeParts = mimeType?.split('/');
+    if (typeParts?.length < 2) {
+        return { fileType: FILE_TYPE.OTHERS, exactType: null };
+    }
+    switch (typeParts[0]) {
         case TYPE_IMAGE:
             fileType = FILE_TYPE.IMAGE;
             break;
@@ -30,7 +36,7 @@ export async function getFileType(worker, receivedFile: globalThis.File) {
         default:
             fileType = FILE_TYPE.OTHERS;
     }
-    return { fileType, mimeType };
+    return { fileType, exactType: typeParts[1] };
 }
 
 /*
