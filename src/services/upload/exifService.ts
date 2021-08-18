@@ -6,7 +6,7 @@ import { NULL_LOCATION, Location } from './metadataService';
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
 const EXIF_HAVING_TYPES = new Set(['jpeg', 'jpg', 'tiff']);
-const CHUNK_SIZE_FOR_EXIF_READING = 4100;
+const CHUNK_SIZE_FOR_EXIF_READING = 4 * 1024 * 1024;
 interface ParsedEXIFData {
     location: Location;
     creationTime: number;
@@ -35,7 +35,7 @@ export async function getExifData(
         };
     } catch (e) {
         logError(e, 'error reading exif data');
-        throw e;
+        // ignore exif parsing errors
     }
 }
 
