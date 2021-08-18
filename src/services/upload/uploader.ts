@@ -1,4 +1,4 @@
-import { File } from 'services/fileService';
+import { File, FILE_TYPE } from 'services/fileService';
 import { sleep } from 'utils/common';
 import { handleError, CustomError } from 'utils/common/errorUtil';
 import { decryptFile } from 'utils/file';
@@ -11,8 +11,12 @@ import UploadService, {
     BackupedFile,
     EncryptedFile,
     FileInMemory,
+    FileWithMetadata,
+    MetadataObject,
     UploadFile,
 } from './uploadService';
+import uploadService from './uploadService';
+import { FileTypeInfo, getFileType } from './readFileService';
 
 const TwoSecondInMillSeconds = 2000;
 
@@ -31,19 +35,33 @@ export default async function uploader(
 
     let file: FileInMemory = null;
     let encryptedFile: EncryptedFile = null;
-    try {
-        file = await UploadService.readFile(worker, rawFile, collection);
+    let metadata: MetadataObject = null;
+    let fileTypeInfo: FileTypeInfo = null;
 
-        if (fileAlreadyInCollection(existingFilesInCollection, file)) {
+    try {
+        fileTypeInfo = await getFileType(worker, rawFile);
+        if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
+            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+        }
+        metadata = await uploadService.getFileMetadata(
+            worker,
+            rawFile,
+            collection
+        );
+
+        if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
             UIService.setFileProgress(rawFile.name, FileUploadResults.SKIPPED);
             // wait two second before removing the file from the progress in file section
             await sleep(TwoSecondInMillSeconds);
             return { fileUploadResult: FileUploadResults.SKIPPED };
         }
 
+        file = await UploadService.readFile(worker, rawFile, fileTypeInfo);
+        const fileWithMetadata: FileWithMetadata = { ...file, metadata };
+
         encryptedFile = await UploadService.encryptFile(
             worker,
-            file,
+            fileWithMetadata,
             collection.key
         );
 

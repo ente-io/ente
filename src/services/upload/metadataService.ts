@@ -1,6 +1,6 @@
-import { FILE_TYPE } from 'services/fileService';
 import { logError } from 'utils/sentry';
 import { getExifData } from './exifService';
+import { FileTypeInfo } from './readFileService';
 import { MetadataObject } from './uploadService';
 
 export interface Location {
@@ -30,13 +30,12 @@ const NULL_PARSED_METADATA_JSON: ParsedMetaDataJSON = {
 export async function extractMetadata(
     worker,
     receivedFile: globalThis.File,
-    fileType: FILE_TYPE,
-    exactType: string
+    fileTypeInfo: FileTypeInfo
 ) {
     const { location, creationTime } = await getExifData(
         worker,
         receivedFile,
-        exactType
+        fileTypeInfo.exactType
     );
 
     const extractedMetadata: MetadataObject = {
@@ -45,7 +44,7 @@ export async function extractMetadata(
         modificationTime: receivedFile.lastModified * 1000,
         latitude: location?.latitude,
         longitude: location?.latitude,
-        fileType,
+        fileType: fileTypeInfo.fileType,
     };
     return extractedMetadata;
 }

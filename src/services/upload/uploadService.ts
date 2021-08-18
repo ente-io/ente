@@ -9,15 +9,16 @@ import {
 } from './metadataService';
 import { generateThumbnail } from './thumbnailService';
 import {
-    getFileType,
     getFileOriginalName,
     getFileData,
+    getFileType,
+    FileTypeInfo,
 } from './readFileService';
 import { encryptFiledata } from './encryptionService';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
-import { CustomError, parseError } from 'utils/common/errorUtil';
+import { parseError } from 'utils/common/errorUtil';
 import { MetadataMap } from './uploadManager';
 import { fileIsHEIC } from 'utils/file';
 
@@ -66,6 +67,11 @@ export interface MetadataObject {
 export interface FileInMemory {
     filedata: Uint8Array | DataStream;
     thumbnail: Uint8Array;
+    hasStaticThumbnail: boolean;
+}
+
+export interface FileWithMetadata
+    extends Omit<FileInMemory, 'hasStaticThumbnail'> {
     metadata: MetadataObject;
 }
 
@@ -99,23 +105,34 @@ class UploadService {
     }
 
     async readFile(
-        worker,
+        worker: any,
         rawFile: globalThis.File,
-        collection: Collection
+        fileTypeInfo: FileTypeInfo
     ): Promise<FileInMemory> {
-        const { fileType, exactType } = await getFileType(worker, rawFile);
-        if (fileType === FILE_TYPE.OTHERS) {
-            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
-        }
-
-        const isHEIC = fileIsHEIC(exactType);
+        const isHEIC = fileIsHEIC(fileTypeInfo.exactType);
 
         const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
             worker,
             rawFile,
-            fileType,
+            fileTypeInfo.fileType,
             isHEIC
         );
+
+        const filedata = await getFileData(worker, rawFile);
+
+        return {
+            filedata,
+            thumbnail,
+            hasStaticThumbnail,
+        };
+    }
+
+    async getFileMetadata(
+        worker: any,
+        rawFile: File,
+        collection: { id: number }
+    ): Promise<MetadataObject> {
+        const fileTypeInfo = await getFileType(worker, rawFile);
 
         const originalName = getFileOriginalName(rawFile);
         const googleMetadata =
@@ -125,31 +142,21 @@ class UploadService {
         const extractedMetadata: MetadataObject = await extractMetadata(
             worker,
             rawFile,
-            fileType,
-            exactType
+            fileTypeInfo
         );
-        if (hasStaticThumbnail) {
-            extractedMetadata.hasStaticThumbnail = true;
-        }
+
         for (const [key, value] of Object.entries(googleMetadata)) {
             if (!value) {
                 continue;
             }
             extractedMetadata[key] = value;
         }
-
-        const filedata = await getFileData(worker, rawFile);
-
-        return {
-            filedata,
-            thumbnail,
-            metadata: extractedMetadata,
-        };
+        return extractedMetadata;
     }
 
     async encryptFile(
         worker: any,
-        file: FileInMemory,
+        file: FileWithMetadata,
         encryptionKey: string
     ): Promise<EncryptedFile> {
         try {

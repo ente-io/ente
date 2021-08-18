@@ -16,10 +16,15 @@ export async function getFileData(worker, file: globalThis.File) {
     }
 }
 
+export interface FileTypeInfo {
+    fileType: FILE_TYPE;
+    exactType: string;
+}
+
 export async function getFileType(
     worker,
     receivedFile: globalThis.File
-): Promise<{ fileType: FILE_TYPE; exactType: string }> {
+): Promise<FileTypeInfo> {
     let fileType: FILE_TYPE;
     const mimeType = await getMimeType(worker, receivedFile);
     const typeParts = mimeType?.split('/');
