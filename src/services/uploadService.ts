@@ -283,6 +283,10 @@ class UploadService {
                 );
 
                 this.existingFiles.push(decryptedFile);
+                this.addFileToExistingFileCollectionWise(
+                    decryptedFile,
+                    collection.id
+                );
                 this.existingFiles = sortFiles(this.existingFiles);
                 await localForage.setItem(
                     'files',
@@ -381,6 +385,15 @@ class UploadService {
         } else {
             return false;
         }
+    }
+    private addFileToExistingFileCollectionWise(
+        file: File,
+        collectionID: number
+    ) {
+        if (!this.existingFilesCollectionWise.has(collectionID)) {
+            this.existingFilesCollectionWise.set(collectionID, []);
+        }
+        this.existingFilesCollectionWise.get(collectionID).push(file);
     }
 
     private async readFile(reader: FileReader, receivedFile: globalThis.File) {
