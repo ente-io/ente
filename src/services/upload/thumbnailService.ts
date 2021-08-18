@@ -11,7 +11,6 @@ const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
 
 export async function generateThumbnail(
     worker,
-    reader: FileReader,
     file: globalThis.File,
     fileType: FILE_TYPE,
     isHEIC: boolean

@@ -8,25 +8,17 @@ const TYPE_IMAGE = 'image';
 const EDITED_FILE_SUFFIX = '-edited';
 const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
 
-export async function getFileData(
-    worker,
-    reader: FileReader,
-    file: globalThis.File
-) {
+export async function getFileData(worker, file: globalThis.File) {
     if (file.size > MULTIPART_PART_SIZE) {
-        return getFileStream(worker, reader, file, FILE_READER_CHUNK_SIZE);
+        return getFileStream(worker, file, FILE_READER_CHUNK_SIZE);
     } else {
         return await worker.getUint8ArrayView(file);
     }
 }
 
-export async function getFileType(
-    worker,
-    reader: FileReader,
-    receivedFile: globalThis.File
-) {
+export async function getFileType(worker, receivedFile: globalThis.File) {
     let fileType: FILE_TYPE;
-    const mimeType = await getMimeType(worker, reader, receivedFile);
+    const mimeType = await getMimeType(worker, receivedFile);
     const majorType = mimeType?.split('/')[0].toLowerCase();
     switch (majorType) {
         case TYPE_IMAGE:
@@ -57,33 +49,19 @@ export function getFileOriginalName(file: globalThis.File) {
     return originalName;
 }
 
-async function getMimeType(worker, reader: FileReader, file: globalThis.File) {
+async function getMimeType(worker, file: globalThis.File) {
     const fileChunkBlob = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
-    return getMimeTypeFromBlob(worker, reader, fileChunkBlob);
+    return getMimeTypeFromBlob(worker, fileChunkBlob);
 }
 
-export async function getMimeTypeFromBlob(
-    worker,
-    reader: FileReader,
-    fileBlob: Blob
-) {
+export async function getMimeTypeFromBlob(worker, fileBlob: Blob) {
     const initialFiledata = await worker.getUint8ArrayView(fileBlob);
     const result = await FileType.fromBuffer(initialFiledata);
     return result?.mime;
 }
 
-function getFileStream(
-    worker,
-    reader: FileReader,
-    file: globalThis.File,
-    chunkSize: number
-) {
-    const fileChunkReader = fileChunkReaderMaker(
-        worker,
-        reader,
-        file,
-        chunkSize
-    );
+function getFileStream(worker, file: globalThis.File, chunkSize: number) {
+    const fileChunkReader = fileChunkReaderMaker(worker, file, chunkSize);
 
     const stream = new ReadableStream<Uint8Array>({
         async pull(controller: ReadableStreamDefaultController) {
@@ -104,7 +82,6 @@ function getFileStream(
 
 async function* fileChunkReaderMaker(
     worker,
-    reader: FileReader,
     file: globalThis.File,
     chunkSize: number
 ) {

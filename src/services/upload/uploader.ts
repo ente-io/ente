@@ -22,7 +22,6 @@ interface UploadResponse {
 }
 export default async function uploader(
     worker: any,
-    reader: FileReader,
     existingFilesInCollection: File[],
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
@@ -33,12 +32,7 @@ export default async function uploader(
     let file: FileInMemory = null;
     let encryptedFile: EncryptedFile = null;
     try {
-        file = await UploadService.readFile(
-            worker,
-            reader,
-            rawFile,
-            collection
-        );
+        file = await UploadService.readFile(worker, rawFile, collection);
 
         if (fileAlreadyInCollection(existingFilesInCollection, file)) {
             UIService.setFileProgress(rawFile.name, FileUploadResults.SKIPPED);

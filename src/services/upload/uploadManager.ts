@@ -157,15 +157,14 @@ class UploadManager {
             this.cryptoWorkers[i] = cryptoWorker;
             uploadProcesses.push(
                 this.uploadNextFileInQueue(
-                    await new this.cryptoWorkers[i].comlink(),
-                    new FileReader()
+                    await new this.cryptoWorkers[i].comlink()
                 )
             );
         }
         await Promise.all(uploadProcesses);
     }
 
-    private async uploadNextFileInQueue(worker: any, fileReader: FileReader) {
+    private async uploadNextFileInQueue(worker: any) {
         while (this.filesToBeUploaded.length > 0) {
             const fileWithCollection = this.filesToBeUploaded.pop();
             const existingFilesInCollection =
@@ -178,7 +177,6 @@ class UploadManager {
             fileWithCollection.collection = collection;
             const { fileUploadResult, file } = await uploader(
                 worker,
-                fileReader,
                 existingFilesInCollection,
                 fileWithCollection
             );
