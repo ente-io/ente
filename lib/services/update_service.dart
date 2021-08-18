@@ -38,6 +38,19 @@ class UpdateService {
     }
   }
 
+  bool shouldForceUpdate(LatestVersionInfo info) {
+    if (!isIndependent()) {
+      return false;
+    }
+    try {
+      final currentVersionCode = int.parse(_packageInfo.buildNumber);
+      return currentVersionCode < info.lastSupportedVersionCode;
+    } catch (e) {
+      _logger.severe(e);
+      return false;
+    }
+  }
+
   LatestVersionInfo getLatestVersionInfo() {
     return _latestVersion;
   }
@@ -87,6 +100,7 @@ class LatestVersionInfo {
   final int code;
   final List<String> changelog;
   final bool shouldForceUpdate;
+  final int lastSupportedVersionCode;
   final String url;
   final int size;
   final bool shouldNotify;
@@ -96,6 +110,7 @@ class LatestVersionInfo {
     this.code,
     this.changelog,
     this.shouldForceUpdate,
+    this.lastSupportedVersionCode,
     this.url,
     this.size,
     this.shouldNotify,
@@ -107,6 +122,7 @@ class LatestVersionInfo {
       map['code'],
       List<String>.from(map['changelog']),
       map['shouldForceUpdate'],
+      map['lastSupportedVersionCode'] ?? 1,
       map['url'],
       map['size'],
       map['shouldNotify'],
