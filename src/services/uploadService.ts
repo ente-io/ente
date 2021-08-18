@@ -1094,7 +1094,7 @@ class UploadService {
             };
         } catch (e) {
             logError(e, 'error reading exif data');
-            throw e;
+            // log and ignore error
         }
     }
     private getUNIXTime(exifData: any) {
