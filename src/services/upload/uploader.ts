@@ -42,7 +42,11 @@ export default async function uploader(
     try {
         fileTypeInfo = await getFileType(worker, rawFile);
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
-            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+            throw Error(
+                `${CustomError.UNSUPPORTED_FILE_FORMAT}-${
+                    fileTypeInfo.exactType ?? rawFile.name.split('.')[-1]
+                }`
+            );
         }
         metadata = await uploadService.getFileMetadata(
             worker,
