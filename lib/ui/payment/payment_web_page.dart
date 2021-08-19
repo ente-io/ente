@@ -163,8 +163,8 @@ class _PaymentWebPage extends State<PaymentWebPage> {
 
   Future<void> handlePaymentResponse(Uri uri) async {
     var queryParams = uri.queryParameters;
-    // success or fail
     var paymentStatus = uri.queryParameters['status'] ?? '';
+    _logger.fine('handle payment response with status $paymentStatus');
     if ('fail' == paymentStatus) {
       var reason = queryParams['reason'] ?? '';
       showDialog(
@@ -223,12 +223,14 @@ class _PaymentWebPage extends State<PaymentWebPage> {
   Future<dynamic> _showExitPageDialog({String title, String content}) {
     return showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (context) => AlertDialog(
                 title: Text(title),
                 content: Text(content),
                 actions: <Widget>[
                   TextButton(
-                      child: Text('ok'),
+                      child: Text('ok',
+                      style: TextStyle(color: Theme.of(context).buttonColor),),
                       onPressed: () {
                         Navigator.of(context).pop('dialog');
                         Navigator.of(context).pop(true);

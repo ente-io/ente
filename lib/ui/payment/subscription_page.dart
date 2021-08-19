@@ -95,14 +95,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }).toList();
   }
 
-  FutureOr onWebPaymentGoBack(dynamic value) {
-    // refresh subscription
+  FutureOr onWebPaymentGoBack(dynamic value) async {
     if (widget.isOnboarding) {
       Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
-      _dialog
-          .show()
-          .then((value) => _fetchSub().then((value) => _dialog.hide()));
+      // refresh subscription
+      try {
+        showToast("refreshing subscription status");
+        await _fetchSub();
+      } catch (e) {
+        showToast("failed to refresh subscription");
+      }
     }
   }
 
