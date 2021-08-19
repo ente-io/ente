@@ -203,8 +203,8 @@ class _PaymentWebPage extends State<PaymentWebPage> {
       await _dialog.hide();
       if (response != null) {
         var content = widget.actionType == 'buy'
-            ? 'you have successfully subscribed to ente'
-            : 'your ente subscription update was successful';
+            ? 'you subscription purchase was successful'
+            : 'your subscription update was successful';
         await _showExitPageDialog(title: 'thank you', content: content);
       } else {
         throw Exception("verifySubscription api failed");
@@ -222,19 +222,22 @@ class _PaymentWebPage extends State<PaymentWebPage> {
   // warn the user to wait for sometime before trying another payment
   Future<dynamic> _showExitPageDialog({String title, String content}) {
     return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-                title: Text(title),
-                content: Text(content),
-                actions: <Widget>[
-                  TextButton(
-                      child: Text('ok',
-                      style: TextStyle(color: Theme.of(context).buttonColor),),
-                      onPressed: () {
-                        Navigator.of(context).pop('dialog');
-                        Navigator.of(context).pop(true);
-                      }),
-                ]));
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+              child: Text(
+                'ok',
+                style: TextStyle(color: Theme.of(context).buttonColor),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop('dialog');
+              }),
+        ],
+      ),
+    ).then((val) => Navigator.pop(context, true));
   }
 }
