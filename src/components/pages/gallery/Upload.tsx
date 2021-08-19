@@ -281,9 +281,9 @@ export default function Upload(props: Props) {
             await props.syncWithRemote(true, true);
             await uploadManager.retryFailedFiles();
         } catch (err) {
+            appContext.resetSharedFiles();
             props.setBannerMessage(err.message);
             setProgressView(false);
-            throw err;
         } finally {
             props.setUploadInProgress(false);
             props.syncWithRemote();

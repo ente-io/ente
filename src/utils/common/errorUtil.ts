@@ -5,6 +5,7 @@ export const ServerErrorCodes = {
     NO_ACTIVE_SUBSCRIPTION: '402',
     FORBIDDEN: '403',
     STORAGE_LIMIT_EXCEEDED: '426',
+    FILE_TOO_LARGE: '413',
 };
 
 export const CustomError = {
@@ -31,6 +32,9 @@ export function parseError(error) {
                 break;
             case ServerErrorCodes.SESSION_EXPIRED:
                 parsedMessage = constants.SESSION_EXPIRED_MESSAGE;
+                break;
+            case ServerErrorCodes.FILE_TOO_LARGE:
+                parsedMessage = constants.FILE_TOO_LARGE;
                 break;
         }
     }
