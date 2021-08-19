@@ -11,7 +11,6 @@ import { generateThumbnail } from './thumbnailService';
 import {
     getFileOriginalName,
     getFileData,
-    getFileType,
     FileTypeInfo,
 } from './readFileService';
 import { encryptFiledata } from './encryptionService';
@@ -130,10 +129,9 @@ class UploadService {
     async getFileMetadata(
         worker: any,
         rawFile: File,
-        collection: { id: number }
+        collection: Collection,
+        fileTypeInfo: FileTypeInfo
     ): Promise<MetadataObject> {
-        const fileTypeInfo = await getFileType(worker, rawFile);
-
         const originalName = getFileOriginalName(rawFile);
         const googleMetadata =
             this.metadataMap.get(

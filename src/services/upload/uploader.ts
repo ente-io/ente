@@ -47,7 +47,8 @@ export default async function uploader(
         metadata = await uploadService.getFileMetadata(
             worker,
             rawFile,
-            collection
+            collection,
+            fileTypeInfo
         );
 
         if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
