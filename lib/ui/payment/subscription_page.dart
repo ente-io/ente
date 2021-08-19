@@ -24,6 +24,8 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../web_page.dart';
+
 class SubscriptionPage extends StatefulWidget {
   final bool isOnboarding;
 
@@ -69,7 +71,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Future<void> _fetchSub() async {
     return _billingService.fetchSubscription().then((subscription) async {
       _currentSubscription = subscription;
-      showToast("Is yearly plan " + _currentSubscription.period);
       _showYearlyPlan = _currentSubscription.isYearlyPlan();
       _hasActiveSubscription = _currentSubscription.isValid();
       _isAutoReviewCancelled =
@@ -108,12 +109,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       // refresh subscription
+      await _dialog.show();
       try {
-        showToast("refreshing subscription status");
         await _fetchSub();
       } catch (e) {
         showToast("failed to refresh subscription");
       }
+      await _dialog.hide();
     }
   }
 
@@ -252,11 +254,17 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       Padding(padding: EdgeInsets.all(8)),
     ]);
 
+    if (_showStripePlans()) {
+      widgets.add(_showSubscriptionToggle());
+    }
+
     if (_hasActiveSubscription) {
       var endDate = getDateAndMonthAndYear(
           DateTime.fromMicrosecondsSinceEpoch(_currentSubscription.expiryTime));
-      var message = "valid till " + endDate;
-      if (_isAutoReviewCancelled) {
+      var message = "renews on $endDate";
+      if (_currentSubscription.productID == kFreeProductID) {
+        message = "free plan valid till $endDate";
+      } else if (_isAutoReviewCancelled) {
         message = "your subscription will be cancelled on $endDate";
       }
       widgets.add(
@@ -268,10 +276,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ),
         ),
       );
-    }
-
-    if (_showStripePlans()) {
-      widgets.add(_showSubscriptionToggle());
     }
 
     if (_isIndependentApk &&
@@ -286,12 +290,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         Align(
           alignment: Alignment.center,
           child: GestureDetector(
-            onTap: () {
+            onTap: () async {
               if (_isActiveStripeSubscriber) {
-                if(_isIndependentApk) {
-
+                if (_isIndependentApk) {
+                  await _launchStripePortal();
+                  return;
+                } else {
+                  return;
                 }
-                return;
               }
               if (Platform.isAndroid) {
                 launch(
@@ -308,7 +314,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: _isActiveStripeSubscriber
+                      text: _isActiveStripeSubscriber && !_isIndependentApk
                           ? "visit web.ente.io to manage your subscription"
                           : "payment details",
                       style: TextStyle(
@@ -372,6 +378,24 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
+  Future<void> _launchStripePortal() async {
+    await _dialog.show();
+    try {
+      String url = await _billingService.getStripeCustomerPortalUrl();
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return WebPage("payment details", url);
+          },
+        ),
+      ).then((value) => onWebPaymentGoBack);
+    } catch (e) {
+      await _dialog.hide();
+      showGenericErrorDialog(context);
+    }
+    await _dialog.hide();
+  }
+
   Widget _stripeSubscriptionToggleButton(bool isCurrentlyCancelled) {
     return TextButton(
       child: Text(
@@ -389,7 +413,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                       ? 'confirm subscription renewal'
                       : 'confirm subscription cancellation'),
                   content: Text(isCurrentlyCancelled
-                      ? 'are you sure you want to renew>'
+                      ? 'are you sure you want to renew?'
                       : 'are you sure you want to cancel?'),
                   actions: <Widget>[
                     TextButton(
@@ -403,18 +427,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         ),
                         onPressed: () async {
                           Navigator.of(context).pop('dialog');
-                          _dialog.show();
-                          if (isCurrentlyCancelled) {
-                            await _billingService.activateStripeSubscription();
-                          } else {
-                            await _billingService.cancelStripeSubscription();
-                          }
-                          await _fetchSub();
-                          _dialog.hide();
+                          await toggleStripeSubscription(isCurrentlyCancelled);
                         }),
                     TextButton(
                         child: Text(
-                          'cancel',
+                          'no',
                           style: TextStyle(
                             color: isCurrentlyCancelled
                                 ? Theme.of(context).errorColor
@@ -429,6 +446,21 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             });
       },
     );
+  }
+
+  Future<void> toggleStripeSubscription(bool isCurrentlyCancelled) async {
+    await _dialog.show();
+    try {
+      if (isCurrentlyCancelled) {
+        await _billingService.activateStripeSubscription();
+      } else {
+        await _billingService.cancelStripeSubscription();
+      }
+      await _fetchSub();
+    } catch (e) {
+      showToast(isCurrentlyCancelled ? 'failed to renew' : 'failed to cancel');
+    }
+    await _dialog.hide();
   }
 
   List<Widget> _getStripePlanWidgets() {
@@ -504,11 +536,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                           ]);
                     });
               } else {
-                Navigator.of(context).push(
+                Navigator.push(
+                  context,
                   MaterialPageRoute(
                     builder: (BuildContext context) {
                       return PaymentWebPage(
-                          planId: plan.stripeID, actionType: "buy");
+                        planId: plan.stripeID,
+                        actionType: "buy",
+                      );
                     },
                   ),
                 ).then((value) => onWebPaymentGoBack(value));
@@ -672,7 +707,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   void _addCurrentPlanWidget(List<Widget> planWidgets) {
     // don't add current plan if it's monthly plan but UI is showing yearly plans
     // and vice versa.
-    if (_showYearlyPlan != _currentSubscription.isYearlyPlan()) {
+    if (_showYearlyPlan != _currentSubscription.isYearlyPlan() && _currentSubscription.productID != kFreeProductID) {
       return;
     }
     int activePlanIndex = 0;

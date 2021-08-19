@@ -143,6 +143,24 @@ class BillingService {
     }
   }
 
+  Future<String> getStripeCustomerPortalUrl(
+      {String endpoint = "https://ente.to"}) async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/billing/stripe/customer-portal",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      return response.data["url"];
+    } on DioError catch (e, s) {
+      _logger.severe(e, s);
+      rethrow;
+    }
+  }
+
   Future<int> fetchUsage() async {
     try {
       final response = await _dio.get(
