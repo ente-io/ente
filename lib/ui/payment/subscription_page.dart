@@ -43,11 +43,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   StreamSubscription _purchaseUpdateSubscription;
   ProgressDialog _dialog;
   Future<int> _usageFuture;
+
+  // indicates if user's subscription plan is still active
   bool _hasActiveSubscription;
+  bool _isAutoReviewCancelled;
   FreePlan _freePlan;
-  List<BillingPlan> _plans;
+  List<BillingPlan> _plans = [];
   bool _hasLoadedData = false;
   bool _isActiveStripeSubscriber;
+
   // based on this flag, we would show ente payment page with stripe plans
   bool _isIndependentApk;
   bool _showYearlyPlan = false;
@@ -56,7 +60,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
     _isIndependentApk = UpdateService.instance.isIndependentFlavor();
-     _fetchSub();
+    _fetchSub();
     _setupPurchaseUpdateStreamListener();
     _dialog = createProgressDialog(context, "please wait...");
     super.initState();
@@ -68,13 +72,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       showToast("Is yearly plan " + _currentSubscription.period);
       _showYearlyPlan = _currentSubscription.isYearlyPlan();
       _hasActiveSubscription = _currentSubscription.isValid();
+      _isAutoReviewCancelled =
+          _currentSubscription.attributes?.isCancelled ?? false;
       _isActiveStripeSubscriber =
           _currentSubscription.paymentProvider == kStripe &&
               _currentSubscription.isValid();
-      _filterPlansForUI();
       _usageFuture = _billingService.fetchUsage();
-      _hasLoadedData = true;
-      setState(() {});
+      return _filterPlansForUI().then((value) {
+        _hasLoadedData = true;
+        setState(() {});
+      });
     });
   }
 
@@ -86,13 +93,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       final productID = (_showStripePlans())
           ? plan.stripeID
           : Platform.isAndroid
-          ? plan.androidID
-          : plan.iosID;
+              ? plan.androidID
+              : plan.iosID;
       var isYearlyPlan = plan.period == 'year';
       return productID != null &&
           productID.isNotEmpty &&
           isYearlyPlan == _showYearlyPlan;
     }).toList();
+    setState(() {});
   }
 
   FutureOr onWebPaymentGoBack(dynamic value) async {
@@ -245,11 +253,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     ]);
 
     if (_hasActiveSubscription) {
+      var endDate = getDateAndMonthAndYear(
+          DateTime.fromMicrosecondsSinceEpoch(_currentSubscription.expiryTime));
+      var message = "valid till " + endDate;
+      if (_isAutoReviewCancelled) {
+        message = "your subscription will be cancelled on $endDate";
+      }
       widgets.add(
         Text(
-          "valid till " +
-              getDateAndMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
-                  _currentSubscription.expiryTime)),
+          message,
           style: TextStyle(
             color: Colors.white.withOpacity(0.6),
             fontSize: 14,
@@ -257,8 +269,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       );
     }
+
     if (_showStripePlans()) {
       widgets.add(_showSubscriptionToggle());
+    }
+
+    if (_isIndependentApk &&
+        _hasActiveSubscription &&
+        _isActiveStripeSubscriber) {
+      widgets.add(_stripeSubscriptionToggleButton(_isAutoReviewCancelled));
     }
 
     if (_hasActiveSubscription &&
@@ -269,6 +288,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           child: GestureDetector(
             onTap: () {
               if (_isActiveStripeSubscriber) {
+                if(_isIndependentApk) {
+
+                }
                 return;
               }
               if (Platform.isAndroid) {
@@ -350,6 +372,65 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     );
   }
 
+  Widget _stripeSubscriptionToggleButton(bool isCurrentlyCancelled) {
+    return TextButton(
+      child: Text(
+        isCurrentlyCancelled ? "renew subscription" : "cancel subscription",
+        style: TextStyle(
+          color: isCurrentlyCancelled ? Colors.greenAccent : Colors.redAccent,
+        ),
+      ),
+      onPressed: () {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                  title: Text(isCurrentlyCancelled
+                      ? 'confirm subscription renewal'
+                      : 'confirm subscription cancellation'),
+                  content: Text(isCurrentlyCancelled
+                      ? 'are you sure you want to renew>'
+                      : 'are you sure you want to cancel?'),
+                  actions: <Widget>[
+                    TextButton(
+                        child: Text(
+                          'yes',
+                          style: TextStyle(
+                            color: isCurrentlyCancelled
+                                ? Theme.of(context).buttonColor
+                                : Theme.of(context).errorColor,
+                          ),
+                        ),
+                        onPressed: () async {
+                          Navigator.of(context).pop('dialog');
+                          _dialog.show();
+                          if (isCurrentlyCancelled) {
+                            await _billingService.activateStripeSubscription();
+                          } else {
+                            await _billingService.cancelStripeSubscription();
+                          }
+                          await _fetchSub();
+                          _dialog.hide();
+                        }),
+                    TextButton(
+                        child: Text(
+                          'cancel',
+                          style: TextStyle(
+                            color: isCurrentlyCancelled
+                                ? Theme.of(context).errorColor
+                                : Theme.of(context).buttonColor,
+                          ),
+                        ),
+                        onPressed: () => {
+                              Navigator.of(context, rootNavigator: true)
+                                  .pop('dialog')
+                            }),
+                  ]);
+            });
+      },
+    );
+  }
+
   List<Widget> _getStripePlanWidgets() {
     final List<Widget> planWidgets = [];
     bool foundActivePlan = false;
@@ -370,6 +451,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               if (isActive) {
                 return;
               }
+              if (_isActiveStripeSubscriber && !_isIndependentApk) {
+                showErrorDialog(context, "sorry",
+                    "please visit web.ente.io to manage your subscription");
+                return;
+              }
               await _dialog.show();
               if (_usageFuture != null) {
                 final usage = await _usageFuture;
@@ -380,47 +466,43 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   return;
                 }
               }
-              if (_isActiveStripeSubscriber && !_isIndependentApk) {
-                showErrorDialog(context, "sorry",
-                    "please visit web.ente.io to manage your subscription");
-                return;
-              }
-
               if (_isActiveStripeSubscriber) {
                 // check if user really wants to change his plan plan
-                  showDialog(context: context,
-                      builder: (BuildContext context)  {
-                    return AlertDialog(
-                            title: Text( 'confirm plan change'),
-                            content: Text("are you sure you want to change your plan?"),
-                            actions: <Widget>[
-                              TextButton(
-                                  child: Text('yes',
-                                    style: TextStyle(
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                          title: Text('confirm plan change'),
+                          content: Text(
+                              "are you sure you want to change your plan?"),
+                          actions: <Widget>[
+                            TextButton(
+                                child: Text(
+                                  'yes',
+                                  style: TextStyle(
                                     color: Theme.of(context).buttonColor,
                                   ),
                                 ),
                                 onPressed: () {
-                                    Navigator.of(context).pop('dialog');
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                          return PaymentWebPage(
-                                              planId: plan.stripeID,
-                                              actionType: "update");
-                                        },
-                                      ),
-                                    ).then((value) => onWebPaymentGoBack(value)); }
-                              ),
-                              TextButton(
-                                  child: Text('cancel'),
-                                  onPressed: () => {
-                                    Navigator.of(context,
-                                        rootNavigator: true)
-                                        .pop('dialog')
-                                  }),
-                            ]);
-                  });
+                                  Navigator.of(context).pop('dialog');
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) {
+                                        return PaymentWebPage(
+                                            planId: plan.stripeID,
+                                            actionType: "update");
+                                      },
+                                    ),
+                                  ).then((value) => onWebPaymentGoBack(value));
+                                }),
+                            TextButton(
+                                child: Text('cancel'),
+                                onPressed: () => {
+                                      Navigator.of(context, rootNavigator: true)
+                                          .pop('dialog')
+                                    }),
+                          ]);
+                    });
               } else {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -558,9 +640,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _showYearlyPlan
-              ? Text("yearly plans")
-              : Text("monthly plans"),
+          _showYearlyPlan ? Text("yearly plans") : Text("monthly plans"),
           Switch(
             value: _showYearlyPlan,
             onChanged: (value) async {

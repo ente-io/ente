@@ -12,6 +12,7 @@ class Subscription {
   final int expiryTime;
   final String price;
   final String period;
+  final Attributes attributes;
 
   Subscription({
     this.id,
@@ -22,6 +23,7 @@ class Subscription {
     this.expiryTime,
     this.price,
     this.period,
+    this.attributes,
   });
 
   bool isValid() {
@@ -56,7 +58,7 @@ class Subscription {
   }
 
   Map<String, dynamic> toMap() {
-    return {
+    var map = <String, dynamic>{
       'id': id,
       'productID': productID,
       'storage': storage,
@@ -66,11 +68,14 @@ class Subscription {
       'price': price,
       'period': period,
     };
+    if (attributes != null) {
+      map["attributes"] = attributes.toJson();
+    }
+    return map;
   }
 
   factory Subscription.fromMap(Map<String, dynamic> map) {
     if (map == null) return null;
-
     return Subscription(
       id: map['id'],
       productID: map['productID'],
@@ -80,6 +85,9 @@ class Subscription {
       expiryTime: map['expiryTime'],
       price: map['price'],
       period: map['period'],
+      attributes: map["attributes"] != null
+          ? Attributes.fromJson(map["attributes"])
+          : null,
     );
   }
 
@@ -90,7 +98,7 @@ class Subscription {
 
   @override
   String toString() {
-    return 'Subscription(id: $id, productID: $productID, storage: $storage, originalTransactionID: $originalTransactionID, paymentProvider: $paymentProvider, expiryTime: $expiryTime, price: $price, period: $period)';
+    return 'Subscription{id: $id, productID: $productID, storage: $storage, originalTransactionID: $originalTransactionID, paymentProvider: $paymentProvider, expiryTime: $expiryTime, price: $price, period: $period, attributes: $attributes}';
   }
 
   @override
@@ -119,4 +127,31 @@ class Subscription {
         price.hashCode ^
         period.hashCode;
   }
+}
+
+class Attributes {
+  bool isCancelled;
+  String customerID;
+
+  Attributes({
+    this.isCancelled,
+    this.customerID});
+
+  Attributes.fromJson(dynamic json) {
+    isCancelled = json["isCancelled"];
+    customerID = json["customerID"];
+  }
+
+  Map<String, dynamic> toJson() {
+    var map = <String, dynamic>{};
+    map["isCancelled"] = isCancelled;
+    map["customerID"] = customerID;
+    return map;
+  }
+
+  @override
+  String toString() {
+    return 'Attributes{isCancelled: $isCancelled, customerID: $customerID}';
+  }
+
 }
