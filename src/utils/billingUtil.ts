@@ -176,13 +176,12 @@ export async function updatePaymentMethod(
         setLoading(true);
         await billingService.redirectToCustomerPortal();
     } catch (error) {
+        setLoading(false);
         setDialogMessage({
             title: constants.ERROR,
             content: constants.UNKNOWN_ERROR,
             close: { variant: 'danger' },
         });
-    } finally {
-        setLoading(false);
     }
 }
 
