@@ -640,7 +640,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _showYearlyPlan ? Text("yearly plans") : Text("monthly plans"),
+          Text(
+            "monthly plans",
+            style: TextStyle(
+              color: Theme.of(context)
+                  .buttonColor
+                  .withOpacity(_showYearlyPlan ? 0.2 : 1.0),
+            ),
+          ),
           Switch(
             value: _showYearlyPlan,
             onChanged: (value) async {
@@ -648,6 +655,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               await _filterPlansForUI();
               setState(() {});
             },
+          ),
+          Text(
+            "yearly plans",
+            style: TextStyle(
+              color: Theme.of(context)
+                  .buttonColor
+                  .withOpacity(_showYearlyPlan ? 1.0 : 0.2),
+            ),
           ),
         ],
       ),
