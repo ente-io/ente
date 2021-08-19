@@ -78,7 +78,7 @@ class _PaymentWebPage extends State<PaymentWebPage> {
         onWillPop: () async => _buildPageExitWidget(context),
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('ente payment'),
+            title: const Text('subscription'),
           ),
           body: Column(
             children: <Widget>[
@@ -103,7 +103,6 @@ class _PaymentWebPage extends State<PaymentWebPage> {
                       (controller, navigationAction) async {
                     var loadingUri = navigationAction.request.url;
                     _logger.info("Loading url $loadingUri");
-
                     // handle the payment response
                     if (_isPaymentActionComplete(loadingUri)) {
                       await handlePaymentResponse(loadingUri);
@@ -164,9 +163,8 @@ class _PaymentWebPage extends State<PaymentWebPage> {
 
   Future<void> handlePaymentResponse(Uri uri) async {
     var queryParams = uri.queryParameters;
-    _logger.info(queryParams);
     // success or fail
-    var paymentStatus = queryParams['status'] ?? '';
+    var paymentStatus = uri.queryParameters['status'] ?? '';
     if ('fail' == paymentStatus) {
       var reason = queryParams['reason'] ?? '';
       showDialog(

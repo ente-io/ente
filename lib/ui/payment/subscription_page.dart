@@ -55,7 +55,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
     _isIndependentApk = UpdateService.instance.isIndependentFlavor();
-    _billingService.fetchSubscription().then((subscription) async {
+     _fetchSub();
+    _setupPurchaseUpdateStreamListener();
+    _dialog = createProgressDialog(context, "please wait...");
+    super.initState();
+  }
+
+  Future<void> _fetchSub() async {
+    return _billingService.fetchSubscription().then((subscription) async {
       _currentSubscription = subscription;
       _hasActiveSubscription = _currentSubscription.isValid();
       final billingPlans = await _billingService.getBillingPlans();
@@ -73,12 +80,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       _freePlan = billingPlans.freePlan;
       _usageFuture = _billingService.fetchUsage();
       _hasLoadedData = true;
-      setState(() {
-      });
+      setState(() {});
     });
-    _setupPurchaseUpdateStreamListener();
-    _dialog = createProgressDialog(context, "please wait...");
-    super.initState();
+  }
+
+  FutureOr onWebPaymentGoBack(dynamic value) {
+    // refresh subscription
+    if (widget.isOnboarding) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } else {
+      _dialog
+          .show()
+          .then((value) => _fetchSub().then((value) => _dialog.hide()));
+    }
   }
 
   bool _showStripePlans() {
@@ -360,12 +374,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   showDialog(context: context,
                       builder: (BuildContext context)  {
                     return AlertDialog(
-                            title: Text(
-                                'do you want really to change your subscription plan?'),
+                            title: Text( 'confirm plan change'),
+                            content: Text("are you sure you want to change your plan?"),
                             actions: <Widget>[
                               TextButton(
-                                  child: Text('yes'),
-                                  onPressed: () {
+                                  child: Text('yes',
+                                    style: TextStyle(
+                                    color: Theme.of(context).buttonColor,
+                                  ),
+                                ),
+                                onPressed: () {
                                     Navigator.of(context).pop('dialog');
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
@@ -375,10 +393,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                               actionType: "update");
                                         },
                                       ),
-                                    ); }
+                                    ).then((value) => onWebPaymentGoBack(value)); }
                               ),
                               TextButton(
-                                  child: Text('no'),
+                                  child: Text('cancel'),
                                   onPressed: () => {
                                     Navigator.of(context,
                                         rootNavigator: true)
@@ -394,7 +412,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                           planId: plan.stripeID, actionType: "buy");
                     },
                   ),
-                );
+                ).then((value) => onWebPaymentGoBack(value));
               }
             },
             child: SubscriptionPlanWidget(
