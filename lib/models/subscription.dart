@@ -28,6 +28,10 @@ class Subscription {
     return expiryTime > DateTime.now().microsecondsSinceEpoch;
   }
 
+  bool isYearlyPlan() {
+    return 'year' == period;
+  }
+
   Subscription copyWith({
     int id,
     String productID,

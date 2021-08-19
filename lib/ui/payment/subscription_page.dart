@@ -50,6 +50,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   bool _isActiveStripeSubscriber;
   // based on this flag, we would show ente payment page with stripe plans
   bool _isIndependentApk;
+  bool _showYearlyPlan = false;
 
   @override
   void initState() {
@@ -64,24 +65,34 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Future<void> _fetchSub() async {
     return _billingService.fetchSubscription().then((subscription) async {
       _currentSubscription = subscription;
+      showToast("Is yearly plan " + _currentSubscription.period);
+      _showYearlyPlan = _currentSubscription.isYearlyPlan();
       _hasActiveSubscription = _currentSubscription.isValid();
-      final billingPlans = await _billingService.getBillingPlans();
       _isActiveStripeSubscriber =
           _currentSubscription.paymentProvider == kStripe &&
               _currentSubscription.isValid();
-      _plans = billingPlans.plans.where((plan) {
-        final productID = (_showStripePlans())
-            ? plan.stripeID
-            : Platform.isAndroid
-                ? plan.androidID
-                : plan.iosID;
-        return productID != null && productID.isNotEmpty;
-      }).toList();
-      _freePlan = billingPlans.freePlan;
+      _filterPlansForUI();
       _usageFuture = _billingService.fetchUsage();
       _hasLoadedData = true;
       setState(() {});
     });
+  }
+
+  // _filterPlansForUI is used for initializing initState & plan toggle states
+  Future<void> _filterPlansForUI() async {
+    final billingPlans = await _billingService.getBillingPlans();
+    _freePlan = billingPlans.freePlan;
+    _plans = billingPlans.plans.where((plan) {
+      final productID = (_showStripePlans())
+          ? plan.stripeID
+          : Platform.isAndroid
+          ? plan.androidID
+          : plan.iosID;
+      var isYearlyPlan = plan.period == 'year';
+      return productID != null &&
+          productID.isNotEmpty &&
+          isYearlyPlan == _showYearlyPlan;
+    }).toList();
   }
 
   FutureOr onWebPaymentGoBack(dynamic value) {
@@ -242,6 +253,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           ),
         ),
       );
+    }
+    if (_showStripePlans()) {
+      widgets.add(_showSubscriptionToggle());
     }
 
     if (_hasActiveSubscription &&
@@ -533,7 +547,36 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     return planWidgets;
   }
 
+  Widget _showSubscriptionToggle() {
+    return Container(
+      padding: EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
+      margin: EdgeInsets.only(bottom: 12),
+      // color: Color.fromRGBO(10, 40, 40, 0.3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _showYearlyPlan
+              ? Text("yearly plans")
+              : Text("monthly plans"),
+          Switch(
+            value: _showYearlyPlan,
+            onChanged: (value) async {
+              _showYearlyPlan = value;
+              await _filterPlansForUI();
+              setState(() {});
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   void _addCurrentPlanWidget(List<Widget> planWidgets) {
+    // don't add current plan if it's monthly plan but UI is showing yearly plans
+    // and vice versa.
+    if (_showYearlyPlan != _currentSubscription.isYearlyPlan()) {
+      return;
+    }
     int activePlanIndex = 0;
     for (; activePlanIndex < _plans.length; activePlanIndex++) {
       if (_plans[activePlanIndex].storage > _currentSubscription.storage) {
