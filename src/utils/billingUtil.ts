@@ -9,6 +9,7 @@ import { SetDialogMessage } from 'components/MessageDialog';
 import { SetLoading } from 'pages/gallery';
 import { getData, LS_KEYS } from './storage/localStorage';
 import { CustomError } from './common/errorUtil';
+import { logError } from './sentry';
 
 const STRIPE = 'stripe';
 
@@ -196,59 +197,7 @@ export async function checkSubscriptionPurchase(
         const status = urlParams.get('status');
         const reason = urlParams.get('reason');
         if (status === RESPONSE_STATUS.fail) {
-            switch (reason) {
-                case FAILURE_REASON.CANCELED:
-                    setDialogMessage({
-                        title: constants.MESSAGE,
-                        content: constants.SUBSCRIPTION_PURCHASE_CANCELLED,
-                        close: { variant: 'danger' },
-                    });
-                    break;
-                case FAILURE_REASON.REQUIRE_PAYMENT_METHOD:
-                    setDialogMessage({
-                        title: constants.UPDATE_PAYMENT_METHOD,
-                        content: constants.UPDATE_PAYMENT_METHOD_MESSAGE,
-                        staticBackdrop: true,
-                        proceed: {
-                            text: constants.UPDATE_PAYMENT_METHOD,
-                            variant: 'success',
-                            action: updatePaymentMethod.bind(
-                                null,
-
-                                setDialogMessage,
-                                setLoading
-                            ),
-                        },
-                        close: { text: constants.CANCEL },
-                    });
-                    break;
-
-                case FAILURE_REASON.AUTHENTICATION_FAILED:
-                    setDialogMessage({
-                        title: constants.UPDATE_PAYMENT_METHOD,
-                        content: constants.STRIPE_AUTHENTICATION_FAILED,
-                        staticBackdrop: true,
-                        proceed: {
-                            text: constants.UPDATE_PAYMENT_METHOD,
-                            variant: 'success',
-                            action: updatePaymentMethod.bind(
-                                null,
-
-                                setDialogMessage,
-                                setLoading
-                            ),
-                        },
-                        close: { text: constants.CANCEL },
-                    });
-                    break;
-
-                default:
-                    setDialogMessage({
-                        title: constants.ERROR,
-                        content: constants.SUBSCRIPTION_PURCHASE_FAILED,
-                        close: { variant: 'danger' },
-                    });
-            }
+            handleFailureReason(reason, setDialogMessage, setLoading);
         } else if (status === RESPONSE_STATUS.success) {
             try {
                 const subscription = await billingService.verifySubscription(
@@ -273,6 +222,67 @@ export async function checkSubscriptionPurchase(
         // ignore
     } finally {
         router.push('gallery', undefined, { shallow: true });
+    }
+}
+
+function handleFailureReason(
+    reason: string,
+    setDialogMessage: SetDialogMessage,
+    setLoading: SetLoading
+): void {
+    logError(Error(`subscription purchase failed with reason- ${reason}`));
+    switch (reason) {
+        case FAILURE_REASON.CANCELED:
+            setDialogMessage({
+                title: constants.MESSAGE,
+                content: constants.SUBSCRIPTION_PURCHASE_CANCELLED,
+                close: { variant: 'danger' },
+            });
+            break;
+        case FAILURE_REASON.REQUIRE_PAYMENT_METHOD:
+            setDialogMessage({
+                title: constants.UPDATE_PAYMENT_METHOD,
+                content: constants.UPDATE_PAYMENT_METHOD_MESSAGE,
+                staticBackdrop: true,
+                proceed: {
+                    text: constants.UPDATE_PAYMENT_METHOD,
+                    variant: 'success',
+                    action: updatePaymentMethod.bind(
+                        null,
+
+                        setDialogMessage,
+                        setLoading
+                    ),
+                },
+                close: { text: constants.CANCEL },
+            });
+            break;
+
+        case FAILURE_REASON.AUTHENTICATION_FAILED:
+            setDialogMessage({
+                title: constants.UPDATE_PAYMENT_METHOD,
+                content: constants.STRIPE_AUTHENTICATION_FAILED,
+                staticBackdrop: true,
+                proceed: {
+                    text: constants.UPDATE_PAYMENT_METHOD,
+                    variant: 'success',
+                    action: updatePaymentMethod.bind(
+                        null,
+
+                        setDialogMessage,
+                        setLoading
+                    ),
+                },
+                close: { text: constants.CANCEL },
+            });
+            break;
+
+        default:
+            setDialogMessage({
+                title: constants.ERROR,
+                content: constants.SUBSCRIPTION_PURCHASE_FAILED,
+                close: { variant: 'danger' },
+            });
     }
 }
 
