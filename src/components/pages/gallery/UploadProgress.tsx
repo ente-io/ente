@@ -58,7 +58,6 @@ const Section = styled.div`
 `;
 const SectionInfo = styled.div`
     margin: 4px 0;
-    text-align: justify;
     padding-left: 15px;
 `;
 
