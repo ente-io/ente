@@ -37,6 +37,7 @@ export default async function uploader(
     let encryptedFile: EncryptedFile = null;
     let metadata: MetadataObject = null;
     let fileTypeInfo: FileTypeInfo = null;
+    let fileWithMetadata: FileWithMetadata = null;
 
     try {
         fileTypeInfo = await getFileType(worker, rawFile);
@@ -57,7 +58,14 @@ export default async function uploader(
         }
 
         file = await UploadService.readFile(worker, rawFile, fileTypeInfo);
-        const fileWithMetadata: FileWithMetadata = { ...file, metadata };
+        if (file.hasStaticThumbnail) {
+            metadata.hasStaticThumbnail = true;
+        }
+        fileWithMetadata = {
+            filedata: file.filedata,
+            thumbnail: file.thumbnail,
+            metadata,
+        };
 
         encryptedFile = await UploadService.encryptFile(
             worker,
@@ -110,6 +118,7 @@ export default async function uploader(
         }
     } finally {
         file = null;
+        fileWithMetadata = null;
         encryptedFile = null;
     }
 }
