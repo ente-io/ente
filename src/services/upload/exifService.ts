@@ -5,7 +5,6 @@ import { NULL_LOCATION, Location } from './metadataService';
 
 const SOUTH_DIRECTION = 'S';
 const WEST_DIRECTION = 'W';
-const EXIF_HAVING_TYPES = new Set(['jpeg', 'jpg', 'tiff']);
 const CHUNK_SIZE_FOR_EXIF_READING = 4 * 1024 * 1024;
 interface ParsedEXIFData {
     location: Location;
@@ -14,14 +13,9 @@ interface ParsedEXIFData {
 
 export async function getExifData(
     worker,
-    receivedFile: globalThis.File,
-    exactType: string
+    receivedFile: globalThis.File
 ): Promise<ParsedEXIFData> {
     try {
-        if (!fileHasEXIF(exactType)) {
-            // files don't have exif
-            return { location: NULL_LOCATION, creationTime: null };
-        }
         const fileChunk = await worker.getUint8ArrayView(
             receivedFile.slice(0, CHUNK_SIZE_FOR_EXIF_READING)
         );
@@ -37,10 +31,6 @@ export async function getExifData(
         logError(e, 'error reading exif data');
         // ignore exif parsing errors
     }
-}
-
-function fileHasEXIF(type) {
-    return EXIF_HAVING_TYPES.has(type);
 }
 
 function getUNIXTime(exifData: any) {

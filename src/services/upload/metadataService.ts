@@ -32,11 +32,7 @@ export async function extractMetadata(
     receivedFile: globalThis.File,
     fileTypeInfo: FileTypeInfo
 ) {
-    const { location, creationTime } = await getExifData(
-        worker,
-        receivedFile,
-        fileTypeInfo.exactType
-    );
+    const { location, creationTime } = await getExifData(worker, receivedFile);
 
     const extractedMetadata: MetadataObject = {
         title: receivedFile.name,
