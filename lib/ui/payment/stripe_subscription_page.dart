@@ -17,6 +17,7 @@ import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
+import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import 'package:photos/ui/progress_dialog.dart';
 import 'package:photos/utils/data_util.dart';
@@ -54,14 +55,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   bool _hasLoadedData = false;
   bool _isActiveStripeSubscriber;
 
-  // based on this flag, we would show ente payment page with stripe plans
-  bool _isIndependentApk;
   bool _showYearlyPlan = false;
 
   @override
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
-    _isIndependentApk = UpdateService.instance.isIndependentFlavor();
     _fetchSub();
     _dialog = createProgressDialog(context, "please wait...");
     super.initState();
@@ -119,9 +117,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   bool _showStripePlans() {
-    return _isActiveStripeSubscriber || _isIndependentApk;
+    return _isActiveStripeSubscriber;
   }
-
 
   @override
   void dispose() {
@@ -148,76 +145,28 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   Widget _buildPlans() {
     final widgets = <Widget>[];
-    if (widget.isOnboarding) {
-      widgets.add(Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Text(
-          "ente preserves your memories, so they're always available to you, even if you lose your device",
-          style: TextStyle(
-            color: Colors.white54,
-            height: 1.2,
-          ),
-        ),
-      ));
-    } else {
-      widgets.add(
-        SizedBox(
-          height: 50,
-          child: FutureBuilder(
-            future: _usageFuture,
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.hasData) {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text("current usage is " + formatBytes(snapshot.data)),
-                );
-              } else if (snapshot.hasError) {
-                return Container();
-              } else {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: loadWidget,
-                );
-              }
-            },
-          ),
-        ),
-      );
-    }
+
+    widgets.add(SubscriptionHeaderWidget(
+      isOnboarding: widget.isOnboarding,
+      usageFuture: _usageFuture,
+    ));
+
     widgets.addAll([
       Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children:_getStripePlanWidgets()
-      ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: _getStripePlanWidgets()),
       Padding(padding: EdgeInsets.all(8)),
     ]);
 
     widgets.add(_showSubscriptionToggle());
 
     if (_hasActiveSubscription) {
-      var endDate = getDateAndMonthAndYear(
-          DateTime.fromMicrosecondsSinceEpoch(_currentSubscription.expiryTime));
-      var message = "renews on $endDate";
-      if (_currentSubscription.productID == kFreeProductID) {
-        message = "free plan valid till $endDate";
-      } else if (_isAutoReviewCancelled) {
-        message = "your subscription will be cancelled on $endDate";
-      }
-      widgets.add(
-        Text(
-          message,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-            fontSize: 14,
-          ),
-        ),
-      );
+      widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
     }
 
-    if (_isIndependentApk &&
-        _hasActiveSubscription &&
+    if (_hasActiveSubscription &&
         _isActiveStripeSubscriber) {
-      widgets.add(_stripeSubscriptionToggleButton(_isAutoReviewCancelled));
+      widgets.add(_stripeRenewOrCancelButton());
     }
 
     if (_hasActiveSubscription &&
@@ -228,12 +177,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           child: GestureDetector(
             onTap: () async {
               if (_isActiveStripeSubscriber) {
-                if (_isIndependentApk) {
                   await _launchStripePortal();
                   return;
-                } else {
-                  return;
-                }
               }
               if (Platform.isAndroid) {
                 launch(
@@ -250,7 +195,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: _isActiveStripeSubscriber && !_isIndependentApk
+                      text: _isActiveStripeSubscriber
                           ? "visit web.ente.io to manage your subscription"
                           : "payment details",
                       style: TextStyle(
@@ -332,43 +277,45 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     await _dialog.hide();
   }
 
-  Widget _stripeSubscriptionToggleButton(bool isCurrentlyCancelled) {
+  Widget _stripeRenewOrCancelButton() {
+    bool isRenewCancelled =
+        _currentSubscription.attributes?.isCancelled ?? false;
     return TextButton(
       child: Text(
-        isCurrentlyCancelled ? "renew subscription" : "cancel subscription",
+        isRenewCancelled ? "renew subscription" : "cancel subscription",
         style: TextStyle(
-          color: isCurrentlyCancelled ? Colors.greenAccent : Colors.redAccent,
+          color: isRenewCancelled ? Colors.greenAccent : Colors.redAccent,
         ),
       ),
       onPressed: () async {
         var result = await showChoiceDialog(
             context,
-            isCurrentlyCancelled
+            isRenewCancelled
                 ? 'subscription renewal'
                 : 'subscription cancellation',
-            isCurrentlyCancelled
+            isRenewCancelled
                 ? 'are you sure you want to renew?'
                 : 'are you sure you want to cancel?',
             firstAction: 'yes',
             secondAction: 'no');
         if (result == DialogUserChoice.firstChoice) {
-          toggleStripeSubscription(isCurrentlyCancelled);
+          toggleStripeSubscription(isRenewCancelled);
         }
       },
     );
   }
 
-  Future<void> toggleStripeSubscription(bool isCurrentlyCancelled) async {
+  Future<void> toggleStripeSubscription(bool isRenewCancelled) async {
     await _dialog.show();
     try {
-      if (isCurrentlyCancelled) {
+      if (isRenewCancelled) {
         await _billingService.activateStripeSubscription();
       } else {
         await _billingService.cancelStripeSubscription();
       }
       await _fetchSub();
     } catch (e) {
-      showToast(isCurrentlyCancelled ? 'failed to renew' : 'failed to cancel');
+      showToast(isRenewCancelled ? 'failed to renew' : 'failed to cancel');
     }
     await _dialog.hide();
   }
@@ -393,9 +340,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               if (isActive) {
                 return;
               }
-              if (_isActiveStripeSubscriber && !_isIndependentApk) {
+              if (!_isActiveStripeSubscriber) {
                 showErrorDialog(context, "sorry",
-                    "please visit web.ente.io to manage your subscription");
+                    "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first");
                 return;
               }
               await _dialog.show();

@@ -12,13 +12,11 @@ import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/ui/billing_questions_widget.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
+import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import 'package:photos/ui/progress_dialog.dart';
-import 'package:photos/utils/data_util.dart';
-import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -67,7 +65,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         return productID != null && productID.isNotEmpty;
       }).toList();
       _freePlan = billingPlans.freePlan;
-
       _usageFuture = _billingService.fetchUsage();
       _hasLoadedData = true;
       setState(() {});
@@ -162,42 +159,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget _buildPlans() {
     final widgets = <Widget>[];
-    if (widget.isOnboarding) {
-      widgets.add(Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Text(
-          "ente preserves your memories, so they're always available to you, even if you lose your device",
-          style: TextStyle(
-            color: Colors.white54,
-            height: 1.2,
-          ),
-        ),
-      ));
-    } else {
-      widgets.add(
-        SizedBox(
-          height: 50,
-          child: FutureBuilder(
-            future: _usageFuture,
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.hasData) {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text("current usage is " + formatBytes(snapshot.data)),
-                );
-              } else if (snapshot.hasError) {
-                return Container();
-              } else {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: loadWidget,
-                );
-              }
-            },
-          ),
-        ),
-      );
-    }
+    widgets.add(SubscriptionHeaderWidget(
+      isOnboarding: widget.isOnboarding,
+      usageFuture: _usageFuture,
+    ));
     widgets.addAll([
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -209,17 +174,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     ]);
 
     if (_hasActiveSubscription) {
-      widgets.add(
-        Text(
-          "valid till " +
-              getDateAndMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
-                  _currentSubscription.expiryTime)),
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-            fontSize: 14,
-          ),
-        ),
-      );
+      widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
     }
 
     if (_hasActiveSubscription &&
