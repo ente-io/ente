@@ -13,6 +13,7 @@ import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/billing_questions_widget.dart';
+import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
@@ -404,46 +405,20 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           color: isCurrentlyCancelled ? Colors.greenAccent : Colors.redAccent,
         ),
       ),
-      onPressed: () {
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                  title: Text(isCurrentlyCancelled
-                      ? 'confirm subscription renewal'
-                      : 'confirm subscription cancellation'),
-                  content: Text(isCurrentlyCancelled
-                      ? 'are you sure you want to renew?'
-                      : 'are you sure you want to cancel?'),
-                  actions: <Widget>[
-                    TextButton(
-                        child: Text(
-                          'yes',
-                          style: TextStyle(
-                            color: isCurrentlyCancelled
-                                ? Theme.of(context).buttonColor
-                                : Theme.of(context).errorColor,
-                          ),
-                        ),
-                        onPressed: () async {
-                          Navigator.of(context).pop('dialog');
-                          await toggleStripeSubscription(isCurrentlyCancelled);
-                        }),
-                    TextButton(
-                        child: Text(
-                          'no',
-                          style: TextStyle(
-                            color: isCurrentlyCancelled
-                                ? Theme.of(context).errorColor
-                                : Theme.of(context).buttonColor,
-                          ),
-                        ),
-                        onPressed: () => {
-                              Navigator.of(context, rootNavigator: true)
-                                  .pop('dialog')
-                            }),
-                  ]);
-            });
+      onPressed: () async {
+        var result = await showChoiceDialog(
+            context,
+            isCurrentlyCancelled
+                ? 'subscription renewal'
+                : 'subscription cancellation',
+            isCurrentlyCancelled
+                ? 'are you sure you want to renew?'
+                : 'are you sure you want to cancel?',
+            firstAction: 'yes',
+            secondAction: 'no');
+        if (result == DialogUserChoice.firstChoice) {
+          toggleStripeSubscription(isCurrentlyCancelled);
+        }
       },
     );
   }
@@ -498,56 +473,30 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   return;
                 }
               }
+              String stripPurChaseAction = 'buy';
               if (_isActiveStripeSubscriber) {
-                // check if user really wants to change his plan plan
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                          title: Text('confirm plan change'),
-                          content: Text(
-                              "are you sure you want to change your plan?"),
-                          actions: <Widget>[
-                            TextButton(
-                                child: Text(
-                                  'yes',
-                                  style: TextStyle(
-                                    color: Theme.of(context).buttonColor,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop('dialog');
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) {
-                                        return PaymentWebPage(
-                                            planId: plan.stripeID,
-                                            actionType: "update");
-                                      },
-                                    ),
-                                  ).then((value) => onWebPaymentGoBack(value));
-                                }),
-                            TextButton(
-                                child: Text('cancel'),
-                                onPressed: () => {
-                                      Navigator.of(context, rootNavigator: true)
-                                          .pop('dialog')
-                                    }),
-                          ]);
-                    });
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return PaymentWebPage(
-                        planId: plan.stripeID,
-                        actionType: "buy",
-                      );
-                    },
-                  ),
-                ).then((value) => onWebPaymentGoBack(value));
+                // confirm if user wants to change plan or not
+                var result = await showChoiceDialog(
+                    context,
+                    "confirm plan change",
+                    "are you sure you want to change your plan?",
+                    firstAction: "yes",
+                    secondAction: 'no');
+                if (result == DialogUserChoice.secondChoice) {
+                  return;
+                }
+                stripPurChaseAction = 'update';
               }
+              Navigator.push(
+                context, MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return PaymentWebPage(
+                      planId: plan.stripeID,
+                      actionType: stripPurChaseAction,
+                    );
+                  },
+                ),
+              ).then((value) => onWebPaymentGoBack(value));
             },
             child: SubscriptionPlanWidget(
               storage: plan.storage,
