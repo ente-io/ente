@@ -5,6 +5,8 @@ import 'package:photos/utils/data_util.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 
+import '../billing_questions_widget.dart';
+
 class SubscriptionHeaderWidget extends StatefulWidget {
   final bool isOnboarding;
   final Future<int> usageFuture;
@@ -84,4 +86,39 @@ class ValidityWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+class SubFaqWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          showModalBottomSheet<void>(
+            backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
+            barrierColor: Colors.black87,
+            context: context,
+            builder: (context) {
+              return BillingQuestionsWidget();
+            },
+          );
+        },
+        child: Container(
+          padding: EdgeInsets.all(40),
+          child: RichText(
+            text: TextSpan(
+              text: "questions?",
+              style: TextStyle(
+                color: Colors.blue,
+                fontFamily: 'Ubuntu',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 }

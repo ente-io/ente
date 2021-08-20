@@ -163,6 +163,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       isOnboarding: widget.isOnboarding,
       usageFuture: _usageFuture,
     ));
+
     widgets.addAll([
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -175,6 +176,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
     if (_hasActiveSubscription) {
       widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
+    }
+
+    if ( _currentSubscription.productID == kFreeProductID) {
+      if (widget.isOnboarding) {
+        widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
+      }
+      widgets.add(SubFaqWidget());
     }
 
     if (_hasActiveSubscription &&
@@ -216,42 +224,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     textAlign: TextAlign.center,
                   ),
                 ],
-              ),
-            ),
-          ),
-        ),
-      ]);
-    }
-    if (widget.isOnboarding &&
-        _currentSubscription.productID == kFreeProductID) {
-      widgets.addAll([SkipSubscriptionWidget(freePlan: _freePlan)]);
-    }
-    if (_currentSubscription.productID == kFreeProductID) {
-      widgets.addAll([
-        Align(
-          alignment: Alignment.center,
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              showModalBottomSheet<void>(
-                backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
-                barrierColor: Colors.black87,
-                context: context,
-                builder: (context) {
-                  return BillingQuestionsWidget();
-                },
-              );
-            },
-            child: Container(
-              padding: EdgeInsets.all(40),
-              child: RichText(
-                text: TextSpan(
-                  text: "questions?",
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontFamily: 'Ubuntu',
-                  ),
-                ),
               ),
             ),
           ),

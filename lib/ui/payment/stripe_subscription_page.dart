@@ -49,12 +49,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   // indicates if user's subscription plan is still active
   bool _hasActiveSubscription;
-  bool _isAutoReviewCancelled;
   FreePlan _freePlan;
   List<BillingPlan> _plans = [];
   bool _hasLoadedData = false;
   bool _isActiveStripeSubscriber;
-
   bool _showYearlyPlan = false;
 
   @override
@@ -70,8 +68,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       _currentSubscription = subscription;
       _showYearlyPlan = _currentSubscription.isYearlyPlan();
       _hasActiveSubscription = _currentSubscription.isValid();
-      _isAutoReviewCancelled =
-          _currentSubscription.attributes?.isCancelled ?? false;
       _isActiveStripeSubscriber =
           _currentSubscription.paymentProvider == kStripe &&
               _currentSubscription.isValid();
@@ -164,8 +160,14 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
     }
 
-    if (_hasActiveSubscription &&
-        _isActiveStripeSubscriber) {
+    if ( _currentSubscription.productID == kFreeProductID) {
+      if (widget.isOnboarding) {
+        widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
+      }
+      widgets.add(SubFaqWidget());
+    }
+
+    if (_hasActiveSubscription && _isActiveStripeSubscriber) {
       widgets.add(_stripeRenewOrCancelButton());
     }
 
@@ -215,42 +217,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         ),
       ]);
     }
-    if (widget.isOnboarding &&
-        _currentSubscription.productID == kFreeProductID) {
-      widgets.addAll([SkipSubscriptionWidget(freePlan: _freePlan)]);
-    }
-    if (_currentSubscription.productID == kFreeProductID) {
-      widgets.addAll([
-        Align(
-          alignment: Alignment.center,
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              showModalBottomSheet<void>(
-                backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
-                barrierColor: Colors.black87,
-                context: context,
-                builder: (context) {
-                  return BillingQuestionsWidget();
-                },
-              );
-            },
-            child: Container(
-              padding: EdgeInsets.all(40),
-              child: RichText(
-                text: TextSpan(
-                  text: "questions?",
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontFamily: 'Ubuntu',
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ]);
-    }
+
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
