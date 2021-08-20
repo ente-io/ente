@@ -42,11 +42,7 @@ export default async function uploader(
     try {
         fileTypeInfo = await getFileType(worker, rawFile);
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
-            throw Error(
-                `${CustomError.UNSUPPORTED_FILE_FORMAT}-${
-                    fileTypeInfo.exactType ?? rawFile.name.split('.')[-1]
-                }`
-            );
+            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         metadata = await uploadService.getFileMetadata(
             worker,
@@ -99,7 +95,9 @@ export default async function uploader(
         };
     } catch (e) {
         console.log(e);
-        logError(e, 'file upload failed');
+        const fileFormat =
+            fileTypeInfo.exactType ?? rawFile.name.split('.')[-1];
+        logError(e, 'file upload failed', { fileFormat });
         handleError(e);
         switch (e.message) {
             case CustomError.ETAG_MISSING:
