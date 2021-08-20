@@ -6,6 +6,7 @@ enum DialogUserChoice {
   secondChoice
 }
 
+// if dialog is dismissed by tapping outside, this will return null
 Future<T> showChoiceDialog<T>(
   BuildContext context,
   String title,
