@@ -39,7 +39,7 @@ export async function extractMetadata(
         creationTime: creationTime || receivedFile.lastModified * 1000,
         modificationTime: receivedFile.lastModified * 1000,
         latitude: location?.latitude,
-        longitude: location?.latitude,
+        longitude: location?.longitude,
         fileType: fileTypeInfo.fileType,
     };
     return extractedMetadata;
