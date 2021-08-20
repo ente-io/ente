@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -40,7 +39,6 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     _selectedFolders = Configuration.instance.getPathsToBackUp();
     FilesDB.instance.getLatestLocalFiles().then((files) async {
       _itemCount = await FilesDB.instance.getFileCountInDeviceFolders();
-      Logger("BackupFolderSelectionPage").info(_itemCount);
       setState(() {
         _latestFiles = files;
         _latestFiles.sort((first, second) {
