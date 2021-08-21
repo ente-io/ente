@@ -72,7 +72,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           _currentSubscription.paymentProvider == kStripe &&
               _currentSubscription.isValid();
       _usageFuture = _billingService.fetchUsage();
-      return _filterPlansForUI().then((value) {
+      return _filterStripeForUI().then((value) {
         _hasLoadedData = true;
         setState(() {});
       });
@@ -80,19 +80,15 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   // _filterPlansForUI is used for initializing initState & plan toggle states
-  Future<void> _filterPlansForUI() async {
+  Future<void> _filterStripeForUI() async {
     final billingPlans = await _billingService.getBillingPlans();
     _freePlan = billingPlans.freePlan;
     _plans = billingPlans.plans.where((plan) {
-      final productID = (_showStripePlans())
-          ? plan.stripeID
-          : Platform.isAndroid
-              ? plan.androidID
-              : plan.iosID;
+      if (plan.stripeID == null || plan.stripeID.isEmpty) {
+        return false;
+      }
       var isYearlyPlan = plan.period == 'year';
-      return productID != null &&
-          productID.isNotEmpty &&
-          isYearlyPlan == _showYearlyPlan;
+      return isYearlyPlan == _showYearlyPlan;
     }).toList();
     setState(() {});
   }
@@ -110,10 +106,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       }
       await _dialog.hide();
     }
-  }
-
-  bool _showStripePlans() {
-    return _isActiveStripeSubscriber;
   }
 
   @override
@@ -275,11 +267,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Future<void> toggleStripeSubscription(bool isRenewCancelled) async {
     await _dialog.show();
     try {
-      if (isRenewCancelled) {
-        await _billingService.activateStripeSubscription();
-      } else {
-        await _billingService.cancelStripeSubscription();
-      }
+      isRenewCancelled
+          ? await _billingService.activateStripeSubscription()
+          : await _billingService.cancelStripeSubscription();
       await _fetchSub();
     } catch (e) {
       showToast(isRenewCancelled ? 'failed to renew' : 'failed to cancel');
@@ -307,7 +297,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               if (isActive) {
                 return;
               }
-              if (!_isActiveStripeSubscriber) {
+              if (!_isActiveStripeSubscriber &&
+                  _currentSubscription.productID != kFreeProductID) {
                 showErrorDialog(context, "sorry",
                     "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first");
                 return;
@@ -365,6 +356,17 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Widget _showSubscriptionToggle() {
+    Text _planText(String title, bool reduceOpacity) {
+      return Text(
+        title,
+        style: TextStyle(
+          color: Theme.of(context)
+              .buttonColor
+              .withOpacity(reduceOpacity ? 0.5 : 1.0),
+        ),
+      );
+    }
+
     return Container(
       padding: EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
       margin: EdgeInsets.only(bottom: 12),
@@ -372,30 +374,15 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Text(
-            "monthly plans",
-            style: TextStyle(
-              color: Theme.of(context)
-                  .buttonColor
-                  .withOpacity(_showYearlyPlan ? 0.2 : 1.0),
-            ),
-          ),
+          _planText("monthly plans", _showYearlyPlan),
           Switch(
             value: _showYearlyPlan,
             onChanged: (value) async {
               _showYearlyPlan = value;
-              await _filterPlansForUI();
-              setState(() {});
+              await _filterStripeForUI();
             },
           ),
-          Text(
-            "yearly plans",
-            style: TextStyle(
-              color: Theme.of(context)
-                  .buttonColor
-                  .withOpacity(_showYearlyPlan ? 1.0 : 0.2),
-            ),
-          ),
+          _planText("yearly plans", !_showYearlyPlan)
         ],
       ),
     );

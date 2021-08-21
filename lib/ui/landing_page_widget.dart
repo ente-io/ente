@@ -6,6 +6,7 @@ import 'package:photos/ui/email_entry_page.dart';
 import 'package:photos/ui/login_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
+import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/payment/subscription_page.dart';
 
 class LandingPageWidget extends StatefulWidget {
@@ -207,7 +208,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         page = PasswordReentryPage();
       } else {
         // All is well, user just has not subscribed
-        page = SubscriptionPage(isOnboarding: true);
+        page = getSubscriptionPage(isOnBoarding: true);
       }
     }
     Navigator.of(context).push(
@@ -233,7 +234,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         page = PasswordReentryPage();
       } else {
         // All is well, user just has not subscribed
-        page = SubscriptionPage(isOnboarding: true);
+        page = getSubscriptionPage(isOnBoarding: true);
       }
     }
     Navigator.of(context).push(

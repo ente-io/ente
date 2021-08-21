@@ -11,7 +11,6 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
-import 'package:photos/ui/billing_questions_widget.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
@@ -30,7 +29,7 @@ class SubscriptionPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _SubscriptionPageState createState() => _SubscriptionPageState();
+   State<SubscriptionPage> createState() => _SubscriptionPageState();
 }
 
 class _SubscriptionPageState extends State<SubscriptionPage> {

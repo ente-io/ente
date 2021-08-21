@@ -8,6 +8,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/change_email_dialog.dart';
 import 'package:photos/ui/password_entry_page.dart';
+import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/recovery_key_dialog.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
@@ -38,7 +39,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return SubscriptionPage();
+                  return getSubscriptionPage();
                 },
               ),
             );

@@ -165,10 +165,13 @@ class _PaymentWebPage extends State<PaymentWebPage> {
     var queryParams = uri.queryParameters;
     var paymentStatus = uri.queryParameters['status'] ?? '';
     _logger.fine('handle payment response with status $paymentStatus');
-    if ('fail' == paymentStatus) {
+    if (paymentStatus == 'success') {
+      await _handlePaymentSuccess(queryParams);
+    } else if ('fail' == paymentStatus) {
       var reason = queryParams['reason'] ?? '';
-      showDialog(
+      await showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (context) => AlertDialog(
                   title: Text('payment failed'),
                   content:
@@ -178,16 +181,13 @@ class _PaymentWebPage extends State<PaymentWebPage> {
                         child: Text('ok'),
                         onPressed: () {
                           Navigator.of(context).pop('dialog');
-                          Navigator.of(context).pop(true);
                         }),
                   ]));
+      Navigator.of(context).pop(true);
       return;
-      // showToast("sorry, we couldn't process your payment due to $reason");
-    } else if (paymentStatus == 'success') {
-      await _handlePaymentSuccess(queryParams);
     } else {
       // should never reach here
-      _logger.severe("unexpected payement status", uri.toString());
+      _logger.severe("unexpected status", uri.toString());
       Navigator.of(context).pop();
     }
   }
