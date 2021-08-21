@@ -14,8 +14,8 @@ import 'package:photos/utils/toast_util.dart';
 import '../loading_widget.dart';
 import '../progress_dialog.dart';
 
-const kMobilePaymentRedirect = "https://payments.ente.io/mobile";
-const kWebPaymentUrl = String.fromEnvironment("web-payment",
+const kWebPaymentRedirectUrl = "https://payments.ente.io/frameRedirect";
+const kWebPaymentBaseEndpoint = String.fromEnvironment("web-payment",
     defaultValue: "https://payments.ente.io");
 
 class PaymentWebPage extends StatefulWidget {
@@ -36,14 +36,15 @@ class _PaymentWebPage extends State<PaymentWebPage> {
   ProgressDialog _dialog;
   InAppWebViewController webView;
   double progress = 0;
-  String paymentWebToken;
-  String basePaymentUrl = kWebPaymentUrl;
+  Uri initPaymentUrl;
+  String basePaymentUrl = kWebPaymentBaseEndpoint;
 
   @override
   void initState() {
     userService.getPaymentToken().then((token) {
-      paymentWebToken = token;
-      setState(() {});
+      initPaymentUrl = _getPaymentUrl(token);
+      setState(() {
+      });
     });
     if (Platform.isAndroid && kDebugMode) {
       AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
@@ -52,16 +53,15 @@ class _PaymentWebPage extends State<PaymentWebPage> {
     super.initState();
   }
 
-  Uri _getPaymentUrl(String baseEndpoint, String productId, String paymentToken,
-      String actionType, String redirectUrl) {
+  Uri _getPaymentUrl(String paymentToken) {
     final queryParameters = {
-      'productID': productId,
+      'productID': widget.planId,
       'paymentToken': paymentToken,
-      'action': actionType,
-      'redirectURL': redirectUrl,
+      'action': widget.actionType,
+      'redirectURL': kWebPaymentRedirectUrl,
     };
-    var tryParse = Uri.tryParse(baseEndpoint);
-    if (kDebugMode && baseEndpoint.startsWith("http://")) {
+    var tryParse = Uri.tryParse(kWebPaymentBaseEndpoint);
+    if (kDebugMode && kWebPaymentBaseEndpoint.startsWith("http://")) {
       return Uri.http(tryParse.authority, tryParse.path, queryParameters);
     } else {
       return Uri.https(tryParse.authority, tryParse.path, queryParameters);
@@ -70,12 +70,9 @@ class _PaymentWebPage extends State<PaymentWebPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (paymentWebToken == null) {
+    if (initPaymentUrl == null) {
       return loadWidget;
     }
-    Uri paymentUri = _getPaymentUrl(basePaymentUrl, widget.planId,
-        paymentWebToken, widget.actionType, kMobilePaymentRedirect);
-    _logger.info("paymentUrl : $paymentUri");
     return WillPopScope(
         onWillPop: () async => _buildPageExitWidget(context),
         child: Scaffold(
@@ -89,7 +86,7 @@ class _PaymentWebPage extends State<PaymentWebPage> {
                   : Container(),
               Expanded(
                 child: InAppWebView(
-                  initialUrlRequest: URLRequest(url: paymentUri),
+                  initialUrlRequest: URLRequest(url: initPaymentUrl),
                   onProgressChanged:
                       (InAppWebViewController controller, int progress) {
                     setState(() {
@@ -125,7 +122,11 @@ class _PaymentWebPage extends State<PaymentWebPage> {
                       await _dialog.hide();
                     }
                   },
+                  onLoadHttpError: (controller, navigationAction, code, msg) async {
+                    _logger.info("onHttpError with $code and msg = $msg");
+                  },
                   onLoadStop: (controller, navigationAction) async {
+                    _logger.info("loadStart" + navigationAction.toString());
                     if (_dialog.isShowing()) {
                       await _dialog.hide();
                     }
@@ -160,7 +161,7 @@ class _PaymentWebPage extends State<PaymentWebPage> {
   }
 
   bool _isPaymentActionComplete(Uri loadingUri) {
-    return loadingUri.toString().startsWith(kMobilePaymentRedirect);
+    return loadingUri.toString().startsWith(kWebPaymentRedirectUrl);
   }
 
   Future<void> handlePaymentResponse(Uri uri) async {

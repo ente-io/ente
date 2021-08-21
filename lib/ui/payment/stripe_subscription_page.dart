@@ -20,8 +20,6 @@ import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import 'package:photos/ui/progress_dialog.dart';
-import 'package:photos/utils/data_util.dart';
-import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -57,7 +55,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   @override
   void initState() {
-    _billingService.setIsOnSubscriptionPage(true);
     _fetchSub();
     _dialog = createProgressDialog(context, "please wait...");
     super.initState();
@@ -152,7 +149,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
     }
 
-    if ( _currentSubscription.productID == kFreeProductID) {
+    if (_currentSubscription.productID == kFreeProductID) {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
@@ -170,17 +167,22 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           alignment: Alignment.center,
           child: GestureDetector(
             onTap: () async {
-              if (_isActiveStripeSubscriber) {
+              switch (_currentSubscription.paymentProvider) {
+                case kStripe:
                   await _launchStripePortal();
-                  return;
-              }
-              if (Platform.isAndroid) {
-                launch(
-                    "https://play.google.com/store/account/subscriptions?sku=" +
-                        _currentSubscription.productID +
-                        "&package=io.ente.photos");
-              } else {
-                launch("https://apps.apple.com/account/billing");
+                  break;
+                case kPlayStore:
+                  launch(
+                      "https://play.google.com/store/account/subscriptions?sku=" +
+                          _currentSubscription.productID +
+                          "&package=io.ente.photos");
+                  break;
+                case kAppStore:
+                  launch("https://apps.apple.com/account/billing");
+                  break;
+                default:
+                  _logger.severe(
+                      "unexpected payment provider ", _currentSubscription);
               }
             },
             child: Container(
@@ -189,13 +191,13 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: _isActiveStripeSubscriber
-                          ? "visit web.ente.io to manage your subscription"
+                      text: !_isActiveStripeSubscriber
+                          ? "visit ${_currentSubscription.paymentProvider} to manage your subscription"
                           : "payment details",
                       style: TextStyle(
                         color: _isActiveStripeSubscriber
-                            ? Colors.white
-                            : Colors.blue,
+                            ? Colors.blue
+                            : Colors.white,
                         fontFamily: 'Ubuntu',
                         fontSize: 15,
                       ),
@@ -239,19 +241,18 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget _stripeRenewOrCancelButton() {
     bool isRenewCancelled =
         _currentSubscription.attributes?.isCancelled ?? false;
+    String title =
+        isRenewCancelled ? "renew subscription" : "cancel subscription";
     return TextButton(
       child: Text(
-        isRenewCancelled ? "renew subscription" : "cancel subscription",
+        title,
         style: TextStyle(
-          color: isRenewCancelled ? Colors.greenAccent : Colors.redAccent,
+          color: (isRenewCancelled ? Colors.greenAccent : Colors.white)
+          .withOpacity(isRenewCancelled ? 1.0: 0.4),
         ),
       ),
       onPressed: () async {
-        var result = await showChoiceDialog(
-            context,
-            isRenewCancelled
-                ? 'subscription renewal'
-                : 'subscription cancellation',
+        var result = await showChoiceDialog(context, title,
             isRenewCancelled
                 ? 'are you sure you want to renew?'
                 : 'are you sure you want to cancel?',
