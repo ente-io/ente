@@ -14,7 +14,9 @@ import 'package:photos/utils/toast_util.dart';
 import '../loading_widget.dart';
 import '../progress_dialog.dart';
 
-const kMobilePaymentRedirect = "https://payment.ente.io/mobile";
+const kMobilePaymentRedirect = "https://payments.ente.io/mobile";
+const kWebPaymentUrl = String.fromEnvironment("web-payment",
+    defaultValue: "https://payments.ente.io");
 
 class PaymentWebPage extends StatefulWidget {
   final String planId;
@@ -35,7 +37,7 @@ class _PaymentWebPage extends State<PaymentWebPage> {
   InAppWebViewController webView;
   double progress = 0;
   String paymentWebToken;
-  String basePaymentUrl = "http://192.168.1.123:3001";
+  String basePaymentUrl = kWebPaymentUrl;
 
   @override
   void initState() {
@@ -169,27 +171,30 @@ class _PaymentWebPage extends State<PaymentWebPage> {
       await _handlePaymentSuccess(queryParams);
     } else if ('fail' == paymentStatus) {
       var reason = queryParams['reason'] ?? '';
-      await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-                  title: Text('payment failed'),
-                  content:
-                      Text("unfortunately your payment failed due to $reason"),
-                  actions: <Widget>[
-                    TextButton(
-                        child: Text('ok'),
-                        onPressed: () {
-                          Navigator.of(context).pop('dialog');
-                        }),
-                  ]));
-      Navigator.of(context).pop(true);
-      return;
+      await _handlePaymentFailure(reason);
     } else {
       // should never reach here
       _logger.severe("unexpected status", uri.toString());
-      Navigator.of(context).pop();
+       showGenericErrorDialog(context);
     }
+  }
+
+  Future<void> _handlePaymentFailure(String reason) async {
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+                title: Text('payment failed'),
+                content:
+                    Text("unfortunately your payment failed due to $reason"),
+                actions: <Widget>[
+                  TextButton(
+                      child: Text('ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop('dialog');
+                      }),
+                ]));
+    Navigator.of(context).pop(true);
   }
 
   // return true if verifySubscription didn't throw any exceptions
