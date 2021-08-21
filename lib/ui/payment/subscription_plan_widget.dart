@@ -16,6 +16,11 @@ class SubscriptionPlanWidget extends StatelessWidget {
   final String period;
   final bool isActive;
 
+  String _displayPrice() {
+    var result = price + (period.isNotEmpty ? " per " + period : "");
+    return result.isNotEmpty ? result : "free";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -49,7 +54,7 @@ class SubscriptionPlanWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(price + (period.isNotEmpty ? " per " + period : "")),
+              Text(_displayPrice()),
               Expanded(child: Container()),
               isActive
                   ? Expanded(
