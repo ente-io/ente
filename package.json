@@ -1,9 +1,9 @@
 {
   "name": "ente",
   "productName": "ente",
-  "version": "1.2.0",
+  "version": "1.2.3",
   "private": true,
-  "description": "Desktop client of ente",
+  "description": "Desktop client for ente.io",
   "main": "app/main.js",
   "build": {
     "appId": "io.ente.bhari-frame",
