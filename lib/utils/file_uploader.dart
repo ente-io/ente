@@ -278,7 +278,7 @@ class FileUploader {
         mediaUploadData = await getUploadDataFromEnteFile(file);
       } catch (e) {
         if (e is InvalidFileError) {
-          _onInvalidFileError(file);
+          await _onInvalidFileError(file);
         } else {
           rethrow;
         }
