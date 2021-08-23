@@ -1,7 +1,6 @@
 import 'dart:io' as io;
 
 import 'package:photos/core/cache/lru_map.dart';
-import 'package:photos/models/file.dart';
 
 class FileLruCache {
   static final LRUMap<String, io.File> _map = LRUMap(25);
