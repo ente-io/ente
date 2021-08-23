@@ -26,18 +26,18 @@ class PaymentWebPage extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _PaymentWebPage();
+  State<StatefulWidget> createState() => _PaymentWebPageState();
 }
 
-class _PaymentWebPage extends State<PaymentWebPage> {
-  final _logger = Logger("PaymentWebPage");
-  UserService userService = UserService.instance;
-  BillingService billingService = BillingService.instance;
+class _PaymentWebPageState extends State<PaymentWebPage> {
+  final _logger = Logger("PaymentWebPageState");
+  final UserService userService = UserService.instance;
+  final BillingService billingService = BillingService.instance;
+  final String basePaymentUrl = kWebPaymentBaseEndpoint;
   ProgressDialog _dialog;
   InAppWebViewController webView;
   double progress = 0;
   Uri initPaymentUrl;
-  String basePaymentUrl = kWebPaymentBaseEndpoint;
 
   @override
   void initState() {
@@ -51,21 +51,6 @@ class _PaymentWebPage extends State<PaymentWebPage> {
     }
     _dialog = createProgressDialog(context, "please wait...");
     super.initState();
-  }
-
-  Uri _getPaymentUrl(String paymentToken) {
-    final queryParameters = {
-      'productID': widget.planId,
-      'paymentToken': paymentToken,
-      'action': widget.actionType,
-      'redirectURL': kWebPaymentRedirectUrl,
-    };
-    var tryParse = Uri.tryParse(kWebPaymentBaseEndpoint);
-    if (kDebugMode && kWebPaymentBaseEndpoint.startsWith("http://")) {
-      return Uri.http(tryParse.authority, tryParse.path, queryParameters);
-    } else {
-      return Uri.https(tryParse.authority, tryParse.path, queryParameters);
-    }
   }
 
   @override
@@ -104,7 +89,7 @@ class _PaymentWebPage extends State<PaymentWebPage> {
                     _logger.info("Loading url $loadingUri");
                     // handle the payment response
                     if (_isPaymentActionComplete(loadingUri)) {
-                      await handlePaymentResponse(loadingUri);
+                      await _handlePaymentResponse(loadingUri);
                       return NavigationActionPolicy.CANCEL;
                     }
                     return NavigationActionPolicy.ALLOW;
@@ -144,12 +129,27 @@ class _PaymentWebPage extends State<PaymentWebPage> {
     super.dispose();
   }
 
+  Uri _getPaymentUrl(String paymentToken) {
+    final queryParameters = {
+      'productID': widget.planId,
+      'paymentToken': paymentToken,
+      'action': widget.actionType,
+      'redirectURL': kWebPaymentRedirectUrl,
+    };
+    var tryParse = Uri.tryParse(kWebPaymentBaseEndpoint);
+    if (kDebugMode && kWebPaymentBaseEndpoint.startsWith("http://")) {
+      return Uri.http(tryParse.authority, tryParse.path, queryParameters);
+    } else {
+      return Uri.https(tryParse.authority, tryParse.path, queryParameters);
+    }
+  }
+
   // show dialog to handle accidental back press.
   Future<bool> _buildPageExitWidget(BuildContext context) {
     return showDialog(
         context: context,
         builder: (context) => AlertDialog(
-                title: Text('Are you sure you want to exit?'),
+                title: Text('are you sure you want to exit?'),
                 actions: <Widget>[
                   TextButton(
                       child: Text('yes'),
@@ -164,13 +164,13 @@ class _PaymentWebPage extends State<PaymentWebPage> {
     return loadingUri.toString().startsWith(kWebPaymentRedirectUrl);
   }
 
-  Future<void> handlePaymentResponse(Uri uri) async {
+  Future<void> _handlePaymentResponse(Uri uri) async {
     var queryParams = uri.queryParameters;
     var paymentStatus = uri.queryParameters['status'] ?? '';
     _logger.fine('handle payment response with status $paymentStatus');
     if (paymentStatus == 'success') {
       await _handlePaymentSuccess(queryParams);
-    } else if ('fail' == paymentStatus) {
+    } else if (paymentStatus == 'fail') {
       var reason = queryParams['reason'] ?? '';
       await _handlePaymentFailure(reason);
     } else {
@@ -209,8 +209,8 @@ class _PaymentWebPage extends State<PaymentWebPage> {
       await _dialog.hide();
       if (response != null) {
         var content = widget.actionType == 'buy'
-            ? 'you subscription purchase was successful'
-            : 'your subscription update was successful';
+            ? 'your purchase was successful'
+            : 'your subscription was updated successfully';
         await _showExitPageDialog(title: 'thank you', content: content);
       } else {
         throw Exception("verifySubscription api failed");

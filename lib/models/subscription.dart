@@ -60,7 +60,7 @@ class Subscription {
   }
 
   Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{
+    final map = <String, dynamic>{
       'id': id,
       'productID': productID,
       'storage': storage,
@@ -69,10 +69,8 @@ class Subscription {
       'expiryTime': expiryTime,
       'price': price,
       'period': period,
+      'attributes': attributes?.toJson()
     };
-    if (attributes != null) {
-      map["attributes"] = attributes.toJson();
-    }
     return map;
   }
 

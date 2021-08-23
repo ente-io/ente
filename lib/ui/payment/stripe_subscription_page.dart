@@ -84,7 +84,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       if (plan.stripeID == null || plan.stripeID.isEmpty) {
         return false;
       }
-      var isYearlyPlan = plan.period == 'year';
+      final isYearlyPlan = plan.period == 'year';
       return isYearlyPlan == _showYearlyPlan;
     }).toList();
     setState(() {});
