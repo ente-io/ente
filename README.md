@@ -8,3 +8,13 @@ You can grab the latest build from:
 You can read more about ente's encryption protocol here: https://ente.io/architecture.
 
 For more information about the project please visit: https://ente.io.
+
+---
+
+## Building
+1. [Install Flutter](https://flutter.dev/docs/get-started/install)
+2. Run `flutter build apk --release --flavor independent`
+
+---
+
+If there's something you need help with, please write to [support@ente.io](mailto:support@ente.io), we'd be happy to help!

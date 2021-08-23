@@ -6,7 +6,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/utils/dialog_util.dart';
 
 class AppUpdateDialog extends StatefulWidget {
   final LatestVersionInfo latestVersionInfo;
@@ -74,10 +73,12 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         ),
       ],
     );
+    final shouldForceUpdate =
+        UpdateService.instance.shouldForceUpdate(widget.latestVersionInfo);
     return WillPopScope(
-      onWillPop: () async => !widget.latestVersionInfo.shouldForceUpdate,
+      onWillPop: () async => !shouldForceUpdate,
       child: AlertDialog(
-        title: Text("update available"),
+        title: Text(shouldForceUpdate? "critical update available" : "update available"),
         content: content,
       ),
     );

@@ -119,17 +119,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> _showShareCollectionDialog() async {
     var collection = widget.collection;
+    final dialog = createProgressDialog(context, "please wait...");
+    await dialog.show();
     if (collection == null) {
       if (widget.type == GalleryAppBarType.local_folder) {
         collection =
             CollectionsService.instance.getCollectionForPath(widget.path);
         if (collection == null) {
-          final dialog = createProgressDialog(context, "please wait...");
-          await dialog.show();
           try {
             collection = await CollectionsService.instance
                 .getOrCreateForPath(widget.path);
-            await dialog.hide();
           } catch (e, s) {
             _logger.severe(e, s);
             await dialog.hide();
@@ -140,7 +139,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         throw Exception(
             "Cannot create a collection of type" + widget.type.toString());
       }
+    } else {
+      final sharees =
+          await CollectionsService.instance.getSharees(collection.id);
+      collection = collection.copyWith(sharees: sharees);
     }
+    await dialog.hide();
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {

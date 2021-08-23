@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:path/path.dart';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
@@ -278,7 +279,7 @@ class FileUploader {
         mediaUploadData = await getUploadDataFromEnteFile(file);
       } catch (e) {
         if (e is InvalidFileError) {
-          _onInvalidFileError(file);
+          await _onInvalidFileError(file);
         } else {
           rethrow;
         }
@@ -318,8 +319,9 @@ class FileUploader {
       final fileUploadURL = await _getUploadURL();
       String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
+      final metadata = await file.getMetadata();
       final encryptedMetadataData = await CryptoUtil.encryptChaCha(
-          utf8.encode(jsonEncode(file.getMetadata())), fileAttributes.key);
+          utf8.encode(jsonEncode(metadata)), fileAttributes.key);
       final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
           Sodium.bin2base64(encryptedThumbnailData.header);
@@ -402,7 +404,8 @@ class FileUploader {
   }
 
   Future _onInvalidFileError(File file) async {
-    _logger.warning("Invalid file encountered: " + file.toString());
+    String ext = file.title == null ? "no title" : extension(file.title);
+    _logger.severe("Invalid file: (ext: $ext) encountered: " + file.toString());
     await FilesDB.instance.deleteLocalFile(file);
     await LocalSyncService.instance.trackInvalidFile(file);
     throw InvalidFileError();
