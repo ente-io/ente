@@ -11,6 +11,7 @@ import HTTPService from './HTTPService';
 import { File, FILE_TYPE } from './fileService';
 import { logError } from 'utils/sentry';
 import { decodeMotionPhoto } from './motionPhotoService';
+import { getMimeTypeFromBlob } from './upload/readFileService';
 
 class DownloadManager {
     private fileDownloads = new Map<string, string>();
@@ -78,7 +79,16 @@ class DownloadManager {
                         );
                         fileBlob = new Blob([motionPhoto.image]);
                     }
-                    if (fileIsHEIC(file.metadata.title)) {
+
+                    const typeFromExtension =
+                        file.metadata.title.split('.')[-1];
+                    const worker = await new CryptoWorker();
+
+                    const mimeType =
+                        (await getMimeTypeFromBlob(worker, fileBlob)) ??
+                        typeFromExtension;
+
+                    if (fileIsHEIC(mimeType)) {
                         fileBlob = await convertHEIC2JPEG(fileBlob);
                     }
                 }

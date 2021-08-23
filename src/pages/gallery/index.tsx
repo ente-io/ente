@@ -144,7 +144,6 @@ export default function Gallery() {
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
-        accept: ['image/*', 'video/*', '.json'],
         disabled: uploadInProgress,
     });
 

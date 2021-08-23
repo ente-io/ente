@@ -130,11 +130,11 @@ const GlobalStyles = createGlobalStyle`
         background-color:#202020 !important;
     }
     .modal-dialog{
-        margin:5% auto;
+        margin:5vh auto;
         width:90%;
     }
     .modal-body{
-        max-height:80vh;
+        max-height:74vh;
         overflow-y:auto;
     }
     .modal-xl{

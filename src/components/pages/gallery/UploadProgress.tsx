@@ -3,7 +3,10 @@ import ExpandMore from 'components/icons/ExpandMore';
 import React, { useState } from 'react';
 import { Button, Modal, ProgressBar } from 'react-bootstrap';
 import { FileRejection } from 'react-dropzone';
-import { FileUploadResults, UPLOAD_STAGES } from 'services/uploadService';
+import {
+    FileUploadResults,
+    UPLOAD_STAGES,
+} from 'services/upload/uploadManager';
 import styled from 'styled-components';
 import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
 import constants from 'utils/strings/constants';
@@ -55,7 +58,6 @@ const Section = styled.div`
 `;
 const SectionInfo = styled.div`
     margin: 4px 0;
-    text-align: justify;
     padding-left: 15px;
 `;
 
@@ -239,31 +241,30 @@ export default function UploadProgress(props: Props) {
                     sectionTitle={constants.UNSUPPORTED_FILES}
                     sectionInfo={constants.UNSUPPORTED_INFO}
                 />
-
-                {props.uploadStage === UPLOAD_STAGES.FINISH && (
-                    <Modal.Footer style={{ border: 'none' }}>
-                        {props.uploadStage === UPLOAD_STAGES.FINISH &&
-                            (fileUploadResultMap?.get(FileUploadResults.FAILED)
-                                ?.length > 0 ||
-                            fileUploadResultMap?.get(FileUploadResults.BLOCKED)
-                                ?.length > 0 ? (
-                                <Button
-                                    variant="outline-success"
-                                    style={{ width: '100%' }}
-                                    onClick={props.retryFailed}>
-                                    {constants.RETRY_FAILED}
-                                </Button>
-                            ) : (
-                                <Button
-                                    variant="outline-secondary"
-                                    style={{ width: '100%' }}
-                                    onClick={props.closeModal}>
-                                    {constants.CLOSE}
-                                </Button>
-                            ))}
-                    </Modal.Footer>
-                )}
             </Modal.Body>
+            {props.uploadStage === UPLOAD_STAGES.FINISH && (
+                <Modal.Footer style={{ border: 'none' }}>
+                    {props.uploadStage === UPLOAD_STAGES.FINISH &&
+                        (fileUploadResultMap?.get(FileUploadResults.FAILED)
+                            ?.length > 0 ||
+                        fileUploadResultMap?.get(FileUploadResults.BLOCKED)
+                            ?.length > 0 ? (
+                            <Button
+                                variant="outline-success"
+                                style={{ width: '100%' }}
+                                onClick={props.retryFailed}>
+                                {constants.RETRY_FAILED}
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="outline-secondary"
+                                style={{ width: '100%' }}
+                                onClick={props.closeModal}>
+                                {constants.CLOSE}
+                            </Button>
+                        ))}
+                </Modal.Footer>
+            )}
         </Modal>
     );
 }

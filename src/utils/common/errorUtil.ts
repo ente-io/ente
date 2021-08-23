@@ -5,6 +5,7 @@ export const ServerErrorCodes = {
     NO_ACTIVE_SUBSCRIPTION: '402',
     FORBIDDEN: '403',
     STORAGE_LIMIT_EXCEEDED: '426',
+    FILE_TOO_LARGE: '413',
 };
 
 export const CustomError = {
@@ -13,6 +14,9 @@ export const CustomError = {
     VIDEO_PLAYBACK_FAILED: 'video playback failed',
     ETAG_MISSING: 'no header/etag present in response body',
     KEY_MISSING: 'encrypted key missing from localStorage',
+    FAILED_TO_LOAD_WEB_WORKER: 'failed to load web worker',
+    CHUNK_MORE_THAN_EXPECTED: 'chunks more than expected',
+    UNSUPPORTED_FILE_FORMAT: 'unsupported file formats',
 };
 
 export function parseError(error) {
@@ -28,6 +32,9 @@ export function parseError(error) {
                 break;
             case ServerErrorCodes.SESSION_EXPIRED:
                 parsedMessage = constants.SESSION_EXPIRED_MESSAGE;
+                break;
+            case ServerErrorCodes.FILE_TOO_LARGE:
+                parsedMessage = constants.FILE_TOO_LARGE;
                 break;
         }
     }
