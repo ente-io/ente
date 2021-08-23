@@ -16,11 +16,35 @@
             ]
         },
         {
+            "name": "Android Local",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "program": "lib/main.dart",
+            "args": [
+                "--flavor",
+                "independent",
+                "--dart-define",
+                "endpoint=http://localhost:8080",
+            ]
+        },
+        {
             "name": "iOS Prod",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
             "program": "lib/main.dart"
-        }
+        },
+        {
+            "name": "iOS Local",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define",
+                "endpoint=http://localhost:8080",
+            ]
+        },
     ]
 }

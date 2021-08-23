@@ -36,6 +36,11 @@ class FilesDB {
   static final columnLatitude = 'latitude';
   static final columnLongitude = 'longitude';
   static final columnFileType = 'file_type';
+  static final columnFileSubType = 'file_sub_type';
+  static final columnDuration = 'duration';
+  static final columnExif = 'exif';
+  static final columnHash = 'hash';
+  static final columnMetadataVersion = 'metadata_version';
   static final columnIsDeleted = 'is_deleted';
   static final columnCreationTime = 'creation_time';
   static final columnModificationTime = 'modification_time';
@@ -51,6 +56,7 @@ class FilesDB {
     ...alterDeviceFolderToAllowNULL(),
     ...alterTimestampColumnTypes(),
     ...addIndices(),
+    ...addMetadataColumns(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -197,6 +203,26 @@ class FilesDB {
       '''
         ALTER TABLE $tempTable 
         RENAME TO $table;
+      ''',
+    ];
+  }
+
+  static List<String> addMetadataColumns() {
+    return [
+      '''
+        ALTER TABLE $table ADD COLUMN $columnFileSubType INTEGER;
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnDuration INTEGER;
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnExif TEXT;
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnHash TEXT;
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnMetadataVersion INTEGER;
       ''',
     ];
   }
@@ -846,6 +872,11 @@ class FilesDB {
     row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
     row[columnThumbnailDecryptionHeader] = file.thumbnailDecryptionHeader;
     row[columnMetadataDecryptionHeader] = file.metadataDecryptionHeader;
+    row[columnFileSubType] = file.fileSubType ?? -1;
+    row[columnDuration] = file.duration ?? 0;
+    row[columnExif] = file.exif;
+    row[columnHash] = file.hash;
+    row[columnMetadataVersion] = file.metadataVersion;
     return row;
   }
 
@@ -867,6 +898,11 @@ class FilesDB {
     row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
     row[columnThumbnailDecryptionHeader] = file.thumbnailDecryptionHeader;
     row[columnMetadataDecryptionHeader] = file.metadataDecryptionHeader;
+    row[columnFileSubType] = file.fileSubType ?? -1;
+    row[columnDuration] = file.duration ?? 0;
+    row[columnExif] = file.exif;
+    row[columnHash] = file.hash;
+    row[columnMetadataVersion] = file.metadataVersion;
     return row;
   }
 
@@ -893,6 +929,11 @@ class FilesDB {
     file.fileDecryptionHeader = row[columnFileDecryptionHeader];
     file.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
     file.metadataDecryptionHeader = row[columnMetadataDecryptionHeader];
+    file.fileSubType = row[columnFileSubType] ?? -1;
+    file.duration = row[columnDuration] ?? 0;
+    file.exif = row[columnExif];
+    file.hash = row[columnHash];
+    file.metadataVersion = row[columnMetadataVersion] ?? 0;
     return file;
   }
 }
