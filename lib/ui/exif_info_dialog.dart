@@ -86,6 +86,6 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
   }
 
   Future<Map<String, IfdTag>> _getExif() async {
-    return await readExifFromFile(await getFile(widget.file));
+    return await readExifFromFile(await getFile(widget.file, isOrigin: true));
   }
 }

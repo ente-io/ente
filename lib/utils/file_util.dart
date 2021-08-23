@@ -27,16 +27,23 @@ void preloadFile(ente.File file) {
   getFile(file);
 }
 
-Future<io.File> getFile(ente.File file,
-    {bool liveVideo = false} // only relevant for live photos
+Future<io.File> getFile(
+  ente.File file, {
+  bool liveVideo = false,
+  bool isOrigin = false,
+} // only relevant for live photos
     ) async {
   if (file.isRemoteFile()) {
     return getFileFromServer(file, liveVideo: liveVideo);
   } else {
-    String key = file.tag() + liveVideo.toString();
+    String key = file.tag() + liveVideo.toString() + isOrigin.toString();
     final cachedFile = FileLruCache.get(key);
     if (cachedFile == null) {
-      final diskFile = await _getLocalDiskFile(file, liveVideo: liveVideo);
+      final diskFile = await _getLocalDiskFile(
+        file,
+        liveVideo: liveVideo,
+        isOrigin: isOrigin,
+      );
       FileLruCache.put(key, diskFile);
       return diskFile;
     }
@@ -48,8 +55,11 @@ Future<bool> doesLocalFileExist(ente.File file) async {
   return await _getLocalDiskFile(file) != null;
 }
 
-Future<io.File> _getLocalDiskFile(ente.File file,
-    {bool liveVideo = false}) async {
+Future<io.File> _getLocalDiskFile(
+  ente.File file, {
+  bool liveVideo = false,
+  bool isOrigin = false,
+}) async {
   if (file.isSharedMediaToAppSandbox()) {
     var localFile = io.File(getSharedMediaFilePath(file));
     return localFile.exists().then((exist) {
@@ -62,7 +72,7 @@ Future<io.File> _getLocalDiskFile(ente.File file,
       if (asset == null || !(await asset.exists)) {
         return null;
       }
-      return asset.file;
+      return isOrigin ? asset.originFile : asset.file;
     });
   }
 }

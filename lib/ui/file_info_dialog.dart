@@ -458,6 +458,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   }
 
   Future<Map<String, IfdTag>> _getExif() async {
-    return await readExifFromFile(await getFile(widget.file));
+    return await readExifFromFile(await getFile(widget.file, isOrigin: true));
   }
 }
