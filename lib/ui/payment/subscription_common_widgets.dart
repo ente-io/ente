@@ -78,11 +78,14 @@ class ValidityWidget extends StatelessWidget {
     } else if (currentSubscription.attributes?.isCancelled ?? false) {
       message = "your subscription will be cancelled on $endDate";
     }
-    return Text(
-      message,
-      style: TextStyle(
-        color: Colors.white.withOpacity(0.6),
-        fontSize: 14,
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Text(
+        message,
+        style: TextStyle(
+          color: Colors.white.withOpacity(0.6),
+          fontSize: 14,
+        ),
       ),
     );
   }
@@ -120,5 +123,4 @@ class SubFaqWidget extends StatelessWidget {
       ),
     );
   }
-
 }

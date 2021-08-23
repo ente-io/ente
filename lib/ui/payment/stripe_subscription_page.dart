@@ -1,18 +1,12 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
-import 'package:photos/services/update_service.dart';
-import 'package:photos/ui/billing_questions_widget.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
@@ -140,7 +134,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: _getStripePlanWidgets()),
-      Padding(padding: EdgeInsets.all(8)),
+      Padding(padding: EdgeInsets.all(4)),
     ]);
 
     widgets.add(_showSubscriptionToggle());
@@ -248,11 +242,13 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         title,
         style: TextStyle(
           color: (isRenewCancelled ? Colors.greenAccent : Colors.white)
-          .withOpacity(isRenewCancelled ? 1.0: 0.4),
+              .withOpacity(isRenewCancelled ? 1.0 : 0.4),
         ),
       ),
       onPressed: () async {
-        var result = await showChoiceDialog(context, title,
+        var result = await showChoiceDialog(
+            context,
+            title,
             isRenewCancelled
                 ? 'are you sure you want to renew?'
                 : 'are you sure you want to cancel?',
@@ -357,13 +353,14 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Widget _showSubscriptionToggle() {
-    Text _planText(String title, bool reduceOpacity) {
-      return Text(
-        title,
-        style: TextStyle(
-          color: Theme.of(context)
-              .buttonColor
-              .withOpacity(reduceOpacity ? 0.5 : 1.0),
+    Widget _planText(String title, bool reduceOpacity) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 4, right: 4),
+        child: Text(
+          title,
+          style: TextStyle(
+            color: Colors.white.withOpacity(reduceOpacity ? 0.5 : 1.0),
+          ),
         ),
       );
     }
@@ -373,17 +370,19 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       margin: EdgeInsets.only(bottom: 12),
       // color: Color.fromRGBO(10, 40, 40, 0.3),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _planText("monthly plans", _showYearlyPlan),
+          _planText("monthly", _showYearlyPlan),
           Switch(
             value: _showYearlyPlan,
+            activeColor: Colors.white,
+            inactiveThumbColor: Colors.white,
             onChanged: (value) async {
               _showYearlyPlan = value;
               await _filterStripeForUI();
             },
           ),
-          _planText("yearly plans", !_showYearlyPlan)
+          _planText("yearly", !_showYearlyPlan)
         ],
       ),
     );
