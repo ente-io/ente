@@ -43,8 +43,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   void initState() {
     userService.getPaymentToken().then((token) {
       initPaymentUrl = _getPaymentUrl(token);
-      setState(() {
-      });
+      setState(() {});
     });
     if (Platform.isAndroid && kDebugMode) {
       AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
@@ -107,7 +106,8 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                       await _dialog.hide();
                     }
                   },
-                  onLoadHttpError: (controller, navigationAction, code, msg) async {
+                  onLoadHttpError:
+                      (controller, navigationAction, code, msg) async {
                     _logger.info("onHttpError with $code and msg = $msg");
                   },
                   onLoadStop: (controller, navigationAction) async {
@@ -147,17 +147,29 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   // show dialog to handle accidental back press.
   Future<bool> _buildPageExitWidget(BuildContext context) {
     return showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-                title: Text('are you sure you want to exit?'),
-                actions: <Widget>[
-                  TextButton(
-                      child: Text('yes'),
-                      onPressed: () => Navigator.of(context).pop(true)),
-                  TextButton(
-                      child: Text('no'),
-                      onPressed: () => Navigator.of(context).pop(false)),
-                ]));
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('are you sure you want to exit?'),
+        actions: <Widget>[
+          TextButton(
+            child: Text('yes',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                )),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+          TextButton(
+            child: Text(
+              'no',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+        ],
+      ),
+    );
   }
 
   bool _isPaymentActionComplete(Uri loadingUri) {
@@ -176,7 +188,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     } else {
       // should never reach here
       _logger.severe("unexpected status", uri.toString());
-       showGenericErrorDialog(context);
+      showGenericErrorDialog(context);
     }
   }
 
