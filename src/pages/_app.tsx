@@ -176,24 +176,26 @@ const GlobalStyles = createGlobalStyle`
         box-shadow: none;
     }
     .btn-success {
-        background: #2dc262;
-        border-color: #29a354;
+        background: #66ff91;
+        color: #242424;
+        border-color: #66ff91;
     }
     .btn-success:hover .btn-success:focus .btn-success:active {
         background-color: #29a354;
         border-color: #2dc262;
+        color: #242424;
     }
     .btn-success:disabled {
         background-color: #69b383;
     }
     .btn-outline-success {
-        color: #2dc262;
-        border-color: #2dc262;
-        border-width: 2px;
+        background: #66ff91;
+        color: #242424;
+        border-color: #66ff91;
     }
     .btn-outline-success:hover:enabled {
         background: #2dc262;
-        color: white;
+        color: #242424;
     }
     .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
         border-width: 2px;
