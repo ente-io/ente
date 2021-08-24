@@ -18,12 +18,12 @@ class LoadingPhotosWidget extends StatefulWidget {
 class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   StreamSubscription<SyncStatusUpdate> _firstImportEvent;
   int _currentPage = 0;
-  PageController _pageController = PageController(
+  final PageController _pageController = PageController(
     initialPage: 0,
   );
   final List<String> _messages = [
     "web.ente.io has a slick uploader",
-    "we have preserved over 100,000 files so far",
+    "we have preserved over 500,000 files so far",
     "all our apps are open source",
     "our encryption protocols have been reviewed by engineers at Google, Apple, Amazon, and Facebook",
     "you can share files and folders with your loved ones, end-to-end encrypted",
@@ -110,7 +110,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
               ),
             ),
             Padding(padding: EdgeInsets.all(8)),
-            Container(
+            SizedBox(
               height: 80,
               child: PageView.builder(
                 scrollDirection: Axis.vertical,
