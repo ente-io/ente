@@ -310,9 +310,6 @@ const GlobalStyles = createGlobalStyle`
         text-decoration: none;
         background-color: #e9ecef;
     }
-    .submitButton:hover > .spinner-border{
-        color:white;
-    }
     hr{
         border-top: 1rem solid #444 !important;
     }
