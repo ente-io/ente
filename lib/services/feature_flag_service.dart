@@ -17,6 +17,7 @@ class FeatureFlagService {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+    await sync();
   }
 
   bool disableCFWorker() {
