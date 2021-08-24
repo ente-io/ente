@@ -165,7 +165,7 @@ export default function LandingPage() {
                         <Button
                             variant="outline-success"
                             size="lg"
-                            style={{ color: '#fff', padding: '10px 50px' }}
+                            style={{ padding: '10px 50px' }}
                             onClick={() => router.push('signup')}>
                             {constants.SIGN_UP}
                         </Button>
