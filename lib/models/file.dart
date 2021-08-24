@@ -7,6 +7,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 
 class File {
@@ -145,7 +146,7 @@ class File {
   }
 
   String getDownloadUrl() {
-    if (kDebugMode) {
+    if (kDebugMode || FeatureFlagService.instance.disableCFWorker()) {
       return Configuration.instance.getHttpEndpoint() +
           "/files/download/" +
           uploadedFileID.toString();
@@ -156,7 +157,7 @@ class File {
   }
 
   String getThumbnailUrl() {
-    if (kDebugMode) {
+    if (kDebugMode || FeatureFlagService.instance.disableCFWorker()) {
       return Configuration.instance.getHttpEndpoint() +
           "/files/preview/" +
           uploadedFileID.toString();

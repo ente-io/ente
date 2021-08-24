@@ -13,6 +13,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/notification_service.dart';
@@ -109,6 +110,7 @@ void _backgroundTask(String taskId) async {
   _logger.info("[BackgroundFetch] Event received: $taskId");
   _scheduleBGTaskKill(taskId);
   await _init(true);
+  FeatureFlagService.instance.sync();
   UpdateService.instance.showUpdateNotification();
   await _sync(isAppInBackground: true);
   BackgroundFetch.finish(taskId);
