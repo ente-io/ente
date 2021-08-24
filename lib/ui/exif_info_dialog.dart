@@ -1,11 +1,10 @@
 import 'dart:ui';
 
-import 'package:exif/exif.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/exif_util.dart';
 
 class ExifInfoDialog extends StatefulWidget {
   final File file;
@@ -47,7 +46,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
 
   Widget _getInfo() {
     return FutureBuilder(
-      future: _getExif(),
+      future: getExif(widget.file),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           final exif = snapshot.data;
@@ -83,9 +82,5 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
         }
       },
     );
-  }
-
-  Future<Map<String, IfdTag>> _getExif() async {
-    return await readExifFromFile(await getFile(widget.file, isOrigin: true));
   }
 }

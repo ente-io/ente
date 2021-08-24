@@ -8,6 +8,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'dart:io' as io;
 
 class File {
   int generatedID;
@@ -114,7 +115,7 @@ class File {
     metadataVersion = metadata["version"] ?? 0;
   }
 
-  Future<Map<String, dynamic>> getMetadata() async {
+  Future<Map<String, dynamic>> getMetadata(io.File sourceFile) async {
     final metadata = <String, dynamic>{};
     metadata["localID"] = isSharedMediaToAppSandbox() ? null : localID;
     metadata["title"] = title;
@@ -135,10 +136,10 @@ class File {
       duration = asset.duration;
       metadata["duration"] = duration;
     } else {
-      exif = (await readExifFromFile(await asset.originFile)).toString();
+      exif = (await readExifFromFile(sourceFile)).toString();
       metadata["exif"] = exif;
     }
-    hash = Sodium.bin2base64(await CryptoUtil.getHash(await asset.originFile));
+    hash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
     metadata["hash"] = hash;
     metadata["version"] = metadataVersion;
     return metadata;

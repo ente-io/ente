@@ -6,6 +6,7 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/exif_info_dialog.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -30,7 +31,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
     if (_isImage) {
-      _getExif().then((exif) {
+      getExif(widget.file).then((exif) {
         setState(() {
           _exif = exif;
         });
@@ -455,9 +456,5 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         }
       },
     );
-  }
-
-  Future<Map<String, IfdTag>> _getExif() async {
-    return await readExifFromFile(await getFile(widget.file, isOrigin: true));
   }
 }

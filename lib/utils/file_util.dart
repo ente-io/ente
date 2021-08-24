@@ -27,6 +27,8 @@ void preloadFile(ente.File file) {
   getFile(file);
 }
 
+// IMPORTANT: Delete the returned file if `isOrigin` is set to true
+// https://github.com/CaiJingLong/flutter_photo_manager#cache-problem-of-ios
 Future<io.File> getFile(
   ente.File file, {
   bool liveVideo = false,
