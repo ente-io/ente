@@ -1,5 +1,5 @@
 import { Search, SearchStats, SetCollections } from 'pages/gallery';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import AsyncSelect from 'react-select/async';
 import { components } from 'react-select';
@@ -19,38 +19,37 @@ import DateIcon from './icons/DateIcon';
 import SearchIcon from './icons/SearchIcon';
 import CrossIcon from './icons/CrossIcon';
 
-const Wrapper = styled.div<{ width: number; isDisabled: boolean }>`
+const Wrapper = styled.div<{ isDisabled: boolean; isOpen: boolean }>`
     position: fixed;
-    z-index: 1000;
     top: 0;
-    left: ${(props) => `max(0px, 50% - min(360px,${props.width / 2}px))`};
+    z-index: 1000;
+    display: ${({ isOpen }) => (isOpen ? 'flex' : 'none')};
     width: 100%;
-    max-width: 720px;
-    display: flex;
+    background: #111;
+    @media (min-width: 625px) {
+        display: flex;
+        width: calc(100vw - 140px);
+        margin: 0 70px;
+    }
     align-items: center;
-    justify-content: center;
-    padding: 0 5%;
-    background-color: #111;
-    color: #fff;
     min-height: 64px;
     transition: opacity 1s ease;
     opacity: ${(props) => (props.isDisabled ? 0 : 1)};
     margin-bottom: 10px;
 `;
 
-const SearchButton = styled.div<{ isDisabled: boolean }>`
-    top: 1px;
-    z-index: 100;
-    right: 80px;
-    color: #fff;
-    cursor: pointer;
-    transition: opacity 1s ease;
-    opacity: ${(props) => (props.isDisabled ? 0 : 1)};
-    min-height: 64px;
-    position: fixed;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+const SearchButton = styled.div<{ isOpen: boolean }>`
+    display: none;
+    @media (max-width: 624px) {
+        display: ${({ isOpen }) => (!isOpen ? 'flex' : 'none')};
+        right: 80px;
+        cursor: pointer;
+        position: fixed;
+        top: 0;
+        z-index: 1000;
+        align-items: center;
+        min-height: 64px;
+    }
 `;
 
 const SearchStatsContainer = styled.div`
@@ -59,6 +58,14 @@ const SearchStatsContainer = styled.div`
     align-items: center;
     color: #979797;
     margin-bottom: 8px;
+`;
+
+const SearchInput = styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    max-width: 484px;
+    margin: auto;
 `;
 
 export enum SuggestionType {
@@ -86,7 +93,6 @@ interface Props {
     searchStats: SearchStats;
 }
 export default function SearchBar(props: Props) {
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const selectRef = useRef(null);
     useEffect(() => {
         if (props.isOpen) {
@@ -96,11 +102,6 @@ export default function SearchBar(props: Props) {
         }
     }, [props.isOpen]);
 
-    useEffect(() => {
-        window.addEventListener('resize', () =>
-            setWindowWidth(window.innerWidth)
-        );
-    });
     // = =========================
     // Functionality
     // = =========================
@@ -273,8 +274,8 @@ export default function SearchBar(props: Props) {
                     {constants.SEARCH_STATS(props.searchStats)}
                 </SearchStatsContainer>
             )}
-            {windowWidth > 1000 || props.isOpen ? (
-                <Wrapper isDisabled={props.isFirstFetch} width={windowWidth}>
+            <Wrapper isDisabled={props.isFirstFetch} isOpen={props.isOpen}>
+                <SearchInput>
                     <div
                         style={{
                             flex: 1,
@@ -304,14 +305,13 @@ export default function SearchBar(props: Props) {
                             </div>
                         )}
                     </div>
-                </Wrapper>
-            ) : (
-                <SearchButton
-                    isDisabled={props.isFirstFetch}
-                    onClick={() => !props.isFirstFetch && props.setOpen(true)}>
-                    <SearchIcon />
-                </SearchButton>
-            )}
+                </SearchInput>
+            </Wrapper>
+            <SearchButton
+                isOpen={props.isOpen}
+                onClick={() => !props.isFirstFetch && props.setOpen(true)}>
+                <SearchIcon />
+            </SearchButton>
         </>
     );
 }
