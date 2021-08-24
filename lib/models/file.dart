@@ -155,16 +155,6 @@ class File {
     }
   }
 
-  // Passing token within the URL due to https://github.com/flutter/flutter/issues/16466
-  String getStreamUrl() {
-    return Configuration.instance.getHttpEndpoint() +
-        "/streams/" +
-        Configuration.instance.getToken() +
-        "/" +
-        uploadedFileID.toString() +
-        "/index.m3u8";
-  }
-
   String getThumbnailUrl() {
     if (kDebugMode) {
       return Configuration.instance.getHttpEndpoint() +
