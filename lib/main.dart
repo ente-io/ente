@@ -13,6 +13,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/notification_service.dart';
@@ -142,6 +143,7 @@ Future<void> _init(bool isBackground) async {
   await RemoteSyncService.instance.init();
   await SyncService.instance.init();
   await MemoriesService.instance.init();
+  FeatureFlagService.instance.init();
   _logger.info("Initialization done");
   _initializationStatus.complete();
 }
