@@ -110,7 +110,6 @@ void _backgroundTask(String taskId) async {
   _logger.info("[BackgroundFetch] Event received: $taskId");
   _scheduleBGTaskKill(taskId);
   await _init(true);
-  FeatureFlagService.instance.sync();
   UpdateService.instance.showUpdateNotification();
   await _sync(isAppInBackground: true);
   BackgroundFetch.finish(taskId);
@@ -144,6 +143,7 @@ Future<void> _init(bool isBackground) async {
   await RemoteSyncService.instance.init();
   await SyncService.instance.init();
   await MemoriesService.instance.init();
+  FeatureFlagService.instance.sync();
   _logger.info("Initialization done");
   _initializationStatus.complete();
 }
