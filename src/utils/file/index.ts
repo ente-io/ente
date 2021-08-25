@@ -3,7 +3,7 @@ import { File } from 'services/fileService';
 import { runningInBrowser } from 'utils/common';
 import CryptoWorker from 'utils/crypto';
 
-const TYPE_HEIC = 'heic';
+export const TYPE_HEIC = 'heic';
 const UNSUPPORTED_FORMATS = ['flv', 'mkv', '3gp', 'avi', 'wmv'];
 
 export function downloadAsFile(filename: string, content: string) {
@@ -31,8 +31,8 @@ export async function convertHEIC2JPEG(fileBlob: Blob): Promise<Blob> {
     });
 }
 
-export function fileIsHEIC(name: string) {
-    return name.toLowerCase().endsWith(TYPE_HEIC);
+export function fileIsHEIC(mimeType: string) {
+    return mimeType.toLowerCase().endsWith(TYPE_HEIC);
 }
 
 export function sortFilesIntoCollections(files: File[]) {
@@ -136,7 +136,7 @@ export async function decryptFile(file: File, collection: Collection) {
     return file;
 }
 
-export function removeUnneccessaryFileProps(files: File[]): File[] {
+export function removeUnnecessaryFileProps(files: File[]): File[] {
     const stripedFiles = files.map((file) => {
         delete file.src;
         delete file.msrc;

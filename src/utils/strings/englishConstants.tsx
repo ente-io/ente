@@ -504,6 +504,8 @@ const englishConstants = {
     UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'blocked uploads',
     INPROGRESS_UPLOADS: 'uploads in progress',
+    FILE_TOO_LARGE:
+        'the file you are trying to upload is larger than your available storage please upgrade your plan and try again',
 };
 
 export default englishConstants;

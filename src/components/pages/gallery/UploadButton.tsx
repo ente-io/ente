@@ -11,6 +11,7 @@ const Wrapper = styled.div<{ isDisabled: boolean }>`
     min-height: 64px;
     right: 32px;
     transition: opacity 1s ease;
+    cursor: pointer;
     opacity: ${(props) => (props.isDisabled ? 0 : 1)};
 `;
 function UploadButton({ openFileUploader, isFirstFetch }) {

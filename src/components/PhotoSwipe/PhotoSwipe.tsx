@@ -417,8 +417,8 @@ function PhotoSwipe(props: Iprops) {
                                 constants.UPDATED_ON,
                                 formatDateTime(metadata.modificationTime / 1000)
                             )}
-                        {metadata?.longitude &&
-                            metadata?.longitude &&
+                        {metadata?.longitude > 0 &&
+                            metadata?.longitude > 0 &&
                             renderInfoItem(
                                 constants.LOCATION,
                                 <a

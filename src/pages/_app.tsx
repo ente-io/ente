@@ -130,11 +130,11 @@ const GlobalStyles = createGlobalStyle`
         background-color:#202020 !important;
     }
     .modal-dialog{
-        margin:5% auto;
+        margin:5vh auto;
         width:90%;
     }
     .modal-body{
-        max-height:80vh;
+        max-height:74vh;
         overflow-y:auto;
     }
     .modal-xl{
@@ -176,24 +176,26 @@ const GlobalStyles = createGlobalStyle`
         box-shadow: none;
     }
     .btn-success {
-        background: #2dc262;
-        border-color: #29a354;
+        background: #66ff91;
+        color: #242424;
+        border-color: #66ff91;
     }
     .btn-success:hover .btn-success:focus .btn-success:active {
         background-color: #29a354;
         border-color: #2dc262;
+        color: #242424;
     }
     .btn-success:disabled {
         background-color: #69b383;
     }
     .btn-outline-success {
-        color: #2dc262;
-        border-color: #2dc262;
-        border-width: 2px;
+        background: #66ff91;
+        color: #242424;
+        border-color: #66ff91;
     }
     .btn-outline-success:hover:enabled {
         background: #2dc262;
-        color: white;
+        color: #242424;
     }
     .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
         border-width: 2px;
@@ -307,9 +309,6 @@ const GlobalStyles = createGlobalStyle`
         color: #16181b;
         text-decoration: none;
         background-color: #e9ecef;
-    }
-    .submitButton:hover > .spinner-border{
-        color:white;
     }
     hr{
         border-top: 1rem solid #444 !important;
@@ -528,14 +527,14 @@ export default function App({ Component, err }) {
                             src="https://static.cloudflareinsights.com/beacon.min.js"
                             data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
                         />
-                    ) : pageRootURL.hostname === 'web.ente.io' ? (
-                        <script
-                            defer
-                            src="https://static.cloudflareinsights.com/beacon.min.js"
-                            data-cf-beacon='{"token": "dfde128b7bb34a618ad34a08f1ba7609"}'
-                        />
                     ) : (
-                        console.warn('Web analytics is disabled')
+                        pageRootURL.hostname === 'web.ente.io' && (
+                            <script
+                                defer
+                                src="https://static.cloudflareinsights.com/beacon.min.js"
+                                data-cf-beacon='{"token": "dfde128b7bb34a618ad34a08f1ba7609"}'
+                            />
+                        )
                     ))}
                 {/* End Cloudflare Web Analytics  */}
             </Head>
