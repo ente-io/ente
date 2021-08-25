@@ -10,6 +10,10 @@ import 'package:photos/core/network.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 
+const kWebPaymentRedirectUrl = "https://payments.ente.io/frameRedirect";
+const kWebPaymentBaseEndpoint = String.fromEnvironment("web-payment",
+    defaultValue: "https://payments.ente.io");
+
 class BillingService {
   BillingService._privateConstructor();
 
@@ -144,10 +148,13 @@ class BillingService {
   }
 
   Future<String> getStripeCustomerPortalUrl(
-      {String endpoint = "https://ente.to"}) async {
+      {String endpoint = kWebPaymentRedirectUrl}) async {
     try {
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/billing/stripe/customer-portal",
+        queryParameters: {
+          "redirectURL": kWebPaymentRedirectUrl,
+        },
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),

@@ -14,10 +14,6 @@ import 'package:photos/utils/toast_util.dart';
 import '../loading_widget.dart';
 import '../progress_dialog.dart';
 
-const kWebPaymentRedirectUrl = "https://payments.ente.io/frameRedirect";
-const kWebPaymentBaseEndpoint = String.fromEnvironment("web-payment",
-    defaultValue: "https://payments.ente.io");
-
 class PaymentWebPage extends StatefulWidget {
   final String planId;
   final String actionType;
