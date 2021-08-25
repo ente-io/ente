@@ -527,14 +527,14 @@ export default function App({ Component, err }) {
                             src="https://static.cloudflareinsights.com/beacon.min.js"
                             data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
                         />
-                    ) : pageRootURL.hostname === 'web.ente.io' ? (
-                        <script
-                            defer
-                            src="https://static.cloudflareinsights.com/beacon.min.js"
-                            data-cf-beacon='{"token": "dfde128b7bb34a618ad34a08f1ba7609"}'
-                        />
                     ) : (
-                        console.warn('Web analytics is disabled')
+                        pageRootURL.hostname === 'web.ente.io' && (
+                            <script
+                                defer
+                                src="https://static.cloudflareinsights.com/beacon.min.js"
+                                data-cf-beacon='{"token": "dfde128b7bb34a618ad34a08f1ba7609"}'
+                            />
+                        )
                     ))}
                 {/* End Cloudflare Web Analytics  */}
             </Head>
