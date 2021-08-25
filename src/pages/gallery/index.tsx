@@ -175,7 +175,11 @@ export default function Gallery() {
             setFiles(files);
             setCollections(collections);
             await initDerivativeState(collections, files);
-            await checkSubscriptionPurchase(setDialogMessage, router);
+            await checkSubscriptionPurchase(
+                setDialogMessage,
+                router,
+                setLoading
+            );
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);

@@ -1,19 +1,16 @@
-import { getEndpoint } from 'utils/common/apiUtil';
-import { getStripePublishableKey, getToken } from 'utils/common/key';
-import { checkConnectivity, runningInBrowser } from 'utils/common/';
+import { getEndpoint, getPaymentsUrl } from 'utils/common/apiUtil';
+import { getToken } from 'utils/common/key';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
 import { convertToHumanReadable } from 'utils/billingUtil';
-import { loadStripe, Stripe } from '@stripe/stripe-js';
-import { CustomError } from 'utils/common/errorUtil';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
+import { getPaymentToken } from './userService';
 
 const ENDPOINT = getEndpoint();
 
-export enum PAYMENT_INTENT_STATUS {
-    SUCCESS = 'success',
-    REQUIRE_ACTION = 'requires_action',
-    REQUIRE_PAYMENT_METHOD = 'requires_payment_method',
+enum PaymentActionType {
+    Buy = 'buy',
+    Update = 'update',
 }
 export interface Subscription {
     id: number;
@@ -39,31 +36,8 @@ export interface Plan {
     stripeID: string;
 }
 
-export interface SubscriptionUpdateResponse {
-    subscription: Subscription;
-    status: PAYMENT_INTENT_STATUS;
-    clientSecret: string;
-}
 export const FREE_PLAN = 'free';
 class billingService {
-    private stripe: Stripe;
-
-    constructor() {
-        try {
-            const publishableKey = getStripePublishableKey();
-            const main = async () => {
-                try {
-                    this.stripe = await loadStripe(publishableKey);
-                } catch (e) {
-                    logError(e);
-                }
-            };
-            runningInBrowser() && checkConnectivity() && main();
-        } catch (e) {
-            logError(e);
-        }
-    }
-
     public async getPlans(): Promise<Plan[]> {
         try {
             const response = await HTTPService.get(
@@ -92,59 +66,31 @@ class billingService {
         }
     }
 
-    public async buyPaidSubscription(productID) {
+    public async buySubscription(productID: string) {
         try {
-            const response = await this.createCheckoutSession(productID);
-            await this.stripe.redirectToCheckout({
-                sessionId: response.data.sessionID,
-            });
+            const paymentToken = await getPaymentToken();
+            await this.redirectToPayments(
+                paymentToken,
+                productID,
+                PaymentActionType.Buy
+            );
         } catch (e) {
             logError(e, 'unable to buy subscription');
             throw e;
         }
     }
 
-    public async updateSubscription(productID) {
+    public async updateSubscription(productID: string) {
         try {
-            const response = await HTTPService.post(
-                `${ENDPOINT}/billing/stripe/update-subscription`,
-                {
-                    productID,
-                },
-                null,
-                {
-                    'X-Auth-Token': getToken(),
-                }
+            const paymentToken = await getPaymentToken();
+            await this.redirectToPayments(
+                paymentToken,
+                productID,
+                PaymentActionType.Update
             );
-            const { result } = response.data;
-            switch (result.status) {
-                case PAYMENT_INTENT_STATUS.SUCCESS:
-                    // subscription updated successfully
-                    // no-op required
-                    break;
-                case PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD:
-                    throw new Error(
-                        PAYMENT_INTENT_STATUS.REQUIRE_PAYMENT_METHOD
-                    );
-                case PAYMENT_INTENT_STATUS.REQUIRE_ACTION:
-                    {
-                        const { error } = await this.stripe.confirmCardPayment(
-                            result.clientSecret
-                        );
-                        if (error) {
-                            throw error;
-                        }
-                    }
-                    break;
-            }
         } catch (e) {
-            logError(e);
+            logError(e, 'subscription update failed');
             throw e;
-        }
-        try {
-            await this.verifySubscription();
-        } catch (e) {
-            throw new Error(CustomError.SUBSCRIPTION_VERIFICATION_ERROR);
         }
     }
 
@@ -184,18 +130,6 @@ class billingService {
         }
     }
 
-    private async createCheckoutSession(productID) {
-        return HTTPService.get(
-            `${ENDPOINT}/billing/stripe/checkout-session`,
-            {
-                productID,
-            },
-            {
-                'X-Auth-Token': getToken(),
-            }
-        );
-    }
-
     public async verifySubscription(
         sessionID: string = null
     ): Promise<Subscription> {
@@ -218,6 +152,21 @@ class billingService {
         } catch (err) {
             logError(err, 'Error while verifying subscription');
             throw err;
+        }
+    }
+
+    public async redirectToPayments(
+        paymentToken: string,
+        productID: string,
+        action: string
+    ) {
+        try {
+            window.location.href = `${getPaymentsUrl()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${
+                window.location.origin
+            }/gallery`;
+        } catch (e) {
+            logError(e, 'unable to get payments url');
+            throw e;
         }
     }
 

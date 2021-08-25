@@ -27,3 +27,10 @@ export const getThumbnailUrl = (id: number) => {
 export const getSentryTunnelUrl = () => {
     return `https://sentry-reporter.ente.workers.dev`;
 };
+
+export const getPaymentsUrl = () => {
+    if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
+        return process.env.NEXT_PUBLIC_ENTE_PAYMENT_ENDPOINT;
+    }
+    return `https://payments.ente.io`;
+};

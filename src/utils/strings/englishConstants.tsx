@@ -283,10 +283,13 @@ const englishConstants = {
     SUBSCRIPTION_VERIFICATION_FAILED:
         'we were not able to verify your purchase, verification can take few hours',
     SUBSCRIPTION_PURCHASE_FAILED:
-        'subscription purchase failed , please try again later',
-
+        'subscription purchase failed , please try again',
+    SUBSCRIPTION_UPDATE_FAILED:
+        'subscription updated failed , please try again',
     UPDATE_PAYMENT_METHOD_MESSAGE:
         'we are sorry, payment failed when we tried to charge your card, please update your payment method and try again',
+    STRIPE_AUTHENTICATION_FAILED:
+        'We are unable to authenticate your payment method. Please choose a different payment method and try again',
     UPDATE_PAYMENT_METHOD: 'update payment method',
     MONTHLY: 'monthly',
     YEARLY: 'yearly',
