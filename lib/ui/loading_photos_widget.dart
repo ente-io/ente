@@ -23,7 +23,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   );
   final List<String> _messages = [
     "web.ente.io has a slick uploader",
-    "we have preserved over 500,000 files so far",
+    "we have preserved over 500,000 memories so far",
     "all our apps are open source",
     "our encryption protocols have been reviewed by engineers at Google, Apple, Amazon, and Facebook",
     "you can share files and folders with your loved ones, end-to-end encrypted",
