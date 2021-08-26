@@ -30,6 +30,7 @@ export async function generateThumbnail(
                     const thumb = await FFmpegService.generateThumbnail(file);
                     return { thumbnail: thumb, hasStaticThumbnail: false };
                 } catch (e) {
+                    console.log(e);
                     canvas = await generateVideoThumbnail(file);
                 }
             }
@@ -39,6 +40,7 @@ export async function generateThumbnail(
                 throw Error('EMPTY THUMBNAIL');
             }
         } catch (e) {
+            console.log(e);
             logError(e);
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
                 c.charCodeAt(0)
