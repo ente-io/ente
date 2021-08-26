@@ -13,7 +13,9 @@ class FFmpegService {
         try {
             this.ffmpeg = createFFmpeg({
                 log: true,
-                corePath: '/js/ffmpeg-core.js',
+                ...(!process.env.NEXT_PUBLIC_SENTRY_ENV && {
+                    corePath: '/js/ffmpeg/ffmpeg-core.js',
+                }),
             });
             console.log('Loading ffmpeg-core.js');
             this.isLoading = this.ffmpeg.load();
