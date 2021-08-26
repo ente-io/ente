@@ -25,12 +25,8 @@ export async function generateThumbnail(
             if (fileType === FILE_TYPE.IMAGE) {
                 canvas = await generateImageThumbnail(file, isHEIC);
             } else {
-                try {
-                    const thumb = await FFmpegService.generateThumbnail(file);
-                    return { thumbnail: thumb, hasStaticThumbnail: false };
-                } catch (e) {
-                    canvas = await generateVideoThumbnail(file);
-                }
+                const thumb = await FFmpegService.generateThumbnail(file);
+                return { thumbnail: thumb, hasStaticThumbnail: false };
             }
             const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
             thumbnail = await worker.getUint8ArrayView(thumbnailBlob);

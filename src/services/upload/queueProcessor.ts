@@ -53,7 +53,11 @@ export default class QueueProcessor<T> {
             if (queueItem.isCanceled.status) {
                 response = null;
             } else {
-                response = await queueItem.request(queueItem.canceller);
+                try {
+                    response = await queueItem.request(queueItem.canceller);
+                } catch (e) {
+                    response = null;
+                }
             }
             queueItem.callback(response);
             await this.processQueue();
