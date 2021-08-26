@@ -3,7 +3,6 @@ import { CustomError } from 'utils/common/errorUtil';
 import { convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
-import { getUint8ArrayView } from './readFileService';
 import FFmpegService from 'services/ffmpegService';
 
 const THUMBNAIL_HEIGHT = 720;
