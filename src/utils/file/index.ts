@@ -4,6 +4,7 @@ import { runningInBrowser } from 'utils/common';
 import CryptoWorker from 'utils/crypto';
 
 export const TYPE_HEIC = 'heic';
+export const TYPE_HEIF = 'heif';
 const UNSUPPORTED_FORMATS = ['flv', 'mkv', '3gp', 'avi', 'wmv'];
 
 export function downloadAsFile(filename: string, content: string) {
@@ -32,7 +33,10 @@ export async function convertHEIC2JPEG(fileBlob: Blob): Promise<Blob> {
 }
 
 export function fileIsHEIC(mimeType: string) {
-    return mimeType.toLowerCase().endsWith(TYPE_HEIC);
+    return (
+        mimeType.toLowerCase().endsWith(TYPE_HEIC) ||
+        mimeType.toLowerCase().endsWith(TYPE_HEIF)
+    );
 }
 
 export function sortFilesIntoCollections(files: File[]) {
