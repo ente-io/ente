@@ -195,20 +195,12 @@ async function ffmpegThumbnailGenerator(file: File) {
     try {
         ffmpeg = createFFmpeg({
             log: true,
+            corePath: '/js/ffmpeg-core.js',
         });
         console.log('Loading ffmpeg-core.js');
         await ffmpeg.load();
     } catch (e) {
-        try {
-            ffmpeg = createFFmpeg({
-                log: true,
-                corePath: '/js/ffmpeg-core.js',
-            });
-            console.log('Loading ffmpeg-core.js');
-            await ffmpeg.load();
-        } catch (e) {
-            throw Error('ffmpeg load failed');
-        }
+        throw Error('ffmpeg load failed');
     }
     console.log('Start transcoding');
     ffmpeg.FS(
