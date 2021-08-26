@@ -190,10 +190,10 @@ async function ffmpegThumbnailGenerator(file: File) {
     const ffmpeg = createFFmpeg({
         log: true,
     });
-    // const IS_COMPATIBLE = typeof SharedArrayBuffer === 'function';
-    // if (!IS_COMPATIBLE) {
-    //     throw e;
-    // }
+    const IS_COMPATIBLE = typeof SharedArrayBuffer === 'function';
+    if (!IS_COMPATIBLE) {
+        throw Error('ffmpeg is not compatible');
+    }
     console.log('Loading ffmpeg-core.js');
     await ffmpeg.load();
     console.log('Start transcoding');
