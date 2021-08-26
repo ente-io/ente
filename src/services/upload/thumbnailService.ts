@@ -29,7 +29,6 @@ export async function generateThumbnail(
                     const thumb = await FFmpegService.generateThumbnail(file);
                     return { thumbnail: thumb, hasStaticThumbnail: false };
                 } catch (e) {
-                    console.log(e);
                     canvas = await generateVideoThumbnail(file);
                 }
             }

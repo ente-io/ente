@@ -116,9 +116,6 @@ class UploadService {
             fileTypeInfo.fileType,
             isHEIC
         );
-        if (hasStaticThumbnail) {
-            throw Error('ee');
-        }
 
         const filedata = await getFileData(worker, rawFile);
 
