@@ -1,20 +1,22 @@
-import { RequestCanceller } from 'services/HTTPService';
-
 interface RequestQueueItem {
-    request: (canceller?: RequestCanceller) => any;
+    request: (canceller?: RequestCanceller) => Promise<any>;
     callback: (response) => void;
     isCanceled: { status: boolean };
     canceller: { exec: () => void };
 }
 
-export default class QueueService {
+interface RequestCanceller {
+    exec: () => void;
+}
+
+export default class QueueProcessor<T> {
     private requestQueue: RequestQueueItem[] = [];
 
     private requestInProcessing = 0;
 
     constructor(private maxParallelProcesses: number) {}
 
-    public queueUpRequest(request: () => any) {
+    public queueUpRequest(request: () => Promise<T>) {
         const isCanceled = { status: false };
         const canceller: RequestCanceller = {
             exec: () => {
@@ -22,7 +24,7 @@ export default class QueueService {
             },
         };
 
-        const response = new Promise<string>((resolve) => {
+        const promise = new Promise<T>((resolve) => {
             this.requestQueue.push({
                 request,
                 callback: resolve,
@@ -32,7 +34,7 @@ export default class QueueService {
             this.pollQueue();
         });
 
-        return { response, canceller };
+        return { promise, canceller };
     }
 
     async pollQueue() {
