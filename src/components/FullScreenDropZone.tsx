@@ -30,7 +30,7 @@ const Overlay = styled.div`
     font-weight: 900;
     text-align: center;
     position: absolute;
-    border-color: #2dc262;
+    border-color: #51cd7c;
     border-style: solid;
     background: rgba(0, 0, 0, 0.9);
     z-index: 3000;

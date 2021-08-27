@@ -182,7 +182,7 @@ const GlobalStyles = createGlobalStyle`
     }
     .btn-success:hover .btn-success:focus .btn-success:active {
         background-color: #29a354;
-        border-color: #2dc262;
+        border-color: #51cd7c;
         color: #242424;
     }
     .btn-success:disabled {
@@ -276,7 +276,7 @@ const GlobalStyles = createGlobalStyle`
         background: rgba(0, 0, 0, 0.8) !important;
     }
     .bg-upload-progress-bar {
-        background-color: #2dc262;
+        background-color: #51cd7c;
     }
     .custom-switch.custom-switch-md .custom-control-label {
         padding-left: 2rem;
@@ -347,7 +347,7 @@ const GlobalStyles = createGlobalStyle`
         margin-right: 12px;
     }
     .carousel-indicators .active {
-        background-color: #2dc262;
+        background-color: #51cd7c;
     }
     div.otp-input input {
         width: 36px !important;
@@ -360,7 +360,7 @@ const GlobalStyles = createGlobalStyle`
     }
 
     div.otp-input input:not(:placeholder-shown) , div.otp-input input:focus{
-        border: 2px solid #2dc262;
+        border: 2px solid #51cd7c;
         border-radius:1px; 
         -webkit-transition: 0.5s;
         transition: 0.5s;

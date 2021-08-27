@@ -81,7 +81,7 @@ const UpperText = styled(TextContainer)`
 `;
 
 const FeatureText = styled.div`
-    color: #2dc262;
+    color: #51cd7c;
     font-weight: bold;
     padding-top: 20px;
     font-size: 24px;

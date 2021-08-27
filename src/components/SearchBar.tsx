@@ -221,12 +221,12 @@ export default function SearchBar(props: Props) {
             ...style,
             backgroundColor: '#282828',
             color: '#d1d1d1',
-            borderColor: isFocused ? '#2dc262' : '#444',
+            borderColor: isFocused ? '#51cd7c' : '#444',
             boxShadow: 'none',
             ':hover': {
-                borderColor: '#2dc262',
+                borderColor: '#51cd7c',
                 cursor: 'text',
-                '&>.icon': { color: '#2dc262' },
+                '&>.icon': { color: '#51cd7c' },
             },
         }),
         input: (style) => ({

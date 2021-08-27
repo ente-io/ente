@@ -140,7 +140,7 @@ const englishConstants = {
     NO_INTERNET_CONNECTION:
         'please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
-    UPLOAD_FIRST_PHOTO: 'backup your first photo',
+    UPLOAD_FIRST_PHOTO: 'backup a memory',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CONFIRM_DELETE_FILE: 'confirm file deletion',
     DELETE_FILE_MESSAGE: 'sure you want to delete selected files?',
@@ -207,14 +207,14 @@ const englishConstants = {
             <a
                 href="https://play.google.com/store/apps/details?id=io.ente.photos"
                 target="_blank"
-                style={{ color: '#2dc262' }}
+                style={{ color: '#51cd7c' }}
                 rel="noreferrer">
                 android
             </a>{' '}
             or{' '}
             <a
                 href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                style={{ color: '#2dc262' }}
+                style={{ color: '#51cd7c' }}
                 target="_blank"
                 rel="noreferrer">
                 ios app{' '}
@@ -380,8 +380,8 @@ const englishConstants = {
     ),
     SEARCH_STATS: ({ resultCount, timeTaken }) => (
         <span>
-            found <span style={{ color: '#2dc262' }}>{resultCount}</span>{' '}
-            memories ( <span style={{ color: '#2dc262' }}> {timeTaken}</span>{' '}
+            found <span style={{ color: '#51cd7c' }}>{resultCount}</span>{' '}
+            memories ( <span style={{ color: '#51cd7c' }}> {timeTaken}</span>{' '}
             seconds )
         </span>
     ),
@@ -484,7 +484,7 @@ const englishConstants = {
                 using <code>eTags</code> to upload large files, or use our{' '}
                 <a
                     href={url}
-                    style={{ color: '#2dc262', textDecoration: 'underline' }}
+                    style={{ color: '#51cd7c', textDecoration: 'underline' }}
                     target="_blank"
                     rel="noreferrer">
                     desktop app

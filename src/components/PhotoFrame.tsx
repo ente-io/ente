@@ -118,7 +118,7 @@ const EmptyScreen = styled.div`
     align-items: center;
     flex-direction: column;
     flex: 1;
-    color: #2dc262;
+    color: #51cd7c;
 
     & > svg {
         filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
@@ -500,6 +500,7 @@ const PhotoFrame = ({
                             paddingRight: '32px',
                             paddingTop: '12px',
                             paddingBottom: '12px',
+                            fontWeight: 900,
                         }}>
                         {constants.UPLOAD_FIRST_PHOTO}
                     </Button>

@@ -10,7 +10,7 @@ export default function EnteSpinner(props) {
                 width: '36px',
                 height: '36px',
                 borderWidth: '0.20em',
-                color: '#2dc262',
+                color: '#51cd7c',
             }}
             role="status"
         />
