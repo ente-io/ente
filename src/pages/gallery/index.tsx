@@ -352,7 +352,7 @@ export default function Gallery() {
                         <EnteSpinner />
                     </LoadingOverlay>
                 )}
-                <LoadingBar color="#2dc262" ref={loadingBar} />
+                <LoadingBar color="#51cd7c" ref={loadingBar} />
                 {isFirstLoad && (
                     <AlertContainer>
                         {constants.INITIAL_LOAD_DELAY_WARNING}
