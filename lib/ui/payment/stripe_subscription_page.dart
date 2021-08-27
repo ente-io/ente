@@ -246,15 +246,21 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         ),
       ),
       onPressed: () async {
-        var result = await showChoiceDialog(
-            context,
-            title,
-            isRenewCancelled
-                ? 'are you sure you want to renew?'
-                : 'are you sure you want to cancel?',
-            firstAction: 'yes',
-            secondAction: 'no');
-        if (result == DialogUserChoice.firstChoice) {
+        bool confirmAction = false;
+        if (isRenewCancelled) {
+          var choice = await showChoiceDialog(
+              context, title, "are you sure you want to renew?",
+              firstAction: "no", secondAction: "yes");
+          confirmAction = choice == DialogUserChoice.secondChoice;
+        } else {
+          var choice = await showChoiceDialog(
+              context, title, 'are you sure you want to cancel?',
+              firstAction: 'yes, cancel',
+              secondAction: 'no',
+              actionType: ActionType.critical);
+          confirmAction = choice == DialogUserChoice.firstChoice;
+        }
+        if (confirmAction) {
           toggleStripeSubscription(isRenewCancelled);
         }
       },
@@ -317,9 +323,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                     context,
                     "confirm plan change",
                     "are you sure you want to change your plan?",
-                    firstAction: "yes",
-                    secondAction: 'no');
-                if (result != DialogUserChoice.firstChoice) {
+                    firstAction: "no",
+                    secondAction: 'yes');
+                if (result != DialogUserChoice.secondChoice) {
                   return;
                 }
                 stripPurChaseAction = 'update';
