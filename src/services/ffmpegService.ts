@@ -39,6 +39,7 @@ class FFmpegService {
         );
 
         const thumbnail = await response.promise;
+        console.log(URL.createObjectURL(thumbnail));
         if (!thumbnail) {
             throw Error(CustomError.THUMBNAIL_GENERATION_FAILED);
         }
@@ -65,6 +66,8 @@ async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
         );
         console.log('Complete transcoding');
         const thumb = ffmpeg.FS('readFile', 'thumb.png');
+        ffmpeg.FS('unlink', 'thumb.png');
+        ffmpeg.FS('unlink', file.name);
         return thumb;
     } catch (e) {
         console.log(e);
