@@ -175,7 +175,7 @@ export default function LandingPage() {
                             size="lg"
                             style={{ color: '#fff', padding: '10px 50px' }}
                             onClick={() => router.push('login')}>
-                            {constants.SIGN_IN}
+                            {constants.LOGIN}
                         </Button>
                     </MobileBox>
                     <DesktopBox>

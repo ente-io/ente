@@ -40,9 +40,8 @@ const englishConstants = {
     HERO_SLIDE_3:
         'reliably replicated to a fallout shelter, designed to outlive',
     COMPANY_NAME: 'ente',
-    LOGIN: 'login',
+    LOGIN: 'log in',
     SIGN_UP: 'sign up',
-    SIGN_IN: 'log in',
     NAME: 'name',
     ENTER_NAME: 'your name',
     EMAIL: 'email',
@@ -121,8 +120,7 @@ const englishConstants = {
             </span>
         </div>
     ),
-    SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew it',
-
+    SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew',
     STORAGE_QUOTA_EXCEEDED:
         'you have exceeded your storage quota, please upgrade your plan',
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
@@ -155,10 +153,9 @@ const englishConstants = {
     SESSION_EXPIRED_MESSAGE:
         'your session has expired, please login again to continue',
     SESSION_EXPIRED: 'session expired',
-    SYNC_FAILED:
-        'failed to sync with remote server, please refresh page to try again',
+    SYNC_FAILED: 'failed to sync with server, please refresh this page',
     PASSWORD_GENERATION_FAILED:
-        "your browser was unable to generate a strong enough password  that meets ente's encryption standards, please try using the mobile app or another browser",
+        "your browser was unable to generate a strong key that meets ente's encryption standards, please try using the mobile app or another browser",
     CHANGE_PASSWORD: 'change password',
     GO_BACK: 'go back',
     DOWNLOAD_RECOVERY_KEY: 'recovery key',
@@ -167,7 +164,7 @@ const englishConstants = {
     RECOVERY_KEY_DESCRIPTION:
         'if you forget your password, the only way you can recover your data is with this key',
     RECOVER_KEY_GENERATION_FAILED:
-        'recovery code could be generated, please try again',
+        'recovery code could not be generated, please try again',
     KEY_NOT_STORED_DISCLAIMER:
         "we don't store this key, so please save this in a safe place",
     RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
@@ -184,7 +181,7 @@ const englishConstants = {
         <>
             please drop an email to{' '}
             <a href="mailto:support@ente.io">support@ente.io</a> from your
-            registered email
+            registered email address
         </>
     ),
     CONTACT_SUPPORT: 'contact support',
@@ -196,7 +193,7 @@ const englishConstants = {
     LOGOUT: 'logout',
     LOGOUT_MESSAGE: 'sure you want to logout?',
     CHANGE: 'change',
-    CHANGE_EMAIL: 'change email ?',
+    CHANGE_EMAIL: 'change email?',
     OK: 'ok',
     SUCCESS: 'success',
     ERROR: 'error',
@@ -224,8 +221,10 @@ const englishConstants = {
     ),
     DOWNLOAD_APP_MESSAGE: () => (
         <>
-            <p>sorry, this operation is currently not supported on the web,</p>
-            <p> do you want to download the desktop app</p>
+            <p>
+                sorry, this operation is currently only supported on our desktop
+                app
+            </p>
         </>
     ),
     DOWNLOAD_APP: 'download desktop app',
@@ -289,7 +288,7 @@ const englishConstants = {
     UPDATE_PAYMENT_METHOD_MESSAGE:
         'we are sorry, payment failed when we tried to charge your card, please update your payment method and try again',
     STRIPE_AUTHENTICATION_FAILED:
-        'We are unable to authenticate your payment method. Please choose a different payment method and try again',
+        'we are unable to authenticate your payment method. please choose a different payment method and try again',
     UPDATE_PAYMENT_METHOD: 'update payment method',
     MONTHLY: 'monthly',
     YEARLY: 'yearly',
@@ -324,13 +323,13 @@ const englishConstants = {
     RENAME_COLLECTION: 'rename album',
     CONFIRM_DELETE_COLLECTION: 'confirm album deletion',
     DELETE_COLLECTION: 'delete album',
-    DELETE_COLLECTION_FAILED: 'album deletion failed , please try again',
+    DELETE_COLLECTION_FAILED: 'album deletion failed, please try again',
     DELETE_COLLECTION_MESSAGE: () => (
         <>
             <p>are you sure you want to delete this album?</p>
             <p>
-                all files that are present only in this album will be
-                permanently deleted
+                all files that are unique to this album will be permanently
+                deleted
             </p>
         </>
     ),
@@ -367,10 +366,10 @@ const englishConstants = {
     ),
     CONFIRM_PASSWORD_NOT_SAVED: () => (
         <p>
-            i understand that if i lose my password , i may lose my data since
+            I understand that if I lose my password , I may lose my data since
             my data is{' '}
             <a
-                href="https://ente.io/encryption"
+                href="https://ente.io/architecture"
                 target="_blank"
                 rel="noreferrer">
                 end-to-end encrypted
@@ -385,7 +384,7 @@ const englishConstants = {
             seconds )
         </span>
     ),
-    NOT_FILE_OWNER: 'deleting shared collection files is not allowed',
+    NOT_FILE_OWNER: 'you cannot delete files in a shared album',
     ADD_TO_COLLECTION: 'add to collection',
     SELECTED: 'selected',
     VIDEO_PLAYBACK_FAILED: 'video format not supported',
@@ -414,7 +413,7 @@ const englishConstants = {
     FILES_TO_BE_UPLOADED: (count: number) =>
         count === 1
             ? `1 file received. uploading in a jiffy`
-            : `${count} files received. Uploading in a jiffy`,
+            : `${count} files received. uploading in a jiffy`,
     TWO_FACTOR: 'two-factor',
     TWO_FACTOR_AUTHENTICATION: 'two-factor authentication',
     TWO_FACTOR_QR_INSTRUCTION:
@@ -505,7 +504,7 @@ const englishConstants = {
     BLOCKED_UPLOADS: 'blocked uploads',
     INPROGRESS_UPLOADS: 'uploads in progress',
     FILE_TOO_LARGE:
-        'the file you are trying to upload is larger than your available storage please upgrade your plan and try again',
+        'the file you are trying to upload is larger than the storage available, please upgrade your plan and try again',
 };
 
 export default englishConstants;
