@@ -15,7 +15,7 @@ type Props = React.PropsWithChildren<{
 export function getVariantColor(variant: string) {
     switch (variant) {
         case ButtonVariant.success:
-            return '#66ff91';
+            return '#51cd7c';
         case ButtonVariant.danger:
             return '#c93f3f';
         case ButtonVariant.secondary:
