@@ -309,6 +309,24 @@ export default function Sidebar(props: Props) {
                     }>
                     {constants.LOGOUT}
                 </LinkButton>
+                <LinkButton
+                    variant="danger"
+                    style={{ marginTop: '30px' }}
+                    onClick={() =>
+                        props.setDialogMessage({
+                            title: `${constants.CONFIRM} ${constants.LOGOUT}`,
+                            content: constants.LOGOUT_MESSAGE,
+                            staticBackdrop: true,
+                            proceed: {
+                                text: constants.LOGOUT,
+                                action: logoutUser,
+                                variant: 'danger',
+                            },
+                            close: { text: constants.CANCEL },
+                        })
+                    }>
+                    {constants.DELETE_ACCOUNT}
+                </LinkButton>
                 <div
                     style={{
                         marginTop: '40px',

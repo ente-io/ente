@@ -191,6 +191,7 @@ const englishConstants = {
     SKIP: 'skip',
     CANCEL: 'cancel',
     LOGOUT: 'logout',
+    DELETE_ACCOUNT: 'delete account',
     LOGOUT_MESSAGE: 'sure you want to logout?',
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email?',
