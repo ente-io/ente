@@ -61,7 +61,6 @@ async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
             '1',
             'thumb.png'
         );
-        console.log('Complete transcoding');
         const thumb = ffmpeg.FS('readFile', 'thumb.png');
         ffmpeg.FS('unlink', 'thumb.png');
         ffmpeg.FS('unlink', file.name);
