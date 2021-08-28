@@ -191,6 +191,19 @@ const englishConstants = {
     SKIP: 'skip',
     CANCEL: 'cancel',
     LOGOUT: 'logout',
+    DELETE_ACCOUNT: 'delete account',
+    DELETE_MESSAGE: () => (
+        <>
+            <p>
+                please send an email to{' '}
+                <a href="mailto:account-deletion@ente.io">
+                    account-deletion@ente.io
+                </a>{' '}
+                from your registered email address.{' '}
+            </p>
+            your request will be processed within 72 hours.
+        </>
+    ),
     LOGOUT_MESSAGE: 'sure you want to logout?',
     CHANGE: 'change',
     CHANGE_EMAIL: 'change email?',
