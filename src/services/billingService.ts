@@ -174,7 +174,7 @@ class billingService {
         try {
             const response = await HTTPService.get(
                 `${ENDPOINT}/billing/stripe/customer-portal`,
-                null,
+                { redirectURL: `${window.location.origin}/gallery` },
                 {
                     'X-Auth-Token': getToken(),
                 }
