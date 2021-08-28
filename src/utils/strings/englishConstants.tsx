@@ -353,7 +353,11 @@ const englishConstants = {
     ZERO_SHAREES: () => (
         <>
             <h6>currently shared with no one 😔</h6>
-            <em style={{ color: '#777' }}>"memories are fonder when shared"</em>
+            <div style={{ marginTop: '16px' }}>
+                <em style={{ color: '#3c3c3c' }}>
+                    memories are fonder when shared
+                </em>
+            </div>
         </>
     ),
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
