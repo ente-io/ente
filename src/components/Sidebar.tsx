@@ -76,13 +76,14 @@ export default function Sidebar(props: Props) {
         const win = window.open(feedbackURL, '_blank');
         win.focus();
     }
-    function openSupportMail() {
-        const a = document.createElement('a');
-        a.href = 'mailto:contact@ente.io';
 
+    function initiateEmail(email: string) {
+        const a = document.createElement('a');
+        a.href = 'mailto:' + email;
         a.rel = 'noreferrer noopener';
         a.click();
     }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function exportFiles() {
         if (isElectron()) {
@@ -215,7 +216,7 @@ export default function Sidebar(props: Props) {
                 </LinkButton>
                 <LinkButton
                     style={{ marginTop: '30px' }}
-                    onClick={openSupportMail}>
+                    onClick={() => initiateEmail('contact@ente.io')}>
                     {constants.SUPPORT}
                 </LinkButton>
                 <>
@@ -320,8 +321,7 @@ export default function Sidebar(props: Props) {
                             proceed: {
                                 text: constants.DELETE_ACCOUNT,
                                 action: () => {
-                                    window.location.href =
-                                        'mailto:account-deletion@ente.io';
+                                    initiateEmail('account-deletion@ente.io');
                                 },
                                 variant: 'danger',
                             },
