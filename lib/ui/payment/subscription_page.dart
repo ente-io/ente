@@ -11,12 +11,11 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
-import 'package:photos/ui/billing_questions_widget.dart';
-import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/payment/skip_subscription_widget.dart';
+import 'package:photos/ui/payment/subscription_common_widgets.dart';
+import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import 'package:photos/ui/progress_dialog.dart';
-import 'package:photos/utils/data_util.dart';
-import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,7 +29,7 @@ class SubscriptionPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _SubscriptionPageState createState() => _SubscriptionPageState();
+   State<SubscriptionPage> createState() => _SubscriptionPageState();
 }
 
 class _SubscriptionPageState extends State<SubscriptionPage> {
@@ -60,12 +59,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         final productID = _isActiveStripeSubscriber
             ? plan.stripeID
             : Platform.isAndroid
-                ? plan.androidID
-                : plan.iosID;
+            ? plan.androidID
+            : plan.iosID;
         return productID != null && productID.isNotEmpty;
       }).toList();
       _freePlan = billingPlans.freePlan;
-
       _usageFuture = _billingService.fetchUsage();
       _hasLoadedData = true;
       setState(() {});
@@ -160,42 +158,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   Widget _buildPlans() {
     final widgets = <Widget>[];
-    if (widget.isOnboarding) {
-      widgets.add(Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Text(
-          "ente preserves your memories, so they're always available to you, even if you lose your device",
-          style: TextStyle(
-            color: Colors.white54,
-            height: 1.2,
-          ),
-        ),
-      ));
-    } else {
-      widgets.add(
-        SizedBox(
-          height: 50,
-          child: FutureBuilder(
-            future: _usageFuture,
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.hasData) {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text("current usage is " + formatBytes(snapshot.data)),
-                );
-              } else if (snapshot.hasError) {
-                return Container();
-              } else {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: loadWidget,
-                );
-              }
-            },
-          ),
-        ),
-      );
-    }
+    widgets.add(SubscriptionHeaderWidget(
+      isOnboarding: widget.isOnboarding,
+      usageFuture: _usageFuture,
+    ));
+
     widgets.addAll([
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -207,17 +174,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     ]);
 
     if (_hasActiveSubscription) {
-      widgets.add(
-        Text(
-          "valid till " +
-              getDateAndMonthAndYear(DateTime.fromMicrosecondsSinceEpoch(
-                  _currentSubscription.expiryTime)),
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-            fontSize: 14,
-          ),
-        ),
-      );
+      widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
+    }
+
+    if ( _currentSubscription.productID == kFreeProductID) {
+      if (widget.isOnboarding) {
+        widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
+      }
+      widgets.add(SubFaqWidget());
     }
 
     if (_hasActiveSubscription &&
@@ -259,42 +223,6 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     textAlign: TextAlign.center,
                   ),
                 ],
-              ),
-            ),
-          ),
-        ),
-      ]);
-    }
-    if (widget.isOnboarding &&
-        _currentSubscription.productID == kFreeProductID) {
-      widgets.addAll([_getSkipButton(_freePlan)]);
-    }
-    if (_currentSubscription.productID == kFreeProductID) {
-      widgets.addAll([
-        Align(
-          alignment: Alignment.center,
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              showModalBottomSheet<void>(
-                backgroundColor: Color.fromRGBO(10, 15, 15, 1.0),
-                barrierColor: Colors.black87,
-                context: context,
-                builder: (context) {
-                  return BillingQuestionsWidget();
-                },
-              );
-            },
-            child: Container(
-              padding: EdgeInsets.all(40),
-              child: RichText(
-                text: TextSpan(
-                  text: "questions?",
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontFamily: 'Ubuntu',
-                  ),
-                ),
               ),
             ),
           ),
@@ -388,8 +316,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 }
               }
               final ProductDetailsResponse response =
-                  await InAppPurchaseConnection.instance
-                      .queryProductDetails({productID});
+              await InAppPurchaseConnection.instance
+                  .queryProductDetails({productID});
               if (response.notFoundIDs.isNotEmpty) {
                 _logger.severe("Could not find products: " +
                     response.notFoundIDs.toString());
@@ -403,8 +331,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   _currentSubscription.productID != plan.androidID;
               if (isCrossGradingOnAndroid) {
                 final existingProductDetailsResponse =
-                    await InAppPurchaseConnection.instance
-                        .queryProductDetails({_currentSubscription.productID});
+                await InAppPurchaseConnection.instance
+                    .queryProductDetails({_currentSubscription.productID});
                 if (existingProductDetailsResponse.notFoundIDs.isNotEmpty) {
                   _logger.severe("Could not find existing products: " +
                       response.notFoundIDs.toString());
@@ -472,92 +400,5 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       ),
     );
   }
-
-  Widget _getSkipButton(FreePlan plan) {
-    return Container(
-      width: double.infinity,
-      height: 64,
-      margin: const EdgeInsets.fromLTRB(0, 30, 0, 30),
-      padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
-      child: button(
-        "continue on free plan",
-        fontSize: 16,
-        onPressed: () async {
-          showToast("thank you for signing up!");
-          Bus.instance.fire(SubscriptionPurchasedEvent());
-          Navigator.of(context).popUntil((route) => route.isFirst);
-          BillingService.instance
-              .verifySubscription(kFreeProductID, "", paymentProvider: "ente");
-        },
-      ),
-    );
-  }
 }
 
-class SubscriptionPlanWidget extends StatelessWidget {
-  const SubscriptionPlanWidget({
-    Key key,
-    @required this.storage,
-    @required this.price,
-    @required this.period,
-    this.isActive = false,
-  }) : super(key: key);
-
-  final int storage;
-  final String price;
-  final String period;
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).cardColor,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 36, 10),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  color: Color(0xDFFFFFFF),
-                  child: Container(
-                    width: 100,
-                    padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
-                    child: Column(
-                      children: [
-                        Text(
-                          convertBytesToReadableFormat(storage),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Theme.of(context).cardColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Text(price + (period.isNotEmpty ? " per " + period : "")),
-              Expanded(child: Container()),
-              isActive
-                  ? Expanded(
-                      child: Icon(
-                        Icons.check_circle,
-                        color: Theme.of(context).buttonColor,
-                      ),
-                    )
-                  : Container(),
-            ],
-          ),
-          Divider(
-            height: 1,
-          ),
-        ],
-      ),
-    );
-  }
-}

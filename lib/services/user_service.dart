@@ -604,6 +604,27 @@ class UserService {
     return recoveryKey;
   }
 
+  Future<String> getPaymentToken() async {
+    try {
+      var response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/payment-token",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      if (response != null && response.statusCode == 200) {
+        return response.data["paymentToken"];
+      } else {
+        throw Exception("non 200 ok response");
+      }
+    } catch (e, s) {
+      _logger.severe(e, s);
+      return null;
+    }
+  }
+
   Future<void> _saveConfiguration(Response response) async {
     await Configuration.instance.setUserID(response.data["id"]);
     if (response.data["encryptedToken"] != null) {

@@ -6,7 +6,8 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common_elements.dart';
-import 'package:photos/ui/subscription_page.dart';
+import 'package:photos/ui/payment/subscription.dart';
+import 'package:photos/ui/payment/subscription_page.dart';
 import 'package:photos/utils/email_util.dart';
 
 class SyncIndicator extends StatefulWidget {
@@ -137,7 +138,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (BuildContext context) {
-                      return SubscriptionPage();
+                      return getSubscriptionPage();
                     },
                   ),
                 );
@@ -173,7 +174,7 @@ class _SyncIndicatorState extends State<SyncIndicator> {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (BuildContext context) {
-                      return SubscriptionPage();
+                      return getSubscriptionPage();
                     },
                   ),
                 );

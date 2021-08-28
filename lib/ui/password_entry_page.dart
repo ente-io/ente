@@ -11,8 +11,9 @@ import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/recovery_key_dialog.dart';
-import 'package:photos/ui/subscription_page.dart';
+import 'package:photos/ui/payment/subscription_page.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -305,7 +306,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {
-                return SubscriptionPage(isOnboarding: true);
+                return getSubscriptionPage(isOnBoarding: true);
               },
             ),
             (route) => route.isFirst,

@@ -93,6 +93,13 @@ class UpdateService {
     }
     return true;
   }
+
+  bool isIndependentFlavor() {
+    if (Platform.isIOS) {
+      return false;
+    }
+    return _packageInfo.packageName.startsWith("io.ente.photos.independent");
+  }
 }
 
 class LatestVersionInfo {

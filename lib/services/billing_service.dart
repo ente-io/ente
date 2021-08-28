@@ -10,6 +10,10 @@ import 'package:photos/core/network.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 
+const kWebPaymentRedirectUrl = "https://payments.ente.io/frameRedirect";
+const kWebPaymentBaseEndpoint = String.fromEnvironment("web-payment",
+    defaultValue: "https://payments.ente.io");
+
 class BillingService {
   BillingService._privateConstructor();
 
@@ -83,7 +87,8 @@ class BillingService {
         ),
       );
       return Subscription.fromMap(response.data["subscription"]);
-    } catch (e) {
+    } catch (e, s) {
+      _logger.severe(e, s);
       rethrow;
     }
   }
@@ -100,8 +105,65 @@ class BillingService {
       );
       final subscription = Subscription.fromMap(response.data["subscription"]);
       return subscription;
-    } on DioError catch (e) {
-      _logger.severe(e);
+    } on DioError catch (e, s) {
+      _logger.severe(e, s);
+      rethrow;
+    }
+  }
+
+  Future<Subscription> cancelStripeSubscription() async {
+    try {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/billing/stripe/cancel-subscription",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      final subscription = Subscription.fromMap(response.data["subscription"]);
+      return subscription;
+    } on DioError catch (e, s) {
+      _logger.severe(e, s);
+      rethrow;
+    }
+  }
+
+  Future<Subscription> activateStripeSubscription() async {
+    try {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/billing/stripe/activate-subscription",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      final subscription = Subscription.fromMap(response.data["subscription"]);
+      return subscription;
+    } on DioError catch (e, s) {
+      _logger.severe(e, s);
+      rethrow;
+    }
+  }
+
+  Future<String> getStripeCustomerPortalUrl(
+      {String endpoint = kWebPaymentRedirectUrl}) async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/billing/stripe/customer-portal",
+        queryParameters: {
+          "redirectURL": kWebPaymentRedirectUrl,
+        },
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      return response.data["url"];
+    } on DioError catch (e, s) {
+      _logger.severe(e, s);
       rethrow;
     }
   }
