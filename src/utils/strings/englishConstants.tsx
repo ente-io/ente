@@ -518,7 +518,7 @@ const englishConstants = {
     INPROGRESS_UPLOADS: 'uploads in progress',
     FILE_TOO_LARGE:
         'the file you are trying to upload is larger than the storage available, please upgrade your plan and try again',
-    UPLOAD_TO_COLLECTION: "'upload to collection'",
+    UPLOAD_TO_COLLECTION: 'upload to collection',
 };
 
 export default englishConstants;

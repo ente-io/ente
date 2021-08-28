@@ -23,7 +23,7 @@ import UploadManager, {
 import uploadManager from 'services/upload/uploadManager';
 import { METADATA_FOLDER_NAME } from 'services/exportService';
 
-const FIRST_ALBUM_NAME = 'first album';
+const FIRST_ALBUM_NAME = 'my first album';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
