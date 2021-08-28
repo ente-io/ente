@@ -11,20 +11,47 @@ const gitSha = cp.execSync('git rev-parse --short HEAD', {
     encoding: 'utf8',
 });
 
-module.exports = withSentryConfig(withWorkbox(withBundleAnalyzer({
-    future: {
-        webpack5: true,
+// eslint-disable-next-line camelcase
+const COOP_COEP_Headers = [
+    {
+        key: 'Cross-Origin-Opener-Policy',
+        value: 'same-origin',
     },
-    env: {
-        SENTRY_RELEASE: gitSha,
+    {
+        key: 'Cross-Origin-Embedder-Policy',
+        value: 'require-corp',
     },
-    workbox: {
-        swSrc: 'src/serviceWorker.js',
-        exclude: [/manifest\.json$/i],
-    },
-    webpack: (config) => {
-        config.output.hotUpdateMainFilename =
-            'static/webpack/[fullhash].[runtime].hot-update.json';
-        return config;
-    },
-})), { release: gitSha });
+];
+
+module.exports = withSentryConfig(
+    withWorkbox(
+        withBundleAnalyzer({
+            future: {
+                webpack5: true,
+            },
+            env: {
+                SENTRY_RELEASE: gitSha,
+            },
+            workbox: {
+                swSrc: 'src/serviceWorker.js',
+                exclude: [/manifest\.json$/i],
+            },
+            webpack: (config) => {
+                config.output.hotUpdateMainFilename =
+                    'static/webpack/[fullhash].[runtime].hot-update.json';
+                return config;
+            },
+
+            async headers() {
+                return [
+                    {
+                        // Apply these headers to all routes in your application.
+                        source: '/(.*)',
+                        headers: COOP_COEP_Headers,
+                    },
+                ];
+            },
+        })
+    ),
+    { release: gitSha }
+);

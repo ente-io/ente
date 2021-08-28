@@ -3,6 +3,7 @@ import { CustomError } from 'utils/common/errorUtil';
 import { convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
+import FFmpegService from 'services/ffmpegService';
 
 const THUMBNAIL_HEIGHT = 720;
 const MAX_ATTEMPTS = 3;
@@ -24,7 +25,12 @@ export async function generateThumbnail(
             if (fileType === FILE_TYPE.IMAGE) {
                 canvas = await generateImageThumbnail(file, isHEIC);
             } else {
-                canvas = await generateVideoThumbnail(file);
+                try {
+                    const thumb = await FFmpegService.generateThumbnail(file);
+                    return { thumbnail: thumb, hasStaticThumbnail: false };
+                } catch (e) {
+                    canvas = await generateVideoThumbnail(file);
+                }
             }
             const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
             thumbnail = await worker.getUint8ArrayView(thumbnailBlob);
@@ -32,7 +38,7 @@ export async function generateThumbnail(
                 throw Error('EMPTY THUMBNAIL');
             }
         } catch (e) {
-            logError(e);
+            logError(e, 'uploading static thumbnail');
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
                 c.charCodeAt(0)
             );
@@ -157,7 +163,7 @@ export async function generateVideoThumbnail(file: globalThis.File) {
     return canvas;
 }
 
-export async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
+async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
     let thumbnailBlob = null;
     let attempts = 0;
     let quality = 1;
