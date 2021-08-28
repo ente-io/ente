@@ -86,7 +86,7 @@ const englishConstants = {
     CONSOLE_WARNING_DESC:
         "This is a browser feature intended for developers. Please don't copy-paste unverified code here.",
     SELECT_COLLECTION: 'select an album to upload to',
-    CREATE_COLLECTION: 'create album',
+    CREATE_COLLECTION: 'new album',
     ENTER_ALBUM_NAME: 'album name',
     CLOSE: 'close',
     NO: 'no',
@@ -138,18 +138,18 @@ const englishConstants = {
     NO_INTERNET_CONNECTION:
         'please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
-    UPLOAD_FIRST_PHOTO: 'backup a memory',
+    UPLOAD_FIRST_PHOTO_DESCRIPTION: 'preserve your first memory with ente',
+    UPLOAD_FIRST_PHOTO: 'preserve',
     UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
     CONFIRM_DELETE_FILE: 'confirm file deletion',
     DELETE_FILE_MESSAGE: 'sure you want to delete selected files?',
     DELETE_FILE: 'delete files',
     DELETE: 'delete',
-    MULTI_FOLDER_UPLOAD: 'choose upload strategy',
-    UPLOAD_STRATEGY_CHOICE:
-        'you are uploading multiple folders, would you like us to create',
-    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album for everything',
+    MULTI_FOLDER_UPLOAD: 'multiple folders detected',
+    UPLOAD_STRATEGY_CHOICE: 'would you like to upload them into',
+    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album',
     OR: 'or',
-    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums for every folder',
+    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums',
     SESSION_EXPIRED_MESSAGE:
         'your session has expired, please login again to continue',
     SESSION_EXPIRED: 'session expired',
@@ -353,7 +353,11 @@ const englishConstants = {
     ZERO_SHAREES: () => (
         <>
             <h6>currently shared with no one 😔</h6>
-            <em style={{ color: '#777' }}>"memories are fonder when shared"</em>
+            <div style={{ marginTop: '16px' }}>
+                <em style={{ color: '#3c3c3c' }}>
+                    memories are fonder when shared
+                </em>
+            </div>
         </>
     ),
     SHARE_WITH_SELF: 'oops, you cannot share with yourself',
@@ -518,7 +522,7 @@ const englishConstants = {
     INPROGRESS_UPLOADS: 'uploads in progress',
     FILE_TOO_LARGE:
         'the file you are trying to upload is larger than the storage available, please upgrade your plan and try again',
-    UPLOAD_TO_COLLECTION: 'upload to collection',
+    UPLOAD_TO_COLLECTION: 'upload to album',
 };
 
 export default englishConstants;
