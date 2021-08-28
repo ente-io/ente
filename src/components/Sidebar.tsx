@@ -314,12 +314,15 @@ export default function Sidebar(props: Props) {
                     style={{ marginTop: '30px' }}
                     onClick={() =>
                         props.setDialogMessage({
-                            title: `${constants.CONFIRM} ${constants.LOGOUT}`,
-                            content: constants.LOGOUT_MESSAGE,
+                            title: `${constants.DELETE_ACCOUNT}`,
+                            content: constants.DELETE_MESSAGE(),
                             staticBackdrop: true,
                             proceed: {
-                                text: constants.LOGOUT,
-                                action: logoutUser,
+                                text: constants.DELETE_ACCOUNT,
+                                action: () => {
+                                    window.location.href =
+                                        'mailto:account-deletion@ente.io';
+                                },
                                 variant: 'danger',
                             },
                             close: { text: constants.CANCEL },
