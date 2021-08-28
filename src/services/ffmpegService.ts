@@ -12,18 +12,16 @@ class FFmpegService {
     async init() {
         try {
             this.ffmpeg = createFFmpeg({
-                log: true,
                 ...(!process.env.NEXT_PUBLIC_SENTRY_ENV && {
                     corePath: '/js/ffmpeg/ffmpeg-core.js',
                 }),
             });
-            console.log('Loading ffmpeg-core.js');
             this.isLoading = this.ffmpeg.load();
             await this.isLoading;
             this.isLoading = null;
-            console.log('ffmpeg loaded');
         } catch (e) {
-            throw Error('ffmpeg load failed');
+            logError(e, 'ffmpeg load failed');
+            throw e;
         }
     }
 
@@ -39,7 +37,6 @@ class FFmpegService {
         );
 
         const thumbnail = await response.promise;
-        console.log(URL.createObjectURL(thumbnail));
         if (!thumbnail) {
             throw Error(CustomError.THUMBNAIL_GENERATION_FAILED);
         }
@@ -70,7 +67,6 @@ async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
         ffmpeg.FS('unlink', file.name);
         return thumb;
     } catch (e) {
-        console.log(e);
         logError(e, 'ffmpeg thumbnail generation failed');
         throw e;
     }

@@ -25,8 +25,12 @@ export async function generateThumbnail(
             if (fileType === FILE_TYPE.IMAGE) {
                 canvas = await generateImageThumbnail(file, isHEIC);
             } else {
-                const thumb = await FFmpegService.generateThumbnail(file);
-                return { thumbnail: thumb, hasStaticThumbnail: false };
+                try {
+                    const thumb = await FFmpegService.generateThumbnail(file);
+                    return { thumbnail: thumb, hasStaticThumbnail: false };
+                } catch (e) {
+                    canvas = await generateVideoThumbnail(file);
+                }
             }
             const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
             thumbnail = await worker.getUint8ArrayView(thumbnailBlob);
@@ -34,8 +38,7 @@ export async function generateThumbnail(
                 throw Error('EMPTY THUMBNAIL');
             }
         } catch (e) {
-            console.log(e);
-            logError(e);
+            logError(e, 'uploading static thumbnail');
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
                 c.charCodeAt(0)
             );
