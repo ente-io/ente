@@ -46,7 +46,6 @@ class FeatureFlagService {
     }
   }
 
-
   Future<void> sync() async {
     try {
       final response = await Network.instance
@@ -69,14 +68,14 @@ class FeatureFlags {
 
   FeatureFlags(
     this.disableCFWorker,
-      this.enableStripe,
+    this.enableStripe,
   );
 
   @override
   Map<String, dynamic> toMap() {
     return {
       "disableCFWorker": disableCFWorker,
-      "enableStripe" : enableStripe,
+      "enableStripe": enableStripe,
     };
   }
 
