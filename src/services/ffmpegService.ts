@@ -46,22 +46,24 @@ class FFmpegService {
 
 async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
     try {
+        const inputFileName = `${Date.now().toString}-${file.name}`;
+        const thumbFileName = `${Date.now().toString}-thumb.png`;
         ffmpeg.FS(
             'writeFile',
-            file.name,
+            inputFileName,
             await getUint8ArrayView(new FileReader(), file)
         );
 
         await ffmpeg.run(
             '-i',
-            file.name,
+            inputFileName,
             '-ss',
             '00:00:01.000',
             '-vframes',
             '1',
-            'thumb.png'
+            thumbFileName
         );
-        const thumb = ffmpeg.FS('readFile', 'thumb.png');
+        const thumb = ffmpeg.FS('readFile', thumbFileName);
         ffmpeg.FS('unlink', 'thumb.png');
         ffmpeg.FS('unlink', file.name);
         return thumb;
