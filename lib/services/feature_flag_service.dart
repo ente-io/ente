@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:photos/core/network.dart';
@@ -31,6 +32,20 @@ class FeatureFlagService {
     }
   }
 
+  bool enableStripe() {
+    if (Platform.isIOS) {
+      return false;
+    }
+    try {
+      _featureFlags ??=
+          FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
+      return _featureFlags != null ? _featureFlags.enableStripe : false;
+    } catch (e) {
+      _logger.severe(e);
+      return false;
+    }
+  }
+
   Future<void> sync() async {
     try {
       final response = await Network.instance
@@ -49,15 +64,18 @@ class FeatureFlagService {
 
 class FeatureFlags {
   bool disableCFWorker = false; // default to false
+  bool enableStripe = true; // default to true
 
   FeatureFlags(
     this.disableCFWorker,
+    this.enableStripe,
   );
 
   @override
   Map<String, dynamic> toMap() {
     return {
       "disableCFWorker": disableCFWorker,
+      "enableStripe": enableStripe,
     };
   }
 
@@ -69,6 +87,7 @@ class FeatureFlags {
   factory FeatureFlags.fromMap(Map<String, dynamic> json) {
     return FeatureFlags(
       json["disableCFWorker"] ?? false,
+      json["enableStripe"] ?? true,
     );
   }
 
