@@ -1,20 +1,13 @@
 import { getToken } from 'utils/common/key';
 import { getFileUrl, getThumbnailUrl } from 'utils/common/apiUtil';
 import CryptoWorker from 'utils/crypto';
-import {
-    fileIsHEIC,
-    convertHEIC2JPEG,
-    fileNameWithoutExtension,
-    generateStreamFromArrayBuffer,
-} from 'utils/file';
+import { generateStreamFromArrayBuffer, convertForPreview } from 'utils/file';
 import HTTPService from './HTTPService';
 import { File, FILE_TYPE } from './fileService';
 import { logError } from 'utils/sentry';
-import { decodeMotionPhoto } from './motionPhotoService';
-import { getMimeTypeFromBlob } from './upload/readFileService';
 
 class DownloadManager {
-    private fileDownloads = new Map<string, string>();
+    private fileObjectUrlPromise = new Map<string, Promise<string>>();
     private thumbnailObjectUrlPromise = new Map<number, Promise<string>>();
 
     public async getPreview(file: File) {
@@ -75,40 +68,23 @@ class DownloadManager {
 
     getFile = async (file: File, forPreview = false) => {
         try {
-            if (!this.fileDownloads.get(`${file.id}_${forPreview}`)) {
-                // unzip motion photo and return fileBlob of the image for preview
+            const getFilePromise = (async () => {
                 const fileStream = await this.downloadFile(file);
                 let fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
-                    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                        const originalName = fileNameWithoutExtension(
-                            file.metadata.title
-                        );
-                        const motionPhoto = await decodeMotionPhoto(
-                            fileBlob,
-                            originalName
-                        );
-                        fileBlob = new Blob([motionPhoto.image]);
-                    }
-
-                    const typeFromExtension =
-                        file.metadata.title.split('.')[-1];
-                    const worker = await new CryptoWorker();
-
-                    const mimeType =
-                        (await getMimeTypeFromBlob(worker, fileBlob)) ??
-                        typeFromExtension;
-
-                    if (fileIsHEIC(mimeType)) {
-                        fileBlob = await convertHEIC2JPEG(fileBlob);
-                    }
+                    fileBlob = await convertForPreview(file, fileBlob);
                 }
-                this.fileDownloads.set(
+                return URL.createObjectURL(fileBlob);
+            })();
+            if (!this.fileObjectUrlPromise.get(`${file.id}_${forPreview}`)) {
+                this.fileObjectUrlPromise.set(
                     `${file.id}_${forPreview}`,
-                    URL.createObjectURL(fileBlob)
+                    getFilePromise
                 );
             }
-            return this.fileDownloads.get(`${file.id}_${forPreview}`);
+            return await this.fileObjectUrlPromise.get(
+                `${file.id}_${forPreview}`
+            );
         } catch (e) {
             logError(e, 'Failed to get File');
         }
