@@ -1,5 +1,7 @@
 import { Collection } from 'services/collectionService';
-import { File } from 'services/fileService';
+import { File, FILE_TYPE } from 'services/fileService';
+import { decodeMotionPhoto } from 'services/motionPhotoService';
+import { getMimeTypeFromBlob } from 'services/upload/readFileService';
 import { runningInBrowser } from 'utils/common';
 import CryptoWorker from 'utils/crypto';
 
@@ -174,4 +176,23 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
             controller.close();
         },
     });
+}
+
+export async function convertForPreview(file: File, fileBlob: Blob) {
+    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        const originalName = fileNameWithoutExtension(file.metadata.title);
+        const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+        fileBlob = new Blob([motionPhoto.image]);
+    }
+
+    const typeFromExtension = file.metadata.title.split('.')[-1];
+    const worker = await new CryptoWorker();
+
+    const mimeType =
+        (await getMimeTypeFromBlob(worker, fileBlob)) ?? typeFromExtension;
+
+    if (fileIsHEIC(mimeType)) {
+        fileBlob = await convertHEIC2JPEG(fileBlob);
+    }
+    return fileBlob;
 }
