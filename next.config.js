@@ -46,7 +46,7 @@ module.exports = withSentryConfig(
                 return [
                     {
                         // Apply these headers to all routes in your application....
-                        source: '/gallery',
+                        source: '/(.*)',
                         headers: COOP_COEP_Headers,
                     },
                 ];
