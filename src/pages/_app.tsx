@@ -13,6 +13,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
+import Head from 'next/head';
 
 const GlobalStyles = createGlobalStyle`
 /* ubuntu-regular - latin */
@@ -533,6 +534,9 @@ export default function App({ Component, err }) {
     };
     return (
         <>
+            <Head>
+                <title>{constants.TITLE}</title>
+            </Head>
             <GlobalStyles />
             {showNavbar && (
                 <Navbar>
