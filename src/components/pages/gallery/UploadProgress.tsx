@@ -49,7 +49,7 @@ const SectionTitle = styled.div`
 `;
 
 const Section = styled.div`
-    margin: 10px 0;
+    margin: 20px 0;
     & > .ReactCollapse--collapse {
         transition: height 200ms;
     }
