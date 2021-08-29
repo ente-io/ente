@@ -17,7 +17,7 @@ import { encryptFiledata } from './encryptionService';
 import { ENCRYPTION_CHUNK_SIZE } from 'types';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
-import { parseError } from 'utils/common/errorUtil';
+import { handleUploadError } from 'utils/common/errorUtil';
 import { MetadataMap } from './uploadManager';
 import { fileIsHEIC } from 'utils/file';
 
@@ -258,10 +258,7 @@ class UploadService {
             await this.fetchUploadURLs();
             // checking for any subscription related errors
         } catch (e) {
-            const { parsedError, parsed } = parseError(e);
-            if (parsed) {
-                throw parsedError;
-            }
+            handleUploadError(e);
         }
     }
 

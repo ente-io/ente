@@ -1,6 +1,6 @@
 import { File, FILE_TYPE } from 'services/fileService';
 import { sleep } from 'utils/common';
-import { handleError, CustomError } from 'utils/common/errorUtil';
+import { handleUploadError, CustomError } from 'utils/common/errorUtil';
 import { decryptFile } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { fileAlreadyInCollection } from 'utils/upload';
@@ -98,7 +98,7 @@ export default async function uploader(
         const fileFormat =
             fileTypeInfo.exactType ?? rawFile.name.split('.')[-1];
         logError(e, 'file upload failed', { fileFormat });
-        handleError(e);
+        handleUploadError(e);
         switch (e.message) {
             case CustomError.ETAG_MISSING:
                 UIService.setFileProgress(

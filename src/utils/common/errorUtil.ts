@@ -1,3 +1,4 @@
+import { AxiosResponse } from 'axios';
 import constants from 'utils/strings/constants';
 
 export const ServerErrorCodes = {
@@ -19,7 +20,7 @@ export const CustomError = {
     UNSUPPORTED_FILE_FORMAT: 'unsupported file formats',
 };
 
-export function parseError(error) {
+function parseUploadError(error: AxiosResponse) {
     let parsedMessage = null;
     if (error?.status) {
         const errorCode = error.status.toString();
@@ -48,8 +49,8 @@ export function parseError(error) {
     }
 }
 
-export function handleError(error) {
-    const { parsedError, parsed } = parseError(error);
+export function handleUploadError(error: AxiosResponse) {
+    const { parsedError, parsed } = parseUploadError(error);
     if (parsed) {
         throw parsedError;
     } else {
