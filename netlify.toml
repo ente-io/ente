@@ -1,6 +1,6 @@
 [build]
   command   = "npm run build"
-  publish   = "out_publish"
+  publish   = "out"
 
 [[headers]]
   for = "/*"
