@@ -15,11 +15,7 @@ export async function retryAsyncFunction(
             return resp;
         } catch (e) {
             if (checkForBreakingError) {
-                try {
-                    checkForBreakingError(e);
-                } catch (err) {
-                    throw e;
-                }
+                checkForBreakingError(e);
             }
             if (attemptNumber < retrySleepTimeInMilliSeconds.length) {
                 await sleep(retrySleepTimeInMilliSeconds[attemptNumber]);
