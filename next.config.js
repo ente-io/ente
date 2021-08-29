@@ -42,7 +42,7 @@ module.exports = withSentryConfig(
                 return config;
             },
 
-            async headers() {
+            headers() {
                 return [
                     {
                         // Apply these headers to all routes in your application....
