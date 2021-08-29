@@ -8,7 +8,7 @@ interface Props {
     variant?: string;
 }
 const Banner = styled.div`
-    border: 1px solid yellow;
+    border: 1px solid #71662e;
     border-radius: 8px;
     padding: 16px 28px;
     color: #eee;
