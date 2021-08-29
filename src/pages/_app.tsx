@@ -8,7 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import EnteSpinner from 'components/EnteSpinner';
 import { logError } from '../utils/sentry';
-import { Workbox } from 'workbox-window';
+// import { Workbox } from 'workbox-window';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
@@ -449,8 +449,8 @@ export default function App({ Component, err }) {
             console.warn('Progressive Web App support is disabled');
             return;
         }
-        const wb = new Workbox('sw.js', { scope: '/' });
-        wb.register();
+        // const wb = new Workbox('sw.js', { scope: '/' });
+        // wb.register();
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.onmessage = (event) => {
