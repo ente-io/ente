@@ -72,14 +72,17 @@ export function handleUploadError(error: AxiosResponse | Error): Error {
     return parsedError;
 }
 
-export function getUserFacingErrorMessage(err: CustomError) {
+export function getUserFacingErrorMessage(
+    err: CustomError,
+    action: () => void
+) {
     switch (err) {
         case CustomError.SESSION_EXPIRED_MESSAGE:
             return constants.SESSION_EXPIRED_MESSAGE;
         case CustomError.SUBSCRIPTION_EXPIRED:
-            return constants.SUBSCRIPTION_EXPIRED;
+            return constants.SUBSCRIPTION_EXPIRED(action);
         case CustomError.STORAGE_QUOTA_EXCEEDED:
-            return constants.STORAGE_QUOTA_EXCEEDED;
+            return constants.STORAGE_QUOTA_EXCEEDED(action);
         default:
             return constants.UNKNOWN_ERROR;
     }

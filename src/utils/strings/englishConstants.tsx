@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from 'react-bootstrap';
 import styled from 'styled-components';
 
 /**
@@ -120,9 +121,29 @@ const englishConstants = {
             </span>
         </div>
     ),
-    SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew',
-    STORAGE_QUOTA_EXCEEDED:
-        'you have exceeded your storage quota, please upgrade your plan',
+    SUBSCRIPTION_EXPIRED: (action) => (
+        <>
+            your subscription has expired, please a{' '}
+            <Button
+                variant="link"
+                style={{ color: '#51cd7c', padding: 0 }}
+                onClick={action}>
+                renew
+            </Button>
+        </>
+    ),
+    STORAGE_QUOTA_EXCEEDED: (action) => (
+        <>
+            you have exceeded your storage quota, please{' '}
+            <Button
+                variant="link"
+                style={{ color: '#51cd7c', padding: 0 }}
+                onClick={action}>
+                upgrade
+            </Button>{' '}
+            your plan
+        </>
+    ),
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',

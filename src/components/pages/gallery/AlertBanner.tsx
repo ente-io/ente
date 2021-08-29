@@ -6,8 +6,6 @@ import styled from 'styled-components';
 interface Props {
     bannerMessage?: any;
     variant?: string;
-    children?: any;
-    style?: any;
 }
 const Banner = styled.div`
     border: 1px solid yellow;
@@ -17,11 +15,11 @@ const Banner = styled.div`
     margin-top: 10px;
 `;
 export default function AlertBanner(props: Props) {
-    return props.bannerMessage || props.children ? (
+    return props.bannerMessage ? (
         <FlexWrapper>
             <Banner>
                 <WarningIcon />
-                {props.bannerMessage}
+                {props.bannerMessage && props.bannerMessage}
             </Banner>
         </FlexWrapper>
     ) : (
