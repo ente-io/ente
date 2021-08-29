@@ -4,7 +4,7 @@ import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
 import { UploadFile, UploadURL } from './uploadService';
 import { File } from '../fileService';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError, handleUploadError } from 'utils/common/errorUtil';
 import { retryAsyncFunction } from 'utils/network';
 import { MultipartUploadURLs } from './multiPartUploadService';
 
@@ -20,10 +20,12 @@ class UploadHttpClient {
             if (!token) {
                 return;
             }
-            const response = await retryAsyncFunction(() =>
-                HTTPService.post(`${ENDPOINT}/files`, uploadFile, null, {
-                    'X-Auth-Token': token,
-                })
+            const response = await retryAsyncFunction(
+                () =>
+                    HTTPService.post(`${ENDPOINT}/files`, uploadFile, null, {
+                        'X-Auth-Token': token,
+                    }),
+                handleUploadError
             );
             return response.data;
         } catch (e) {

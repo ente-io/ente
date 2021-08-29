@@ -12,7 +12,7 @@ import UploadProgress from './UploadProgress';
 import ChoiceModal from './ChoiceModal';
 import { SetCollectionNamerAttributes } from './CollectionNamer';
 import { SetCollectionSelectorAttributes } from './CollectionSelector';
-import { SetFiles, SetLoading } from 'pages/gallery';
+import { GalleryContext, SetFiles, SetLoading } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { FileRejection } from 'react-dropzone';
@@ -22,6 +22,7 @@ import UploadManager, {
 } from 'services/upload/uploadManager';
 import uploadManager from 'services/upload/uploadManager';
 import { METADATA_FOLDER_NAME } from 'services/exportService';
+import { getUserFacingErrorMessage } from 'utils/common/errorUtil';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -75,6 +76,7 @@ export default function Upload(props: Props) {
     const [fileAnalysisResult, setFileAnalysisResult] =
         useState<AnalysisResult>(null);
     const appContext = useContext(AppContext);
+    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         UploadManager.initUploader(
@@ -280,7 +282,11 @@ export default function Upload(props: Props) {
                 collections
             );
         } catch (err) {
-            props.setBannerMessage(err.message);
+            const message = getUserFacingErrorMessage(
+                err.message,
+                galleryContext.showPlanSelectorModal
+            );
+            props.setBannerMessage(message);
             setProgressView(false);
             throw err;
         } finally {
@@ -296,8 +302,12 @@ export default function Upload(props: Props) {
             await props.syncWithRemote(true, true);
             await uploadManager.retryFailedFiles();
         } catch (err) {
+            const message = getUserFacingErrorMessage(
+                err.message,
+                galleryContext.showPlanSelectorModal
+            );
             appContext.resetSharedFiles();
-            props.setBannerMessage(err.message);
+            props.setBannerMessage(message);
             setProgressView(false);
         } finally {
             props.setUploadInProgress(false);

@@ -55,3 +55,9 @@ export const Value = styled.div<{ width?: string }>`
     text-align: center;
     color: #ddd;
 `;
+
+export const FlexWrapper = styled.div`
+    display: flex;
+    text-align: center;
+    justify-content: center;
+`;
