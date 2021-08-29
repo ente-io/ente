@@ -459,6 +459,13 @@ export default function App({ Component, err }) {
                     setSharedFiles(files);
                 }
             };
+            navigator.serviceWorker
+                .getRegistrations()
+                .then(function (registrations) {
+                    for (const registration of registrations) {
+                        registration.unregister();
+                    }
+                });
         }
 
         HTTPService.getInterceptors().response.use(
