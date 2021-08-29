@@ -55,6 +55,14 @@ export default class MyDocument extends Document {
                         name="apple-mobile-web-app-status-bar-style"
                         content="black"
                     />
+                    <meta
+                        httpEquiv="Cross-Origin-Opener-Policy"
+                        content="same-origin"
+                    />
+                    <meta
+                        httpEquiv="Cross-Origin-Embedder-Policy"
+                        content="require-corp"
+                    />
                 </Head>
                 <body>
                     <Main />
