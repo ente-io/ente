@@ -520,7 +520,8 @@ const englishConstants = {
     UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'blocked uploads',
     INPROGRESS_UPLOADS: 'uploads in progress',
-    FILE_TOO_LARGE:
+    TOO_LARGE_UPLOADS: 'too large files',
+    TOO_LARGE_INFO:
         'the file you are trying to upload is larger than the storage available, please upgrade your plan and try again',
     UPLOAD_TO_COLLECTION: 'upload to album',
 };

@@ -98,8 +98,8 @@ export default async function uploader(
         const fileFormat =
             fileTypeInfo.exactType ?? rawFile.name.split('.')[-1];
         logError(e, 'file upload failed', { fileFormat });
-        handleUploadError(e);
-        switch (e.message) {
+        const error = handleUploadError(e);
+        switch (error.message) {
             case CustomError.ETAG_MISSING:
                 UIService.setFileProgress(
                     rawFile.name,
@@ -112,6 +112,13 @@ export default async function uploader(
                     FileUploadResults.UNSUPPORTED
                 );
                 return { fileUploadResult: FileUploadResults.UNSUPPORTED };
+
+            case CustomError.FILE_TOO_LARGE:
+                UIService.setFileProgress(
+                    rawFile.name,
+                    FileUploadResults.TOO_LARGE
+                );
+                return { fileUploadResult: FileUploadResults.TOO_LARGE };
             default:
                 UIService.setFileProgress(
                     rawFile.name,

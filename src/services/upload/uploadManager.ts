@@ -29,6 +29,7 @@ export enum FileUploadResults {
     SKIPPED = -2,
     UNSUPPORTED = -3,
     BLOCKED = -4,
+    TOO_LARGE = -5,
     UPLOADED = 100,
 }
 
