@@ -491,6 +491,9 @@ const PhotoFrame = ({
             {!isFirstLoad && files.length === 0 && !searchMode ? (
                 <EmptyScreen>
                     <img height={150} src="/images/gallery.png" />
+                    <div style={{ color: '#a6a6a6', marginTop: '16px' }}>
+                        {constants.UPLOAD_FIRST_PHOTO_DESCRIPTION}
+                    </div>
                     <Button
                         variant="outline-success"
                         onClick={openFileUploader}
