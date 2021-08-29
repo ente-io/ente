@@ -1,10 +1,14 @@
+import {
+    ButtonVariant,
+    getVariantColor,
+} from 'components/pages/gallery/LinkButton';
 import React from 'react';
 
 export default function WarningIcon(props) {
     return (
         <div
             style={{
-                color: 'red',
+                color: getVariantColor(ButtonVariant.danger),
                 display: 'inline-block',
                 padding: '0 10px',
             }}>
