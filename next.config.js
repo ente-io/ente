@@ -46,11 +46,7 @@ module.exports = withSentryConfig(
                 return [
                     {
                         // Apply these headers to all routes in your application....
-                        source: '/(.*)',
-                        headers: COOP_COEP_Headers,
-                    },
-                    {
-                        source: '/_next/static/chunks/:any',
+                        source: '/gallery',
                         headers: COOP_COEP_Headers,
                     },
                 ];
