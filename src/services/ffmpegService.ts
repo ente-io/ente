@@ -63,7 +63,7 @@ async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
         );
         const thumb = ffmpeg.FS('readFile', thumbFileName);
         ffmpeg.FS('unlink', thumbFileName);
-        ffmpeg.FS('unlink', file.name);
+        ffmpeg.FS('unlink', inputFileName);
         return thumb;
     } catch (e) {
         logError(e, 'ffmpeg thumbnail generation failed');
