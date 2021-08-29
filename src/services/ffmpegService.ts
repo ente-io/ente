@@ -12,9 +12,7 @@ class FFmpegService {
     async init() {
         try {
             this.ffmpeg = createFFmpeg({
-                ...(!process.env.NEXT_PUBLIC_SENTRY_ENV && {
-                    corePath: '/js/ffmpeg/ffmpeg-core.js',
-                }),
+                corePath: '/js/ffmpeg/ffmpeg-core.js',
             });
             this.isLoading = this.ffmpeg.load();
             await this.isLoading;
@@ -64,7 +62,7 @@ async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
             thumbFileName
         );
         const thumb = ffmpeg.FS('readFile', thumbFileName);
-        ffmpeg.FS('unlink', 'thumb.png');
+        ffmpeg.FS('unlink', thumbFileName);
         ffmpeg.FS('unlink', file.name);
         return thumb;
     } catch (e) {
