@@ -1,5 +1,4 @@
 import { AxiosResponse } from 'axios';
-import constants from 'utils/strings/constants';
 
 export const ServerErrorCodes = {
     SESSION_EXPIRED: '401',
@@ -10,6 +9,7 @@ export const ServerErrorCodes = {
 };
 
 export const CustomError = {
+    UNKNOWN_ERROR: 'unknown error',
     SUBSCRIPTION_VERIFICATION_ERROR: 'Subscription verification failed',
     THUMBNAIL_GENERATION_FAILED: 'thumbnail generation failed',
     VIDEO_PLAYBACK_FAILED: 'video playback failed',
@@ -18,6 +18,10 @@ export const CustomError = {
     FAILED_TO_LOAD_WEB_WORKER: 'failed to load web worker',
     CHUNK_MORE_THAN_EXPECTED: 'chunks more than expected',
     UNSUPPORTED_FILE_FORMAT: 'unsupported file formats',
+    FILE_TOO_LARGE: 'file too large',
+    SUBSCRIPTION_EXPIRED: 'subscription expired',
+    STORAGE_QUOTA_EXCEEDED: 'storage quota exceeded',
+    SESSION_EXPIRED_MESSAGE: 'session expired',
 };
 
 function parseUploadError(error: AxiosResponse) {
@@ -26,34 +30,43 @@ function parseUploadError(error: AxiosResponse) {
         const errorCode = error.status.toString();
         switch (errorCode) {
             case ServerErrorCodes.NO_ACTIVE_SUBSCRIPTION:
-                parsedMessage = constants.SUBSCRIPTION_EXPIRED;
+                parsedMessage = CustomError.SUBSCRIPTION_EXPIRED;
                 break;
             case ServerErrorCodes.STORAGE_LIMIT_EXCEEDED:
-                parsedMessage = constants.STORAGE_QUOTA_EXCEEDED;
+                parsedMessage = CustomError.STORAGE_QUOTA_EXCEEDED;
                 break;
             case ServerErrorCodes.SESSION_EXPIRED:
-                parsedMessage = constants.SESSION_EXPIRED_MESSAGE;
+                parsedMessage = CustomError.SESSION_EXPIRED_MESSAGE;
                 break;
             case ServerErrorCodes.FILE_TOO_LARGE:
-                parsedMessage = constants.FILE_TOO_LARGE;
+                parsedMessage = CustomError.FILE_TOO_LARGE;
                 break;
         }
     }
     if (parsedMessage) {
-        return { parsedError: new Error(parsedMessage), parsed: true };
+        return {
+            parsedError: new Error(parsedMessage),
+        };
     } else {
         return {
-            parsedError: new Error(`${constants.UNKNOWN_ERROR} ${error}`),
-            parsed: false,
+            parsedError: new Error(CustomError.UNKNOWN_ERROR),
         };
     }
 }
 
-export function handleUploadError(error: AxiosResponse) {
-    const { parsedError, parsed } = parseUploadError(error);
-    if (parsed) {
-        throw parsedError;
+export function handleUploadError(error: AxiosResponse | Error): Error {
+    let parsedError: Error = null;
+    if ('status' in error) {
+        parsedError = parseUploadError(error).parsedError;
     } else {
-        // swallow error don't break the caller flow
+        parsedError = error;
     }
+    // breaking errors
+    switch (parsedError.message) {
+        case CustomError.SUBSCRIPTION_EXPIRED:
+        case CustomError.STORAGE_QUOTA_EXCEEDED:
+        case CustomError.SESSION_EXPIRED_MESSAGE:
+            throw parsedError;
+    }
+    return parsedError;
 }

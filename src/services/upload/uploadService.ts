@@ -258,6 +258,7 @@ class UploadService {
             await this.fetchUploadURLs();
             // checking for any subscription related errors
         } catch (e) {
+            logError(e, 'prefetch uploadURL failed');
             handleUploadError(e);
         }
     }
