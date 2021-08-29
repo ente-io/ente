@@ -45,7 +45,7 @@ module.exports = withSentryConfig(
             async headers() {
                 return [
                     {
-                        // Apply these headers to all routes in your application.
+                        // Apply these headers to all routes in your application....
                         source: '/(.*)',
                         headers: COOP_COEP_Headers,
                     },
