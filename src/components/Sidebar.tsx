@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { slide as Menu } from 'react-burger-menu';
 import constants from 'utils/strings/constants';
@@ -8,7 +8,6 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { Button } from 'react-bootstrap';
 import {
     isSubscriptionActive,
-    convertBytesToGBs,
     getUserSubscription,
     isOnFreePlan,
     isSubscriptionCancelled,
@@ -28,7 +27,7 @@ import EnteSpinner from './EnteSpinner';
 import RecoveryKeyModal from './RecoveryKeyModal';
 import TwoFactorModal from './TwoFactorModal';
 import ExportModal from './ExportModal';
-import { SetLoading } from 'pages/gallery';
+import { GalleryContext, SetLoading } from 'pages/gallery';
 import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
 import { Subscription } from 'services/billingService';
@@ -51,6 +50,8 @@ export default function Sidebar(props: Props) {
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
     const [exportModalView, setExportModalView] = useState(false);
+    const galleryContext = useContext(GalleryContext);
+    galleryContext.showPlanSelectorModal = props.showPlanSelectorModal;
     useEffect(() => {
         const main = async () => {
             if (!isOpen) {
@@ -186,7 +187,7 @@ export default function Sidebar(props: Props) {
                         {usage ? (
                             constants.USAGE_INFO(
                                 usage,
-                                Number(convertBytesToGBs(subscription?.storage))
+                                convertToHumanReadable(subscription?.storage)
                             )
                         ) : (
                             <div style={{ textAlign: 'center' }}>
