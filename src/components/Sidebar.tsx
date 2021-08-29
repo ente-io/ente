@@ -8,7 +8,6 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { Button } from 'react-bootstrap';
 import {
     isSubscriptionActive,
-    convertBytesToGBs,
     getUserSubscription,
     isOnFreePlan,
     isSubscriptionCancelled,
@@ -186,7 +185,7 @@ export default function Sidebar(props: Props) {
                         {usage ? (
                             constants.USAGE_INFO(
                                 usage,
-                                Number(convertBytesToGBs(subscription?.storage))
+                                convertToHumanReadable(subscription?.storage)
                             )
                         ) : (
                             <div style={{ textAlign: 'center' }}>
