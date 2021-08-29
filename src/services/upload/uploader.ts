@@ -19,7 +19,7 @@ import uploadService from './uploadService';
 import { FileTypeInfo, getFileType } from './readFileService';
 
 const TwoSecondInMillSeconds = 2000;
-
+const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
 interface UploadResponse {
     fileUploadResult: FileUploadResults;
     file?: File;
@@ -40,6 +40,15 @@ export default async function uploader(
     let fileWithMetadata: FileWithMetadata = null;
 
     try {
+        if (rawFile.size >= FIVE_GB_IN_BYTES) {
+            UIService.setFileProgress(
+                rawFile.name,
+                FileUploadResults.TOO_LARGE
+            );
+            // wait two second before removing the file from the progress in file section
+            await sleep(TwoSecondInMillSeconds);
+            return { fileUploadResult: FileUploadResults.TOO_LARGE };
+        }
         fileTypeInfo = await getFileType(worker, rawFile);
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
