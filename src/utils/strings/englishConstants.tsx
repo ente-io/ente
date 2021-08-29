@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button } from 'react-bootstrap';
 import styled from 'styled-components';
 
 /**
@@ -22,6 +21,14 @@ const Logo = styled.img`
     height: 18px;
     vertical-align: middle;
     margin-top: -3px;
+`;
+
+const Trigger = styled.span`
+    :hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    color: #51cd7c;
 `;
 
 const englishConstants = {
@@ -124,24 +131,13 @@ const englishConstants = {
     SUBSCRIPTION_EXPIRED: (action) => (
         <>
             your subscription has expired, please a{' '}
-            <Button
-                variant="link"
-                style={{ color: '#51cd7c', padding: 0 }}
-                onClick={action}>
-                renew
-            </Button>
+            <Trigger onClick={action}>renew</Trigger>
         </>
     ),
     STORAGE_QUOTA_EXCEEDED: (action) => (
         <>
             you have exceeded your storage quota, please{' '}
-            <Button
-                variant="link"
-                style={{ color: '#51cd7c', padding: 0 }}
-                onClick={action}>
-                upgrade
-            </Button>{' '}
-            your plan
+            <Trigger onClick={action}>upgrade</Trigger> your plan
         </>
     ),
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
