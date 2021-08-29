@@ -10,8 +10,8 @@ import {
 import styled from 'styled-components';
 import { DESKTOP_APP_DOWNLOAD_URL } from 'utils/common';
 import constants from 'utils/strings/constants';
-import AlertBanner from './AlertBanner';
 import { Collapse } from 'react-collapse';
+import { ButtonVariant, getVariantColor } from './LinkButton';
 
 interface Props {
     fileCounter;
@@ -63,6 +63,14 @@ const SectionInfo = styled.div`
 
 const Content = styled.div`
     padding-right: 30px;
+`;
+
+const NotUploadSectionHeader = styled.div`
+    margin-top: 30px;
+    text-align: center;
+    color: ${getVariantColor(ButtonVariant.warning)};
+    border-bottom: 1px solid ${getVariantColor(ButtonVariant.warning)};
+    margin: 0 20px;
 `;
 
 interface ResultSectionProps {
@@ -136,12 +144,6 @@ const InProgressSection = (props: InProgressProps) => {
     );
 };
 
-const NotUploadSectionHeader = () => (
-    <AlertBanner variant="warning" style={{ marginTop: '30px' }}>
-        {constants.FILE_NOT_UPLOADED_LIST}
-    </AlertBanner>
-);
-
 export default function UploadProgress(props: Props) {
     const fileProgressStatuses = [] as FileProgresses[];
     const fileUploadResultMap = new Map<FileUploadResults, string[]>();
@@ -214,7 +216,11 @@ export default function UploadProgress(props: Props) {
                 />
 
                 {props.uploadStage === UPLOAD_STAGES.FINISH &&
-                    filesNotUploaded && <NotUploadSectionHeader />}
+                    filesNotUploaded && (
+                        <NotUploadSectionHeader>
+                            {constants.FILE_NOT_UPLOADED_LIST}
+                        </NotUploadSectionHeader>
+                    )}
 
                 <ResultSection
                     fileUploadResultMap={fileUploadResultMap}
