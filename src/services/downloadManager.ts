@@ -15,8 +15,7 @@ import { getMimeTypeFromBlob } from './upload/readFileService';
 
 class DownloadManager {
     private fileDownloads = new Map<string, string>();
-
-    private thumbnailDownloads = new Map<number, string>();
+    private thumbnailObjectUrlPromise = new Map<number, Promise<string>>();
 
     public async getPreview(file: File) {
         try {
@@ -24,21 +23,33 @@ class DownloadManager {
             if (!token) {
                 return null;
             }
-            const cache = await caches.open('thumbs');
-            const cacheResp: Response = await cache.match(file.id.toString());
+            const thumbnailCache = await caches.open('thumbs');
+            const cacheResp: Response = await thumbnailCache.match(
+                file.id.toString()
+            );
             if (cacheResp) {
                 return URL.createObjectURL(await cacheResp.blob());
             }
-            if (!this.thumbnailDownloads.get(file.id)) {
-                const download = await this.downloadThumb(token, cache, file);
-                this.thumbnailDownloads.set(file.id, download);
+            if (!this.thumbnailObjectUrlPromise.get(file.id)) {
+                const downloadPromise = this._downloadThumb(
+                    token,
+                    thumbnailCache,
+                    file
+                );
+                this.thumbnailObjectUrlPromise.set(file.id, downloadPromise);
             }
-            return await this.thumbnailDownloads.get(file.id);
+            return await this.thumbnailObjectUrlPromise.get(file.id);
         } catch (e) {
+            this.thumbnailObjectUrlPromise.delete(file.id);
             logError(e, 'get preview Failed');
         }
     }
-    downloadThumb = async (token: string, cache: Cache, file: File) => {
+
+    _downloadThumb = async (
+        token: string,
+        thumbnailCache: Cache,
+        file: File
+    ) => {
         const resp = await HTTPService.get(
             getThumbnailUrl(file.id),
             null,
@@ -52,7 +63,7 @@ class DownloadManager {
             file.key
         );
         try {
-            await cache.put(
+            await thumbnailCache.put(
                 file.id.toString(),
                 new Response(new Blob([decrypted]))
             );
