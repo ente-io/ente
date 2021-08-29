@@ -4,7 +4,6 @@ import Navbar from 'components/Navbar';
 import constants from 'utils/strings/constants';
 import { useRouter } from 'next/router';
 import Container from 'components/Container';
-import Head from 'next/head';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import EnteSpinner from 'components/EnteSpinner';
@@ -442,7 +441,6 @@ export default function App({ Component, err }) {
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
-    const [pageRootURL, setPageRootURL] = useState<URL>(null);
     useEffect(() => {
         if (
             !('serviceWorker' in navigator) ||
@@ -493,7 +491,6 @@ export default function App({ Component, err }) {
                 setRedirectName(redirect);
             }
         }
-        setPageRootURL(new URL(window.location.href));
 
         router.events.on('routeChangeStart', (url: string) => {
             if (window.location.pathname !== url.split('?')[0]) {
@@ -529,27 +526,6 @@ export default function App({ Component, err }) {
     };
     return (
         <>
-            <Head>
-                <title>{constants.TITLE}</title>
-                {/* Cloudflare Web Analytics */}
-                {pageRootURL?.hostname &&
-                    (pageRootURL.hostname === 'photos.ente.io' ? (
-                        <script
-                            defer
-                            src="https://static.cloudflareinsights.com/beacon.min.js"
-                            data-cf-beacon='{"token": "6a388287b59c439cb2070f78cc89dde1"}'
-                        />
-                    ) : (
-                        pageRootURL.hostname === 'web.ente.io' && (
-                            <script
-                                defer
-                                src="https://static.cloudflareinsights.com/beacon.min.js"
-                                data-cf-beacon='{"token": "dfde128b7bb34a618ad34a08f1ba7609"}'
-                            />
-                        )
-                    ))}
-                {/* End Cloudflare Web Analytics  */}
-            </Head>
             <GlobalStyles />
             {showNavbar && (
                 <Navbar>
