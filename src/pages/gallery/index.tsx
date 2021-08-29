@@ -98,11 +98,13 @@ export interface SearchStats {
 type GalleryContextType = {
     thumbs: Map<number, string>;
     files: Map<number, string>;
+    showPlanSelectorModal: () => void;
 };
 
 const defaultGalleryContext: GalleryContextType = {
     thumbs: new Map(),
     files: new Map(),
+    showPlanSelectorModal: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(

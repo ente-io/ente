@@ -23,6 +23,14 @@ const Logo = styled.img`
     margin-top: -3px;
 `;
 
+const Trigger = styled.span`
+    :hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    color: #51cd7c;
+`;
+
 const englishConstants = {
     HERO_HEADER: () => (
         <div>
@@ -120,9 +128,18 @@ const englishConstants = {
             </span>
         </div>
     ),
-    SUBSCRIPTION_EXPIRED: 'your subscription has expired, please renew',
-    STORAGE_QUOTA_EXCEEDED:
-        'you have exceeded your storage quota, please upgrade your plan',
+    SUBSCRIPTION_EXPIRED: (action) => (
+        <>
+            your subscription has expired, please a{' '}
+            <Trigger onClick={action}>renew</Trigger>
+        </>
+    ),
+    STORAGE_QUOTA_EXCEEDED: (action) => (
+        <>
+            you have exceeded your storage quota, please{' '}
+            <Trigger onClick={action}>upgrade</Trigger> your plan
+        </>
+    ),
     INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
     USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
     UPLOAD_BUTTON_TEXT: 'upload',
@@ -520,8 +537,9 @@ const englishConstants = {
     UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'blocked uploads',
     INPROGRESS_UPLOADS: 'uploads in progress',
-    FILE_TOO_LARGE:
-        'the file you are trying to upload is larger than the storage available, please upgrade your plan and try again',
+    TOO_LARGE_UPLOADS: 'large files',
+    TOO_LARGE_INFO:
+        'these files were not uploaded as they exceed the maximum size limit for your storage plan',
     UPLOAD_TO_COLLECTION: 'upload to album',
 };
 
