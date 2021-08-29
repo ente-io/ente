@@ -1,4 +1,5 @@
 import { AxiosResponse } from 'axios';
+import constants from 'utils/strings/constants';
 
 export const ServerErrorCodes = {
     SESSION_EXPIRED: '401',
@@ -8,21 +9,21 @@ export const ServerErrorCodes = {
     FILE_TOO_LARGE: '413',
 };
 
-export const CustomError = {
-    UNKNOWN_ERROR: 'unknown error',
-    SUBSCRIPTION_VERIFICATION_ERROR: 'Subscription verification failed',
-    THUMBNAIL_GENERATION_FAILED: 'thumbnail generation failed',
-    VIDEO_PLAYBACK_FAILED: 'video playback failed',
-    ETAG_MISSING: 'no header/etag present in response body',
-    KEY_MISSING: 'encrypted key missing from localStorage',
-    FAILED_TO_LOAD_WEB_WORKER: 'failed to load web worker',
-    CHUNK_MORE_THAN_EXPECTED: 'chunks more than expected',
-    UNSUPPORTED_FILE_FORMAT: 'unsupported file formats',
-    FILE_TOO_LARGE: 'file too large',
-    SUBSCRIPTION_EXPIRED: 'subscription expired',
-    STORAGE_QUOTA_EXCEEDED: 'storage quota exceeded',
-    SESSION_EXPIRED_MESSAGE: 'session expired',
-};
+export enum CustomError {
+    UNKNOWN_ERROR = 'unknown error',
+    SUBSCRIPTION_VERIFICATION_ERROR = 'Subscription verification failed',
+    THUMBNAIL_GENERATION_FAILED = 'thumbnail generation failed',
+    VIDEO_PLAYBACK_FAILED = 'video playback failed',
+    ETAG_MISSING = 'no header/etag present in response body',
+    KEY_MISSING = 'encrypted key missing from localStorage',
+    FAILED_TO_LOAD_WEB_WORKER = 'failed to load web worker',
+    CHUNK_MORE_THAN_EXPECTED = 'chunks more than expected',
+    UNSUPPORTED_FILE_FORMAT = 'unsupported file formats',
+    FILE_TOO_LARGE = 'file too large',
+    SUBSCRIPTION_EXPIRED = 'subscription expired',
+    STORAGE_QUOTA_EXCEEDED = 'storage quota exceeded',
+    SESSION_EXPIRED_MESSAGE = 'session expired',
+}
 
 function parseUploadError(error: AxiosResponse) {
     let parsedMessage = null;
@@ -69,4 +70,17 @@ export function handleUploadError(error: AxiosResponse | Error): Error {
             throw parsedError;
     }
     return parsedError;
+}
+
+export function getUserFacingErrorMessage(err: CustomError) {
+    switch (err) {
+        case CustomError.SESSION_EXPIRED_MESSAGE:
+            return constants.SESSION_EXPIRED_MESSAGE;
+        case CustomError.SUBSCRIPTION_EXPIRED:
+            return constants.SUBSCRIPTION_EXPIRED;
+        case CustomError.STORAGE_QUOTA_EXCEEDED:
+            return constants.STORAGE_QUOTA_EXCEEDED;
+        default:
+            return constants.UNKNOWN_ERROR;
+    }
 }

@@ -22,6 +22,7 @@ import UploadManager, {
 } from 'services/upload/uploadManager';
 import uploadManager from 'services/upload/uploadManager';
 import { METADATA_FOLDER_NAME } from 'services/exportService';
+import { getUserFacingErrorMessage } from 'utils/common/errorUtil';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -280,7 +281,8 @@ export default function Upload(props: Props) {
                 collections
             );
         } catch (err) {
-            props.setBannerMessage(err.message);
+            const message = getUserFacingErrorMessage(err.message);
+            props.setBannerMessage(message);
             setProgressView(false);
             throw err;
         } finally {
@@ -296,8 +298,9 @@ export default function Upload(props: Props) {
             await props.syncWithRemote(true, true);
             await uploadManager.retryFailedFiles();
         } catch (err) {
+            const message = getUserFacingErrorMessage(err.message);
             appContext.resetSharedFiles();
-            props.setBannerMessage(err.message);
+            props.setBannerMessage(message);
             setProgressView(false);
         } finally {
             props.setUploadInProgress(false);
