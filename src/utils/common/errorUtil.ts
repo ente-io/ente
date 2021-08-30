@@ -23,6 +23,7 @@ export enum CustomError {
     SUBSCRIPTION_EXPIRED = 'subscription expired',
     STORAGE_QUOTA_EXCEEDED = 'storage quota exceeded',
     SESSION_EXPIRED_MESSAGE = 'session expired',
+    TYPE_DETECTION_FAILED = 'type detection failed',
 }
 
 function parseUploadError(error: AxiosResponse) {

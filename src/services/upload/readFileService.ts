@@ -2,6 +2,7 @@ import { FILE_TYPE } from 'services/fileService';
 import { logError } from 'utils/sentry';
 import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from './uploadService';
 import FileType from 'file-type/browser';
+import { CustomError } from 'utils/common/errorUtil';
 
 const TYPE_VIDEO = 'video';
 const TYPE_IMAGE = 'image';
@@ -25,23 +26,30 @@ export async function getFileType(
     worker,
     receivedFile: globalThis.File
 ): Promise<FileTypeInfo> {
-    let fileType: FILE_TYPE;
-    const mimeType = await getMimeType(worker, receivedFile);
-    const typeParts = mimeType?.split('/');
-    if (typeParts?.length !== 2) {
+    try {
+        let fileType: FILE_TYPE;
+        const mimeType = await getMimeType(worker, receivedFile);
+        const typeParts = mimeType?.split('/');
+        if (typeParts?.length !== 2) {
+            throw Error(CustomError.TYPE_DETECTION_FAILED);
+        }
+        switch (typeParts[0]) {
+            case TYPE_IMAGE:
+                fileType = FILE_TYPE.IMAGE;
+                break;
+            case TYPE_VIDEO:
+                fileType = FILE_TYPE.VIDEO;
+                break;
+            default:
+                fileType = FILE_TYPE.OTHERS;
+        }
+        return { fileType, exactType: typeParts[1] };
+    } catch (e) {
+        logError(e, CustomError.TYPE_DETECTION_FAILED, {
+            fileFormat: receivedFile.name.split('.').pop(),
+        });
         return { fileType: FILE_TYPE.OTHERS, exactType: null };
     }
-    switch (typeParts[0]) {
-        case TYPE_IMAGE:
-            fileType = FILE_TYPE.IMAGE;
-            break;
-        case TYPE_VIDEO:
-            fileType = FILE_TYPE.VIDEO;
-            break;
-        default:
-            fileType = FILE_TYPE.OTHERS;
-    }
-    return { fileType, exactType: typeParts[1] };
 }
 
 /*
@@ -66,9 +74,13 @@ async function getMimeType(worker, file: globalThis.File) {
 }
 
 export async function getMimeTypeFromBlob(worker, fileBlob: Blob) {
-    const initialFiledata = await worker.getUint8ArrayView(fileBlob);
-    const result = await FileType.fromBuffer(initialFiledata);
-    return result?.mime;
+    try {
+        const initialFiledata = await worker.getUint8ArrayView(fileBlob);
+        const result = await FileType.fromBuffer(initialFiledata);
+        return result.mime;
+    } catch (e) {
+        throw Error(CustomError.TYPE_DETECTION_FAILED);
+    }
 }
 
 function getFileStream(worker, file: globalThis.File, chunkSize: number) {
