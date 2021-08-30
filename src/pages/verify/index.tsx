@@ -90,6 +90,7 @@ export default function Verify() {
                 });
                 if (keyAttributes) {
                     setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                    setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
                 } else if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
                     await putAttributes(
                         token,
