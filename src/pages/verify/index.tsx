@@ -14,6 +14,7 @@ import {
     clearFiles,
     EmailVerificationResponse,
     User,
+    putAttributes,
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
 import SubmitButton from 'components/SubmitButton';
@@ -87,7 +88,14 @@ export default function Verify() {
                     id,
                     isTwoFactorEnabled: false,
                 });
-                keyAttributes && setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                if (keyAttributes) {
+                    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                } else if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
+                    await putAttributes(
+                        token,
+                        getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
+                    );
+                }
                 clearFiles();
                 setIsFirstLogin(true);
                 if (keyAttributes?.encryptedKey) {
