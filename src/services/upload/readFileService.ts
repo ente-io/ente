@@ -22,6 +22,12 @@ export interface FileTypeInfo {
     exactType: string;
 }
 
+// list of format that were missed by type-detection for some files.
+export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
+    { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg' },
+    { fileType: FILE_TYPE.VIDEO, exactType: 'webm' },
+];
+
 export async function getFileType(
     worker,
     receivedFile: globalThis.File
@@ -45,8 +51,15 @@ export async function getFileType(
         }
         return { fileType, exactType: typeParts[1] };
     } catch (e) {
+        const fileFormat = receivedFile.name.split('.').pop();
+        const formatMissedByTypeDetection = FORMAT_MISSED_BY_FILE_TYPE_LIB.find(
+            (a) => a.exactType === fileFormat
+        );
+        if (formatMissedByTypeDetection) {
+            return formatMissedByTypeDetection;
+        }
         logError(e, CustomError.TYPE_DETECTION_FAILED, {
-            fileFormat: receivedFile.name.split('.').pop(),
+            fileFormat,
         });
         return { fileType: FILE_TYPE.OTHERS, exactType: null };
     }
