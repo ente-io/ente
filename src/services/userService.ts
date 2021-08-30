@@ -140,15 +140,19 @@ export const isTokenValid = async () => {
                 'X-Auth-Token': getToken(),
             }
         );
-        if (!resp?.data?.hasSetKeys) {
-            try {
-                putAttributes(
-                    getToken(),
-                    getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
-                );
-            } catch (e) {
-                logError(e, 'put attribute failed');
+        try {
+            if (!resp.data['hasSetKeys']) {
+                try {
+                    await putAttributes(
+                        getToken(),
+                        getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
+                    );
+                } catch (e) {
+                    logError(e, 'put attribute failed');
+                }
             }
+        } catch (e) {
+            logError(e, 'hasSetKeys not set in session validity response');
         }
         return true;
     } catch (e) {
