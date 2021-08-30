@@ -1,4 +1,7 @@
-import { FILE_TYPE } from 'services/fileService';
+import {
+    FILE_TYPE,
+    FORMAT_MISSED_BY_FILE_TYPE_LIB,
+} from 'services/fileService';
 import { logError } from 'utils/sentry';
 import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from './uploadService';
 import FileType from 'file-type/browser';
@@ -21,12 +24,6 @@ export interface FileTypeInfo {
     fileType: FILE_TYPE;
     exactType: string;
 }
-
-// list of format that were missed by type-detection for some files.
-export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
-    { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg' },
-    { fileType: FILE_TYPE.VIDEO, exactType: 'webm' },
-];
 
 export async function getFileType(
     worker,
