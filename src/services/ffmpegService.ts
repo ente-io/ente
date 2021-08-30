@@ -67,7 +67,7 @@ async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
                 thumb = ffmpeg.FS('readFile', thumbFileName);
                 break;
             } catch (e) {
-                seekTime = Number((seekTime / 2).toFixed(3));
+                seekTime = Number((seekTime / 10).toFixed(3));
             }
         }
         ffmpeg.FS('unlink', thumbFileName);
