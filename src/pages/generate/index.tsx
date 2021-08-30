@@ -10,7 +10,7 @@ import {
     generateKeyAttributes,
 } from 'utils/crypto';
 import SetPasswordForm from 'components/SetPasswordForm';
-import { setJustSignedUp } from 'utils/storage';
+import { justSignedUp, setJustSignedUp } from 'utils/storage';
 import RecoveryKeyModal from 'components/RecoveryKeyModal';
 import { KeyAttributes } from 'types';
 import Container from 'components/Container';
@@ -28,11 +28,10 @@ export default function Generate() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
     const [recoverModalView, setRecoveryModalView] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const appContext = useContext(AppContext);
     useEffect(() => {
         const main = async () => {
-            setLoading(true);
             const key: string = getKey(SESSION_KEYS.ENCRYPTION_KEY);
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.ORIGINAL_KEY_ATTRIBUTES
@@ -42,10 +41,15 @@ export default function Generate() {
             const user: User = getData(LS_KEYS.USER);
             if (!user?.token) {
                 router.push('/');
+            } else if (key) {
+                if (justSignedUp()) {
+                    setRecoveryModalView(true);
+                    setLoading(false);
+                } else {
+                    router.push('/gallery');
+                }
             } else if (keyAttributes?.encryptedKey) {
                 router.push('/credentials');
-            } else if (key) {
-                router.push('/gallery');
             } else {
                 setToken(user.token);
                 setLoading(false);
