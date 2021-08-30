@@ -2,7 +2,7 @@ import { KeyAttributes } from 'types';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';
-import { clearData } from 'utils/storage/localStorage';
+import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
@@ -133,9 +133,20 @@ export const clearFiles = async () => {
 
 export const isTokenValid = async () => {
     try {
-        await HTTPService.get(`${ENDPOINT}/users/session-validity`, null, {
-            'X-Auth-Token': getToken(),
-        });
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/users/session-validity/v2`,
+            null,
+            {
+                'X-Auth-Token': getToken(),
+            }
+        );
+        if (!resp?.data?.hasSetKeys) {
+            try {
+                putAttributes(getToken(), getData(LS_KEYS.KEY_ATTRIBUTES));
+            } catch (e) {
+                logError(e, 'put attribute failed');
+            }
+        }
         return true;
     } catch (e) {
         return false;
