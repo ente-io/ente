@@ -142,7 +142,10 @@ export const isTokenValid = async () => {
         );
         if (!resp?.data?.hasSetKeys) {
             try {
-                putAttributes(getToken(), getData(LS_KEYS.KEY_ATTRIBUTES));
+                putAttributes(
+                    getToken(),
+                    getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
+                );
             } catch (e) {
                 logError(e, 'put attribute failed');
             }
