@@ -51,17 +51,25 @@ async function generateThumbnailHelper(ffmpeg: FFmpeg, file: File) {
             inputFileName,
             await getUint8ArrayView(new FileReader(), file)
         );
-
-        await ffmpeg.run(
-            '-i',
-            inputFileName,
-            '-ss',
-            '00:00:01.000',
-            '-vframes',
-            '1',
-            thumbFileName
-        );
-        const thumb = ffmpeg.FS('readFile', thumbFileName);
+        let seekTime = 1.0;
+        let thumb = null;
+        while (seekTime > 0) {
+            try {
+                await ffmpeg.run(
+                    '-i',
+                    inputFileName,
+                    '-ss',
+                    `00:00:0${seekTime.toFixed(3)}`,
+                    '-vframes',
+                    '1',
+                    thumbFileName
+                );
+                thumb = ffmpeg.FS('readFile', thumbFileName);
+                break;
+            } catch (e) {
+                seekTime = Number((seekTime / 2).toFixed(3));
+            }
+        }
         ffmpeg.FS('unlink', thumbFileName);
         ffmpeg.FS('unlink', inputFileName);
         return thumb;
