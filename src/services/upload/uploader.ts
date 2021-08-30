@@ -104,7 +104,7 @@ export default async function uploader(
         };
     } catch (e) {
         const fileFormat =
-            fileTypeInfo.exactType ?? rawFile.name.split('.')[-1];
+            fileTypeInfo.exactType ?? rawFile.name.split('.').pop();
         logError(e, 'file upload failed', { fileFormat });
         const error = handleUploadError(e);
         switch (error.message) {
