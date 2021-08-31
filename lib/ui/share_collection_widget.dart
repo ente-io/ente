@@ -18,6 +18,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SharingDialog extends StatefulWidget {
   final Collection collection;
@@ -156,11 +157,12 @@ class _SharingDialogState extends State<SharingDialog> {
           "please enter a valid email address.");
       return;
     } else if (email == Configuration.instance.getEmail()) {
-      showErrorDialog(context, "oops", "you cannot share with yourself");
+      showErrorDialog(context, AppLocalizations.of(context).oops,
+          "you cannot share with yourself");
       return;
     } else if (widget.collection.sharees.any((user) => user.email == email)) {
-      showErrorDialog(
-          context, "oops", "you're already sharing this with " + email);
+      showErrorDialog(context, AppLocalizations.of(context).oops,
+          "you're already sharing this with " + email);
       return;
     }
     if (publicKey == null) {

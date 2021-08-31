@@ -1,0 +1,12 @@
+{
+  "hi": [
+    "sign_up",
+    "log_in",
+    "oops",
+    "start_backup",
+    "auth_session_expired",
+    "auth_login_again",
+    "auth_logging_out",
+    "email_already_claimed"
+  ]
+}

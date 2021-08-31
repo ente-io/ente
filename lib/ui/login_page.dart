@@ -8,6 +8,7 @@ import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -35,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Material(
             type: MaterialType.transparency,
             child: Text(
-              "log in",
+              AppLocalizations.of(context).log_in,
               style: TextStyle(
                 fontSize: 16,
                 letterSpacing: 0.6,
@@ -137,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
           height: 64,
           padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
           child: button(
-            "log in",
+            AppLocalizations.of(context).log_in,
             onPressed: _email != null && _email.isNotEmpty
                 ? () {
                     if (!isValidEmail(_email)) {

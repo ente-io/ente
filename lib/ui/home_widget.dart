@@ -45,6 +45,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({Key key}) : super(key: key);
@@ -116,19 +117,19 @@ class _HomeWidgetState extends State<HomeWidget> {
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       AlertDialog alert = AlertDialog(
-        title: Text("session expired"),
-        content: Text("please login again"),
+        title: Text(AppLocalizations.of(context).auth_session_expired),
+        content: Text(AppLocalizations.of(context).auth_login_again),
         actions: [
           TextButton(
             child: Text(
-              "ok",
+              AppLocalizations.of(context).ok,
               style: TextStyle(
                 color: Theme.of(context).buttonColor,
               ),
             ),
             onPressed: () async {
               Navigator.of(context, rootNavigator: true).pop('dialog');
-              final dialog = createProgressDialog(context, "logging out...");
+              final dialog = createProgressDialog(context, AppLocalizations.of(context).auth_logging_out);
               await dialog.show();
               await Configuration.instance.logout();
               await dialog.hide();
@@ -388,7 +389,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 height: 64,
                 padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
                 child: button(
-                  "start backup",
+                  AppLocalizations.of(context).start_backup,
                   fontSize: 16,
                   lineHeight: 1.5,
                   padding: EdgeInsets.only(bottom: 4),
@@ -401,7 +402,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         context,
                         BackupFolderSelectionPage(
                           shouldSelectAll: true,
-                          buttonText: "start backup",
+                          buttonText: AppLocalizations.of(context).start_backup,
                         ),
                       );
                     }
