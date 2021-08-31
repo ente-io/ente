@@ -3,7 +3,10 @@ import constants from 'utils/strings/constants';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { KeyAttributes } from 'types';
-import CryptoWorker, { SaveKeyInSessionStore } from 'utils/crypto';
+import CryptoWorker, {
+    decryptAndStoreToken,
+    SaveKeyInSessionStore,
+} from 'utils/crypto';
 import SingleInputForm from 'components/SingleInputForm';
 import MessageDialog from 'components/MessageDialog';
 import Container from 'components/Container';
@@ -50,8 +53,9 @@ export default function Recover() {
                 await cryptoWorker.fromHex(recoveryKey)
             );
             await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
+            await decryptAndStoreToken(masterKey);
 
-            router.push('/changePassword');
+            router.push('/change-password');
         } catch (e) {
             logError(e);
             setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);
