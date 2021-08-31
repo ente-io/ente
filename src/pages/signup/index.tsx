@@ -6,6 +6,7 @@ import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SignUp from 'components/SignUp';
+import { PAGES } from 'types';
 
 export default function SignUpPage() {
     const router = useRouter();
@@ -13,18 +14,18 @@ export default function SignUpPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        router.prefetch('/verify');
-        router.prefetch('/login');
+        router.prefetch(PAGES.VERIFY);
+        router.prefetch(PAGES.LOGIN);
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
-            router.push('/verify');
+            router.push(PAGES.VERIFY);
         }
         setLoading(false);
         appContext.showNavBar(false);
     }, []);
 
     const login = () => {
-        router.push('/login');
+        router.push(PAGES.LOGIN);
     };
 
     return (

@@ -61,6 +61,7 @@ import Upload from 'components/pages/gallery/Upload';
 import Collections from 'components/pages/gallery/Collections';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/common/errorUtil';
+import { PAGES } from 'types';
 
 export const DeadCenter = styled.div`
     flex: 1;
@@ -162,7 +163,7 @@ export default function Gallery() {
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
-            router.push('/');
+            router.push(PAGES.ROOT);
             return;
         }
         const main = async () => {
@@ -233,7 +234,7 @@ export default function Gallery() {
                     break;
                 case CustomError.KEY_MISSING:
                     clearKeys();
-                    router.push('/credentials');
+                    router.push(PAGES.CREDENTIALS);
                     break;
             }
         } finally {

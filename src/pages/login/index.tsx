@@ -6,6 +6,7 @@ import Login from 'components/Login';
 import Container from 'components/Container';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import Card from 'react-bootstrap/Card';
+import { PAGES } from 'types';
 
 export default function Home() {
     const router = useRouter();
@@ -13,18 +14,18 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        router.prefetch('/verify');
-        router.prefetch('/signup');
+        router.prefetch(PAGES.VERIFY);
+        router.prefetch(PAGES.SIGNUP);
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
-            router.push('/verify');
+            router.push(PAGES.VERIFY);
         }
         setLoading(false);
         appContext.showNavBar(false);
     }, []);
 
     const register = () => {
-        router.push('/signup');
+        router.push(PAGES.SIGNUP);
     };
 
     return (

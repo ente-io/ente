@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { KeyAttributes } from 'types';
+import { KeyAttributes, PAGES } from 'types';
 import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, {
     decryptAndStoreToken,
@@ -25,7 +25,7 @@ export default function Credentials() {
     const appContext = useContext(AppContext);
 
     useEffect(() => {
-        router.prefetch('/gallery');
+        router.prefetch(PAGES.GALLERY);
         const user = getData(LS_KEYS.USER);
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -34,11 +34,11 @@ export default function Credentials() {
             (keyAttributes && !keyAttributes.memLimit)
         ) {
             clearData();
-            router.push('/');
+            router.push(PAGES.ROOT);
         } else if (!keyAttributes) {
-            router.push('/generate');
+            router.push(PAGES.GENERATE);
         } else if (key) {
-            router.push('/gallery');
+            router.push(PAGES.GALLERY);
         } else {
             setKeyAttributes(keyAttributes);
         }
@@ -76,7 +76,7 @@ export default function Credentials() {
                 await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
                 await decryptAndStoreToken(key);
 
-                router.push('/gallery');
+                router.push(PAGES.GALLERY);
             } catch (e) {
                 logError(e);
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
@@ -113,7 +113,7 @@ export default function Credentials() {
                             }}>
                             <Button
                                 variant="link"
-                                onClick={() => router.push('/recover')}>
+                                onClick={() => router.push(PAGES.RECOVER)}>
                                 {constants.FORGOT_PASSWORD}
                             </Button>
                             <Button variant="link" onClick={logoutUser}>

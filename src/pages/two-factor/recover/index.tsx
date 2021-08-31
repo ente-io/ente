@@ -11,6 +11,7 @@ import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
 import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
+import { PAGES } from 'types';
 
 export default function Recover() {
     const router = useRouter();
@@ -20,12 +21,12 @@ export default function Recover() {
     const [sessionID, setSessionID] = useState(null);
     const appContext = useContext(AppContext);
     useEffect(() => {
-        router.prefetch('/gallery');
+        router.prefetch(PAGES.GALLERY);
         const user = getData(LS_KEYS.USER);
         if (!user.isTwoFactorEnabled && (user.encryptedToken || user.token)) {
-            router.push('/credentials');
+            router.push(PAGES.GENERATE);
         } else if (!user.email || !user.twoFactorSessionID) {
-            router.push('/');
+            router.push(PAGES.ROOT);
         } else {
             setSessionID(user.twoFactorSessionID);
         }
@@ -62,7 +63,7 @@ export default function Recover() {
                 message: constants.TWO_FACTOR_DISABLE_SUCCESS,
                 type: FLASH_MESSAGE_TYPE.INFO,
             });
-            router.push('/credentials');
+            router.push(PAGES.CREDENTIALS);
         } catch (e) {
             logError(e);
             setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);

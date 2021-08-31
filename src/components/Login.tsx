@@ -11,6 +11,7 @@ import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import SubmitButton from 'components/SubmitButton';
 import Button from 'react-bootstrap/Button';
 import LogoImg from './LogoImg';
+import { PAGES } from 'types';
 
 interface formValues {
     email: string;
@@ -27,10 +28,10 @@ export default function Login(props: LoginProps) {
 
     useEffect(() => {
         const main = async () => {
-            router.prefetch('/verify');
+            router.prefetch(PAGES.VERIFY);
             const user = getData(LS_KEYS.USER);
             if (user?.email) {
-                await router.push('/verify');
+                await router.push(PAGES.VERIFY);
             }
             setLoading(false);
         };
@@ -45,7 +46,7 @@ export default function Login(props: LoginProps) {
             setWaiting(true);
             await getOtt(email);
             setData(LS_KEYS.USER, { email });
-            router.push('/verify');
+            router.push(PAGES.VERIFY);
         } catch (e) {
             setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
         }

@@ -31,6 +31,7 @@ import { GalleryContext, SetLoading } from 'pages/gallery';
 import InProgressIcon from './icons/InProgressIcon';
 import exportService from 'services/exportService';
 import { Subscription } from 'services/billingService';
+import { PAGES } from 'types';
 
 interface Props {
     collections: Collection[];
@@ -254,14 +255,14 @@ export default function Sidebar(props: Props) {
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={() => {
-                        router.push('change-password');
+                        router.push(PAGES.CHANGE_PASSWORD);
                     }}>
                     {constants.CHANGE_PASSWORD}
                 </LinkButton>
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={() => {
-                        router.push('change-email');
+                        router.push(PAGES.CHANGE_EMAIL);
                     }}>
                     {constants.UPDATE_EMAIL}
                 </LinkButton>

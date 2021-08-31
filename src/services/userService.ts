@@ -1,4 +1,4 @@
-import { KeyAttributes } from 'types';
+import { KeyAttributes, PAGES } from 'types';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';
@@ -124,7 +124,7 @@ export const logoutUser = async () => {
     clearData();
     await caches.delete('thumbs');
     await clearFiles();
-    router.push('/');
+    router.push(PAGES.ROOT);
 };
 
 export const clearFiles = async () => {

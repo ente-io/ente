@@ -21,7 +21,7 @@ import SubmitButton from 'components/SubmitButton';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
 import LogoImg from 'components/LogoImg';
-import { KeyAttributes } from 'types';
+import { KeyAttributes, PAGES } from 'types';
 
 interface formValues {
     ott: string;
@@ -36,20 +36,20 @@ export default function Verify() {
 
     useEffect(() => {
         const main = async () => {
-            router.prefetch('/twoFactor/verify');
-            router.prefetch('/credentials');
-            router.prefetch('/generate');
+            router.prefetch(PAGES.TWO_FACTOR_VERIFY);
+            router.prefetch(PAGES.CREDENTIALS);
+            router.prefetch(PAGES.GENERATE);
             const user: User = getData(LS_KEYS.USER);
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.KEY_ATTRIBUTES
             );
             if (!user?.email) {
-                router.push('/');
+                router.push(PAGES.ROOT);
             } else if (
                 keyAttributes?.encryptedKey &&
                 (user.token || user.encryptedToken)
             ) {
-                router.push('credentials');
+                router.push(PAGES.CREDENTIALS);
             } else {
                 setEmail(user.email);
             }
@@ -79,7 +79,7 @@ export default function Verify() {
                     isTwoFactorEnabled: true,
                 });
                 setIsFirstLogin(true);
-                router.push('/two-factor/verify');
+                router.push(PAGES.TWO_FACTOR_VERIFY);
             } else {
                 setData(LS_KEYS.USER, {
                     email,
@@ -101,9 +101,9 @@ export default function Verify() {
                 setIsFirstLogin(true);
                 if (keyAttributes?.encryptedKey) {
                     clearKeys();
-                    router.push('/credentials');
+                    router.push(PAGES.CREDENTIALS);
                 } else {
-                    router.push('/generate');
+                    router.push(PAGES.GENERATE);
                 }
             }
         } catch (e) {

@@ -7,7 +7,7 @@ import {
     setData,
 } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { KeyAttributes } from 'types';
+import { KeyAttributes, PAGES } from 'types';
 import CryptoWorker, {
     decryptAndStoreToken,
     SaveKeyInSessionStore,
@@ -29,7 +29,7 @@ export default function Recover() {
     const appContext = useContext(AppContext);
 
     useEffect(() => {
-        router.prefetch('/gallery');
+        router.prefetch(PAGES.GALLERY);
         const user: User = getData(LS_KEYS.USER);
         const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -38,11 +38,11 @@ export default function Recover() {
             !keyAttributes?.memLimit
         ) {
             clearData();
-            router.push('/');
+            router.push(PAGES.ROOT);
         } else if (!keyAttributes) {
-            router.push('/generate');
+            router.push(PAGES.GENERATE);
         } else if (key) {
-            router.push('/gallery');
+            router.push(PAGES.GALLERY);
         } else {
             setKeyAttributes(keyAttributes);
         }
@@ -61,7 +61,7 @@ export default function Recover() {
             await decryptAndStoreToken(masterKey);
 
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
-            router.push('/change-password');
+            router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
             logError(e);
             setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);

@@ -12,6 +12,7 @@ import constants from 'utils/strings/constants';
 import localForage from 'utils/storage/localForage';
 import IncognitoWarning from 'components/IncognitoWarning';
 import { logError } from 'utils/sentry';
+import { PAGES } from 'types';
 
 const Container = styled.div`
     display: flex;
@@ -106,7 +107,7 @@ export default function LandingPage() {
         const main = async () => {
             const user = getData(LS_KEYS.USER);
             if (user?.email) {
-                await router.push('/verify');
+                await router.push(PAGES.VERIFY);
             }
             try {
                 await localForage.ready();
@@ -166,7 +167,7 @@ export default function LandingPage() {
                             variant="outline-success"
                             size="lg"
                             style={{ padding: '10px 50px' }}
-                            onClick={() => router.push('signup')}>
+                            onClick={() => router.push(PAGES.SIGNUP)}>
                             {constants.SIGN_UP}
                         </Button>
                         <br />
@@ -174,7 +175,7 @@ export default function LandingPage() {
                             variant="link"
                             size="lg"
                             style={{ color: '#fff', padding: '10px 50px' }}
-                            onClick={() => router.push('login')}>
+                            onClick={() => router.push(PAGES.LOGIN)}>
                             {constants.LOGIN}
                         </Button>
                     </MobileBox>

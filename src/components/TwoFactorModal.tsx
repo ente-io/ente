@@ -4,6 +4,7 @@ import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { disableTwoFactor, getTwoFactorStatus } from 'services/userService';
+import { PAGES } from 'types';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { Label, Value, Row } from './Container';
@@ -86,7 +87,7 @@ function TwoFactorModal(props: Props) {
         });
     };
     const reconfigureTwoFactor = async () => {
-        router.push('/two-factor/setup');
+        router.push(PAGES.TWO_FACTOR_SETUP);
     };
     return (
         <MessageDialog
@@ -144,7 +145,7 @@ function TwoFactorModal(props: Props) {
                         <div style={{ height: '10px' }} />
                         <Button
                             variant="outline-success"
-                            onClick={() => router.push('/two-factor/setup')}>
+                            onClick={() => router.push(PAGES.TWO_FACTOR_SETUP)}>
                             {constants.ENABLE_TWO_FACTOR}
                         </Button>
                     </DeadCenter>

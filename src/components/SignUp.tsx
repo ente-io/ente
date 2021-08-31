@@ -19,6 +19,7 @@ import { setJustSignedUp } from 'utils/storage';
 import LogoImg from './LogoImg';
 import { logError } from 'utils/sentry';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { PAGES } from 'types';
 
 interface FormValues {
     email: string;
@@ -62,7 +63,7 @@ export default function SignUp(props: SignUpProps) {
                     masterKey
                 );
                 setJustSignedUp(true);
-                router.push('/verify');
+                router.push(PAGES.VERIFY);
             } else {
                 setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
             }

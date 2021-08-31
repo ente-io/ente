@@ -12,7 +12,7 @@ import {
 import SetPasswordForm from 'components/SetPasswordForm';
 import { justSignedUp, setJustSignedUp } from 'utils/storage';
 import RecoveryKeyModal from 'components/RecoveryKeyModal';
-import { KeyAttributes } from 'types';
+import { KeyAttributes, PAGES } from 'types';
 import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
@@ -36,20 +36,20 @@ export default function Generate() {
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.ORIGINAL_KEY_ATTRIBUTES
             );
-            router.prefetch('/gallery');
-            router.prefetch('/credentials');
+            router.prefetch(PAGES.GALLERY);
+            router.prefetch(PAGES.CREDENTIALS);
             const user: User = getData(LS_KEYS.USER);
             if (!user?.token) {
-                router.push('/');
+                router.push(PAGES.ROOT);
             } else if (key) {
                 if (justSignedUp()) {
                     setRecoveryModalView(true);
                     setLoading(false);
                 } else {
-                    router.push('/gallery');
+                    router.push(PAGES.GALLERY);
                 }
             } else if (keyAttributes?.encryptedKey) {
-                router.push('/credentials');
+                router.push(PAGES.CREDENTIALS);
             } else {
                 setToken(user.token);
                 setLoading(false);
@@ -93,7 +93,7 @@ export default function Generate() {
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
-                        router.push('/gallery');
+                        router.push(PAGES.GALLERY);
                     }}
                     somethingWentWrong={() => null}
                 />
