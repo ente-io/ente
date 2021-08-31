@@ -225,11 +225,11 @@ class Configuration {
     } catch (e) {
       throw Exception("Incorrect password");
     }
+    await setKey(Sodium.bin2base64(key));
     final secretKey = CryptoUtil.decryptSync(
         Sodium.base642bin(attributes.encryptedSecretKey),
         key,
         Sodium.base642bin(attributes.secretKeyDecryptionNonce));
-    await setKey(Sodium.bin2base64(key));
     await setSecretKey(Sodium.bin2base64(secretKey));
     final token = CryptoUtil.openSealSync(
         Sodium.base642bin(getEncryptedToken()),
@@ -261,18 +261,29 @@ class Configuration {
   }
 
   Future<void> recover(String recoveryKey) async {
-    final keyAttributes = getKeyAttributes();
+    final attributes = getKeyAttributes();
     Uint8List masterKey;
     try {
       masterKey = await CryptoUtil.decrypt(
-          Sodium.base642bin(keyAttributes.masterKeyEncryptedWithRecoveryKey),
+          Sodium.base642bin(attributes.masterKeyEncryptedWithRecoveryKey),
           Sodium.hex2bin(recoveryKey),
-          Sodium.base642bin(keyAttributes.masterKeyDecryptionNonce));
+          Sodium.base642bin(attributes.masterKeyDecryptionNonce));
     } catch (e) {
       _logger.severe(e);
       rethrow;
     }
     await setKey(Sodium.bin2base64(masterKey));
+    final secretKey = CryptoUtil.decryptSync(
+        Sodium.base642bin(attributes.encryptedSecretKey),
+        masterKey,
+        Sodium.base642bin(attributes.secretKeyDecryptionNonce));
+    await setSecretKey(Sodium.bin2base64(secretKey));
+    final token = CryptoUtil.openSealSync(
+        Sodium.base642bin(getEncryptedToken()),
+        Sodium.base642bin(attributes.publicKey),
+        secretKey);
+    await setToken(
+        Sodium.bin2base64(token, variant: Sodium.base64VariantUrlsafe));
   }
 
   String getHttpEndpoint() {
