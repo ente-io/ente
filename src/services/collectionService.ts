@@ -113,16 +113,20 @@ const getCollections = async (
                         collection,
                         key
                     );
-                    return collectionWithSecrets;
                 } catch (e) {
                     logError(
                         e,
                         `decryption failed for collection with id=${collection.id}`
                     );
                 }
+                return collectionWithSecrets;
             }
         );
-        return await Promise.all(promises);
+        // only allow deleted or collection with key, filtering out collection whose decryption failed
+        const collections = (await Promise.all(promises)).filter(
+            (collection) => collection.isDeleted || collection.key
+        );
+        return collections;
     } catch (e) {
         logError(e, 'getCollections failed');
         throw e;
