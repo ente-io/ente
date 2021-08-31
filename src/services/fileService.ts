@@ -33,6 +33,7 @@ export enum FILE_TYPE {
 // list of format that were missed by type-detection for some files.
 export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
     { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg' },
+    { fileType: FILE_TYPE.IMAGE, exactType: 'jpg' },
     { fileType: FILE_TYPE.VIDEO, exactType: 'webm' },
 ];
 
