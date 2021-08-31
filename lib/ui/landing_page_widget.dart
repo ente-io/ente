@@ -7,8 +7,6 @@ import 'package:photos/ui/login_page.dart';
 import 'package:photos/ui/password_entry_page.dart';
 import 'package:photos/ui/password_reentry_page.dart';
 import 'package:photos/ui/payment/subscription.dart';
-import 'package:photos/ui/payment/subscription_page.dart';
-import 'package:photos/ui/subscription_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LandingPageWidget extends StatefulWidget {

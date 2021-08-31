@@ -1,6 +1,7 @@
 {
-  "de": [
-    "ok",
+  "hi": [
+    "sign_up",
+    "log_in",
     "oops",
     "start_backup",
     "auth_session_expired",
