@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
@@ -10,6 +10,7 @@ import { Card, Button } from 'react-bootstrap';
 import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
 import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
+import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 
 export default function Recover() {
     const router = useRouter();
@@ -17,11 +18,12 @@ export default function Recover() {
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
         useState<B64EncryptionResult>(null);
     const [sessionID, setSessionID] = useState(null);
+    const appContext = useContext(AppContext);
     useEffect(() => {
         router.prefetch('/gallery');
         const user = getData(LS_KEYS.USER);
         if (!user.isTwoFactorEnabled && (user.encryptedToken || user.token)) {
-            router.push('/credential');
+            router.push('/credentials');
         } else if (!user.email || !user.twoFactorSessionID) {
             router.push('/');
         } else {
@@ -56,6 +58,10 @@ export default function Recover() {
                 isTwoFactorEnabled: false,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+            appContext.setDisappearingFlashMessage({
+                message: constants.TWO_FACTOR_DISABLE_SUCCESS,
+                type: FLASH_MESSAGE_TYPE.INFO,
+            });
             router.push('/credentials');
         } catch (e) {
             logError(e);
