@@ -177,7 +177,7 @@ export default function Gallery() {
             const collections = await getLocalCollections();
             setFiles(files);
             setCollections(collections);
-            await initDerivativeState(collections, files);
+            await setDerivativeState(collections, files);
             await checkSubscriptionPurchase(
                 setDialogMessage,
                 router,
@@ -214,8 +214,9 @@ export default function Gallery() {
             !silent && loadingBar.current?.continuousStart();
             await billingService.syncSubscription();
             const collections = await syncCollections();
+            setCollections(collections);
             const { files } = await syncFiles(collections, setFiles);
-            await initDerivativeState(collections, files);
+            await setDerivativeState(collections, files);
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
@@ -247,7 +248,7 @@ export default function Gallery() {
         }
     };
 
-    const initDerivativeState = async (collections, files) => {
+    const setDerivativeState = async (collections, files) => {
         const nonEmptyCollections = getNonEmptyCollections(collections, files);
         const collectionsAndTheirLatestFile =
             await getCollectionsAndTheirLatestFile(nonEmptyCollections, files);
