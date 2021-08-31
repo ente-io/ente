@@ -131,12 +131,16 @@ class File {
     }
     metadata["fileType"] = fileType.index;
     final asset = await getAsset();
-    fileSubType = asset.subTypes;
-    metadata["subType"] = fileSubType;
-    if (fileType == FileType.video) {
-      duration = asset.duration;
-      metadata["duration"] = duration;
-    } else {
+    // asset can be null for files shared to app
+    if (asset != null) {
+      fileSubType = asset.subTypes;
+      metadata["subType"] = fileSubType;
+      if (fileType == FileType.video) {
+        duration = asset.duration;
+        metadata["duration"] = duration;
+      }
+    }
+    if (fileType == FileType.image || fileType == FileType.livePhoto){
       exif = (await readExifFromFile(sourceFile)).toString();
       metadata["exif"] = exif;
     }
