@@ -254,7 +254,6 @@ export default function Sidebar(props: Props) {
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={() => {
-                        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
                         router.push('change-password');
                     }}>
                     {constants.CHANGE_PASSWORD}
@@ -262,7 +261,6 @@ export default function Sidebar(props: Props) {
                 <LinkButton
                     style={{ marginTop: '30px' }}
                     onClick={() => {
-                        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
                         router.push('change-email');
                     }}>
                     {constants.UPDATE_EMAIL}

@@ -69,7 +69,7 @@ export default function Generate() {
         redirectToGallery();
     };
     const redirectToGallery = () => {
-        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
+        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
         router.push('/gallery');
     };
     return (
