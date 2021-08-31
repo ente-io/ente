@@ -2,11 +2,11 @@ import { useRouter } from 'next/router';
 import { DeadCenter, SetLoading } from 'pages/gallery';
 import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, Row } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { disableTwoFactor, getTwoFactorStatus } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
-import { Label, Value } from './Container';
+import { Label, Value, Row } from './Container';
 import MessageDialog, { SetDialogMessage } from './MessageDialog';
 
 interface Props {
@@ -107,7 +107,8 @@ function TwoFactorModal(props: Props) {
                             <Value>
                                 <Button
                                     variant={'outline-success'}
-                                    onClick={warnTwoFactorReconfigure}>
+                                    onClick={warnTwoFactorReconfigure}
+                                    style={{ width: '100%' }}>
                                     {constants.RECONFIGURE}
                                 </Button>
                             </Value>
@@ -117,7 +118,8 @@ function TwoFactorModal(props: Props) {
                             <Value>
                                 <Button
                                     variant={'outline-danger'}
-                                    onClick={warnTwoFactorDisable}>
+                                    onClick={warnTwoFactorDisable}
+                                    style={{ width: '100%' }}>
                                     {constants.DISABLE}
                                 </Button>
                             </Value>
