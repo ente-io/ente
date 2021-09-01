@@ -92,21 +92,9 @@ export function getUserFacingErrorMessage(
 
 export function errorWithContext(originalError: Error, context: string) {
     const errorWithContext = new Error(context);
-    errorWithContext.stack = errorWithContext.stack
-        .split('\n')
-        .slice(1)
-        .join('\n');
-    console.log(originalError, errorWithContext);
-    let i = 0;
-    const errorWithContextStack = errorWithContext.stack.split('\n').reverse();
-    const originalErrorStack = originalError.stack.split('\n').reverse();
-    const requiredStack: string[] = [];
-    while (errorWithContextStack[i] === originalErrorStack[i]) {
-        i++;
-    }
-    requiredStack.push(...errorWithContextStack);
-    requiredStack.push(...originalErrorStack.slice(i + 1));
-    requiredStack.reverse();
-    errorWithContext.stack = requiredStack.join('\n');
+    errorWithContext.stack =
+        errorWithContext.stack.split('\n').slice(2, 4).join('\n') +
+        '/n' +
+        originalError.stack;
     return errorWithContext;
 }
