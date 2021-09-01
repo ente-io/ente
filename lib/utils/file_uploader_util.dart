@@ -51,7 +51,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     }
   });
   if (asset == null) {
-    throw InvalidFileError();
+    throw InvalidFileError("asset is null");
   }
   sourceFile = await asset.originFile
       .timeout(Duration(seconds: 3))
@@ -64,7 +64,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     }
   });
   if (sourceFile == null || !sourceFile.existsSync()) {
-    throw InvalidFileError();
+    throw InvalidFileError("source fill is null or do not exist");
   }
 
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
@@ -100,7 +100,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     quality: kThumbnailQuality,
   );
   if (thumbnailData == null) {
-    throw InvalidFileError();
+    throw InvalidFileError("unable to get asset thumbData");
   }
   int compressionAttempts = 0;
   while (thumbnailData.length > kThumbnailDataLimit &&
@@ -138,7 +138,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   sourceFile = io.File(localPath);
   if (!sourceFile.existsSync()) {
     _logger.warning("File doesn't exist in app sandbox");
-    throw InvalidFileError();
+    throw InvalidFileError("File doesn't exist in app sandbox");
   }
   thumbnailData = await getThumbnailFromInAppCacheFile(file);
   return MediaUploadData(sourceFile, thumbnailData, isDeleted);
