@@ -45,7 +45,7 @@ export default function SignUp(props: SignUpProps) {
             setData(LS_KEYS.USER, { email });
             await getOtt(email);
         } catch (e) {
-            setFieldError('email', `${constants.UNKNOWN_ERROR} ${e.message}`);
+            setFieldError('confirm', `${constants.UNKNOWN_ERROR} ${e.message}`);
         }
         try {
             if (passphrase === confirm) {
