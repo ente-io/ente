@@ -1,4 +1,6 @@
-class InvalidFileError extends Error {}
+class InvalidFileError extends ArgumentError {
+  InvalidFileError(String message) : super(message);
+}
 
 class InvalidFileUploadState extends AssertionError {
   InvalidFileUploadState(String message) : super(message);

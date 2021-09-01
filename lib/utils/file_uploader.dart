@@ -279,7 +279,7 @@ class FileUploader {
         mediaUploadData = await getUploadDataFromEnteFile(file);
       } catch (e) {
         if (e is InvalidFileError) {
-          await _onInvalidFileError(file);
+          await _onInvalidFileError(file, e);
         } else {
           rethrow;
         }
@@ -403,12 +403,12 @@ class FileUploader {
     }
   }
 
-  Future _onInvalidFileError(File file) async {
+  Future _onInvalidFileError(File file, InvalidFileError e) async {
     String ext = file.title == null ? "no title" : extension(file.title);
-    _logger.severe("Invalid file: (ext: $ext) encountered: " + file.toString());
+    _logger.severe("Invalid file: (ext: $ext) encountered: " + file.toString(), e);
     await FilesDB.instance.deleteLocalFile(file);
     await LocalSyncService.instance.trackInvalidFile(file);
-    throw InvalidFileError();
+    throw e;
   }
 
   Future<File> _uploadFile(
