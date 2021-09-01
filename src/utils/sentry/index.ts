@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
+import { errorWithContext } from 'utils/common/errorUtil';
 import { getUserAnonymizedID } from 'utils/user';
 
 export const logError = (
@@ -6,15 +7,11 @@ export const logError = (
     msg?: string,
     info?: Record<string, unknown>
 ) => {
-    Sentry.captureException(e, {
+    const err = errorWithContext(e, msg);
+    Sentry.captureException(err, {
         level: Sentry.Severity.Info,
         user: { id: getUserAnonymizedID() },
         contexts: {
-            ...(msg && {
-                context: {
-                    message: msg,
-                },
-            }),
             ...(info && {
                 info: info,
             }),

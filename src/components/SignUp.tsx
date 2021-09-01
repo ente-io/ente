@@ -42,34 +42,45 @@ export default function SignUp(props: SignUpProps) {
     ) => {
         setLoading(true);
         try {
-            setData(LS_KEYS.USER, { email });
-            await getOtt(email);
-        } catch (e) {
-            setFieldError('confirm', `${constants.UNKNOWN_ERROR} ${e.message}`);
-        }
-        try {
-            if (passphrase === confirm) {
-                const { keyAttributes, masterKey } =
-                    await generateKeyAttributes(passphrase);
-                setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
-                await generateAndSaveIntermediateKeyAttributes(
-                    passphrase,
-                    keyAttributes,
-                    masterKey
+            try {
+                setData(LS_KEYS.USER, { email });
+                await getOtt(email);
+            } catch (e) {
+                setFieldError(
+                    'confirm',
+                    `${constants.UNKNOWN_ERROR} ${e.message}`
                 );
-
-                await SaveKeyInSessionStore(
-                    SESSION_KEYS.ENCRYPTION_KEY,
-                    masterKey
-                );
-                setJustSignedUp(true);
-                router.push(PAGES.VERIFY);
-            } else {
-                setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
+                throw e;
             }
-        } catch (e) {
-            logError(e);
-            setFieldError('passphrase', constants.PASSWORD_GENERATION_FAILED);
+            try {
+                if (passphrase === confirm) {
+                    const { keyAttributes, masterKey } =
+                        await generateKeyAttributes(passphrase);
+                    setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
+                    await generateAndSaveIntermediateKeyAttributes(
+                        passphrase,
+                        keyAttributes,
+                        masterKey
+                    );
+
+                    await SaveKeyInSessionStore(
+                        SESSION_KEYS.ENCRYPTION_KEY,
+                        masterKey
+                    );
+                    setJustSignedUp(true);
+                    router.push(PAGES.VERIFY);
+                } else {
+                    setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
+                }
+            } catch (e) {
+                setFieldError(
+                    'passphrase',
+                    constants.PASSWORD_GENERATION_FAILED
+                );
+                throw e;
+            }
+        } catch (err) {
+            logError(err, 'signup failed');
         }
         setLoading(false);
     };
