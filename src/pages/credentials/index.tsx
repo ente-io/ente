@@ -57,7 +57,7 @@ export default function Credentials() {
                     keyAttributes.memLimit
                 );
             } catch (e) {
-                console.error('failed to deriveKey ', e.message);
+                logError(e, 'failed to derive key');
                 throw e;
             }
             try {
@@ -78,7 +78,7 @@ export default function Credentials() {
 
                 router.push(PAGES.GALLERY);
             } catch (e) {
-                logError(e);
+                logError(e, 'user entered a wrong password');
                 setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
             }
         } catch (e) {
@@ -86,7 +86,6 @@ export default function Credentials() {
                 'passphrase',
                 `${constants.UNKNOWN_ERROR} ${e.message}`
             );
-            console.error('failed to verifyPassphrase ', e.message);
         }
     };
 

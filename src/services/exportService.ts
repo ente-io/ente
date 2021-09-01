@@ -227,7 +227,7 @@ class ExportService {
             }
             return { paused: false };
         } catch (e) {
-            logError(e);
+            logError(e, 'export failed ');
         }
     }
     async addFilesQueuedRecord(folder: string, files: File[]) {

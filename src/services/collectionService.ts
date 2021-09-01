@@ -114,10 +114,9 @@ const getCollections = async (
                         key
                     );
                 } catch (e) {
-                    logError(
-                        e,
-                        `decryption failed for collection with id=${collection.id}`
-                    );
+                    logError(e, `decryption failed for collection`, {
+                        collectionID: collection.id,
+                    });
                 }
                 return collectionWithSecrets;
             }

@@ -65,7 +65,7 @@ export default function Recover() {
             });
             router.push(PAGES.CREDENTIALS);
         } catch (e) {
-            logError(e);
+            logError(e, 'two factor recovery failed');
             setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);
         }
     };

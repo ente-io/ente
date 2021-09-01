@@ -472,7 +472,7 @@ export default function App({ Component, err }) {
         HTTPService.getInterceptors().response.use(
             (resp) => resp,
             (error) => {
-                logError(error);
+                logError(error, 'Network Error');
                 return Promise.reject(error);
             }
         );

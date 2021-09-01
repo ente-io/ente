@@ -1,5 +1,5 @@
 import { FILE_TYPE } from 'services/fileService';
-import { CustomError } from 'utils/common/errorUtil';
+import { CustomError, errorWithContext } from 'utils/common/errorUtil';
 import { convertHEIC2JPEG } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
@@ -85,13 +85,11 @@ export async function generateImageThumbnail(
                 clearTimeout(timeout);
                 resolve(null);
             } catch (e) {
-                reject(e);
-                logError(e);
-                reject(
-                    Error(
-                        `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`
-                    )
+                const err = errorWithContext(
+                    e,
+                    `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`
                 );
+                reject(err);
             }
         };
         timeout = setTimeout(
@@ -142,7 +140,7 @@ export async function generateVideoThumbnail(file: globalThis.File) {
                 const err = Error(
                     `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`
                 );
-                logError(err);
+                logError(e, CustomError.THUMBNAIL_GENERATION_FAILED);
                 reject(err);
             }
         });

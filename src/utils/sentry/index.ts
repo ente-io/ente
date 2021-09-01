@@ -4,7 +4,7 @@ import { getUserAnonymizedID } from 'utils/user';
 
 export const logError = (
     e: any,
-    msg?: string,
+    msg: string,
     info?: Record<string, unknown>
 ) => {
     const err = errorWithContext(e, msg);

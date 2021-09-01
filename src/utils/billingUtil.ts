@@ -230,7 +230,7 @@ function handleFailureReason(
     setDialogMessage: SetDialogMessage,
     setLoading: SetLoading
 ): void {
-    logError(Error(`subscription purchase failed with reason- ${reason}`));
+    logError(Error(reason), 'subscription purchase failed');
     switch (reason) {
         case FAILURE_REASON.CANCELED:
             setDialogMessage({
