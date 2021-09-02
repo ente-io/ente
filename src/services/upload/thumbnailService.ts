@@ -46,7 +46,7 @@ export async function generateThumbnail(
         }
         return { thumbnail, hasStaticThumbnail };
     } catch (e) {
-        logError(e, 'Error generating thumbnail');
+        logError(e, 'Error generating static thumbnail');
         throw e;
     }
 }
