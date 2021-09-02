@@ -24,6 +24,7 @@ export enum CustomError {
     STORAGE_QUOTA_EXCEEDED = 'storage quota exceeded',
     SESSION_EXPIRED_MESSAGE = 'session expired',
     TYPE_DETECTION_FAILED = 'type detection failed',
+    SIGNUP_FAILED = 'signup failed',
 }
 
 function parseUploadError(error: AxiosResponse) {
@@ -87,4 +88,13 @@ export function getUserFacingErrorMessage(
         default:
             return constants.UNKNOWN_ERROR;
     }
+}
+
+export function errorWithContext(originalError: Error, context: string) {
+    const errorWithContext = new Error(context);
+    errorWithContext.stack =
+        errorWithContext.stack.split('\n').slice(2, 4).join('\n') +
+        '\n' +
+        originalError.stack;
+    return errorWithContext;
 }

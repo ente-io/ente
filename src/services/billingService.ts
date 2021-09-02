@@ -107,7 +107,7 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            logError(e);
+            logError(e, 'subscription cancel failed');
             throw e;
         }
     }
@@ -125,7 +125,7 @@ class billingService {
             const { subscription } = response.data;
             setData(LS_KEYS.SUBSCRIPTION, subscription);
         } catch (e) {
-            logError(e);
+            logError(e, 'failed to activate subscription');
             throw e;
         }
     }

@@ -123,7 +123,7 @@ class UploadHttpClient {
                 );
                 if (!resp?.headers?.etag) {
                     const err = Error(CustomError.ETAG_MISSING);
-                    logError(err);
+                    logError(err, 'putFile in parts failed');
                     throw err;
                 }
                 return resp;

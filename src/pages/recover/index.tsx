@@ -63,7 +63,7 @@ export default function Recover() {
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
             router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
-            logError(e);
+            logError(e, 'password recovery failed');
             setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);
         }
     };

@@ -32,10 +32,7 @@ function SetPasswordForm(props: Props) {
                 setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
             }
         } catch (e) {
-            setFieldError(
-                'passphrase',
-                `${constants.UNKNOWN_ERROR} ${e.message}`
-            );
+            setFieldError('confirm', `${constants.UNKNOWN_ERROR} ${e.message}`);
         } finally {
             setLoading(false);
         }
