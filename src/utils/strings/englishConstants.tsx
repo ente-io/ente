@@ -296,7 +296,7 @@ const englishConstants = {
 
     USAGE_INFO: (usage, quota) => (
         <p>
-            you have used {usage} out of your {quota} GB quota
+            you have used {usage} out of your {quota} quota
         </p>
     ),
 
