@@ -19,7 +19,7 @@ export async function retryAsyncFunction(
             }
             if (attemptNumber < retrySleepTimeInMilliSeconds.length) {
                 await sleep(retrySleepTimeInMilliSeconds[attemptNumber]);
-                await retrier(func, attemptNumber + 1);
+                return await retrier(func, attemptNumber + 1);
             } else {
                 throw e;
             }
