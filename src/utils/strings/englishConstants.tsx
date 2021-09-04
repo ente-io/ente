@@ -70,6 +70,7 @@ const englishConstants = {
     VERIFY: 'verify',
     UNKNOWN_ERROR: 'something went wrong, please try again',
     INVALID_CODE: 'invalid verification code',
+    EXPIRED_CODE: 'your verification code has expired',
     SENDING: 'sending...',
     SENT: 'sent!',
     PASSWORD: 'password',
