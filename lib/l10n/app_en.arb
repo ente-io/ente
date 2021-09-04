@@ -4,6 +4,7 @@
     "description": "Text on the sign up button used during registration"
   },
   "log_in": "log in",
+  "log_in_code_expired" : "your verification code has expired",
   "ok": "ok",
   "oops": "oops",
   "@oops": {

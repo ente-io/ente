@@ -25,12 +25,12 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
   return dialog;
 }
 
-void showErrorDialog(BuildContext context, String title, String content) {
+Future<dynamic> showErrorDialog(BuildContext context, String title, String content) {
   AlertDialog alert = AlertDialog(
     title: Text(title),
     content: Text(content),
     actions: [
-      FlatButton(
+      TextButton(
         child: Text("ok"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop('dialog');
@@ -39,7 +39,7 @@ void showErrorDialog(BuildContext context, String title, String content) {
     ],
   );
 
-  showDialog(
+  return showDialog(
     context: context,
     builder: (BuildContext context) {
       return alert;
@@ -48,8 +48,8 @@ void showErrorDialog(BuildContext context, String title, String content) {
   );
 }
 
-void showGenericErrorDialog(BuildContext context) {
-  showErrorDialog(context, "something went wrong", "please try again.");
+Future<dynamic> showGenericErrorDialog(BuildContext context) {
+  return showErrorDialog(context, "something went wrong", "please try again.");
 }
 
 Future<T> showConfettiDialog<T>({
