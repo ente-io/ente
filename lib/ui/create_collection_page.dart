@@ -185,7 +185,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         textCapitalization: TextCapitalization.words,
       ),
       actions: [
-        FlatButton(
+        TextButton(
           child: Text("ok"),
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop('dialog');

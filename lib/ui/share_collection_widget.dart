@@ -13,7 +13,6 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common_elements.dart';
 import 'package:photos/ui/loading_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
-import 'package:photos/ui/payment/subscription_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
@@ -37,8 +36,8 @@ class _SharingDialogState extends State<SharingDialog> {
   @override
   Widget build(BuildContext context) {
     _sharees = widget.collection.sharees;
-    final children = List<Widget>();
-    if (!_showEntryField && _sharees.length == 0) {
+    final children = <Widget>[];
+    if (!_showEntryField && _sharees.isEmpty) {
       _showEntryField = true;
     } else {
       for (final user in _sharees) {
@@ -233,7 +232,7 @@ class _SharingDialogState extends State<SharingDialog> {
             content: Text(
                 "sharing is not permitted for free accounts, please subscribe"),
             actions: [
-              FlatButton(
+              TextButton(
                 child: Text("subscribe"),
                 onPressed: () {
                   Navigator.of(context).pushReplacement(
@@ -245,7 +244,7 @@ class _SharingDialogState extends State<SharingDialog> {
                   );
                 },
               ),
-              FlatButton(
+              TextButton(
                 child: Text("ok"),
                 onPressed: () {
                   Navigator.of(context, rootNavigator: true).pop();
