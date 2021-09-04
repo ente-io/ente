@@ -109,6 +109,8 @@ export default function Verify() {
         } catch (e) {
             if (e?.status === 401) {
                 setFieldError('ott', constants.INVALID_CODE);
+            } else if (e?.status === 410) {
+                setFieldError('ott', constants.EXPIRED_CODE);
             } else {
                 setFieldError('ott', `${constants.UNKNOWN_ERROR} ${e.message}`);
             }
