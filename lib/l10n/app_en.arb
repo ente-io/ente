@@ -5,6 +5,8 @@
   },
   "log_in": "log in",
   "log_in_code_expired" : "your verification code has expired",
+  "incorrect_code_title" : "incorrect code",
+  "incorrect_code_msg" : "authentication failed, please try again",
   "ok": "ok",
   "oops": "oops",
   "@oops": {

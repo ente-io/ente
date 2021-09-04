@@ -3,6 +3,8 @@
     "sign_up",
     "log_in",
     "log_in_code_expired",
+    "incorrect_code_title",
+    "incorrect_code_msg",
     "oops",
     "start_backup",
     "auth_session_expired",

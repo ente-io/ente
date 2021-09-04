@@ -190,11 +190,12 @@ class UserService {
             AppLocalizations.of(context).log_in_code_expired);
         Navigator.of(context).pop();
       } else {
-        showErrorDialog(context, "incorrect code",
-            "authentication failed, please try again");
+        showErrorDialog(
+            context,
+            AppLocalizations.of(context).incorrect_code_title,
+            AppLocalizations.of(context).incorrect_code_msg);
       }
-    }
-    catch (e) {
+    } catch (e) {
       await dialog.hide();
       _logger.severe(e);
       showErrorDialog(context, AppLocalizations
@@ -240,8 +241,8 @@ class UserService {
         showErrorDialog(context, AppLocalizations.of(context).oops,
             AppLocalizations.of(context).email_already_claimed);
       } else {
-        showErrorDialog(context, "incorrect code",
-            "authentication failed, please try again");
+        showErrorDialog(context, AppLocalizations.of(context).incorrect_code_title,
+          AppLocalizations.of(context).incorrect_code_msg);
       }
     } catch (e) {
       await dialog.hide();
