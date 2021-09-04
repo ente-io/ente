@@ -30,7 +30,7 @@ Future<dynamic> showErrorDialog(BuildContext context, String title, String conte
     title: Text(title),
     content: Text(content),
     actions: [
-      FlatButton(
+      TextButton(
         child: Text("ok"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop('dialog');
